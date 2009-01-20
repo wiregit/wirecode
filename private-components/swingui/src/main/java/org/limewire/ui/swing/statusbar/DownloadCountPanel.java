@@ -19,9 +19,9 @@ class DownloadCountPanel extends JXLabel {
     DownloadCountPanel(DownloadListManager downloadListManager) {
         super("0");
         
-        this.setName("DownloadCountPanel");
-        
-        this.setBorder(BorderFactory.createEmptyBorder(0,8,0,0));
+        setName("DownloadCountPanel");
+        setBorder(BorderFactory.createEmptyBorder(0,2,0,0));
+        setIconTextGap(1);
         
         downloadListManager.getDownloads().addListEventListener(new ListEventListener<DownloadItem>() {
 
