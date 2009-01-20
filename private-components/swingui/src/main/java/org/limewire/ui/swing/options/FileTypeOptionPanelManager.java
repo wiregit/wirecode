@@ -283,7 +283,7 @@ public final class FileTypeOptionPanelManager {
         String malformedMsg = I18n.tr("The extension name was not valid, could not add.");
         
         if (   text.length() == 0 
-            || text.length() > MAX_EXT_LENGTH || text.indexOf('.') > 0
+            || text.length() > MAX_EXT_LENGTH || text.indexOf('.') > -1
            ) {                            
             JOptionPane.showMessageDialog(null, malformedMsg);
             return false;
