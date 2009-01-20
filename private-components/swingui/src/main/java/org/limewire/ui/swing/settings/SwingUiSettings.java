@@ -245,6 +245,10 @@ public final class SwingUiSettings extends LimeProps {
     /** Shows an overlay on My Library first time logging in */
     public static final BooleanSetting SHOW_FRIEND_OVERLAY_MESSAGE =
         FACTORY.createBooleanSetting("SHOW_FRIEND_OVERLAY_MESSAGE", true);
+    
+    /** True if the user has logged into chat and viewed their library after, false otherwise */
+    public static final BooleanSetting HAS_LOGGED_IN_AND_SHOWN_LIBRARY =
+        FACTORY.createBooleanSetting("HAS_LOGGED_IN_AND_SHOWN_LIBRARY", false);
 
 
     /**

@@ -58,6 +58,7 @@ import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.LibraryTable;
@@ -97,6 +98,7 @@ public class MyLibraryPanel extends LibraryPanel {
     private final CategoryIconManager categoryIconManager;
     private final PlayerPanel playerPanel;
     private final LibraryManager libraryManager;
+    private final LibraryNavigator libraryNavigator;
     private final Map<Category, LibraryOperable<LocalFileItem>> selectableMap;
     private final ShareWidgetFactory shareFactory;    
    
@@ -111,6 +113,7 @@ public class MyLibraryPanel extends LibraryPanel {
     
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
+                          LibraryNavigator libraryNavigator,
                           IconManager iconManager,
                           LibraryTableFactory tableFactory,
                           CategoryIconManager categoryIconManager,
@@ -127,6 +130,7 @@ public class MyLibraryPanel extends LibraryPanel {
         GuiUtils.assignResources(this);
         
         this.libraryManager = libraryManager;
+        this.libraryNavigator = libraryNavigator;
         this.tableFactory = tableFactory;
         this.categoryIconManager = categoryIconManager;    
         this.shareFactory = shareFactory;
@@ -236,6 +240,10 @@ public class MyLibraryPanel extends LibraryPanel {
                             JXLayer layer = map.get(category);
                             layer.getGlassPane().add(panel);
                             layer.getGlassPane().setVisible(true);
+                            if(!SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.getValue()) {
+                                libraryNavigator.selectLibrary();
+                                SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
+                            }
                         }
                     }
                 }
