@@ -288,28 +288,30 @@ public class CustomHyperlinkUI extends BasicButtonUI {
     protected BasicButtonListener createButtonListener(AbstractButton b) {
         return new BasicHyperlinkListener(b);
     }
-
-    /**
-     * {@inheritDoc} <p>
-     * 
-     * Overridden to return true if the position is inside the union of the
-     * text and icon rectangle, false otherwise.
-     */
-    @Override
-    public boolean contains(JComponent c, int x, int y) {
-        AbstractButton button = (AbstractButton) c;
-        return isInside(getIconTextRect(button), x, y);
-    }
-
-    /**
-     * @param iconTextRect
-     * @param point
-     * @return
-     */
-    private boolean isInside(Rectangle iconTextRect, int x, int y) {
-        if (iconTextRect == null) return false;
-        return iconTextRect.contains(x, y);
-    }
+    
+    
+    //Temporarily kill this as a workaround for LWC-2687 - ArrayIndexOutOfBoundsException in java.awt.font.LineBreakMeasurer.nextOffset()
+//    /**
+//     * {@inheritDoc} <p>
+//     * 
+//     * Overridden to return true if the position is inside the union of the
+//     * text and icon rectangle, false otherwise.
+//     */
+//    @Override
+//    public boolean contains(JComponent c, int x, int y) {
+//        AbstractButton button = (AbstractButton) c;
+//        return isInside(getIconTextRect(button), x, y);
+//    }
+//
+//    /**
+//     * @param iconTextRect
+//     * @param point
+//     * @return
+//     */
+//    private boolean isInside(Rectangle iconTextRect, int x, int y) {
+//        if (iconTextRect == null) return false;
+//        return iconTextRect.contains(x, y);
+//    }
 
     /**
      * C&p'ed from BasicGraphicsUtils (getPreferredButtonSize).
