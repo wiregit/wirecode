@@ -23,11 +23,11 @@ class DownloadCountPanel extends JXLabel {
         setBorder(BorderFactory.createEmptyBorder(0,2,0,0));
         setIconTextGap(1);
         
-        downloadListManager.getDownloads().addListEventListener(new ListEventListener<DownloadItem>() {
+        downloadListManager.getSwingThreadSafeDownloads().addListEventListener(new ListEventListener<DownloadItem>() {
 
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                setText(""+listChanges.getSourceList().size());
+                setText(Integer.toString(listChanges.getSourceList().size()));
             }
 
         });
