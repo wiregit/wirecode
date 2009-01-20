@@ -239,7 +239,7 @@ public final class FileTypeOptionPanelManager {
         
         JPanel addExtPanel = new JPanel(new MigLayout("insets 5, gap 10, alignx right"));
         addExtPanel.setOpaque(false);
-        addExtPanel.add(new JLabel(I18n.tr("File Name:")));
+        addExtPanel.add(new JLabel(I18n.tr("File Extension:")));
         extTextField = new JTextField(6);
         addExtPanel.add(extTextField);
         addButton = new JButton(addAction);
