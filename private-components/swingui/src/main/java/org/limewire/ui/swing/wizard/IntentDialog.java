@@ -57,22 +57,22 @@ public class IntentDialog extends LimeJDialog {
     private final JLabel headingLabel;
     private final MultiLineLabel bodyLabel;
     private final JLabel agreeLabel;
-    private final JButton intentButton;
+    private final JButton copyrightButton;
     private final JButton agreementButton;
     private final JButton privacyButton;
     private final JLabel languageLabel;
     private final JXButton agreeButton;
     private final JXButton exitButton;
     
-    private final String intentURL = "http://www.limewire.com/learnMore/intent";
+    private final String copyrightURL = "http://www.limewire.com/learnMore/copyright";
     private final String agreementURL = "http://www.limewire.com/learnMore/agreement";
     private final String privacyURL = "http://www.limewire.com/learnMore/privacy";
     
     private final Action urlAction = new AbstractAction(){
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(e.getSource().equals(intentButton))
-                NativeLaunchUtils.openURL(intentURL);
+            if(e.getSource().equals(copyrightButton))
+                NativeLaunchUtils.openURL(copyrightURL);
             else if(e.getSource().equals(agreementButton))
                 NativeLaunchUtils.openURL(agreementURL);
             else if(e.getSource().equals(privacyButton))
@@ -103,11 +103,11 @@ public class IntentDialog extends LimeJDialog {
         agreeLabel = new MultiLineLabel("", 500);
         agreeLabel.setFont(smallFont);
         //FontUtils.bold(agreeLabel);
-        intentButton = new HyperlinkButton(urlAction);
-        intentButton.setFocusPainted(false);
-        intentButton.setFont(smallFont);
-        FontUtils.underline(intentButton);
-        intentButton.setForeground(new Color(0x2152a6));
+        copyrightButton = new HyperlinkButton(urlAction);
+        copyrightButton.setFocusPainted(false);
+        copyrightButton.setFont(smallFont);
+        FontUtils.underline(copyrightButton);
+        copyrightButton.setForeground(new Color(0x2152a6));
         agreementButton = new HyperlinkButton(urlAction);
         agreementButton.setFocusPainted(false);
         agreementButton.setFont(smallFont);
@@ -151,7 +151,7 @@ public class IntentDialog extends LimeJDialog {
         int indent = 14;
         headerBar.add(headingLabel, "grow, wrap");
         panel.add(bodyLabel, "gapleft " + indent + ", gaptop 10, wrap");
-        panel.add(intentButton, "gapleft " + indent +  ", gaptop 20, wrap");
+        panel.add(copyrightButton, "gapleft " + indent +  ", gaptop 20, wrap");
         panel.add(agreementButton, "gapleft " + indent +  ", wrap");
         panel.add(privacyButton, "gapleft " + indent +  ", wrap");
         panel.add(agreeLabel, "gapleft " + indent +  ", gaptop 40, wrap");
@@ -290,7 +290,7 @@ public class IntentDialog extends LimeJDialog {
         
         headingLabel.setText(heading);
         bodyLabel.setText(bodyText1);
-        intentButton.setText(copyText);
+        copyrightButton.setText(copyText);
         agreementButton.setText(privacyText);
         privacyButton.setText(licenseText);
         agreeLabel.setText(agreementText);
