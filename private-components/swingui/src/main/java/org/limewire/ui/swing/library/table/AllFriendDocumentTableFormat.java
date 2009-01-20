@@ -15,7 +15,7 @@ public class AllFriendDocumentTableFormat <T extends RemoteFileItem> extends Rem
                 new ColumnStateInfo(NAME_INDEX, "ALL_LIBRARY_DOCUMENT_NAME", I18n.tr("Name"), 250, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "ALL_LIBRARY_DOCUMENT_TYPE", I18n.tr("Type"), 80, true, true),     
                 new ColumnStateInfo(EXTENSION_INDEX, "ALL_LIBRARY_DOCUMENT_EXTENSION", I18n.tr("Extension"), 60, true, true), 
-                new ColumnStateInfo(CREATED_INDEX, "ALL_LIBRARY_DOCUMENT_CREATED", I18n.tr("Date Created"), 100, true, true), 
+                new ColumnStateInfo(CREATED_INDEX, "ALL_LIBRARY_DOCUMENT_CREATED", I18n.tr("Date Created"), 100, false, true), 
                 new ColumnStateInfo(SIZE_INDEX, "ALL_LIBRARY_DOCUMENT_SIZE", I18n.tr("Size"), 60, true, true),
                 new ColumnStateInfo(AUTHOR_INDEX, "ALL_LIBRARY_DOCUMENT_AUTHOR", I18n.tr("Author"), 120, false, true), 
                 new ColumnStateInfo(DESCRIPTION_INDEX, "ALL_LIBRARY_DOCUMENT_DESCRIPTION", I18n.tr("Description"), 120, false, false),
