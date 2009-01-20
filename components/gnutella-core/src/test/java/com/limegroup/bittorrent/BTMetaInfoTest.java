@@ -122,12 +122,30 @@ public class BTMetaInfoTest extends LimeTestCase {
      * Testing to make sure that the createMetaInfo method throws an IOException when a bad
      * file is used.
      */
-    public void testBadFile() {
+    public void testBadFileFileDoesNotExist() {
         File nonExistingFile = new File(UUID.randomUUID().toString() + UUID.randomUUID().toString());
         Assert.assertFalse(nonExistingFile.exists());
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         try {
             btm.createMetaInfo(nonExistingFile);
+            Assert.fail("There should have been an IOException creating the metaInfo.");
+        } catch (IOException e) {
+            //The exception is expected
+        }
+    }
+    
+    
+    /**
+     * Testing using a bad torrent file. Using a file with bad data.
+     * Testing to make sure that the createMetaInfo method throws an IOException 
+     * when a bad file is used.
+     */
+    public void testBadFileInvalidTorrentFile() throws Exception {
+        File file = getFile("test-bad-torrent.torrent");
+        Assert.assertTrue(file.exists());
+        BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
+        try {
+            btm.createMetaInfo(file);
             Assert.fail("There should have been an IOException creating the metaInfo.");
         } catch (IOException e) {
             //The exception is expected
