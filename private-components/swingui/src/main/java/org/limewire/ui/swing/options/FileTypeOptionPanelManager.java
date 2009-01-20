@@ -234,6 +234,7 @@ public final class FileTypeOptionPanelManager {
                 this.sidePanel, this.currentPanel);
         splitPane.setOneTouchExpandable(true);
         splitPane.setDividerLocation(180);
+        splitPane.setEnabled(false);
         
         this.mainContainer.add(splitPane, BorderLayout.CENTER);
         
