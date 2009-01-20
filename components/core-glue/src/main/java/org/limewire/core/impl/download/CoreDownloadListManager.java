@@ -68,7 +68,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     
     private static final String DOWNLOAD_ITEM = "limewire.download.glueItem";
     
-	private final EventList<DownloadItem> downloadItems;
+	private final EventList<DownloadItem> observableDownloadItems;
 	private EventList<DownloadItem> swingThreadDownloadItems;
 	private final DownloadManager downloadManager;
 	private final RemoteFileDescFactory remoteFileDescFactory;
@@ -77,7 +77,8 @@ public class CoreDownloadListManager implements DownloadListManager {
     private final SpamManager spamManager;
     private final ItunesDownloadListenerFactory itunesDownloadListenerFactory;
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
-    private final ThreadSafeList<DownloadItem> threadSafeBaseList;
+    /**the base list - all removing and adding must be done from here.*/
+    private final ThreadSafeList<DownloadItem> threadSafeDownloadItems;
     
     private static final int PERIOD = 1000;
     
@@ -94,11 +95,11 @@ public class CoreDownloadListManager implements DownloadListManager {
         this.spamManager = spamManager;
         this.itunesDownloadListenerFactory = itunesDownloadListenerFactory;
         
-        threadSafeBaseList = GlazedListsFactory.threadSafeList(new BasicEventList<DownloadItem>());
+        threadSafeDownloadItems = GlazedListsFactory.threadSafeList(new BasicEventList<DownloadItem>());
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
-	    downloadItems = GlazedListsFactory.observableElementList(threadSafeBaseList, downloadConnector);
-	    this.queueTimeCalculator = new QueueTimeCalculator(downloadItems);
-	    listenerList.addDownloadListener(new CoreDownloadListener(downloadItems, queueTimeCalculator));
+	    observableDownloadItems = GlazedListsFactory.observableElementList(threadSafeDownloadItems, downloadConnector);
+	    this.queueTimeCalculator = new QueueTimeCalculator(observableDownloadItems);
+	    listenerList.addDownloadListener(new CoreDownloadListener(threadSafeDownloadItems, queueTimeCalculator));
 	    
 	  //TODO: change backgroundExecutor to listener - currently no listener for download progress
       //hack to force tables to update
@@ -114,28 +115,28 @@ public class CoreDownloadListManager implements DownloadListManager {
 
     // forces refresh
     private void update() {
-        downloadItems.getReadWriteLock().writeLock().lock();
+        observableDownloadItems.getReadWriteLock().writeLock().lock();
         try {
             // TODO use TransactionList for these for performance (requires using GlazedLists from head)
-            for (DownloadItem item : downloadItems) {
+            for (DownloadItem item : observableDownloadItems) {
                 if (item.getState() != DownloadState.DONE &&  item instanceof CoreDownloadItem)
                     ((CoreDownloadItem) item).fireDataChanged();
             }
         } finally {
-            downloadItems.getReadWriteLock().writeLock().unlock();
+            observableDownloadItems.getReadWriteLock().writeLock().unlock();
         }
     }
 	
 	@Override
 	public EventList<DownloadItem> getDownloads() {
-		return downloadItems;
+		return observableDownloadItems;
 	}
 	
 	@Override
 	public EventList<DownloadItem> getSwingThreadSafeDownloads() {
 	    assert EventQueue.isDispatchThread();
 	    if(swingThreadDownloadItems == null) {
-	        swingThreadDownloadItems = GlazedListsFactory.swingThreadProxyEventList(downloadItems);
+	        swingThreadDownloadItems = GlazedListsFactory.swingThreadProxyEventList(observableDownloadItems);
 	    }
 	    return swingThreadDownloadItems;
 	}
@@ -412,17 +413,17 @@ public class CoreDownloadListManager implements DownloadListManager {
     @Override
     public void clearFinished() {
         final List<DownloadItem> finishedItems = new ArrayList<DownloadItem>();
-        threadSafeBaseList.getReadWriteLock().writeLock().lock();
+        threadSafeDownloadItems.getReadWriteLock().writeLock().lock();
         try {
-            for (DownloadItem item : threadSafeBaseList) {
+            for (DownloadItem item : threadSafeDownloadItems) {
                 if (item.getState() == DownloadState.DONE) {
                     finishedItems.add(item);
                 }
             }
 
-            threadSafeBaseList.removeAll(finishedItems);
+            threadSafeDownloadItems.removeAll(finishedItems);
         } finally {
-            threadSafeBaseList.getReadWriteLock().writeLock().unlock();
+            threadSafeDownloadItems.getReadWriteLock().writeLock().unlock();
         }
     }
 
