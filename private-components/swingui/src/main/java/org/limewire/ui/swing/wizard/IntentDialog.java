@@ -64,9 +64,9 @@ public class IntentDialog extends LimeJDialog {
     private final JXButton agreeButton;
     private final JXButton exitButton;
     
-    private final String copyrightURL = "http://www.limewire.com/learnMore/copyright";
-    private final String agreementURL = "http://www.limewire.com/learnMore/agreement";
-    private final String privacyURL = "http://www.limewire.com/learnMore/privacy";
+    private final String copyrightURL = "http://www.limewire.com/learnmore/copyright";
+    private final String agreementURL = "http://www.limewire.com/learnmore/agreement";
+    private final String privacyURL = "http://www.limewire.com/learnmore/privacy";
     
     private final Action urlAction = new AbstractAction(){
         @Override
