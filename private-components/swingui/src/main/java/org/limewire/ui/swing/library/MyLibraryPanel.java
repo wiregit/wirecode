@@ -483,7 +483,7 @@ public class MyLibraryPanel extends LibraryPanel {
         JLabel minLabel = new JLabel(I18n.tr("Share entire categories or individual files with your friends."));
         messageComponent.decorateSubLabel(minLabel);
         
-        JLabel secondMinLabel = new JLabel(I18n.tr("Chat with your friends about using LimeWire 5"));
+        JLabel secondMinLabel = new JLabel(I18n.tr("Chat with them about using LimeWire 5"));
         messageComponent.decorateSubLabel(secondMinLabel);
         
         JButton cancelButton = new JButton(closeButton);

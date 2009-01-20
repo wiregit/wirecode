@@ -366,6 +366,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         @Resource Color selectedTextColor;
         @Resource Color textColor;
         @Resource Font  shareButtonFont;
+        @Resource Font  shareLabelFont;
         
         private JLabel emptyCheckBox;
         private JCheckBox checkBox;
@@ -380,7 +381,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         
         public SharingSelectionPanel(Action action, Category category, AbstractFileListPanel library, 
                 ShareAction shareAction, UnshareAction unshareAction) {
-            super(new MigLayout("insets 0, fill, hidemode 3"));
+            super(new MigLayout("gap 0, insets 0 0 2 0, fill, hidemode 3"));
             
             this.libraryPanel = library;
             this.category = category;
@@ -405,7 +406,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
                 createShareButtons(shareAction, unshareAction);
-                add(shareLabel, "gapleft 15, span 2, split");
+                add(shareLabel, "gapleft 22, span 2, split");
                 add(shareButton, "split");
                 add(unshareButton);
             }
@@ -464,6 +465,8 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             shareButton = new HyperlinkButton(shareAction);
             unshareButton = new HyperlinkButton(unshareAction);
 
+            shareLabel.setForeground(textColor);
+            shareLabel.setFont(shareLabelFont);
             shareButton.setFont(shareButtonFont);        
             unshareButton.setFont(shareButtonFont);
             
