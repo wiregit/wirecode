@@ -82,6 +82,7 @@ import org.limewire.ui.swing.action.CopyAllAction;
 import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
@@ -179,16 +180,13 @@ public class ConversationPane extends JPanel implements Displayable {
         conversationScroll.setBorder(BorderFactory.createEmptyBorder());
         
         
-        final JButton closeConversation = new JButton(new AbstractAction() {
+        final JButton closeConversation = new IconButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new CloseChatEvent(chatFriend).publish();
             }
         });
         closeConversation.setIcon(iconLibrary.getEndChat());
-        closeConversation.setBorderPainted(false);
-        closeConversation.setContentAreaFilled(false);
-        closeConversation.setFocusPainted(false);
         
         // TODO: This should be done with a custom layout or 
         //        a mix of overlay layout, border layout, and mig layout.
