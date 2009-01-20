@@ -20,8 +20,8 @@ class DownloadCountPanel extends JXLabel {
         super("0");
         
         setName("DownloadCountPanel");
-        setBorder(BorderFactory.createEmptyBorder(0,8,0,0));
-        setIconTextGap(1);
+        setBorder(BorderFactory.createEmptyBorder(0,6,0,0));
+        setIconTextGap(2);
         
         downloadListManager.getSwingThreadSafeDownloads().addListEventListener(new ListEventListener<DownloadItem>() {
 
