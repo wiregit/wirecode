@@ -224,7 +224,6 @@ public class CheckBoxList<E> extends BoxPanel {
         this.elements.clear();
         this.checked.clear();
         this.unchecked.clear();
-        this.removableElements.clear();
                 
         this.elements.addAll(elements);
         this.checked.addAll(elements);
@@ -255,6 +254,7 @@ public class CheckBoxList<E> extends BoxPanel {
         newElements.remove(key);
         newUnchecked.remove(key);
         this.setElements(newElements, newUnchecked);
+        removableElements.remove(key);
     }
     
     public void addItem(E key) {
