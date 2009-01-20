@@ -9,7 +9,6 @@ import javax.swing.Action;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.plaf.basic.BasicHyperlinkUI;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -44,7 +43,7 @@ public class HyperlinkButton extends JXButton implements MouseListener {
     }
     
     private void initialize() {
-        this.setUI(new BasicHyperlinkUI());
+        this.setUI(new CustomHyperlinkUI());
         addMouseListener(this);
         FontUtils.underline(this);
     }
@@ -137,4 +136,5 @@ public class HyperlinkButton extends JXButton implements MouseListener {
             HyperlinkButton.super.setForeground(foreground);
         }
     }
+    
 }
