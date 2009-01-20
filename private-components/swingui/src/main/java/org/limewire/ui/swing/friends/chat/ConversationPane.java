@@ -517,6 +517,9 @@ public class ConversationPane extends JPanel implements Displayable {
                     LOG.debugf("Opening a view to {0}'s library", chatFriend.getName());
                     libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
 
+                } else if (ChatDocumentBuilder.MY_LIBRARY_LINK.equals(e.getDescription())) {
+                    LOG.debugf("Opening a view to my library");
+                    libraryNavigator.selectLibrary();
                 } else {
                     String linkDescription = e.getDescription();
                     LOG.debugf("Hyperlink clicked: {0}", linkDescription);

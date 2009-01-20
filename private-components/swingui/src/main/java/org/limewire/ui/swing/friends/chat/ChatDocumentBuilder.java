@@ -13,6 +13,7 @@ import org.limewire.xmpp.api.client.ChatState;
  */
 class ChatDocumentBuilder {
     static final String LIBRARY_LINK = "#library";
+    static final String MY_LIBRARY_LINK = "#mylibrary";
 
     private static final String LINE_BREAK = "<br/>";
 
