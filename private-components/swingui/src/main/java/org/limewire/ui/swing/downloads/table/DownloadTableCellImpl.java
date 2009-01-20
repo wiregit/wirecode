@@ -151,7 +151,6 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullStatusLabel = new JLabel();
         fullStatusLabel.setFont(statusFontPlainFull);
         fullStatusLabel.setForeground(statusLabelColour);
-        fullStatusLabel.setPreferredSize(new Dimension(20, 20));
         
         fullProgressBar = progressBarFactory.create(0, 100);
         Dimension size = new Dimension(progressBarWidth, 16);
