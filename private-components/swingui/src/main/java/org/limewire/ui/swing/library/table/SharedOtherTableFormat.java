@@ -25,9 +25,9 @@ public class SharedOtherTableFormat<T extends LocalFileItem> extends AbstractMyL
     
     public SharedOtherTableFormat(LocalFileList localFileList) {
         super(ACTION_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(ACTION_INDEX, "SHARED_LIBRARY_OTHER_ACTION", I18n.tr("Sharing"), 60, true, false),
-                new ColumnStateInfo(NAME_INDEX, "SHARED_LIBRARY_OTHER_NAME", I18n.tr("Name"), 300, true, true), 
-                new ColumnStateInfo(TYPE_INDEX, "SHARED_LIBRARY_OTHER_TYPE", I18n.tr("Type"), 80, true, true),     
+                new ColumnStateInfo(ACTION_INDEX, "SHARED_LIBRARY_OTHER_ACTION", I18n.tr("Sharing"), 61, true, false),
+                new ColumnStateInfo(NAME_INDEX, "SHARED_LIBRARY_OTHER_NAME", I18n.tr("Name"), 493, true, true), 
+                new ColumnStateInfo(TYPE_INDEX, "SHARED_LIBRARY_OTHER_TYPE", I18n.tr("Type"), 180, true, true),     
                 new ColumnStateInfo(SIZE_INDEX, "SHARED_LIBRARY_OTHER_SIZE", I18n.tr("Size"), 60, false, true)
         });
         this.localFileList = localFileList;

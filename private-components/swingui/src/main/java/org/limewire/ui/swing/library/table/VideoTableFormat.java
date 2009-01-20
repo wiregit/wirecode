@@ -31,8 +31,8 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     
     public VideoTableFormat() {
         super(ACTION_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(NAME_INDEX, "LIBRARY_VIDEO_NAME", I18n.tr("Name"), 260, true, true), 
-                new ColumnStateInfo(LENGTH_INDEX, "LIBRARY_VIDEO_LENGTH", I18n.tr("Length"), 100, true, true), 
+                new ColumnStateInfo(NAME_INDEX, "LIBRARY_VIDEO_NAME", I18n.tr("Name"), 611, true, true), 
+                new ColumnStateInfo(LENGTH_INDEX, "LIBRARY_VIDEO_LENGTH", I18n.tr("Length"), 62, true, true), 
                 new ColumnStateInfo(MISC_INDEX, "LIBRARY_VIDEO_MISC", I18n.tr("Misc"), 100, false, true), 
                 new ColumnStateInfo(YEAR_INDEX, "LIBRARY_VIDEO_YEAR", I18n.tr("Year"), 80, false, true), 
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_VIDEO_SIZE", I18n.tr("Size"), 60, false, true),
@@ -43,7 +43,7 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
                 new ColumnStateInfo(HIT_INDEX, "LIBRARY_VIDEO_HITS", I18n.tr("Hits"), 100, false, true), 
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_VIDEO_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_VIDEO_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_VIDEO_ACTION", I18n.tr("Sharing"), 60, true, false)
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_VIDEO_ACTION", I18n.tr("Sharing"), 61, true, false)
         });
     }
 

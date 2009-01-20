@@ -32,9 +32,9 @@ public class SharedVideoTableFormat<T extends LocalFileItem> extends AbstractMyL
     
     public SharedVideoTableFormat(LocalFileList localFileList) {
         super(ACTION_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(ACTION_INDEX, "SHARED_LIBRARY_VIDEO_ACTION", I18n.tr("Sharing"), 60, true, false),
-                new ColumnStateInfo(NAME_INDEX, "SHARED_LIBRARY_VIDEO_NAME", I18n.tr("Name"), 260, true, true), 
-                new ColumnStateInfo(LENGTH_INDEX, "SHARED_LIBRARY_VIDEO_LENGTH", I18n.tr("Length"), 100, true, true), 
+                new ColumnStateInfo(ACTION_INDEX, "SHARED_LIBRARY_VIDEO_ACTION", I18n.tr("Sharing"), 61, true, false),
+                new ColumnStateInfo(NAME_INDEX, "SHARED_LIBRARY_VIDEO_NAME", I18n.tr("Name"), 611, true, true), 
+                new ColumnStateInfo(LENGTH_INDEX, "SHARED_LIBRARY_VIDEO_LENGTH", I18n.tr("Length"), 62, true, true), 
                 new ColumnStateInfo(MISC_INDEX, "SHARED_LIBRARY_VIDEO_MISC", I18n.tr("Misc"), 100, false, true), 
                 new ColumnStateInfo(YEAR_INDEX, "SHARED_LIBRARY_VIDEO_YEAR", I18n.tr("Year"), 80, false, true), 
                 new ColumnStateInfo(SIZE_INDEX, "SHARED_LIBRARY_VIDEO_SIZE", I18n.tr("Size"), 60, false, true),

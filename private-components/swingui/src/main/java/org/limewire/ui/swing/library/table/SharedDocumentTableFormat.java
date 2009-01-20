@@ -30,10 +30,10 @@ public class SharedDocumentTableFormat<T extends LocalFileItem> extends Abstract
     
     public SharedDocumentTableFormat(LocalFileList localFileList) {
         super(ACTION_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(ACTION_INDEX, "SHARED_LIBRARY_DOCUMENT_ACTION", I18n.tr("Sharing"), 50, true, false),
-                new ColumnStateInfo(NAME_INDEX, "SHARED_LIBRARY_DOCUMENT_NAME", "Name", 160, true, true), 
-                new ColumnStateInfo(TYPE_INDEX, "SHARED_LIBRARY_DOCUMENT_TYPE", I18n.tr("Type"), 80, true, true),     
-                new ColumnStateInfo(CREATED_INDEX, "SHARED_LIBRARY_DOCUMENT_CREATED", I18n.tr("Date Created"), 100, true, true), 
+                new ColumnStateInfo(ACTION_INDEX, "SHARED_LIBRARY_DOCUMENT_ACTION", I18n.tr("Sharing"), 61, true, false),
+                new ColumnStateInfo(NAME_INDEX, "SHARED_LIBRARY_DOCUMENT_NAME", "Name", 493, true, true), 
+                new ColumnStateInfo(TYPE_INDEX, "SHARED_LIBRARY_DOCUMENT_TYPE", I18n.tr("Type"), 180, true, true),     
+                new ColumnStateInfo(CREATED_INDEX, "SHARED_LIBRARY_DOCUMENT_CREATED", I18n.tr("Date Created"), 100, false, true), 
                 new ColumnStateInfo(SIZE_INDEX, "SHARED_LIBRARY_DOCUMENT_SIZE", I18n.tr("Size"), 60, false, true),
                 new ColumnStateInfo(AUTHOR_INDEX, "SHARED_LIBRARY_DOCUMENT_AUTHOR", I18n.tr("Author"), 60, false, true), 
                 new ColumnStateInfo(DESCRIPTION_INDEX, "SHARED_LIBRARY_DOCUMENT_DESCRIPTION", I18n.tr("Description"), 100, false, true) 
