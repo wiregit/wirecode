@@ -62,7 +62,7 @@ class ConnectionStatusPanel extends JXPanel {
         this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         
         connectionStrengthLabel = new JLabel();
-        connectionStrengthLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
+        connectionStrengthLabel.setBorder(BorderFactory.createEmptyBorder(1,0,0,4));
         connectionStatusLabel = new JLabel();
         connectionStatusLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
         connectionStatusLabel.setFont(font);
