@@ -52,7 +52,7 @@ public class StatusPanel extends JXPanel {
  
         StatusBarSectionPainter<JComponent> sectionPainter = new StatusBarSectionPainter<JComponent>();
         sharedFileCountPanel.setBackgroundPainter(sectionPainter);
-   //     downloadCountPanel.setBackgroundPainter(sectionPainter);
+        downloadCountPanel.setBackgroundPainter(sectionPainter);
         
         MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player, libraryNavigator);
         miniPlayerPanel.setVisible(false);
