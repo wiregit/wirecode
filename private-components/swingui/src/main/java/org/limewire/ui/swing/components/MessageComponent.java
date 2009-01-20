@@ -36,12 +36,16 @@ public class MessageComponent extends JPanel {
     private JXPanel messageContainer;
     
     public MessageComponent() {
+        this(18, 22, 18, 22);
+    }
+    
+    public MessageComponent(int topInset, int leftInset, int rightInset, int bottomInset) {
         GuiUtils.assignResources(this);
         
         setLayout(new MigLayout("insets 0 0 " + (arrowIcon.getIconHeight()-2) + " 0, gap 0"));
         setOpaque(false);
         
-        messageContainer = new JXPanel(new MigLayout("insets 18 22 18 22, hidemode 3"));
+        messageContainer = new JXPanel(new MigLayout("insets " + topInset + " " + leftInset + " " + rightInset + " " + bottomInset + ", hidemode 3"));
         messageContainer.setOpaque(false);
         messageContainer.setBackgroundPainter(new GreenMessagePainter());
         

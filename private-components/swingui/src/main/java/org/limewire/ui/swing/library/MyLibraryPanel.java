@@ -475,7 +475,7 @@ public class MyLibraryPanel extends LibraryPanel {
      */
     public MessageComponent getMessageComponent() {
         MessageComponent messageComponent;
-        messageComponent = new MessageComponent();
+        messageComponent = new MessageComponent(6, 22, 18, 6);
         
         JLabel headerLabel = new JLabel(I18n.tr("What Now?"));
         messageComponent.decorateHeaderLabel(headerLabel);
@@ -501,11 +501,11 @@ public class MyLibraryPanel extends LibraryPanel {
                 SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.setValue(false);
             }
         });
-        
-        messageComponent.addComponent(headerLabel, "push");
-        messageComponent.addComponent(cancelButton, "wrap");
-        messageComponent.addComponent(minLabel, "wrap");
-        messageComponent.addComponent(secondMinLabel, "");
+
+        messageComponent.addComponent(cancelButton, "span, alignx right");
+        messageComponent.addComponent(headerLabel, "push, wrap");
+        messageComponent.addComponent(minLabel, "wrap, gapright 16");
+        messageComponent.addComponent(secondMinLabel, "gapright 16");
 
         return messageComponent;
     }
