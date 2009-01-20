@@ -109,13 +109,13 @@ class ConnectionStatusPanel extends JXPanel {
         
         switch(strength) {
         case NO_INTERNET:
-            statusMessage = I18n.tr("No Internet Connection");
+            statusMessage = I18n.tr("No internet connection");
             tooltipText = I18n.tr("You have no internet connection");
             strengthIcon = noInternet;
             break;
         case DISCONNECTED:
-            tooltipText = "Couldn't connect - ";
-            statusMessage = "You couldn't connect to LimeWire";
+            tooltipText = I18n.tr("Couldn't connect");
+            statusMessage = I18n.tr("You couldn't connect to LimeWire");
             strengthIcon = disconnected;
             showTryAgain = true;
             break;
@@ -137,24 +137,24 @@ class ConnectionStatusPanel extends JXPanel {
             break;            
          case MEDIUM:
             statusMessage = I18n.tr("Medium connection");
-            tooltipText = I18n.tr("You have an medium connection");
+            tooltipText = I18n.tr("You have a medium connection");
             strengthIcon = medium; 
             break;
          case MEDIUM_PLUS:
              statusMessage = I18n.tr("Medium connection");
-             tooltipText = I18n.tr("You have an medium connection");
+             tooltipText = I18n.tr("You have a medium connection");
              strengthIcon = mediumPlus; 
              break;            
         case FULL:
             shouldHideStatusLater = true;
-            statusMessage = I18n.tr("Full Connection");
+            statusMessage = I18n.tr("Full connection");
             tooltipText = I18n.tr("You are fully connected");
             strengthIcon = full;
             break;
         case TURBO:
             shouldHideStatusLater = true;
-            statusMessage = I18n.tr("Turbo charged Connection");
-            tooltipText = I18n.tr("You have an turbo-charged connection");
+            statusMessage = I18n.tr("Turbo-charged connection");
+            tooltipText = I18n.tr("You have a turbo-charged connection");
             strengthIcon = turbo; 
             break;
         }
