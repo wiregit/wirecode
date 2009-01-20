@@ -1,8 +1,11 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.util.UUID;
 
+import junit.framework.Assert;
 import junit.framework.Test;
 
 import org.limewire.util.AssertComparisons;
@@ -112,6 +115,17 @@ public class BTMetaInfoTest extends LimeTestCase {
         AssertComparisons.assertEquals(2, metaInfo.getWebSeeds().length);
         AssertComparisons.assertEquals("http://localhost:8080/pub/", metaInfo.getWebSeeds()[0].toString());
         AssertComparisons.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
+    }
+    
+    public void testBadFile() {
+        File nonExistingFile = new File(UUID.randomUUID().toString() + UUID.randomUUID().toString());
+        BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
+        try {
+            btm.createMetaInfo(nonExistingFile);
+            Assert.fail("There should have been an IOException creating the metaInfo.");
+        } catch (IOException e) {
+            //The exception is expected
+        }
     }
 
     /**
