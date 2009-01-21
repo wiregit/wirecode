@@ -171,7 +171,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         FilterList<LocalFileItem> storeFileFilteredList = GlazedListsFactory.filterList(filterList, new Matcher<LocalFileItem>() {
                 @Override
                 public boolean matches(LocalFileItem item) {
-                    return !item.isStoreFile();
+                    return item.isShareable();
                 }
         });
         addDisposable(storeFileFilteredList);
@@ -367,7 +367,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             LocalFileItem fileItem = libraryTableModel.getFileItem(adapter.row);
-            return fileItem.isIncomplete() || !fileItem.isShareable();
+            return !fileItem.isShareable();
         }       
     }
     

@@ -65,7 +65,7 @@ public class ShareLibraryPopupMenu extends JPopupMenu {
         boolean deleteActionEnabled = false;
         
         for(LocalFileItem localFileItem : fileItems) {
-            if(localFileItem.isShareable() && !localFileItem.isIncomplete()) {
+            if(localFileItem.isShareable()) {
                 shareActionEnabled = true;
                 break;
             }
@@ -156,7 +156,7 @@ public class ShareLibraryPopupMenu extends JPopupMenu {
         @Override
         public void actionPerformed(ActionEvent e) {
             for (LocalFileItem localFileItem : localFileItems) {
-                if(localFileItem.isShareable() && !localFileItem.isIncomplete()) {
+                if(localFileItem.isShareable()) {
                     friendFileList.addFile(localFileItem.getFile());
                 }
             }

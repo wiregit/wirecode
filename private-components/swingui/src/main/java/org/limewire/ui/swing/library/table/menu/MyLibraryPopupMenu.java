@@ -67,7 +67,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         boolean deleteActionEnabled = false;
 
         for (LocalFileItem localFileItem : fileItems) {
-            if (localFileItem.isShareable() && !localFileItem.isIncomplete()) {
+            if (localFileItem.isShareable()) {
                 shareActionEnabled = true;
                 break;
             }

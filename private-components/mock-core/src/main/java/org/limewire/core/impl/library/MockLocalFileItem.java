@@ -128,9 +128,4 @@ public class MockLocalFileItem implements LocalFileItem {
         // TODO Auto-generated method stub
         return 0;
     }
-
-    @Override
-    public boolean isStoreFile() {
-        return false;
-    }
 }

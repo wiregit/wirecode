@@ -280,14 +280,9 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     @Override
     public boolean isShareable() {
-        return !isStoreFile();
+        return !fileDesc.isStoreFile() && !isIncomplete();
     }
     
-    @Override
-    public boolean isStoreFile() {
-        return fileDesc.isStoreFile();
-    }
-
     @Override
     public org.limewire.core.api.URN getUrn() {
         URN urn = fileDesc.getSHA1Urn();
