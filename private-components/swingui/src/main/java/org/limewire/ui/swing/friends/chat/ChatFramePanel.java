@@ -230,9 +230,14 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     
     private void handleConnectionEstablished(XMPPConnectionEvent event) {
         addChatPanel();
-        chatPanel.setLoggedInID(event.getSource().getConfiguration().getCanonicalizedLocalID());
+        chatPanel.setLoggedInID(formatLoggedInName(event.getSource().getConfiguration().getCanonicalizedLocalID()));
         resetBounds();
         setActionEnabled(true);
+    }
+
+    private String formatLoggedInName(String fullLoggedInId) {
+        int index = fullLoggedInId.lastIndexOf("@");
+        return (index == -1) ? fullLoggedInId : fullLoggedInId.substring(0, index);
     }
 
     private void addChatPanel() {
