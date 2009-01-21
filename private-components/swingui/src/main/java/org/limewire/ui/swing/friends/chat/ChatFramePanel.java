@@ -168,7 +168,8 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
-        if (event.getMessage().getType() != Message.Type.Sent && !GuiUtils.getMainFrame().isActive()) {
+        if (event.getMessage().getType() != Message.Type.Sent &&
+             (!GuiUtils.getMainFrame().isActive() || !isVisible())) {
             notifyUnseenMessageListener(event);
             LOG.debug("Sending a message to the tray notifier");
             notifier.showMessage(getNoticeForMessage(event));
