@@ -477,11 +477,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         // make sure we don't forget this RequestCache too soon!
         REQUESTS.put(session.getHost(), rqc);
         rqc.countRequest();
-        // only enforce hammering for unauthenticated clients
-        if (rqc.isHammering() && context.getAttribute(ServerAuthState.AUTH_STATE) == null) {
-            if (LOG.isWarnEnabled())
-                LOG.warn("BANNED: " + session.getHost() + " (hammering)");
-            return QueueStatus.BANNED;
+        // only enforce hammering for unauthenticated clients that don't have credentials
+        ServerAuthState serverAuthState = (ServerAuthState) context.getAttribute(ServerAuthState.AUTH_STATE); 
+        if (serverAuthState == null || serverAuthState.getCredentials() == null) {
+            if (rqc.isHammering()) {
+                if (LOG.isWarnEnabled())
+                    LOG.warn("BANNED: " + session.getHost() + " (hammering)");
+                return QueueStatus.BANNED;
+            }
         }
 
         FileDesc fd = session.getUploader().getFileDesc();
