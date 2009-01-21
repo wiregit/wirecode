@@ -1324,6 +1324,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
 
     /** Dispatches a SAVE event & tells library data to save. */
     void save() {
+        dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.SAVE));
         urnCache.persistCache();
         getLibraryData().save();
     }
