@@ -434,13 +434,28 @@ public class LimeComboBox extends JXButton {
             }
         }
         
+        selectedComponent = null;
+        selectedLabel = null;
+        
         for (Action action : actions) {
+            
             // We create the label ourselves (instead of using JMenuItem),
             // because JMenuItem adds lots of bulky insets.
             JXPanel panel = new JXPanel(new VerticalLayout());
-            panel.setOpaque(action == selectedAction);
-            panel.setBackground(UIManager.getColor("MenuItem.selectionBackground"));                
             ActionLabel menuItem = new ActionLabel(action, false);
+            
+            panel.setBackground(UIManager.getColor("MenuItem.selectionBackground"));
+            
+            if (action != selectedAction) {
+                panel.setOpaque(false);
+                menuItem.setForeground(UIManager.getColor("MenuItem.foreground"));
+            } else {
+                selectedComponent = panel;
+                selectedLabel = menuItem;
+                selectedComponent.setOpaque(true);
+                selectedLabel.setForeground(UIManager.getColor("MenuItem.selectionForeground"));
+            }
+            
             if(menuItem.getIcon() == null) {
                 menuItem.setIcon(emptyIcon);
             }
