@@ -462,7 +462,7 @@ public final class Initializer {
      * @param mozillaOverrides */
     private void initializeEarlyUI(LimeMozillaOverrides mozillaOverrides) {
         // Load up the HTML engine.
-        splashRef.get().setStatusText(I18n.tr("Loading HTML engine..."));
+        splashRef.get().setStatusText(I18n.tr("Muddling Mint..."));        //html engine
         stopwatch.resetAndLog("update splash for HTML engine");
 
         SwingUtils.invokeAndWait(new Runnable() {
@@ -479,7 +479,7 @@ public final class Initializer {
         });
         stopwatch.resetAndLog("return from evt queue");
         
-        splashRef.get().setStatusText(I18n.tr("Loading browser..."));
+        splashRef.get().setStatusText(I18n.tr("Scouring NYC for Limes..."));           //loading browser
         // Not pretty but Mozilla initialization errors should not crash the
         // program
         if (LimeMozillaInitializer.shouldInitialize()) {
@@ -504,7 +504,7 @@ public final class Initializer {
     
     /** Loads the UI. */
     private void loadUI() {
-        splashRef.get().setStatusText(I18n.tr("Loading user interface..."));
+        splashRef.get().setStatusText(I18n.tr("Squeezing Limes..."));        //loading user interface
         stopwatch.resetAndLog("update splash for UI");
         
         DefaultErrorCatcher.storeCaughtBugs();
@@ -540,7 +540,7 @@ public final class Initializer {
     /** Runs any late UI tasks, such as initializing Icons, I18n support. */
     private void loadLateTasksForUI() {
         // Touch the I18N stuff to ensure it loads properly.
-        splashRef.get().setStatusText(I18n.tr("Loading other languages..."));
+        splashRef.get().setStatusText(I18n.tr("Prepping Mojitos..."));  //other languages?
         I18NConvert.instance();
         stopwatch.resetAndLog("I18nConvert instance");
     }
