@@ -42,6 +42,12 @@ public class LimeComboBox extends JXButton {
 
     /** The currently selected item. */
     private Action selectedAction;
+    
+    /** The currently selected component. */
+    private JComponent selectedComponent;
+    
+    /** The currently selected label */
+    private ActionLabel selectedLabel;
 
     /** Listeners that will be notified when a new item is selected. */
     private final List<SelectionListener> selectionListeners 
@@ -185,7 +191,7 @@ public class LimeComboBox extends JXButton {
     public void setSelectedAction(Action action) {        
         // Make sure the selected action is in the list
         if (actions.contains(action)) {
-            selectedAction = action;        
+            selectedAction = action;     
             menuDirty = true;
         }        
     }
@@ -368,6 +374,8 @@ public class LimeComboBox extends JXButton {
                 ActionLabel label = (ActionLabel)e.getSource();
                 Action action = label.getAction();
                 selectedAction = action;
+                selectedComponent = (JComponent)label.getParent();
+                selectedLabel = label;
                 // Fire the parent listeners
                 for (SelectionListener listener : selectionListeners) {
                     listener.selectionChanged(action);
@@ -380,29 +388,41 @@ public class LimeComboBox extends JXButton {
         // This is a workaround for not using JMenuItem -- it mimicks the feel
         // without requiring odd spacing.
         MouseListener mouseListener = new MouseAdapter() {
+            
+            private final Color foreground = UIManager.getColor("MenuItem.foreground");
+            private final Color selectedForeground = UIManager.getColor("MenuItem.selectionForeground");
+            
             @Override
             public void mouseEntered(MouseEvent e) {
-                ActionLabel label = (ActionLabel)e.getSource();
-                ((JComponent)label.getParent()).setOpaque(true);
-                label.setForeground(UIManager.getColor("MenuItem.selectionForeground"));
-                label.getParent().repaint();
+                paintNormal(e.getSource(), true);
             }
             
             @Override
             public void mouseExited(MouseEvent e) {
-                paintNormal(e.getSource());
+                paintNormal(e.getSource(), false);
             }
             
             @Override
             public void mouseClicked(MouseEvent e) {
-                paintNormal(e.getSource());
+                paintNormal(e.getSource(), true);
             }
             
-            private void paintNormal(Object source) {
-                ActionLabel label = (ActionLabel)source;
-                ((JComponent)label.getParent()).setOpaque(false);
-                label.setForeground(UIManager.getColor("MenuItem.foreground"));
-                label.getParent().repaint();
+            private void paintNormal(Object source, boolean selected) {
+                 ActionLabel label = (ActionLabel)source;
+                 label.setForeground(selected ? selectedForeground : foreground );
+                 
+                 JComponent parent = (JComponent) label.getParent();
+                 parent.setOpaque(selected);
+                 parent.repaint();
+                
+                 // Remove highlight on the last selected component.
+                 if (selectedComponent != null && selectedComponent != parent) {
+                     selectedLabel.setForeground(foreground);
+                     selectedComponent.setOpaque(false);
+                     selectedComponent.repaint();
+                     selectedLabel = null;
+                     selectedComponent = null;
+                 }
             }
         };
         
@@ -418,7 +438,7 @@ public class LimeComboBox extends JXButton {
             // We create the label ourselves (instead of using JMenuItem),
             // because JMenuItem adds lots of bulky insets.
             JXPanel panel = new JXPanel(new VerticalLayout());
-            panel.setOpaque(false);
+            panel.setOpaque(action == selectedAction);
             panel.setBackground(UIManager.getColor("MenuItem.selectionBackground"));                
             ActionLabel menuItem = new ActionLabel(action, false);
             if(menuItem.getIcon() == null) {
