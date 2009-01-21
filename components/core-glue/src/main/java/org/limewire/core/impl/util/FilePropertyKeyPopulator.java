@@ -268,6 +268,8 @@ public class FilePropertyKeyPopulator {
                 return LimeXMLNames.VIDEO_COMMENTS;
             case COMPANY:
                 return LimeXMLNames.VIDEO_STUDIO;
+            case GENRE:
+                return LimeXMLNames.VIDEO_TYPE;
             case HEIGHT:
                 return LimeXMLNames.VIDEO_HEIGHT;
             case WIDTH:
