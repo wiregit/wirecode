@@ -3,6 +3,7 @@ package org.limewire.ui.swing.table;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -42,6 +43,7 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
     @Resource private Icon downloadingIcon;
     @Resource private Icon libraryIcon;
     @Resource private Color disabledForegroundColor;
+    @Resource private Font font;
     
     public IconLabelRenderer(IconManager iconManager, CategoryIconManager categoryIconManager, DownloadListManager downloadListManager, LibraryManager libraryManager) {
         super(new BorderLayout());
@@ -55,6 +57,7 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
         setBorder(BorderFactory.createEmptyBorder(0,2,0,2));
         label = new JLabel();        
         label.setIconTextGap(5);
+        label.setFont(font);
         
         add(label);
     }
