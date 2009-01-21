@@ -26,10 +26,10 @@ public class RemoteOtherTableFormat<T extends RemoteFileItem> extends AbstractRe
     
     public RemoteOtherTableFormat() {
         super(new ColumnStateInfo[] {
-                new ColumnStateInfo(NAME_INDEX, "REMOTE_LIBRARY_OTHER_NAME", I18n.tr("Name"), 450, true, true),     
-                new ColumnStateInfo(TYPE_INDEX, "REMOTE_LIBRARY_OTHER_TYPE", I18n.tr("Type"), 60, true, true), 
-                new ColumnStateInfo(EXTENSION_INDEX, "REMOTE_LIBRARY_OTHER_EXTENSION", I18n.tr("Extension"), 60, true, true), 
-                new ColumnStateInfo(SIZE_INDEX, "REMOTE_LIBRARY_OTHER_SIZE", I18n.tr("Size"), 60, true, true) 
+                new ColumnStateInfo(NAME_INDEX, "REMOTE_LIBRARY_OTHER_NAME", I18n.tr("Name"), 417, true, true),     
+                new ColumnStateInfo(TYPE_INDEX, "REMOTE_LIBRARY_OTHER_TYPE", I18n.tr("Type"), 170, true, true), 
+                new ColumnStateInfo(EXTENSION_INDEX, "REMOTE_LIBRARY_OTHER_EXTENSION", I18n.tr("Extension"), 78, true, true), 
+                new ColumnStateInfo(SIZE_INDEX, "REMOTE_LIBRARY_OTHER_SIZE", I18n.tr("Size"), 57, true, true) 
         });
     }
 

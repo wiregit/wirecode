@@ -40,9 +40,9 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
         super(ACTION_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(PLAY_INDEX, "LIBRARY_AUDIO_PLAY", "", 25, true, false), 
                 new ColumnStateInfo(TITLE_INDEX, "LIBRARY_AUDIO_TITLE", I18n.tr("Name"), 278, true, true),     
-                new ColumnStateInfo(ARTIST_INDEX, "LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 166, true, true), 
-                new ColumnStateInfo(ALBUM_INDEX, "LIBRARY_AUDIO_ALBUM", I18n.tr("Album"), 152, true, true), 
-                new ColumnStateInfo(LENGTH_INDEX, "LIBRARY_AUDIO_LENGTH", I18n.tr("Length"), 62, true, true), 
+                new ColumnStateInfo(ARTIST_INDEX, "LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 120, true, true), 
+                new ColumnStateInfo(ALBUM_INDEX, "LIBRARY_AUDIO_ALBUM", I18n.tr("Album"), 180, true, true), 
+                new ColumnStateInfo(LENGTH_INDEX, "LIBRARY_AUDIO_LENGTH", I18n.tr("Length"), 60, true, true), 
                 new ColumnStateInfo(GENRE_INDEX, "LIBRARY_AUDIO_GENRE", I18n.tr("Genre"), 60, false, true), 
                 new ColumnStateInfo(BITRATE_INDEX, "LIBRARY_AUDIO_BITRATE", I18n.tr("Bitrate"), 50, false, true), 
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_AUDIO_SIZE", I18n.tr("Size"), 50, false, true),
