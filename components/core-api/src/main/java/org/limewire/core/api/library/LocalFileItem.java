@@ -24,6 +24,9 @@ public interface LocalFileItem extends FileItem {
     /** Determines if this file is sharable. */
     boolean isShareable();
     
+    /** Determines if this file is a store file */
+    boolean isStoreFile();
+    
     /**True if the file is incomplete**/
     boolean isIncomplete();
     

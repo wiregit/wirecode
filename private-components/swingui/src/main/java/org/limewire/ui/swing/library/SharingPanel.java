@@ -79,6 +79,7 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 abstract class SharingPanel extends AbstractFileListPanel implements PropertyChangeListener {
@@ -166,9 +167,18 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         addDisposable(filterList);
 
+        
+        FilterList<LocalFileItem> storeFileFilteredList = GlazedListsFactory.filterList(filterList, new Matcher<LocalFileItem>() {
+                @Override
+                public boolean matches(LocalFileItem item) {
+                    return !item.isStoreFile();
+                }
+        });
+        addDisposable(storeFileFilteredList);
+        
         Comparator<LocalFileItem> c = new LocalFileItemComparator(friendFileList);
         
-        SortedList<LocalFileItem> sortedList = new SortedList<LocalFileItem>(filterList, c);
+        SortedList<LocalFileItem> sortedList = new SortedList<LocalFileItem>(storeFileFilteredList, c);
         addDisposable(sortedList);
 
         JScrollPane scrollPane;

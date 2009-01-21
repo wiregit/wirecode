@@ -105,7 +105,6 @@ public class MockLocalFileItem implements LocalFileItem {
     
     @Override
     public boolean isShareable() {
-        // TODO Auto-generated method stub
         return true;
     }
 
@@ -128,5 +127,10 @@ public class MockLocalFileItem implements LocalFileItem {
     public int getNumUploadAttempts() {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public boolean isStoreFile() {
+        return false;
     }
 }

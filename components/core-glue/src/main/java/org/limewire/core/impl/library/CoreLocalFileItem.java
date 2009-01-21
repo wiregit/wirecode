@@ -280,7 +280,12 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     @Override
     public boolean isShareable() {
-        return !fileDesc.isStoreFile();
+        return !isStoreFile();
+    }
+    
+    @Override
+    public boolean isStoreFile() {
+        return fileDesc.isStoreFile();
     }
 
     @Override
