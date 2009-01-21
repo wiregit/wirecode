@@ -477,6 +477,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	}
 	
 	public synchronized void finish() {
+	    //when finish is called it is expected that the downloader has already been removed from the download manager.
+        assert downloadManager.contains(this) == false;
         finished = true;
 		torrentManager.get().removeEventListener(this);
 		torrent = new FinishedTorrentDownload(torrent);
