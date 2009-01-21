@@ -232,7 +232,7 @@ public class FilePropertyKeyPopulator {
                 return LimeXMLNames.DOCUMENT_AUTHOR;
             case TITLE:
                 return LimeXMLNames.DOCUMENT_TITLE;
-            case TOPIC:
+            case DESCRIPTION:
                 return LimeXMLNames.DOCUMENT_TOPIC;
             }
             break;

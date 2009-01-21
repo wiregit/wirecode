@@ -53,7 +53,7 @@ public class SharedDocumentTableFormat<T extends LocalFileItem> extends Abstract
          case NAME_INDEX: return baseObject;
          case ACTION_INDEX: return baseObject;
          case SIZE_INDEX: return baseObject.getSize();
-         case TYPE_INDEX: return baseObject.getProperty(FilePropertyKey.TOPIC);
+         case TYPE_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
          }
          throw new IllegalArgumentException("Unknown column:" + column);
     }

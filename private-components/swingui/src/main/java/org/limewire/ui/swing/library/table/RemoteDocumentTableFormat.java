@@ -47,7 +47,7 @@ public class RemoteDocumentTableFormat<T extends RemoteFileItem> extends Abstrac
              case CREATED_INDEX: return baseObject.getCreationTime();
              case NAME_INDEX: return baseObject;
              case SIZE_INDEX: return baseObject.getSize();
-             case TYPE_INDEX: return baseObject.getProperty(FilePropertyKey.TOPIC);  
+             case TYPE_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);  
              case EXTENSION_INDEX: return FileUtils.getFileExtension(baseObject.getFileName());
              case DESCRIPTION_INDEX: return "";
          }

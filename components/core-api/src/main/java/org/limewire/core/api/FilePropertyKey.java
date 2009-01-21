@@ -23,7 +23,6 @@ public enum FilePropertyKey {
     RATING,
     TRACK_NUMBER,
     ALBUM,
-    TOPIC,
     WIDTH,
     YEAR;
     
@@ -53,7 +52,6 @@ public enum FilePropertyKey {
         editableKeys.add(TITLE);
         editableKeys.add(TRACK_NUMBER);
         editableKeys.add(YEAR);
-        editableKeys.add(TOPIC);
     };
     
     static {

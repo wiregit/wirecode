@@ -63,7 +63,7 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
              // Use icon manager to return MIME description.
              return (iconManager != null) ?
                  iconManager.getMIMEDescription(baseObject) : 
-                 baseObject.getProperty(FilePropertyKey.TOPIC);
+                 baseObject.getProperty(FilePropertyKey.DESCRIPTION);
          case HIT_INDEX: return baseObject.getNumHits();
          case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
          case UPLOADS_INDEX: return baseObject.getNumUploads();
