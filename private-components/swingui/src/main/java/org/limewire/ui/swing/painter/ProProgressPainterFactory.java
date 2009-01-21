@@ -24,6 +24,7 @@ public class ProProgressPainterFactory implements ProgressPainterFactory {
     @Resource private Color barForegroundGradientBottom = PainterUtils.TRASPARENT;
     @Resource private Color barDisabledForegroundGradientTop = PainterUtils.TRASPARENT;
     @Resource private Color barDisabledForegroundGradientBottom = PainterUtils.TRASPARENT;
+    @Resource private Color barUpperAccent = PainterUtils.TRASPARENT;
     
     public ProProgressPainterFactory() { 
         GuiUtils.assignResources(this);
@@ -40,7 +41,8 @@ public class ProProgressPainterFactory implements ProgressPainterFactory {
     public AbstractPainter<JProgressBar> createRegularForegroundPainter() {
         return new ProgressBarForegroundPainter<JProgressBar>(
              new GradientPaint(0,0,this.barForegroundGradientTop,0,1,this.barForegroundGradientBottom),
-             new GradientPaint(0,0,this.barDisabledForegroundGradientTop,0,1,this.barDisabledForegroundGradientBottom));
+             new GradientPaint(0,0,this.barDisabledForegroundGradientTop,0,1,this.barDisabledForegroundGradientBottom),
+             barUpperAccent);
     }
     
 }
