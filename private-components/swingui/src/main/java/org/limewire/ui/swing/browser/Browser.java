@@ -1,13 +1,22 @@
 package org.limewire.ui.swing.browser;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import org.jdesktop.swingx.HorizontalLayout;
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXCollapsiblePane;
+import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.components.ColoredBusyLabel;
+import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.MozillaPanel;
@@ -61,11 +70,29 @@ public class Browser extends MozillaPanel {
         loadingPane = new JXCollapsiblePane();
         
         if(loadStatus != VisibilityMode.FORCED_HIDDEN) {
-            loadingPane.setLayout(new HorizontalLayout());
-            JXBusyLabel busyLabel = new JXBusyLabel();
+            loadingPane.setLayout(new BorderLayout());
+            
+            JXBusyLabel busyLabel = new ColoredBusyLabel(new Dimension(12, 12), 
+                    new Color(0xacacac),  new Color(0x545454));
+            
             busyLabel.setBusy(true);
             busyLabel.setText(I18n.tr("Loading..."));
-            loadingPane.add(busyLabel);
+            busyLabel.setFont(new Font("DIALOG", Font.PLAIN, 12));
+            busyLabel.setForeground(new Color(0x313131));
+            busyLabel.setOpaque(false);
+            
+            JXPanel loadingPaneInner = new JXPanel(new MigLayout("insets 6 8 2 2, gap 8, fill, aligny center"));
+            
+            loadingPaneInner.setBackgroundPainter(new GenericBarPainter<JXCollapsiblePane>(
+                    new GradientPaint(0,0,new Color(0xc8c8c8),0,1, new Color(0xf9f9f9)), new Color(0x696969),
+                    new Color(0xebebeb), PainterUtils.TRASPARENT, PainterUtils.TRASPARENT));
+            
+            loadingPane.setOpaque(false);
+            loadingPaneInner.setOpaque(true);
+            
+            loadingPaneInner.add(busyLabel);
+            loadingPane.add(loadingPaneInner, BorderLayout.CENTER);
+            
             add(loadingPane, BorderLayout.SOUTH);
             loadingPane.setCollapsed(true);
         }
