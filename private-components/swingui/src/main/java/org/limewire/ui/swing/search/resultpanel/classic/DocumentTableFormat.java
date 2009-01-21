@@ -30,12 +30,11 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     
     public DocumentTableFormat() {
         super(NAME_INDEX, FROM_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_DOCUMENT_FROM", I18n.tr("From"), 55, true, true), 
-                new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_DOCUMENT_NAME", I18n.tr("Name"), 360, true, true),     
-                new ColumnStateInfo(TYPE_INDEX, "CLASSIC_SEARCH_DOCUMENT_TYPE", I18n.tr("Type"), 80, true, true), 
-                new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_DOCUMENT_EXTENSION", I18n.tr("Extension"), 80, true, true), 
-                new ColumnStateInfo(DATE_INDEX, "CLASSIC_SEARCH_DOCUMENT_DATE", I18n.tr("Date Created"), 60, true, true), 
-                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_DOCUMENT_SIZE", I18n.tr("Size"), 100, true, true), 
+                new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_DOCUMENT_FROM", I18n.tr("From"), 88, true, true), 
+                new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_DOCUMENT_NAME", I18n.tr("Name"), 493, true, true), 
+                new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_DOCUMENT_EXTENSION", I18n.tr("Extension"), 83, true, true), 
+                new ColumnStateInfo(DATE_INDEX, "CLASSIC_SEARCH_DOCUMENT_DATE", I18n.tr("Date Created"), 104, true, true), 
+                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_DOCUMENT_SIZE", I18n.tr("Size"), 92, true, true), 
                 new ColumnStateInfo(AUTHOR_INDEX, "CLASSIC_SEARCH_DOCUMENT_AUTHOR", I18n.tr("Author"), 80, false, true), 
                 new ColumnStateInfo(DESCRIPTION_INDEX, "CLASSIC_SEARCH_DOCUMENT_DESCRIPTION", I18n.tr("Description"), 80, false, true)
         });
