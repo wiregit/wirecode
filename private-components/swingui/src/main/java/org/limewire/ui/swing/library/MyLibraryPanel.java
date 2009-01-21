@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TooManyListenersException;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -41,6 +43,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
@@ -85,7 +88,7 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class MyLibraryPanel extends LibraryPanel {
+public class MyLibraryPanel extends LibraryPanel implements EventListener<FriendEvent> {
     
     @Resource(key="LibraryPanel.selectionPanelBackgroundOverride")
     private Color selectionPanelBackgroundOverride = null;
@@ -110,7 +113,11 @@ public class MyLibraryPanel extends LibraryPanel {
     
     private Timer repaintTimer;
     private ListenerSupport<XMPPConnectionEvent> connectionListeners;
+    private final ListenerSupport<FriendEvent> knownFriendsListeners;
     
+    // set of known friends helps keep correct share numbers
+    private final Set<String> knownFriends;
+
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
                           LibraryNavigator libraryNavigator,
@@ -123,7 +130,7 @@ public class MyLibraryPanel extends LibraryPanel {
                           GhostDragGlassPane ghostPane,
                           ListenerSupport<XMPPConnectionEvent> connectionListeners,
                           ShareListManager shareListManager,
-                          @Named("available") ListenerSupport<FriendEvent> availListeners) {
+                          @Named("known") ListenerSupport<FriendEvent> knownFriendsListeners) {
         
         super(headerBarFactory);
         
@@ -148,6 +155,12 @@ public class MyLibraryPanel extends LibraryPanel {
         multiShareWidget = shareFactory.createMultiFileShareWidget();
         createMyCategories(libraryManager.getLibraryManagedList());
         selectFirstVisible();
+
+        this.knownFriends = new HashSet<String>();
+        this.knownFriends.add(Friend.P2P_FRIEND_ID);
+        this.knownFriendsListeners = knownFriendsListeners;
+        this.knownFriendsListeners.addListener(this);
+        getSelectionPanel().updateCollectionShares(knownFriends);
         
         addHeaderComponent(playerPanel, "cell 0 0, grow");
         playerPanel.setMaximumSize(new Dimension(999,999));
@@ -180,7 +193,25 @@ public class MyLibraryPanel extends LibraryPanel {
             }
         });
     }
-        
+
+    @Override
+    public void handleEvent(FriendEvent event) {
+        Friend friend = event.getSource();
+
+        switch (event.getType()) {
+            case ADDED:
+                knownFriends.add(friend.getId());
+                break;
+            case REMOVED:
+            case DELETE:
+                knownFriends.remove(friend.getId());
+                break;
+            default:
+                return;
+        }
+        getSelectionPanel().updateCollectionShares(knownFriends);
+    }
+    
     private void createMyCategories(LibraryFileList libraryFileList) {
         for(Category category : Category.getCategoriesInOrder()) {        
             CategorySelectionCallback callback = null;
@@ -276,6 +307,7 @@ public class MyLibraryPanel extends LibraryPanel {
         
         categoryShareWidget.dispose();
         multiShareWidget.dispose();
+        knownFriendsListeners.removeListener(this);
     }
     
     private static class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{

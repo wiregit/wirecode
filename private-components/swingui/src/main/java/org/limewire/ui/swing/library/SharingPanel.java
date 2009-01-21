@@ -262,7 +262,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
                 LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
             }
-            if(category == Category.DOCUMENT && friend.getId().equals("_@_GNUTELLA_@_")) {
+            if(category == Category.DOCUMENT && friend.getId().equals(Friend.P2P_FRIEND_ID)) {
                 LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.addSettingListener(this);
             }
         }
@@ -287,7 +287,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                 action.setEnabled(allFileList.size() > 0);
             } else if(category == Category.PROGRAM) {// hide program category is not enabled
                 action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
-            } else if(category == Category.DOCUMENT && friend.getId().equals("_@_GNUTELLA_@_")) {
+            } else if(category == Category.DOCUMENT && friend.getId().equals(Friend.P2P_FRIEND_ID)) {
                 action.setEnabled(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue());
             }
         }
@@ -302,7 +302,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
                 LibrarySettings.SNAPSHOT_SHARING_ENABLED.removeSettingListener(this);
             }
-            if(category == Category.DOCUMENT && friend.getId().equals("_@_GNUTELLA_@_")) {
+            if(category == Category.DOCUMENT && friend.getId().equals(Friend.P2P_FRIEND_ID)) {
                 LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.removeSettingListener(this);
             }
         }
