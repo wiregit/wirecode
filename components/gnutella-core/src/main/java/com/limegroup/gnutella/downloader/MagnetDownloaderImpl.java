@@ -173,7 +173,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     
     /** 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
-     * is provided, issues a HEAD request to get the file size.  If this fails,
+     * is provided and fileSize is -1, it issues a HEAD request to get the file size.  If this fails,
      * returns null.
      * <p>
      * Protected and non-static so it can be overridden in tests.
