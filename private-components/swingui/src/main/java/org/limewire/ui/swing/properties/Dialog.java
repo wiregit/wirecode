@@ -390,8 +390,6 @@ public abstract class Dialog extends LimeJDialog {
         details.add(newSmallLabel(COMPANY), "wrap");
         details.add(platform, "wmin 90");
         details.add(company, "growx, wrap");
-        details.add(newSmallLabel(DESCRIPTION), "wrap");
-        details.add(descriptionScrollPane, "hmin pref, grow, span");
         
         addDetails();
     }

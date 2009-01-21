@@ -248,8 +248,6 @@ public class FilePropertyKeyPopulator {
             break;
         case PROGRAM:
             switch (filePropertyKey) {
-            case AUTHOR:
-                return LimeXMLNames.APPLICATION_PUBLISHER;
             case COMPANY:
                 return LimeXMLNames.APPLICATION_PUBLISHER;
             case PLATFORM:
