@@ -29,8 +29,7 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
     static final int FILENAME_INDEX = 8;
     static final int TRACK_INDEX = 9;
     static final int YEAR_INDEX = 10;
-    static final int QUALITY_INDEX = 11;
-    static final int DESCRIPTION_INDEX = 12;
+    static final int DESCRIPTION_INDEX = 11;
     
     private final LocalFileList localFileList;
     
@@ -47,7 +46,6 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
                 new ColumnStateInfo(FILENAME_INDEX, "SHARE_LIBRARY_AUDIO_FILENAME", I18n.tr("Filename"), 100, false, true), 
                 new ColumnStateInfo(TRACK_INDEX, "SHARE_LIBRARY_AUDIO_TRACK", I18n.tr("Track"), 50, false, true), 
                 new ColumnStateInfo(YEAR_INDEX, "SHARE_LIBRARY_AUDIO_YEAR", I18n.tr("Year"), 50, false, true), 
-                new ColumnStateInfo(QUALITY_INDEX, "SHARE_LIBRARY_AUDIO_QUALITY", I18n.tr("Quality"), 60, false, true), 
                 new ColumnStateInfo(DESCRIPTION_INDEX, "SHARE_LIBRARY_AUDIO_DESCRIPTION", I18n.tr("Description"), 100, false, true) 
         });
         this.localFileList = localFileList;
@@ -66,7 +64,6 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
         case SIZE_INDEX: return baseObject.getSize();
         case TRACK_INDEX: return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
         case YEAR_INDEX: return baseObject.getProperty(FilePropertyKey.YEAR);
-        case QUALITY_INDEX: return "";
         case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         case ACTION_INDEX: return baseObject;
         }

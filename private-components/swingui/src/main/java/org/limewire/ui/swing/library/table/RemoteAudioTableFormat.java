@@ -59,7 +59,7 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
             case ARTIST_INDEX: return baseObject.getProperty(FilePropertyKey.AUTHOR);
             case ALBUM_INDEX: return baseObject.getProperty(FilePropertyKey.ALBUM);
             case LENGTH_INDEX: return baseObject.getProperty(FilePropertyKey.LENGTH);
-            case QUALITY_INDEX: return "";
+            case QUALITY_INDEX: return baseObject;
             case GENRE_INDEX: return baseObject.getProperty(FilePropertyKey.GENRE);
             case BITRATE_INDEX: return baseObject.getProperty(FilePropertyKey.BITRATE);
             case SIZE_INDEX: return baseObject.getSize();

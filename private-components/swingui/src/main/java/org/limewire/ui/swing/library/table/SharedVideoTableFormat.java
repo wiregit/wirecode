@@ -51,7 +51,7 @@ public class SharedVideoTableFormat<T extends LocalFileItem> extends AbstractMyL
         switch(column) {
         case NAME_INDEX: return baseObject;
         case LENGTH_INDEX: return baseObject.getProperty(FilePropertyKey.LENGTH);
-        case MISC_INDEX: return "";
+        case MISC_INDEX: return baseObject;
         case YEAR_INDEX: return baseObject.getProperty(FilePropertyKey.YEAR);
         case RATING_INDEX: return baseObject.getProperty(FilePropertyKey.RATING);
         case SIZE_INDEX: return baseObject.getSize();
