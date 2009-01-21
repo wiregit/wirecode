@@ -136,9 +136,11 @@ public final class Initializer {
         //must agree not to use LW for copyright infringement on first running
         confirmIntent(awtSplash);
 
+        boolean isPro = injector.getInstance(org.limewire.core.api.Application.class).isProVersion();
+        
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
-        switchSplashes(awtSplash, splashImage);
+        switchSplashes(awtSplash, splashImage, isPro);
         
         startEarlyCore(limeWireCore);
         
@@ -437,11 +439,11 @@ public final class Initializer {
     }
     
     /** Switches from the AWT splash to the Swing splash. */
-    private void switchSplashes(final Frame awtSplash, final Image splashImage) {
+    private void switchSplashes(final Frame awtSplash, final Image splashImage, final boolean isPro) {
         SwingUtils.invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                splashRef.set(new SplashWindow(splashImage, Locale.getDefault(), 4));
+                splashRef.set(new SplashWindow(splashImage, isPro, Locale.getDefault(), 4));
                 if(!isStartup) {
                     splashRef.get().begin();
                     stopwatch.resetAndLog("begin splash window");
