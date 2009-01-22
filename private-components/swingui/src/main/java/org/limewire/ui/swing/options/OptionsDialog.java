@@ -138,7 +138,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     }
     
     private void createComponents(BarPainterFactory barPainterFactory) {
-        setLayout(new MigLayout("gap 0, insets 0 0 0 0, fill", "fill", "[63!][fill][40!, fill]"));
+        setLayout(new MigLayout("gap 0, insets 0 0 0 0, fill", "fill", "[][fill][40!, fill]"));
         
         cardLayout = new CardLayout();
         cardPanel = new JPanel();
