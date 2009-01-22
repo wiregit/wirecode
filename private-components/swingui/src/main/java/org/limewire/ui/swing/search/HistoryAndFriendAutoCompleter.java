@@ -149,6 +149,7 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             setFocusable(false);
             setCellRenderer(new Renderer());
+            setSelectionBackground(new Color(0xcbe997));
         }
         
         // override to return true always, to enforce '...' added
@@ -213,7 +214,7 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
         private final JPanel firstSuggestionPanel;
         private final DefaultListCellRenderer firstSuggestionLabel;
         private final JLabel firstSuggestionTitle;
-        private final Border firstSuggestionBorder = new SideLineBorder(Color.BLACK, SideLineBorder.Side.TOP);
+        private final Border firstSuggestionBorder = new SideLineBorder(Color.GRAY, SideLineBorder.Side.TOP);
         
         public Renderer() {
             compoundBorder = new ExtendedCompoundBorder(BorderFactory.createEmptyBorder(), BorderFactory.createEmptyBorder(0, 2, 0, 2));
