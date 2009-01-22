@@ -133,8 +133,8 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         titleLabel1.setForeground(titleFontColor);
 
         JLabel titleLabel2 = new JLabel(titleLine2);
-        titleLabel1.setFont(titleFont);
-        titleLabel1.setForeground(titleFontColor);
+        titleLabel2.setFont(titleFont);
+        titleLabel2.setForeground(titleFontColor);
 
         titleLabel1.addMouseListener(performNotificationActionsMouseListener);
         titleLabel2.addMouseMotionListener(performNotificationActionsMouseListener);
