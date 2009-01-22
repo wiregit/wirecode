@@ -58,7 +58,6 @@ public class NavPanel extends JXPanel {
     @Resource private Color selectedBackgroundGradientTop = PainterUtils.TRASPARENT;
     @Resource private Color selectedBackgroundGradientBottom = PainterUtils.TRASPARENT;
     
-    @Resource private Font selectedTextFont;
     @Resource private Color selectedTextColor;
     @Resource private Font failedTextFont;
     @Resource private Font textFont;
@@ -132,7 +131,7 @@ public class NavPanel extends JXPanel {
                         requestFocus();
                         setBackgroundPainter(selectedPainter);
                         categoryLabel.setForeground(selectedTextColor);
-                        categoryLabel.setFont(selectedTextFont);
+                        categoryLabel.setFont(textFont);
                         setOpaque(true);
                         repaint();
                     } else {
@@ -189,13 +188,6 @@ public class NavPanel extends JXPanel {
     public void setPanelFont(Font font) {
         this.textFont = font;
         if(!Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
-            categoryLabel.setFont(font);
-        }
-    }
-    
-    public void setSelectedFont(Font font) {
-        this.selectedTextFont = font;
-        if(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
             categoryLabel.setFont(font);
         }
     }
