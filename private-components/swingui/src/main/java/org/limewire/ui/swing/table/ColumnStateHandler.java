@@ -4,6 +4,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -131,22 +135,53 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
         }
     }
     
+    /**
+     * Sets the column order of the table based on the preffered index of each column.
+     * Because table.getColumnModel.move is not stable. Meaning moving an item to index 2 might 
+     * move the item already there to the left, or maybe to the right. We have to jump through a few
+     * hoops to make it stable.
+     * First we make a list ordering all columns in the reverse preffered order, then move each item
+     * from where it currently is in the column model to the zero index. Since items cannot be moved to
+     * the left of the zero index this makes the move stable, and places the items in the proper
+     * preffered index order.
+     */
     public void setupColumnOrder() {
         stopListening();
-
+        List<TableColumn> columns = new ArrayList<TableColumn>();
         for(int i = 0; i < table.getColumnCount(); i++) {
-            TableColumnExt column = table.getColumnExt(i); 
-            ColumnStateInfo info = format.getColumnInfo(column.getModelIndex());
-            if(i != info.getPreferredViewIndex()) {
-                if(info.getPreferredViewIndex() >= 0 && info.getPreferredViewIndex() < table.getColumnCount()) {
-                    table.getColumnModel().moveColumn(i, info.getPreferredViewIndex());
-                }
+            TableColumn tableColumn = table.getColumn(i);
+            columns.add(tableColumn);
+        }
+        Collections.sort(columns, new Comparator<TableColumn> () {
+           @Override
+            public int compare(TableColumn o1, TableColumn o2) {
+                ColumnStateInfo info1 = format.getColumnInfo(o1.getModelIndex());
+                ColumnStateInfo info2 = format.getColumnInfo(o2.getModelIndex());
+                Integer prefferedIndex1 = info1.getPreferredViewIndex();
+                Integer prefferedIndex2 = info2.getPreferredViewIndex();
+                return prefferedIndex1.compareTo(prefferedIndex2) * -1;
+            } 
+        });
+        
+        for(TableColumn tableColumn : columns) {
+            int currentIndex = getCurrentIndex(tableColumn);
+            if(currentIndex > 0 && currentIndex < table.getColumnCount()) {
+                table.getColumnModel().moveColumn(currentIndex, 0);
             }
         }
-
+       
         startListening();
     }
     
+    private int getCurrentIndex(TableColumn tableColumn) {
+        for(int i = 0; i < table.getColumnCount(); i++) {
+            if(table.getColumn(i) == tableColumn) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public void setupColumnVisibility() {
         stopListening();
 
