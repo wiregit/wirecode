@@ -70,6 +70,7 @@ public abstract class AbstractColumnStateFormat<T> implements VisibleTableFormat
                     }
                     return alpha.toString().compareToIgnoreCase(beta.toString());
                 } catch (ClassCastException cce) {
+                    // see LWC-2728, remove when it cause is known and fixed
                     cce.initCause(new Exception("happening in " + AbstractColumnStateFormat.this.getClass()));
                     throw cce;
                 }
