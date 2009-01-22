@@ -28,6 +28,7 @@ import org.limewire.ui.swing.components.CollectionBackedListModel;
 import org.limewire.ui.swing.components.ExtendedCompoundBorder;
 import org.limewire.ui.swing.components.SideLineBorder;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.I18n;
 
 /** An autocompleter that shows its suggestions in a list and can have new suggestions added. */
 public class HistoryAndFriendAutoCompleter implements AutoCompleter {
@@ -225,7 +226,7 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             
             firstSuggestionLabel = new DefaultListCellRenderer();
             firstSuggestionTitle = new DefaultListCellRenderer();
-            firstSuggestionTitle.setText("Friend Suggestions");
+            firstSuggestionTitle.setText(I18n.tr("Friend Suggestions"));
             FontUtils.changeSize(firstSuggestionTitle, -1);
             firstSuggestionTitle.setForeground(Color.GRAY);
             
