@@ -2,6 +2,7 @@ package org.limewire.ui.swing.friends.login;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -12,6 +13,7 @@ import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
@@ -146,6 +148,7 @@ class LoginPanel extends JXPanel implements SettingListener {
                 populateInputs();
             }
         });
+        ResizeUtils.looseForceHeight(serviceComboBox, 22);
         
         serviceField = new LimePromptTextField(tr("Domain"), AccentType.NONE);
         
@@ -153,8 +156,8 @@ class LoginPanel extends JXPanel implements SettingListener {
         passwordField = new LimePromptPasswordField(tr("Password"), AccentType.NONE);
         passwordField.setAction(signinAction);
         
-        ResizeUtils.forceWidth(usernameField, 139);
-        ResizeUtils.forceWidth(passwordField, 139);
+        ResizeUtils.forceSize(usernameField, new Dimension(139, 22));
+        ResizeUtils.forceSize(passwordField, new Dimension(139, 22));
 
         autoLoginCheckBox = new LimeCheckBox(tr("Remember me")); 
         autoLoginCheckBox.setSelected(SwingUiSettings.REMEMBER_ME_CHECKED.getValue());
@@ -175,7 +178,9 @@ class LoginPanel extends JXPanel implements SettingListener {
 
         signInButton = new JXButton(signinAction);
         buttonDecorator.decorateDarkFullButton(signInButton, AccentType.NONE);
-
+        signInButton.setBorder(BorderFactory.createEmptyBorder(0,15,2,15));
+        ResizeUtils.looseForceHeight(signInButton, 22);
+        
         authFailedLabel = new MultiLineLabel();
         authFailedLabel.setVisible(false);
         authFailedLabel.setName("LoginPanel.authFailedLabel");
@@ -189,17 +194,17 @@ class LoginPanel extends JXPanel implements SettingListener {
         });
         hideButton.setName("LoginPanel.hideButton");
 
-        setLayout(new MigLayout("nocache, nogrid, gap 0, insets 4 5 8 4, fill"));
+        setLayout(new MigLayout("nocache, nogrid, gap 0, insets 4 5 8 4, fill, alignx left"));
         
-        add(titleLabel, "alignx left, gaptop 1, gapleft 2, gapbottom 4");
+        add(titleLabel, "gaptop 1, gapleft 2, gapbottom 4");
         add(hideButton, "alignx right, aligny top, gapbefore push, wrap");
-        add(authFailedLabel, "alignx left, gapleft 2, wmin 0, hidemode 3, gapbottom 3, wrap");
-        add(serviceComboBox, "alignx left, gapbottom 8, wmin 0, wrap");
-        add(serviceField, "alignx left, gapbottom 8, hidemode 3, grow, wmin 0, wrap");
-        add(usernameField, "alignx left, gapbottom 8, grow, wrap");
-        add(passwordField, "alignx left, gapbottom 4, grow, wrap");
-        add(autoLoginCheckBox, "alignx left, gapleft 1, gapbottom 3, wmin 0, wrap");
-        add(signInButton, "alignx left, wmin 0");
+        add(authFailedLabel, "gapleft 2, wmin 0, hidemode 3, gapbottom 3, wrap");
+        add(serviceComboBox, "gapbottom 8, wmin 0, wrap");
+        add(serviceField, "gapbottom 8, hidemode 3, grow, wmin 0, wrap");
+        add(usernameField, "gapbottom 8, grow, wrap");
+        add(passwordField, "gapbottom 4, grow, wrap");
+        add(autoLoginCheckBox, "gapleft 1, gapbottom 3, wmin 0, wrap");
+        add(signInButton);
 
         setBackgroundPainter(barPainterFactory.createFriendsBarPainter());
 
