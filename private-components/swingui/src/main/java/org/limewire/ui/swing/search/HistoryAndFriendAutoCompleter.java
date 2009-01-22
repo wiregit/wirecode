@@ -51,12 +51,13 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
         this.suggestionDictionary = dictionary;
         
         entryPanel = new JPanel(new MigLayout("insets 0, gap 0, fill"));
-        entryPanel.setBorder(UIManager.getBorder("List.border"));
+        entryPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         entryPanel.setBackground(UIManager.getColor("List.background"));
         
         entryList = new AutoCompleteList();
         
         JScrollPane entryScrollPane = new JScrollPane(entryList);
+        entryScrollPane.setBorder(BorderFactory.createEmptyBorder());
         entryScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         entryScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         entryPanel.add(entryScrollPane, "grow");
