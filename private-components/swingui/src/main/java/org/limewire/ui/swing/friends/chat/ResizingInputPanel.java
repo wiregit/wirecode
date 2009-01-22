@@ -53,6 +53,7 @@ class ResizingInputPanel extends JPanel implements Displayable {
         text.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "sendMessage");
         text.getActionMap().put("sendMessage", new SendMessage());
         text.getDocument().addDocumentListener(new ChatStateDocumentListener());
+        text.setBorder(BorderFactory.createEmptyBorder(2,0,0,0));
         
         JPopupMenu popup = PopupUtil.addPopupMenus(text, new CutAction(text), new CopyAction(text), 
                 new PasteAction(), new DeleteAction(text));
@@ -69,7 +70,7 @@ class ResizingInputPanel extends JPanel implements Displayable {
                 }
             }
         });
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
         add(scrollPane);
     }
     
