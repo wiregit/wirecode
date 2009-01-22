@@ -224,11 +224,16 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                                 vsrToRowDisplayResultMap.put(vsr, result);
                             } 
                             int newRowHeight = result.getConfig().getRowHeight();
-                            if (resultsList.getRowHeight(row) != newRowHeight) {
-                                LOG.debugf("Row: {0} vsr: {1} config: {2}", row, vsr.getHeading(), 
-                                        result.getConfig());
-                                resultsList.setRowHeight(row, newRowHeight);
-                                setRowSize = true;
+                            if(vsr.getSimilarityParent() == null) {
+                                //only resize rows that belong to parent visual results.
+                                //this will prevent the jumping when expanding child results as mentioned in
+                                //https://www.limewire.org/jira/browse/LWC-2545
+                                if (resultsList.getRowHeight(row) != newRowHeight) {
+                                    LOG.debugf("Row: {0} vsr: {1} config: {2}", row, vsr.getHeading(), 
+                                            result.getConfig());
+                                    resultsList.setRowHeight(row, newRowHeight);
+                                    setRowSize = true;
+                                }
                             }
                         }
                         resultsList.setIgnoreRepaints(false);
