@@ -151,6 +151,7 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             setFocusable(false);
             setCellRenderer(new Renderer());
             setSelectionBackground(new Color(0xcbe997));
+            setSelectionForeground(Color.BLACK);
         }
         
         // override to return true always, to enforce '...' added
