@@ -326,12 +326,17 @@ public class AppFrame extends SingleFrameApplication {
         
         // Set the menu item highlight colors to avoid contrast issues with
         //  new highlight background in default XP theme
-        Color highlightForeground = Color.BLACK;
-        UIManager.put("Menu.selectionForeground", highlightForeground);
-        UIManager.put("MenuItem.selectionForeground", highlightForeground);
-        UIManager.put("CheckBoxMenuItem.selectionForeground", highlightForeground);
-        UIManager.put("RadioButtonMenuItem.selectionForeground", highlightForeground);
-        
+        Color selectionForeground = new Color(0x313131);
+        UIManager.put("Menu.selectionForeground", selectionForeground);
+        UIManager.put("MenuItem.selectionForeground", selectionForeground);
+        UIManager.put("CheckBoxMenuItem.selectionForeground", selectionForeground);
+        UIManager.put("RadioButtonMenuItem.selectionForeground", selectionForeground);
+        UIManager.put("TextArea.selectionForeground", selectionForeground);
+        UIManager.put("Menu.selectionForeground", selectionForeground);
+        UIManager.put("MenuItem.selectionForeground", selectionForeground);
+        UIManager.put("CheckBoxMenuItem.selectionForeground", selectionForeground);
+        UIManager.put("RadioButtonMenuItem.selectionForeground", selectionForeground);
+                
         // Necessary to allow popups to behave normally.
         UIManager.put("PopupMenu.consumeEventOnClose", false);
         
