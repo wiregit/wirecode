@@ -184,8 +184,8 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
                 mainPanel.add(box(tr("Sharing with"), scroll), "grow, cell 0 3, wmin 200");
             }
             
-            location.setLayout(new MigLayout("", "[]10[]15[]", isShared ? "[top][]" : "[top]"));
-            location.add(fileLocation, "gapbottom 5,push");
+            location.setLayout(new MigLayout("nocache", "[]10[]15[]", isShared ? "[top][]" : "[top]"));
+            location.add(fileLocation, "gapbottom 5,growx, push");
             location.add(locateOnDisk);
             location.add(locateInLibrary, isShared ? "wrap" : "");
 

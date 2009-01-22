@@ -16,6 +16,8 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -74,7 +76,7 @@ public abstract class Dialog extends LimeJDialog {
     protected final JComboBox platform = new JComboBox();
     protected final JTextField company = new JTextField();
     protected final DefaultTableModel readOnlyInfoModel = new ReadOnlyTableModel();
-    protected final JLabel fileLocation = newLabel();
+    protected final JEditorPane fileLocation = new JEditorPane();
     protected final HyperlinkButton locateOnDisk;
     protected final HyperlinkButton locateInLibrary;
     protected final HyperlinkButton copyToClipboard;
@@ -112,6 +114,8 @@ public abstract class Dialog extends LimeJDialog {
         setFont(smallFont, metadata, copyToClipboard, moreFileInfo, locateOnDisk, locateInLibrary,
                 title, genre, unEditableGenre, rating, year, description, artist, album, track, author, platform,
                 company, fileLocation);
+        decorateEditorPane(fileLocation);
+        
         //Use the same border that a textfield uses - JTextAreas by default are not given a border
         //This makes the look consistent with JTextField
         descriptionScrollPane.setBorder(artist.getBorder());
@@ -164,6 +168,12 @@ public abstract class Dialog extends LimeJDialog {
         }
     }
 
+    private void decorateEditorPane(JEditorPane editor) {
+        editor.setOpaque(false);
+        editor.setEditable(false);
+        editor.setPreferredSize(new Dimension(100,30));
+    }
+    
     private JLabel newLabel() {
         //Creating a JLabel that wraps all text in HTML so that multiline word
         //wrapping will behave correctly.  The JXLabel.setMultiline() causes the
@@ -480,5 +490,15 @@ public abstract class Dialog extends LimeJDialog {
         public boolean isCellEditable(int row, int column) {
             return false;
         }
+    }
+    
+    public static void main(String args[]) {
+        JFrame  f = new JFrame();
+        JEditorPane pane = new JEditorPane();
+        pane.setText("This is a very long string,stringstringstringstring");
+        pane.setEditable(false);
+        
+        f.add(pane);
+        f.setVisible(true);
     }
 }
