@@ -13,11 +13,11 @@ import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -57,7 +57,7 @@ public abstract class Dialog extends LimeJDialog {
     private static final String TITLE = "Title";
     private static final String HASH = "Hash";
     protected final JLabel icon = new JLabel();
-    protected final JLabel heading = newLabel();
+    protected final JEditorPane heading = new JEditorPane();
     protected final JLabel filename = newLabel();
     protected final JLabel fileSize = new JLabel();
     protected final JLabel metadata = newLabel();
@@ -114,6 +114,7 @@ public abstract class Dialog extends LimeJDialog {
         setFont(smallFont, metadata, copyToClipboard, moreFileInfo, locateOnDisk, locateInLibrary,
                 title, genre, unEditableGenre, rating, year, description, artist, album, track, author, platform,
                 company, fileLocation);
+        decorateEditorPane(heading);
         decorateEditorPane(fileLocation);
         
         //Use the same border that a textfield uses - JTextAreas by default are not given a border
@@ -126,7 +127,7 @@ public abstract class Dialog extends LimeJDialog {
         buttons.add(new JButton(new CancelAction()));
         mainPanel.add(buttons, "alignx right, cell 1 4");
         
-        overview = newPanel(new MigLayout("fillx", "[][]push[]", "[top]3[top]"));
+        overview = newPanel(new MigLayout("gap 0, fillx", "[][grow]push[]", "[top]2[top]"));
 
         JPanel linksPanel = new JPanel(new BorderLayout());
         linksPanel.setOpaque(false);
@@ -134,7 +135,7 @@ public abstract class Dialog extends LimeJDialog {
         linksPanel.add(moreFileInfo, BorderLayout.SOUTH);
         
         overview.add(icon, "spany");
-        overview.add(heading, "grow");
+        overview.add(heading, "growx");
         overview.add(linksPanel, "spany, wrap");
         overview.add(metadata, "cell 1 1");
 
@@ -170,8 +171,9 @@ public abstract class Dialog extends LimeJDialog {
 
     private void decorateEditorPane(JEditorPane editor) {
         editor.setOpaque(false);
+        editor.setBorder(BorderFactory.createEmptyBorder());
         editor.setEditable(false);
-        editor.setPreferredSize(new Dimension(100,30));
+        editor.setPreferredSize(new Dimension(100,20));
     }
     
     private JLabel newLabel() {
@@ -490,15 +492,5 @@ public abstract class Dialog extends LimeJDialog {
         public boolean isCellEditable(int row, int column) {
             return false;
         }
-    }
-    
-    public static void main(String args[]) {
-        JFrame  f = new JFrame();
-        JEditorPane pane = new JEditorPane();
-        pane.setText("This is a very long string,stringstringstringstring");
-        pane.setEditable(false);
-        
-        f.add(pane);
-        f.setVisible(true);
     }
 }
