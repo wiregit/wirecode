@@ -19,7 +19,6 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.player.api.AudioPlayer;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.BackAction;
@@ -125,7 +124,7 @@ public class MainDownloadPanel extends JPanel {
 	@Inject
 	public MainDownloadPanel(AllDownloadPanelFactory allDownloadPanelFactory, 
 	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
-	        DownloadMediator downloadMediator, AudioPlayer player,
+	        DownloadMediator downloadMediator,
 	        LimeHeaderBarFactory headerBarFactory, LimeComboBoxFactory comboBoxFactory,
 	        ButtonDecorator buttonDecorator, DockIconFactory dockIconFactory,
 	        BackAction backAction) {
