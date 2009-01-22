@@ -48,7 +48,7 @@ public abstract class AbstractColumnStateFormat<T> implements VisibleTableFormat
         return comparator;
     }
     
-    private static class LimeComparator implements Comparator<Object> {
+    private class LimeComparator implements Comparator<Object> {
     
         /**
          * Compares object alpha to object beta by casting object one
@@ -62,20 +62,19 @@ public abstract class AbstractColumnStateFormat<T> implements VisibleTableFormat
             } else if (beta == null){
                 return 1;
             } else {
-                if(alpha instanceof Long) {
-                    return ((Long)alpha).compareTo((Long)beta);
-                } else if(alpha instanceof Integer) {
-                    return ((Integer)alpha).compareTo((Integer)beta);
+                try {
+                    if(alpha instanceof Long) {
+                        return ((Long)alpha).compareTo((Long)beta);
+                    } else if(alpha instanceof Integer) {
+                        return ((Integer)alpha).compareTo((Integer)beta);
+                    }
+                    return alpha.toString().compareToIgnoreCase(beta.toString());
+                } catch (ClassCastException cce) {
+                    cce.initCause(new Exception("happening in " + AbstractColumnStateFormat.this.getClass()));
+                    throw cce;
                 }
-                return alpha.toString().compareToIgnoreCase(beta.toString());
             }
         }
     }
-    
-    public static class StringComparator implements Comparator<String> {
-        @Override
-        public int compare(String o1, String o2) {
-            return o1.toLowerCase().compareTo(o2.toLowerCase());
-        }
-    }
+
 }
