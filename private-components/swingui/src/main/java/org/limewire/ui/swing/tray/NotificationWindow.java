@@ -121,7 +121,7 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         if (notification.getTitle() != null) {
             StringTokenizer title = new StringTokenizer(notification.getTitle(), " \t\n\r");
             StringBuffer titleBuffer1 = new StringBuffer();
-            StringBuffer remainingMessage = buildLine(titleBuffer1, title, titleFont, 120);
+            StringBuffer remainingMessage = buildLine(titleBuffer1, title, titleFont, 150);
             titleLine1 = titleBuffer1.toString().trim();
             titleLine2 = getTruncatedMessage(remainingMessage.toString().trim(), titleFont, 180);
         }
