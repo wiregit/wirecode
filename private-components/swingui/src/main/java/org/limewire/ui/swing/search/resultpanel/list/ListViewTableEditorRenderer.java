@@ -260,7 +260,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             @Override
             public void handlePopupMouseEvent(MouseEvent e) {
                 final VisualSearchResult result = vsr; 
-                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, Collections.singletonList(vsr), properties);
+                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, Collections.singletonList(vsr), properties, SearchResultMenu.ViewType.List);
                 searchResultMenu.addPopupMenuListener(new PopupMenuListener() {
                     @Override
                     public void popupMenuCanceled(PopupMenuEvent e) {
