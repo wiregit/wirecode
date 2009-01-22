@@ -54,8 +54,8 @@ public class ResizeUtils {
      *  usually leaves things in a state where the component width grows with contents.
      */
     public static void looseForceHeight(Component comp, int height) {
-        comp.setMinimumSize(new Dimension(10, 22));
-        comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        comp.setMinimumSize(new Dimension(10, height));
+        comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
     }
     
     /**
