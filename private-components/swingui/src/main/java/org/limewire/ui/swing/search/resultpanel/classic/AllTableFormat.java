@@ -15,13 +15,11 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * This class specifies the content of a table that contains
  * objects representing any kind of media.
  */
-@Singleton
 public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int FROM_INDEX = 0;
     static final int NAME_INDEX = 1;
