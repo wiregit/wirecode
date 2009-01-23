@@ -80,7 +80,7 @@ public class DownloadPopupHandler implements TablePopupHandler {
         libraryMenuItem.addActionListener(menuListener);
 
         
-        propertiesMenuItem = new JMenuItem(I18n.tr("View File Info"));
+        propertiesMenuItem = new JMenuItem(I18n.tr("View File Info..."));
         propertiesMenuItem.setActionCommand(DownloadActionHandler.PROPERTIES_COMMAND);
         propertiesMenuItem.addActionListener(menuListener);
 
