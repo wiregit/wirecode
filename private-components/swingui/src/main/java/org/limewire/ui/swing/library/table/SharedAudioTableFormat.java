@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
@@ -13,6 +14,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.PropertyUtils;
 
 /**
  * Table format for the Audio Table when it is in Sharing View
@@ -74,6 +76,7 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
     public Class getColumnClass(int column) {
         switch(column) {
             case ACTION_INDEX:
+            case TITLE_INDEX:
                 return FileItem.class;
         }
         return super.getColumnClass(column);
@@ -83,6 +86,7 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
     public Comparator getColumnComparator(int column) {
         switch(column) {
             case ACTION_INDEX: return new CheckBoxComparator(localFileList);
+            case TITLE_INDEX: return new NameComparator();
         }
         return super.getColumnComparator(column);
     }
@@ -105,6 +109,19 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
             return Arrays.asList(TRACK_INDEX, TITLE_INDEX);
         default:
             return Collections.emptyList();
+        }
+    }
+    
+    /**
+     * Compares the title value for the Name column.
+     */
+    private class NameComparator implements Comparator<FileItem> {
+        @Override
+        public int compare(FileItem o1, FileItem o2) {
+            String title1 = PropertyUtils.getTitle(o1);
+            String title2 = PropertyUtils.getTitle(o2);
+            
+            return title1.toLowerCase(Locale.US).compareTo(title2.toLowerCase(Locale.US));
         }
     }
 }

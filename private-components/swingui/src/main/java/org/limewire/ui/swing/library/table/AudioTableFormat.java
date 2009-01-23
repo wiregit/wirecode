@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
@@ -87,6 +88,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
         switch(column) {
             case ACTION_INDEX:
             case PLAY_INDEX:
+            case TITLE_INDEX:
                 return FileItem.class;
         }
         return super.getColumnClass(column);
@@ -95,7 +97,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     @Override
     public Comparator getColumnComparator(int column) {
         switch(column) {
-            case PLAY_INDEX: return new NameComparator();
+            case TITLE_INDEX: return new NameComparator();
             case ACTION_INDEX: return new ActionComparator();
         }
         return super.getColumnComparator(column);
@@ -131,7 +133,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
             String title1 = PropertyUtils.getTitle(o1);
             String title2 = PropertyUtils.getTitle(o2);
             
-            return title1.toLowerCase().compareTo(title2.toLowerCase());
+            return title1.toLowerCase(Locale.US).compareTo(title2.toLowerCase(Locale.US));
         }
     }
 }
