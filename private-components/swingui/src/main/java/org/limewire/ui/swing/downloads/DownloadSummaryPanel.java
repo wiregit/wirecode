@@ -577,10 +577,14 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                 }
             }
 
-            timeLabel.setVisible(item.getState() == DownloadState.DOWNLOADING && item.getRemainingDownloadTime() < Long.MAX_VALUE-1000);
-            if (timeLabel.isVisible()) {
-                timeLabel.setText(CommonUtils.seconds2time(item.getRemainingDownloadTime()));
-            }
+            timeLabel.setVisible(true);
+            
+            if(item.getState() == DownloadState.PAUSED)
+                timeLabel.setText(I18n.tr("Paused at {0}%", item.getPercentComplete()));
+            else if(item.getState() == DownloadState.DOWNLOADING && item.getRemainingDownloadTime() < Long.MAX_VALUE-1000)
+                timeLabel.setText(I18n.tr("{0}% - {1} left", item.getPercentComplete(), CommonUtils.seconds2time(item.getRemainingDownloadTime())));
+            else
+                timeLabel.setVisible(false);
         }
         
         private String getMessage(DownloadItem item) {
@@ -594,7 +598,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             case CONNECTING:
                 return I18n.tr("Connecting...");           
             case STALLED:
-                return I18n.tr("Stalled - ");
+                return I18n.tr("Stalled at {0}% - ", item.getPercentComplete()); 
             case ERROR:         
                 return I18n.tr("Unable to download  - ");            
             case LOCAL_QUEUED:

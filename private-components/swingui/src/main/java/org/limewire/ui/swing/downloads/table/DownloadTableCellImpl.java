@@ -376,6 +376,8 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         
         editor.fullIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
         editor.fullTitleLabel.setText(item.getTitle());
+        editor.fullTimeLabel.setForeground(statusLabelColour);
+        editor.fullTimeLabel.setFont(statusFontPlainFull);
         
         if (item.getTotalSize() != 0) {
             editor.fullProgressBar.setValue((int)(100 * item.getCurrentSize()/item.getTotalSize()));
@@ -392,7 +394,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
             editor.fullTimeLabel.setVisible(false);
         }
         else {
-            editor.fullTimeLabel.setText(CommonUtils.seconds2time(item.getRemainingDownloadTime()));
+            editor.fullTimeLabel.setText(I18n.tr("{0} left", CommonUtils.seconds2time(item.getRemainingDownloadTime())));
             editor.fullTimeLabel.setVisible(item.getState() == DownloadState.DOWNLOADING);
         }
                  
@@ -503,7 +505,11 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
                     GuiUtils.rate2speed(item.getDownloadSpeed()), 
                     item.getDownloadSourceCount());
         case STALLED:
-            return I18n.tr("Stalled - ");
+            return I18n.tr("Stalled - {0} of {1} ({2}%). - ", 
+                    GuiUtils.toUnitbytes(item.getCurrentSize()),
+                    GuiUtils.toUnitbytes(item.getTotalSize()),
+                    item.getPercentComplete()
+                    );
         case ERROR:         
             return I18n.tr("Unable to download: ");
         case PAUSED:
