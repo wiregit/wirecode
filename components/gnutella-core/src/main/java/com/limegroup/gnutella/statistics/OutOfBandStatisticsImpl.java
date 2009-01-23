@@ -2,6 +2,7 @@ package com.limegroup.gnutella.statistics;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.inspection.InspectablePrimitive;
 
 import com.google.inject.Singleton;
@@ -82,10 +83,14 @@ class OutOfBandStatisticsImpl implements OutOfBandStatistics {
     }
     
     public boolean isOOBEffectiveForProxy() {
+        if(SearchSettings.FORCE_OOB.getValue())
+            return true;
         return !((sent.get() > 40) && (requested.get() == 0));
     }
 
     public boolean isOOBEffectiveForMe() {
+        if(SearchSettings.FORCE_OOB.getValue())
+            return true;
         return !((sent.get() > 20) && (requested.get() == 0));
     }
 
