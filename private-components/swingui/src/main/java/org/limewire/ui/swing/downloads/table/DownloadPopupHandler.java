@@ -135,9 +135,9 @@ public class DownloadPopupHandler implements TablePopupHandler {
                     popupMenu.add(playMenuItem).setEnabled(downloadItem.isLaunchable());
                 } else if (downloadItem.getCategory() == Category.IMAGE
                         || downloadItem.getCategory() == Category.DOCUMENT) {
-                    popupMenu.add(viewMenuItem);
+                    popupMenu.add(viewMenuItem).setEnabled(downloadItem.isLaunchable());
                 } else {
-                    popupMenu.add(launchMenuItem);
+                    popupMenu.add(launchMenuItem).setEnabled(downloadItem.isLaunchable());
                 }
             }
             popupMenu.add(shareMenuItem);
