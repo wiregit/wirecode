@@ -103,7 +103,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         this.miscOptionPanel = miscOptionPanel;
         this.advancedOptionPanel = advancedOptionPanel;
 
-        if (!OSUtils.isAnyMac()) {
+        if (!OSUtils.isMacOSX()) {
             setSize(700, 656);
             setPreferredSize(getSize());
         } else {

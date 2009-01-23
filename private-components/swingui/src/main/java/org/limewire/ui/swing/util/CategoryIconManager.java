@@ -79,7 +79,7 @@ public class CategoryIconManager {
             documentIcon = largeDocumentIcon;
             otherIcon = largeOtherIcon;
             
-            if (OSUtils.isAnyMac()) {
+            if (OSUtils.isMacOSX()) {
                 programIcon = largeProgramIconOSX;
             } else if (OSUtils.isWindowsVista()) {
                 programIcon = largeProgramIconWinVista;
@@ -95,7 +95,7 @@ public class CategoryIconManager {
             documentIcon = smallDocumentIcon;
             otherIcon = smallOtherIcon;
             
-            if (OSUtils.isAnyMac()) {
+            if (OSUtils.isMacOSX()) {
                 programIcon = smallProgramIconOSX;
             } else if (OSUtils.isWindowsVista()) {
                 programIcon = smallProgramIconWinVista;

@@ -303,7 +303,7 @@ public class AppFrame extends SingleFrameApplication {
      * Sets the custom default UI color and behavior properties
      */
     private void initUIDefaults() {       
-        if (OSUtils.isAnyMac()) {
+        if (OSUtils.isMacOSX()) {
             initMacUIDefaults();
         }
         
