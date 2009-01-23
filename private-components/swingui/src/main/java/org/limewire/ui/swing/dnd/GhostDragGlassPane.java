@@ -53,7 +53,7 @@ public class GhostDragGlassPane extends JPanel {
     @Inject
     public GhostDragGlassPane() {
         setOpaque(false);
-        if(OSUtils.isAnyMac()) {
+        if(OSUtils.isMacOSX()) {
             alpha = 1.0f;
         }
         
