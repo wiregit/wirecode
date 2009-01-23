@@ -341,31 +341,45 @@ public class CoreDownloadListManager implements DownloadListManager {
             public void handleEvent(DownloadStatusEvent event) {
                 DownloadStatus downloadStatus = event.getType();
                 if(DownloadStatus.COMPLETE == downloadStatus) {
-                    try {
                         if(downloader instanceof BTTorrentFileDownloader){
+                            BTMetaInfo btMetaInfo = null;
+                            try {
                             BTTorrentFileDownloader btTorrentFileDownloader = (BTTorrentFileDownloader)downloader;
-                            BTMetaInfo btMetaInfo = btTorrentFileDownloader.getBtMetaInfo();
+                            btMetaInfo = btTorrentFileDownloader.getBtMetaInfo();
                             list.remove(getDownloadItem(downloader));
                             downloadManager.downloadTorrent(btMetaInfo, true);
-                            
+                            } catch (SaveLocationException sle) {
+                                final BTMetaInfo btMetaInfoCopy = btMetaInfo;
+                                activityCallback.handleSaveLocationException(new DownloadAction() {
+                                    @Override
+                                    public void download(File saveFile, boolean overwrite)
+                                            throws SaveLocationException {
+                                        list.remove(getDownloadItem(downloader));
+                                        downloadManager.downloadTorrent(btMetaInfoCopy, overwrite);
+                                    }
+                                }, sle, false);
+                            }
                         } else {
-                            File possibleTorrentFile = downloader.getSaveFile();
-                            String fileExtension = FileUtils.getFileExtension(possibleTorrentFile);
-                            if("torrent".equalsIgnoreCase(fileExtension)) {
-                                list.remove(getDownloadItem(downloader));
-                                downloadManager.downloadTorrent(possibleTorrentFile, false);
+                            File possibleTorrentFile = null;
+                            try {
+                                possibleTorrentFile = downloader.getSaveFile();
+                                String fileExtension = FileUtils.getFileExtension(possibleTorrentFile);
+                                if("torrent".equalsIgnoreCase(fileExtension)) {
+                                    list.remove(getDownloadItem(downloader));
+                                    downloadManager.downloadTorrent(possibleTorrentFile, false);
+                                }
+                            } catch (SaveLocationException sle) {
+                                final File torrentFile = possibleTorrentFile;
+                                activityCallback.handleSaveLocationException(new DownloadAction() {
+                                    @Override
+                                    public void download(File saveFile, boolean overwrite)
+                                            throws SaveLocationException {
+                                        list.remove(getDownloadItem(downloader));
+                                        downloadManager.downloadTorrent(torrentFile, overwrite);
+                                    }
+                                }, sle, false);
                             }
                         }
-                    } catch (SaveLocationException sle) {
-                        activityCallback.handleSaveLocationException(new DownloadAction() {
-                            @Override
-                            public void download(File saveFile, boolean overwrite)
-                                    throws SaveLocationException {
-                                list.remove(getDownloadItem(downloader));
-                                downloadManager.downloadTorrent(saveFile, overwrite);
-                            }
-                        }, sle, false);
-                    }
                 }
             }
         }
