@@ -141,11 +141,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private final JPanel emptyPanel = new JPanel();
     private JXPanel searchResultTextPanel;
 
-    private int currentColumn;
-    private int currentRow;
-    private int mousePressedRow = -1;
-    private int mousePressedColumn = -1;
-
     private JLabel lastRowMessage;
 
     @AssistedInject
@@ -155,7 +150,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         @Assisted ActionColumnTableCellEditor actionEditor, 
         @Assisted String searchText, 
         @Assisted Navigator navigator, 
-        final @Assisted Color rowSelectionColor,
         final @Assisted DownloadHandler downloadHandler,
         SearchHeadingDocumentBuilder headingBuilder,
         ListViewRowHeightRule rowHeightRule,
@@ -175,6 +169,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.iconManager = iconManager;
         GuiUtils.assignResources(this);
 
+        similarButton.setFocusable(false);
         similarButton.setPressedIcon(similarDownIcon);
         similarButton.setIcon(similarUpIcon);
         similarButton.setToolTipText(I18n.tr("Show similar files"));
@@ -186,6 +181,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         similarButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                System.out.println("clicked!");
                 similarButton.setIcon(isShowingSimilarResults() ? similarActiveIcon : similarUpIcon);
                 similarButton.setToolTipText(isShowingSimilarResults() ? 
                         I18n.tr("Hide similar files") : I18n.tr("Show similar files"));
@@ -219,25 +215,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
        
         makePanel(navigator, libraryNavigator, properties);
         
-        editorComponent = new JXPanel(new BorderLayout()) {
-
-            @Override
-            public void setBackground(final Color bg) {
-                //Don't highlight the limit row
-                if (currentRow == displayLimit.getLastDisplayedRow()) {
-                    super.setBackground(Color.WHITE);
-                    return;
-                }
-                boolean editingColumn = mousePressedColumn == currentColumn;
-                boolean editingRow = mousePressedRow == currentRow;
-                boolean paintForCellSelection = editingColumn && editingRow;
-                super.setBackground(paintForCellSelection ? rowSelectionColor : bg);
-                if (paintForCellSelection) {
-                    mousePressedColumn = -1;
-                    mousePressedRow = -1;
-                }
-            }
-        };
+        editorComponent = new JXPanel(new BorderLayout());
         
         itemIconLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -286,28 +264,19 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         itemIconLabel.addMouseListener(popupListener);
         heading.addMouseListener(popupListener);
     }
+    
+    @Override
+    public boolean shouldSelectCell(EventObject anEvent) {
+        return false;
+    }
 
+    @Override
     public Object getCellEditorValue() {
         return vsr;
     }
 
     private int getSimilarResultsCount() {
         return vsr == null ? 0 : vsr.getSimilarResults().size();
-    }
-    
-    @Override
-    public boolean isCellEditable(EventObject e) {
-        //TODO this is probably unnecessary since MouseableTable handles background color
-        if (table != null && e instanceof MouseEvent) {
-            MouseEvent event = (MouseEvent) e;
-            if (event.getID() == MouseEvent.MOUSE_PRESSED) {
-                //Cache the cell that's just been clicked on so that the editor component
-                //can draw the correct selection background color 
-                mousePressedRow = table.rowAtPoint(event.getPoint());
-                mousePressedColumn = table.columnAtPoint(event.getPoint());
-            }
-        }
-        return super.isCellEditable(e);
     }
 
     @Override
@@ -316,9 +285,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         vsr = (VisualSearchResult) value;
         this.table = table;
         LOG.debugf("getTableCellEditorComponent: row = {0} column = {1}", row, col);
-
-        currentColumn = col;
-        currentRow = row;
+        
+        editorComponent.setBackground(table.getBackground());
         
         if (value == null) {
             editorComponent.removeAll();
@@ -372,6 +340,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         similarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 vsr.toggleChildrenVisibility();
+                table.editingStopped(new ChangeEvent(table));
             }
         });
         

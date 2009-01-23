@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search.resultpanel;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -21,6 +22,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
@@ -59,6 +61,7 @@ import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.VisibleTableFormat;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -176,7 +179,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
            new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    navigator, resultsList.getTableColors().selectionColor, this, 
+                    navigator, this, 
                     displayLimit);
         
         TableColumnModel tcm = resultsList.getColumnModel();
@@ -188,7 +191,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
                 new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    navigator, resultsList.getTableColors().selectionColor, this,
+                    navigator, this,
                     displayLimit);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
@@ -418,23 +421,27 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
     
     public static class ListViewTable extends ConfigurableTable<VisualSearchResult> {
+        @Resource private Color similarResultParentBackgroundColor;        
         private boolean ignoreRepaints;
         
         public ListViewTable(EventList<VisualSearchResult> eventList, VisibleTableFormat<VisualSearchResult> tableFormat) {
             super(eventList, tableFormat, false);
+            GuiUtils.assignResources(this);
             
             setGridColor(Color.decode("#EBEBEB"));
+            setRowSelectionAllowed(false);
+            setCellSelectionEnabled(false);
+            setColumnSelectionAllowed(false);
+            setHighlighters(new ColorHighlighter(new HighlightPredicate() {
+                public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+                    VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
+                    return vsr != null && vsr.isChildrenVisible();
+                }}, similarResultParentBackgroundColor, null, similarResultParentBackgroundColor, null));
         }
-
+        
         @Override
-        protected TableColors newTableColors() {
-            TableColors colors = super.newTableColors();
-            
-            colors.evenColor = Color.WHITE;
-            colors.oddColor = Color.WHITE;
-            colors.getEvenHighlighter().setBackground(colors.evenColor);
-            colors.getOddHighlighter().setBackground(colors.oddColor);
-            return colors;
+        protected void paintEmptyRows(Graphics g) {
+            // do nothing.
         }
         
         private void setIgnoreRepaints(boolean ignore) {
