@@ -25,7 +25,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.Highlighter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
@@ -425,14 +424,17 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             super(eventList, tableFormat, false);
             
             setGridColor(Color.decode("#EBEBEB"));
-            setRowSelectionAllowed(false);
-            setCellSelectionEnabled(false);
-            setColumnSelectionAllowed(false);
-            setHighlighters(new ColorHighlighter(new HighlightPredicate() {
-                public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
-                    VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
-                    return vsr != null && vsr.isChildrenVisible();
-                }}, Color.GREEN, null, Color.GREEN, null));
+        }
+
+        @Override
+        protected TableColors newTableColors() {
+            TableColors colors = super.newTableColors();
+            
+            colors.evenColor = Color.WHITE;
+            colors.oddColor = Color.WHITE;
+            colors.getEvenHighlighter().setBackground(colors.evenColor);
+            colors.getOddHighlighter().setBackground(colors.oddColor);
+            return colors;
         }
         
         private void setIgnoreRepaints(boolean ignore) {
