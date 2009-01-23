@@ -356,7 +356,15 @@ public class ConversationPane extends JPanel implements Displayable {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
+                    System.out.println("reset " + scrollValue);
                     verticalScrollBar.setValue(scrollValue);
+                }
+            });
+        } else {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    verticalScrollBar.setValue(verticalScrollBar.getMaximum());
                 }
             });
         }
