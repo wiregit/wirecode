@@ -10,6 +10,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
@@ -153,9 +154,13 @@ public class LimeEditableComboBox extends JXPanel{
         @Resource private Icon arrowIcon;
         @Resource private Icon rolloverArrowIcon;
         @Resource private Icon downArrowIcon;
+        @Resource private Color selectedBackground;
+        
+        private final Color selectedForeground = UIManager.getColor("MenuItem.selectionForeground");
+        
         
         public LimeEditableComboBoxUI(){
-            GuiUtils.assignResources(this);
+            GuiUtils.assignResources(this);            
         }
         
         public BasicComboPopup getPopup(){
@@ -164,7 +169,10 @@ public class LimeEditableComboBox extends JXPanel{
         
         @Override 
         protected ComboPopup createPopup() {
-            return new BasicComboPopup(comboBox);
+             BasicComboPopup comboPopup = new BasicComboPopup(comboBox);
+             comboPopup.getList().setSelectionBackground(selectedBackground);
+             comboPopup.getList().setSelectionForeground(selectedForeground);
+            return comboPopup;
         }
         
         @Override
