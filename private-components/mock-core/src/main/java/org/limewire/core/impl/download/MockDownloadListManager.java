@@ -102,8 +102,9 @@ public class MockDownloadListManager implements DownloadListManager {
         item.addDownloadSource(new MockDownloadSource("23.12.33.4"));
         addDownload(item);
         
-        item = new MockDownloadItem("Tester.bmp", 46,
+        item = new MockDownloadItem("Cancun.bmp", 232753,
                 DownloadState.STALLED, Category.AUDIO);
+        item.setCurrentSize(113472);
         item.addDownloadSource(new MockDownloadSource("234.2.2.2"));
         addDownload(item);
 
