@@ -365,7 +365,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                    JPopupMenu popup = new JPopupMenu();
                    popup.add(new JLabel(I18n.tr("Add files to My Library from Tools > Options to share them")));
                    //move popup 15 pixels to the right so the mouse doesn't obscure the first word
-                   popup.show(MyLibraryPanel.this, getMousePosition().x + 15, getMousePosition().y);
+                   popup.show(MyLibraryPanel.this, getMousePosition(true).x + 15, getMousePosition(true).y);
                 }
             } else {
                 categoryShareWidget.setShareable(category);
