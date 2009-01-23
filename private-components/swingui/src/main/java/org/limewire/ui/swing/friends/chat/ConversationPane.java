@@ -41,6 +41,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.OverlayLayout;
 import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
@@ -188,19 +189,23 @@ public class ConversationPane extends JPanel implements Displayable {
         });
         closeConversation.setIcon(iconLibrary.getEndChat());
         
-        // TODO: This should be done with a custom layout or 
-        //        a mix of overlay layout, border layout, and mig layout.
-        //        Mig layout may also have this functionality on its own.
-        //        This is a proof on concept / temp bug fix.
         chatWrapper = new JPanel();
-        chatWrapper.setLayout(null);
+        chatWrapper.setLayout(new OverlayLayout(chatWrapper));
+        
+        JPanel closePanel = new JPanel();
+        closePanel.setLayout(null);
+        closePanel.setOpaque(false);
         final Rectangle closeBounds = new Rectangle(268,5,6,6);
         final Rectangle closeBoundsSlider = new Rectangle(250,5,6,6);
         closeConversation.setBounds(closeBounds);
-        conversationScroll.setBounds(0,0, 278,171);
+        closePanel.add(closeConversation);
         
-        chatWrapper.add(closeConversation);
-        chatWrapper.add(conversationScroll);
+        JPanel conversationPanel = new JPanel(new BorderLayout());
+        conversationPanel.setOpaque(false);
+        conversationPanel.add(conversationScroll, BorderLayout.CENTER);
+        
+        chatWrapper.add(closePanel);
+        chatWrapper.add(conversationPanel);
         
         conversationScroll.getVerticalScrollBar().addComponentListener(new ComponentListener() {
             @Override
