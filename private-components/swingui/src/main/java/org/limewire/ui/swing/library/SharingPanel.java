@@ -146,7 +146,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     }
     
     protected void addBackButton(JButton button) {
-        backButtonSlot.add(button, "gapafter 6");
+        backButtonSlot.add(button, "gapafter 6, gapbottom 1");
         backButtonSlot.setVisible(true);
     }
     

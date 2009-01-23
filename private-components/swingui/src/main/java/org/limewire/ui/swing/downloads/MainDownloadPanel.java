@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -15,6 +14,7 @@ import javax.swing.SwingUtilities;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXLabel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
@@ -30,6 +30,7 @@ import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
+import org.limewire.ui.swing.painter.TextShadowPainter;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.I18n;
 
@@ -158,8 +159,11 @@ public class MainDownloadPanel extends JPanel {
 		
 		JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0, gap 0, fill, aligny center"));
         headerTitlePanel.setOpaque(false);        
-        JLabel titleTextLabel = new JLabel(I18n.tr("Downloads"));        
-        headerTitlePanel.add(new IconButton(backAction), "gapafter 6");
+        JXLabel titleTextLabel = new JXLabel(I18n.tr("Downloads"));
+        titleTextLabel.setForegroundPainter(new TextShadowPainter());
+        IconButton backButton = new IconButton(backAction);
+        backButton.setRolloverEnabled(true);        
+        headerTitlePanel.add(backButton, "gapafter 6, gapbottom 1");
         headerTitlePanel.add(titleTextLabel, "gapbottom 2");        
         settingsPanel = headerBarFactory.createBasic(headerTitlePanel, titleTextLabel);
         this.initHeader();

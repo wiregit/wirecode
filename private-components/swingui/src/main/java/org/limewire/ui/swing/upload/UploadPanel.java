@@ -6,13 +6,13 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
@@ -23,6 +23,7 @@ import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.painter.TextShadowPainter;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.upload.table.UploadTable;
 import org.limewire.ui.swing.util.ButtonDecorator;
@@ -83,8 +84,11 @@ public class UploadPanel extends JXPanel{
     private void initHeader(Action backAction) {
         JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0, gap 0, fill, aligny center"));
         headerTitlePanel.setOpaque(false);        
-        JLabel titleTextLabel = new JLabel(I18n.tr("Uploads"));        
-        headerTitlePanel.add(new IconButton(backAction), "gapafter 6");
+        JXLabel titleTextLabel = new JXLabel(I18n.tr("Uploads"));
+        titleTextLabel.setForegroundPainter(new TextShadowPainter());
+        IconButton backButton = new IconButton(backAction);
+        backButton.setRolloverEnabled(true);        
+        headerTitlePanel.add(backButton, "gapafter 6, gapbottom 1");
         headerTitlePanel.add(titleTextLabel, "gapbottom 2");        
         header = headerBarFactory.createBasic(headerTitlePanel, titleTextLabel);
         
