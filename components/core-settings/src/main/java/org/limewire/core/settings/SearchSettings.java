@@ -252,11 +252,20 @@ public final class SearchSettings extends LimeProps {
 	 */
 	public static final BooleanSetting OOB_ENABLED =
 		FACTORY.createBooleanSetting("OOB_ENABLED", true);
+    
+    /**
+     * Setting for whether to force OOB searching to be enabled
+     * (for testing purposes).
+     */
+    public static final BooleanSetting FORCE_OOB =
+        FACTORY.createBooleanSetting("FORCE_OOB", false);
 
-
-    public static final ProbabilisticBooleanSetting DISABLE_OOB_V2
-        = FACTORY.createRemoteProbabilisticBooleanSetting("DISABLE_OOB_V2",
-                0f, "SearchSettings.DisableOOBV2",0f,1f);
+    /**
+     * Setting for whether old-style OOB searching is enabled.
+     */
+    public static final ProbabilisticBooleanSetting DISABLE_OOB_V2 =
+        FACTORY.createRemoteProbabilisticBooleanSetting("DISABLE_OOB_V2",
+                0f, "SearchSettings.DisableOOBV2", 0f, 1f);
 
     /**
      * Setting for the characters that are not allowed in search strings
