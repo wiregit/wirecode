@@ -149,7 +149,7 @@ public class ShapeDialog extends JXPanel implements Resizable {
                     if ((event.getID() == MouseEvent.MOUSE_PRESSED)) {
                         MouseEvent e = (MouseEvent) event;                        
                         
-                        if ((getMousePosition() == null || !contains(getMousePosition())) && component != e.getComponent()
+                        if ((getMousePosition(true) == null || !contains(getMousePosition(true))) && component != e.getComponent()
                                 && (!component.contains(SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), component)))) {
                             setVisible(false);
                         }
