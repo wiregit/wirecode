@@ -71,6 +71,7 @@ public class FilterPainter<T> extends RectanglePainter<T>
      */
     public static LimePromptTextField decorate(LimePromptTextField textField) {
         
+        // TODO: THIS METHOD HAS BEEN SHORT CIRCUITED UNTIL REFACTOR
         if (true) return textField;
         
         // Create filter painter.
