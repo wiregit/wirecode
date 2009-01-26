@@ -23,9 +23,14 @@ public class TextFieldDecorator {
         this.painterFactory = painterFactory;
     }
     
+    /**
+     * Decorates the specified text field using a background painter that 
+     * includes an X icon to clear the field.
+     */
     public void decorateClearablePromptField(LimePromptTextField field, AccentType accent) {
-        // TODO: ernie
-        decoratePromptField(field, accent);
+        field.setBackgroundPainter(painterFactory.createClearableBackgroundPainter(field, accent));
+        field.setPromptPainter(painterFactory.createBasicPromptPainter());
+        field.setOpaque(false);
     }
     
     public void decoratePromptField(LimePromptTextField field, AccentType accent, Paint border) {
