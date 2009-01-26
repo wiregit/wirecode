@@ -324,7 +324,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * Manages writing stuff to disk, remember what's leased, what's verified,
      * what is valid, etc........
      */
-    protected VerifyingFile commonOutFile;
+    protected volatile VerifyingFile commonOutFile;
     
     /** A list of pushing hosts. */
     private volatile PushList pushes;
