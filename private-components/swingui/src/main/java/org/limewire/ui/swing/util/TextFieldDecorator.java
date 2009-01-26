@@ -29,8 +29,7 @@ public class TextFieldDecorator {
      */
     public void decorateClearablePromptField(LimePromptTextField field, AccentType accent) {
         field.setBackgroundPainter(painterFactory.createClearableBackgroundPainter(field, accent));
-        field.setPromptPainter(painterFactory.createBasicPromptPainter());
-        field.setOpaque(false);
+        decorateGeneralText(field);
     }
     
     public void decoratePromptField(LimePromptTextField field, AccentType accent, Paint border) {
