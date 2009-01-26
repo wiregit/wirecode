@@ -37,12 +37,7 @@ public class TextFieldDecorator {
         field.setBackgroundPainter(painterFactory.createBasicBackgroundPainter(accent));
         decorateGeneralText(field);
     }
-    
-    private void decorateGeneralText(LimePromptTextField field) {
-        field.setPromptPainter(painterFactory.createBasicPromptPainter());
-        decorateGeneral(field);
-    }
-    
+   
     public void decoratePromptField(LimePromptPasswordField field, AccentType accent, Paint border) {
         field.setBackgroundPainter(painterFactory.createBasicBackgroundPainter(accent, border));
         decorateGeneralPassword(field);
@@ -52,7 +47,12 @@ public class TextFieldDecorator {
         field.setBackgroundPainter(painterFactory.createBasicBackgroundPainter(accent));
         decorateGeneralPassword(field);
     }
-
+    
+    private void decorateGeneralText(LimePromptTextField field) {
+        field.setPromptPainter(painterFactory.createBasicPromptPainter());
+        decorateGeneral(field);
+    }
+    
     private void decorateGeneralPassword(LimePromptPasswordField field) {
         field.setPromptPainter(painterFactory.createBasicPromptPainter());
         decorateGeneral(field);
