@@ -3,10 +3,12 @@ package org.limewire.ui.swing.search;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.annotation.Resource;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComponent;
@@ -28,10 +30,14 @@ import org.limewire.ui.swing.components.CollectionBackedListModel;
 import org.limewire.ui.swing.components.ExtendedCompoundBorder;
 import org.limewire.ui.swing.components.SideLineBorder;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 /** An autocompleter that shows its suggestions in a list and can have new suggestions added. */
 public class HistoryAndFriendAutoCompleter implements AutoCompleter {
+    
+    @Resource private Color selectionBackground;
+    @Resource private Font font;
     
     private final JPanel entryPanel;
     
@@ -49,6 +55,9 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
     }
     
     public HistoryAndFriendAutoCompleter(AutoCompleteDictionary dictionary) {
+        
+        GuiUtils.assignResources(this);
+        
         this.suggestionDictionary = dictionary;
         
         entryPanel = new JPanel(new MigLayout("insets 0, gap 0, fill"));
@@ -150,7 +159,8 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             setFocusable(false);
             setCellRenderer(new Renderer());
-            setSelectionBackground(new Color(0xcbe997));
+            setFont(font);
+            setSelectionBackground(selectionBackground);
             setSelectionForeground(Color.BLACK);
         }
         

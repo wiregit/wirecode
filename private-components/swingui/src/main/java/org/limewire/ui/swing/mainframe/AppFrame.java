@@ -314,7 +314,7 @@ public class AppFrame extends SingleFrameApplication {
         initBackgrounds();
         
         // Set default selection colours
-        Color selectionBackground = new Color(0xcbe997);
+        Color selectionBackground = new Color(0xc2e986);
         UIManager.put("TextField.selectionBackground", selectionBackground);
         UIManager.put("PasswordField.selectionBackground", selectionBackground);
         UIManager.put("EditorPane.selectionBackground", selectionBackground);
@@ -326,7 +326,7 @@ public class AppFrame extends SingleFrameApplication {
         
         // Set the menu item highlight colors to avoid contrast issues with
         //  new highlight background in default XP theme
-        Color selectionForeground = new Color(0x313131);
+        Color selectionForeground = Color.BLACK;
         UIManager.put("Menu.selectionForeground", selectionForeground);
         UIManager.put("MenuItem.selectionForeground", selectionForeground);
         UIManager.put("CheckBoxMenuItem.selectionForeground", selectionForeground);
