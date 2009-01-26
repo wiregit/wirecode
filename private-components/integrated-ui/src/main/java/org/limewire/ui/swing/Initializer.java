@@ -489,15 +489,16 @@ public final class Initializer {
             } catch (Exception e) {
                 LOG.error("Mozilla initialization failed");
             }
+            
+            stopwatch.resetAndLog("Load XUL Library Path");
+            SwingUtils.invokeAndWait(new Runnable() {
+                public void run() {
+                    stopwatch.resetAndLog("enter evt queue");
+                    new MozillaPanel();
+                    stopwatch.resetAndLog("Load MozillaPanel");
+                }
+            });
         }
-        stopwatch.resetAndLog("Load XUL Library Path");
-        SwingUtils.invokeAndWait(new Runnable() {
-            public void run() {
-                stopwatch.resetAndLog("enter evt queue");
-                new MozillaPanel();
-                stopwatch.resetAndLog("Load MozillaPanel");
-            }
-        });
         
         stopwatch.resetAndLog("return from evt queue");
     }
