@@ -49,7 +49,6 @@ import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.AbstractDownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
-import org.limewire.ui.swing.downloads.table.DownloadActionHandlerFactory;
 import org.limewire.ui.swing.downloads.table.DownloadPopupHandler;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableCell;
@@ -134,7 +133,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, DownloadMediator downloadMediator, MainDownloadPanel mainDownloadPanel, 
 	        Navigator navigator, LimeProgressBarFactory progressBarFactory, BarPainterFactory barPainterFactory, SaveLocationExceptionHandler saveLocationExceptionHandler,
-	        DownloadActionHandlerFactory downloadActionHandlerFactory, TrayNotifier notifier) {
+	        DownloadActionHandler actionHandler, TrayNotifier notifier) {
 	    this.navigator = navigator;        
         this.progressBarFactory = progressBarFactory;
         this.notifier = notifier;
@@ -204,11 +203,11 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         
         final DownloadSummaryPanelRendererEditor editorPanel = new DownloadSummaryPanelRendererEditor();
         final DownloadTableEditor editor = new DownloadTableEditor(editorPanel);
-        editor.initialiseEditor(allList, downloadActionHandlerFactory.create(allList));
+        editor.initialiseEditor(allList, actionHandler);
         table.setDefaultEditor(DownloadItem.class, editor);
         
         table.setColumnDoubleClickHandler(new DownloadClickHandler());
-        TablePopupHandler popupHandler = new DownloadPopupHandler(downloadActionHandlerFactory.create(allList), table){
+        TablePopupHandler popupHandler = new DownloadPopupHandler(actionHandler, table){
             @Override
             protected int getPopupRow(int x, int y){
                 //columns and rows are reversed in this table

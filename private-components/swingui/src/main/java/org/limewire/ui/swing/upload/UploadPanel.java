@@ -30,8 +30,6 @@ import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.EventList;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -42,7 +40,6 @@ public class UploadPanel extends JXPanel{
     private JXButton clearAllButton;
     private LimeHeaderBar header;
     private LimeHeaderBarFactory headerBarFactory;
-    private EventList<UploadItem> uploadItems;
     
     private final Action clearAction = new AbstractAction(I18n.tr("Clear finished")) {
         @Override
@@ -64,9 +61,8 @@ public class UploadPanel extends JXPanel{
         this.listManager = listManager;
         this.buttonDecorator = buttonDecorator;
         this.headerBarFactory = headerBarFactory;
-        this.uploadItems = listManager.getSwingThreadSafeUploads();
 
-        UploadTable table = new UploadTable(uploadItems, categoryIconManager, progressBarFactory, propertiesFactory, libraryNavigator, libraryManager);
+        UploadTable table = new UploadTable(listManager, categoryIconManager, progressBarFactory, propertiesFactory, libraryNavigator, libraryManager);
         table.setTableHeader(null);
         initHeader(backAction);
         

@@ -446,4 +446,9 @@ public class CoreDownloadListManager implements DownloadListManager {
         }
     }
 
+    @Override
+    public void remove(DownloadItem item) {
+        threadSafeDownloadItems.remove(item);
+    }
+
 }

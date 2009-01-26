@@ -194,4 +194,9 @@ public class MockDownloadListManager implements DownloadListManager {
         }
     }
     
+    @Override
+    public void remove(DownloadItem item) {
+        downloadItems.remove(item);
+    }
+    
 }
