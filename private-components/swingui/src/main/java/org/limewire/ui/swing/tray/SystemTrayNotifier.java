@@ -19,6 +19,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 /**
  * Puts an icon and menu in the system tray. Delegates System Notifications to
@@ -35,11 +36,15 @@ class SystemTrayNotifier implements TrayNotifier {
     private final BasicNotifier basicNotifier;
 
     @Resource
-    private Icon trayIconResource16;
+    private Icon windowsIconResource16;
     @Resource
-    private Icon trayIconResource32;
+    private Icon linuxIconResource16;
     @Resource
-    private Icon trayIconResource48;
+    private Icon linuxIconResource24;
+    @Resource
+    private Icon linuxIconResource32;
+    @Resource
+    private Icon linuxIconResource48;
 
     public SystemTrayNotifier() {
         this.basicNotifier = new BasicNotifier();
@@ -75,14 +80,14 @@ class SystemTrayNotifier implements TrayNotifier {
 
     private Icon getIcon() {
         Dimension iconSize = SystemTray.getSystemTray().getTrayIconSize();
-        if(iconSize == null) {
-            return trayIconResource16;
-        } else if(iconSize.getWidth() <= 16) {
-            return trayIconResource16;
+        if(OSUtils.isWindows() || iconSize == null || iconSize.getWidth() <= 16) {
+            return OSUtils.isWindows() ? windowsIconResource16 : linuxIconResource16;
+        } else if(iconSize.getWidth() <= 24) {
+            return linuxIconResource24;
         } else if(iconSize.getWidth() <= 32) {
-            return trayIconResource32;
+            return linuxIconResource32;
         } else {
-            return trayIconResource48;
+            return linuxIconResource48;
         }
     }
 
