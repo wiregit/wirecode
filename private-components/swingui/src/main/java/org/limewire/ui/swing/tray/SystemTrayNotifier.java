@@ -35,8 +35,6 @@ class SystemTrayNotifier implements TrayNotifier {
     private final BasicNotifier basicNotifier;
 
     @Resource
-    private Icon defaultTrayIconResource;
-    @Resource
     private Icon trayIconResource16;
     @Resource
     private Icon trayIconResource32;
@@ -78,7 +76,7 @@ class SystemTrayNotifier implements TrayNotifier {
     private Icon getIcon() {
         Dimension iconSize = SystemTray.getSystemTray().getTrayIconSize();
         if(iconSize == null) {
-            return defaultTrayIconResource;
+            return trayIconResource16;
         } else if(iconSize.getWidth() <= 16) {
             return trayIconResource16;
         } else if(iconSize.getWidth() <= 32) {
