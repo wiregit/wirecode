@@ -69,6 +69,7 @@ public class FilterPainter<T> extends RectanglePainter<T>
      * Installs a new instance of FilterPainter on the specified text field, 
      * and returns the text field. 
      */
+    @Deprecated
     public static LimePromptTextField decorate(LimePromptTextField textField) {
         
         // TODO: THIS METHOD HAS BEEN SHORT CIRCUITED UNTIL REFACTOR
