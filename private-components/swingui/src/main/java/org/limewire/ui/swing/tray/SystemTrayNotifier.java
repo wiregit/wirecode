@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.tray;
 
 import java.awt.AWTException;
+import java.awt.Dimension;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
@@ -18,7 +19,6 @@ import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.OSUtils;
 
 /**
  * Puts an icon and menu in the system tray. Delegates System Notifications to
@@ -35,9 +35,13 @@ class SystemTrayNotifier implements TrayNotifier {
     private final BasicNotifier basicNotifier;
 
     @Resource
-    private Icon windowsTrayIconResource;
+    private Icon defaultTrayIconResource;
     @Resource
-    private Icon linuxTrayIconResource;
+    private Icon trayIconResource16;
+    @Resource
+    private Icon trayIconResource32;
+    @Resource
+    private Icon trayIconResource48;
 
     public SystemTrayNotifier() {
         this.basicNotifier = new BasicNotifier();
@@ -55,7 +59,7 @@ class SystemTrayNotifier implements TrayNotifier {
     }
 
     private TrayIcon buildTrayIcon(String desc) {
-        Icon trayIcon = OSUtils.isLinux() ? linuxTrayIconResource : windowsTrayIconResource;  
+        Icon trayIcon = getIcon();
         TrayIcon icon = new TrayIcon(((ImageIcon) trayIcon).getImage(), desc, popupMenu);
 
         // left click restores. This happens on the awt thread.
@@ -69,6 +73,19 @@ class SystemTrayNotifier implements TrayNotifier {
 
         icon.setImageAutoSize(true);
         return icon;
+    }
+
+    private Icon getIcon() {
+        Dimension iconSize = SystemTray.getSystemTray().getTrayIconSize();
+        if(iconSize == null) {
+            return defaultTrayIconResource;
+        } else if(iconSize.getWidth() <= 16) {
+            return trayIconResource16;
+        } else if(iconSize.getWidth() <= 32) {
+            return trayIconResource32;
+        } else {
+            return trayIconResource48;
+        }
     }
 
     private PopupMenu buildPopupMenu() {
