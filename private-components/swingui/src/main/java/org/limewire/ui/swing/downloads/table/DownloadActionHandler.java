@@ -65,7 +65,9 @@ public class DownloadActionHandler {
             //Do nothing for now
            // NativeLaunchUtils.openURL(ERROR_URL);
         } else if (actionCommmand == PREVIEW_COMMAND || actionCommmand == LAUNCH_COMMAND || actionCommmand == PLAY_COMMAND){
-            DownloadItemUtils.launch(item);
+            if (item.isLaunchable()) {
+                DownloadItemUtils.launch(item);
+            }
         } else if (actionCommmand == LOCATE_COMMAND){
             NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
         } else if (actionCommmand == PROPERTIES_COMMAND){
