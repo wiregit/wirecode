@@ -31,6 +31,8 @@ public class UploadActionHandler {
 
     public void performAction(final String actionCommmand, final UploadItem item){
         if (actionCommmand == CANCEL_COMMAND) {
+            //canceled upload items end up in the DONE state so they need to be manually removed.
+            uploadItems.remove(item);
             item.cancel();
         } else if (actionCommmand == LOCATE_ON_DISK_COMMAND){
             NativeLaunchUtils.launchExplorer(item.getFile());
