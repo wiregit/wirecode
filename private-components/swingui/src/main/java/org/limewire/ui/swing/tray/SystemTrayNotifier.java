@@ -38,6 +38,10 @@ class SystemTrayNotifier implements TrayNotifier {
     @Resource
     private Icon windowsIconResource16;
     @Resource
+    private Icon windowsIconResource32;
+    @Resource
+    private Icon windowsIconResource48;
+    @Resource
     private Icon linuxIconResource16;
     @Resource
     private Icon linuxIconResource24;
@@ -62,11 +66,11 @@ class SystemTrayNotifier implements TrayNotifier {
     }
 
     private TrayIcon buildTrayIcon(String desc) {
-        Icon trayIcon = getIcon();
-        TrayIcon icon = new TrayIcon(((ImageIcon) trayIcon).getImage(), desc, popupMenu);
+        Icon icon = getIcon();
+        TrayIcon trayIcon = new TrayIcon(((ImageIcon) icon).getImage(), desc, popupMenu);
 
         // left click restores. This happens on the awt thread.
-        icon.addActionListener(new ActionListener() {
+        trayIcon.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 ActionMap map = Application.getInstance().getContext().getActionManager()
                         .getActionMap();
@@ -74,20 +78,20 @@ class SystemTrayNotifier implements TrayNotifier {
             }
         });
 
-        icon.setImageAutoSize(true);
-        return icon;
+        trayIcon.setImageAutoSize(true);
+        return trayIcon;
     }
 
     private Icon getIcon() {
         Dimension iconSize = SystemTray.getSystemTray().getTrayIconSize();
-        if(OSUtils.isWindows() || iconSize == null || iconSize.getWidth() <= 16) {
+        if(iconSize == null || iconSize.getWidth() <= 16) {
             return OSUtils.isWindows() ? windowsIconResource16 : linuxIconResource16;
         } else if(iconSize.getWidth() <= 24) {
-            return linuxIconResource24;
+            return OSUtils.isWindows() ? windowsIconResource16 : linuxIconResource24;
         } else if(iconSize.getWidth() <= 32) {
-            return linuxIconResource32;
+            return OSUtils.isWindows() ? windowsIconResource32 : linuxIconResource32;
         } else {
-            return linuxIconResource48;
+            return OSUtils.isWindows() ? windowsIconResource48 : linuxIconResource48;
         }
     }
 
