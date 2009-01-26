@@ -574,16 +574,17 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                 } else {
                     statusLabel.setForeground(grayForeground);
                 }
-            }
-
-            timeLabel.setVisible(true);
+            }            
             
-            if(item.getState() == DownloadState.PAUSED)
+            if(item.getState() == DownloadState.PAUSED){
+                timeLabel.setVisible(true);
                 timeLabel.setText(I18n.tr("Paused at {0}%", item.getPercentComplete()));
-            else if(item.getState() == DownloadState.DOWNLOADING && item.getRemainingDownloadTime() < Long.MAX_VALUE-1000)
+            } else if(item.getState() == DownloadState.DOWNLOADING && item.getRemainingDownloadTime() < Long.MAX_VALUE-1000) {
+                timeLabel.setVisible(true);
                 timeLabel.setText(I18n.tr("{0}% - {1} left", item.getPercentComplete(), CommonUtils.seconds2time(item.getRemainingDownloadTime())));
-            else
+            } else {
                 timeLabel.setVisible(false);
+            }
         }
         
         private String getMessage(DownloadItem item) {
