@@ -70,11 +70,14 @@ public class FilterPainter<T> extends RectanglePainter<T>
      * and returns the text field. 
      */
     public static LimePromptTextField decorate(LimePromptTextField textField) {
+        
+        if (true) return textField;
+        
         // Create filter painter.
         FilterPainter<JTextField> filterPainter = new FilterPainter<JTextField>(textField.getCursor());
 
         // Create border painter, and adjust for rounded corners.
-        Painter<JTextField> borderPainter = textField.createBorderPainter();
+        Painter<JTextField> borderPainter = null; // textField.createBorderPainter();
         if (borderPainter instanceof BorderPainter) {
             filterPainter.setRounded(true);
             filterPainter.setRoundWidth(((BorderPainter) borderPainter).getArcWidth());

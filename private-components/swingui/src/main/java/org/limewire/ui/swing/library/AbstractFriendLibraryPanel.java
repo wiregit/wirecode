@@ -31,6 +31,7 @@ import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -55,8 +56,9 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
                     LibraryManager libraryManager,
                     LimeHeaderBarFactory headerBarFactory,
                     GhostDragGlassPane ghostPane,
-                    LibraryNavigator libraryNavigator) {        
-        super(headerBarFactory);
+                    LibraryNavigator libraryNavigator,
+                    TextFieldDecorator textFieldDecorator) {        
+        super(headerBarFactory, textFieldDecorator);
         this.friend = friend;
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;

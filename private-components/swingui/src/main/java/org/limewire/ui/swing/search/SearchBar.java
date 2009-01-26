@@ -40,6 +40,7 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.util.I18NConvert;
 
@@ -73,7 +74,8 @@ public class SearchBar extends JXPanel {
     public SearchBar(LimeComboBoxFactory comboBoxFactory, 
             final FriendAutoCompleters friendLibraries,
             @Named("searchHistory") AutoCompleteDictionary searchHistory,
-            CategoryIconManager categoryIconManager) {
+            CategoryIconManager categoryIconManager,
+            TextFieldDecorator textFieldDecorator) {
         super(new MigLayout("ins 0, gapx 0, gapy 0"));
     
         GuiUtils.assignResources(this);
@@ -114,7 +116,8 @@ public class SearchBar extends JXPanel {
         comboBox = comboBoxFactory.createLightFullComboBox(typeActions);
         comboBox.setName("SearchBar.comboBox");
                 
-        searchField = new LimePromptTextField(I18n.tr("Search"), AccentType.BUBBLE, searchBorder);
+        searchField = new LimePromptTextField(I18n.tr("Search"));
+        textFieldDecorator.decoratePromptField(searchField, AccentType.BUBBLE, searchBorder);
         searchField.setName("SearchBar.searchField");
         searchField.setDocument(new SearchFieldDocument());
         

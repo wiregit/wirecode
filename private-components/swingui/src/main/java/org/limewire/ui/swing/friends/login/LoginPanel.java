@@ -16,8 +16,6 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
@@ -42,6 +40,7 @@ import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -63,9 +62,9 @@ class LoginPanel extends JXPanel implements SettingListener {
     private static final String CONFIG = "limewire.configProperty";
 
     private LimeComboBox serviceComboBox;
-    private JTextField serviceField;
-    private JTextField usernameField;
-    private JPasswordField passwordField;
+    private LimePromptTextField serviceField;
+    private LimePromptTextField usernameField;
+    private LimePromptPasswordField passwordField;
     private LimeCheckBox autoLoginCheckBox;
     private JLabel authFailedLabel;
     private JXButton signInButton;
@@ -78,12 +77,13 @@ class LoginPanel extends JXPanel implements SettingListener {
             XMPPService xmppService,
             LimeComboBoxFactory comboFactory,
             ButtonDecorator buttonDecorator,
-            BarPainterFactory barPainterFactory) {
+            BarPainterFactory barPainterFactory,
+            TextFieldDecorator textFieldDecorator) {
         this.accountManager = accountManager;
         this.xmppService = xmppService;
         GuiUtils.assignResources(this);
         SwingUiSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
-        initComponents(comboFactory, buttonDecorator, barPainterFactory);
+        initComponents(comboFactory, buttonDecorator, textFieldDecorator, barPainterFactory);
     }
     
     private Action getActionForConfig(XMPPAccountConfiguration config) {
@@ -127,7 +127,7 @@ class LoginPanel extends JXPanel implements SettingListener {
     }
 
     private void initComponents(LimeComboBoxFactory comboFactory, ButtonDecorator buttonDecorator,
-            BarPainterFactory barPainterFactory) {
+            TextFieldDecorator textFieldDecorator, BarPainterFactory barPainterFactory) {
         
         JLabel titleLabel = new JLabel(tr("Sign in with"));
         titleLabel.setName("LoginPanel.titleLabel");
@@ -150,10 +150,13 @@ class LoginPanel extends JXPanel implements SettingListener {
         });
         ResizeUtils.looseForceHeight(serviceComboBox, 22);
         
-        serviceField = new LimePromptTextField(tr("Domain"), AccentType.NONE);
+        serviceField = new LimePromptTextField(tr("Domain"));
+        textFieldDecorator.decoratePromptField(serviceField, AccentType.NONE);
         
-        usernameField = new LimePromptTextField(tr("Username"), AccentType.NONE);
-        passwordField = new LimePromptPasswordField(tr("Password"), AccentType.NONE);
+        usernameField = new LimePromptTextField(tr("Username"));
+        textFieldDecorator.decoratePromptField(usernameField, AccentType.NONE);
+        passwordField = new LimePromptPasswordField(tr("Password"));
+        textFieldDecorator.decoratePromptField(passwordField, AccentType.NONE);
         passwordField.setAction(signinAction);
         
         ResizeUtils.forceSize(usernameField, new Dimension(139, 22));

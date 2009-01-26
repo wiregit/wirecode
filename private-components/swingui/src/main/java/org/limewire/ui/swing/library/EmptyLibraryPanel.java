@@ -21,6 +21,7 @@ import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -48,8 +49,9 @@ public class EmptyLibraryPanel extends LibraryPanel {
             @Assisted Disposable messageComponent,
             @Assisted JComponent component,
             LimeHeaderBarFactory headerBarFactory,
-            ButtonDecorator buttonDecorator) {
-        super(headerBarFactory);
+            ButtonDecorator buttonDecorator,
+            TextFieldDecorator textFieldDecorator) {
+        super(headerBarFactory, textFieldDecorator);
   
         GuiUtils.assignResources(this);
         

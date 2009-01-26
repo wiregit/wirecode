@@ -20,6 +20,7 @@ import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.EventList;
 
@@ -45,8 +46,12 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
                     LimeHeaderBarFactory headerBarFactory,
                     ButtonDecorator buttonDecorator,
                     GhostDragGlassPane ghostPane,
-                    LibraryNavigator libraryNavigator) {
-        super(friend, friendFileList, categoryIconManager, tableFactory, downloadListManager, libraryManager, headerBarFactory, ghostPane, libraryNavigator);
+                    LibraryNavigator libraryNavigator,
+                    TextFieldDecorator textFieldDecorator) {
+        
+        super(friend, friendFileList, categoryIconManager, tableFactory, downloadListManager, 
+                libraryManager, headerBarFactory, ghostPane, libraryNavigator,
+                textFieldDecorator);
 
         GuiUtils.assignResources(this);
         

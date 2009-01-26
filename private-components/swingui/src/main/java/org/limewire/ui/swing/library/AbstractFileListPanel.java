@@ -42,6 +42,7 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -74,11 +75,11 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
 
     private final LimePromptTextField filterField;        
     
-    public AbstractFileListPanel(LimeHeaderBarFactory headerBarFactory) {        
+    public AbstractFileListPanel(LimeHeaderBarFactory headerBarFactory, TextFieldDecorator textFieldDecorator) {        
         setLayout(new MigLayout("fill, gap 0, insets 0", "[][][grow]", "[][grow]"));
 
         cardPanel.setLayout(cardLayout);              
-        filterField = createFilterField(I18n.tr("Search Library..."));
+        filterField = createFilterField(textFieldDecorator, I18n.tr("Search Library..."));
         headerPanel = createHeaderBar(headerBarFactory);
         headerPanel.setLayout(new MigLayout("insets 0, gap 0, fill, alignx right"));
         headerPanel.add(filterField, "gapbefore push, cell 1 0, gapafter 10");
@@ -94,7 +95,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     protected abstract LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory);
-    protected abstract LimePromptTextField createFilterField(String prompt);
+    protected abstract LimePromptTextField createFilterField(TextFieldDecorator decorator, String prompt);
     
     protected LimeHeaderBar getHeaderPanel() {
         return headerPanel;

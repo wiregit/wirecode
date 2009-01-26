@@ -64,7 +64,6 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
-import org.limewire.ui.swing.painter.FilterPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableColors;
@@ -73,6 +72,7 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -98,8 +98,9 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                  CategoryIconManager categoryIconManager,
                  LibraryTableFactory tableFactory,
                  LimeHeaderBarFactory headerBarFactory,
-                 GhostDragGlassPane ghostPane, Friend friend) {
-        super(headerBarFactory);
+                 GhostDragGlassPane ghostPane, Friend friend,
+                 TextFieldDecorator textFieldDecorator) {
+        super(headerBarFactory, textFieldDecorator);
         
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
@@ -140,9 +141,10 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     }
     
     @Override
-    protected LimePromptTextField createFilterField(String prompt) {
-        // Create filter field and install painter.
-        return FilterPainter.decorate(new LimePromptTextField(prompt, AccentType.GREEN_SHADOW));
+    protected LimePromptTextField createFilterField(TextFieldDecorator decorator, String prompt) {
+        LimePromptTextField field = new LimePromptTextField(prompt);
+        decorator.decorateClearablePromptField(field, AccentType.GREEN_SHADOW);
+        return field;
     }
     
     protected void addBackButton(JButton button) {

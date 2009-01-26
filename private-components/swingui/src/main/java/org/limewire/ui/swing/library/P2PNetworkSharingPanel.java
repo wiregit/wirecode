@@ -16,6 +16,7 @@ import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import com.google.inject.Inject;
 
@@ -30,10 +31,13 @@ public class P2PNetworkSharingPanel extends SharingPanel {
             LibraryTableFactory tableFactory,
             LimeHeaderBarFactory headerBarFactory,
             ButtonDecorator buttonDecorator,
-            GhostDragGlassPane ghostPane) {
+            GhostDragGlassPane ghostPane,
+            TextFieldDecorator textFieldDecorator) {
+        
         super(libraryManager.getLibraryManagedList().getSwingModel(), 
                 shareListManager.getGnutellaShareList(), categoryIconManager, 
-                tableFactory, headerBarFactory, ghostPane, new P2PFriend());
+                tableFactory, headerBarFactory, ghostPane, new P2PFriend(),
+                textFieldDecorator);
 
         setInnerNavLayout(new MigLayout("insets 0, gap 0, fill, wrap, hidemode 3", "[138!]", ""));
         

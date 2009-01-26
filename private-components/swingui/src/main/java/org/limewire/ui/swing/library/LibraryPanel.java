@@ -12,8 +12,9 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
-import org.limewire.ui.swing.painter.FilterPainter;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -21,8 +22,8 @@ import ca.odell.glazedlists.event.ListEventListener;
 
 class LibraryPanel extends AbstractFileListPanel {
 
-    public LibraryPanel(LimeHeaderBarFactory headerBarFactory) {
-        super(headerBarFactory);
+    public LibraryPanel(LimeHeaderBarFactory headerBarFactory, TextFieldDecorator textFieldDecorator) {
+        super(headerBarFactory, textFieldDecorator);
     }
     
     @Override
@@ -31,9 +32,10 @@ class LibraryPanel extends AbstractFileListPanel {
     }
     
     @Override
-    protected LimePromptTextField createFilterField(String prompt) {
-        // Create filter field and install painter.
-        return FilterPainter.decorate(new LimePromptTextField(prompt));
+    protected LimePromptTextField createFilterField(TextFieldDecorator decorator, String prompt) {
+        LimePromptTextField field = new LimePromptTextField(prompt);
+        decorator.decorateClearablePromptField(field, AccentType.SHADOW);
+        return field;
     }
     
     @Override

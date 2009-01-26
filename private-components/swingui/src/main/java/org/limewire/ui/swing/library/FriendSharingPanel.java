@@ -20,6 +20,7 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.EventList;
 
@@ -45,9 +46,12 @@ public class FriendSharingPanel extends SharingPanel {
             CategoryIconManager categoryIconManager,
             LibraryTableFactory tableFactory,
             LimeHeaderBarFactory headerBarFactory,
-            GhostDragGlassPane ghostPane) {
+            GhostDragGlassPane ghostPane,
+            TextFieldDecorator textFieldDecorator) {
 
-        super(wholeLibraryList, friendFileList, categoryIconManager, tableFactory, headerBarFactory, ghostPane, friend);
+        super(wholeLibraryList, friendFileList, categoryIconManager, 
+                tableFactory, headerBarFactory, ghostPane, friend,
+                textFieldDecorator);
         
         setInnerNavLayout(new MigLayout("insets 0, gap 0, fill, wrap, hidemode 3", "[138!]", ""));
         

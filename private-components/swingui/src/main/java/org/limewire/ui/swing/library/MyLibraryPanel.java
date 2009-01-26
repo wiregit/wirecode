@@ -77,6 +77,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.util.TextFieldDecorator;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import ca.odell.glazedlists.EventList;
@@ -130,9 +131,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                           GhostDragGlassPane ghostPane,
                           ListenerSupport<XMPPConnectionEvent> connectionListeners,
                           ShareListManager shareListManager,
-                          @Named("known") ListenerSupport<FriendEvent> knownFriendsListeners) {
+                          @Named("known") ListenerSupport<FriendEvent> knownFriendsListeners,
+                          TextFieldDecorator textFieldDecorator) {
         
-        super(headerBarFactory);
+        super(headerBarFactory, textFieldDecorator);
         
         GuiUtils.assignResources(this);
         
