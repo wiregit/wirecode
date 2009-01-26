@@ -4,6 +4,7 @@ import java.awt.Paint;
 
 import javax.swing.BorderFactory;
 import javax.swing.JTextField;
+import javax.swing.border.Border;
 
 import org.limewire.ui.swing.components.LimePromptPasswordField;
 import org.limewire.ui.swing.components.LimePromptTextField;
@@ -29,7 +30,11 @@ public class TextFieldDecorator {
      */
     public void decorateClearablePromptField(LimePromptTextField field, AccentType accent) {
         field.setBackgroundPainter(painterFactory.createClearableBackgroundPainter(field, accent));
+        // Get installed border, and restore it at the end.  This has a larger
+        // right margin to prevent text from running into the reset icon.
+        Border border = field.getBorder();
         decorateGeneralText(field);
+        field.setBorder(border);
     }
     
     public void decoratePromptField(LimePromptTextField field, AccentType accent, Paint border) {
