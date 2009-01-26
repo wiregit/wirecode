@@ -26,16 +26,18 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int SIZE_INDEX = 4;
     static final int DESCRIPTION_INDEX = 5;
     static final int TITLE_INDEX = 6;
+    static final int IS_SPAM_INDEX = 7;
     
     public ImageTableFormat() {
-        super(NAME_INDEX, FROM_INDEX, new ColumnStateInfo[] {
+        super(NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_IMAGE_FROM", I18n.tr("From"), 88, true, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_IMAGE_NAME", I18n.tr("Name"), 503, true, true),     
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_IMAGE_EXTENSION", I18n.tr("Extension"), 77, true, true), 
                 new ColumnStateInfo(DATE_INDEX, "CLASSIC_SEARCH_IMAGE_DATE", I18n.tr("Date Created"), 112, true, true), 
                 new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_IMAGE_SIZE", I18n.tr("Size"), 78, true, true), 
                 new ColumnStateInfo(DESCRIPTION_INDEX, "CLASSIC_SEARCH_IMAGE_DESCRIPTION", I18n.tr("Description"), 80, false, true), 
-                new ColumnStateInfo(TITLE_INDEX, "CLASSIC_SEARCH_IMAGE_TITLE", I18n.tr("Title"), 80, false, true)
+                new ColumnStateInfo(TITLE_INDEX, "CLASSIC_SEARCH_IMAGE_TITLE", I18n.tr("Title"), 80, false, true),
+                new ColumnStateInfo(IS_SPAM_INDEX, "CLASSIC_SEARCH_IMAGE_IS_SPAM", "", 10, false, false)
         });
     }
 
@@ -59,6 +61,7 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case SIZE_INDEX: return vsr.getSize();
             case DESCRIPTION_INDEX: return "";
             case TITLE_INDEX: return vsr.getProperty(FilePropertyKey.TITLE);
+            case IS_SPAM_INDEX: return vsr;
         }
         throw new IllegalArgumentException("Unknown column:" + index);
     }

@@ -1,7 +1,10 @@
 package org.limewire.ui.swing.library.table;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
+import org.jdesktop.swingx.decorator.SortKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.table.AbstractColumnStateFormat;
@@ -33,6 +36,11 @@ public abstract class AbstractRemoteLibraryFormat<T extends FileItem> extends Ab
     @Override
     public Class getColumnClass(int column) {
         return String.class;
+    }
+            
+    @Override
+    public List<SortKey> getPreSortColumns() {
+        return Collections.emptyList();
     }
     
     @Override

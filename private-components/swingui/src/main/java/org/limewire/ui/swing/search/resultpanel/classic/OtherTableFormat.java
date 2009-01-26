@@ -22,14 +22,16 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int TYPE_INDEX = 2;
     static final int EXTENSION_INDEX = 3;
     public static final int SIZE_INDEX = 4;
+    static final int IS_SPAM_INDEX = 5;
     
     public OtherTableFormat() {
-        super(NAME_INDEX, FROM_INDEX, new ColumnStateInfo[] {
+        super(NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_OTHER_FROM", I18n.tr("From"), 88, true, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_OTHER_NAME", I18n.tr("Name"), 525, true, true),     
                 new ColumnStateInfo(TYPE_INDEX, "CLASSIC_SEARCH_OTHER_TYPE", I18n.tr("Type"), 75, true, true), 
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_OTHER_EXTENSION", I18n.tr("Extension"), 80, true, true), 
-                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_OTHER_SIZE", I18n.tr("Size"), 92, true, true)
+                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_OTHER_SIZE", I18n.tr("Size"), 92, true, true),
+                new ColumnStateInfo(IS_SPAM_INDEX, "CLASSIC_SEARCH_OTHER_IS_SPAM", "", 10, false, false)
         });
     }
 
@@ -51,6 +53,7 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case TYPE_INDEX: return vsr.getCategory();
             case SIZE_INDEX: return vsr.getSize();
             case FROM_INDEX: return vsr;
+            case IS_SPAM_INDEX: return vsr;
         }
         throw new IllegalArgumentException("Unknown column:" + index);
     }

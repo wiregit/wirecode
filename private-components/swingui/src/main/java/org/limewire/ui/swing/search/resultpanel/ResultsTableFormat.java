@@ -1,7 +1,11 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
+import org.jdesktop.swingx.decorator.SortKey;
+import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -21,15 +25,17 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     protected VisualSearchResult vsr;
     private final int nameColumn;
     private final int fromColumn;
+    private final int spamColumn;
 
     public ResultsTableFormat(ColumnStateInfo... columnInfo) {
-        this(-1, -1, columnInfo);
+        this(-1, -1, -1, columnInfo);
     }
     
-    public ResultsTableFormat(int nameColumn, int fromColumn, ColumnStateInfo... columnInfo) {
+    public ResultsTableFormat(int nameColumn, int fromColumn, int spamColumn, ColumnStateInfo... columnInfo) {
         super(columnInfo);
         this.nameColumn = nameColumn;
         this.fromColumn = fromColumn;
+        this.spamColumn = spamColumn;
     }
     
     @Override
@@ -55,6 +61,11 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     public int getNameColumn() {
         return nameColumn;
     }
+    
+    @Override
+    public List<SortKey> getPreSortColumns() {
+        return Arrays.asList(new SortKey(SortOrder.ASCENDING, spamColumn));
+    }
 
     /**
      * If the FromColumn is sorted, use a custom column sorter
@@ -67,6 +78,8 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
             return getFromComparator();
         else if(index == nameColumn) 
             return getNameComparator();
+        else if(index == spamColumn)
+            return getSpamComparator();
         else
             return getLimeComparator();
     }
@@ -77,6 +90,10 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     
     public NameComparator getNameComparator() {
         return new NameComparator();
+    }
+    
+    public IsSpamComparator getSpamComparator() {
+        return new IsSpamComparator();
     }
     
     /**
@@ -119,6 +136,26 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
                 name =  result.getPropertyString(FilePropertyKey.TITLE);
             }
             return name;
+        }
+    }
+    
+    /**
+     * Compares the Spam Column. This column is never displayed to the user. Its used
+     * to sort classic search results based on files marked as spam and files not 
+     * marked as spam. 
+     */
+    public static class IsSpamComparator implements Comparator<VisualSearchResult> {
+        @Override
+        public int compare(VisualSearchResult o1, VisualSearchResult o2) {
+            boolean spam1 = o1.isSpam();
+            boolean spam2 = o2.isSpam();
+            
+            if(!spam1 && spam2)
+                return -1;
+            else if(spam1 && !spam2)
+                return 1;
+            else 
+                return 0;
         }
     }
 }

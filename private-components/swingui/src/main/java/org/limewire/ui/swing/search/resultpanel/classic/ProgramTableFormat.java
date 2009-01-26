@@ -25,16 +25,18 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int PLATFORM_INDEX = 4;
     static final int COMPANY_INDEX = 5;
     static final int DESCRIPTION_INDEX = 6;
+    static final int IS_SPAM_INDEX = 7;
     
     public ProgramTableFormat() {
-        super(NAME_INDEX, FROM_INDEX, new ColumnStateInfo[] {
+        super(NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_PROGRAM_FROM", I18n.tr("From"), 88, true, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_PROGRAM_NAME", I18n.tr("Name"), 489, true, true),     
                 new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_PROGRAM_SIZE", I18n.tr("Size"), 93, true, true), 
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_PROGRAM_EXTENSION", I18n.tr("Extension"), 70, true, true), 
                 new ColumnStateInfo(PLATFORM_INDEX, "CLASSIC_SEARCH_PROGRAM_PLATFORM", I18n.tr("Platform"), 120, false, true),
                 new ColumnStateInfo(COMPANY_INDEX, "CLASSIC_SEARCH_PROGRAM_COMPANY", I18n.tr("Company"), 118, true, true), 
-                new ColumnStateInfo(DESCRIPTION_INDEX, "CLASSIC_SEARCH_PROGRAM_DESCRIPTION", I18n.tr("Description"), 80, false, true)
+                new ColumnStateInfo(DESCRIPTION_INDEX, "CLASSIC_SEARCH_PROGRAM_DESCRIPTION", I18n.tr("Description"), 80, false, true),
+                new ColumnStateInfo(IS_SPAM_INDEX, "CLASSIC_SEARCH_PROGRAM_IS_SPAM", "", 10, false, false)
         });
     }
 
@@ -58,6 +60,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case EXTENSION_INDEX: return vsr.getFileExtension();
             case FROM_INDEX: return vsr;
             case DESCRIPTION_INDEX: return "";
+            case IS_SPAM_INDEX: return vsr;
         }
         throw new IllegalArgumentException("Unknown column:" + index);
     }
