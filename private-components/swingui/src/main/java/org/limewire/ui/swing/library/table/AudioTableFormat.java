@@ -11,6 +11,7 @@ import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertyUtils;
@@ -38,7 +39,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     static final int ACTION_INDEX = 16;
     
     public AudioTableFormat() {
-        super(ACTION_INDEX, new ColumnStateInfo[] {
+        super(ACTION_INDEX, "LIBRARY_AUDIO_TABLE", ARTIST_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(PLAY_INDEX, "LIBRARY_AUDIO_PLAY", "", 25, true, false), 
                 new ColumnStateInfo(TITLE_INDEX, "LIBRARY_AUDIO_TITLE", I18n.tr("Name"), 278, true, true),     
                 new ColumnStateInfo(ARTIST_INDEX, "LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 120, true, true), 
@@ -105,11 +106,15 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     
     @Override
     public List<SortKey> getDefaultSortKeys() {
-        return Arrays.asList(
-                new SortKey(SortOrder.ASCENDING, ARTIST_INDEX),
-                new SortKey(SortOrder.ASCENDING, ALBUM_INDEX),
-                new SortKey(SortOrder.ASCENDING, TRACK_INDEX),
-                new SortKey(SortOrder.ASCENDING, TITLE_INDEX));
+        if(TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue() == getSortedColumn() &&
+                TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == getSortOrder())
+            return Arrays.asList(
+                    new SortKey(SortOrder.ASCENDING, ARTIST_INDEX),
+                    new SortKey(SortOrder.ASCENDING, ALBUM_INDEX),
+                    new SortKey(SortOrder.ASCENDING, TRACK_INDEX),
+                    new SortKey(SortOrder.ASCENDING, TITLE_INDEX));
+        else
+            return super.getDefaultSortKeys();
     }
     
     @Override

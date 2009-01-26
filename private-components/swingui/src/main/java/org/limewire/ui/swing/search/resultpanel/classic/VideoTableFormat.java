@@ -10,6 +10,7 @@ import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
+import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
 
@@ -34,7 +35,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int IS_SPAM_INDEX = 12;
     
     public VideoTableFormat() {
-        super(NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
+        super("CLASSIC_SEARCH_VIDEO_TABLE", NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_VIDEO_FROM", I18n.tr("From"), 88, true, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_VIDEO_NAME", I18n.tr("Name"), 434, true, true),     
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_VIDEO_EXTENSION", I18n.tr("Extension"), 85, true, true), 
@@ -88,10 +89,14 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     
     @Override
     public List<SortKey> getDefaultSortKeys() {
-        return Arrays.asList(
-                new SortKey(SortOrder.DESCENDING, FROM_INDEX),
-                new SortKey(SortOrder.ASCENDING, NAME_INDEX),
-                new SortKey(SortOrder.ASCENDING, SIZE_INDEX));
+        if(TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue() == getSortedColumn() &&
+                TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == getSortOrder())
+            return Arrays.asList(
+                    new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                    new SortKey(SortOrder.ASCENDING, NAME_INDEX),
+                    new SortKey(SortOrder.ASCENDING, SIZE_INDEX));
+        else
+            return super.getDefaultSortKeys();
     }
     
     @Override

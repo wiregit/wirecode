@@ -10,6 +10,7 @@ import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
+import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
 
@@ -35,7 +36,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int IS_SPAM_INDEX = 14;
     
     public AudioTableFormat() {
-        super(TITLE_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
+        super("CLASSIC_SEARCH_AUDIO_TABLE", TITLE_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_AUDIO_FROM", I18n.tr("From"), 88, true, true), 
                 new ColumnStateInfo(TITLE_INDEX, "CLASSIC_SEARCH_AUDIO_TITLE", I18n.tr("Name"), 287, true, true),     
                 new ColumnStateInfo(ARTIST_INDEX, "CLASSIC_SEARCH_AUDIO_ARTIST", I18n.tr("Artist"), 174, true, true), 
@@ -88,12 +89,16 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     
     @Override
     public List<SortKey> getDefaultSortKeys() {
-        return Arrays.asList(
-                new SortKey(SortOrder.DESCENDING, FROM_INDEX),
-                new SortKey(SortOrder.ASCENDING, ARTIST_INDEX),
-                new SortKey(SortOrder.ASCENDING, ALBUM_INDEX),
-                new SortKey(SortOrder.ASCENDING, TRACK_INDEX),
-                new SortKey(SortOrder.ASCENDING, TITLE_INDEX));
+        if(TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue() == getSortedColumn() &&
+                TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == getSortOrder())
+            return Arrays.asList(
+                    new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                    new SortKey(SortOrder.ASCENDING, ARTIST_INDEX),
+                    new SortKey(SortOrder.ASCENDING, ALBUM_INDEX),
+                    new SortKey(SortOrder.ASCENDING, TRACK_INDEX),
+                    new SortKey(SortOrder.ASCENDING, TITLE_INDEX));
+        else
+            return super.getDefaultSortKeys();
     }
     
     @Override

@@ -9,6 +9,7 @@ import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.AbstractColumnStateFormat;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.EventListTableSortFormat;
@@ -26,13 +27,16 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     private final int nameColumn;
     private final int fromColumn;
     private final int spamColumn;
+    
+    private final String sortID;
 
     public ResultsTableFormat(ColumnStateInfo... columnInfo) {
-        this(-1, -1, -1, columnInfo);
+        this("", -1, -1, -1, columnInfo);
     }
     
-    public ResultsTableFormat(int nameColumn, int fromColumn, int spamColumn, ColumnStateInfo... columnInfo) {
+    public ResultsTableFormat(String sortID, int nameColumn, int fromColumn, int spamColumn, ColumnStateInfo... columnInfo) {
         super(columnInfo);
+        this.sortID = sortID;
         this.nameColumn = nameColumn;
         this.fromColumn = fromColumn;
         this.spamColumn = spamColumn;
@@ -67,6 +71,29 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
         return Arrays.asList(new SortKey(SortOrder.ASCENDING, spamColumn));
     }
 
+    @Override
+    public boolean getSortOrder() {// always descending for search results
+        return false;
+    }
+
+    @Override
+    public String getSortOrderID() {
+        return sortID;
+    }
+
+    @Override
+    public int getSortedColumn() { // always from column for search results
+        return fromColumn;
+    }
+    
+    @Override
+    public List<SortKey> getDefaultSortKeys() {
+        return Arrays.asList(
+                new SortKey(((TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == true) ?
+                    SortOrder.ASCENDING : SortOrder.DESCENDING ),
+                    TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue()));
+    }
+    
     /**
      * If the FromColumn is sorted, use a custom column sorter
      * otherwise it is assumed the column returns a value that 

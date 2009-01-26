@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
@@ -16,6 +17,10 @@ import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.FilterPipeline;
+import org.jdesktop.swingx.decorator.SortController;
+import org.jdesktop.swingx.decorator.SortKey;
+import org.jdesktop.swingx.decorator.SortOrder;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.ui.swing.settings.TablesHandler;
 
@@ -84,7 +89,37 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
     public void columnSelectionChanged(ListSelectionEvent e) {}
 
     @Override
-    public void mouseClicked(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) {
+        if(SwingUtilities.isLeftMouseButton(e)) {
+            SortOrder sortOrder = getSortOrder(table, table.getSortedColumn().getModelIndex());
+    
+            setSortedColumn(table.getSortedColumn().getModelIndex(), sortOrder.isAscending());
+        }
+    }
+    
+    private SortOrder getSortOrder(JXTable table, int modelColumn) {
+        FilterPipeline filters = table.getFilters();
+        if (filters == null) {
+            return SortOrder.UNSORTED;
+        }
+        
+        SortController sortController = filters.getSortController();
+        if (sortController == null) {
+            return SortOrder.UNSORTED;
+        }
+        
+        List<? extends SortKey> sortKeys = sortController.getSortKeys();
+        if (sortKeys == null) {
+            return SortOrder.UNSORTED;
+        }
+        
+        SortKey firstKey = SortKey.getFirstSortingKey(sortKeys);
+        if ((firstKey != null) && (firstKey.getColumn() == modelColumn)) {
+            return firstKey.getSortOrder();
+        } else {
+            return SortOrder.UNSORTED;
+        }
+    }
 
     @Override
     public void mouseEntered(MouseEvent e) {}
@@ -203,6 +238,11 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
     
     private void setWidth(ColumnStateInfo column, int width) {
         TablesHandler.getWidth(column.getId(), column.getDefaultWidth()).setValue(width);
+    }
+    
+    private void setSortedColumn(int sortedColumn, boolean sortOrder) {
+        TablesHandler.getSortedColumn(format.getSortOrderID(), format.getSortedColumn()).setValue(sortedColumn);
+        TablesHandler.getSortedOrder(format.getSortOrderID(), format.getSortOrder()).setValue(sortOrder);
     }
 
     @Override

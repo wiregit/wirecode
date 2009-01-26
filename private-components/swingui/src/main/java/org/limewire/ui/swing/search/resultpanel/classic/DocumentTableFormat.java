@@ -11,6 +11,7 @@ import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
+import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
 
@@ -30,7 +31,7 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     static final int IS_SPAM_INDEX = 8;
     
     public DocumentTableFormat() {
-        super(NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
+        super("CLASSIC_SEARCH_DOCUMENT_TABLE", NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_DOCUMENT_FROM", I18n.tr("From"), 88, true, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_DOCUMENT_NAME", I18n.tr("Name"), 493, true, true), 
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_DOCUMENT_EXTENSION", I18n.tr("Extension"), 83, true, true), 
@@ -71,11 +72,15 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     
     @Override
     public List<SortKey> getDefaultSortKeys() {
-        return Arrays.asList(
-                new SortKey(SortOrder.DESCENDING, FROM_INDEX),
-                new SortKey(SortOrder.ASCENDING, NAME_INDEX),
-                new SortKey(SortOrder.ASCENDING, TYPE_INDEX),
-                new SortKey(SortOrder.ASCENDING, SIZE_INDEX));
+        if(TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue() == getSortedColumn() &&
+                TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == getSortOrder())
+            return Arrays.asList(
+                    new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                    new SortKey(SortOrder.ASCENDING, NAME_INDEX),
+                    new SortKey(SortOrder.ASCENDING, TYPE_INDEX),
+                    new SortKey(SortOrder.ASCENDING, SIZE_INDEX));
+        else
+            return super.getDefaultSortKeys();
     }
     
     @Override
