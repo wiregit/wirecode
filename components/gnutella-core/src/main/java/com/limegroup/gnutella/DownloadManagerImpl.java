@@ -846,7 +846,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
     @Override
     public Downloader downloadTorrent(File torrentFile, boolean overwrite) throws SaveLocationException {
-        if(torrentFile.length() > 1024 * 1024 * 10 ) {
+        if(torrentFile.length() > 1024 * 1024 * 5 ) {
             //torrent files are supposed to be small. If it is large it is probably not a valid torrent file 
             throw new SaveLocationException(SaveLocationException.LocationCode.TORRENT_FILE_TOO_LARGE, torrentFile);
         }
