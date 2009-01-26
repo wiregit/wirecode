@@ -20,13 +20,11 @@ import java.util.regex.Pattern;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.HyperlinkEvent;
@@ -45,6 +43,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.listener.MousePopupListener;
@@ -104,13 +103,23 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     @Resource private Icon spamIcon;
     @Resource private Icon downloadingIcon;
     @Resource private Icon libraryIcon;
-    @Resource private Icon propertiesDown;
-    @Resource private Icon propertiesHover;
-    @Resource private Icon propertiesNormal;
-    @Resource private Icon similarUpIcon;
-    @Resource private Icon similarDownIcon;
-    @Resource private Icon similarActiveIcon;
-    @Resource private Icon similarHoverIcon;
+    
+    @Resource private Icon propertiesPressedIcon;
+    @Resource private Icon propertiesHoverIcon;
+    @Resource private Icon propertiesIcon;
+    
+    @Resource private Icon propertiesSimilarShownPressedIcon;
+    @Resource private Icon propertiesSimilarShownHoverIcon;
+    @Resource private Icon propertiesSimilarShownIcon;
+    
+    @Resource private Icon similarHiddenIcon;
+    @Resource private Icon similarHiddenPressedIcon;
+    @Resource private Icon similarHiddenHoverIcon;
+    
+    @Resource private Icon similarShownIcon;
+    @Resource private Icon similarShownPressedIcon;
+    @Resource private Icon similarShownHoverIcon;
+    
     @Resource private Icon dividerIcon;
     
     private final ActionColumnTableCellEditor actionEditor;
@@ -123,8 +132,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
-    private JToggleButton similarButton = new JToggleButton();
-    private JButton propertiesButton = new JButton();
+    private IconButton similarButton = new IconButton();
+    private IconButton propertiesButton = new IconButton();
     private JEditorPane heading = new JEditorPane();
     private JLabel subheadingLabel = new JLabel();
     private JLabel metadataLabel = new JLabel();
@@ -170,46 +179,15 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         GuiUtils.assignResources(this);
 
         similarButton.setFocusable(false);
-        similarButton.setPressedIcon(similarDownIcon);
-        similarButton.setIcon(similarUpIcon);
+        similarButton.setIcon(similarHiddenIcon);
+        similarButton.setPressedIcon(similarHiddenPressedIcon);
+        similarButton.setRolloverIcon(similarHiddenHoverIcon);
         similarButton.setToolTipText(I18n.tr("Show similar files"));
-        similarButton.setBorderPainted(false);
-        similarButton.setContentAreaFilled(false);
-        //This mouse listener is unfortunately necessary. Setting the icons for rollover
-        //causes the wrong icon to be displayed after the button is active and the 
-        //mouse has entered "edit" mode in the cell.
-        similarButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                System.out.println("clicked!");
-                similarButton.setIcon(isShowingSimilarResults() ? similarActiveIcon : similarUpIcon);
-                similarButton.setToolTipText(isShowingSimilarResults() ? 
-                        I18n.tr("Hide similar files") : I18n.tr("Show similar files"));
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent arg0) {
-                if (!isShowingSimilarResults()) {
-                    similarButton.setIcon(similarHoverIcon);
-                }
-            }
-
-            @Override
-            public void mouseExited(MouseEvent arg0) { 
-                if (!isShowingSimilarResults()) {
-                    similarButton.setIcon(similarUpIcon);
-                }
-            }
-        });
-
-        propertiesButton.setIcon(propertiesNormal);
-        propertiesButton.setRolloverIcon(propertiesHover);
-        propertiesButton.setRolloverEnabled(true);
-        propertiesButton.setPressedIcon(propertiesDown);
-        propertiesButton.setToolTipText(I18n.tr("View file info"));
-        propertiesButton.setBorderPainted(false);
-        propertiesButton.setContentAreaFilled(false);
-        propertiesButton.setFocusPainted(false);
+        
+        propertiesButton.setFocusable(false);
+        propertiesButton.setIcon(propertiesIcon);
+        propertiesButton.setPressedIcon(propertiesPressedIcon);
+        propertiesButton.setRolloverIcon(propertiesHoverIcon);
         
         fromWidget = fromWidgetFactory.create(false);
        
@@ -226,6 +204,31 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                 }
             }
         });
+
+        similarButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                vsr.toggleChildrenVisibility();
+                if(vsr.isChildrenVisible()) {
+                    similarButton.setIcon(similarShownIcon);
+                    similarButton.setPressedIcon(similarShownPressedIcon);
+                    similarButton.setRolloverIcon(similarShownHoverIcon);
+                    similarButton.setToolTipText(I18n.tr("Hide similar files"));
+                    propertiesButton.setIcon(propertiesSimilarShownIcon);
+                    propertiesButton.setPressedIcon(propertiesSimilarShownPressedIcon);
+                    propertiesButton.setRolloverIcon(propertiesSimilarShownHoverIcon);
+                } else {
+                    similarButton.setIcon(similarHiddenIcon);
+                    similarButton.setPressedIcon(similarHiddenPressedIcon);
+                    similarButton.setRolloverIcon(similarHiddenHoverIcon);
+                    similarButton.setToolTipText(I18n.tr("Show similar files"));
+                    propertiesButton.setIcon(propertiesIcon);
+                    propertiesButton.setPressedIcon(propertiesPressedIcon);
+                    propertiesButton.setRolloverIcon(propertiesHoverIcon);
+                }
+                table.editingStopped(new ChangeEvent(table));
+            }
+        });
+        
         
         propertiesButton.addActionListener(new ActionListener() {
             @Override
@@ -275,10 +278,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         return vsr;
     }
 
-    private int getSimilarResultsCount() {
-        return vsr == null ? 0 : vsr.getSimilarResults().size();
-    }
-
     @Override
     public Component getTableCellEditorComponent(
         final JTable table, Object value, boolean isSelected, int row, final int col) {
@@ -311,10 +310,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             panel = col == 0 ? leftPanel : fromPanel;
             
             if (col == 1) {
-                propertiesButton.setIcon(propertiesNormal);
-                similarButton.setIcon(isShowingSimilarResults() ? similarActiveIcon : similarUpIcon);
-                similarButton.setToolTipText(isShowingSimilarResults() ? 
-                        I18n.tr("Hide similar files") : I18n.tr("Show similar files"));
+                propertiesButton.setIcon(vsr.isChildrenVisible() ? propertiesSimilarShownIcon : propertiesIcon);
+                similarButton.setIcon(vsr.isChildrenVisible() ? similarShownIcon : similarHiddenIcon);
             }
         }
 
@@ -332,18 +329,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             table, value, isSelected, row, column);
     }
     
-    private boolean isShowingSimilarResults() {
-        return vsr != null && getSimilarResultsCount() > 0 && vsr.isChildrenVisible();
-    }
-
     private JPanel makeFromPanel() {
-        similarButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                vsr.toggleChildrenVisibility();
-                table.editingStopped(new ChangeEvent(table));
-            }
-        });
-        
         JXPanel panel = new JXPanel(new MigLayout("", "0[][][]8[]", "5[]")) {
             @Override
             public void setBackground(Color color) {
@@ -568,7 +554,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             populateOther(result);
             
         } else if (column == 1) {
-            similarButton.setVisible(getSimilarResultsCount() > 0);
+            similarButton.setVisible(vsr.getSimilarResults().size() > 0);
             populateFrom(vsr);
         }
     }
