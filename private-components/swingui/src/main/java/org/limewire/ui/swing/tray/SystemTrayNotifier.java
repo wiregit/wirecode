@@ -18,6 +18,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 /**
  * Puts an icon and menu in the system tray. Delegates System Notifications to
@@ -34,7 +35,9 @@ class SystemTrayNotifier implements TrayNotifier {
     private final BasicNotifier basicNotifier;
 
     @Resource
-    private Icon trayIconResource;
+    private Icon windowsTrayIconResource;
+    @Resource
+    private Icon linuxTrayIconResource;
 
     public SystemTrayNotifier() {
         this.basicNotifier = new BasicNotifier();
@@ -52,7 +55,8 @@ class SystemTrayNotifier implements TrayNotifier {
     }
 
     private TrayIcon buildTrayIcon(String desc) {
-        TrayIcon icon = new TrayIcon(((ImageIcon) trayIconResource).getImage(), desc, popupMenu);
+        Icon trayIcon = OSUtils.isLinux() ? linuxTrayIconResource : windowsTrayIconResource;  
+        TrayIcon icon = new TrayIcon(((ImageIcon) trayIcon).getImage(), desc, popupMenu);
 
         // left click restores. This happens on the awt thread.
         icon.addActionListener(new ActionListener() {
@@ -127,7 +131,7 @@ class SystemTrayNotifier implements TrayNotifier {
     }
 
     public boolean showTrayIcon() {
-        if (tray == null || trayIconResource == null) {
+        if (tray == null) {
             return false;
         }
 
