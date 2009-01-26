@@ -125,7 +125,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     public void setMode(Presence.Mode mode) {
         XMPPConnection localCopy = connection;
         if (localCopy != null) { 
-            connection.sendPacket(getPresenceForMode(mode));
+            localCopy.sendPacket(getPresenceForMode(mode));
         }
     }
 
