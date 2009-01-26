@@ -35,4 +35,6 @@ public interface IconLibrary {
     Icon getMinimizeOver();
     
     Icon getMinimizeDown();
+    
+    Icon getOffline();
 }

@@ -27,6 +27,7 @@ class IconLibraryImpl implements IconLibrary {
     @Resource private Icon minimizeNormal;
     @Resource private Icon minimizeOver;
     @Resource private Icon minimizeDown;
+    @Resource private Icon offline;
     
     public IconLibraryImpl() {
         GuiUtils.assignResources(this);
@@ -91,5 +92,10 @@ class IconLibraryImpl implements IconLibrary {
     @Override
     public Icon getMinimizeOver() {
         return minimizeOver;
+    }
+    
+    @Override
+    public Icon getOffline() {
+        return offline;
     }
 }

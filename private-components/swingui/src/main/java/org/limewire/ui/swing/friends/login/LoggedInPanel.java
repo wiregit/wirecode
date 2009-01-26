@@ -3,14 +3,13 @@ package org.limewire.ui.swing.friends.login;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -32,7 +31,6 @@ import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.ButtonDecorator;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;
@@ -77,7 +75,7 @@ class LoggedInPanel extends JXPanel {
         optionsBox = comboFactory.createMiniComboBox();
         signoutBox = comboFactory.createMiniComboBox();
         statusMenuLabel = new JLabel();
-        currentUser = new JLabel(iconLibrary.getEndChat());
+        currentUser = new JLabel(iconLibrary.getOffline());
         loggingInLabel = new JLabel(I18n.tr("Signing in..."));
         signInButton = new JXButton();
         buttonDecorator.decorateMiniButton(signInButton);
@@ -100,18 +98,21 @@ class LoggedInPanel extends JXPanel {
             }
         })));
         
-        optionsMenu.add(decorateHeading(new JLabel(I18n.tr("SHOW"))));
-        final JCheckBoxMenuItem showOfflineFriends = new JCheckBoxMenuItem(I18n.tr("Offline Friends"));
-        showOfflineFriends.setHorizontalTextPosition(SwingConstants.LEFT);
+        
+        final JCheckBoxMenuItem showOfflineFriends = new JCheckBoxMenuItem();
         showOfflineFriends.setSelected(SwingUiSettings.XMPP_SHOW_OFFLINE.getValue());
-        showOfflineFriends.addActionListener(new ActionListener() {
+        showOfflineFriends.setAction(new AbstractAction(I18n.tr("Offline Friends")) {
+            {
+                putValue(Action.SMALL_ICON, iconLibrary.getOffline());
+            }
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 SwingUiSettings.XMPP_SHOW_OFFLINE.setValue(showOfflineFriends.isSelected());
-            } 
+            }
         });
         
-
+        optionsMenu.add(decorateHeading(new JLabel(I18n.tr("SHOW"))));
         optionsMenu.add(decorateItem(showOfflineFriends));
         optionsMenu.add(decorateHeading(statusMenuLabel));
         optionsMenu.add(decorateItem(statusActions.getAvailableMenuItem()));
@@ -181,7 +182,7 @@ class LoggedInPanel extends JXPanel {
                     break;
                 case CONNECT_FAILED:
                 case DISCONNECTED:
-                    currentUser.setIcon(iconLibrary.getEndChat());
+                    currentUser.setIcon(iconLibrary.getOffline());
                     break;
                 }
             }
@@ -267,7 +268,6 @@ class LoggedInPanel extends JXPanel {
     private JComponent decorateHeading(JComponent component){
         component.setForeground(headingColor);
         component.setFont(headingFont);
-        FontUtils.bold(component);
         return component;
     }
     
