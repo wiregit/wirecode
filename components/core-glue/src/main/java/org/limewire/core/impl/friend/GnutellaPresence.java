@@ -84,7 +84,7 @@ public class GnutellaPresence implements FriendPresence {
             "Guitar", "Bomb", "Border", "Apparel", "Activity", "Desk", "Art", "Colt", "Cyclist",
             "Biker", "Blogger", "Anchoby", "Carp", "Glassfish", "Clownfish", "Barracuda", "Eel",
             "Moray", "Stingray", "Flounder", "Swordfish", "Marlin", "Pipefish", "Grunter",
-            "Grunion", "Grouper", "Guppy", "Gulper", "Crap", "Lobster", "Halibut", "Hagfish",
+            "Grunion", "Grouper", "Guppy", "Gulper", "Crab", "Lobster", "Halibut", "Hagfish",
             "Horsefish", "Seahorse", "Jellyfish", "Killifish", "Trout", "Pike", "Ray", "Razorfish",
             "Ragfish", "Hamster", "Gerbil", "Mouse", "Gnome", "Shark", "Snail", "Skilfish" };
     
