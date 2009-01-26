@@ -172,7 +172,7 @@ public final class SaveDirectoryHandler {
                         null,
                         JOptionPane.YES_OPTION);
         
-        if(ret == JOptionPane.YES_OPTION) {
+        if(ret == JOptionPane.NO_OPTION) {
             SwingUiSettings.VISTA_WARN_DIRECTORIES.add(f);
         }
         
