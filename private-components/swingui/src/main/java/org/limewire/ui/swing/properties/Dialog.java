@@ -347,7 +347,7 @@ public abstract class Dialog extends LimeJDialog {
     }
 
     private void configureVideoDetailsLayout() {
-        details.setLayout(new MigLayout("fillx, nocache", "[20%!][20%!][]", "[][][][][][]"));
+        details.setLayout(new MigLayout("fillx", "[20%!][20%!][]", "[][][][][][]"));
         details.add(newSmallLabel(TITLE), "wrap");
         details.add(title, "span, growx, wrap");
         details.add(newSmallLabel(GENRE));
@@ -364,7 +364,7 @@ public abstract class Dialog extends LimeJDialog {
     }
     
     private void configureAudioDetailsLayout() {
-        details.setLayout(new MigLayout("fillx, nocache", "[50%!][20%!]0[10%][10%]", "[][][][][][]"));
+        details.setLayout(new MigLayout("fillx", "[50%!][20%!]0[10%][10%]", "[][][][][][]"));
         details.add(newSmallLabel(TITLE));
         details.add(newSmallLabel(ARTIST), "wrap");
         details.add(title, "growx");
@@ -395,7 +395,7 @@ public abstract class Dialog extends LimeJDialog {
     }
     
     private void configureProgramDetailsLayout() {
-        details.setLayout(new MigLayout("fillx, nocache", "[30%!][]", "[][][][][][]"));
+        details.setLayout(new MigLayout("fillx", "[30%!][]", "[][][][][][]"));
         details.add(newSmallLabel(TITLE), "wrap");
         details.add(title, "span, growx, wrap");
         details.add(newSmallLabel(PLATFORM));

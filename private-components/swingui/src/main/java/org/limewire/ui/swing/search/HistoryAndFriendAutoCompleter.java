@@ -232,7 +232,7 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             compoundBorder = new ExtendedCompoundBorder(BorderFactory.createEmptyBorder(), BorderFactory.createEmptyBorder(0, 2, 0, 2));
             
             firstSuggestionPanel = new JPanel();
-            firstSuggestionPanel.setLayout(new MigLayout("nocache, fill, gap 0, insets 0"));
+            firstSuggestionPanel.setLayout(new MigLayout("fill, gap 0, insets 0"));
             firstSuggestionPanel.setBorder(compoundBorder);
             
             firstSuggestionLabel = new DefaultListCellRenderer();

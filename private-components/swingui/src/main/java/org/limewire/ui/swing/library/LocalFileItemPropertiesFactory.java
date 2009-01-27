@@ -173,7 +173,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
             boolean isShared = sharedWithList.size() > 0;
             
             if (isShared) {                
-                sharing.setLayout(new MigLayout("fillx, nogrid, nocache, gap 0! 0!, insets 0 0 0 0"));
+                sharing.setLayout(new MigLayout("fillx, nogrid, gap 0! 0!, insets 0 0 0 0"));
                 for(Friend friend : sharedWithList) {
                     final Friend shareFriend = friend;
                     final JLabel friendLabel = new JLabel(friend.getRenderName());
@@ -199,7 +199,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
                 mainPanel.add(box(tr("Sharing with"), scroll), "grow, cell 0 3, wmin 200");
             }
             
-            location.setLayout(new MigLayout("nocache", "[]10[]15[]", isShared ? "[top][]" : "[top]"));
+            location.setLayout(new MigLayout("", "[]10[]15[]", isShared ? "[top][]" : "[top]"));
             location.add(fileLocation, "gapbottom 5,growx, push");
             location.add(locateOnDisk);
             location.add(locateInLibrary, isShared ? "wrap" : "");

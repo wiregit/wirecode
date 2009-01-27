@@ -57,7 +57,7 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
         @Override
         public void showProperties(VisualSearchResult vsr) {
             icon.setIcon(categoryIconManager.getIcon(vsr, iconManager));
-            location.setLayout(new MigLayout("nocache", "[50%!]", "[]"));
+            location.setLayout(new MigLayout("", "[50%!]", "[]"));
             readOnlyInfoModel.setColumnIdentifiers(new Object[] { tr("Address"), tr("Filename") });
             location.add(new JScrollPane(readOnlyInfo));
             populateCommonFields(vsr);

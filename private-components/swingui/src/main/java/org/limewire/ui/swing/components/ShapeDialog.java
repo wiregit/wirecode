@@ -48,7 +48,7 @@ public class ShapeDialog extends JXPanel implements Resizable {
     private boolean isPositionedRelativeToOwner;
 
     public ShapeDialog() {
-        super(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
+        super(new MigLayout("fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         GuiUtils.assignResources(this);
         
         setOpaque(false);

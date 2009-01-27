@@ -197,7 +197,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         });
         hideButton.setName("LoginPanel.hideButton");
 
-        setLayout(new MigLayout("nocache, nogrid, gap 0, insets 4 5 8 4, fill, alignx left"));
+        setLayout(new MigLayout("nogrid, gap 0, insets 4 5 8 4, fill, alignx left"));
         
         add(titleLabel, "gaptop 1, gapleft 2, gapbottom 4");
         add(hideButton, "alignx right, aligny top, gapbefore push, wrap");
