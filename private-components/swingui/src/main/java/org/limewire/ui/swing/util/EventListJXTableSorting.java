@@ -289,7 +289,7 @@ public class EventListJXTableSorting {
             // If the tableFormat is an AdvancedTableFormat, use the table column comparators
             // found in the AdvancedTableFormat for sorting.
             if(tableFormat instanceof AdvancedTableFormat) {
-                return new TableColumnComparator(tableFormat, modelIndex, ((AdvancedTableFormat)tableFormat).getColumnComparator(modelIndex));
+                return new EventListColumnComparator(tableFormat, modelIndex, ((AdvancedTableFormat)tableFormat).getColumnComparator(modelIndex));
             } else 
                 return new TableColumnComparator(tableFormat, modelIndex);
         }
