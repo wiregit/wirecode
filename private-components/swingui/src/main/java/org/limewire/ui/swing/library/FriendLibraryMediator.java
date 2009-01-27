@@ -50,7 +50,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     
     private final ListenerSupport<FriendEvent> availListeners;
     
-    private final ShowLibraryListener showLibraryListener;
+    private ShowLibraryListener showLibraryListener;
 
     @AssistedInject
     public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
@@ -68,8 +68,6 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         this.friendFileList = shareListManager.getOrCreateFriendShareList(friend);
         this.availListeners = availListeners;
         this.availListeners.addListener(this);
-        
-        showLibraryListener = new ShowLibraryListener();
         
         createEmptyCard();
         showEmptyCard();
@@ -106,8 +104,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         if(!disposed) {
             switch(libraryState) { 
             case FAILED_TO_LOAD:
-                if(this.eventList != null)
-                    this.eventList.remove(showLibraryListener);
+                removeEventListener();
                 this.eventList = null;
                 emptyPanelMessage.setMessageType(MessageTypes.LW_CONNECTION_ERROR);
                 if(!isSharingCardShown()) {
@@ -117,8 +114,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             case LOADED:
                 // must do this here also, may skip loading step all together
                 if(this.eventList != eventList) {
-                    if(this.eventList != null)
-                        this.eventList.remove(showLibraryListener);
+                    removeEventListener();
                     this.eventList = eventList;
                 } 
                 if(eventList.size() == 0) {
@@ -126,6 +122,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                     if(!isSharingCardShown()) {
                         showEmptyCard();
                     }
+                    registerEventListener();
                 } else {
                     setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
                     showLibrary();
@@ -133,8 +130,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 break;
             case LOADING:
                 if(this.eventList != eventList) {
-                    if(this.eventList != null)
-                        this.eventList.remove(showLibraryListener);
+                    removeEventListener();
                     this.eventList = eventList;
                 } 
                 if(eventList.size() == 0) {
@@ -142,7 +138,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 	                if(!isSharingCardShown()) {
 	                    showEmptyCard();
 	                }
-	                this.eventList.addListEventListener(showLibraryListener);
+	                registerEventListener();
                 } else {
                     setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
                     showLibrary();
@@ -152,10 +148,23 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         }
     }
     
+    private void registerEventListener() {
+        if(eventList != null && showLibraryListener == null) {
+            showLibraryListener = new ShowLibraryListener();
+            eventList.addListEventListener(showLibraryListener);
+        }
+    }
+    
+    private void removeEventListener() {
+        if(eventList != null && showLibraryListener != null) {
+            eventList.remove(showLibraryListener);
+            showLibraryListener = null;
+        }
+    }
+    
     private void showLibrary() {
         if(isEmptyCardShown()) {
-            if(eventList != null)
-                eventList.remove(showLibraryListener);
+            removeEventListener();
             super.showLibraryCard();
         }
     }
@@ -189,8 +198,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     
     @Override
     public void dispose() {
-        if(eventList != null)
-            eventList.removeListEventListener(showLibraryListener);
+        removeEventListener();
         availListeners.removeListener(this);
         super.dispose();
     }
@@ -211,7 +219,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         public void listChanged(ListEvent<RemoteFileItem> listChanges) {
             if(listChanges.getSourceList().size() > 0 ) {
                 showLibrary();
-                eventList.removeListEventListener(this);
+                removeEventListener();
             }
         }
     }
