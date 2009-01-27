@@ -52,8 +52,6 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.ActionButtonPanel;
-import org.limewire.ui.swing.search.resultpanel.ActionColumnTableCellEditor;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
@@ -122,14 +120,12 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     
     @Resource private Icon dividerIcon;
     
-    private final ActionColumnTableCellEditor actionEditor;
     private final SearchHeadingDocumentBuilder headingBuilder;
     private final ListViewRowHeightRule rowHeightRule;
     private final ListViewDisplayedRowsLimit displayLimit;
     private final SearchResultTruncator truncator;
     private final HeadingFontWidthResolver headingFontWidthResolver = new HeadingFontWidthResolver();
     private final IconManager iconManager;
-    private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
     private IconButton similarButton = new IconButton();
@@ -152,11 +148,12 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
 
     private JLabel lastRowMessage;
 
+    private DownloadHandler downloadHandler;
+
     @AssistedInject
     ListViewTableEditorRenderer(
             CategoryIconManager categoryIconManager,
             SearchResultFromWidgetFactory fromWidgetFactory,
-        @Assisted ActionColumnTableCellEditor actionEditor, 
         @Assisted String searchText, 
         @Assisted Navigator navigator, 
         final @Assisted DownloadHandler downloadHandler,
@@ -169,13 +166,13 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
 
         this.categoryIconManager = categoryIconManager;
         
-        this.actionEditor = actionEditor;
         this.searchText = searchText;
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
         this.displayLimit = displayLimit;
         this.truncator = truncator;
         this.iconManager = iconManager;
+        this.downloadHandler = downloadHandler;
         GuiUtils.assignResources(this);
 
         similarButton.setFocusable(false);
@@ -199,7 +196,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             @Override
             public void mousePressed(MouseEvent e) {
                 if(SwingUtilities.isLeftMouseButton(e) && isDownloadEligible(vsr)) {
-                    actionButtonPanel.startDownload();
+                    downloadHandler.download(vsr);
                     table.editingStopped(new ChangeEvent(table));
                 }
             }
@@ -292,11 +289,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             editorComponent.add(emptyPanel, BorderLayout.CENTER);
             return editorComponent;
         }
-        
-        actionButtonPanel =
-            (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
-                    table, value, isSelected, row, col);
-
+                
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
         
         editorComponent.removeAll();
@@ -404,7 +397,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 if (EventType.ACTIVATED == e.getEventType()) {
                     if (e.getDescription().equals("#download")) {
-                        actionButtonPanel.startDownload();
+                        downloadHandler.download(vsr);
                         table.editingStopped(new ChangeEvent(table));
                     } else if (e.getDescription().equals("#downloading")) {
                         navigator.getNavItem(

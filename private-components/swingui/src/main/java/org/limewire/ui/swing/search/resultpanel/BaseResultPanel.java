@@ -178,7 +178,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
-           new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
+           searchInfo.getQuery(), 
                     navigator, this, 
                     displayLimit);
         
@@ -189,10 +189,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             tc.setCellRenderer(renderer);
         }
 
-        ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
-                new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    navigator, this,
-                    displayLimit);
+        ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(searchInfo.getQuery(), 
+                navigator, this, displayLimit);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
