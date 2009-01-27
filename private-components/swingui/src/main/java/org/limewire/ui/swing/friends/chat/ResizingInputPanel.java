@@ -116,7 +116,7 @@ class ResizingInputPanel extends JPanel implements Displayable {
     private class ChatStateManager implements DocumentListener {
 
         private final Periodic chatPausedTimer;
-        private ChatState currentInputChatState = ChatState.active;
+        private volatile ChatState currentInputChatState = ChatState.active;
 
         ChatStateManager(ScheduledExecutorService schedExecService) {
             chatPausedTimer = new Periodic(new Runnable() {
