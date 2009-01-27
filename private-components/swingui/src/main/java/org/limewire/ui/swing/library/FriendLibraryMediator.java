@@ -105,7 +105,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         if(!disposed) {
             switch(libraryState) { 
             case FAILED_TO_LOAD:
-                removeEventListener();
+                removeEventListener(true);
                 this.eventList = null;
                 emptyPanelMessage.setMessageType(MessageTypes.LW_CONNECTION_ERROR);
                 if(!isSharingCardShown()) {
@@ -115,7 +115,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             case LOADED:
                 // must do this here also, may skip loading step all together
                 if(this.eventList != eventList) {
-                    removeEventListener();
+                    removeEventListener(true);
                     this.eventList = eventList;
                 } 
                 if(eventList.size() == 0) {
@@ -130,7 +130,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 break;
             case LOADING:
                 if(this.eventList != eventList) {
-                    removeEventListener();
+                    removeEventListener(true);
                     this.eventList = eventList;
                 } 
                 if(eventList.size() == 0) {
@@ -154,9 +154,11 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         }
     }
     
-    private void removeEventListener() {
+    private void removeEventListener(boolean cancel) {
         if(eventList != null && showLibraryListener != null) {
-            showLibraryListener.cancelled = true;
+            if(cancel) {
+                showLibraryListener.cancelled = true;
+            }
             eventList.remove(showLibraryListener);
             showLibraryListener = null;
         }
@@ -164,7 +166,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     
     private void showLibrary() {
         if(isEmptyCardShown()) {
-            removeEventListener();
+            removeEventListener(true);
             setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
             super.showLibraryCard();
         }
@@ -199,7 +201,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     
     @Override
     public void dispose() {
-        removeEventListener();
+        removeEventListener(true);
         availListeners.removeListener(this);
         super.dispose();
     }
@@ -221,12 +223,12 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         @Override
         public void listChanged(ListEvent<RemoteFileItem> listChanges) {
             if(listChanges.getSourceList().size() > 0 ) {
+                removeEventListener(false);
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
                         if(!cancelled) {
                             showLibrary();
-                            removeEventListener();
                         }
                     }
                 });
