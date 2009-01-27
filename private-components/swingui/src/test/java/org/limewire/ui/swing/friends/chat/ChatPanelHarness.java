@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -44,8 +45,8 @@ public class ChatPanelHarness {
                 ChatPanel chatPanel = new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, ChatFriend chatFriend, String loggedInID) {
-                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), null, null, null, friendSupport, null, featureSupport,
-                                new IconLibraryImpl());
+                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), null, null, null, null,
+                                new IconLibraryImpl(), new ScheduledThreadPoolExecutor(1));
                     }
                 }, icons, friendsPane, new ChatTopPanel());
                 

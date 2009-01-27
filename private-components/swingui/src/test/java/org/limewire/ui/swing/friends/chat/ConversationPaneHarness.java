@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends.chat;
 
 import java.awt.Dimension;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -54,8 +55,8 @@ public class ConversationPaneHarness {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        ConversationPane pane = new ConversationPane(writer, friend, "me", new MockLibraryManager(), iconManager, null, null, null, new EventListenerList<FriendEvent>(), null, new EventListenerList<FeatureEvent>(),
-                                new IconLibraryImpl());
+                        ConversationPane pane = new ConversationPane(writer, friend, "me", new MockLibraryManager(), iconManager, null, null, null, null,
+                                new IconLibraryImpl(), new ScheduledThreadPoolExecutor(1));
                         frame.add(pane);
                         
                         for(int i = 0; i < 10; i++) {

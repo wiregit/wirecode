@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -106,6 +107,7 @@ import org.limewire.xmpp.api.client.XMPPException;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
+import com.google.inject.Inject;
 
 /**
  *
@@ -136,6 +138,12 @@ public class ConversationPane extends JPanel implements Displayable {
     private final ResultDownloader downloader;
     private final RemoteFileItemFactory remoteFileItemFactory;
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+
+    private ListenerSupport<FriendEvent> friendSupport;
+    private ListenerSupport<FeatureEvent> featureSupport;
+    private EventListener<FeatureEvent> featureListener;
+    private EventListener<FriendEvent> friendListener;
+    
     @Resource(key="ChatConversation.toolbarTopColor") private Color toolbarTopColor;
     @Resource(key="ChatConversation.toolbarBottomColor") private Color toolbarBottomColor;
     @Resource(key="ChatConversation.toolbarBorderColor") private Color toolbarBorderColor;
@@ -149,9 +157,9 @@ public class ConversationPane extends JPanel implements Displayable {
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
                             ShareListManager libraryManager, IconManager iconManager, LibraryNavigator libraryNavigator,
                             ResultDownloader downloader, RemoteFileItemFactory remoteFileItemFactory,
-                            @Named("available") ListenerSupport<FriendEvent> friendSupport,
                             SaveLocationExceptionHandler saveLocationExceptionHandler,
-                            ListenerSupport<FeatureEvent> featureSupport, IconLibrary iconLibrary) {
+                            IconLibrary iconLibrary,
+                            @Named("backgroundExecutor")ScheduledExecutorService schedExecService) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.remoteFileItemFactory = remoteFileItemFactory;
@@ -238,22 +246,21 @@ public class ConversationPane extends JPanel implements Displayable {
         FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, libraryManager.getOrCreateFriendShareList(chatFriend.getFriend()));
         editor.setDropTarget(friendShare.getDropTarget());
 
-        add(footerPanel(writer, chatFriend), BorderLayout.SOUTH);
+        add(footerPanel(writer, chatFriend, schedExecService), BorderLayout.SOUTH);
 
         setBackground(DEFAULT_BACKGROUND);
 
         EventAnnotationProcessor.subscribe(this);
-        friendSupport.addListener(new EventListener<FriendEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendEvent event) {
-                if(event.getSource().getId().equals(friendId)) {
-                    handleFriendEvent(event);
-                }
-            }
-        });
+    }
 
-        featureSupport.addListener(new EventListener<FeatureEvent>() {
+    
+    @Inject
+    public void register(@Named("available")ListenerSupport<FriendEvent> friendSupport,
+                         ListenerSupport<FeatureEvent> featureSupport) {
+        this.friendSupport = friendSupport;
+        this.featureSupport = featureSupport;
+
+        featureListener = new EventListener<FeatureEvent>() {
             @Override
             @SwingEDTEvent
             public void handleEvent(FeatureEvent event) {
@@ -261,7 +268,19 @@ public class ConversationPane extends JPanel implements Displayable {
                     handleFeatureUpdate(event);
                 }
             }
-        });
+        };
+
+        friendListener = new EventListener<FriendEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendEvent event) {
+                if (event.getSource().getId().equals(friendId)) {
+                    handleFriendEvent(event);
+                }
+            }
+        };
+        friendSupport.addListener(friendListener);
+        featureSupport.addListener(featureListener);
     }
 
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
@@ -296,6 +315,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private void handleFriendEvent(FriendEvent event) {
         switch(event.getType()) {
         case ADDED:
+            currentChatState = ChatState.active;
             displayMessages(false);
             inputPanel.getInputComponent().setEnabled(true);
             break;
@@ -325,12 +345,12 @@ public class ConversationPane extends JPanel implements Displayable {
         } catch (XMPPException e) {
             LOG.error("Could not set chat state while closing the conversation", e);
         }
-
-        // TODO: remove listeners
     }
 
     public void destroy() {
         EventAnnotationProcessor.unsubscribe(this);
+        featureSupport.removeListener(featureListener);
+        friendSupport.removeListener(friendListener);
     }
 
     public String getMessageReceivedTopicName() {
@@ -411,7 +431,8 @@ public class ConversationPane extends JPanel implements Displayable {
         }
     }
 
-    private JPanel footerPanel(MessageWriter writer, ChatFriend chatFriend) {
+    private JPanel footerPanel(MessageWriter writer, ChatFriend chatFriend,
+                               ScheduledExecutorService schedExecService) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);
         
@@ -433,7 +454,7 @@ public class ConversationPane extends JPanel implements Displayable {
         toolbar.add(downloadlink);
         toolbar.add(sharelink);
 
-        inputPanel = new ResizingInputPanel(writer);
+        inputPanel = new ResizingInputPanel(writer, schedExecService);
         inputPanel.setBorder(BorderFactory.createEmptyBorder());
         panel.add(toolbar, BorderLayout.NORTH);
         panel.add(inputPanel, BorderLayout.CENTER);
