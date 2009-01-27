@@ -133,8 +133,6 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             break;
         }
 
-        I18n.tr("Unable to download: {0}\nfile {1}", sle.getErrorCode(), sle.getFile());
-
         // Log exception and display user message.
         LOG.error(message, sle);
         FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), message, I18n.tr("Download"),
