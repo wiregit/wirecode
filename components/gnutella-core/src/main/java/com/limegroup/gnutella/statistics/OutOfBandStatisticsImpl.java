@@ -2,6 +2,8 @@ package com.limegroup.gnutella.statistics;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.inspection.InspectablePrimitive;
 
@@ -11,13 +13,15 @@ import com.google.inject.Singleton;
 @Singleton
 class OutOfBandStatisticsImpl implements OutOfBandStatistics {
     
-    private static final int START_MIN_SAMPLE_SIZE = 500;
+    private static final Log LOG = LogFactory.getLog(OutOfBandStatisticsImpl.class);
+    
+    private static final int SAMPLE_SIZE = 500;
     private static final int MIN_SUCCESS_RATE = 60;
     private static final int PROXY_SUCCESS_RATE = 80;
     private static final int TERRIBLE_SUCCESS_RATE = 40;
     
     @InspectablePrimitive("oob sample size")
-    private AtomicInteger sampleSize = new AtomicInteger(START_MIN_SAMPLE_SIZE);
+    private AtomicInteger sampleSize = new AtomicInteger(SAMPLE_SIZE);
     @InspectablePrimitive("oob requested")
     private AtomicInteger requested = new AtomicInteger(0);
     @InspectablePrimitive("oob received")
@@ -52,7 +56,7 @@ class OutOfBandStatisticsImpl implements OutOfBandStatistics {
     }
     
     public void increaseSampleSize() {
-        sampleSize.addAndGet(500);
+        sampleSize.addAndGet(SAMPLE_SIZE);
     }
 
     public double getSuccessRate() {
@@ -63,35 +67,71 @@ class OutOfBandStatisticsImpl implements OutOfBandStatistics {
     
     public boolean isSuccessRateGood() {
         // we want a large enough sample space.....
-        if (requested.get() < sampleSize.get())
+        if (requested.get() < sampleSize.get()) {
+            LOG.debug("Assuming OOB success rate is good");
             return true;
-        return (getSuccessRate() > MIN_SUCCESS_RATE);
+        }
+        boolean good = getSuccessRate() > MIN_SUCCESS_RATE; 
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("OOB success rate of " +
+                    getSuccessRate() + "% is " +
+                    (good ? "" : "not ") + "good"); 
+        }
+        return good;
     }
     
     public boolean isSuccessRateGreat() {
         // we want a large enough sample space.....
-        if (requested.get() < sampleSize.get())
+        if (requested.get() < sampleSize.get()) {
+            LOG.debug("Assuming OOB success rate is great");
             return true;
-        return (getSuccessRate() > PROXY_SUCCESS_RATE);
+        }
+        boolean great = getSuccessRate() > PROXY_SUCCESS_RATE;
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("OOB success rate of " +
+                    getSuccessRate() + "% is " +
+                    (great ? "" : "not ") + "great"); 
+        }
+        return great;
     }
     
     public boolean isSuccessRateTerrible() {
         // we want a large enough sample space.....
-        if (requested.get() < sampleSize.get())
+        if (requested.get() < sampleSize.get()) {
+            LOG.debug("Assuming OOB success rate is not terrible");
             return false;
-        return (getSuccessRate() < TERRIBLE_SUCCESS_RATE);
+        }
+        boolean terrible = getSuccessRate() < TERRIBLE_SUCCESS_RATE; 
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("OOB success rate of " +
+                    getSuccessRate() + "% is " +
+                    (terrible ? "" : "not ") + "terrible"); 
+        }
+        return terrible;
     }
     
     public boolean isOOBEffectiveForProxy() {
         if(SearchSettings.FORCE_OOB.getValue())
             return true;
-        return !((sent.get() > 40) && (requested.get() == 0));
+        boolean effective = !((sent.get() > 40) && (requested.get() == 0));
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Sent " + sent.get() + " queries, requested " +
+                    requested.get() + " responses, OOB is " +
+                    (effective ? "" : "not ") + "effective for proxying");
+        }
+        return effective;
     }
 
     public boolean isOOBEffectiveForMe() {
         if(SearchSettings.FORCE_OOB.getValue())
             return true;
-        return !((sent.get() > 20) && (requested.get() == 0));
+        boolean effective = !((sent.get() > 20) && (requested.get() == 0));
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Sent " + sent.get() + " queries, requested " +
+                    requested.get() + " responses, OOB is " +
+                    (effective ? "" : "not ") + "effective for me");
+        }
+        return effective;
     }
 
 }
