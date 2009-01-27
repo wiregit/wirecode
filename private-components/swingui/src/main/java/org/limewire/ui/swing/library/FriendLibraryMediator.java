@@ -49,6 +49,8 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     private EventList<RemoteFileItem> eventList;
     
     private final ListenerSupport<FriendEvent> availListeners;
+    
+    private final ShowLibraryListener showLibraryListener;
 
     @AssistedInject
     public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
@@ -66,6 +68,8 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         this.friendFileList = shareListManager.getOrCreateFriendShareList(friend);
         this.availListeners = availListeners;
         this.availListeners.addListener(this);
+        
+        showLibraryListener = new ShowLibraryListener();
         
         createEmptyCard();
         showEmptyCard();
@@ -102,6 +106,8 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         if(!disposed) {
             switch(libraryState) { 
             case FAILED_TO_LOAD:
+                if(this.eventList != null)
+                    this.eventList.remove(showLibraryListener);
                 this.eventList = null;
                 emptyPanelMessage.setMessageType(MessageTypes.LW_CONNECTION_ERROR);
                 if(!isSharingCardShown()) {
@@ -111,6 +117,8 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             case LOADED:
                 // must do this here also, may skip loading step all together
                 if(this.eventList != eventList) {
+                    if(this.eventList != null)
+                        this.eventList.remove(showLibraryListener);
                     this.eventList = eventList;
                 } 
                 if(eventList.size() == 0) {
@@ -120,13 +128,13 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                     }
                 } else {
                     setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
-                    if(isEmptyCardShown()) {
-                        super.showLibraryCard();
-                    }
+                    showLibrary();
                 }
                 break;
             case LOADING:
                 if(this.eventList != eventList) {
+                    if(this.eventList != null)
+                        this.eventList.remove(showLibraryListener);
                     this.eventList = eventList;
                 } 
                 if(eventList.size() == 0) {
@@ -134,14 +142,21 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 	                if(!isSharingCardShown()) {
 	                    showEmptyCard();
 	                }
+	                this.eventList.addListEventListener(showLibraryListener);
                 } else {
                     setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
-                    if(isEmptyCardShown()) {
-                        super.showLibraryCard();
-                    }
+                    showLibrary();
                 }
                 break;
             }
+        }
+    }
+    
+    private void showLibrary() {
+        if(isEmptyCardShown()) {
+            if(eventList != null)
+                eventList.remove(showLibraryListener);
+            super.showLibraryCard();
         }
     }
     
@@ -174,6 +189,8 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     
     @Override
     public void dispose() {
+        if(eventList != null)
+            eventList.removeListEventListener(showLibraryListener);
         availListeners.removeListener(this);
         super.dispose();
     }
@@ -184,6 +201,20 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     enum MessageTypes {
         OFFLINE, ONLINE, LW_LOADING, LW_NO_FILES, LW_CONNECTION_ERROR;
     };
+    
+    /**
+     * Listens to library loads. When first file from friend is displayed, show
+     * the library and remove this listener.
+     */
+    private class ShowLibraryListener implements ListEventListener<RemoteFileItem> {
+        @Override
+        public void listChanged(ListEvent<RemoteFileItem> listChanges) {
+            if(listChanges.getSourceList().size() > 0 ) {
+                showLibrary();
+                eventList.removeListEventListener(this);
+            }
+        }
+    }
     
     /**
 	 * Hover over message panel in the EmptyLibrary. This displays feedback to the user as to
