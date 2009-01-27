@@ -46,11 +46,6 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     public Class getColumnClass(int index) {
         return String.class;
     }
-    
-    @Override
-    public boolean isColumnHideable(int column) {
-        return true;
-    }
 
     public VisualSearchResult setColumnValue(
         VisualSearchResult vsr, Object value, int index) {
