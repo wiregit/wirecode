@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -134,6 +135,17 @@ public class DropDownListAutoCompleteControl {
                 PopupFactory pf = PopupFactory.getSharedInstance();
 				Component parent = textField;
 				JComponent component = autoCompleter.getRenderComponent();
+
+				// Adjust popup position for text field with painted border.
+                int leftInset = 0;
+				int bottomInset = 0;
+				int widthInset = 0;
+				if (textField instanceof Paintable) {
+				    Insets paintedInsets = ((Paintable) textField).getPaintedInsets();
+				    leftInset = paintedInsets.left;
+				    bottomInset = paintedInsets.bottom;
+                    widthInset = paintedInsets.left + paintedInsets.right;
+				}
 				
 		        // Null out our prior preferred size, then set a new one
 		        // that overrides the width to be the size we want it, but
@@ -141,7 +153,7 @@ public class DropDownListAutoCompleteControl {
 				Dimension priorPref = component.getPreferredSize();
 		        component.setPreferredSize(null);
 		        Dimension pref = component.getPreferredSize();
-		        pref = new Dimension(textField.getWidth(), pref.height+10);
+		        pref = new Dimension(textField.getWidth() - widthInset, pref.height+10);
 		        component.setPreferredSize(pref);
 		        if(popup != null && priorPref.equals(pref)) {
 		            return; // no need to change if sizes are same.
@@ -166,7 +178,8 @@ public class DropDownListAutoCompleteControl {
 				    popup.hide();
 				}
 				
-                popup = pf.getPopup(parent, component, origin.x, origin.y + textField.getHeight());
+                popup = pf.getPopup(parent, component, origin.x + leftInset, 
+                        origin.y + textField.getHeight() - bottomInset);
                 showPending = false;
                 popup.show();
             } else {
