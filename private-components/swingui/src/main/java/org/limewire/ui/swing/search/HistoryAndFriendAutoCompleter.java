@@ -8,7 +8,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.annotation.Resource;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComponent;
@@ -23,6 +22,7 @@ import javax.swing.border.Border;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.StringTrieSet;
 import org.limewire.ui.swing.components.AutoCompleter;
