@@ -16,9 +16,6 @@ class OutOfBandStatisticsImpl implements OutOfBandStatistics {
     private static final Log LOG = LogFactory.getLog(OutOfBandStatisticsImpl.class);
     
     private static final int SAMPLE_SIZE = 500;
-    private static final int MIN_SUCCESS_RATE = 60;
-    private static final int PROXY_SUCCESS_RATE = 80;
-    private static final int TERRIBLE_SUCCESS_RATE = 40;
     
     @InspectablePrimitive("oob sample size")
     private AtomicInteger sampleSize = new AtomicInteger(SAMPLE_SIZE);
@@ -71,7 +68,8 @@ class OutOfBandStatisticsImpl implements OutOfBandStatistics {
             LOG.debug("Assuming OOB success rate is good");
             return true;
         }
-        boolean good = getSuccessRate() > MIN_SUCCESS_RATE; 
+        int threshold = SearchSettings.OOB_SUCCESS_RATE_GOOD.getValue();
+        boolean good = getSuccessRate() > threshold;
         if(LOG.isDebugEnabled()) {
             LOG.debug("OOB success rate of " +
                     getSuccessRate() + "% is " +
@@ -86,7 +84,8 @@ class OutOfBandStatisticsImpl implements OutOfBandStatistics {
             LOG.debug("Assuming OOB success rate is great");
             return true;
         }
-        boolean great = getSuccessRate() > PROXY_SUCCESS_RATE;
+        int threshold = SearchSettings.OOB_SUCCESS_RATE_GREAT.getValue();
+        boolean great = getSuccessRate() > threshold;
         if(LOG.isDebugEnabled()) {
             LOG.debug("OOB success rate of " +
                     getSuccessRate() + "% is " +
@@ -101,7 +100,8 @@ class OutOfBandStatisticsImpl implements OutOfBandStatistics {
             LOG.debug("Assuming OOB success rate is not terrible");
             return false;
         }
-        boolean terrible = getSuccessRate() < TERRIBLE_SUCCESS_RATE; 
+        int threshold = SearchSettings.OOB_SUCCESS_RATE_TERRIBLE.getValue();
+        boolean terrible = getSuccessRate() < threshold; 
         if(LOG.isDebugEnabled()) {
             LOG.debug("OOB success rate of " +
                     getSuccessRate() + "% is " +
