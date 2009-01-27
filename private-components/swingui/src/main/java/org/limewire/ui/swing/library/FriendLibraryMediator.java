@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
@@ -124,7 +125,6 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                     }
                     registerEventListener();
                 } else {
-                    setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
                     showLibrary();
                 }
                 break;
@@ -140,7 +140,6 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 	                }
 	                registerEventListener();
                 } else {
-                    setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
                     showLibrary();
                 }
                 break;
@@ -157,6 +156,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     
     private void removeEventListener() {
         if(eventList != null && showLibraryListener != null) {
+            showLibraryListener.cancelled = true;
             eventList.remove(showLibraryListener);
             showLibraryListener = null;
         }
@@ -165,6 +165,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     private void showLibrary() {
         if(isEmptyCardShown()) {
             removeEventListener();
+            setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
             super.showLibraryCard();
         }
     }
@@ -215,11 +216,20 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
      * the library and remove this listener.
      */
     private class ShowLibraryListener implements ListEventListener<RemoteFileItem> {
+        private boolean cancelled = false;
+        
         @Override
         public void listChanged(ListEvent<RemoteFileItem> listChanges) {
             if(listChanges.getSourceList().size() > 0 ) {
-                showLibrary();
-                removeEventListener();
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!cancelled) {
+                            showLibrary();
+                            removeEventListener();
+                        }
+                    }
+                });
             }
         }
     }
