@@ -14,6 +14,7 @@ import org.limewire.io.IpPort;
 import org.limewire.net.SocketsManager.ConnectType;
 
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
@@ -28,11 +29,21 @@ import com.limegroup.gnutella.version.UpdateInformation;
  * The command-line UI for the Gnutella servent.
  */
 public class Main {
+    
+    @Inject private LifecycleManager lifecycleManager;
+    @Inject private NetworkManager networkManager;
+    @Inject private ConnectionServices connectionServices;
+    @Inject private SearchServices searchServices;
+    
+    
     public static void main(String args[]) {
         Injector injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(MainCallback.class));
-        LimeWireCore core = injector.getInstance(LimeWireCore.class);
-        core.getLifecycleManager().start();        
-        NetworkManager networkManager = core.getNetworkManager();
+        Main main = injector.getInstance(Main.class);
+        main.start();
+    }
+    
+    private void start() {
+        lifecycleManager.start();
         
         System.out.println("For a command list type help.");
         BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
@@ -82,7 +93,7 @@ public class Main {
                         if (commands.length>=3)
                             port=Integer.parseInt(commands[2]);
                         System.out.println("Connecting...");
-                        core.getConnectionServices().connectToHostAsynchronously(commands[1], port, ConnectType.PLAIN);
+                        connectionServices.connectToHostAsynchronously(commands[1], port, ConnectType.PLAIN);
                     } catch (NumberFormatException e) {
                         System.out.println("Please specify a valid port.");
                     }
@@ -91,7 +102,6 @@ public class Main {
                     int i=command.indexOf(' ');
                     assert(i!=-1 && i<command.length());
                     String query=command.substring(i+1);
-                    SearchServices searchServices = core.getSearchServices();
                     searchServices.query(searchServices.newQueryGUID(), query);
                 } else if (commands.length==2 && commands[0].equals("listen")) {
                     try {
@@ -108,7 +118,7 @@ public class Main {
             }
         }
         System.out.println("Good bye.");
-        core.getLifecycleManager().shutdown(); //write gnutella.net
+        lifecycleManager.shutdown(); //write gnutella.net
     }
     
     /** Returns an array of strings containing the words of s, where

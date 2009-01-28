@@ -248,8 +248,6 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireContentAuthModule());
         binder().install(new LimeWireFiltersModule());
         
-        bind(LimeWireCore.class);
-        
         if(activityCallbackClass != null) {
             bind(ActivityCallback.class).to(activityCallbackClass);
         }        
