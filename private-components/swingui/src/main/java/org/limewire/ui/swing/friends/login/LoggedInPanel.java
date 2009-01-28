@@ -25,8 +25,8 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.StatusActions;
 import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.friends.AddFriendDialog;
 import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.painter.BarPainterFactory;
@@ -63,7 +63,7 @@ class LoggedInPanel extends JXPanel {
     @Resource private Color itemColor;
 
     @Inject
-    LoggedInPanel(LimeComboBoxFactory comboFactory,
+    LoggedInPanel(ComboBoxDecorator comboDecorator,
             FriendActions friendActions, BarPainterFactory barPainterFactory,
             ButtonDecorator buttonDecorator,
             StatusActions statusActions, XMPPService xmppService, IconLibrary iconLibrary) {
@@ -72,8 +72,10 @@ class LoggedInPanel extends JXPanel {
 
         this.friendActions = friendActions;
         this.iconLibrary = iconLibrary;
-        optionsBox = comboFactory.createMiniComboBox();
-        signoutBox = comboFactory.createMiniComboBox();
+        optionsBox = new LimeComboBox();
+        comboDecorator.decorateMiniComboBox(optionsBox);
+        signoutBox = new LimeComboBox();
+        comboDecorator.decorateMiniComboBox(signoutBox);
         statusMenuLabel = new JLabel();
         currentUser = new JLabel(iconLibrary.getOffline());
         loggingInLabel = new JLabel(I18n.tr("Signing in..."));

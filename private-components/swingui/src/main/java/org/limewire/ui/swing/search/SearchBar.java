@@ -32,8 +32,8 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.DropDownListAutoCompleteControl;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -71,7 +71,7 @@ public class SearchBar extends JXPanel {
     
     
     @Inject
-    public SearchBar(LimeComboBoxFactory comboBoxFactory, 
+    public SearchBar(ComboBoxDecorator comboBoxDecorator, 
             final FriendAutoCompleters friendLibraries,
             @Named("searchHistory") AutoCompleteDictionary searchHistory,
             CategoryIconManager categoryIconManager,
@@ -113,7 +113,8 @@ public class SearchBar extends JXPanel {
         
         programAction = progAction;
         
-        comboBox = comboBoxFactory.createLightFullComboBox(typeActions);
+        comboBox = new LimeComboBox(typeActions);
+        comboBoxDecorator.decorateLightFullComboBox(comboBox);
         comboBox.setName("SearchBar.comboBox");
                 
         searchField = new PromptTextField(I18n.tr("Search"));

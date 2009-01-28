@@ -25,8 +25,8 @@ import org.limewire.ui.swing.action.BackAction;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
@@ -46,7 +46,7 @@ import com.google.inject.Singleton;
 public class MainDownloadPanel extends JPanel {
 	
     private final ButtonDecorator buttonDecorator;
-    private final LimeComboBoxFactory comboBoxFactory;
+    private final ComboBoxDecorator comboBoxDecorator;
     
     public static final String NAME = "MainDownloadPanel";
 	private final CardLayout cardLayout;
@@ -126,14 +126,14 @@ public class MainDownloadPanel extends JPanel {
 	public MainDownloadPanel(AllDownloadPanelFactory allDownloadPanelFactory, 
 	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
 	        DownloadMediator downloadMediator,
-	        HeaderBarDecorator headerBarDecorator, LimeComboBoxFactory comboBoxFactory,
+	        HeaderBarDecorator headerBarDecorator, ComboBoxDecorator comboBoxFactory,
 	        ButtonDecorator buttonDecorator, DockIconFactory dockIconFactory,
 	        BackAction backAction) {
 	    
 	    
 		this.downloadMediator = downloadMediator;
 		this.buttonDecorator = buttonDecorator;
-		this.comboBoxFactory = comboBoxFactory;
+		this.comboBoxDecorator = comboBoxFactory;
 		
 		dock = dockIconFactory.createDockIcon();
 		
@@ -209,11 +209,12 @@ public class MainDownloadPanel extends JPanel {
 	}
 	
 	private void initHeader() {
-	    moreButton = new LimeComboBox();
 	    clearFinishedNowButton = new JXButton(clearFinishedNowAction);
-	    
 	    buttonDecorator.decorateDarkFullButton(clearFinishedNowButton);
-	    comboBoxFactory.decorateDarkMiniComboBox(moreButton, I18n.tr("more"));
+	    
+	    moreButton = new LimeComboBox();
+	    comboBoxDecorator.decorateDarkFullComboBox(moreButton);
+	    moreButton.setText(I18n.tr("more"));
 
 	    categoriseCheckBox = new JCheckBoxMenuItem(categorizeAction);
 	    clearFinishedCheckBox = new JCheckBoxMenuItem(clearFinishedAction);

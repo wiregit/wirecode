@@ -1,14 +1,13 @@
-package org.limewire.ui.swing.components;
+package org.limewire.ui.swing.components.decorators;
 
 import java.awt.Cursor;
-import java.util.List;
 
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.jdesktop.swingx.JXButton;
+import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -43,7 +42,7 @@ import com.google.inject.Singleton;
  *  
  */
 @Singleton
-public class LimeComboBoxFactory {
+public class ComboBoxDecorator {
     
     private final ButtonDecorator buttonDecorator;
     
@@ -54,63 +53,43 @@ public class LimeComboBoxFactory {
     @Resource private Icon darkFullIcon;
     
     @Inject
-    LimeComboBoxFactory(ButtonDecorator buttonDecorator) {
+    ComboBoxDecorator(ButtonDecorator buttonDecorator) {
         GuiUtils.assignResources(this);  
         
         this.buttonDecorator = buttonDecorator;        
     }
     
-    public LimeComboBox createDarkFullComboBox() {
-        return this.createDarkFullComboBox(null);
-    }
-    
-    public LimeComboBox createDarkFullComboBox(List<Action> items) {
-        LimeComboBox box = new LimeComboBox(items);
+    public void decorateDarkFullComboBox(JXButton box) {
         buttonDecorator.decorateDarkFullButton(box);
-        box.setIcon(this.darkFullIcon);
+        box.setIcon(darkFullIcon);
         box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
-        return box;
     }    
     
-    public LimeComboBox createDarkFullComboBox(List<Action> items, AccentType accentType) {
-        LimeComboBox box = new LimeComboBox(items);
+    /**
+     * Decorates a combo box in the default style however allows the
+     *  accent to be overridden.
+     */
+    public void decorateDarkFullComboBox(JXButton box, AccentType accentType) {
         buttonDecorator.decorateDarkFullButton(box, accentType);
-        box.setIcon(this.darkFullIcon);
+        box.setIcon(darkFullIcon);
         box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
-        return box;
     }
-        
     
-    public LimeComboBox createLightFullComboBox(List<Action> items) {
-        LimeComboBox box = new LimeComboBox(items);
+    public void decorateLightFullComboBox(JXButton box) {
         buttonDecorator.decorateLightFullButton(box);
-        box.setIcon(this.lightFullIcon);
+        box.setIcon(lightFullIcon);
         box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
-        return box;
     }
     
-    public LimeComboBox createMiniComboBox() {
-        return createMiniComboBox(null,null);
-    }
-    
-    public LimeComboBox createMiniComboBox(String promptText, List<Action> items) {
-        LimeComboBox box = new LimeComboBox(items);
-        this.decorateMiniComboBox(box, promptText);
-        return box;
-    }
-    
-    public void decorateDarkMiniComboBox(LimeComboBox box, String promptText) {
-        buttonDecorator.decorateDarkFullButton(box);
-        box.setIcon(this.darkFullIcon);
-        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
-        box.setText(promptText);
-    }
-    
-    public void decorateMiniComboBox(LimeComboBox box, String promptText) {
+    public void decorateMiniComboBox(JXButton box) {
         buttonDecorator.decorateMiniButton(box);
-        box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
+        box.setIcon(miniRegIcon);
+        box.setRolloverIcon(miniHoverIcon);
+        box.setPressedIcon(miniDownIcon);
         box.setBorder(BorderFactory.createEmptyBorder(2,6,3,15));
-        box.setText(promptText);
-        box.setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        
+        if (box instanceof LimeComboBox) {
+            ((LimeComboBox)box).setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
     }
 }

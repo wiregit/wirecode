@@ -283,14 +283,7 @@ public class LimeComboBox extends JXButton {
             }
         });
     }
-        
-    /** Sets the icons of the combobox when the button is rolled over, pressed, and normal. */
-    public void setIcons(Icon regular, Icon hover, Icon down) {
-        setIcon(regular);
-        setRolloverIcon(hover);
-        setPressedIcon(down);
-    }
-    
+
     @Override
     public Icon getRolloverIcon() {
         Icon icon = super.getRolloverIcon();

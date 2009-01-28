@@ -27,11 +27,11 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
@@ -72,7 +72,7 @@ class LoginPanel extends JXPanel implements SettingListener {
     @Inject
     LoginPanel(XMPPAccountConfigurationManager accountManager,
             XMPPService xmppService,
-            LimeComboBoxFactory comboFactory,
+            ComboBoxDecorator comboFactory,
             ButtonDecorator buttonDecorator,
             BarPainterFactory barPainterFactory,
             TextFieldDecorator textFieldDecorator) {
@@ -126,7 +126,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         }
     }
 
-    private void initComponents(LimeComboBoxFactory comboFactory, ButtonDecorator buttonDecorator,
+    private void initComponents(ComboBoxDecorator comboFactory, ButtonDecorator buttonDecorator,
             TextFieldDecorator textFieldDecorator, BarPainterFactory barPainterFactory) {
         
         JLabel titleLabel = new JLabel(tr("Sign in with"));
@@ -141,7 +141,9 @@ class LoginPanel extends JXPanel implements SettingListener {
             action.putValue(CONFIG, config);
             actions.add(action);
         }        
-        serviceComboBox = comboFactory.createDarkFullComboBox(actions, AccentType.NONE);
+        serviceComboBox = new LimeComboBox(actions);
+        comboFactory.decorateDarkFullComboBox(serviceComboBox, AccentType.NONE);
+        
         serviceComboBox.addSelectionListener(new LimeComboBox.SelectionListener() {
             @Override
             public void selectionChanged(Action item) {

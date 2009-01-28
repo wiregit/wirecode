@@ -38,10 +38,10 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
@@ -115,7 +115,7 @@ public class SortAndFilterPanel implements Disposable {
     private SettingListener viewTypeListener;
 
     @Inject
-    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory, TextFieldDecorator textFieldDecorator, 
+    SortAndFilterPanel(ComboBoxDecorator comboBoxDecorator, TextFieldDecorator textFieldDecorator, 
             ButtonDecorator buttonDecorator, HeaderBarDecorator headerBarFactory) {
         
         GuiUtils.assignResources(this);
@@ -128,7 +128,8 @@ public class SortAndFilterPanel implements Disposable {
         
         sortLabel.setFont(sortLabelFont);
         sortLabel.setForeground(Color.WHITE);
-        sortCombo = comboBoxFactory.createDarkFullComboBox();
+        sortCombo = new LimeComboBox();
+        comboBoxDecorator.decorateDarkFullComboBox(sortCombo);
         
         sizeSortCombo();
 
