@@ -28,7 +28,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeProgressBar;
-import org.limewire.ui.swing.components.LimeProgressBarFactory;
+import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -40,7 +40,7 @@ import com.google.inject.assistedinject.AssistedInject;
 public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell {
 
     private final CategoryIconManager categoryIconManager;
-    private final LimeProgressBarFactory progressBarFactory;
+    private final ProgressBarDecorator progressBarDecorator;
     
     private CardLayout statusViewLayout;
     private final static String FULL_LAYOUT = "Full download display";
@@ -81,12 +81,13 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     private ActionListener editorListener = null;
     
     @AssistedInject
-    public DownloadTableCellImpl(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory) {
+    public DownloadTableCellImpl(CategoryIconManager categoryIconManager,
+            ProgressBarDecorator progressBarDecorator) {
         
         GuiUtils.assignResources(this);
 
         this.categoryIconManager = categoryIconManager;
-        this.progressBarFactory = progressBarFactory;
+        this.progressBarDecorator = progressBarDecorator;
         
         initComponents();
     }
@@ -152,7 +153,8 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullStatusLabel.setFont(statusFontPlainFull);
         fullStatusLabel.setForeground(statusLabelColour);
         
-        fullProgressBar = progressBarFactory.create(0, 100);
+        fullProgressBar = new LimeProgressBar(0, 100);
+        progressBarDecorator.decoratePlain(fullProgressBar);        
         Dimension size = new Dimension(progressBarWidth, 16);
         fullProgressBar.setMaximumSize(size);
         fullProgressBar.setMinimumSize(size);

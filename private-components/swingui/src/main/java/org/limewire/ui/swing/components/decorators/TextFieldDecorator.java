@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.util;
+package org.limewire.ui.swing.components.decorators;
 
 import java.awt.Paint;
 
@@ -6,8 +6,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
-import org.limewire.ui.swing.components.LimePromptPasswordField;
-import org.limewire.ui.swing.components.LimePromptTextField;
+import org.limewire.ui.swing.components.PromptPasswordField;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.TextFieldPainterFactory;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 
@@ -28,7 +28,7 @@ public class TextFieldDecorator {
      * Decorates the specified text field using a background painter that 
      * includes an X icon to clear the field.
      */
-    public void decorateClearablePromptField(LimePromptTextField field, AccentType accent) {
+    public void decorateClearablePromptField(PromptTextField field, AccentType accent) {
         field.setBackgroundPainter(painterFactory.createClearableBackgroundPainter(field, accent));
         // Get installed border, and restore it at the end.  This has a larger
         // right margin to prevent text from running into the reset icon.
@@ -37,32 +37,32 @@ public class TextFieldDecorator {
         field.setBorder(border);
     }
     
-    public void decoratePromptField(LimePromptTextField field, AccentType accent, Paint border) {
+    public void decoratePromptField(PromptTextField field, AccentType accent, Paint border) {
         field.setBackgroundPainter(painterFactory.createBasicBackgroundPainter(accent, border));
         decorateGeneralText(field);
     }
     
-    public void decoratePromptField(LimePromptTextField field, AccentType accent) {
+    public void decoratePromptField(PromptTextField field, AccentType accent) {
         field.setBackgroundPainter(painterFactory.createBasicBackgroundPainter(accent));
         decorateGeneralText(field);
     }
    
-    public void decoratePromptField(LimePromptPasswordField field, AccentType accent, Paint border) {
+    public void decoratePromptField(PromptPasswordField field, AccentType accent, Paint border) {
         field.setBackgroundPainter(painterFactory.createBasicBackgroundPainter(accent, border));
         decorateGeneralPassword(field);
     }
     
-    public void decoratePromptField(LimePromptPasswordField field, AccentType accent) {
+    public void decoratePromptField(PromptPasswordField field, AccentType accent) {
         field.setBackgroundPainter(painterFactory.createBasicBackgroundPainter(accent));
         decorateGeneralPassword(field);
     }
     
-    private void decorateGeneralText(LimePromptTextField field) {
+    private void decorateGeneralText(PromptTextField field) {
         field.setPromptPainter(painterFactory.createBasicPromptPainter());
         decorateGeneral(field);
     }
     
-    private void decorateGeneralPassword(LimePromptPasswordField field) {
+    private void decorateGeneralPassword(PromptPasswordField field) {
         field.setPromptPainter(painterFactory.createBasicPromptPainter());
         decorateGeneral(field);
     }

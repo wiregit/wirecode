@@ -5,7 +5,7 @@ import java.awt.GradientPaint;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.ui.swing.components.LimeHeaderBar;
+import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
 
@@ -45,15 +45,15 @@ public class BarPainterFactory {
         GuiUtils.assignResources(this);
     }
     
-    public GenericBarPainter<LimeHeaderBar> createHeaderBarPainter() {
-        return new GenericBarPainter<LimeHeaderBar>(
+    public GenericBarPainter<HeaderBar> createHeaderBarPainter() {
+        return new GenericBarPainter<HeaderBar>(
             new GradientPaint(0,0,this.headerBarGradientTop,0,1,this.headerBarGradientBottom), 
             PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
             PainterUtils.TRASPARENT, PainterUtils.TRASPARENT);
     }
     
-    public GenericBarPainter<LimeHeaderBar> createSpecialHeaderBarPainter() {
-        return new GenericBarPainter<LimeHeaderBar>(
+    public GenericBarPainter<HeaderBar> createSpecialHeaderBarPainter() {
+        return new GenericBarPainter<HeaderBar>(
                 new GradientPaint(0,0, specialHeaderBarGradientTop,0,1, specialHeaderBarGradientBottom), 
                 specialHeaderBarTopBorder1, PainterUtils.TRASPARENT,
                 specialHeaderBarBottomBorder1, PainterUtils.TRASPARENT);

@@ -18,15 +18,15 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.ui.swing.action.BackAction;
+import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.components.LimeHeaderBar;
-import org.limewire.ui.swing.components.LimeHeaderBarFactory;
-import org.limewire.ui.swing.components.LimeProgressBarFactory;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.painter.TextShadowPainter;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.upload.table.UploadTable;
-import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 
@@ -38,8 +38,8 @@ public class UploadPanel extends JXPanel{
     
     public static final String NAME = "UploadPanel";
     private JXButton clearAllButton;
-    private LimeHeaderBar header;
-    private LimeHeaderBarFactory headerBarFactory;
+    private HeaderBar header;
+    private HeaderBarDecorator headerBarDecorator;
     
     private final Action clearAction = new AbstractAction(I18n.tr("Clear finished")) {
         @Override
@@ -52,15 +52,15 @@ public class UploadPanel extends JXPanel{
     private UploadListManager listManager;
     
     @Inject
-    public UploadPanel(UploadListManager listManager, LimeHeaderBarFactory headerBarFactory,
-            ButtonDecorator buttonDecorator, CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory, 
+    public UploadPanel(UploadListManager listManager, HeaderBarDecorator headerBarFactory,
+            ButtonDecorator buttonDecorator, CategoryIconManager categoryIconManager, ProgressBarDecorator progressBarFactory, 
             PropertiesFactory<UploadItem> propertiesFactory, LibraryNavigator libraryNavigator,
             BackAction backAction, LibraryManager libraryManager){
         super(new BorderLayout());
         
         this.listManager = listManager;
         this.buttonDecorator = buttonDecorator;
-        this.headerBarFactory = headerBarFactory;
+        this.headerBarDecorator = headerBarFactory;
 
         UploadTable table = new UploadTable(listManager, categoryIconManager, progressBarFactory, propertiesFactory, libraryNavigator, libraryManager);
         table.setTableHeader(null);
@@ -86,7 +86,10 @@ public class UploadPanel extends JXPanel{
         backButton.setRolloverEnabled(true);        
         headerTitlePanel.add(backButton, "gapafter 6, gapbottom 1");
         headerTitlePanel.add(titleTextLabel, "gapbottom 2");        
-        header = headerBarFactory.createBasic(headerTitlePanel, titleTextLabel);
+        
+        header = new HeaderBar(headerTitlePanel);
+        header.linkTextComponent(titleTextLabel);
+        headerBarDecorator.decorateBasic(header);
         
         clearAllButton = new JXButton(clearAction);  
         buttonDecorator.decorateDarkFullButton(clearAllButton);     

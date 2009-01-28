@@ -3,33 +3,32 @@ package org.limewire.ui.swing.components;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import org.jdesktop.swingx.painter.Painter;
 
-public class LimePromptTextField extends JTextField implements FocusListener, Paintable {
+public class PromptPasswordField extends JPasswordField implements FocusListener {
     
     private String promptText;
     
     private Painter<JTextField> backgroundPainter;
     private Painter<JTextField> promptPainter;
-    private Insets paintedInsets;
     
-    public LimePromptTextField() {
+    public PromptPasswordField() {
         this.init();
     }
     
   
-    public LimePromptTextField(String promptText) {
+    public PromptPasswordField(String promptText) {
         this.setPromptText(promptText);        
         this.init();
     }
 
-    public LimePromptTextField(String promptText, int columns) {
+    public PromptPasswordField(String promptText, int columns) {
         this.promptText = promptText;
         this.setColumns(columns);        
         init();
@@ -80,25 +79,10 @@ public class LimePromptTextField extends JTextField implements FocusListener, Pa
     }
     
     /**
-     * Returns the effective insets rendered by a custom painter.  This can be
-     * used to determine the actual dimensions as drawn on the screen.
-     */
-    @Override
-    public Insets getPaintedInsets() {
-        return (backgroundPainter == null) ? new Insets(0, 0, 0, 0) : paintedInsets;
-    }
-    
-    /**
      * Sets the background painter for this component
      */
     public void setBackgroundPainter(Painter<JTextField> painter) {
         this.backgroundPainter = painter;
-        
-        // Set painted insets.  For now, we assume that a non-null painter 
-        // visualizes the component with 1-pixel insets around the edges.
-        if (painter != null) {
-            paintedInsets = new Insets(1, 1, 1, 1);
-        }
     }
     
     /**
@@ -122,7 +106,7 @@ public class LimePromptTextField extends JTextField implements FocusListener, Pa
             
         super.paintComponent(g);
     
-        if (promptPainter != null && !hasFocus() && getText().isEmpty() && promptText != null) {
+        if (promptPainter != null && !hasFocus() && new String(getPassword()).isEmpty() && promptText != null) {
             promptPainter.paint((Graphics2D) g, this, getWidth(), getHeight());
         }
 

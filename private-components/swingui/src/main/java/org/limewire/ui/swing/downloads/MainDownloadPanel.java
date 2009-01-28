@@ -22,16 +22,16 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.BackAction;
+import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
-import org.limewire.ui.swing.components.LimeHeaderBar;
-import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.painter.TextShadowPainter;
-import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -56,7 +56,7 @@ public class MainDownloadPanel extends JPanel {
 	
 	private final DownloadMediator downloadMediator;
 	
-	private final LimeHeaderBar settingsPanel;
+	private final HeaderBar settingsPanel;
     
 	private LimeComboBox moreButton;
     private JXButton clearFinishedNowButton;
@@ -126,7 +126,7 @@ public class MainDownloadPanel extends JPanel {
 	public MainDownloadPanel(AllDownloadPanelFactory allDownloadPanelFactory, 
 	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
 	        DownloadMediator downloadMediator,
-	        LimeHeaderBarFactory headerBarFactory, LimeComboBoxFactory comboBoxFactory,
+	        HeaderBarDecorator headerBarDecorator, LimeComboBoxFactory comboBoxFactory,
 	        ButtonDecorator buttonDecorator, DockIconFactory dockIconFactory,
 	        BackAction backAction) {
 	    
@@ -165,7 +165,11 @@ public class MainDownloadPanel extends JPanel {
         backButton.setRolloverEnabled(true);        
         headerTitlePanel.add(backButton, "gapafter 6, gapbottom 1");
         headerTitlePanel.add(titleTextLabel, "gapbottom 2");        
-        settingsPanel = headerBarFactory.createBasic(headerTitlePanel, titleTextLabel);
+        
+        settingsPanel = new HeaderBar(headerTitlePanel);
+        settingsPanel.linkTextComponent(titleTextLabel);
+        headerBarDecorator.decorateBasic(settingsPanel);
+        
         this.initHeader();
 		add(settingsPanel, BorderLayout.NORTH);
 		

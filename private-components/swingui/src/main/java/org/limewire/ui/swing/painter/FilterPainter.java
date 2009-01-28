@@ -18,7 +18,7 @@ import javax.swing.text.Document;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.painter.RectanglePainter;
-import org.limewire.ui.swing.components.LimePromptTextField;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
@@ -68,7 +68,7 @@ public class FilterPainter<T> extends RectanglePainter<T>
     /**
      * Installs this painter on the specified text field. 
      */
-    public void install(LimePromptTextField textField) {
+    public void install(PromptTextField textField) {
         // Set default cursor.
         defaultCursor = textField.getCursor();
         

@@ -15,6 +15,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
@@ -25,22 +26,21 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.components.LimeCheckBox;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
-import org.limewire.ui.swing.components.LimePromptPasswordField;
-import org.limewire.ui.swing.components.LimePromptTextField;
+import org.limewire.ui.swing.components.PromptPasswordField;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
-import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
-import org.limewire.ui.swing.util.TextFieldDecorator;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -51,21 +51,18 @@ import com.google.inject.Singleton;
 @Singleton
 class LoginPanel extends JXPanel implements SettingListener {
 
-    // private static final Log LOG = LogFactory.getLog(LoginPanel.class);
-
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign in");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in ...");
-
     private static final String AUTHENTICATION_ERROR = tr("Incorrect username or password.");
     private static final String NETWORK_ERROR = tr("Network error.");
     
     private static final String CONFIG = "limewire.configProperty";
 
     private LimeComboBox serviceComboBox;
-    private LimePromptTextField serviceField;
-    private LimePromptTextField usernameField;
-    private LimePromptPasswordField passwordField;
-    private LimeCheckBox autoLoginCheckBox;
+    private PromptTextField serviceField;
+    private PromptTextField usernameField;
+    private PromptPasswordField passwordField;
+    private JCheckBox autoLoginCheckBox;
     private JLabel authFailedLabel;
     private JXButton signInButton;
     private final XMPPAccountConfigurationManager accountManager;
@@ -79,9 +76,12 @@ class LoginPanel extends JXPanel implements SettingListener {
             ButtonDecorator buttonDecorator,
             BarPainterFactory barPainterFactory,
             TextFieldDecorator textFieldDecorator) {
+        
+        GuiUtils.assignResources(this);
+        
         this.accountManager = accountManager;
         this.xmppService = xmppService;
-        GuiUtils.assignResources(this);
+
         SwingUiSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
         initComponents(comboFactory, buttonDecorator, textFieldDecorator, barPainterFactory);
     }
@@ -150,19 +150,19 @@ class LoginPanel extends JXPanel implements SettingListener {
         });
         ResizeUtils.looseForceHeight(serviceComboBox, 22);
         
-        serviceField = new LimePromptTextField(tr("Domain"));
+        serviceField = new PromptTextField(tr("Domain"));
         textFieldDecorator.decoratePromptField(serviceField, AccentType.NONE);
         
-        usernameField = new LimePromptTextField(tr("Username"));
+        usernameField = new PromptTextField(tr("Username"));
         textFieldDecorator.decoratePromptField(usernameField, AccentType.NONE);
-        passwordField = new LimePromptPasswordField(tr("Password"));
+        passwordField = new PromptPasswordField(tr("Password"));
         textFieldDecorator.decoratePromptField(passwordField, AccentType.NONE);
         passwordField.setAction(signinAction);
         
         ResizeUtils.forceSize(usernameField, new Dimension(139, 22));
         ResizeUtils.forceSize(passwordField, new Dimension(139, 22));
 
-        autoLoginCheckBox = new LimeCheckBox(tr("Remember me")); 
+        autoLoginCheckBox = new JCheckBox(tr("Remember me")); 
         autoLoginCheckBox.setSelected(SwingUiSettings.REMEMBER_ME_CHECKED.getValue());
         autoLoginCheckBox.addItemListener(new ItemListener() {
             @Override
@@ -177,7 +177,6 @@ class LoginPanel extends JXPanel implements SettingListener {
         });
         autoLoginCheckBox.setName("LoginPanel.autoLoginCheckBox");
         autoLoginCheckBox.setOpaque(false);
-        autoLoginCheckBox.setTextPainter(LimeCheckBox.NORMAL_TEXT_PAINTER);
 
         signInButton = new JXButton(signinAction);
         buttonDecorator.decorateDarkFullButton(signInButton, AccentType.NONE);
@@ -206,7 +205,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         add(serviceField, "gapbottom 8, hidemode 3, grow, wmin 0, wrap");
         add(usernameField, "gapbottom 8, grow, wrap");
         add(passwordField, "gapbottom 4, grow, wrap");
-        add(autoLoginCheckBox, "gapleft 1, gapbottom 3, wmin 0, wrap");
+        add(autoLoginCheckBox, "gapbottom 3, wmin 0, wrap");
         add(signInButton);
 
         setBackgroundPainter(barPainterFactory.createFriendsBarPainter());

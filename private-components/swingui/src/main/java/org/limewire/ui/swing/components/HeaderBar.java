@@ -13,10 +13,9 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.painter.TextShadowPainter;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
-public class LimeHeaderBar extends JXPanel {
+public class HeaderBar extends JXPanel {
     
     private final Component titleComponent;
     private final JPanel componentContainer;
@@ -27,19 +26,24 @@ public class LimeHeaderBar extends JXPanel {
      * The default height of components added to the
      *  content pane.  Accessed with setDefaultComponentHeight(int)  
      *  
-     * NOTE: When -1 no default will be set
+     * NOTE: When unset or -1 no default will be set
      */
     private int defaultCompHeight = -1;
 
-    public LimeHeaderBar() {
+    public HeaderBar() {
         this("");
     }
     
-    public LimeHeaderBar(String title) {
-        GuiUtils.assignResources(this);
-        
+    public HeaderBar(String title) {
+        this(title, true);
+    }
+    
+    public HeaderBar(String title, boolean hasShadow) {
         JXLabel headerLabel = new JXLabel(title);
-        headerLabel.setForegroundPainter(new TextShadowPainter());
+        
+        if (hasShadow) {
+            headerLabel.setForegroundPainter(new TextShadowPainter());
+        }
         
         this.titleComponent = headerLabel;
         this.componentContainer = new JPanel();
@@ -47,9 +51,7 @@ public class LimeHeaderBar extends JXPanel {
         init();
     }
     
-    public LimeHeaderBar(Component titleComponent) {
-        GuiUtils.assignResources(this);
-        
+    public HeaderBar(Component titleComponent) {
         this.titleComponent = titleComponent;
         this.componentContainer = new JPanel();
         
@@ -127,6 +129,10 @@ public class LimeHeaderBar extends JXPanel {
         if (titleTextComponent != null) {
             titleTextComponent.setText(text);
         }
+    }
+    
+    public String getText() {
+        return titleTextComponent == null ? "" : titleTextComponent.getText();
     }
     
     @Override

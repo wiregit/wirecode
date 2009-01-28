@@ -39,8 +39,9 @@ import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.components.LimeSliderBarFactory;
+import org.limewire.ui.swing.components.LimeSliderBar;
 import org.limewire.ui.swing.components.MarqueeButton;
+import org.limewire.ui.swing.components.decorators.SliderBarDecorator;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.painter.BorderPainter;
@@ -100,7 +101,7 @@ public class PlayerPanel extends JXPanel {
     private final JButton playButton;
     private final JButton pauseButton;
     private final JButton forwardButton;
-    private final JSlider progressSlider;
+    private final LimeSliderBar progressSlider;
     private final JPanel statusPanel;
     private final JButton volumeButton;
     
@@ -132,7 +133,8 @@ public class PlayerPanel extends JXPanel {
     private static final String VOLUME = "VOLUME";
 
     @Inject
-    public PlayerPanel(AudioPlayer player, LibraryNavigator libraryNavigator, LimeSliderBarFactory sliderBarFactory) {
+    public PlayerPanel(AudioPlayer player, LibraryNavigator libraryNavigator, 
+            SliderBarDecorator sliderBarDecorator) {
         this.player = player;
         this.libraryNavigator = libraryNavigator;
 
@@ -175,7 +177,8 @@ public class PlayerPanel extends JXPanel {
         volumeSlider = new JSlider(0,100);
         initVolumeControl();
         
-        progressSlider = sliderBarFactory.create();
+        progressSlider = new LimeSliderBar();
+        sliderBarDecorator.decoratePlain(progressSlider);
         initProgressControl();
         
         statusPanel = new JPanel(new MigLayout());

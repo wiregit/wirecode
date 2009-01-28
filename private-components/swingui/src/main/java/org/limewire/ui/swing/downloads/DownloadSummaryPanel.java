@@ -13,8 +13,8 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.ActionMap;
 import javax.swing.Icon;
@@ -45,7 +45,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeProgressBar;
-import org.limewire.ui.swing.components.LimeProgressBarFactory;
+import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.AbstractDownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
@@ -96,7 +96,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 
 	//private static final int LEFT_MARGIN = 25;
 
-	private final LimeProgressBarFactory progressBarFactory;
+	private final ProgressBarDecorator progressBarDecorator;
     private final Navigator navigator;
     private final TrayNotifier notifier;
 	
@@ -132,10 +132,11 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, DownloadMediator downloadMediator, MainDownloadPanel mainDownloadPanel, 
-	        Navigator navigator, LimeProgressBarFactory progressBarFactory, BarPainterFactory barPainterFactory, SaveLocationExceptionHandler saveLocationExceptionHandler,
+	        Navigator navigator, ProgressBarDecorator progressBarDecorator, BarPainterFactory barPainterFactory, SaveLocationExceptionHandler saveLocationExceptionHandler,
 	        DownloadActionHandler actionHandler, TrayNotifier notifier) {
+        
 	    this.navigator = navigator;        
-        this.progressBarFactory = progressBarFactory;
+        this.progressBarDecorator = progressBarDecorator;
         this.notifier = notifier;
         this.allList = downloadMediator.getDownloadList();
         this.downloadMediator = downloadMediator;
@@ -453,7 +454,9 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             nameLabel.setForeground(fontColor);
             nameLabel.setMaximumSize(new Dimension(nameLabelWidth, Integer.MAX_VALUE));
             
-			progressBar = progressBarFactory.create(0, 100);
+			progressBar = new LimeProgressBar(0, 100);
+			progressBarDecorator.decoratePlain(progressBar);
+			
 			Dimension size = new Dimension(173, 8);
             progressBar.setPreferredSize(size);
             progressBar.setMaximumSize(size);

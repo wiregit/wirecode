@@ -8,7 +8,7 @@ import javax.swing.JTextField;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.ui.swing.components.LimePromptTextField;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -51,7 +51,7 @@ public class TextFieldPainterFactory {
      * be clicked to clear the field, and is suitable for filter fields. 
      */
     public Painter<JTextField> createClearableBackgroundPainter(
-            LimePromptTextField textField, AccentType accentType) {
+            PromptTextField textField, AccentType accentType) {
         
         // Create filter painter.
         FilterPainter<JTextField> filterPainter = new FilterPainter<JTextField>(

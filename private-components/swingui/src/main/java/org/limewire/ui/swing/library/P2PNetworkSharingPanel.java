@@ -9,14 +9,14 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
-import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
-import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import com.google.inject.Inject;
 
@@ -29,7 +29,7 @@ public class P2PNetworkSharingPanel extends SharingPanel {
             IconManager iconManager,
             CategoryIconManager categoryIconManager,
             LibraryTableFactory tableFactory,
-            LimeHeaderBarFactory headerBarFactory,
+            HeaderBarDecorator headerBarFactory,
             ButtonDecorator buttonDecorator,
             GhostDragGlassPane ghostPane,
             TextFieldDecorator textFieldDecorator) {

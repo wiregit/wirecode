@@ -3,7 +3,7 @@ package org.limewire.ui.swing.upload.table;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
-import org.limewire.ui.swing.components.LimeProgressBarFactory;
+import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.LimeSingleColumnTableFormat;
@@ -17,7 +17,7 @@ public class UploadTable extends MouseableTable {
     private EventTableModel<UploadItem> model;
 
     public UploadTable(UploadListManager uploadListManager, CategoryIconManager categoryIconManager, 
-            LimeProgressBarFactory progressBarFactory, PropertiesFactory<UploadItem> propertiesFactory,
+            ProgressBarDecorator progressBarFactory, PropertiesFactory<UploadItem> propertiesFactory,
             LibraryNavigator libraryNavigator, LibraryManager libraryManager) {
         model = GlazedListsSwingFactory.eventTableModel(uploadListManager.getSwingThreadSafeUploads(), new LimeSingleColumnTableFormat<UploadItem>(UploadItem.class));
         setModel(model);

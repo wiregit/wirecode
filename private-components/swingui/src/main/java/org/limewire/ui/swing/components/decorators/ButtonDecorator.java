@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.util;
+package org.limewire.ui.swing.components.decorators;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -11,6 +11,7 @@ import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.painter.ButtonPainterFactory;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

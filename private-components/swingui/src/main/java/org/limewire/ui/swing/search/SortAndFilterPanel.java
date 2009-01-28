@@ -39,18 +39,18 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
-import org.limewire.ui.swing.components.LimeHeaderBarFactory;
-import org.limewire.ui.swing.components.LimePromptTextField;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingDelegateComparator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.settings.SwingUiSettings;
-import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.TextFieldDecorator;
 import org.limewire.util.CommonUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -98,7 +98,7 @@ public class SortAndFilterPanel implements Disposable {
     private final LimeComboBox sortCombo;
     
     private final JLabel sortLabel = new JLabel(tr("Sort by:"));
-    private final LimePromptTextField filterBox = new LimePromptTextField(tr("Refine results..."));
+    private final PromptTextField filterBox = new PromptTextField(tr("Refine results..."));
     private final JXButton listViewToggleButton = new JXButton();
     private final JXButton tableViewToggleButton = new JXButton();
     
@@ -116,7 +116,7 @@ public class SortAndFilterPanel implements Disposable {
 
     @Inject
     SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory, TextFieldDecorator textFieldDecorator, 
-            ButtonDecorator buttonDecorator, LimeHeaderBarFactory headerBarFactory) {
+            ButtonDecorator buttonDecorator, HeaderBarDecorator headerBarFactory) {
         
         GuiUtils.assignResources(this);
         

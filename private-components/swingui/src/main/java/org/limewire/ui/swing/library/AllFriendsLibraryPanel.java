@@ -10,15 +10,15 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
-import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -47,7 +47,7 @@ public class AllFriendsLibraryPanel extends AbstractFriendLibraryPanel {
                     LibraryTableFactory tableFactory,
                     DownloadListManager downloadListManager,
                     LibraryManager libraryManager,
-                    LimeHeaderBarFactory headerBarFactory,
+                    HeaderBarDecorator headerBarFactory,
                     ButtonDecorator buttonDecorator,
                     ShareListManager shareListManager,
                     GhostDragGlassPane ghostPane,

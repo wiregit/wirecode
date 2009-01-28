@@ -21,7 +21,8 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
-import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
@@ -31,7 +32,6 @@ import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -54,7 +54,7 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
                     LibraryTableFactory tableFactory,
                     DownloadListManager downloadListManager,
                     LibraryManager libraryManager,
-                    LimeHeaderBarFactory headerBarFactory,
+                    HeaderBarDecorator headerBarFactory,
                     GhostDragGlassPane ghostPane,
                     LibraryNavigator libraryNavigator,
                     TextFieldDecorator textFieldDecorator) {        

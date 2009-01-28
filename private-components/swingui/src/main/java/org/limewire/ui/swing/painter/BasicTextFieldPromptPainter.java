@@ -8,8 +8,8 @@ import javax.swing.JTextField;
 import javax.swing.text.BadLocationException;
 
 import org.jdesktop.swingx.painter.AbstractPainter;
-import org.limewire.ui.swing.components.LimePromptPasswordField;
-import org.limewire.ui.swing.components.LimePromptTextField;
+import org.limewire.ui.swing.components.PromptPasswordField;
+import org.limewire.ui.swing.components.PromptTextField;
 
 public class BasicTextFieldPromptPainter<X extends JTextField> extends AbstractPainter<X> {
 
@@ -48,11 +48,11 @@ public class BasicTextFieldPromptPainter<X extends JTextField> extends AbstractP
     }
     
     private static String getPromptText(Object object) {
-        if (object instanceof LimePromptTextField) {
-            return ((LimePromptTextField) object).getPromptText();
+        if (object instanceof PromptTextField) {
+            return ((PromptTextField) object).getPromptText();
         } 
-        else if (object instanceof LimePromptPasswordField) {
-            return ((LimePromptPasswordField) object).getPromptText();
+        else if (object instanceof PromptPasswordField) {
+            return ((PromptPasswordField) object).getPromptText();
         } 
         else {
             throw new IllegalArgumentException("Prompt painter does not yet support " + object.getClass());

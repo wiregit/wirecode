@@ -51,11 +51,12 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.components.LimeHeaderBar;
-import org.limewire.ui.swing.components.LimeHeaderBarFactory;
-import org.limewire.ui.swing.components.LimePromptTextField;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.MessageComponent;
+import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.SharingLibraryTransferHandler;
@@ -72,7 +73,6 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -97,7 +97,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                  FriendFileList friendFileList,
                  CategoryIconManager categoryIconManager,
                  LibraryTableFactory tableFactory,
-                 LimeHeaderBarFactory headerBarFactory,
+                 HeaderBarDecorator headerBarFactory,
                  GhostDragGlassPane ghostPane, Friend friend,
                  TextFieldDecorator textFieldDecorator) {
         super(headerBarFactory, textFieldDecorator);
@@ -121,7 +121,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     abstract String getShortPanelName();
         
     @Override
-    protected LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory) {
+    protected HeaderBar createHeaderBar(HeaderBarDecorator headerBarDecorator) {
         JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0, gap 0, fill, aligny center"));
         headerTitlePanel.setOpaque(false);
         
@@ -135,14 +135,16 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         headerTitlePanel.add(backButtonSlot);
         headerTitlePanel.add(titleTextLabel, "gapbottom 2");
         
-        LimeHeaderBar bar = headerBarFactory.createSpecial(headerTitlePanel, titleTextLabel);
+        HeaderBar bar = new HeaderBar(headerTitlePanel);
+        bar.linkTextComponent(titleTextLabel);
+        headerBarDecorator.decorateSpecial(bar);
                 
         return bar;
     }
     
     @Override
-    protected LimePromptTextField createFilterField(TextFieldDecorator decorator, String prompt) {
-        LimePromptTextField field = new LimePromptTextField(prompt);
+    protected PromptTextField createFilterField(TextFieldDecorator decorator, String prompt) {
+        PromptTextField field = new PromptTextField(prompt);
         decorator.decorateClearablePromptField(field, AccentType.GREEN_SHADOW);
         return field;
     }

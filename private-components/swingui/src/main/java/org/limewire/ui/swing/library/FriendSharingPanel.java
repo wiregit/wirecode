@@ -13,14 +13,14 @@ import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
-import org.limewire.ui.swing.util.TextFieldDecorator;
 
 import ca.odell.glazedlists.EventList;
 
@@ -45,7 +45,7 @@ public class FriendSharingPanel extends SharingPanel {
             IconManager iconManager,
             CategoryIconManager categoryIconManager,
             LibraryTableFactory tableFactory,
-            LimeHeaderBarFactory headerBarFactory,
+            HeaderBarDecorator headerBarFactory,
             GhostDragGlassPane ghostPane,
             TextFieldDecorator textFieldDecorator) {
 

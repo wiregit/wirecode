@@ -8,8 +8,8 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
