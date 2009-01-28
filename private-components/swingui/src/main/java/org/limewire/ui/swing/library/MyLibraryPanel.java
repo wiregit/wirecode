@@ -114,10 +114,12 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     
     private Timer repaintTimer;
     private ListenerSupport<XMPPConnectionEvent> connectionListeners;
-    private final ListenerSupport<FriendEvent> knownFriendsListeners;
-    
-    // set of known friends helps keep correct share numbers
-    private final Set<String> knownFriends;
+    private ListenerSupport<FriendEvent> knownFriendsListeners;
+
+    /**
+     * set of known friends helps keep correct share numbers
+     */
+    private final Set<String> knownFriends = new HashSet<String>();
 
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
@@ -131,7 +133,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                           GhostDragGlassPane ghostPane,
                           ListenerSupport<XMPPConnectionEvent> connectionListeners,
                           ShareListManager shareListManager,
-                          @Named("known") ListenerSupport<FriendEvent> knownFriendsListeners,
                           TextFieldDecorator textFieldDecorator) {
         
         super(headerBarFactory, textFieldDecorator);
@@ -158,10 +159,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         createMyCategories(libraryManager.getLibraryManagedList());
         selectFirstVisible();
 
-        this.knownFriends = new HashSet<String>();
         this.knownFriends.add(Friend.P2P_FRIEND_ID);
-        this.knownFriendsListeners = knownFriendsListeners;
-        this.knownFriendsListeners.addListener(this);
         getSelectionPanel().updateCollectionShares(knownFriends);
         
         addHeaderComponent(playerPanel, "cell 0 0, grow");
@@ -195,6 +193,13 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             }
         });
     }
+
+    @Inject
+    public void register(@Named("known") ListenerSupport<FriendEvent> knownFriendsListeners) {
+        this.knownFriendsListeners = knownFriendsListeners;
+        this.knownFriendsListeners.addListener(this);
+    }
+
 
     @Override
     public void handleEvent(FriendEvent event) {
