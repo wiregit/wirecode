@@ -357,8 +357,11 @@ public class ChatFriendListPane extends JPanel {
         Message message = event.getMessage();
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         ChatFriend chatFriend = idToFriendMap.get(message.getFriendID());
-        if (!chatFriend.isActiveConversation() && message.getType() != Type.Sent) {
+
+        if (message.getType() != Type.Sent) {
             chatFriend.setReceivingUnviewedMessages(true);
+        }
+        if (!chatFriend.isActiveConversation() && message.getType() != Type.Sent) {
             if (!friendTimerMap.containsKey(chatFriend)) {
                 AlternatingIconTimer iconTimer = new AlternatingIconTimer(chatFriend);
                 friendTimerMap.put(chatFriend, iconTimer);
@@ -423,11 +426,26 @@ public class ChatFriendListPane extends JPanel {
         friendTimerMap.remove(chatFriend);
     }
     
+    /**
+     * Marks the active conversation as having no unseen messages.
+     */
+    public void markActiveConversationRead() {
+        ChatFriend activeFriend = activeConversation.get();
+        if(activeFriend != null) {
+            activeFriend.setReceivingUnviewedMessages(false);
+        }
+    }
+    
     private Icon getChatIcon(ChatFriend chatFriend) {
         AlternatingIconTimer timer = friendTimerMap.get(chatFriend);
         if (timer != null) {
             return timer.getIcon();
         }
+        
+        if(!chatFriend.isActiveConversation() && chatFriend.isReceivingUnviewedMessages()) {
+            return icons.getUnviewedMessages();
+        }
+        
         //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally
         if (chatFriend.isChatting()) {
             return icons.getChatting();
