@@ -21,18 +21,26 @@ import com.limegroup.gnutella.downloader.DownloadStatusEvent;
  * DownloadSettings.RECENT_DOWNLOADS list.
  */
 public class RecentDownloadListener implements EventListener<DownloadStatusEvent> {
-    private static final int MAX_TRACKED_DOWNLOADS = 10;
+    private static final int DEFAULT_MAX_TRACKED_DOWNLOADS = 10;
 
     private final Downloader downloader;
+    private final int maxTrackedDownloads; 
 
-    public RecentDownloadListener(Downloader downloader) {
+    public RecentDownloadListener(Downloader downloader, int maxTrackedDownloads) {
+        assert maxTrackedDownloads > 0;
         this.downloader = Objects.nonNull(downloader, "downloader");
+        this.maxTrackedDownloads = maxTrackedDownloads;
+        
         if (downloader.getState() == DownloadStatus.COMPLETE) {
             if (downloader instanceof CoreDownloader) {
                 handleEvent(new DownloadStatusEvent((CoreDownloader) downloader,
                         DownloadStatus.COMPLETE));
             }
         }
+    }
+    
+    public RecentDownloadListener(Downloader downloader) {
+        this(downloader, DEFAULT_MAX_TRACKED_DOWNLOADS);
     }
 
     @Override
@@ -50,7 +58,7 @@ public class RecentDownloadListener implements EventListener<DownloadStatusEvent
                         }
                         files.add(saveFile);
                         Collections.sort(files, new FileDateLeastToMostRecentComparator());
-                        while(files.size() > MAX_TRACKED_DOWNLOADS) {
+                        while(files.size() > maxTrackedDownloads) {
                             files.remove(0);
                         }
                         DownloadSettings.RECENT_DOWNLOADS.setValue(new HashSet<File>(files));
