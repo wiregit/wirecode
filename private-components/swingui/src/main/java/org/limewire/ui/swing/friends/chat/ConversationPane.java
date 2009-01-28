@@ -184,7 +184,7 @@ public class ConversationPane extends JPanel implements Displayable {
         HTMLEditorKit editorKit = (HTMLEditorKit) editor.getEditorKit();
         editorKit.setAutoFormSubmission(false);
 
-        conversationScroll = new JScrollPane(editor, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        conversationScroll = new JScrollPane(editor, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         conversationScroll.setOpaque(false);
         conversationScroll.setBorder(BorderFactory.createEmptyBorder());
         

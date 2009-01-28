@@ -13,7 +13,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 public class MessageTextImpl extends AbstractMessageImpl implements MessageText {
 
-    private static final int MAX_LENGTH_PIXELS = 255;// smaller than chat window
+    private static final int MAX_LENGTH_PIXELS = 250;// smaller than chat window
                                                      // width to account for
                                                      // non-fixed width fonts
 

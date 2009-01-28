@@ -93,7 +93,7 @@ public class ChatDocumentBuilderTest extends TestCase {
     
     public void testBuildChatTextForALargeMessage() {
         StringBuilder conversation = new StringBuilder();
-        conversation.append("<div class=\"them\">you:</div><a href=\"http://gooooooooooooooooooooooooooooooooooooooooooooooooooooooooogle.com/\">http://goooooooooooooooooooooooooooo<wbr>ooooooooooooooooooooooooooooogle.com<wbr>/<wbr></a><br/><br/>")
+        conversation.append("<div class=\"them\">you:</div><a href=\"http://gooooooooooooooooooooooooooooooooooooooooooooooooooooooooogle.com/\">http://gooooooooooooooooooooooooooo<wbr>oooooooooooooooooooooooooooooogle.c<wbr>om/<wbr></a><br/><br/>")
                     .append("<div class=\"me\">me:</div>wow cool link<br/><br/>")
                     .append("<div class=\"them\">you:</div>yeah I can't beleive it is an actual site.<br/>");
         
