@@ -91,9 +91,11 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
     @Override
     public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isLeftMouseButton(e)) {
-            SortOrder sortOrder = getSortOrder(table, table.getSortedColumn().getModelIndex());
-    
-            setSortedColumn(table.getSortedColumn().getModelIndex(), sortOrder.isAscending());
+            TableColumn column = table.getSortedColumn();
+            if(column != null) {
+                SortOrder sortOrder = getSortOrder(table, column.getModelIndex());
+                setSortedColumn(column.getModelIndex(), sortOrder.isAscending());
+            }
         }
     }
     
