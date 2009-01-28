@@ -27,15 +27,7 @@ class URLWrapper {
             int startIndex = result.start();
             bldr.append(input.substring(index, startIndex));
             String url = result.group();
-            bldr.append("<a href=\"");
-            if (url.matches("magnet://.*")) {
-                //no-op guard to prevent appending http://
-            } else if (!url.matches("http[s]?://.*")) {
-                bldr.append("http://");
-            }
-            bldr.append(url).append("\">");
-            bldr.append(url);
-            bldr.append("</a>");
+            bldr.append(createAnchorTag(url, url));
             index = matcher.end();
 
             LOG.debugf("Start: {0} url: {1} end: {2}", startIndex, url, matcher.end());
@@ -46,6 +38,25 @@ class URLWrapper {
         String message = bldr.toString();
         LOG.debugf("Transformed message: {0}", message);
         return message;
+    }
+    
+    public static boolean isURL(String input) {
+        Matcher matcher = getRegex().matcher(input);
+        return matcher.matches();
+    }
+    
+    public static String createAnchorTag(String url, String text) {
+        StringBuilder bldr = new StringBuilder();
+        bldr.append("<a href=\"");
+        if (url.matches("magnet://.*")) {
+            //no-op guard to prevent appending http://
+        } else if (!url.matches("http[s]?://.*")) {
+            bldr.append("http://");
+        }
+        bldr.append(url).append("\"> ");
+        bldr.append(text);
+        bldr.append(" </a>");
+        return bldr.toString();
     }
     
     private static Pattern getRegex() {
