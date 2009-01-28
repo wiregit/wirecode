@@ -13,7 +13,9 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 public class MessageTextImpl extends AbstractMessageImpl implements MessageText {
 
-    private static final int MAX_LENGTH_PIXELS = 255;//smaller than chat window width to account for non-fixed width fonts
+    private static final int MAX_LENGTH_PIXELS = 255;// smaller than chat window
+                                                     // width to account for
+                                                     // non-fixed width fonts
 
     private final String message;
 
@@ -57,16 +59,21 @@ public class MessageTextImpl extends AbstractMessageImpl implements MessageText 
             StringBuffer brokenString = new StringBuffer();
             String[] brokenTokens = breakString(token);
             for (int i = 0; i < brokenTokens.length; i++) {
-                brokenString.append(brokenTokens[i]).append("<wbr>");
+                brokenString.append(brokenTokens[i]);
+                if (brokenTokens.length > 1) {
+                    brokenString.append("<wbr>");
+                }
             }
             // if the string is a url make sure to wrap it in an anchor tag
             if (isURL) {
-                htmlString.append(URLWrapper.createAnchorTag(token, brokenString.toString()));
+                htmlString.append(URLWrapper.createAnchorTag(token, brokenString.toString().trim()));
             } else {
                 htmlString.append(brokenString.toString());
             }
 
-            htmlString.append(" ");
+            if(stringTokenizer.hasMoreTokens()) {
+                htmlString.append(" ");
+            }
         }
         return htmlString.toString();
     }
@@ -76,9 +83,8 @@ public class MessageTextImpl extends AbstractMessageImpl implements MessageText 
      * MAX_LENGTH_PIXELS wide.
      */
     private String[] breakString(String token) {
-        int pixelWidth1Character = getPixelWidth(new String(new char[] { token.charAt(0) }),
-                textFont);
-        int maxCharacters = (MAX_LENGTH_PIXELS / pixelWidth1Character);
+        // TODO update to support full string
+        int maxCharacters = getMaxCharacters(token);
         List<String> brokenStrings = new ArrayList<String>();
         int index = 0;
         int length = token.length();
@@ -95,12 +101,19 @@ public class MessageTextImpl extends AbstractMessageImpl implements MessageText 
         return brokenStrings.toArray(new String[brokenStrings.size()]);
     }
 
+    private int getMaxCharacters(String token) {
+        int pixelWidth1Character = getAverageCharacterWidthInString(token, textFont);
+        return (MAX_LENGTH_PIXELS / pixelWidth1Character);
+    }
+
     /**
      * Returns the width of the message in the given font and editor kit.
      */
-    private int getPixelWidth(String text, Font font) {
+    private int getAverageCharacterWidthInString(String text, Font font) {
+        //TODO optimize
         StyleSheet css = new StyleSheet();
         FontMetrics fontMetrics = css.getFontMetrics(font);
-        return fontMetrics.stringWidth(text);
+        int averageCharacterWidthForFont = (int)Math.ceil((fontMetrics.stringWidth(text) /(double) text.length()));
+        return averageCharacterWidthForFont;
     }
 }

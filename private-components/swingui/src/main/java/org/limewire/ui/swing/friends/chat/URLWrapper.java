@@ -53,9 +53,9 @@ class URLWrapper {
         } else if (!url.matches("http[s]?://.*")) {
             bldr.append("http://");
         }
-        bldr.append(url).append("\"> ");
+        bldr.append(url).append("\">");
         bldr.append(text);
-        bldr.append(" </a>");
+        bldr.append("</a>");
         return bldr.toString();
     }
     

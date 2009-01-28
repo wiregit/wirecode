@@ -47,7 +47,7 @@ public class ChatDocumentBuilderTest extends TestCase {
     public void testBuildChatTextForExternallyInitiatedConversationWhenTheyAreTyping() {
         StringBuilder conversation = new StringBuilder();
         conversation.append("<div class=\"them\">you:</div>heynow<br/>")
-                    .append("<div class=\"typing\">you is typing a message...</div><br/>");
+                    .append("<div class=\"typing\">you is typing...</div><br/>");
         compareOutput(conversation.toString(), ChatState.composing, 
                 new Type[] {Type.Received},  
                 new String[] {"heynow"});
@@ -89,6 +89,17 @@ public class ChatDocumentBuilderTest extends TestCase {
         compareOutput(conversation.toString(), ChatState.active, 
                 new Type[] {Type.Received, Type.Sent, Type.Received}, 
                 new String[] {"heynow", "yo", "fooey"});
+    }
+    
+    public void testBuildChatTextForALargeMessage() {
+        StringBuilder conversation = new StringBuilder();
+        conversation.append("<div class=\"them\">you:</div><a href=\"http://gooooooooooooooooooooooooooooooooooooooooooooooooooooooooogle.com/\">http://goooooooooooooooooooooooooooo<wbr>ooooooooooooooooooooooooooooogle.com<wbr>/<wbr></a><br/><br/>")
+                    .append("<div class=\"me\">me:</div>wow cool link<br/><br/>")
+                    .append("<div class=\"them\">you:</div>yeah I can't beleive it is an actual site.<br/>");
+        
+        compareOutput(conversation.toString(), ChatState.active, 
+                new Type[] {Type.Received, Type.Sent, Type.Received}, 
+                new String[] {"http://gooooooooooooooooooooooooooooooooooooooooooooooooooooooooogle.com/", "wow cool link", "yeah I can't beleive it is an actual site."});
     }
 
     public void testBuildChatTextForMessagesISendMoreThan60SecondsApart() {
