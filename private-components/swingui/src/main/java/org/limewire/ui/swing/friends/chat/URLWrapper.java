@@ -1,47 +1,13 @@
 package org.limewire.ui.swing.friends.chat;
 
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
-
 class URLWrapper {
-    private static final Log LOG = LogFactory.getLog(URLWrapper.class);
     private static Pattern REGEX;
-
-    /**
-     * This method uses a regular expression to detect URLs in the input text and wraps
-     * them in an HTML anchor link.  foo.com -> &lt;a href="http://foo.com"&gt;foo.com&lt;/a&gt;
-     * @param input String that may contain URLs
-     * @return HTML encoded version of the input string
-     */
-    public static String wrap(String input) {
-        Matcher matcher = getRegex().matcher(input);
-        StringBuilder bldr = new StringBuilder();
-        int index = 0;
-        while (matcher.find()) {
-            MatchResult result = matcher.toMatchResult();
-
-            int startIndex = result.start();
-            bldr.append(input.substring(index, startIndex));
-            String url = result.group();
-            bldr.append(createAnchorTag(url, url));
-            index = matcher.end();
-
-            LOG.debugf("Start: {0} url: {1} end: {2}", startIndex, url, matcher.end());
-        }
-        
-        bldr.append(input.substring(index, input.length()));
-
-        String message = bldr.toString();
-        LOG.debugf("Transformed message: {0}", message);
-        return message;
-    }
     
     public static boolean isURL(String input) {
-        Matcher matcher = getRegex().matcher(input);
+        Matcher matcher = getRegex().matcher(input.toLowerCase());
         return matcher.matches();
     }
     
