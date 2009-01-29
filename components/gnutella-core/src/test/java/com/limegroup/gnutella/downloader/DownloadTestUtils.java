@@ -14,7 +14,7 @@ public class DownloadTestUtils {
     
     /** Waits 1 second for the given state. */
     public static void waitForState(Downloader downloader, DownloadState state) throws Exception {
-        waitForState(downloader, state, 1, TimeUnit.SECONDS);
+        waitForState(downloader, state, 2, TimeUnit.SECONDS);
     }
     
     /** Waits the duration for the given state. */
@@ -25,11 +25,12 @@ public class DownloadTestUtils {
             Thread.sleep(50);
             timeout -= System.currentTimeMillis() - now;
         }
+        AssertComparisons.assertEquals(state, downloader.getState());
     }
     
     /** Waits for the given state, only allowing the allowed states while waiting. */
     public static void strictWaitForState(Downloader downloader, DownloadState state, DownloadState... allowed) throws Exception {
-        strictWaitForState(downloader, state, 1, TimeUnit.SECONDS, allowed);
+        strictWaitForState(downloader, state, 2, TimeUnit.SECONDS, allowed);
     }
     
     /** Waits the duration for the given state, only allowing the allowed states while waiting. */
@@ -52,6 +53,7 @@ public class DownloadTestUtils {
             Thread.sleep(200);
             timeout -= System.currentTimeMillis() - now;
         }
+        AssertComparisons.assertEquals(state, downloader.getState());
     }
 
 }

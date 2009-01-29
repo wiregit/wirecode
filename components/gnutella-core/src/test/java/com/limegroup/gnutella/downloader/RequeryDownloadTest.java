@@ -9,7 +9,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -269,30 +271,14 @@ public class RequeryDownloadTest extends LimeTestCase {
         assertTrue(downloader instanceof ResumeDownloader);
         assertEquals(DownloadState.QUEUED,downloader.getState());
         
-        int counts = 0;
-		// Make sure that you are through the QUEUED state.
-        while (downloader.getState() == DownloadState.QUEUED) {
-            Thread.sleep(100);
-            if(counts++ > 50)
-                fail("took too long, state: " + downloader.getState());
-		}
-        
-        assertEquals("downloader isn't waiting for user", 
-                DownloadState.WAITING_FOR_USER, downloader.getState());
-        
+        DownloadTestUtils.strictWaitForState(downloader, DownloadState.WAITING_FOR_USER, DownloadState.QUEUED);
+        messageRouter.broadcastLatch = new CountDownLatch(1);
         downloader.resume();
-        
-        //give the downloading thread time to change states
-        Thread.sleep(1000);
-        
-        assertEquals("downloader isn't waiting for results", 
-                DownloadState.WAITING_FOR_GNET_RESULTS, downloader.getState());
-
-        // no need to do a dldr.resume() cuz ResumeDownloaders spawn the query
-        // automatically
+        DownloadTestUtils.strictWaitForState(downloader, DownloadState.WAITING_FOR_GNET_RESULTS, DownloadState.QUEUED, DownloadState.GAVE_UP);
 
         //Check that we can get query of right type.
         //TODO: try resume without URN
+        assertTrue(messageRouter.broadcastLatch.await(1, TimeUnit.SECONDS));
         assertEquals("unexpected router.broadcasts size", 1, messageRouter.broadcasts.size());
         Object m=messageRouter.broadcasts.get(0);
         assertInstanceof("m should be a query request", QueryRequest.class, m);
@@ -328,31 +314,20 @@ public class RequeryDownloadTest extends LimeTestCase {
         messageRouter.handleQueryReply(reply, managedConnectionFactory.createRoutedConnection("1.2.3.4", PORT));
 
         //Make sure the downloader does the right thing with the response.
-        Thread.sleep(2000);
-        counts = 0;
         if (shouldDownload) {
-            //a) Match: wait for download to start, then complete.
-            while (downloader.getState()!=DownloadState.COMPLETE) {            
-			    if ( downloader.getState() != DownloadState.CONNECTING &&
-			         downloader.getState() != DownloadState.HASHING &&
-			         downloader.getState() != DownloadState.SAVING )
-                    assertEquals(DownloadState.DOWNLOADING, downloader.getState());
-                Thread.sleep(500);
-                if(counts++ > 60)
-                    fail("took too long, state: " + downloader.getState());
-            }
-        } 
-        else {
+            DownloadTestUtils.strictWaitForState(downloader, DownloadState.COMPLETE, 30, TimeUnit.SECONDS, DownloadState.WAITING_FOR_GNET_RESULTS, DownloadState.CONNECTING, DownloadState.HASHING, DownloadState.SAVING, DownloadState.DOWNLOADING);
+        } else {
             //b) No match: keep waiting for results
-            assertEquals("downloader should wait for user", 
-                    DownloadState.WAITING_FOR_GNET_RESULTS, downloader.getState());
+            Thread.sleep(2000); // sleep a bit and make sure nothing happened in the meantime.
+            assertEquals("downloader should wait for user", DownloadState.WAITING_FOR_GNET_RESULTS, downloader.getState());
             downloader.stop(false);
         }
     }
     
     @Singleton
     private static class TestMessageRouter extends MessageRouterStub {        
-        private List<QueryRequest> broadcasts=Collections.synchronizedList(new LinkedList<QueryRequest>());
+        private volatile CountDownLatch broadcastLatch;
+        private final List<QueryRequest> broadcasts=Collections.synchronizedList(new LinkedList<QueryRequest>());
         
         @Inject
         public TestMessageRouter(NetworkManager networkManager,
@@ -412,6 +387,9 @@ public class RequeryDownloadTest extends LimeTestCase {
         
         @Override
         public void sendDynamicQuery(QueryRequest query) {
+            if(broadcastLatch != null) {
+                broadcastLatch.countDown();
+            }
             broadcasts.add(query);
             super.sendDynamicQuery(query); //add GUID to route table
         }
