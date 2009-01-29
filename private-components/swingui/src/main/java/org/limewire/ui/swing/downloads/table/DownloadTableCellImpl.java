@@ -529,7 +529,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
                     "Waiting - {0} in line",
                     item.getQueuePosition(), item.getQueuePosition());
         default:
-            throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
+            return null;
         }
         
     }

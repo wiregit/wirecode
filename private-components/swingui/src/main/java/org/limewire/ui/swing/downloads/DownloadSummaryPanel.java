@@ -614,7 +614,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                         "Waiting - {0} in line",
                         item.getQueuePosition(), item.getQueuePosition());
             default:
-                throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
+                return null;
             }            
         }
         
