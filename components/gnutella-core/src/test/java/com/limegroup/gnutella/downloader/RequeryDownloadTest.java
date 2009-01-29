@@ -277,6 +277,11 @@ public class RequeryDownloadTest extends LimeTestCase {
                 fail("took too long, state: " + downloader.getState());
 		}
         
+        assertEquals("downloader isn't waiting for user", 
+                DownloadStatus.WAITING_FOR_USER, downloader.getState());
+        
+        downloader.resume();
+        
         //give the downloading thread time to change states
         Thread.sleep(1000);
         
