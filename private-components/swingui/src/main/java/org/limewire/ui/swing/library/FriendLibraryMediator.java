@@ -159,7 +159,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             if(cancel) {
                 showLibraryListener.cancelled = true;
             }
-            eventList.remove(showLibraryListener);
+            eventList.removeListEventListener(showLibraryListener);
             showLibraryListener = null;
         }
     }
