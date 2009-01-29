@@ -60,7 +60,7 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.painter.BarPainterFactory;
+import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.table.TableColumnDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.tray.Notification;

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.painter;
+package org.limewire.ui.swing.painter.factories;
 
 import javax.swing.JComponent;
 import javax.swing.JProgressBar;

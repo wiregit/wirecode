@@ -8,8 +8,8 @@ import javax.swing.border.Border;
 
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
-import org.limewire.ui.swing.painter.TextFieldPainterFactory;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.painter.factories.TextFieldPainterFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

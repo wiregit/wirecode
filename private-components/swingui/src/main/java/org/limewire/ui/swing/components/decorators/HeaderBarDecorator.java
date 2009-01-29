@@ -6,7 +6,7 @@ import java.awt.Font;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.HeaderBar;
-import org.limewire.ui.swing.painter.BarPainterFactory;
+import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;

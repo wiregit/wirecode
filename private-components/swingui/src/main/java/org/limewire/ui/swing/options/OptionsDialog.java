@@ -29,7 +29,7 @@ import org.limewire.ui.swing.options.actions.ApplyOptionAction;
 import org.limewire.ui.swing.options.actions.CancelOptionAction;
 import org.limewire.ui.swing.options.actions.HelpAction;
 import org.limewire.ui.swing.options.actions.TabAction;
-import org.limewire.ui.swing.painter.BarPainterFactory;
+import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;

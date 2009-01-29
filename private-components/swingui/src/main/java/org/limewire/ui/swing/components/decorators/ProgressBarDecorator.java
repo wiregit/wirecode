@@ -11,7 +11,7 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.components.LimeProgressBar;
 import org.limewire.ui.swing.painter.ProgressBarForegroundPainter;
-import org.limewire.ui.swing.painter.ProgressPainterFactory;
+import org.limewire.ui.swing.painter.factories.ProgressPainterFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.painter;
+package org.limewire.ui.swing.painter.factories;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
@@ -8,6 +8,8 @@ import javax.swing.JProgressBar;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.painter.AbstractPainter;
+import org.limewire.ui.swing.painter.ProgressBarBackgroundPainter;
+import org.limewire.ui.swing.painter.ProgressBarForegroundPainter;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
 

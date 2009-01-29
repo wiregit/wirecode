@@ -8,9 +8,9 @@ import javax.swing.BorderFactory;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.ui.swing.painter.ButtonPainterFactory;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
+import org.limewire.ui.swing.painter.factories.ButtonPainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;

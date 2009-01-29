@@ -1,9 +1,10 @@
-package org.limewire.ui.swing.painter;
+package org.limewire.ui.swing.painter.factories;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.painter.SearchTabPainter;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;

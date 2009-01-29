@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.painter;
+package org.limewire.ui.swing.painter.factories;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -9,6 +9,10 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.painter.BasicTextFieldBackgroundPainter;
+import org.limewire.ui.swing.painter.BasicTextFieldPromptPainter;
+import org.limewire.ui.swing.painter.BorderPainter;
+import org.limewire.ui.swing.painter.FilterPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 
