@@ -152,7 +152,6 @@ public class ConversationPane extends JPanel implements Displayable {
     private final JScrollPane conversationScroll;
     private final JPanel chatWrapper;
     
-    
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
                             ShareListManager libraryManager, IconManager iconManager, LibraryNavigator libraryNavigator,
@@ -232,12 +231,15 @@ public class ConversationPane extends JPanel implements Displayable {
             }
         });
         
-        conversationScroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+        AdjustmentListener adjustmentListener = new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
                 chatWrapper.repaint();
             }
-        });
+        };
+        
+        conversationScroll.getVerticalScrollBar().addAdjustmentListener(adjustmentListener);
+        conversationScroll.getHorizontalScrollBar().addAdjustmentListener(adjustmentListener);
         
         add(chatWrapper, BorderLayout.CENTER);
 
