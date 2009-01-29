@@ -101,6 +101,7 @@ public class DaapManagerImplTest extends BaseTestCase {
             } catch (ConnectException e) {
                 // expected
             }
+            assertFalse(daapServer.isServerRunning());
         } finally {
             if (writer != null) {
                 try {
