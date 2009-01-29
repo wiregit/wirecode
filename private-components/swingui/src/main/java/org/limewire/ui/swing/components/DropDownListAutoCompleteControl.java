@@ -3,7 +3,6 @@ package org.limewire.ui.swing.components;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -13,15 +12,15 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
-import javax.swing.Popup;
-import javax.swing.PopupFactory;
 import javax.swing.SwingUtilities;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.limewire.ui.swing.components.AutoCompleter.AutoCompleterCallback;
-import org.limewire.util.OSUtils;
 
 
 /** A DropDown list of autocompletable items for a JTextField. */
@@ -36,7 +35,7 @@ public class DropDownListAutoCompleteControl {
     private final AutoCompleter autoCompleter;
 
     /** The popup the scroll pane is in */
-    protected Popup popup;
+    protected JPopupMenu popup;
 
     /** Whether or not we tried to show a popup while this wasn't showing */
     protected boolean showPending;
@@ -127,12 +126,39 @@ public class DropDownListAutoCompleteControl {
         }
     }
 
+    /**
+     * Creates a new popup containing the specified component. 
+     */
+    private JPopupMenu createPopup(Component component) {
+        // Create popup.  We only display the border for the popup component,
+        // so we remove it from the popup container.  Also, we want to keep the 
+        // focus within the text field, so the popup should not be focusable.
+        JPopupMenu popupMenu = new JPopupMenu();
+        popupMenu.setBorder(BorderFactory.createEmptyBorder());
+        popupMenu.setFocusable(false);
+        popupMenu.add(component);
+
+        // Add listener to reset popup reference when hidden.
+        popupMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+            }
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                resetPopup();
+            }
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+            }
+        });
+        
+        return popupMenu;
+    }
+    
     /** Shows the popup. */
     private void showPopup() {
         if(autoCompleter.isAutoCompleteAvailable()) {
             if(textField.isShowing()) {
-                Point origin = textField.getLocationOnScreen();
-                PopupFactory pf = PopupFactory.getSharedInstance();
 				Component parent = textField;
 				JComponent component = autoCompleter.getRenderComponent();
 
@@ -158,30 +184,16 @@ public class DropDownListAutoCompleteControl {
 		        if(popup != null && priorPref.equals(pref)) {
 		            return; // no need to change if sizes are same.
 		        }
-
-                // OSX doesn't handle MOUSE_CLICKED events correctly
-                // using medium-weight popups, so we need to force
-                // PopupFactory to return a heavy-weight popup.
-                // This is done by adding a panel into a Popup, which implicitly
-                // adds it into a Popup.HeavyWeightWindow, which PopupFactory happens
-                // to check as a condition for returning a heavy-weight popup.
-                // In an ideal world, the OSX bug would be fixed.
-                // In a less ideal world, Popup & PopupFactory would be written so that
-                // outside developers can correctly subclass methods.
-                if(OSUtils.isMacOSX()) {
-                    parent = new JPanel();
-                    new MyPopup(textField, parent, 0, 0);
-                }
 		        
 		        // If the popup exists already, hide it & reshow it to make it the right size.
-				if(popup != null) {
-				    popup.hide();
+				if (popup != null) {
+				    hidePopup();
 				}
-				
-                popup = pf.getPopup(parent, component, origin.x + leftInset, 
-                        origin.y + textField.getHeight() - bottomInset);
+
+                popup = createPopup(component);
                 showPending = false;
-                popup.show();
+                popup.show(parent, leftInset, textField.getHeight() - bottomInset);
+                
             } else {
                 showPending = true;
             }
@@ -190,11 +202,16 @@ public class DropDownListAutoCompleteControl {
 
     /** Hides the popup window. */
     private void hidePopup() {
-        showPending = false;
-        if(popup != null) {
-            popup.hide();
-            popup = null;
+        if (popup != null) {
+            popup.setVisible(false);
         }
+        resetPopup();
+    }
+
+    /** Resets popup references.  Called when popup is hidden. */
+    private void resetPopup() {
+        showPending = false;
+        popup = null;
     }
     
     private class Listener implements ActionListener, KeyListener, HierarchyListener, FocusListener, AutoCompleterCallback {
@@ -321,14 +338,4 @@ public class DropDownListAutoCompleteControl {
             }
         }
     }
-	
-	/**
-     * Subclass that provides access to the constructor.
-     */
-	private static class MyPopup extends Popup {
-		public MyPopup(Component owner, Component contents, int x, int y) {
-			super(owner, contents, x, y);
-		}
-	}
 }
-
