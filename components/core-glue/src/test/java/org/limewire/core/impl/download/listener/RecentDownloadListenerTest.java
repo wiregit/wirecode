@@ -12,7 +12,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
 public class RecentDownloadListenerTest extends BaseTestCase {
@@ -32,7 +32,7 @@ public class RecentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getSaveFile();
                 will(returnValue(null));
             }
@@ -55,7 +55,7 @@ public class RecentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.ABORTED));
+                will(returnValue(DownloadState.ABORTED));
                 one(downloader).getSaveFile();
                 will(returnValue(saveFile));
             }
@@ -78,7 +78,7 @@ public class RecentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getSaveFile();
                 will(returnValue(saveFile));
             }
@@ -105,11 +105,11 @@ public class RecentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader1).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader1).getSaveFile();
                 will(returnValue(saveFile1));
                 one(downloader2).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader2).getSaveFile();
                 will(returnValue(saveFile2));
             }
@@ -144,11 +144,11 @@ public class RecentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader1).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader1).getSaveFile();
                 will(returnValue(saveFile1));
                 one(downloader2).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader2).getSaveFile();
                 will(returnValue(saveFile2));
             }

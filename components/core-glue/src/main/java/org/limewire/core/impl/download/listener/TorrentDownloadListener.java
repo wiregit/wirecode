@@ -15,15 +15,15 @@ import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.CoreDownloader;
-import com.limegroup.gnutella.downloader.DownloadStatusEvent;
+import com.limegroup.gnutella.downloader.DownloadStateEvent;
 
 /**
  * Listens for downloads of .torrent files to complete. When the download
  * finishes then the torrent download will be started.
  */
-public class TorrentDownloadListener implements EventListener<DownloadStatusEvent> {
+public class TorrentDownloadListener implements EventListener<DownloadStateEvent> {
     
     private final Downloader downloader;
 
@@ -40,22 +40,22 @@ public class TorrentDownloadListener implements EventListener<DownloadStatusEven
         this.activityCallback = Objects.nonNull(activityCallback, "activityCallback");
         this.downloadItems = Objects.nonNull(downloadItems, "downloadItems");
 
-        if (downloader.getState() == DownloadStatus.COMPLETE) {
+        if (downloader.getState() == DownloadState.COMPLETE) {
             // TODO not sure why Downloader and CoreDownloader are not merged
             // into one class.
             // No classes implement Downloader, CoreDownloader extends
             // Downloader, and all downloaders implement CoreDownloader
             if (downloader instanceof CoreDownloader) {
-                handleEvent(new DownloadStatusEvent((CoreDownloader) downloader,
-                        DownloadStatus.COMPLETE));
+                handleEvent(new DownloadStateEvent((CoreDownloader) downloader,
+                        DownloadState.COMPLETE));
             }
         }
     }
 
     @Override
-    public void handleEvent(DownloadStatusEvent event) {
-        DownloadStatus downloadStatus = event.getType();
-        if (DownloadStatus.COMPLETE == downloadStatus) {
+    public void handleEvent(DownloadStateEvent event) {
+        DownloadState downloadStatus = event.getType();
+        if (DownloadState.COMPLETE == downloadStatus) {
             if (downloader instanceof BTTorrentFileDownloader) {
                 BTMetaInfo btMetaInfo = null;
                 try {

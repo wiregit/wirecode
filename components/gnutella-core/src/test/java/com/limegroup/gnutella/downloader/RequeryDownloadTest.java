@@ -57,7 +57,7 @@ import com.limegroup.gnutella.UDPReplyHandlerCache;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -267,18 +267,18 @@ public class RequeryDownloadTest extends LimeTestCase {
         Downloader downloader = null;
         downloader = downloadManager.download(incompleteFile);
         assertTrue(downloader instanceof ResumeDownloader);
-        assertEquals(DownloadStatus.QUEUED,downloader.getState());
+        assertEquals(DownloadState.QUEUED,downloader.getState());
         
         int counts = 0;
 		// Make sure that you are through the QUEUED state.
-        while (downloader.getState() == DownloadStatus.QUEUED) {
+        while (downloader.getState() == DownloadState.QUEUED) {
             Thread.sleep(100);
             if(counts++ > 50)
                 fail("took too long, state: " + downloader.getState());
 		}
         
         assertEquals("downloader isn't waiting for user", 
-                DownloadStatus.WAITING_FOR_USER, downloader.getState());
+                DownloadState.WAITING_FOR_USER, downloader.getState());
         
         downloader.resume();
         
@@ -286,7 +286,7 @@ public class RequeryDownloadTest extends LimeTestCase {
         Thread.sleep(1000);
         
         assertEquals("downloader isn't waiting for results", 
-                DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
+                DownloadState.WAITING_FOR_GNET_RESULTS, downloader.getState());
 
         // no need to do a dldr.resume() cuz ResumeDownloaders spawn the query
         // automatically
@@ -332,11 +332,11 @@ public class RequeryDownloadTest extends LimeTestCase {
         counts = 0;
         if (shouldDownload) {
             //a) Match: wait for download to start, then complete.
-            while (downloader.getState()!=DownloadStatus.COMPLETE) {            
-			    if ( downloader.getState() != DownloadStatus.CONNECTING &&
-			         downloader.getState() != DownloadStatus.HASHING &&
-			         downloader.getState() != DownloadStatus.SAVING )
-                    assertEquals(DownloadStatus.DOWNLOADING, downloader.getState());
+            while (downloader.getState()!=DownloadState.COMPLETE) {            
+			    if ( downloader.getState() != DownloadState.CONNECTING &&
+			         downloader.getState() != DownloadState.HASHING &&
+			         downloader.getState() != DownloadState.SAVING )
+                    assertEquals(DownloadState.DOWNLOADING, downloader.getState());
                 Thread.sleep(500);
                 if(counts++ > 60)
                     fail("took too long, state: " + downloader.getState());
@@ -345,7 +345,7 @@ public class RequeryDownloadTest extends LimeTestCase {
         else {
             //b) No match: keep waiting for results
             assertEquals("downloader should wait for user", 
-                    DownloadStatus.WAITING_FOR_GNET_RESULTS, downloader.getState());
+                    DownloadState.WAITING_FOR_GNET_RESULTS, downloader.getState());
             downloader.stop(false);
         }
     }

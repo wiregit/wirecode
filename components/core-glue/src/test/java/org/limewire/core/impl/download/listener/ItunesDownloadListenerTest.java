@@ -9,7 +9,7 @@ import org.limewire.core.settings.iTunesSettings;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
 public class ItunesDownloadListenerTest extends BaseTestCase {
@@ -31,7 +31,7 @@ public class ItunesDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getSaveFile();
                 will(returnValue(null));
             }
@@ -53,7 +53,7 @@ public class ItunesDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.ABORTED));
+                will(returnValue(DownloadState.ABORTED));
                 one(downloader).getSaveFile();
                 will(returnValue(new File("testDownloadNotComplete")));
             }
@@ -74,7 +74,7 @@ public class ItunesDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.ABORTED));
+                will(returnValue(DownloadState.ABORTED));
                 one(downloader).getSaveFile();
                 will(returnValue(file));
                 one(itunesMediator).addSong(file);
@@ -96,7 +96,7 @@ public class ItunesDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.ABORTED));
+                will(returnValue(DownloadState.ABORTED));
                 one(downloader).getSaveFile();
                 will(returnValue(file));
             }

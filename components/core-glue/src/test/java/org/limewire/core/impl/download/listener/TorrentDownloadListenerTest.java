@@ -21,7 +21,7 @@ import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
 public class TorrentDownloadListenerTest extends BaseTestCase {
@@ -43,7 +43,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getSaveFile();
                 will(returnValue(new File("testNonTorrentFileNotAdded")));
             }
@@ -64,7 +64,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.ABORTED));
+                will(returnValue(DownloadState.ABORTED));
                 one(downloader).getSaveFile();
                 will(returnValue(new File("testNonCompleteFileNotAdded")));
             }
@@ -89,7 +89,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getSaveFile();
                 will(returnValue(torrentFile));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
@@ -122,7 +122,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getSaveFile();
                 will(returnValue(torrentFile));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
@@ -159,7 +159,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getBtMetaInfo();
                 will(returnValue(bMetaInfo));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
@@ -192,7 +192,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
-                will(returnValue(DownloadStatus.COMPLETE));
+                will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getBtMetaInfo();
                 will(returnValue(bMetaInfo));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
