@@ -19,6 +19,7 @@ import javax.jmdns.ServiceInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DaapSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.NetworkInstanceUtils;
@@ -158,7 +159,12 @@ public final class DaapManager {
             
             try {
                 
-                InetAddress addr = NetworkUtils.getLocalAddress();
+                InetAddress addr = null;
+                if(ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
+                    addr = InetAddress.getByName(ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue());
+                } else {
+                    addr = NetworkUtils.getLocalAddress();
+                }
                 
                 bonjour = new BonjourService(addr);
                 urnToSong = new HashMap<URN, Song>();
