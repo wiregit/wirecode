@@ -106,8 +106,7 @@
 	</target>
     
     <target name="prep-tests">
-        <mkdir dir="${limewire.components.all.tests.resources}"/>
-        <!--<copy file="${limewire.components.home}/log4j.properties" todir="${limewire.components.all.tests.resources}" overwrite="true"/>-->
+        <mkdir dir="${limewire.components.private-all.tests.resources}"/>
     </target>
 	    
     <target name="jar"
