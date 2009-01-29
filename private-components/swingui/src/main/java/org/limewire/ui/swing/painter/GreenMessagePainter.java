@@ -17,21 +17,10 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
 
 /**
- *  Paints a Green Message components.
+ *  Paints a Green Message component.
  */
 public class GreenMessagePainter<X> extends AbstractPainter<JXPanel> {
 
-    /**
-     * For creating buttons with different edge rounding properties
-     * 
-     *   Examples :     
-     * 
-     *       ( LEFT_ROUNDED |   | UNROUNDED |   | RIGHT_ROUNDED ) 
-     */
-    enum DrawMode {
-        FULLY_ROUNDED, RIGHT_ROUNDED, LEFT_ROUNDED, UNROUNDED 
-    }
-    
     @Resource private int arcWidth;
     @Resource private int arcHeight;
     @Resource private Color backgroundGradientTop = PainterUtils.TRASPARENT;
@@ -45,8 +34,6 @@ public class GreenMessagePainter<X> extends AbstractPainter<JXPanel> {
     @Resource private Color bevelBottom = PainterUtils.TRASPARENT;
     
     private Painter<JXPanel> normalPainter;
-    
-    private DrawMode drawMode = DrawMode.FULLY_ROUNDED;
     
     public GreenMessagePainter() {
         GuiUtils.assignResources(this);
@@ -69,31 +56,11 @@ public class GreenMessagePainter<X> extends AbstractPainter<JXPanel> {
         
         RectanglePainter<JXPanel> painter = new RectanglePainter<JXPanel>();
         
-        int shiftX1 = 0;
-        int shiftX2 = 0;
-        
-        switch (this.drawMode) {       
-            case LEFT_ROUNDED :
-                shiftX1 = 0;
-                shiftX2 = -arcWidth+2;
-                break;
-                
-            case RIGHT_ROUNDED :
-                shiftX1 = -arcWidth-2;
-                shiftX2 = 0;
-                break;
-                
-            case UNROUNDED :
-                shiftX1 = -arcWidth-2;
-                shiftX2 = -arcWidth-2;
-                break;   
-        }
-        
         painter.setRounded(true);
         painter.setFillPaint(new GradientPaint(0,0, gradientTop, 0, 1, gradientBottom, false));
         painter.setRoundWidth(arcWidth);
         painter.setRoundHeight(arcHeight);
-        painter.setInsets(new Insets(1,2+shiftX1,2,2+shiftX2));
+        painter.setInsets(new Insets(1,2,2,2));
         painter.setPaintStretched(true);
         painter.setBorderPaint(null);
         painter.setFillVertical(true);
@@ -104,7 +71,6 @@ public class GreenMessagePainter<X> extends AbstractPainter<JXPanel> {
         BorderPainter borderPainter = new BorderPainter(arcWidth, arcHeight,
                 border,  bevelLeft,  bevelTop1,  bevelTop2, 
                 bevelRight,  bevelBottom, accentType);
-        borderPainter.setInsets(new Insets(0,shiftX1, 0, shiftX2));        
         
         compoundPainter.setPainters(painter, borderPainter);
         compoundPainter.setCacheable(true);
