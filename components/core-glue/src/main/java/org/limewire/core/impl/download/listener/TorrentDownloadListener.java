@@ -62,7 +62,7 @@ public class TorrentDownloadListener implements EventListener<DownloadStatusEven
                     BTTorrentFileDownloader btTorrentFileDownloader = (BTTorrentFileDownloader) downloader;
                     btMetaInfo = btTorrentFileDownloader.getBtMetaInfo();
                     downloadItems.remove(getDownloadItem(downloader));
-                    downloadManager.downloadTorrent(btMetaInfo, true);
+                    downloadManager.downloadTorrent(btMetaInfo, false);
                 } catch (SaveLocationException sle) {
                     final BTMetaInfo btMetaInfoCopy = btMetaInfo;
                     activityCallback.handleSaveLocationException(new DownloadAction() {
