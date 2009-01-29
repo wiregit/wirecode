@@ -71,7 +71,7 @@
 	<target name="compile-tests"
 	        description="Compiles the tests of every component (and the source if necessary)"
 	        depends="compile-src, lw-test-util.compile-src, lw-swingui.compile-tests, lw-mock-core.compile-tests, lw-integrated-ui.compile-tests">
-        <mkdir dir="${build.limewire.components.all.tests}"/>
+        <mkdir dir="${build.limewire.components.private-all.tests}"/>
 	</target>
     
 	<target name="clean-tests"
