@@ -6,7 +6,6 @@ import java.awt.Insets;
 import java.awt.Paint;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
@@ -16,7 +15,7 @@ import org.limewire.ui.swing.util.PainterUtils;
 /**
  *  Paints a Green Message component.
  */
-public class GreenMessagePainter<X> extends CompoundPainter<JXPanel> {
+public class GreenMessagePainter<X> extends CompoundPainter<X> {
 
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -46,7 +45,7 @@ public class GreenMessagePainter<X> extends CompoundPainter<JXPanel> {
             Paint border, Paint bevelLeft, Paint bevelTop1, Paint bevelTop2, 
             Paint bevelRight, Paint bevelBottom, int arcWidth, int arcHeight, AccentType accentType) {
                 
-        RectanglePainter<JXPanel> painter = new RectanglePainter<JXPanel>();
+        RectanglePainter<X> painter = new RectanglePainter<X>();
         
         painter.setRounded(true);
         painter.setFillPaint(new GradientPaint(0,0, gradientTop, 0, 1, gradientBottom, false));
@@ -60,7 +59,7 @@ public class GreenMessagePainter<X> extends CompoundPainter<JXPanel> {
         painter.setAntialiasing(true);
         painter.setCacheable(true);
                 
-        BorderPainter borderPainter = new BorderPainter(arcWidth, arcHeight,
+        BorderPainter borderPainter = new BorderPainter<X>(arcWidth, arcHeight,
                 border,  bevelLeft,  bevelTop1,  bevelTop2, 
                 bevelRight,  bevelBottom, accentType);
         
