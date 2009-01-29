@@ -30,11 +30,14 @@ public class BorderPainter<X> extends AbstractPainter<X> {
     private final int arcWidth;
     private final int arcHeight;
     private final Paint border;
-    private final Paint bevelLeft;
     private final Paint bevelTop1;
     private final Paint bevelTop2;
-    private final Paint bevelRight;
     private final Paint bevelBottom;
+    
+    private Paint bevelLeft;
+    private Paint bevelRight;
+    
+    private int tabHeightCache = -1;
     
     private final Paint accentPaint1;
     private final Paint accentPaint2;
@@ -140,26 +143,33 @@ public class BorderPainter<X> extends AbstractPainter<X> {
     @Override
     protected void doPaint(Graphics2D g, X object, int width, int height) {
         
-        int ix1 = this.insets.left;
-        int ix2 = this.insets.right;
+        int ix1 = insets.left;
+        int ix2 = insets.right;
         
-        int singleArcHeight = this.arcHeight/2;
+        int singleArcHeight = arcHeight/2;
         
         // Draw upper bevels
         g.setClip(0+ix1, 0, width-2-ix1-ix2, 7);
-        g.setPaint(this.bevelTop2);
-        g.drawRoundRect(1+ix1, 2, width-2-ix1-ix2, height-5, this.arcWidth, this.arcHeight);
-        g.setPaint(this.bevelTop1);
-        g.drawRoundRect(1+ix1, 1, width-3-ix1-ix2, height-4, this.arcWidth, this.arcHeight);
+        g.setPaint(bevelTop2);
+        g.drawRoundRect(1+ix1, 2, width-2-ix1-ix2, height-5, arcWidth, arcHeight);
+        g.setPaint(bevelTop1);
+        g.drawRoundRect(1+ix1, 1, width-3-ix1-ix2, height-4, arcWidth, arcHeight);
+        
+        // Update gradients if height has changed
+        if (tabHeightCache != height) {
+            bevelLeft = PaintUtils.resizeGradient(bevelLeft, 0, height-singleArcHeight+1);
+            bevelRight = PaintUtils.resizeGradient(bevelRight, 0, height-singleArcHeight+1);
+            tabHeightCache = height;
+        }
         
         // Draw side and bottom bevels
         g.setClip(0+ix1, singleArcHeight, width-2-ix1-ix2, height);
-        g.setPaint(this.bevelBottom);        
-        g.drawRoundRect(1+ix1, 1, width-4-ix1-ix2, height-4, this.arcWidth, this.arcHeight);
+        g.setPaint(bevelBottom);        
+        g.drawRoundRect(1+ix1, 1, width-4-ix1-ix2, height-4, arcWidth, arcHeight);
         g.setClip(0+ix1, singleArcHeight-1, width-2-ix1-ix2, height);
-        g.setPaint(PaintUtils.resizeGradient(this.bevelLeft, 0, height-singleArcHeight+1));
+        g.setPaint(bevelLeft);
         g.drawLine(2+ix1,singleArcHeight-1,2+ix1,height-singleArcHeight);
-        g.setPaint(PaintUtils.resizeGradient(this.bevelRight, 0, height-singleArcHeight+1));
+        g.setPaint(bevelRight);
         g.drawLine(width-3-ix2,singleArcHeight-1,width-3-ix2,height-singleArcHeight);
                 
         
@@ -168,7 +178,7 @@ public class BorderPainter<X> extends AbstractPainter<X> {
         
             g.setClip(0+ix1, singleArcHeight, width-ix1-ix2, height);
             g.setPaint(accentPaint3);
-            g.drawRoundRect(0+ix1, 0, width-1-ix1-ix2, height-1, this.arcWidth, this.arcHeight);
+            g.drawRoundRect(0+ix1, 0, width-1-ix1-ix2, height-1, arcWidth, arcHeight);
             g.setPaint(accentPaint2);        
             g.drawLine(0+ix1,singleArcHeight,0+ix1,height/2);
             g.drawLine(width-1-ix2,singleArcHeight,width-1-ix2,height/2);
@@ -180,8 +190,8 @@ public class BorderPainter<X> extends AbstractPainter<X> {
         g.setClip(0+ix1, 0, width-ix1-ix2, height);
         
         // Draw final border
-        g.setPaint(PaintUtils.resizeGradient(this.border, 0, height));
-        g.drawRoundRect(1+ix1, 0, width-3-ix1-ix2, height-2, this.arcWidth, this.arcHeight);
+        g.setPaint(PaintUtils.resizeGradient(border, 0, height));
+        g.drawRoundRect(1+ix1, 0, width-3-ix1-ix2, height-2, arcWidth, arcHeight);
         
         // Cap the left border if it is not rounded on the left        
         if (ix1 < 0) {
@@ -191,8 +201,8 @@ public class BorderPainter<X> extends AbstractPainter<X> {
         // Cap the right border if it is not rounded on the right        
         if (ix2 < 0) {
             GradientPaint spanGradient 
-            = new GradientPaint(0,1, PainterUtils.getColour(this.bevelTop1), 
-                    0, height-3, PainterUtils.getColour(this.bevelBottom), false);
+            = new GradientPaint(0,1, PainterUtils.getColour(bevelTop1), 
+                    0, height-3, PainterUtils.getColour(bevelBottom), false);
             
             g.setPaint(spanGradient);
             g.drawLine(width-1, 2, width-1, height-3);

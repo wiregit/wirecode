@@ -2,15 +2,12 @@ package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
-import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Paint;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.CompoundPainter;
-import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -19,7 +16,7 @@ import org.limewire.ui.swing.util.PainterUtils;
 /**
  *  Paints a Green Message component.
  */
-public class GreenMessagePainter<X> extends AbstractPainter<JXPanel> {
+public class GreenMessagePainter<X> extends CompoundPainter<JXPanel> {
 
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -32,28 +29,23 @@ public class GreenMessagePainter<X> extends AbstractPainter<JXPanel> {
     @Resource private Color bevelRightGradientTop = PainterUtils.TRASPARENT;
     @Resource private Color bevelRightGradientBottom = PainterUtils.TRASPARENT;
     @Resource private Color bevelBottom = PainterUtils.TRASPARENT;
-    
-    private Painter<JXPanel> normalPainter;
-    
+        
     public GreenMessagePainter() {
         GuiUtils.assignResources(this);
         
         GradientPaint gradientRight = new GradientPaint(0,0, this.bevelRightGradientTop, 
                 0, 1, this.bevelRightGradientBottom, false);
         
-        this.normalPainter = createPainter(this.backgroundGradientTop, this.backgroundGradientBottom,
+        createPainter(this.backgroundGradientTop, this.backgroundGradientBottom,
                 this.borderColour, bevelLeft,  this.bevelTop1,  this.bevelTop2, 
                 gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, AccentType.NONE);
         
-        this.setCacheable(false);
     }
     
-    private Painter<JXPanel> createPainter(Color gradientTop, Color gradientBottom, 
+    private void createPainter(Color gradientTop, Color gradientBottom, 
             Paint border, Paint bevelLeft, Paint bevelTop1, Paint bevelTop2, 
             Paint bevelRight, Paint bevelBottom, int arcWidth, int arcHeight, AccentType accentType) {
-        
-        CompoundPainter<JXPanel> compoundPainter = new CompoundPainter<JXPanel>();
-        
+                
         RectanglePainter<JXPanel> painter = new RectanglePainter<JXPanel>();
         
         painter.setRounded(true);
@@ -72,14 +64,7 @@ public class GreenMessagePainter<X> extends AbstractPainter<JXPanel> {
                 border,  bevelLeft,  bevelTop1,  bevelTop2, 
                 bevelRight,  bevelBottom, accentType);
         
-        compoundPainter.setPainters(painter, borderPainter);
-        compoundPainter.setCacheable(true);
-        
-        return compoundPainter;
-    }
-    
-    @Override
-    protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
-        this.normalPainter.paint(g, object, width, height);
+        setPainters(painter, borderPainter);
+        setCacheable(true);
     }
 }
