@@ -162,6 +162,7 @@ public class MainDownloadPanel extends JPanel {
         JXLabel titleTextLabel = new JXLabel(I18n.tr("Downloads"));
         titleTextLabel.setForegroundPainter(new TextShadowPainter());
         IconButton backButton = new IconButton(backAction);
+        backButton.removeActionHandListener();
         backButton.setRolloverEnabled(true);        
         headerTitlePanel.add(backButton, "gapafter 6, gapbottom 1");
         headerTitlePanel.add(titleTextLabel, "gapbottom 2");        
