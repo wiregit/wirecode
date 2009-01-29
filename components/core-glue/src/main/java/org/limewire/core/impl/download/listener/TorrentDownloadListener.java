@@ -61,16 +61,16 @@ public class TorrentDownloadListener implements EventListener<DownloadStatusEven
                 try {
                     BTTorrentFileDownloader btTorrentFileDownloader = (BTTorrentFileDownloader) downloader;
                     btMetaInfo = btTorrentFileDownloader.getBtMetaInfo();
-                    downloadItems.remove(getDownloadItem(downloader));
                     downloadManager.downloadTorrent(btMetaInfo, false);
+                    downloadItems.remove(getDownloadItem(downloader));
                 } catch (SaveLocationException sle) {
                     final BTMetaInfo btMetaInfoCopy = btMetaInfo;
                     activityCallback.handleSaveLocationException(new DownloadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {
-                            downloadItems.remove(getDownloadItem(downloader));
                             downloadManager.downloadTorrent(btMetaInfoCopy, overwrite);
+                            downloadItems.remove(getDownloadItem(downloader));
                         }
                     }, sle, false);
                 }
@@ -80,8 +80,8 @@ public class TorrentDownloadListener implements EventListener<DownloadStatusEven
                     possibleTorrentFile = downloader.getSaveFile();
                     String fileExtension = FileUtils.getFileExtension(possibleTorrentFile);
                     if ("torrent".equalsIgnoreCase(fileExtension)) {
-                        downloadItems.remove(getDownloadItem(downloader));
                         downloadManager.downloadTorrent(possibleTorrentFile, false);
+                        downloadItems.remove(getDownloadItem(downloader));
                     }
                 } catch (SaveLocationException sle) {
                     final File torrentFile = possibleTorrentFile;
@@ -89,8 +89,8 @@ public class TorrentDownloadListener implements EventListener<DownloadStatusEven
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {
-                            downloadItems.remove(getDownloadItem(downloader));
                             downloadManager.downloadTorrent(torrentFile, overwrite);
+                            downloadItems.remove(getDownloadItem(downloader));
                         }
                     }, sle, false);
                 }
