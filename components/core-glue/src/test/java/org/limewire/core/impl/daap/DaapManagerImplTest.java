@@ -116,6 +116,8 @@ public class DaapManagerImplTest extends BaseTestCase {
                 } catch (IOException e) {
                 }
             }
+            
+            daapServer.stop();
         }
 
     }
