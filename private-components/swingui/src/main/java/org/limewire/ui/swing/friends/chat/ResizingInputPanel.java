@@ -85,6 +85,10 @@ class ResizingInputPanel extends JPanel implements Displayable {
             revalidate();
         }
     }
+
+    public void destroy() {
+        chatStateManager.cancelPendingChatStateUpdates();        
+    }
     
     @Override
     public void handleDisplay() {
@@ -138,6 +142,10 @@ class ResizingInputPanel extends JPanel implements Displayable {
                     LOG.error("Unable to set chat state", e);
                 }
             }
+        }
+
+        void cancelPendingChatStateUpdates() {
+            chatPausedTimer.unschedule();
         }
 
         @Override

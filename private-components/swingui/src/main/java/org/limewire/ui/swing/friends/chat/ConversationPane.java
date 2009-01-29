@@ -353,6 +353,7 @@ public class ConversationPane extends JPanel implements Displayable {
         EventAnnotationProcessor.unsubscribe(this);
         featureSupport.removeListener(featureListener);
         friendSupport.removeListener(friendListener);
+        inputPanel.destroy();
     }
 
     public String getMessageReceivedTopicName() {
