@@ -6,6 +6,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -366,8 +367,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 } else {
                    JPopupMenu popup = new JPopupMenu();
                    popup.add(new JLabel(I18n.tr("Add files to My Library from Tools > Options to share them")));
-                   //move popup 15 pixels to the right so the mouse doesn't obscure the first word
-                   popup.show(MyLibraryPanel.this, getMousePosition(true).x + 15, getMousePosition(true).y);
+                   Point mousePoint = getMousePosition(true);
+                   if(mousePoint != null) {
+                       //move popup 15 pixels to the right so the mouse doesn't obscure the first word
+                       popup.show(MyLibraryPanel.this, mousePoint.x + 15, mousePoint.y);
+                   }
                 }
             } else {
                 categoryShareWidget.setShareable(category);
