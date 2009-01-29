@@ -121,14 +121,20 @@ public class ResumeDownloaderTest extends LimeTestCase {
      */
     public void testRequeryProgress() throws Exception {
         ResumeDownloader downloader = newResumeDownloader();
+        int count = 0;
         while(downloader.getState() != DownloadStatus.WAITING_FOR_USER) {
             Thread.sleep(50);
+            if(count++ > 4)
+                fail("Test took too long");
         }
         downloader.resume();
+        count = 0;
         while (downloader.getState() != DownloadStatus.WAITING_FOR_GNET_RESULTS) {
             if (downloader.getState() != DownloadStatus.QUEUED)
                 assertEquals(DownloadStatus.GAVE_UP, downloader.getState());
             Thread.sleep(200);
+            if(count++ > 10)
+                fail("Test took too long"); 
         }
         
         // give the downloader time to change its state
