@@ -149,5 +149,113 @@ public class FilePropertyKeyPopulatorTest extends BaseTestCase {
         assertEquals(creationTime, map.get(FilePropertyKey.DATE_CREATED));
         assertEquals(quality, map.get(FilePropertyKey.QUALITY));
     }
+    
+    public void testImageFilePopulation() throws Exception {
+        final String fileName = "testFileName.jpg";
+        final Long fileSize = new Long(1234);
+        final Long creationTime = new Long(5678);
+        final String author = "Hello World";
+        final String title = "Rock";
+        final String comments = "woah!";
+
+        Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        final LimeXMLDocument document = context.mock(LimeXMLDocument.class);
+
+        context.checking(new Expectations() {
+            {
+                allowing(document).getValue(LimeXMLNames.IMAGE_ARTIST);
+                will(returnValue(author.toString()));
+                allowing(document).getValue(LimeXMLNames.IMAGE_TITLE);
+                will(returnValue(title.toString()));
+                allowing(document).getValue(LimeXMLNames.IMAGE_DESCRIPTION);
+                will(returnValue(comments.toString()));
+            }
+        });
+
+        Map<FilePropertyKey, Object> map = new HashMap<FilePropertyKey, Object>();
+        FilePropertyKeyPopulator
+                .populateProperties(fileName, fileSize, creationTime, map, document);
+
+        assertEquals(author, map.get(FilePropertyKey.AUTHOR));
+        assertEquals(title, map.get(FilePropertyKey.TITLE));
+        assertEquals(comments, map.get(FilePropertyKey.DESCRIPTION));
+        assertEquals(FileUtils.getFilenameNoExtension(fileName), map.get(FilePropertyKey.NAME));
+        assertEquals(fileSize, map.get(FilePropertyKey.FILE_SIZE));
+        assertEquals(creationTime, map.get(FilePropertyKey.DATE_CREATED));
+    }
+    
+    public void testDocumentFilePopulation() throws Exception {
+        final String fileName = "testFileName.txt";
+        final Long fileSize = new Long(1234);
+        final Long creationTime = new Long(5678);
+        final String author = "Hello World";
+        final String title = "Rock";
+        final String comments = "woah!";
+
+        Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        final LimeXMLDocument document = context.mock(LimeXMLDocument.class);
+
+        context.checking(new Expectations() {
+            {
+                allowing(document).getValue(LimeXMLNames.DOCUMENT_AUTHOR);
+                will(returnValue(author.toString()));
+                allowing(document).getValue(LimeXMLNames.DOCUMENT_TITLE);
+                will(returnValue(title.toString()));
+                allowing(document).getValue(LimeXMLNames.DOCUMENT_TOPIC);
+                will(returnValue(comments.toString()));
+            }
+        });
+
+        Map<FilePropertyKey, Object> map = new HashMap<FilePropertyKey, Object>();
+        FilePropertyKeyPopulator
+                .populateProperties(fileName, fileSize, creationTime, map, document);
+
+        assertEquals(author, map.get(FilePropertyKey.AUTHOR));
+        assertEquals(title, map.get(FilePropertyKey.TITLE));
+        assertEquals(comments, map.get(FilePropertyKey.DESCRIPTION));
+        assertEquals(FileUtils.getFilenameNoExtension(fileName), map.get(FilePropertyKey.NAME));
+        assertEquals(fileSize, map.get(FilePropertyKey.FILE_SIZE));
+        assertEquals(creationTime, map.get(FilePropertyKey.DATE_CREATED));
+    }
+    
+    public void testProgramFilePopulation() throws Exception {
+        final String fileName = "testFileName.exe";
+        final Long fileSize = new Long(1234);
+        final Long creationTime = new Long(5678);
+        final String company = "Hello World";
+        final String title = "Rock";
+        final String platform = "woah!";
+
+        Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        final LimeXMLDocument document = context.mock(LimeXMLDocument.class);
+
+        context.checking(new Expectations() {
+            {
+                allowing(document).getValue(LimeXMLNames.APPLICATION_PUBLISHER);
+                will(returnValue(company.toString()));
+                allowing(document).getValue(LimeXMLNames.APPLICATION_NAME);
+                will(returnValue(title.toString()));
+                allowing(document).getValue(LimeXMLNames.APPLICATION_PLATFORM);
+                will(returnValue(platform.toString()));
+            }
+        });
+
+        Map<FilePropertyKey, Object> map = new HashMap<FilePropertyKey, Object>();
+        FilePropertyKeyPopulator
+                .populateProperties(fileName, fileSize, creationTime, map, document);
+
+        assertEquals(company, map.get(FilePropertyKey.COMPANY));
+        assertEquals(title, map.get(FilePropertyKey.TITLE));
+        assertEquals(platform, map.get(FilePropertyKey.PLATFORM));
+        assertEquals(FileUtils.getFilenameNoExtension(fileName), map.get(FilePropertyKey.NAME));
+        assertEquals(fileSize, map.get(FilePropertyKey.FILE_SIZE));
+        assertEquals(creationTime, map.get(FilePropertyKey.DATE_CREATED));
+    }
 
 }
