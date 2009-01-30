@@ -136,7 +136,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
         newDownloader.startDownload();
 
         // Check same state as before serialization.
-        DownloadTestUtils.waitForState(downloader, DownloadState.WAITING_FOR_USER);
+        DownloadTestUtils.waitForState(newDownloader, DownloadState.WAITING_FOR_USER);
         assertEquals(amountDownloaded, newDownloader.getAmountRead());
         newDownloader.stop(false);
     }
