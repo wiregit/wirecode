@@ -7,8 +7,13 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
+import com.google.inject.Module;
+import com.google.inject.Stage;
+import com.google.inject.util.Modules;
+import com.limegroup.gnutella.ActivityCallbackAdapter;
+import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
@@ -54,7 +59,9 @@ public class FilePropertyKeyPopulatorTest extends BaseTestCase {
                 + "\" license=\""
                 + license + "\"/></audios>";
 
-        Injector injector = LimeTestUtils.createInjector();
+        Module combinedOriginals = Modules.combine(new LimeWireCoreModule(ActivityCallbackAdapter.class));
+        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, combinedOriginals);
+        
         LimeXMLDocumentFactory limeXMLDocumentFactory = injector
                 .getInstance(LimeXMLDocumentFactory.class);
         LimeXMLDocument document = limeXMLDocumentFactory.createLimeXMLDocument(xml);
