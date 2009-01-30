@@ -11,6 +11,16 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
 
+/**
+ * Used to paint a prompt message on a component.  This 
+ *  painter must be fired manually by a prompt ready
+ *  component when needed.  It is not to be used as a 
+ *  standard foreground painter because it has no logic for
+ *  when and when not to paint the prompt.
+ *  
+ * Right now only supports Components that extend JTextField,
+ *  specifically PromptTextField and PromptPasswordField.
+ */
 public class BasicTextFieldPromptPainter<X extends JTextField> extends AbstractPainter<X> {
 
     private final Paint promptForeground;

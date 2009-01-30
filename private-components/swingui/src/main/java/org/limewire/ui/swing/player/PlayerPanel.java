@@ -3,7 +3,6 @@ package org.limewire.ui.swing.player;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -28,9 +27,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.Category;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
@@ -44,7 +41,7 @@ import org.limewire.ui.swing.components.MarqueeButton;
 import org.limewire.ui.swing.components.decorators.SliderBarDecorator;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.painter.BorderPainter;
+import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -516,27 +513,8 @@ public class PlayerPanel extends JXPanel {
     }
     
     private Painter<JXPanel> createStatusBackgroundPainter() {
-        
-        CompoundPainter<JXPanel> compoundPainter = new CompoundPainter<JXPanel>();
-        
-        RectanglePainter<JXPanel> painter = new RectanglePainter<JXPanel>();
-        
-        painter.setRounded(true);
-        painter.setFillPaint(innerBackground);
-        painter.setRoundWidth(this.arcWidth);
-        painter.setRoundHeight(this.arcHeight);
-        painter.setInsets(new Insets(2,2,2,2));
-        painter.setBorderPaint(null);
-        painter.setFillVertical(true);
-        painter.setFillHorizontal(true);
-        painter.setAntialiasing(true);
-        painter.setCacheable(true);
-        
-        compoundPainter.setPainters(painter, new BorderPainter<JXPanel>(this.arcWidth, this.arcHeight,
-                this.innerBorder, this.bevelLeft, this.bevelTop1, this.bevelTop2, 
-                this.bevelRight,  this.bevelBottom, AccentType.SHADOW));
-        compoundPainter.setCacheable(true);
-        
-        return compoundPainter;
+        return new ComponentBackgroundPainter<JXPanel>(innerBackground, innerBorder, bevelLeft, bevelTop1, 
+                bevelTop2, bevelRight,bevelBottom, arcWidth, arcHeight,
+                AccentType.SHADOW);
     }
 }

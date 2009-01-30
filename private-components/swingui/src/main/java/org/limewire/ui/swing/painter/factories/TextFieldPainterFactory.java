@@ -6,10 +6,11 @@ import java.awt.Paint;
 import javax.swing.JTextField;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.components.PromptTextField;
-import org.limewire.ui.swing.painter.BasicTextFieldBackgroundPainter;
+import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BasicTextFieldPromptPainter;
 import org.limewire.ui.swing.painter.BorderPainter;
 import org.limewire.ui.swing.painter.FilterPainter;
@@ -37,14 +38,14 @@ public class TextFieldPainterFactory {
         GuiUtils.assignResources(this);
     }
     
-    public BasicTextFieldBackgroundPainter createBasicBackgroundPainter(AccentType accentType) {
-        return new BasicTextFieldBackgroundPainter(border, bevelLeft, bevelTop1,
+    public AbstractPainter<JTextField> createBasicBackgroundPainter(AccentType accentType) {
+        return new ComponentBackgroundPainter<JTextField>(Color.WHITE, border, bevelLeft, bevelTop1,
                 bevelTop2, bevelRight, bevelBottom, arcWidth, arcHeight,
                 accentType);
     }
     
-    public BasicTextFieldBackgroundPainter createBasicBackgroundPainter(AccentType accentType, Paint border) {
-        return new BasicTextFieldBackgroundPainter(border, bevelLeft, bevelTop1,
+    public AbstractPainter<JTextField> createBasicBackgroundPainter(AccentType accentType, Paint border) {
+        return new ComponentBackgroundPainter<JTextField>(Color.WHITE, border, bevelLeft, bevelTop1,
                 bevelTop2, bevelRight, bevelBottom, arcWidth, arcHeight,
                 accentType);
     }
