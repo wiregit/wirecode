@@ -56,6 +56,7 @@ public enum FilePropertyKey {
     };
     
     static {
+        longKeys.add(QUALITY);
         longKeys.add(LENGTH);
         longKeys.add(YEAR);
         longKeys.add(WIDTH);  
