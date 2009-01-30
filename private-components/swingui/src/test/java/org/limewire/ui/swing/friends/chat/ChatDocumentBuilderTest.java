@@ -4,9 +4,6 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
-import org.limewire.ui.swing.friends.chat.ChatDocumentBuilder;
-import org.limewire.ui.swing.friends.chat.Message;
-import org.limewire.ui.swing.friends.chat.MessageTextImpl;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MockFileMetadata;
@@ -121,12 +118,11 @@ public class ChatDocumentBuilderTest extends TestCase {
     public void testBuildChatTextAfterBeingOfferedAFile() {
         StringBuilder conversation = new StringBuilder();
         conversation.append("<div class=\"them\">you:</div>myName wants to share a file with you<br/>")
-                    .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"heynow-fileid\"/><input type=\"submit\" value=\"Foo doc.doc\"/></form><br/>")
-                    .append("Download it now, or get it from their <a href=\"#library\">Library</a> later.<br/>");
+                    .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"heynow-fileid\"/><input type=\"submit\" value=\"Download Foo doc.doc\"/></form><br/>")
+                    .append("Download it now, or get it from them <a href=\"#library\">later</a>.<br/>");
 
-        MockChatFriend friend = new MockChatFriend("myName", null, Mode.available);
         ArrayList<Message> messages = new ArrayList<Message>();
-        messages.add(new MockMessageFileOffer(friend, 0, "you", Type.Received, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
+        messages.add(new MessageFileOfferImpl("you", "0", "myName", Type.Received, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
 
         compareOutput(conversation.toString(), ChatState.active, false, messages);
     }
@@ -141,9 +137,9 @@ public class ChatDocumentBuilderTest extends TestCase {
                     .append("value=\"heynow-fileid\"/>")
                     .append("<input type=\"submit\" value=\"Foo doc.doc:disabled\"/></form><br/><br/>");
 
-        MockChatFriend friend = new MockChatFriend("myName", null, Mode.available);
         ArrayList<Message> messages = new ArrayList<Message>();
-        messages.add(new MockMessageFileOffer(friend, 0, "you", Type.Sent, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
+        messages.add(new MessageFileOfferImpl("you", "0", "myName", Type.Sent, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
+        compareOutput(conversation.toString(), ChatState.active, false, messages);
     }
 
     private void compareOutput(String input, String expected) {
