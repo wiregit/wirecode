@@ -38,14 +38,7 @@ public class DownloadTestUtils {
         timeout = unit.toMillis(timeout);
         while(timeout > 0 && downloader.getState() != state) {
             DownloadState current = downloader.getState();
-            boolean match = false;
-            for(int i = 0; i < allowed.length; i++) {
-                if(allowed[i] == current) {
-                    match = true;
-                    break;
-                }
-            }
-            if(!match) {
+            if(!Arrays.asList(allowed).contains(current)) {
                 AssertComparisons.fail("Current state: " + current + ", not in allowed states: " + Arrays.asList(allowed)); 
             }
             
@@ -54,6 +47,42 @@ public class DownloadTestUtils {
             timeout -= System.currentTimeMillis() - now;
         }
         AssertComparisons.assertEquals(state, downloader.getState());
+    }
+    
+    public static void pumpThroughStates(Downloader downloader, Runnable pump, DownloadState startState, DownloadState endState, DownloadState... middleStates) throws Exception {
+        pumpThroughStates(downloader, pump, startState, endState, 2, TimeUnit.SECONDS, middleStates);
+    }
+    
+    public static void pumpThroughStates(Downloader downloader, Runnable pump, DownloadState startState, DownloadState endState, long timeout, TimeUnit unit, DownloadState... middleStates) throws Exception {
+        AssertComparisons.assertEquals(startState, downloader.getState());
+        timeout = unit.toMillis(timeout);
+        // Jump out of the start state immediately.
+        timeout = waitForStatesToEnd(downloader, pump, timeout, startState);
+        if(downloader.getState() == startState) {
+            // This is an additional assertion incase start & end are the same,
+            // in which case we want to be extra certain that some middle states are involved.
+            AssertComparisons.fail("Still in start state: " + startState);
+        }
+        
+        // Then loop through the middle states.
+        // (We do the first one separate to ensure that we can cycle from start -> end even if start & end are the same)
+        while(timeout > 0 && downloader.getState() != endState) {
+            timeout = waitForStatesToEnd(downloader, pump, timeout, middleStates);
+        } 
+        
+        if(downloader.getState() != endState) {
+            AssertComparisons.fail("Invalid end state: " + downloader.getState() + ", required: " + endState);
+        }
+    }
+        
+    private static long waitForStatesToEnd(Downloader downloader, Runnable pump, long timeout, DownloadState... possibleStates) throws Exception {
+        while(timeout > 0 && Arrays.asList(possibleStates).contains(downloader.getState())) {
+            long now = System.currentTimeMillis();
+            Thread.sleep(200);
+            timeout -= System.currentTimeMillis() - now;
+            pump.run();
+        }
+        return timeout;
     }
 
 }
