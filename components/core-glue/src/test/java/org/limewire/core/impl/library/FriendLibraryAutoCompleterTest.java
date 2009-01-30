@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -88,7 +89,7 @@ public class FriendLibraryAutoCompleterTest extends BaseTestCase {
         assertContains(result, value3);
     }
 
-    public void test() {
+    public void testLookup() {
         Mockery context = new Mockery() {
             {
                 setImposteriser(ClassImposteriser.INSTANCE);
@@ -116,5 +117,37 @@ public class FriendLibraryAutoCompleterTest extends BaseTestCase {
         assertNotNull(lookup);
 
         assertEquals(value2, lookup);
+    }
+
+    public void testInterator() {
+        Mockery context = new Mockery() {
+            {
+                setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+
+        final String testPrefix1 = "";
+
+        final String value1 = "1";
+        final String value2 = "2";
+
+        final SearchCategory searchCategory = SearchCategory.AUDIO;
+        final FriendLibraries friendLibraries = context.mock(FriendLibraries.class);
+        context.checking(new Expectations() {
+            {
+                one(friendLibraries).getSuggestions(testPrefix1, searchCategory);
+                will(returnValue(Arrays.asList(value2, value1)));
+            }
+        });
+
+        FriendLibraryAutoCompleter friendLibraryAutoCompleter = new FriendLibraryAutoCompleter(
+                friendLibraries, searchCategory);
+
+        Iterator<String> iterator = friendLibraryAutoCompleter.iterator();
+        assertNotNull(iterator);
+
+        assertEquals(value2, iterator.next());
+        assertEquals(value1, iterator.next());
+        assertFalse(iterator.hasNext());
     }
 }
