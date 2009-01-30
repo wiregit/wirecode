@@ -79,5 +79,75 @@ public class FilePropertyKeyPopulatorTest extends BaseTestCase {
         assertEquals(creationTime, map.get(FilePropertyKey.DATE_CREATED));
         assertEquals(quality, map.get(FilePropertyKey.QUALITY));
     }
+    
+    public void testVideoFilePopulation() throws Exception {
+        final String fileName = "testFileName.mpg";
+        final Long fileSize = new Long(1234);
+        final Long creationTime = new Long(5678);
+        final String title = "Hello World";
+        final String genre = "Rock";
+        final String comments = "woah!";
+        final String company = "company";
+        final String producer = "producer";
+        final String rating = "rating";
+        final Long height = new Long(240);
+        final Long width = new Long(352);
+        final Long bitrate = new Long(128);
+        final Long seconds = new Long(956);
+        final Long year = new Long(1999);
+        final Long quality = new Long(2);
+
+        Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        final LimeXMLDocument document = context.mock(LimeXMLDocument.class);
+
+        context.checking(new Expectations() {
+            {
+                allowing(document).getValue(LimeXMLNames.VIDEO_PRODUCER);
+                will(returnValue(producer.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_STUDIO);
+                will(returnValue(company.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_RATING);
+                will(returnValue(rating.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_BITRATE);
+                will(returnValue(bitrate.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_COMMENTS);
+                will(returnValue(comments.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_TYPE);
+                will(returnValue(genre.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_HEIGHT);
+                will(returnValue(height.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_WIDTH);
+                will(returnValue(width.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_YEAR);
+                will(returnValue(year.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_TITLE);
+                will(returnValue(title.toString()));
+                allowing(document).getValue(LimeXMLNames.VIDEO_LENGTH);
+                will(returnValue(seconds.toString()));
+            }
+        });
+
+        Map<FilePropertyKey, Object> map = new HashMap<FilePropertyKey, Object>();
+        FilePropertyKeyPopulator
+                .populateProperties(fileName, fileSize, creationTime, map, document);
+
+        assertEquals(rating, map.get(FilePropertyKey.RATING));
+        assertEquals(producer, map.get(FilePropertyKey.AUTHOR));
+        assertEquals(title, map.get(FilePropertyKey.TITLE));
+        assertEquals(company, map.get(FilePropertyKey.COMPANY));
+        assertEquals(genre, map.get(FilePropertyKey.GENRE));
+        assertEquals(height, map.get(FilePropertyKey.HEIGHT));
+        assertEquals(width, map.get(FilePropertyKey.WIDTH));
+        assertEquals(year, map.get(FilePropertyKey.YEAR));
+        assertEquals(seconds, map.get(FilePropertyKey.LENGTH));
+        assertEquals(bitrate, map.get(FilePropertyKey.BITRATE));
+        assertEquals(comments, map.get(FilePropertyKey.DESCRIPTION));
+        assertEquals(FileUtils.getFilenameNoExtension(fileName), map.get(FilePropertyKey.NAME));
+        assertEquals(fileSize, map.get(FilePropertyKey.FILE_SIZE));
+        assertEquals(creationTime, map.get(FilePropertyKey.DATE_CREATED));
+        assertEquals(quality, map.get(FilePropertyKey.QUALITY));
+    }
 
 }
