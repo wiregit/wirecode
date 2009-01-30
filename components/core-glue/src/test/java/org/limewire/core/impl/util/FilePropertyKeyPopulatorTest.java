@@ -3,19 +3,15 @@ package org.limewire.core.impl.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.google.inject.util.Modules;
-import com.limegroup.gnutella.ActivityCallbackAdapter;
-import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 public class FilePropertyKeyPopulatorTest extends BaseTestCase {
     public FilePropertyKeyPopulatorTest(String name) {
@@ -23,52 +19,53 @@ public class FilePropertyKeyPopulatorTest extends BaseTestCase {
     }
 
     public void testAudioFilePopulation() throws Exception {
-        String fileName = "testFileName.mp3";
-        Long fileSize = new Long(1234);
-        Long creationTime = new Long(5678);
-        String title = "Hello World";
-        String artist = "Me and you";
-        String album = "Testing the waters";
-        String genre = "Rock";
-        String license = "me and you";
-        String comments = "woah!";
-        Long bitrate = new Long(128);
-        Long seconds = new Long(956);
-        Long year = new Long(1999);
-        Long track = new Long(5);
-        Long quality = new Long(2);
+        final String fileName = "testFileName.mp3";
+        final Long fileSize = new Long(1234);
+        final Long creationTime = new Long(5678);
+        final String title = "Hello World";
+        final String artist = "Me and you";
+        final String album = "Testing the waters";
+        final String genre = "Rock";
+        final String comments = "woah!";
+        final Long bitrate = new Long(128);
+        final Long seconds = new Long(956);
+        final Long year = new Long(1999);
+        final Long track = new Long(5);
+        final Long quality = new Long(2);
 
-        String xml = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio title=\""
-                + title
-                + "\" artist=\""
-                + artist
-                + "\" album=\""
-                + album
-                + "\" genre=\""
-                + genre
-                + "\" track=\""
-                + track
-                + "\" year=\""
-                + year
-                + "\" seconds=\""
-                + seconds
-                + "\" bitrate=\""
-                + bitrate
-                + "\" comments=\""
-                + comments
-                + "\" license=\""
-                + license + "\"/></audios>";
+        Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        final LimeXMLDocument document = context.mock(LimeXMLDocument.class);
 
-        Module combinedOriginals = Modules.combine(new LimeWireCoreModule(ActivityCallbackAdapter.class));
-        Injector injector = Guice.createInjector(Stage.DEVELOPMENT, combinedOriginals);
-        
-        LimeXMLDocumentFactory limeXMLDocumentFactory = injector
-                .getInstance(LimeXMLDocumentFactory.class);
-        LimeXMLDocument document = limeXMLDocumentFactory.createLimeXMLDocument(xml);
+        context.checking(new Expectations() {
+            {
+                allowing(document).getValue(LimeXMLNames.AUDIO_ALBUM);
+                will(returnValue(album.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_ARTIST);
+                will(returnValue(artist.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_BITRATE);
+                will(returnValue(bitrate.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_COMMENTS);
+                will(returnValue(comments.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_GENRE);
+                will(returnValue(genre.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_TRACK);
+                will(returnValue(track.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_YEAR);
+                will(returnValue(year.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_TITLE);
+                will(returnValue(title.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_SECONDS);
+                will(returnValue(seconds.toString()));
+            }
+        });
 
         Map<FilePropertyKey, Object> map = new HashMap<FilePropertyKey, Object>();
-        FilePropertyKeyPopulator.populateProperties(fileName, fileSize, creationTime, map, document);
+        FilePropertyKeyPopulator
+                .populateProperties(fileName, fileSize, creationTime, map, document);
 
+        assertEquals(artist, map.get(FilePropertyKey.AUTHOR));
         assertEquals(title, map.get(FilePropertyKey.TITLE));
         assertEquals(album, map.get(FilePropertyKey.ALBUM));
         assertEquals(genre, map.get(FilePropertyKey.GENRE));
