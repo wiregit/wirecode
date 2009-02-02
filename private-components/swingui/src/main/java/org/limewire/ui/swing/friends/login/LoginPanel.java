@@ -242,7 +242,7 @@ class LoginPanel extends JXPanel implements SettingListener {
     void disconnected(Exception reason) {
         setSignInComponentsEnabled(true);
         populateInputs();
-        if(reason.getMessage().toLowerCase(Locale.US).contains("auth")) {
+        if(reason.getMessage() != null && reason.getMessage().toLowerCase(Locale.US).contains("auth")) {
             authFailedLabel.setText(AUTHENTICATION_ERROR);
             passwordField.setText("");
         } else {
