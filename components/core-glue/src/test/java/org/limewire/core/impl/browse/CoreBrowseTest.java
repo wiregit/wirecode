@@ -22,7 +22,7 @@ public class CoreBrowseTest extends BaseTestCase {
         super(name);
     }
 
-    public void testThis() {
+    public void testBasicBrowseListenerPopulation() {
         Mockery context = new Mockery();
         final FriendPresence friendPresence = context.mock(FriendPresence.class);
         final SearchServices searchServices = context.mock(SearchServices.class);
