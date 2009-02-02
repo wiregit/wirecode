@@ -124,7 +124,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         matchingItems = friendLibraries.getMatchingItems("na", SearchCategory.ALL);
         assertEquals(1, matchingItems.size());
         assertContains(matchingItems, remoteFileItem1);
-
+        context.assertIsSatisfied();
     }
 
     public void testIndexing1FriendLibraryAndMultipleFilesByFileNameOnly() {
@@ -266,7 +266,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         assertEquals(2, matchingItems.size());
         assertContains(matchingItems, remoteFileItem1);
         assertContains(matchingItems, remoteFileItem2);
-
+        context.assertIsSatisfied();
     }
     
     public void testIndexingMultipleFriendLibraryAndMultipleFilesByFileNameOnly() {
@@ -432,7 +432,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         assertEquals(2, matchingItems.size());
         assertContains(matchingItems, remoteFileItem1);
         assertContains(matchingItems, remoteFileItem2);
-
+        context.assertIsSatisfied();
     }
     
     public void testIndexingFileMetaData() {
@@ -553,7 +553,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         matchingItems = friendLibraries.getMatchingItems("nameo", SearchCategory.ALL);
         assertEquals(1, matchingItems.size());
         assertContains(matchingItems, remoteFileItem1);
-
+        context.assertIsSatisfied();
     }
 
 }
