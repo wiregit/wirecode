@@ -229,7 +229,7 @@ class CoreUploadItem implements UploadItem {
         case UNAVAILABLE_RANGE:
             return UploadErrorState.FILE_ERROR;       
         }
-        throw new IllegalStateException("Non-error UploaderState: " + uploader.getState());
+        return UploadErrorState.NO_ERROR;
     }
 
     @Override

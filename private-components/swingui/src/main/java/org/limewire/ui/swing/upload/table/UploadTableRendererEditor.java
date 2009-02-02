@@ -241,7 +241,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         case UNABLE_TO_UPLOAD:
             return getErrorMessage(item.getErrorState());        
         }
-        throw new IllegalArgumentException("Unknown UploadState " + item.getState());
+        return null;
     }
     
     private String getErrorMessage(UploadErrorState errorState){
@@ -253,7 +253,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         case LIMIT_REACHED:
             return I18n.tr("Unable to upload: upload limit reached"); 
         }
-        throw new IllegalArgumentException("Unknown UploadErrorState " + errorState);
+        return null;
     }
 
 }
