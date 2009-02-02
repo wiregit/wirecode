@@ -124,7 +124,7 @@ public class XMPPAddressResolver implements AddressResolver {
     }
 
     @Override
-    public void resolve(Address address, AddressResolutionObserver observer) {
+    public <T extends AddressResolutionObserver> T resolve(Address address, T observer) {
         LOG.debugf("resolving: {0}", address);
         XMPPAddress xmppAddress = (XMPPAddress)address;
         FriendPresence resolvedPresence = getPresence(xmppAddress);
@@ -157,6 +157,7 @@ public class XMPPAddressResolver implements AddressResolver {
                 observer.resolved(resolvedAddress);
             }
         }
+        return observer;
     }
 
     private class ConnectivyFeatureListener implements EventListener<FeatureEvent> {
