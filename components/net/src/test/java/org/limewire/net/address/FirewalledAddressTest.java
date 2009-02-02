@@ -39,7 +39,7 @@ public class FirewalledAddressTest extends BaseTestCase {
         FirewalledAddress address1 = new FirewalledAddress(publicAddress, privateAddress, clientGuid, proxies, 1);
         assertEquals(address1, address1);
         // copy
-        assertEquals(address1, new FirewalledAddress(new ConnectableImpl("129.0.01", 2000, true), 
+        assertEquals(address1, new FirewalledAddress(new ConnectableImpl("129.0.0.1", 2000, true), 
                 new ConnectableImpl("192.168.0.1", 1000, true), new GUID(clientGuid.bytes()),
                 new StrictIpPortSet<Connectable>(new ConnectableImpl("200.0.0.0", 1000, true), 
                         new ConnectableImpl("100.0.0.0", 1000, false)), 1));
@@ -72,7 +72,7 @@ public class FirewalledAddressTest extends BaseTestCase {
         FirewalledAddress address1 = new FirewalledAddress(publicAddress, privateAddress, clientGuid, proxies, 1);
         assertEquals(address1.hashCode(), address1.hashCode());
         // copy
-        assertEquals(address1.hashCode(), new FirewalledAddress(new ConnectableImpl("129.0.01", 2000, true), 
+        assertEquals(address1.hashCode(), new FirewalledAddress(new ConnectableImpl("129.0.0.1", 2000, true), 
                 new ConnectableImpl("192.168.0.1", 1000, true), new GUID(clientGuid.bytes()),
                 new StrictIpPortSet<Connectable>(new ConnectableImpl("200.0.0.0", 1000, true), 
                         new ConnectableImpl("100.0.0.0", 1000, false)), 1).hashCode());
