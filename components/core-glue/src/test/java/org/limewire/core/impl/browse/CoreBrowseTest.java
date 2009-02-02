@@ -74,6 +74,8 @@ public class CoreBrowseTest extends BaseTestCase {
 
         innerBrowseListener.browseFinished(true);
         assertTrue(testBrowseListener.success);
+        
+        context.assertIsSatisfied();
     }
 
     /**
