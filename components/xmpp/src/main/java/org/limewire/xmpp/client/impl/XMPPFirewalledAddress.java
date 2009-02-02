@@ -15,6 +15,11 @@ public class XMPPFirewalledAddress implements Address {
     private final XMPPAddress xmppAddress;
     private final FirewalledAddress resolvedAddress;
 
+    /**
+     * Constructs an {@link XMPPFirewalledAddress}.
+     * @param xmppAddress cannot be null
+     * @param resolvedAddress cannot be null
+     */
     public XMPPFirewalledAddress(XMPPAddress xmppAddress, FirewalledAddress resolvedAddress) {
         this.xmppAddress = Objects.nonNull(xmppAddress, "xmppAddress");
         this.resolvedAddress = Objects.nonNull(resolvedAddress, "resolvedAddress");
@@ -25,10 +30,16 @@ public class XMPPFirewalledAddress implements Address {
         return xmppAddress.getAddressDescription();
     }
     
+    /**
+     * @return the {@link XMPPAddress} 
+     */
     public XMPPAddress getXmppAddress() {
         return xmppAddress;
     }
     
+    /**
+     * @reuturn the {@link FirewalledAddress} 
+     */
     public FirewalledAddress getFirewalledAddress() {
         return resolvedAddress;
     }
