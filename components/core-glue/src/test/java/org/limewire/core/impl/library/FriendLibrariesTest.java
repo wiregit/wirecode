@@ -1,6 +1,8 @@
 package org.limewire.core.impl.library;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -432,4 +434,126 @@ public class FriendLibrariesTest extends BaseTestCase {
         assertContains(matchingItems, remoteFileItem2);
 
     }
+    
+    public void testIndexingFileMetaData() {
+
+        Mockery context = new Mockery();
+
+        final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
+        final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
+        final EventList<RemoteFileItem> remoteFileItemList1 = new BasicEventList<RemoteFileItem>();
+
+        final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
+        final FriendLibrary friendLibrary1 = context.mock(FriendLibrary.class);
+        final PresenceLibrary presenceLibrary1 = context.mock(PresenceLibrary.class);
+
+        final RemoteFileItem remoteFileItem1 = context.mock(RemoteFileItem.class);
+        final String name1 = "name1";
+        final Category category1 = Category.AUDIO;
+        final Map<FilePropertyKey, Object> properties1 = new HashMap<FilePropertyKey, Object>();
+        final String album1 = "nameo";
+        properties1.put(FilePropertyKey.ALBUM, album1);
+
+        final Presence presence1 = context.mock(Presence.class);
+        final String presenceId1 = "1";
+
+        context.checking(new Expectations() {
+            {
+                allowing(friendLibrary1).getPresenceLibraryList();
+                will(returnValue(presenceLibraryList1));
+                allowing(remoteLibraryManager).getFriendLibraryList();
+                will(returnValue(friendLibraryList));
+
+                allowing(presenceLibrary1).getPresence();
+                will(returnValue(presence1));
+                allowing(presence1).getPresenceId();
+                will(returnValue(presenceId1));
+                allowing(presenceLibrary1).getModel();
+                will(returnValue(remoteFileItemList1));
+
+                allowing(remoteFileItem1).getName();
+                will(returnValue(name1));
+                allowing(remoteFileItem1).getCategory();
+                will(returnValue(category1));
+
+                for (FilePropertyKey filePropertyKey : FilePropertyKey.getIndexableKeys()) {
+                    allowing(remoteFileItem1).getProperty(filePropertyKey);
+                    if(properties1.containsKey(filePropertyKey)) {
+                        will(returnValue(properties1.get(filePropertyKey)));
+                    } else {
+                        will(returnValue(null));
+                    }
+                }
+            }
+        });
+
+        FriendLibraries friendLibraries = new FriendLibraries();
+        friendLibraries.register(remoteLibraryManager);
+
+        friendLibraryList.add(friendLibrary1);
+
+        presenceLibraryList1.add(presenceLibrary1);
+
+        remoteFileItemList1.add(remoteFileItem1);
+
+        Collection<String> suggestions = friendLibraries.getSuggestions("name",
+                SearchCategory.AUDIO);
+        assertEquals(2, suggestions.size());
+        assertContains(suggestions, name1);
+        assertContains(suggestions, album1);
+
+        Collection<RemoteFileItem> matchingItems = friendLibraries.getMatchingItems("name",
+                SearchCategory.AUDIO);
+        assertEquals(1, matchingItems.size());
+        assertContains(matchingItems, remoteFileItem1);
+
+        suggestions = friendLibraries.getSuggestions("name", SearchCategory.ALL);
+        assertEquals(2, suggestions.size());
+        assertContains(suggestions, name1);
+        assertContains(suggestions, album1);
+
+        matchingItems = friendLibraries.getMatchingItems("name", SearchCategory.ALL);
+        assertEquals(1, matchingItems.size());
+        assertContains(matchingItems, remoteFileItem1);
+
+        suggestions = friendLibraries.getSuggestions("name", SearchCategory.DOCUMENT);
+        assertEquals(0, suggestions.size());
+
+        matchingItems = friendLibraries.getMatchingItems("name", SearchCategory.DOCUMENT);
+        assertEquals(0, matchingItems.size());
+
+        suggestions = friendLibraries.getSuggestions("blah", SearchCategory.AUDIO);
+        assertEquals(0, suggestions.size());
+
+        matchingItems = friendLibraries.getMatchingItems("blah", SearchCategory.AUDIO);
+        assertEquals(0, matchingItems.size());
+
+        suggestions = friendLibraries.getSuggestions("na", SearchCategory.AUDIO);
+        assertEquals(2, suggestions.size());
+        assertContains(suggestions, name1);
+        assertContains(suggestions, album1);
+
+        matchingItems = friendLibraries.getMatchingItems("na", SearchCategory.AUDIO);
+        assertEquals(1, matchingItems.size());
+        assertContains(matchingItems, remoteFileItem1);
+
+        suggestions = friendLibraries.getSuggestions("na", SearchCategory.ALL);
+        assertEquals(2, suggestions.size());
+        assertContains(suggestions, name1);
+        assertContains(suggestions, album1);
+
+        matchingItems = friendLibraries.getMatchingItems("na", SearchCategory.ALL);
+        assertEquals(1, matchingItems.size());
+        assertContains(matchingItems, remoteFileItem1);
+        
+        suggestions = friendLibraries.getSuggestions("nameo", SearchCategory.ALL);
+        assertEquals(1, suggestions.size());
+        assertContains(suggestions, album1);
+
+        matchingItems = friendLibraries.getMatchingItems("nameo", SearchCategory.ALL);
+        assertEquals(1, matchingItems.size());
+        assertContains(matchingItems, remoteFileItem1);
+
+    }
+
 }
