@@ -351,19 +351,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         heading.setEditable(false);
         heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
         heading.setOpaque(false);
-        
-        heading.addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                populateHeading(rowHeightRule.getDisplayResult(vsr, searchText), vsr.getDownloadState(), true);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                populateHeading(rowHeightRule.getDisplayResult(vsr, searchText), vsr.getDownloadState(), false);
-            }
-        });
 
         subheadingLabel.setForeground(subHeadingLabelColor);
         subheadingLabel.setFont(subHeadingFont);
