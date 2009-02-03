@@ -132,8 +132,9 @@ public class XMPPAddressResolver implements AddressResolver {
             LOG.debugf("{0} could not be resolved", address);
             observer.handleIOException(new IOException("Could not be resolved"));
         } else {
-            // TODO have to use xmpp address with current presence id to make look up work
             Address resolvedAddress = addressRegistry.get(xmppAddress);
+            // race condition, address could have been nulled in the mean time,
+            // although it was checked in getPresence() 
             if (resolvedAddress == null) {
                 LOG.debugf("could not resolve {0}, not in registry {1}", address, addressRegistry);
                 observer.handleIOException(new IOException("could not be resolved, no address"));

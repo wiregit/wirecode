@@ -92,6 +92,14 @@ public class XMPPAddressResolverTest extends BaseTestCase {
         assertTrue(xmppAddressResolver.canResolve(new XMPPAddress("me@you.com/resource1234")));
     }
     
+    public void testCanResolveNoPresence() {
+        assertFalse(xmppAddressResolver.canResolve(new XMPPAddress("me@you.com/resource")));
+    }
+    
+    public void testCanResolveWrongAddressType() {
+        assertFalse(xmppAddressResolver.canResolve(ConnectableImpl.INVALID_CONNECTABLE));
+    }
+    
     public void testResolveNoPresence() {
         try {
             xmppAddressResolver.resolve(new XMPPAddress("hello@world/ivef"), 
