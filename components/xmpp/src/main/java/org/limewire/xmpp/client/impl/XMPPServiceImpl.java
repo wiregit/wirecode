@@ -113,10 +113,18 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
             public void handleEvent(XmppActivityEvent event) {
                 switch(event.getSource()) {
                 case Idle:
-                    setMode(Mode.xa);
+                    try {
+                        setMode(Mode.xa);
+                    } catch (XMPPException e) {
+                        LOG.debugf("setting mode failed", e);
+                    }
                     break;
                 case Active:
-                    setMode(jabberSettings.isDoNotDisturbSet() ? Mode.dnd : Mode.available);
+                    try {
+                        setMode(jabberSettings.isDoNotDisturbSet() ? Mode.dnd : Mode.available);
+                    } catch (XMPPException e) {
+                        LOG.debugf("setting mode failed", e);
+                    }
                 }
             }
         });
@@ -263,12 +271,17 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
         connectRequest.setTo(userId);
         connectRequest.setFrom(connection.getLocalJid());
         LOG.debugf("sending request: {0}", connectRequest);
-        connection.sendPacket(connectRequest);
+        try {
+            connection.sendPacket(connectRequest);
+        } catch (XMPPException e) {
+            LOG.debug("sending connect back request failed", e);
+            return false;
+        }
         return true;
     }
     
     @Override
-    public void setMode(Mode mode) {
+    public void setMode(Mode mode) throws XMPPException {
         for(XMPPConnection connection : connections) {
             connection.setMode(mode);
         }

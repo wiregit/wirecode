@@ -218,7 +218,7 @@ public class XMPPServiceTest extends BaseTestCase {
     /**
      * Tests that friends receive one another's status updates
      */
-    public void testStatusChanges() throws InterruptedException, UnknownHostException {
+    public void testStatusChanges() throws InterruptedException, UnknownHostException, XMPPException {
         assertEquals(1, aliceRosterListener.getRosterSize());
         assertEquals(USERNAME_2, aliceRosterListener.getFirstRosterEntry());
         assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));

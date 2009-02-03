@@ -18,6 +18,7 @@ import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.client.impl.XMPPAuthenticator;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 
@@ -72,7 +73,7 @@ public class AuthTokenIQListener implements PacketListener {
         }
     }
 
-    private void sendResult(FriendPresence presence) {
+    private void sendResult(FriendPresence presence) throws XMPPException {
         byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(presence.getPresenceId())).getBytes(Charset.forName("UTF-8"));
         AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
         queryResult.setTo(presence.getPresenceId());
@@ -98,7 +99,11 @@ public class AuthTokenIQListener implements PacketListener {
         @Override
         public void initializeFeature(FriendPresence friendPresence) {
             synchronized (AuthTokenIQListener.this) {
-                sendResult(friendPresence);
+                try {
+                    sendResult(friendPresence);
+                } catch (XMPPException e) {
+                    LOG.debug("sending auth token failed", e);
+                }
                 if (pendingAuthTokens.containsKey(friendPresence.getPresenceId())) {
                     byte[] authToken = pendingAuthTokens.remove(friendPresence.getPresenceId());
                     if (LOG.isDebugEnabled()) {

@@ -28,7 +28,7 @@ public interface XMPPConnection {
      * Sets a new <code>&lt;presence&gt;</code> mode (i.e., status)
      * @param mode the new mode to set
      */
-    public void setMode(Presence.Mode mode);
+    public void setMode(Presence.Mode mode) throws XMPPException;
 
     /**
      * Add a user to the friend list

@@ -37,5 +37,5 @@ public interface XMPPService {
     /**
      * Sets the Mode for all of known the XMPP connections. 
      */
-    void setMode(Mode mode);
+    void setMode(Mode mode) throws XMPPException;
 }
