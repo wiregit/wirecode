@@ -222,6 +222,8 @@ public class RemoteLibraryManagerImplTest extends BaseTestCase {
         assertContains(allFriendFiles.getModel(), remoteFileItem1);
         assertContains(allFriendFiles.getModel(), remoteFileItem2);
         assertContains(allFriendFiles.getModel(), remoteFileItem2);
+        
+        context.assertIsSatisfied();
     }
 
     private class TestURN implements URN {
