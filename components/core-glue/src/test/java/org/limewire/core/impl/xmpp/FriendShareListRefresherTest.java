@@ -1,16 +1,18 @@
 package org.limewire.core.impl.xmpp;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.core.api.browse.server.BrowseTracker;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendShareListEvent;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.FinishedLoadingListener;
+import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPService;
+
+import ca.odell.glazedlists.EventList;
 
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.ManagedFileList;
@@ -25,17 +27,13 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     public void testRegister() {
         Mockery context = new Mockery();
 
-        final BrowseTracker tracker = context.mock(BrowseTracker.class);
-        final XMPPService xmppService = context.mock(XMPPService.class);
-        final ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
         final FileManager fileManager = context.mock(FileManager.class);
         final ManagedFileList managedFileList = context.mock(ManagedFileList.class);
         
         final ListenerSupport<FriendShareListEvent> listenerSupport
             = context.mock(ListenerSupport.class);
       
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                xmppService, scheduledExecutorService);
+        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(null, null, null);
         
         context.checking(new Expectations() {
             {
@@ -54,5 +52,45 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
- 
+    @SuppressWarnings("unchecked")
+    public void testHandleEvent() {
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+
+        final FriendShareListEvent event = context.mock(FriendShareListEvent.class);
+        final Friend friend = context.mock(Friend.class);
+        final LocalFileList localFileList = context.mock(LocalFileList.class);
+        final EventList<LocalFileItem> eventList = context.mock(EventList.class);;
+        
+        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(null, null, null);
+        
+        context.checking(new Expectations() {
+            {
+                allowing(event).getType();
+                will(returnValue(FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED));
+                
+                atLeast(1).of(event).getFriend();
+                will(returnValue(friend));
+                
+                allowing(friend).getId();
+                will(returnValue("sadsadsa"));
+                
+                atLeast(1).of(event).getFileList();
+                will(returnValue(localFileList));
+                
+                atLeast(1).of(localFileList).getModel();
+                will(returnValue(eventList));
+                
+                exactly(1).of(eventList).addListEventListener(with(any(LibraryChangedSender.class)));
+            }});
+        
+        
+        friendShareListRefresher.handleEvent(event); 
+        
+        context.assertIsSatisfied();
+
+    }
+    
 }
