@@ -753,10 +753,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      * @see com.limegroup.gnutella.RoutedConnection#send(com.limegroup.gnutella.messages.Message)
      */
     public void send(Message m) {
-        LOG.debugf("send message: {0}, class: {1}", m);
-        if (m instanceof QueryRequest && !shouldSendQuery((QueryRequest)m))
-                return;
-        
+        if(m instanceof QueryRequest && !shouldSendQuery((QueryRequest)m))
+                return;        
         _outputRunner.send(m);
     }
 
@@ -795,16 +793,19 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     public void originateQuery(QueryRequest query) {
         query.originate();
         
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("do not proxy condition "
-                    + getConnectionCapabilities().isClientSupernodeConnection() + " "
-                    + (getConnectionCapabilities().getSupportedOOBProxyControlVersion() == -1)
-                    + " " + SearchSettings.DISABLE_OOB_V2.getValueAsString());
+        if(LOG.isDebugEnabled()) {
+            boolean leaf = getConnectionCapabilities().isClientSupernodeConnection();
+            int control = getConnectionCapabilities().getSupportedOOBProxyControlVersion();
+            boolean disabled = SearchSettings.DISABLE_OOB_V2.getBoolean();
+            LOG.debug("Originating query, leaf " + leaf +
+                    ", proxy control version " + control +
+                    ", OOBv2 disabled " + disabled);
         }
 
         if (getConnectionCapabilities().isClientSupernodeConnection()
                 && getConnectionCapabilities().getSupportedOOBProxyControlVersion() == -1
                 && SearchSettings.DISABLE_OOB_V2.getBoolean()) {
+            LOG.debug("Creating do not proxy OOB query");
             // don't proxy if we are a leaf and the ultrapeer
             // does not know OOB v3 and they would proxy for us
             query = queryRequestFactory.createDoNotProxyQuery(query);
@@ -953,6 +954,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     public long getNumQueryReplies() {
         return _connectionStats.getRepliesReceived();
     }
+    
+    public long getNumQueriesReceived() {
+        return _connectionStats.getQueriesReceived();
+    }
 
     /*
      * (non-Javadoc)
@@ -976,17 +981,23 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // 3) Query must not be OOB.
         // 3.5) The query originator should not disallow proxying.
         // 4) We must be able to OOB and have great success rate.
-        if (getConnectionCapabilities().remoteHostSupportsLeafGuidance() < 1)
+        if (getConnectionCapabilities().remoteHostSupportsLeafGuidance() < 1) {
+            LOG.trace("Not OOB proxying: remote host doesn't support leaf guidance");
             return query;
-        if (query.desiresOutOfBandRepliesV3())
+        }
+        if (query.desiresOutOfBandRepliesV3()) {
+            LOG.trace("Not OOB proxying: query already requests OOBv3");
             return query;
+        }
 
-        if (query.doNotProxy())
+        if (query.doNotProxy()) {
+            LOG.trace("Not OOB proxying: query says no");
             return query;
+        }
 
         if (_maxDisabledOOBProtocolVersion >= ReplyNumberVendorMessage.VERSION) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("query not proxied because disabled version is "
+            if (LOG.isDebugEnabled()) {
+                LOG.trace("Not OOB proxying: disabled version is "
                         + _maxDisabledOOBProtocolVersion);
             }
             return query;
@@ -997,9 +1008,18 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             }
         }
 
-        if (!networkManager.isOOBCapable() || !outOfBandStatistics.isSuccessRateGreat()
-                || !outOfBandStatistics.isOOBEffectiveForProxy())
+        if(!networkManager.isOOBCapable()) {
+            LOG.trace("Not OOB proxying: not OOB capable");
             return query;
+        }
+        if(!outOfBandStatistics.isSuccessRateGreat()) {
+            LOG.trace("Not OOB proxying: success rate isn't great");
+            return query;
+        }
+        if(!outOfBandStatistics.isOOBEffectiveForProxy()) {
+            LOG.trace("Not OOB proxying: OOB isn't effective enough");
+            return query;
+        }
 
         // everything is a go - we need to do the following:
         // 1) mutate the GUID of the query - you should maintain every param of
@@ -1009,6 +1029,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // of the replies back to the original guid. also, see if a you get a
         // QueryStatusResponse message and morph it...
         // THIS IS SOME MAJOR HOKERY-POKERY!!!
+        LOG.debug("OOB proxying query");
 
         // 1) mutate the GUID of the query
         byte[] origGUID = query.getGUID();
@@ -1062,7 +1083,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
 
     public void countDroppedMessage() {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("dropped", new Exception());
+            LOG.debug("Dropped message ", new Exception());
         }
         _connectionStats.addReceivedDropped();
     }
@@ -1233,10 +1254,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         } else if (vm instanceof OOBProxyControlVendorMessage) {
             _maxDisabledOOBProtocolVersion = ((OOBProxyControlVendorMessage) vm)
                     .getMaximumDisabledVersion();
-            if (LOG.isTraceEnabled()) {
-                LOG
-                        .trace("_maxDisabledOOBProtocolVersion set to "
-                                + _maxDisabledOOBProtocolVersion);
+            if(LOG.isTraceEnabled()) {
+                LOG.trace("Max disabled OOB version set to " +
+                        _maxDisabledOOBProtocolVersion);
             }
         }
     }
@@ -1371,13 +1391,13 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         }
 
         public void shutdown() {
-            LOG.debug("shutdown");
+            LOG.trace("Shutting down");
             observer.shutdown();
         }
 
         // ignored.
         public void handleIOException(IOException iox) {
-            LOG.debug("", iox);
+            LOG.debug("Exception during async handshake ", iox);
         }
     }
 
