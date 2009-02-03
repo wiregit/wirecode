@@ -74,6 +74,61 @@ public class ShareListManagerImplTest extends BaseTestCase {
         
         context.assertIsSatisfied();
     }
+    
+    @SuppressWarnings("unchecked")
+    public void testFriendRemoved() {
+        Mockery context = new Mockery();
+
+        final FileManager fileManager = context.mock(FileManager.class);
+        final CoreLocalFileItemFactory coreLocalFileItemFactory = context
+                .mock(CoreLocalFileItemFactory.class);
+        final EventListener<FriendShareListEvent> friendShareListEventListener = context
+                .mock(EventListener.class);
+        final TestListenerSupport listenerSupport = new TestListenerSupport();
+
+        final Friend friend1 = context.mock(Friend.class);
+        final String friendId1 = "1";
+
+        final com.limegroup.gnutella.library.FriendFileList friendFileList1 = context
+                .mock(com.limegroup.gnutella.library.FriendFileList.class);
+        final Lock lock1 = new ReentrantLock();
+        final Iterator<FileDesc> iterator1 = new ArrayList<FileDesc>().iterator();
+
+        context.checking(new Expectations() {
+            {
+                one(fileManager).getGnutellaFileList();
+                allowing(fileManager).getOrCreateFriendFileList(friendId1);
+                will(returnValue(friendFileList1));
+                allowing(fileManager).getFriendFileList(friendId1);
+                will(returnValue(friendFileList1));
+                allowing(friend1).getId();
+                will(returnValue(friendId1));
+                one(friendFileList1).addFileListListener(with(any(EventListener.class)));
+                allowing(friendFileList1).getReadLock();
+                will(returnValue(lock1));
+                one(friendFileList1).iterator();
+                will(returnValue(iterator1));
+                allowing(friendShareListEventListener).handleEvent(
+                        with(any(FriendShareListEvent.class)));
+            }
+        });
+        ShareListManagerImpl shareListManagerImpl = new ShareListManagerImpl(fileManager,
+                coreLocalFileItemFactory, friendShareListEventListener);
+        shareListManagerImpl.register(listenerSupport);
+
+        FriendFileList testFriendFileList1 = shareListManagerImpl.getOrCreateFriendShareList(friend1);
+        assertNotNull(testFriendFileList1);
+
+        context.checking(new Expectations() {{
+            one(fileManager).unloadFilesForFriend(friendId1);
+            one(friendFileList1).removeFileListListener(with(any(EventListener.class)));
+        }});
+        listenerSupport.fireEvent(new FriendEvent(friend1, FriendEvent.Type.REMOVED));
+        
+        testFriendFileList1 = shareListManagerImpl.getFriendShareList(friend1);
+        assertNull(testFriendFileList1);
+        context.assertIsSatisfied();
+    }
 
     private class TestListenerSupport implements ListenerSupport<FriendEvent> {
         private final CopyOnWriteArrayList<EventListener<FriendEvent>> listenerList;
