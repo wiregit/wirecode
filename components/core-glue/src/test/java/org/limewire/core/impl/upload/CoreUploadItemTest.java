@@ -2,15 +2,19 @@ package org.limewire.core.impl.upload;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.InetAddress;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.upload.UploadItem.BrowseType;
+import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
+import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.UploadType;
 
 public class CoreUploadItemTest extends BaseTestCase {
@@ -154,15 +158,23 @@ public class CoreUploadItemTest extends BaseTestCase {
         testGetHostWithAnyBrowseAndFileName(UploadStatus.COMPLETE);
     }
     
-    // TODO: This needs to be tested but getHost is doing some
-    //        whacky stuff and HTTPUploader is not an interface
-    /*
+    // this test is a bit ridiculous, functionality should not be 
+    //  in CoreUploadItem
+    // Functionality is too closely related to HTTPUploader and GnutellaPresence
     public void testGetHostWithoutFileName() {
-        Mockery context = new Mockery();
+        Mockery context = new Mockery() {
+            {
+                setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
         
         final Uploader uploader = context.mock(HTTPUploader.class);
+        final InetAddress addr = context.mock(InetAddress.class);
  
+        
         final String fileName = "";
+        final String host = "ay.yi";
+        final int port = 999;
         
         context.checking(new Expectations() {
             {
@@ -173,15 +185,25 @@ public class CoreUploadItemTest extends BaseTestCase {
                 
                 allowing(uploader).getUploadType();
                 will(returnValue(UploadType.BROWSE_HOST));
+                
+                atLeast(1).of(uploader).getAddress();
+                will(returnValue(host));
+                atLeast(1).of(uploader).getPort();
+                will(returnValue(port));
+                atLeast(1).of(uploader).getInetAddress();
+                will(returnValue(addr));
+                
+                atLeast(1).of(addr).getAddress();
+                will(returnValue(new byte[] {1,2,3,4}));
             }});
         
         CoreUploadItem upload = new CoreUploadItem(uploader);
         
-        System.out.println(upload.getHost());
+        assertEquals(new GnutellaPresence(uploader, host+":"+port).getFriend().getRenderName(), upload.getHost());
    
         context.assertIsSatisfied();
     }
-    */
+    
     
     public void testGetHostNormal() {
         Mockery context = new Mockery();
