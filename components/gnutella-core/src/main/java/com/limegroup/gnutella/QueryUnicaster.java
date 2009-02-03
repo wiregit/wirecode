@@ -380,7 +380,7 @@ public final class QueryUnicaster implements Service {
 			        !(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
 			                NetworkUtils.isCloseIP(networkManager.getAddress(),
 			                        endpoint.getInetAddress().getAddress()))) {
-                LOG.trace("Sending a UDP test ping");
+                LOG.debug("Sending a UDP test ping");
                 byte[] guid = udpService.get().getSolicitedGUID().bytes();
 				PingRequest pr = 
 				    pingRequestFactory.createPingRequest(guid, (byte)1, (byte)0);
@@ -478,7 +478,7 @@ public final class QueryUnicaster implements Service {
     /** May block if no hosts exist.
      */
     private GUESSEndpoint getUnicastHost() throws InterruptedException {
-        LOG.debug("Waiting for hosts");
+        LOG.trace("Waiting for hosts");
         synchronized (_queryHosts) {
             while (_queryHosts.isEmpty()) {
                 // don't sent too many pings
@@ -486,15 +486,16 @@ public final class QueryUnicaster implements Service {
                     // first send a Ping, hopefully we'll get some pongs....
                     byte ttl = ConnectionSettings.TTL.getValue();
                     PingRequest pr = pingRequestFactory.createPingRequest(ttl);
-                    LOG.trace("Broadcasting a ping");
+                    LOG.debug("Broadcasting a ping");
                     messageRouter.get().broadcastPingRequest(pr);
                     _lastPingTime = System.currentTimeMillis();
                 }
 				// now wait, what else can we do?
 				_queryHosts.wait();
             }
-            LOG.trace("Got some hosts");
         }
+        if(LOG.isTraceEnabled())
+            LOG.trace("Got " + _queryHosts.size() + " hosts");
 
         if (_queryHosts.size() < MIN_ENDPOINTS) {
             // send a ping to the guy you are popping if cache too small
