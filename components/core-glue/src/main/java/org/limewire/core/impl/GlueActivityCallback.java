@@ -38,6 +38,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
  * An implementation of the UI callback to handle notifications about 
@@ -128,9 +129,9 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     @Override
-    public void handleQueryString(String query) {
+    public void handleQuery(QueryRequest query, String address, int port) {
         for (IncomingSearchListener listener : monitorListeners) {
-            listener.handleQueryString(query);
+            listener.handleQueryString(query.getQuery());
         }
     }
 
