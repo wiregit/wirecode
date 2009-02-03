@@ -272,7 +272,7 @@ public class XMPPServiceTest extends BaseTestCase {
     /**
      * Tests that friends receive one another's file offers
      */
-    public void testOfferFile() throws InterruptedException, IOException, XmlPullParserException {
+    public void testOfferFile() throws InterruptedException, IOException, XmlPullParserException, XMPPException {
 
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));

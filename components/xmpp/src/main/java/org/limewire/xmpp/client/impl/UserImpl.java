@@ -148,7 +148,11 @@ public class UserImpl implements User {
     public void setName(final String name) {
         Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
             public void run() {
-                UserImpl.this.rosterEntry.get().setName(name);
+                try {
+                    UserImpl.this.rosterEntry.get().setName(name);
+                } catch (org.jivesoftware.smack.XMPPException e) {
+                    LOG.debugf("set name failed", e);
+                }
             }
         }), "set-name-thread-" + toString());
         t.start();
