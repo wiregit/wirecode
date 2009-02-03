@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.messagehandlers;
 
-
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,10 +91,17 @@ public class OOBHandler implements MessageHandler, Runnable {
 	private void handleRNVM(ReplyNumberVendorMessage msg, final ReplyHandler handler) {
 		GUID g = new GUID(msg.getGUID());
 
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Received RNVM from " + handler.getAddress() +
+                    ":" + handler.getPort());
+        }
+        
         int toRequest;
         
-        if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg)) <= 0) {
+        if(!router.isQueryAlive(g) ||
+                (toRequest = router.getNumOOBToRequest(msg)) <= 0) {
             // remember as possible GUESS source though
+            LOG.debug("Bypassing source");
             router.addBypassedSource(msg, handler);
             outOfBandStatistics.addBypassedResponse(msg.getNumResults());
             return;
@@ -110,15 +116,27 @@ public class OOBHandler implements MessageHandler, Runnable {
                 if (!OOBSessions.containsKey(hash)) {
                     OOBSessions.put(hash,new OOBSession(t, toRequest, new GUID(msg.getGUID()), true));
                     ack = new LimeACKVendorMessage(g, toRequest,t);
-                } // else we already sent ack(s)
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Sending OOBv3 LimeACK to " +
+                                handler.getAddress() + ":" + handler.getPort());
+                    }
+                } else {
+                    LOG.debug("RNVM has already been acked");
+                }
             }
-        } else
+        } else {
             ack = new LimeACKVendorMessage(g, toRequest);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Sending OOBv2 LimeACK to " +
+                        handler.getAddress() + ":" + handler.getPort());
+            }
+        }
         
         if (ack != null) {
             outOfBandStatistics.addRequestedResponse(toRequest);
             handler.reply(ack);
             if (MessageSettings.OOB_REDUNDANCY.getValue()) {
+                LOG.debug("Sending redundant LimeACK");
                 final LimeACKVendorMessage ackf = ack;
                 executor.schedule(new Runnable() {
                     public void run() {
@@ -141,16 +159,18 @@ public class OOBHandler implements MessageHandler, Runnable {
      *  {@link BypassedResultsCache}.
      */
     private void handleOOBReply(QueryReply reply, ReplyHandler handler) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Handling reply: " + reply + ", from: " + handler);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Handling OOB reply from " + handler.getAddress() +
+                    ":" + handler.getPort());
+        }
         
         // check if ip address of reply and sender of reply match
         // and update address of reply if necessary
         byte[] handlerAddress = handler.getInetAddress().getAddress(); 
         if (!Arrays.equals(handlerAddress, reply.getIPBytes())) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("IP addresses of sender and packet did not match, sender: " + handler.getInetAddress()
-                        + ", packet: " + reply.getIP());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Reply has wrong address " + reply.getIP() +
+                        ":" + reply.getPort());
             }
             // override address in packet
             try {
@@ -165,14 +185,18 @@ public class OOBHandler implements MessageHandler, Runnable {
             }
             catch (BadPacketException bpe) {
                 // invalid packet, don't handle it
+                LOG.debug("Error overriding address");
                 return;
             }
         }
         
         SecurityToken token = getVerifiedSecurityToken(reply, handler);
         if (token == null) {
-            if (!SearchSettings.DISABLE_OOB_V2.getBoolean()) 
+            LOG.debug("Reply has no security token");
+            if (!SearchSettings.DISABLE_OOB_V2.getBoolean()) {
+                LOG.debug("Handling OOBv2 reply");
                 router.handleQueryReply(reply, handler);
+            }
             return;
         }
         
@@ -181,8 +205,6 @@ public class OOBHandler implements MessageHandler, Runnable {
         
         int requestedResponseCount = token.getBytes()[0] & 0xFF;
         
-        
-        boolean shouldAddBypassedSource = false;
         /*
          * Router will handle the reply if it
          * it has a route && we still expect results for this OOB session
@@ -190,7 +212,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         // if query is not of interest anymore return
         GUID queryGUID = new GUID(reply.getGUID());
         if (!router.isQueryAlive(queryGUID)) {
-            shouldAddBypassedSource = true;
+            router.addBypassedSource(reply, handler);
         }
         else {
             synchronized (OOBSessions) {
@@ -201,29 +223,28 @@ public class OOBHandler implements MessageHandler, Runnable {
                     OOBSessions.put(hashKey, session);
                 }
 
-                int remainingCount = session.getRemainingResultsCount() - numResps; 
-                if (remainingCount >= 0) {
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("Requested >= than got (" + remainingCount + " left over)");
+                int remaining = session.getRemainingResultsCount() - numResps;
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Reply has " + numResps + " results, " +
+                            remaining + " remaining");
+                }
+                if(remaining >= 0) {
                     // parsing of query reply already done here in message dispatcher thread
                     try {
                         int added = session.countAddedResponses(reply.getResultsArray());
-                        if (added > 0) {
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace("Handling the reply.");
-                            }
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("Reply has " + added + " new results");                        
+                        if(added > 0) {
+                            LOG.debug("Handling OOBv3 reply");
                             router.handleQueryReply(reply, handler);
                         }
                     } 
                     catch (BadPacketException e) {
+                        LOG.debug("Error getting results");
                         // ignore packet
                     }
                 }
             }
-        }
-        
-        if (shouldAddBypassedSource) {
-            router.addBypassedSource(reply, handler);
         }
     }
     
