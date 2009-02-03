@@ -25,6 +25,9 @@ public class ShareListManagerImplTest extends BaseTestCase {
         super(name);
     }
 
+    /**
+     * Tests methods for getting and creating share lists for friends.
+     */
     @SuppressWarnings("unchecked")
     public void testFriendShareListMethods() {
         Mockery context = new Mockery();
@@ -71,10 +74,14 @@ public class ShareListManagerImplTest extends BaseTestCase {
 
         testFriendFileList1 = shareListManagerImpl.getOrCreateFriendShareList(friend1);
         assertNotNull(testFriendFileList1);
-        
+
         context.assertIsSatisfied();
     }
-    
+
+    /**
+     * Tests that when a friend is removed their share files are unloaded from
+     * memory. And unloaded from the file manager.
+     */
     @SuppressWarnings("unchecked")
     public void testFriendRemoved() {
         Mockery context = new Mockery();
@@ -116,20 +123,27 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 coreLocalFileItemFactory, friendShareListEventListener);
         shareListManagerImpl.register(listenerSupport);
 
-        FriendFileList testFriendFileList1 = shareListManagerImpl.getOrCreateFriendShareList(friend1);
+        FriendFileList testFriendFileList1 = shareListManagerImpl
+                .getOrCreateFriendShareList(friend1);
         assertNotNull(testFriendFileList1);
 
-        context.checking(new Expectations() {{
-            one(fileManager).unloadFilesForFriend(friendId1);
-            one(friendFileList1).removeFileListListener(with(any(EventListener.class)));
-        }});
+        context.checking(new Expectations() {
+            {
+                one(fileManager).unloadFilesForFriend(friendId1);
+                one(friendFileList1).removeFileListListener(with(any(EventListener.class)));
+            }
+        });
         listenerSupport.fireEvent(new FriendEvent(friend1, FriendEvent.Type.REMOVED));
-        
+
         testFriendFileList1 = shareListManagerImpl.getFriendShareList(friend1);
         assertNull(testFriendFileList1);
         context.assertIsSatisfied();
     }
-    
+
+    /**
+     * Tests that when a friend is removed their share files are unloaded from
+     * memory. And removed from the file manager.
+     */
     @SuppressWarnings("unchecked")
     public void testFriendDeleted() {
         Mockery context = new Mockery();
@@ -171,15 +185,18 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 coreLocalFileItemFactory, friendShareListEventListener);
         shareListManagerImpl.register(listenerSupport);
 
-        FriendFileList testFriendFileList1 = shareListManagerImpl.getOrCreateFriendShareList(friend1);
+        FriendFileList testFriendFileList1 = shareListManagerImpl
+                .getOrCreateFriendShareList(friend1);
         assertNotNull(testFriendFileList1);
 
-        context.checking(new Expectations() {{
-            one(fileManager).removeFriendFileList(friendId1);
-            one(friendFileList1).removeFileListListener(with(any(EventListener.class)));
-        }});
+        context.checking(new Expectations() {
+            {
+                one(fileManager).removeFriendFileList(friendId1);
+                one(friendFileList1).removeFileListListener(with(any(EventListener.class)));
+            }
+        });
         listenerSupport.fireEvent(new FriendEvent(friend1, FriendEvent.Type.DELETE));
-        
+
         testFriendFileList1 = shareListManagerImpl.getFriendShareList(friend1);
         assertNull(testFriendFileList1);
         context.assertIsSatisfied();
