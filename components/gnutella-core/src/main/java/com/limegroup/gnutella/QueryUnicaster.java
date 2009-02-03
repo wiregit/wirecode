@@ -380,7 +380,7 @@ public final class QueryUnicaster implements Service {
 			        !(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
 			                NetworkUtils.isCloseIP(networkManager.getAddress(),
 			                        endpoint.getInetAddress().getAddress()))) {
-                LOG.debug("Sending a UDP test ping");
+                LOG.info("Sending a UDP test ping");
                 byte[] guid = udpService.get().getSolicitedGUID().bytes();
 				PingRequest pr = 
 				    pingRequestFactory.createPingRequest(guid, (byte)1, (byte)0);
@@ -486,7 +486,7 @@ public final class QueryUnicaster implements Service {
                     // first send a Ping, hopefully we'll get some pongs....
                     byte ttl = ConnectionSettings.TTL.getValue();
                     PingRequest pr = pingRequestFactory.createPingRequest(ttl);
-                    LOG.debug("Broadcasting a ping");
+                    LOG.info("Broadcasting a ping");
                     messageRouter.get().broadcastPingRequest(pr);
                     _lastPingTime = System.currentTimeMillis();
                 }

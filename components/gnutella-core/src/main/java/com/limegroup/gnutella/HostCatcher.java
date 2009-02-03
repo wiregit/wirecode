@@ -337,8 +337,8 @@ public class HostCatcher implements Service {
     private final TcpBootstrap tcpBootstrap;
     
     @Inject
-	public HostCatcher(
-	        @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+    public HostCatcher(
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ConnectionServices connectionServices,
             Provider<ConnectionManager> connectionManager,
             Provider<UDPService> udpService, Provider<DHTManager> dhtManager,
@@ -583,7 +583,7 @@ public class HostCatcher implements Service {
                             LOG.trace("File contains invalid host: " + line);
                     }
                 } catch (ParseException pe) {
-                    LOG.debug("Exception parsing host file", pe);
+                    LOG.info("Exception parsing host file", pe);
                     continue;
                 }
             }
@@ -592,19 +592,19 @@ public class HostCatcher implements Service {
                 if(in != null)
                     in.close();
             } catch(IOException e) {
-                LOG.debug("Exception closing host file", e);
+                LOG.info("Exception closing host file", e);
             }
         }
     }
 
-	/**
-	 * Writes the host file to the default location.
-	 *
-	 * @throws <tt>IOException</tt> if the file cannot be written
-	 */
-	synchronized void write() throws IOException {
-		write(getHostsFile());
-	}
+    /**
+     * Writes the host file to the default location.
+     *
+     * @throws <tt>IOException</tt> if the file cannot be written
+     */
+    synchronized void write() throws IOException {
+        write(getHostsFile());
+    }
 
     /**
      * @modifies the file named filename
@@ -654,7 +654,7 @@ public class HostCatcher implements Service {
             GUID g = new GUID(pr.getGUID());
             if(!g.equals(PingRequest.UDP_GUID) &&
                     !g.equals(udpService.get().getSolicitedGUID())) {
-                LOG.debug("Discarding UDP pong with unknown GUID");
+                LOG.info("Discarding UDP pong with unknown GUID");
                 return false;
             }
         } 
@@ -664,7 +664,7 @@ public class HostCatcher implements Service {
         
         if(pr.getDailyUptime() != -1) {
             endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort(), 
-											pr.getDailyUptime());
+                                            pr.getDailyUptime());
         } else {
             endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort());
         }
@@ -732,8 +732,8 @@ public class HostCatcher implements Service {
             if(isValidHost(ep)) {
                 add(ep, GOOD_PRIORITY);
             } else {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Not adding invalid packed host " + ep);
+                if(LOG.isInfoEnabled())
+                    LOG.info("Not adding invalid packed host " + ep);
             }
         }
         
@@ -861,8 +861,8 @@ public class HostCatcher implements Service {
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
         if(!isValidHost(e)) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Not adding invalid host " + e);
+            if(LOG.isInfoEnabled())
+                LOG.info("Not adding invalid host " + e);
             return false;
         }
         if (forceHighPriority)
@@ -877,8 +877,8 @@ public class HostCatcher implements Service {
      */
     public boolean add(Endpoint e, boolean forceHighPriority, String locale) {
         if(!isValidHost(e)) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Not adding invalid host " + e);
+            if(LOG.isInfoEnabled())
+                LOG.info("Not adding invalid host " + e);
             return false;
         }
         //need ExtendedEndpoint for the locale
@@ -1016,7 +1016,7 @@ public class HostCatcher implements Service {
      * @return <tt>true</tt> if the host is valid and can be added, otherwise
      *  <tt>false</tt>
      */
-    private boolean isValidHost(Endpoint host) {
+    public boolean isValidHost(Endpoint host) {
         if(LOG.isTraceEnabled())
             LOG.trace("Validating host " + host);
         // caches will validate for themselves.
@@ -1525,8 +1525,8 @@ public class HostCatcher implements Service {
         try {
             read(getHostsFile());
         } catch (IOException e) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Exception reading host file " + getHostsFile(), e);
+            if(LOG.isInfoEnabled())
+                LOG.info("Exception reading host file " + getHostsFile(), e);
         }
     }
 

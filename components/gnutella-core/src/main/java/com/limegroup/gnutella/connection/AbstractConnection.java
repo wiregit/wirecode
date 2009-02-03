@@ -573,11 +573,11 @@ public abstract class AbstractConnection implements Connection {
         setHeaders(handshaker.getReadHeaders(), handshaker.getWrittenHeaders());
         connectionTime = System.currentTimeMillis();
         
-        if(LOG.isDebugEnabled()) {
+        if(LOG.isInfoEnabled()) {
             HandshakeResponse response = handshaker.getReadHeaders();
             String ip = response.getProperty(HeaderNames.LISTEN_IP);
             String agent = response.getProperty(HeaderNames.USER_AGENT);
-            LOG.debug("Listen-ip " + ip + ", user agent " + agent);
+            LOG.info("Listen-ip " + ip + ", user agent " + agent);
         }
 
         // Now set the soft max TTL that should be used on this connection.
@@ -632,8 +632,8 @@ public abstract class AbstractConnection implements Connection {
         }
         // Otherwise, if our current address is invalid, change.
         else if (!NetworkUtils.isValidAddress(networkManager.getAddress())) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Updating address to " + ipAddressFromHeader);
+            if(LOG.isInfoEnabled())
+                LOG.info("Updating address to " + ipAddressFromHeader);
             // will auto-call addressChanged.
             // TODO store address in one place     
             acceptor.setAddress(ipAddressFromHeader);

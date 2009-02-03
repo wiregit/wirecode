@@ -160,8 +160,8 @@ public class UDPHostCache {
             // failure size, add'm back if we have room.
             if(ep.getUDPHostCacheFailures() == MAXIMUM_FAILURES &&
                     udpHosts.size() < PERMANENT_SIZE) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Restoring failed UHC " + ep);
+                if(LOG.isInfoEnabled())
+                    LOG.info("Restoring failed UHC " + ep);
                 add(ep);
             }
             dirty = true;
@@ -202,8 +202,8 @@ public class UDPHostCache {
             if(!networkInstanceUtils.isValidExternalIpPort(next) || 
                     !NetworkUtils.isValidIpPort(next) || // this does explicit resolving.
                     networkInstanceUtils.isPrivateAddress(next.getAddress())) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Invalid address for " + next);
+                if(LOG.isInfoEnabled())
+                    LOG.info("Invalid address for " + next);
                 invalidHosts.add(next);
                 continue;
             }
@@ -226,12 +226,12 @@ public class UDPHostCache {
       */
      protected synchronized boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
         if(hosts.isEmpty()) {
-            LOG.debug("No UHCs to try");
+            LOG.info("No UHCs to try");
             return false;
         }
 
-        if(LOG.isDebugEnabled())
-            LOG.debug("Pinging UHCs " + hosts);
+        if(LOG.isInfoEnabled())
+            LOG.info("Pinging UHCs " + hosts);
 
         pinger.rank(
             hosts,
@@ -260,8 +260,8 @@ public class UDPHostCache {
      * Removes a given hostcache from this.
      */
     public synchronized boolean remove(ExtendedEndpoint e) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Removing UHC " + e);
+        if(LOG.isInfoEnabled())
+            LOG.info("Removing UHC " + e);
         boolean removed1=udpHosts.remove(e);
         boolean removed2=udpHostsSet.remove(e);
         assert removed1==removed2 : "Set "+removed1+" but queue "+removed2;
@@ -289,8 +289,8 @@ public class UDPHostCache {
         // from gnutella.net, in which case all will be added),
         // and we always want to try new people.
         
-        if(LOG.isDebugEnabled())
-            LOG.debug("Adding UHC " + e);
+        if(LOG.isInfoEnabled())
+            LOG.info("Adding UHC " + e);
         
         // if we've exceeded the maximum size, remove the worst element.
         if(udpHosts.size() >= PERMANENT_SIZE) {
@@ -401,8 +401,8 @@ public class UDPHostCache {
             synchronized(UDPHostCache.this) {
                 // Record the failures...
                 for(ExtendedEndpoint ep : hosts) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("No response from UHC " + ep);
+                    if(LOG.isInfoEnabled())
+                        LOG.info("No response from UHC " + ep);
                     ep.recordUDPHostCacheFailure();
                     dirty = true;
                     writeDirty = true;
@@ -412,8 +412,8 @@ public class UDPHostCache {
                 // Then record the successes...
                 allHosts.removeAll(hosts);
                 for(ExtendedEndpoint ep : allHosts) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Valid response from UHC " + ep);
+                    if(LOG.isInfoEnabled())
+                        LOG.info("Valid response from UHC " + ep);
                     ep.recordUDPHostCacheSuccess();
                     dirty = true;
                     writeDirty = true;

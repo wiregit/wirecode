@@ -1069,7 +1069,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param locallyEvaluate false if you don't want to send the query to
      * leaves and yourself, true otherwise....
      */
-    protected void handleQueryRequest(QueryRequest request,
+    public void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler, 
 									  ResultCounter counter,
                                       boolean locallyEvaluate) {
