@@ -80,7 +80,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
         }
     }
     
-    private class FinishedLoadingListener implements EventListener<ManagedListStatusEvent> {
+    class FinishedLoadingListener implements EventListener<ManagedListStatusEvent> {
         @SuppressWarnings("unchecked")
         @BlockingEvent
         public void handleEvent(ManagedListStatusEvent evt) {
@@ -104,7 +104,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
         }            
     }
     
-    private class LibraryChangedSender implements ListEventListener<LocalFileItem> {
+    class LibraryChangedSender implements ListEventListener<LocalFileItem> {
         
         private final Friend friend;
         
