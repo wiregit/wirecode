@@ -401,7 +401,7 @@ public class HostCatcher implements Service {
     protected void scheduleServices() {        
         Runnable probationRestorer = new Runnable() {
             public void run() {
-                LOG.trace("restoring hosts on probation");
+                // Restore probated hosts
                 List<Endpoint> toAdd;
                 synchronized(HostCatcher.this) {
                     if(LOG.isTraceEnabled()) {
@@ -411,9 +411,22 @@ public class HostCatcher implements Service {
                     toAdd = new ArrayList<Endpoint>(PROBATION_HOSTS);
                     PROBATION_HOSTS.clear();
                 }
-                
                 for(Endpoint e : toAdd)
                     add(e, false);
+                // Take this opportunity to do some logging
+                if(LOG.isTraceEnabled()) {
+                    LOG.trace(ENDPOINT_SET.size() + " ordinary, " +
+                            FREE_ULTRAPEER_SLOTS_SET.size() + " UP slots, " +
+                            FREE_LEAF_SLOTS_SET.size() + " leaf slots, " +
+                            LOCALE_SET_MAP.size() + " locales, " +
+                            permanentHostsSet.size() + " permanent, " +
+                            restoredHosts.size() + " restored, " +
+                            udpHostCache.getSize() + " UHCs, " +
+                            _failures + " failures, " +
+                            EXPIRED_HOSTS.size() + " expired, " +
+                            PROBATION_HOSTS.size() + " on probation, " +
+                            _catchersWaiting.size() + " waiting");
+                }
             } 
         };
         // Recover hosts on probation every minute.
@@ -426,7 +439,6 @@ public class HostCatcher implements Service {
         // (because of a fresh installation) we will connect.
         backgroundExecutor.scheduleWithFixedDelay(FETCHER, 0, 2*1000,
                 TimeUnit.MILLISECONDS);
-        LOG.trace("STOP scheduling");
     }
 
     /**
@@ -631,6 +643,8 @@ public class HostCatcher implements Service {
      * @return true iff pr was actually added 
      */
     public boolean add(PingReply pr) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Pong from " + pr.getAddress() + ":" + pr.getPort());
         // Discard UDP pongs with unknown GUIDs, unless they're from local
         // sources, in which case they might be replies to multicast pings 
         byte[] source = pr.getInetAddress().getAddress();
@@ -638,8 +652,8 @@ public class HostCatcher implements Service {
                 || networkInstanceUtils.isPrivateAddress(source);
         if(pr.isUDP() && !isLocalOrPrivate) {
             GUID g = new GUID(pr.getGUID());
-            if(!g.equals(PingRequest.UDP_GUID)
-                    && !g.equals(udpService.get().getSolicitedGUID())) {
+            if(!g.equals(PingRequest.UDP_GUID) &&
+                    !g.equals(udpService.get().getSolicitedGUID())) {
                 LOG.debug("Discarding UDP pong with unknown GUID");
                 return false;
             }
@@ -695,6 +709,8 @@ public class HostCatcher implements Service {
         // if the pong carried packed IP/Ports, add those as their own
         // endpoints.
         Collection<IpPort> packed = pr.getPackedIPPorts();
+        if(LOG.isTraceEnabled() && !packed.isEmpty())
+            LOG.trace("Pong contains " + packed.size() + " packed hosts");
         if(ConnectionSettings.FILTER_CLASS_C.getValue())
             packed = NetworkUtils.filterOnePerClassC(packed);
         rank(packed);
@@ -713,21 +729,31 @@ public class HostCatcher implements Service {
                 }
             }
             
-            if(isValidHost(ep))
+            if(isValidHost(ep)) {
                 add(ep, GOOD_PRIORITY);
+            } else {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Not adding invalid packed host " + ep);
+            }
         }
         
         // if the pong carried packed UDP host caches, add those as their
         // own endpoints.
-        for(IpPort ipp : pr.getPackedUDPHostCaches()) {
-            ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+        packed = pr.getPackedUDPHostCaches();
+        if(LOG.isTraceEnabled() && !packed.isEmpty())
+            LOG.trace("Pong contains " + packed.size() + " packed UHCs");
+        for(IpPort ipp : packed) {
+            ExtendedEndpoint ep =
+                new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
             ep.setUDPHostCache(true);
             addUDPHostCache(ep);
         }
         
         // if it was a UDPHostCache pong, just add it as that.
-        if(endpoint.isUDPHostCache())
+        if(endpoint.isUDPHostCache()) {
+            LOG.trace("Adding host as UHC");
             return addUDPHostCache(endpoint);
+        }
         
         if(pr.isTLSCapable())
             endpoint.setTLSCapable(true);
@@ -822,9 +848,7 @@ public class HostCatcher implements Service {
             }
         }
         return added;
-            
     }
-
 
     /**
      * Adds an address to this, possibly ejecting other elements from the cache.
@@ -836,23 +860,27 @@ public class HostCatcher implements Service {
      * @return true iff e was actually added
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
-        if(!isValidHost(e))
+        if(!isValidHost(e)) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Not adding invalid host " + e);
             return false;
+        }
         if (forceHighPriority)
             return add(e, GOOD_PRIORITY);
         else
             return add(e, NORMAL_PRIORITY);
     }
 
-    
-
     /**
      * Adds an endpoint.  Use this method if the locale of endpoint is known
      * (used by ConnectionManager.disconnect())
      */
     public boolean add(Endpoint e, boolean forceHighPriority, String locale) {
-        if(!isValidHost(e))
-            return false;        
+        if(!isValidHost(e)) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Not adding invalid host " + e);
+            return false;
+        }
         //need ExtendedEndpoint for the locale
         if(forceHighPriority)
             return add(new ExtendedEndpoint(e.getAddress(), 
@@ -1157,7 +1185,7 @@ public class HostCatcher implements Service {
         return p;
     }
     
-    /** Removes an oberserver from wanting to get an endpoint. */
+    /** Removes an observer from wanting to get an endpoint. */
     public synchronized void removeEndpointObserver(EndpointObserver observer) {
         LOG.trace("Removing waiting observer");
         _catchersWaiting.remove(observer);
@@ -1352,7 +1380,6 @@ public class HostCatcher implements Service {
         return permanentHosts.iterator();
     }
 
-    
     /**
      * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
      * advertised free Ultrapeer slots.  The returned <tt>Collection</tt> is a 
@@ -1362,17 +1389,10 @@ public class HostCatcher implements Service {
      *  have advertised they have free ultrapeer slots
      */
     public synchronized Collection<IpPort>
-    getUltrapeersWithFreeUltrapeerSlots(int num) {
-        return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
-                ApplicationSettings.LANGUAGE.getValue(), num);
-    }
-
-    public synchronized Collection<IpPort>
     getUltrapeersWithFreeUltrapeerSlots(String locale, int num) {
         return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET, locale, num);
     }
     
-
     /**
      * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
      * advertised free leaf slots.  The returned <tt>Collection</tt> is a 
@@ -1381,12 +1401,6 @@ public class HostCatcher implements Service {
      * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
      *  have advertised they have free leaf slots
      */
-    public synchronized Collection<IpPort>
-    getUltrapeersWithFreeLeafSlots(int num) {
-        return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
-                ApplicationSettings.LANGUAGE.getValue(), num);
-    }
-    
     public synchronized Collection<IpPort>
     getUltrapeersWithFreeLeafSlots(String locale, int num) {
         return getPreferencedCollection(FREE_LEAF_SLOTS_SET, locale, num);
@@ -1433,7 +1447,6 @@ public class HostCatcher implements Service {
         
         return hosts;
     }
-
 
     /**
      * Notifies this that connect() has been called.  This may decide to give
@@ -1484,7 +1497,6 @@ public class HostCatcher implements Service {
      *  HostCatcherTest. */
     static boolean DEBUG = false;
 
-    
     /** Checks invariants. Very slow; method body should be enabled for testing
      *  purposes only. */
     protected void checkInvariants() {
@@ -1508,12 +1520,13 @@ public class HostCatcher implements Service {
      * Reads the gnutella.net file.
      */
     private void readHostsFile() {
-        LOG.trace("Reading Hosts File");
+        LOG.trace("Reading hosts File");
         // Just gnutella.net
         try {
             read(getHostsFile());
         } catch (IOException e) {
-            LOG.debug(getHostsFile(), e);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Exception reading host file " + getHostsFile(), e);
         }
     }
 
@@ -1526,7 +1539,7 @@ public class HostCatcher implements Service {
      * removal from our hosts list.
      */
     public void recoverHosts() {
-        LOG.debug("Recovering hosts file");
+        LOG.trace("Recovering hosts file");
         
         synchronized(this) {
             PROBATION_HOSTS.clear();
@@ -1704,8 +1717,8 @@ public class HostCatcher implements Service {
         }
         
         private boolean tcpHostCacheFetch(long now) {
-            if(nextAllowedTcpTime < now
-                    && tcpBootstrap.fetchHosts(new BootstrapListener())) {
+            if(nextAllowedTcpTime < now &&
+                    tcpBootstrap.fetchHosts(new BootstrapListener())) {
                 LOG.trace("Fetching via TCP");
                 nextAllowedTcpTime = now + TCP_INTERVAL;
                 return true;
