@@ -38,7 +38,7 @@ public class XMPPFirewalledAddress implements Address {
     }
     
     /**
-     * @reuturn the {@link FirewalledAddress} 
+     * @return the {@link FirewalledAddress} 
      */
     public FirewalledAddress getFirewalledAddress() {
         return resolvedAddress;
@@ -49,4 +49,17 @@ public class XMPPFirewalledAddress implements Address {
         return StringUtils.toString(this);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof XMPPFirewalledAddress) {
+            XMPPFirewalledAddress other = (XMPPFirewalledAddress)obj;
+            return this.xmppAddress.equals(other.xmppAddress) && this.resolvedAddress.equals(other.resolvedAddress);
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return xmppAddress.hashCode() + 31 * resolvedAddress.hashCode();
+    }
 }
