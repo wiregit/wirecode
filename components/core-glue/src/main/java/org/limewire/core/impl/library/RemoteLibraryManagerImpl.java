@@ -35,6 +35,11 @@ import ca.odell.glazedlists.impl.ReadOnlyList;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
+/**
+ * This class keeps track of all friends libraries. As friend presences are found they are 
+ * aggregated into a single friend library per friend. All RemoteFileItems found in the friend libraries
+ * are also coalesced into a single FileList.
+ */
 @Singleton
 public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     
