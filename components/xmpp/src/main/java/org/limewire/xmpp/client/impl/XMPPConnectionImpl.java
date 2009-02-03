@@ -63,6 +63,12 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
 
+    /**
+     * The max number of times to attempt looking up
+     * the xmpp host in DNS
+     */
+    private static final int MAX_XMPP_HOST_LOOKUPS = 3;
+
     private final XMPPConnectionConfiguration configuration;
     private final EventBroadcaster<FileOfferEvent> fileOfferBroadcaster;
     private final EventBroadcaster<FriendRequestEvent> friendRequestBroadcaster;
@@ -206,6 +212,10 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
      * if the SRV lookup fails. This method blocks during the DNS lookup.
      */
     private ConnectionConfiguration getConnectionConfig() {
+        return getConnectionConfig(0);
+    }
+
+    private ConnectionConfiguration getConnectionConfig(int attempts) {
         String host = configuration.getServiceName(); // Fallback
         int port = 5222; // Default XMPP client port
         String serviceName = configuration.getServiceName();
@@ -214,24 +224,42 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             Lookup lookup = new Lookup(domain, Type.SRV);
             Record[] answers = lookup.run();
             int result = lookup.getResult();
-            if(result == Lookup.SUCCESSFUL && answers != null) {
-                // RFC 2782: use the server with the lowest-numbered priority,
-                // break ties by preferring servers with higher weights
-                int lowestPriority = Integer.MAX_VALUE;
-                int highestWeight = Integer.MIN_VALUE;
-                for(Record rec : answers) {
-                    if(rec instanceof SRVRecord) {
-                        SRVRecord srvRec = (SRVRecord)rec;
-                        int priority = srvRec.getPriority();
-                        int weight = srvRec.getWeight();
-                        if(priority < lowestPriority
-                                && weight > highestWeight) {
-                            port = srvRec.getPort();
-                            host = srvRec.getTarget().toString();
-                            lowestPriority = priority;
-                            highestWeight = weight;
+            if(result == Lookup.SUCCESSFUL) {
+                if(answers != null && answers.length > 0) {
+                    // RFC 2782: use the server with the lowest-numbered priority,
+                    // break ties by preferring servers with higher weights
+                    int lowestPriority = Integer.MAX_VALUE;
+                    int highestWeight = Integer.MIN_VALUE;
+                    for(Record rec : answers) {
+                        if(rec instanceof SRVRecord) {
+                            SRVRecord srvRec = (SRVRecord)rec;
+                            int priority = srvRec.getPriority();
+                            int weight = srvRec.getWeight();
+                            if(priority < lowestPriority
+                                    && weight > highestWeight) {
+                                port = srvRec.getPort();
+                                host = srvRec.getTarget().toString();
+                                lowestPriority = priority;
+                                highestWeight = weight;
+                            }
+                        } else {
+                            LOG.debugf("dns lookup of {0} was successful, but contains non-SRV record: {1}: {2}",
+                                    domain, rec.getClass().getSimpleName(), rec.toString());
                         }
                     }
+                } else {
+                    LOG.debugf("dns lookup of {0} was successful, but contained no records", domain);
+                }
+            } else if(result == Lookup.HOST_NOT_FOUND) {
+                LOG.debugf("dns lookup of {0} failed: host not found", domain);
+            } else if(result == Lookup.UNRECOVERABLE) {
+                LOG.debugf("dns lookup of {0} failed: unrecoverable", domain);
+            } else if(result == Lookup.TYPE_NOT_FOUND) {
+                LOG.debugf("dns lookup of {0} failed: type not found", domain);
+            } else if(result == Lookup.TRY_AGAIN) {
+                LOG.debugf("dns lookup of {0} failed: try again", domain);
+                if(attempts < MAX_XMPP_HOST_LOOKUPS) {
+                    return getConnectionConfig(++attempts);
                 }
             }
         } catch(IOException iox) {
