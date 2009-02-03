@@ -2,6 +2,7 @@ package org.limewire.core.impl.xmpp;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.Sequence;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendShareListEvent;
@@ -59,38 +60,59 @@ public class FriendShareListRefresherTest extends BaseTestCase {
             }
         };
 
-        final FriendShareListEvent event = context.mock(FriendShareListEvent.class);
+        final FriendShareListEvent event1 = context.mock(FriendShareListEvent.class);
+        final FriendShareListEvent event2 = context.mock(FriendShareListEvent.class);
         final Friend friend = context.mock(Friend.class);
         final LocalFileList localFileList = context.mock(LocalFileList.class);
         final EventList<LocalFileItem> eventList = context.mock(EventList.class);;
         
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(null, null, null);
         
+        final Sequence resultSequence = context.sequence("resultSequence");
+        
         context.checking(new Expectations() {
             {
-                allowing(event).getType();
+                atLeast(1).of(event1).getType();
                 will(returnValue(FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED));
                 
-                atLeast(1).of(event).getFriend();
+                atLeast(1).of(event2).getType();
+                will(returnValue(FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED));
+                                
+                atLeast(1).of(event1).getFriend();
+                will(returnValue(friend));
+                
+                atLeast(1).of(event2).getFriend();
                 will(returnValue(friend));
                 
                 allowing(friend).getId();
                 will(returnValue("sadsadsa"));
                 
-                atLeast(1).of(event).getFileList();
+                atLeast(1).of(event1).getFileList();
+                will(returnValue(localFileList));
+                
+                atLeast(1).of(event2).getFileList();
                 will(returnValue(localFileList));
                 
                 atLeast(1).of(localFileList).getModel();
                 will(returnValue(eventList));
                 
                 exactly(1).of(eventList).addListEventListener(with(any(LibraryChangedSender.class)));
+                inSequence(resultSequence);
+                
+                exactly(1).of(eventList).removeListEventListener(with(any(LibraryChangedSender.class)));
+                inSequence(resultSequence);
             }});
         
         
-        friendShareListRefresher.handleEvent(event); 
+        friendShareListRefresher.handleEvent(event1);
+        friendShareListRefresher.handleEvent(event2);
         
         context.assertIsSatisfied();
 
+    }
+    
+    public void testFinishedLoadingListener() {
+        
     }
     
 }
