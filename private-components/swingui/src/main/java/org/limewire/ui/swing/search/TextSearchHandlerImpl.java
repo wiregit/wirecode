@@ -27,6 +27,9 @@ import org.limewire.ui.swing.util.SwingUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * An implementation of SearchHandler to initiate regular text searches.
+ */
 @Singleton
 class TextSearchHandlerImpl implements SearchHandler {
     
