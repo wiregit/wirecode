@@ -1,5 +1,6 @@
 package org.limewire.core.impl.xmpp;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -289,6 +290,53 @@ public class FriendShareListRefresherTest extends BaseTestCase {
             }});
         
         libraryChangedSender.listChanged(event);
+        
+        context.assertIsSatisfied();
+    }
+    
+    
+    /**
+     * Force fire a refresh action with the last browse time before the 
+     *  last refresh time, therefore with no notifications necessary.
+     *  
+     * Ensure no notifications are made.
+     */
+    public void testScheduledLibraryRefreshSenderNoRefreshNeeded() {
+        Mockery context = new Mockery();
+        
+        final BrowseTracker tracker = context.mock(BrowseTracker.class);
+        final XMPPService xmppService = context.mock(XMPPService.class);
+        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
+        
+        final Friend friend = context.mock(Friend.class);
+        
+        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
+                xmppService, scheduledExecutorService);
+        
+        final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
+        
+        final ScheduledLibraryRefreshSender scheduledLibraryRefreshSender = libraryChangedSender.new ScheduledLibraryRefreshSender();
+        
+        final String friendID = "anID";
+        final Date lastBrowseTime = new Date(50);
+        final Date lastRefreshTime = new Date(100);
+        
+        
+        context.checking(new Expectations() {
+            {   
+                // Non critical actions
+                allowing(friend).getId();
+                will(returnValue(friendID));
+                
+                // Browse times should at least be compared
+                atLeast(1).of(tracker).lastBrowseTime(friendID);
+                will(returnValue(lastBrowseTime));
+                atLeast(1).of(tracker).lastRefreshTime(friendID);
+                will(returnValue(lastRefreshTime));
+                
+            }});
+        
+        scheduledLibraryRefreshSender.run();
         
         context.assertIsSatisfied();
     }
