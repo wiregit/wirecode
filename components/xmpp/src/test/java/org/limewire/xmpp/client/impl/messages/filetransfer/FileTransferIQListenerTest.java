@@ -34,7 +34,7 @@ public class FileTransferIQListenerTest extends BaseTestCase {
     }
 
     @SuppressWarnings("unchecked")
-    public void testProcessPacketThrowsEvent() {
+    public void testProcessPacketFiresEvent() {
         Map<Element, String> data = new EnumMap<Element, String>(Element.class);
         data.put(Element.index, "2");
         data.put(Element.urns, "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
