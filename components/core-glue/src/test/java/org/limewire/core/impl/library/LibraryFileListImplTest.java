@@ -21,7 +21,7 @@ public class LibraryFileListImplTest extends BaseTestCase {
     }
 
     @SuppressWarnings("unchecked")
-    public void testBasics() {
+    public void testPropertyChangesUpdateLibraryState() {
         Mockery context = new Mockery();
 
         final ManagedFileList managedList = context.mock(ManagedFileList.class);
