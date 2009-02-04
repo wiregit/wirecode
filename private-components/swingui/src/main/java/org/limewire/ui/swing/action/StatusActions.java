@@ -53,7 +53,7 @@ public class StatusActions {
                     xmppService.setMode(Mode.available);
                     XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(false);
                 } catch (XMPPException e1) {
-                    LOG.debugf("setting mode failed", e);
+                    LOG.debugf(e1, "setting mode failed");
                 }
             }
         });
@@ -70,7 +70,7 @@ public class StatusActions {
                     xmppService.setMode(Mode.dnd);                    
                     XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(true);
                 } catch (XMPPException e1) {
-                    LOG.debugf("setting mode failed", e);
+                    LOG.debugf(e1, "setting mode failed");
                 }
             }
         });

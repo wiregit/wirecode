@@ -188,6 +188,7 @@ public class UserImpl implements User {
         }
         Collection<Feature> features = presence.getFeatures();
         for(Feature feature : features) {
+            LOG.debugf("removing feature {0} for {1}", feature, presence);
             featureRegistry.get(feature.getID()).removeFeature(presence);
         }
 

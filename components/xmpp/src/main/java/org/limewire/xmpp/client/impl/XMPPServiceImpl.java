@@ -28,6 +28,7 @@ import org.limewire.xmpp.api.client.FriendRequestEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.Presence.Mode;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
@@ -35,7 +36,6 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
-import org.limewire.xmpp.api.client.Presence.Mode;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
 
 import com.google.inject.Inject;
@@ -116,14 +116,14 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                     try {
                         setMode(Mode.xa);
                     } catch (XMPPException e) {
-                        LOG.debugf("setting mode failed", e);
+                        LOG.debugf(e, "couldn't set mode based on {0}", event);
                     }
                     break;
                 case Active:
                     try {
                         setMode(jabberSettings.isDoNotDisturbSet() ? Mode.dnd : Mode.available);
                     } catch (XMPPException e) {
-                        LOG.debugf("setting mode failed", e);
+                        LOG.debugf(e, "couldn't set mode based on {0}", event);
                     }
                 }
             }
@@ -269,9 +269,9 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
         }
         ConnectBackRequestIQ connectRequest = new ConnectBackRequestIQ(address, clientGuid, supportedFWTVersion);
         connectRequest.setTo(userId);
-        connectRequest.setFrom(connection.getLocalJid());
-        LOG.debugf("sending request: {0}", connectRequest);
         try {
+            connectRequest.setFrom(connection.getLocalJid());
+            LOG.debugf("sending request: {0}", connectRequest);
             connection.sendPacket(connectRequest);
         } catch (XMPPException e) {
             LOG.debug("sending connect back request failed", e);

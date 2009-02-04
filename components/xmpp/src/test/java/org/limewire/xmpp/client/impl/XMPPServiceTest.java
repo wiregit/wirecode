@@ -111,6 +111,8 @@ public class XMPPServiceTest extends BaseTestCase {
         registry.stop();
         // Allow logout messages to be sent, received before next test
         Thread.sleep(SLEEP);
+        assertEquals(0, aliceRosterListener.getRosterSize());
+        assertEquals(0, bobRosterListener.getRosterSize());
     }
 
     protected List<Module> getServiceModules() {

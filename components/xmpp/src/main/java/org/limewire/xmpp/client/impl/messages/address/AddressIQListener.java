@@ -97,7 +97,7 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
                             try {
                                 sendAddress(address, presenceEntry.getKey());
                             } catch (XMPPException e) {
-                                LOG.debug("sending address failed", e);
+                                LOG.debugf(e, "couldn't send address to {0}", presenceEntry.getKey());
                             }
                         }
                     }
@@ -128,7 +128,7 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
                     try {
                         sendAddress(address, friendPresence.getPresenceId());
                     } catch (XMPPException e) {
-                        LOG.debug("sending address failed", e);
+                        LOG.debugf(e, "couldn't send address to {0}" + friendPresence.getPresenceId());
                     }
                 }
                 if (pendingAddresses.containsKey(friendPresence.getPresenceId())) {

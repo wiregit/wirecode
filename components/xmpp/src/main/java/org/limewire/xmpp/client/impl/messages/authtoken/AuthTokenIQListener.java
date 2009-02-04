@@ -94,7 +94,7 @@ public class AuthTokenIQListener implements PacketListener {
                 try {
                     sendResult(friendPresence);
                 } catch (XMPPException e) {
-                    LOG.debug("sending auth token failed", e);
+                    LOG.debugf(e, "couldn't send auth token to {0} " + friendPresence);
                 }
                 if (pendingAuthTokens.containsKey(friendPresence.getPresenceId())) {
                     byte[] authToken = pendingAuthTokens.remove(friendPresence.getPresenceId());

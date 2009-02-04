@@ -44,8 +44,7 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
             Presence presence = (Presence)packet;
             String friendUsername = StringUtils.parseBareAddress(packet.getFrom());
             if(presence.getType() == Type.subscribe) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("subscribe from " + friendUsername);
+                LOG.debugf("subscribe from {0}", friendUsername);
                 // If this is a new friend request, ask the user what to do
                 Roster roster = connection.getRoster();
                 if(roster != null) {
@@ -65,11 +64,9 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
                     }
                 }
             } else if(presence.getType() == Type.subscribed) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("subscribed from " + friendUsername);
+                LOG.debugf("subscribed from {0}", friendUsername);
             } else if(presence.getType() == Type.unsubscribe) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("unsubscribe from " + friendUsername);
+                LOG.debugf("unsubscribe from {0}", friendUsername);
                 // Acknowledge the unsubscription
                 Presence unsubbed = new Presence(Presence.Type.unsubscribed);
                 unsubbed.setTo(friendUsername);
@@ -95,8 +92,7 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
                     }
                 }
             } else if(presence.getType() == Type.unsubscribed) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("unsubscribed from " + friendUsername);
+                LOG.debugf("unsubscribed from {0}", friendUsername);
             }
         } catch (XMPPException e) {
             LOG.debug("processPacket failed", e);
