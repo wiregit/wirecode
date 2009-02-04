@@ -47,7 +47,7 @@ public class RemoteFileItemFactoryImpl implements RemoteFileItemFactory {
             throws SaveLocationException, InvalidDataException {
         byte[] clientGuid = DataUtils.EMPTY_GUID;
         
-        Set<String> urnsAsString = fileMeta.getURNsAsString();
+        Set<String> urnsAsString = fileMeta.getUrns();
         Set<URN> urns = new HashSet<URN>();
         for (String urnStr : urnsAsString) {
             try {
