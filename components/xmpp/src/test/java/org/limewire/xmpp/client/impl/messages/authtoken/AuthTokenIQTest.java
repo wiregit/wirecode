@@ -19,15 +19,20 @@ public class AuthTokenIQTest extends BaseTestCase {
         
         AuthTokenIQ parsedAuthTokenIQ = new AuthTokenIQ(IQTestUtils.createParser(authTokenIQ.getChildElementXML()));
         assertEquals(token, parsedAuthTokenIQ.getAuthToken());
-        
-        authTokenIQ = new AuthTokenIQ((byte[])null);
-        parsedAuthTokenIQ = new AuthTokenIQ(IQTestUtils.createParser(authTokenIQ.getChildElementXML()));
-        assertNull(parsedAuthTokenIQ.getAuthToken());
     }
 
+    public void testParsesMissingTokenGracefully() throws Exception {
+        try {
+            new AuthTokenIQ(IQTestUtils.createParser("<auth-token xmlns=\"jabber:iq:lw-auth-token\"></auth-token>"));
+            fail("expected invalid iq exception");
+        } catch (InvalidIQException iie) {
+        }
+    }
+    
     public void testParsesMissingValueAttributeGracefully() throws Exception {
         try {
             new AuthTokenIQ(IQTestUtils.createParser("<auth-token xmlns=\"jabber:iq:lw-auth-token\"><token/></auth-token>"));
+            fail("expected invalid iq exception");
         } catch (InvalidIQException iie) {
         }
     }

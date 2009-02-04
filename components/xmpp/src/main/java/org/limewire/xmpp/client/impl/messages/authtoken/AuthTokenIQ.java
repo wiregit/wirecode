@@ -1,7 +1,6 @@
 package org.limewire.xmpp.client.impl.messages.authtoken;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jivesoftware.smack.packet.IQ;
@@ -9,6 +8,8 @@ import org.limewire.util.StringUtils;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import com.google.inject.internal.base.Objects;
 
 public class AuthTokenIQ extends IQ {
     private byte [] authToken;
@@ -26,14 +27,18 @@ public class AuthTokenIQ extends IQ {
                 }
             } else if(eventType == XmlPullParser.END_TAG) {
                 if(parser.getName().equals("auth-token")) {
-                    return;
+                    break;
                 }
             }
         } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
+        
+        if (authToken == null) {
+            throw new InvalidIQException("no auth token parsed");
+        }
     }
     
     public AuthTokenIQ(byte [] authToken) {
-        this.authToken = authToken;
+        this.authToken = Objects.nonNull(authToken, "authToken");
     }
 
     public byte [] getAuthToken() {
@@ -41,16 +46,9 @@ public class AuthTokenIQ extends IQ {
     }
 
     public String getChildElementXML() {        
-        String authTokenElement = "<auth-token xmlns=\"jabber:iq:lw-auth-token\">";        
-        if(this.authToken != null) {
-            try {
-                authTokenElement += "<token";
-                authTokenElement += " value=\"" + new String(Base64.encodeBase64(authToken), "UTF-8") + "\"/>";
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        authTokenElement += "</auth-token>";
-        return authTokenElement;
+        StringBuilder authTokenElement = new StringBuilder("<auth-token xmlns=\"jabber:iq:lw-auth-token\">");        
+        authTokenElement.append("<token value=\"").append(StringUtils.getUTF8String(Base64.encodeBase64(authToken))).append("\"/>");
+        authTokenElement.append("</auth-token>");
+        return authTokenElement.toString();
     } 
 }
