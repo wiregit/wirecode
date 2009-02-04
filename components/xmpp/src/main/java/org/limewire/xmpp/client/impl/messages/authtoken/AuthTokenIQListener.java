@@ -55,18 +55,10 @@ public class AuthTokenIQListener implements PacketListener {
             if (user != null) {
                 FriendPresence presence = user.getFriendPresences().get(iq.getFrom());
                 if(presence != null) {
-                    if(iq.getAuthToken() != null) {
-                        if(LOG.isDebugEnabled()) {
-                            try {
-                                LOG.debug("updating auth token on presence " + presence.getPresenceId() + " to " + new String(Base64.encodeBase64(iq.getAuthToken()), "UTF-8"));
-                            } catch (UnsupportedEncodingException e) {
-                                LOG.error(e.getMessage(), e);
-                            }
-                        }
-                        presence.addFeature(new AuthTokenFeature(iq.getAuthToken()));
-                    }
+                    LOG.debugf("updating auth token on presence {0} to {1}", presence, iq);
+                    presence.addFeature(new AuthTokenFeature(iq.getAuthToken()));
                 }  else {
-                    LOG.debugf("auth token {0} for presence {1} is pending", iq.getAuthToken(), iq.getFrom());
+                    LOG.debugf("auth token {0} for presence {1} is pending", iq, iq.getFrom());
                     pendingAuthTokens.put(iq.getFrom(), iq.getAuthToken());
                 }
             }

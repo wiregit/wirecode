@@ -37,11 +37,17 @@ public class AuthTokenIQ extends IQ {
         }
     }
     
+    /**
+     * @param authToken must not be null
+     */
     public AuthTokenIQ(byte [] authToken) {
         this.authToken = Objects.nonNull(authToken, "authToken");
     }
 
-    public byte [] getAuthToken() {
+    /**
+     * @return not null
+     */
+    public byte[] getAuthToken() {
         return authToken;
     }
 
@@ -50,5 +56,10 @@ public class AuthTokenIQ extends IQ {
         authTokenElement.append("<token value=\"").append(StringUtils.getUTF8String(Base64.encodeBase64(authToken))).append("\"/>");
         authTokenElement.append("</auth-token>");
         return authTokenElement.toString();
-    } 
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toUTF8String(Base64.encodeBase64(authToken));
+    }
 }
