@@ -5,7 +5,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.limewire.common.LimeWireCommonModule;
@@ -38,6 +40,7 @@ import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
+import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl.Element;
 import org.xmlpull.v1.XmlPullParserException;
 
 import com.google.inject.Guice;
@@ -280,12 +283,15 @@ public class XMPPServiceTest extends BaseTestCase {
         Thread.sleep(SLEEP);
 
         Presence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
-        FileMetaDataImpl metaData = new FileMetaDataImpl();
-        metaData.setId(new Random().nextInt() + "");
-        metaData.setName("a_cool_file.txt");
-        metaData.setSize(1000);
-        metaData.setCreateTime(new Date());
-        metaData.setDescription("cool file");
+        Map<Element, String> data = new EnumMap<Element, String>(Element.class);
+        data.put(Element.id, new Random().nextInt() + "");
+        data.put(Element.name, "a_cool_file.txt");
+        data.put(Element.size, 1000 + "");
+        data.put(Element.createTime, Long.toString(new Date().getTime()));
+        data.put(Element.description, "cool file");
+        data.put(Element.urns, "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
+        data.put(Element.index, "455");
+        FileMetaDataImpl metaData = new FileMetaDataImpl(data);
         FileOfferFeature feature = (FileOfferFeature)automatedtestfriend2.getFeature(FileOfferFeature.ID);
         assertNotNull(feature);
         FileOfferer fileOfferer = feature.getFeature();

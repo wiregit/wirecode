@@ -195,13 +195,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
             data.put(Element.index, Long.toString(index));
         }
 
-        public Map<String, String> getMetaData() {
-            // TODO
-            return null; // To change body of implemented methods use File |
-            // Settings | File Templates.
-        }
-
-        public Set<String> getURNsAsString() {
+        public Set<String> getUrns() {
             StringTokenizer st = new StringTokenizer(data.get(Element.urns), " ");
             Set<String> set = new HashSet<String>();
             while (st.hasMoreElements()) {
