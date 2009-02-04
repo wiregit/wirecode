@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="lw-build-macros" basedir=".">
+<project name="lw-build-macros" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<description>
 	    A collection of macros for other build files to use.
@@ -134,6 +134,13 @@
 		</sequential>
 	</macrodef>
     
+    <macrodef name="do.resolve-dependencies" description="retreive dependencies with ivy">
+        <sequential>
+            <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+            <ivy:retrieve/>
+        </sequential>
+    </macrodef>
+    
     <macrodef name="do.compile" description="Compiles source and test code.">
         <attribute name="component"/>
         <sequential>
@@ -149,6 +156,7 @@
 	    <sequential>
 	        <do.build-init component="@{component}"/>
 			<mkdir dir="${build.limewire.components.@{component}.classes}"/>
+            <do.resolve-dependencies/>
 			<javac destdir		="${build.limewire.components.@{component}.classes}"
  				   debug	    ="${compile.debug}"
 				   deprecation  ="${compile.deprecation}"
