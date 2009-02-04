@@ -26,7 +26,7 @@ public class XMPPResourceFactoryImplTest extends BaseTestCase  {
         
         context.checking(new Expectations() {
             {
-                // The guid should be looked up at least once
+                // The guid should be looked up at least twice
                 //  or something strange is happening
                 atLeast(2).of(appServices).getMyGUID();
                 will(returnValue(new byte[] {1,2,3,4}));
@@ -52,27 +52,28 @@ public class XMPPResourceFactoryImplTest extends BaseTestCase  {
     public void testGetResourceUniqueness() {
         Mockery context = new Mockery();
         
-        final ApplicationServices appServices = context.mock(ApplicationServices.class);
+        final ApplicationServices appServices1 = context.mock(ApplicationServices.class);
+        final ApplicationServices appServices2 = context.mock(ApplicationServices.class);
         
-        XMPPResourceFactoryImpl factory = new XMPPResourceFactoryImpl(appServices);
+        XMPPResourceFactoryImpl factory1 = new XMPPResourceFactoryImpl(appServices1);
+        XMPPResourceFactoryImpl factory2 = new XMPPResourceFactoryImpl(appServices2);
         
         context.checking(new Expectations() {
             {
-                one(appServices).getMyGUID();
+                atLeast(1).of(appServices1).getMyGUID();
                 will(returnValue(new byte[] {1,2,3,4}));
-                one(appServices).getMyGUID();
+                atLeast(1).of(appServices2).getMyGUID();
                 will(returnValue(new byte[] {4,2,3,1, 0xF}));
 
-                
             }});
         
-       String resource1 = factory.getResource();
-       String resource2 = factory.getResource();
+       String resource1 = factory1.getResource();
+       String resource2 = factory2.getResource();
        assertNotNull(resource1);
        assertNotNull(resource2);
        assertNotEquals("", resource1);
        assertNotEquals("", resource2);
-       assertNotEquals("multiple invocations of getResource with differnt hashes not unique", resource1, resource2);
+       assertNotEquals("multiple invocations of getResource with differnt guids not unique", resource1, resource2);
        
        context.assertIsSatisfied();
     }
