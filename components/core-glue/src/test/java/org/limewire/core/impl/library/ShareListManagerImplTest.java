@@ -6,6 +6,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.friend.Friend;
@@ -61,8 +63,6 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 will(returnValue(lock1));
                 one(friendFileList1).iterator();
                 will(returnValue(iterator1));
-                allowing(friendShareListEventListener).handleEvent(
-                        with(any(FriendShareListEvent.class)));
             }
         });
         ShareListManagerImpl shareListManagerImpl = new ShareListManagerImpl(fileManager,
@@ -72,6 +72,15 @@ public class ShareListManagerImplTest extends BaseTestCase {
         FriendFileList testFriendFileList1 = shareListManagerImpl.getFriendShareList(friend1);
         assertNull(testFriendFileList1);
 
+        context.checking(new Expectations() {
+            {
+                one(friendShareListEventListener)
+                        .handleEvent(
+                                with(new FriendShareListEventMatcher(new FriendShareListEvent(
+                                        FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED, null,
+                                        friend1))));
+            }
+        });
         testFriendFileList1 = shareListManagerImpl.getOrCreateFriendShareList(friend1);
         assertNotNull(testFriendFileList1);
 
@@ -115,8 +124,11 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 will(returnValue(lock1));
                 one(friendFileList1).iterator();
                 will(returnValue(iterator1));
-                allowing(friendShareListEventListener).handleEvent(
-                        with(any(FriendShareListEvent.class)));
+                one(friendShareListEventListener)
+                        .handleEvent(
+                                with(new FriendShareListEventMatcher(new FriendShareListEvent(
+                                        FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED, null,
+                                        friend1))));
             }
         });
         ShareListManagerImpl shareListManagerImpl = new ShareListManagerImpl(fileManager,
@@ -127,9 +139,14 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 .getOrCreateFriendShareList(friend1);
         assertNotNull(testFriendFileList1);
 
+        final FriendFileList friendFileListForEvent = testFriendFileList1;
         context.checking(new Expectations() {
             {
                 one(fileManager).unloadFilesForFriend(friendId1);
+                one(friendShareListEventListener).handleEvent(
+                        with(new FriendShareListEventMatcher(new FriendShareListEvent(
+                                FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED,
+                                friendFileListForEvent, friend1))));
                 one(friendFileList1).removeFileListListener(with(any(EventListener.class)));
             }
         });
@@ -177,8 +194,11 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 will(returnValue(lock1));
                 one(friendFileList1).iterator();
                 will(returnValue(iterator1));
-                allowing(friendShareListEventListener).handleEvent(
-                        with(any(FriendShareListEvent.class)));
+                one(friendShareListEventListener)
+                        .handleEvent(
+                                with(new FriendShareListEventMatcher(new FriendShareListEvent(
+                                        FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED, null,
+                                        friend1))));
             }
         });
         ShareListManagerImpl shareListManagerImpl = new ShareListManagerImpl(fileManager,
@@ -189,9 +209,15 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 .getOrCreateFriendShareList(friend1);
         assertNotNull(testFriendFileList1);
 
+        final FriendFileList friendFileListForEvent = testFriendFileList1;
+
         context.checking(new Expectations() {
             {
                 one(fileManager).removeFriendFileList(friendId1);
+                one(friendShareListEventListener).handleEvent(
+                        with(new FriendShareListEventMatcher(new FriendShareListEvent(
+                                FriendShareListEvent.Type.FRIEND_SHARE_LIST_DELETED,
+                                friendFileListForEvent, friend1))));
                 one(friendFileList1).removeFileListListener(with(any(EventListener.class)));
             }
         });
@@ -200,6 +226,44 @@ public class ShareListManagerImplTest extends BaseTestCase {
         testFriendFileList1 = shareListManagerImpl.getFriendShareList(friend1);
         assertNull(testFriendFileList1);
         context.assertIsSatisfied();
+    }
+
+    private final class FriendShareListEventMatcher extends BaseMatcher<FriendShareListEvent> {
+        private final FriendShareListEvent friendShareListEvent;
+
+        public FriendShareListEventMatcher(FriendShareListEvent friendShareListEvent) {
+            this.friendShareListEvent = friendShareListEvent;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Makes sure the called event matches the given event.");
+        }
+
+        @Override
+        public boolean matches(Object item) {
+
+            if (!FriendShareListEvent.class.isInstance(item)) {
+                return false;
+            }
+            FriendShareListEvent friendShareListEvent = (FriendShareListEvent) item;
+
+            if (!(this.friendShareListEvent.getType() == friendShareListEvent.getType())) {
+                return false;
+            }
+
+            if (!(this.friendShareListEvent.getFriend() == friendShareListEvent.getFriend())) {
+                return false;
+            }
+
+            if (friendShareListEvent.getType() != FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED) {
+                if (!(this.friendShareListEvent.getFileList() == friendShareListEvent.getFileList())) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 
     private class TestListenerSupport implements ListenerSupport<FriendEvent> {
