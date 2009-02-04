@@ -56,4 +56,12 @@ public class AddressIQTest extends BaseTestCase {
         } catch (InvalidIQException iie) {
         }
     }
+    
+    public void testParsesMismatchingClosingElementGracefully() throws Exception {
+        try {
+            new AddressIQ(IQTestUtils.createParser("<address xmlns=\"jabber:iq:lw-address\"><street-address value=\"abc\"/></different-address>"), addressFactory);
+            fail("invalid iq expected");
+        } catch (InvalidIQException iie) {
+        }
+    }
 }
