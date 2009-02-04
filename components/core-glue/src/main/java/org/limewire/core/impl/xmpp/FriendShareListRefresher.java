@@ -48,7 +48,9 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
     private final ScheduledExecutorService scheduledExecutorService;
 
     private final Map<String, LibraryChangedSender> listeners;
-    private final AtomicBoolean fileManagerLoaded = new AtomicBoolean(false);
+    
+    // Package private for testing
+    final AtomicBoolean fileManagerLoaded = new AtomicBoolean(false);
 
     @Inject
     FriendShareListRefresher(BrowseTracker tracker,
@@ -121,7 +123,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
             }
         }        
     
-        private class ScheduledLibraryRefreshSender implements Runnable {
+        class ScheduledLibraryRefreshSender implements Runnable {
     
             @SuppressWarnings("unchecked")
             @Override
