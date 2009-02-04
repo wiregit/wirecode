@@ -397,7 +397,6 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 allowing(featureB).getFeature();
                 will(returnValue(notifierB));
                 
-                
                 // Browse times should at least be compared
                 atLeast(1).of(tracker).lastBrowseTime(friendID);
                 will(returnValue(lastBrowseTime));
