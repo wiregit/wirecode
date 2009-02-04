@@ -9,6 +9,8 @@ import org.limewire.core.api.URN;
 /** A list of FileItems that are locally stored on disk. */
 public interface LocalFileList extends FileList<LocalFileItem> {
 
+    public static final String FILE_ITEM_PROPERTY = "limewire.fileitem";
+    
     /**
      * Adds the given file to the list.
      * 
