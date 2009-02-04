@@ -2884,13 +2884,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             URN sha1 = getSha1Urn();
             URN ttroot = tree.getTreeRootUrn();
             tigerTreeCache.get().addRoot(sha1, ttroot);
-            synchronized(fileManager) {
-                List<FileDesc> fds = fileManager.getManagedFileList().getFileDescsMatching(sha1);
-                for(FileDesc fd : fds) {
-                    if (fd == null) // possible for in-network downloads
-                        return;
-                    fd.setTTRoot(ttroot);
-                }
+            List<FileDesc> fds = fileManager.getManagedFileList().getFileDescsMatching(sha1);
+            for(FileDesc fd : fds) {
+                fd.setTTRoot(ttroot);
             }
         }
     }
