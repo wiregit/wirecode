@@ -47,7 +47,7 @@ public class XMPPResourceFactoryImplTest extends BaseTestCase  {
     /**
      * Test the return from getResource is
      *  non null, non empty, and unique
-     *  across invocations with different same guids
+     *  across invocations with different guids
      */
     public void testGetResourceUniqueness() {
         Mockery context = new Mockery();
