@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -20,6 +21,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.FinishedLoadingListener;
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender;
+import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender.ScheduledLibraryRefreshSender;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.User;
@@ -27,6 +29,7 @@ import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
 
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.ManagedFileList;
@@ -160,6 +163,8 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         
         finishedLoadingListener.handleEvent(event);
         finishedLoadingListener.handleEvent(event);
+        
+        context.assertIsSatisfied();
     }
     
     
@@ -245,6 +250,47 @@ public class FriendShareListRefresherTest extends BaseTestCase {
             }});
         
         finishedLoadingListener.handleEvent(event);
+        
+        context.assertIsSatisfied();
     }
     
+    /**
+     * Create a new LibraryChangedSender within a ready FriendShareListRefresher and 
+     *  fire a listChanged event.  Ensure that a new runnable is scheduled for the
+     *  library refresh.
+     */
+    @SuppressWarnings("unchecked")
+    public void testLibraryChangedSenderListChanged() {
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+
+        final BrowseTracker tracker = context.mock(BrowseTracker.class);
+        final XMPPService xmppService = context.mock(XMPPService.class);
+        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
+        
+        ListEvent<LocalFileItem> event = context.mock(ListEvent.class);
+        
+        final Friend friend = context.mock(Friend.class);
+        
+        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
+                xmppService, scheduledExecutorService);
+        friendShareListRefresher.fileManagerLoaded.set(true);
+        
+        final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
+        
+        context.checking(new Expectations() {
+            {
+                // Assertions
+                exactly(1).of(scheduledExecutorService).schedule(with(any(ScheduledLibraryRefreshSender.class)),
+                        with(any(Integer.class)), with(any(TimeUnit.class)));
+                
+            }});
+        
+        libraryChangedSender.listChanged(event);
+        
+        context.assertIsSatisfied();
+    }
+
 }
