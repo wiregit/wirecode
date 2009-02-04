@@ -341,7 +341,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     }
 
     /**
-     * Force fire a refresh action with the last browse time before the 
+     * Force fire a refresh action with the last browse time after the 
      *  last refresh time, therefore with notifications necessary.
      *  
      * Ensure that the browse tracker and friend presence notifications are made.  
