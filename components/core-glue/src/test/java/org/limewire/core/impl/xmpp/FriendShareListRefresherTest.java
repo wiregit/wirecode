@@ -1,9 +1,12 @@
 package org.limewire.core.impl.xmpp;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.Sequence;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.browse.server.BrowseTracker;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LocalFileItem;
@@ -12,11 +15,13 @@ import org.limewire.core.impl.xmpp.FriendShareListRefresher.FinishedLoadingListe
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.BaseTestCase;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
 
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.ManagedListStatusEvent;
 
 public class FriendShareListRefresherTest extends BaseTestCase {
 
@@ -53,6 +58,9 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
+    /**
+     * Confirm completion listeners are added and removed with respective friend share list events.
+     */
     @SuppressWarnings("unchecked")
     public void testHandleEvent() {
         Mockery context = new Mockery() {
@@ -111,8 +119,36 @@ public class FriendShareListRefresherTest extends BaseTestCase {
 
     }
     
-    public void testFinishedLoadingListener() {
+    /**
+     * Fire handleEvent() of the FinishedLoadingListener with SAVE and LOAD_FINISHING.
+     * 
+     * Confirm that nothing happens
+     */
+    public void testFinishedLoadingListenerOtherEvents() {
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+
+        final BrowseTracker tracker = context.mock(BrowseTracker.class);
+        final XMPPService xmppService = context.mock(XMPPService.class);
+        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
+        final ManagedListStatusEvent event = context.mock(ManagedListStatusEvent.class);
         
+        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
+                xmppService, scheduledExecutorService);
+
+        final FinishedLoadingListener finishedLoadingListener = friendShareListRefresher.new FinishedLoadingListener();
+        
+        context.checking(new Expectations() {
+            {   exactly(1).of(event).getType();
+                will(returnValue(ManagedListStatusEvent.Type.SAVE));
+                exactly(1).of(event).getType();
+                will(returnValue(ManagedListStatusEvent.Type.LOAD_FINISHING));
+            }});
+        
+        finishedLoadingListener.handleEvent(event);
+        finishedLoadingListener.handleEvent(event);
     }
     
 }
