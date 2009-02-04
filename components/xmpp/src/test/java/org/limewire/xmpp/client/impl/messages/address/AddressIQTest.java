@@ -1,5 +1,8 @@
 package org.limewire.xmpp.client.impl.messages.address;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.net.address.AddressFactory;
@@ -13,6 +16,7 @@ public class AddressIQTest extends BaseTestCase {
 
     private AddressFactory addressFactory;
     private ConnectableSerializer serializer;
+    private Mockery context;
     
     public AddressIQTest(String name) {
         super(name);
@@ -23,6 +27,7 @@ public class AddressIQTest extends BaseTestCase {
         addressFactory = new AddressFactoryImpl();
         serializer = new ConnectableSerializer();
         addressFactory.registerSerializer(serializer);
+        context = new Mockery();
     }
     
     public void testParsesOwnOutput() throws Exception {
@@ -31,6 +36,21 @@ public class AddressIQTest extends BaseTestCase {
         
         AddressIQ parsedAddressIQ = new AddressIQ(IQTestUtils.createParser(addressIQ.getChildElementXML()), addressFactory);
         assertEquals(connectable, parsedAddressIQ.getAddress());        
+    }
+    
+    public void testParsesWellFormedInput() throws Exception {
+        final AddressFactory addressFactory = context.mock(AddressFactory.class);
+        final Address address = context.mock(Address.class);
+     
+        context.checking(new Expectations() {{
+            one(addressFactory).deserialize("mock-address", new byte[] { 'h', 'e', 'l', 'l', 'o' });
+            will(returnValue(address));
+        }});
+        
+        AddressIQ addressIQ = new AddressIQ(IQTestUtils.createParser("<address xmlns=\"jabber:iq:lw-address\"><mock-address value=\"aGVsbG8=\"/></address>"), addressFactory);
+        assertSame(address, addressIQ.getAddress());        
+        
+        context.assertIsSatisfied();
     }
     
     public void testParsesMissingAddressElementGracefully() throws Exception {
@@ -52,14 +72,6 @@ public class AddressIQTest extends BaseTestCase {
     public void testParsesUnknownAddressTypeGracefully() throws Exception {
         try {
             new AddressIQ(IQTestUtils.createParser("<address xmlns=\"jabber:iq:lw-address\"><street-address value=\"abc\"/></address>"), addressFactory);
-            fail("invalid iq expected");
-        } catch (InvalidIQException iie) {
-        }
-    }
-    
-    public void testParsesMismatchingClosingElementGracefully() throws Exception {
-        try {
-            new AddressIQ(IQTestUtils.createParser("<address xmlns=\"jabber:iq:lw-address\"><street-address value=\"abc\"/></different-address>"), addressFactory);
             fail("invalid iq expected");
         } catch (InvalidIQException iie) {
         }
