@@ -139,7 +139,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
      * 
      * Confirm that nothing happens
      */
-    public void testFinishedLoadingListenerOtherEvents() {
+    public void testFinishedLoadingListenerWithOtherEvents() {
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
             }
@@ -175,7 +175,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
      * Ensure that refreshes are sent to all friend and presences
      */
     @SuppressWarnings("unchecked")
-    public void testFinishedLoadingListenerLoadComplete() {
+    public void testFinishedLoadingListenerWithLoadComplete() {
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
             }
@@ -261,7 +261,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
      *  library refresh.
      */
     @SuppressWarnings("unchecked")
-    public void testLibraryChangedSenderListChanged() {
+    public void testLibraryChangedSenderWithListChanged() {
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
             }
@@ -294,14 +294,13 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
     
-    
     /**
      * Force fire a refresh action with the last browse time before the 
      *  last refresh time, therefore with no notifications necessary.
      *  
      * Ensure no notifications are made.
      */
-    public void testScheduledLibraryRefreshSenderNoRefreshNeeded() {
+    public void testScheduledLibraryRefreshSenderWithNoRefreshNeeded() {
         Mockery context = new Mockery();
         
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
@@ -341,4 +340,78 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
+    /**
+     * Force fire a refresh action with the last browse time before the 
+     *  last refresh time, therefore with notifications necessary.
+     *  
+     * Ensure that the browse tracker and friend presence notifications are made.  
+     */
+    @SuppressWarnings("unchecked")
+    public void testScheduledLibraryRefreshSender() {
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+        
+        final BrowseTracker tracker = context.mock(BrowseTracker.class);
+        final XMPPService xmppService = context.mock(XMPPService.class);
+        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
+        
+        
+        final Map<String, FriendPresence> presences = new HashMap<String, FriendPresence>();
+        presences.put("a", context.mock(FriendPresence.class));
+        presences.put("b", context.mock(FriendPresence.class));
+        
+        final Feature<LibraryChangedNotifier> featureA = context.mock(Feature.class);
+        final Feature<LibraryChangedNotifier> featureB = context.mock(Feature.class);
+        
+        final LibraryChangedNotifier notifierA = context.mock(LibraryChangedNotifier.class);
+        final LibraryChangedNotifier notifierB = context.mock(LibraryChangedNotifier.class); 
+        
+        final Friend friend = context.mock(Friend.class);
+        
+        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
+                xmppService, scheduledExecutorService);
+        
+        final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
+        
+        final ScheduledLibraryRefreshSender scheduledLibraryRefreshSender = libraryChangedSender.new ScheduledLibraryRefreshSender();
+        
+        final String friendID = "anID";
+        final Date lastBrowseTime = new Date(100);
+        final Date lastRefreshTime = new Date(50);
+        
+        context.checking(new Expectations() {
+            {   
+                // Non critical actions
+                allowing(friend).getId();
+                will(returnValue(friendID));
+                allowing(friend).getFriendPresences();
+                will(returnValue(presences));
+                allowing(presences.get("a")).getFeature(LibraryChangedNotifierFeature.ID);
+                will(returnValue(featureA));
+                allowing(presences.get("b")).getFeature(LibraryChangedNotifierFeature.ID);
+                will(returnValue(featureB));
+                allowing(featureA).getFeature();
+                will(returnValue(notifierA));
+                allowing(featureB).getFeature();
+                will(returnValue(notifierB));
+                
+                
+                // Browse times should at least be compared
+                atLeast(1).of(tracker).lastBrowseTime(friendID);
+                will(returnValue(lastBrowseTime));
+                atLeast(1).of(tracker).lastRefreshTime(friendID);
+                will(returnValue(lastRefreshTime));
+                
+                // Assertions
+                exactly(1).of(tracker).sentRefresh(friendID);
+                exactly(1).of(notifierA).sendLibraryRefresh();
+                exactly(1).of(notifierB).sendLibraryRefresh();
+            }});
+        
+        scheduledLibraryRefreshSender.run();
+        
+        context.assertIsSatisfied();
+    }
 }
