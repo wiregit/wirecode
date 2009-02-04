@@ -32,7 +32,7 @@ public class FileTransferIQTest extends BaseTestCase {
             one(metaData).getCreateTime();
             will(returnValue(date));
             one(metaData).getDescription();
-            will(returnValue("description>>>now]][["));
+            will(returnValue("help & description>>>now]][["));
             one(metaData).getId();
             will(returnValue("id"));
             one(metaData).getIndex();
@@ -53,7 +53,7 @@ public class FileTransferIQTest extends BaseTestCase {
         FileMetaData parsedMetaData = parsedIQ.getFileMetaData();
         
         assertEquals(date, parsedMetaData.getCreateTime());
-        assertEquals("description>>>now]][[", parsedMetaData.getDescription());
+        assertEquals("help & description>>>now]][[", parsedMetaData.getDescription());
         assertEquals("id", parsedMetaData.getId());
         assertEquals(Long.MIN_VALUE, parsedMetaData.getIndex());
         assertEquals("hold <bold>this</bold>.html", parsedMetaData.getName());

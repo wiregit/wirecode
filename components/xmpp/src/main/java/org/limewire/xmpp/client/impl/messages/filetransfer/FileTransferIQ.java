@@ -88,6 +88,7 @@ public class FileTransferIQ extends IQ {
                 return new FileTransferIQ(parser);
             } catch (InvalidIQException ie) {
                 LOG.debug("invalid iq", ie);
+                // throwing would close connection
                 return null;
             }
         }

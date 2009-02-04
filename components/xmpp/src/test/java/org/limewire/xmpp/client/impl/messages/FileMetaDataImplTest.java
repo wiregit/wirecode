@@ -19,10 +19,10 @@ public class FileMetaDataImplTest extends BaseTestCase {
     }
     
     public void testRandomUnescapedText() throws Exception {
-        XmlPullParser parser = IQTestUtils.createParser("<file><name>\\//[[hello\"'kdf;;.?---</name><size>2</size><index>0</index><createTime>50005</createTime><urns>urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB</urns></file>");
+        XmlPullParser parser = IQTestUtils.createParser("<file><name>&quot;&amp;\\//[[hello\"'kdf;;.?---</name><size>2</size><index>0</index><createTime>50005</createTime><urns>urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB</urns></file>");
         parser.next();
         FileMetaDataImpl metaData = new FileMetaDataImpl(parser);
-        assertEquals("\\//[[hello\"'kdf;;.?---", metaData.getName());
+        assertEquals("\"&\\//[[hello\"'kdf;;.?---", metaData.getName());
     }
     
     public void testHandlesMissingNonMandatoryParsedElementsGracefully() throws Exception {

@@ -164,19 +164,11 @@ public class FileMetaDataImpl implements FileMetaData {
         put(Element.createTime, Long.toString(date.getTime()));
     }
     
-    private String escape(String value) {
-        if (value.contains("<") || value.contains(">")) {
-            return "<![CDATA[" + value + "]]>";
-        } else {
-            return value;
-        }
-    }
-
     public String toXML() {
         StringBuilder fileMetadata = new StringBuilder("<file>");
         for(Entry<String, String> entry : data.entrySet()) { 
             fileMetadata.append("<").append(entry.getKey()).append(">");
-            fileMetadata.append(escape(entry.getValue()));
+            fileMetadata.append(org.jivesoftware.smack.util.StringUtils.escapeForXML(entry.getValue()));
             fileMetadata.append("</").append(entry.getKey()).append(">");
         }
         fileMetadata.append("</file>");
