@@ -82,21 +82,21 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
                 
         RemoteFileDesc rfdNew = deserialiser.createClone(rfdOrig, addressNew);
         
-        assertTrue(addressNew == rfdNew.getAddress());
-        assertTrue(index == rfdNew.getIndex());
-        assertTrue(fileName == rfdNew.getFileName());
-        assertTrue(size == rfdNew.getSize());
-        assertTrue(clientGUID == rfdNew.getClientGUID());
-        assertTrue(speed == rfdNew.getSpeed());
-        assertTrue(chat == rfdNew.isChatEnabled());
-        assertTrue(quality == rfdNew.getQuality());;
-        assertTrue(browseHost == rfdNew.isBrowseHostEnabled());
-        assertTrue(xmlDoc == rfdNew.getXMLDocument());
-        assertTrue(urns == rfdNew.getUrns());
-        assertTrue(vendor == rfdNew.getVendor());
-        assertTrue(createTime == rfdNew.getCreationTime());
-        assertTrue(http11 == rfdNew.isHTTP11());
-        
+        assertEquals(addressNew, rfdNew.getAddress());
+        assertEquals(index, rfdNew.getIndex());
+        assertEquals(fileName, rfdNew.getFileName());
+        assertEquals(size, rfdNew.getSize());
+        assertEquals(clientGUID, rfdNew.getClientGUID());
+        assertEquals(speed, rfdNew.getSpeed());
+        assertEquals(chat, rfdNew.isChatEnabled());
+        assertEquals(quality, rfdNew.getQuality());;
+        assertEquals(browseHost, rfdNew.isBrowseHostEnabled());
+        assertEquals(xmlDoc, rfdNew.getXMLDocument());
+        assertEquals(urns, rfdNew.getUrns());
+        assertEquals(vendor, rfdNew.getVendor());
+        assertEquals(createTime, rfdNew.getCreationTime());
+        assertEquals(http11, rfdNew.isHTTP11());
+                
         context.assertIsSatisfied();
     }
     
