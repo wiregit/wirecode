@@ -35,17 +35,17 @@ public class XMPPRemoteFileDescDeserializer implements RemoteFileDescDeserialize
     
     @Override
     public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
-            long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
+            long size, byte[] clientGUID, int speed, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             String vendor, long createTime) {
-        return new XMPPRemoteFileDesc((XMPPAddress)address, index, filename, size, clientGUID, speed, chat, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, addressFactory, addressResolver);
+        return new XMPPRemoteFileDesc((XMPPAddress)address, index, filename, size, clientGUID, speed, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, addressFactory, addressResolver);
     }
 
     /**
      * Creates a {@link XMPPRemoteFileDesc} clone of remote file desc replacing the address with <code>address</code>.
      */
     public RemoteFileDesc createClone(RemoteFileDesc rfd, XMPPAddress address) {
-       return new XMPPRemoteFileDesc(address, rfd.getIndex(), rfd.getFileName(), rfd.getSize(), rfd.getClientGUID(), rfd.getSpeed(), rfd.isChatEnabled(), rfd.getQuality(), rfd.isBrowseHostEnabled(), 
-               rfd.getXMLDocument(), rfd.getUrns(), rfd.isReplyToMulticast(), rfd.getVendor(), rfd.getCreationTime(), addressFactory, addressResolver); 
+       return new XMPPRemoteFileDesc(address, rfd.getIndex(), rfd.getFileName(), rfd.getSize(), rfd.getClientGUID(), rfd.getSpeed(), rfd.getQuality(), rfd.isBrowseHostEnabled(), rfd.getXMLDocument(), 
+               rfd.getUrns(), rfd.isReplyToMulticast(), rfd.getVendor(), rfd.getCreationTime(), addressFactory, addressResolver); 
     }
 }

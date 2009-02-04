@@ -181,9 +181,9 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
             urns = Collections.emptySet();
         boolean http11 = !urns.isEmpty();
 
-        return new RemoteFileDescImpl(address, index, filename, size, clientGUID, speed, chat,
-                quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, 
-                createTime, http11, addressFactory);
+        return new RemoteFileDescImpl(address, index, filename, size, clientGUID, speed, quality,
+                browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, 
+                http11, addressFactory);
     }
 
     public RemoteFileDesc createUrlRemoteFileDesc(Address address, String filename,
@@ -245,7 +245,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
                 return deserializer.createRemoteFileDesc(remoteHostMemento.getAddress(addressFactory, pushEndpointFactory), remoteHostMemento.getIndex(), 
                         remoteHostMemento.getFileName(),
                         remoteHostMemento.getSize(), remoteHostMemento.getClientGuid(),
-                        remoteHostMemento.getSpeed(), remoteHostMemento.isChat(), remoteHostMemento
+                        remoteHostMemento.getSpeed(), remoteHostMemento
                         .getQuality(), remoteHostMemento.isBrowseHost(),
                         xml(remoteHostMemento.getXml()), remoteHostMemento.getUrns(),
                         remoteHostMemento.isReplyToMulticast(), 
@@ -293,8 +293,8 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
                 return creator.create(address, index, filename, size, clientGUID, speed, chat, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, http1);
             }
         }
-        return new RemoteFileDescImpl(address, index, filename, size, clientGUID, speed, chat, quality,
-                browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, http1, addressFactory);
+        return new RemoteFileDescImpl(address, index, filename, size, clientGUID, speed, quality, browseHost,
+                xmlDoc, urns, replyToMulticast, vendor, createTime, http1, addressFactory);
     }
 
     @Override

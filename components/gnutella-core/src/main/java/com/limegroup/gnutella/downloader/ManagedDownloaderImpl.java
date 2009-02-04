@@ -52,7 +52,6 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
@@ -358,11 +357,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      *  no corrupt file. */
     private volatile File corruptFile;
 
-	/** The list of all chat-enabled hosts for this <tt>ManagedDownloader</tt>
-	 *  instance.
-	 */
-	private DownloadChatList chatList;
-
 	/** The list of all browsable hosts for this <tt>ManagedDownloader</tt>
 	 *  instance.
 	 */
@@ -569,7 +563,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             _activeWorkers=new LinkedList<DownloadWorker>();
             _workers=new ArrayList<DownloadWorker>();
             _queuedWorkers = new HashMap<DownloadWorker, Integer>();
-    		chatList=new DownloadChatList();
             browseList=new DownloadBrowseHostList();
             stopped=false;
             paused = false;
@@ -2200,14 +2193,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
         setState(DownloadState.DOWNLOADING);
         addActiveWorker(worker);
-        chatList.addHost(worker.getDownloader());
         browseList.addHost(worker.getDownloader());
     }
     
     public void workerFailed(DownloadWorker failed) {
         HTTPDownloader downloader = failed.getDownloader();
         if (downloader != null) {
-            chatList.removeHost(downloader);
             browseList.removeHost(downloader);
         }
     }
@@ -2716,19 +2707,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return sources;
     }    
    
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getChatEnabledHost()
-     */
-	public synchronized Endpoint getChatEnabledHost() {
-		return chatList.getChatEnabledHost();
-	}
-
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.downloader.ManagedDownloader#hasChatEnabledHost()
-     */
-	public synchronized boolean hasChatEnabledHost() {
-		return chatList.hasChatEnabledHost();
-	}
 
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getBrowseEnabledHost()

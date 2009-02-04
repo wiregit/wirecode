@@ -63,9 +63,9 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     private int hashCode = -1;
     
     public XMPPRemoteFileDesc(XMPPAddress address, long index, String filename,
-            long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
-            String vendor, long createTime, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+            long size, byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
+            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            long createTime, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
         this.address = address;
         this.index = index;
         this.filename = filename;
@@ -195,7 +195,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
 
     @Override
     public RemoteHostMemento toMemento() {
-        return new RemoteHostMemento(address, filename, index, clientGUID, speed, size, true, quality, replyToMulticast, getXml(), urns, true, vendor, http11, TYPE, addressFactory);
+        return new RemoteHostMemento(address, filename, index, clientGUID, speed, size, quality, replyToMulticast, getXml(), urns, true, vendor, http11, TYPE, addressFactory);
     }
     
     private String getXml() {
@@ -265,12 +265,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     public boolean isBrowseHostEnabled() {
         return true;
     }
-
-    @Override
-    public boolean isChatEnabled() {
-        return true;
-    }
-
+ 
     @Override
     public boolean isHTTP11() {
         return http11;

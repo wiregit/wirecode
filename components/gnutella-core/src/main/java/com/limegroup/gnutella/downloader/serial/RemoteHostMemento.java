@@ -39,8 +39,8 @@ public class RemoteHostMemento implements Serializable {
     private final Map<Keys, Serializable> propertiesMap;
     
     public RemoteHostMemento(Address address, String filename, long index, byte[] clientGuid,
-            int speed, long size, boolean chat, int quality, boolean replyToMulticast, String xml,
-            Set<URN> urns, boolean browseHost, String vendor, boolean http1, String type, AddressFactory addressFactory) {
+            int speed, long size, int quality, boolean replyToMulticast, String xml, Set<URN> urns,
+            boolean browseHost, String vendor, boolean http1, String type, AddressFactory addressFactory) {
 
         this.propertiesMap = new HashMap<Keys, Serializable>(Keys.values().length);
 
@@ -49,7 +49,6 @@ public class RemoteHostMemento implements Serializable {
         propertiesMap.put(Keys.CLIENTGUID, clientGuid);
         propertiesMap.put(Keys.SPEED, speed);
         propertiesMap.put(Keys.SIZE, size);
-        propertiesMap.put(Keys.CHAT, chat);
         propertiesMap.put(Keys.QUALITY, quality);
         propertiesMap.put(Keys.REPLY_TO_MULTICAST, replyToMulticast);
         propertiesMap.put(Keys.XML, xml);

@@ -13,7 +13,7 @@ public interface RemoteFileDescDeserializer {
     void register(RemoteFileDescFactory remoteFileDescFactory);
     
     RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
-            long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
+            long size, byte[] clientGUID, int speed, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             String vendor, long createTime);
         

@@ -19,7 +19,6 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -115,22 +114,6 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         if (getContentLength() != -1) {
             super.initializeIncompleteFile();
         }
-    }
-
-    /**
-     * Can never chat with LWS, return immediately
-     */
-    @Override
-    public Endpoint getChatEnabledHost() {
-        return null;
-    }
-
-    /**
-     * Can never chat with LWS, always return false
-     */
-    @Override
-    public boolean hasChatEnabledHost() {
-        return false;
     }
 
     /**

@@ -60,7 +60,6 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final long size = 12;
         final byte[] clientGUID = new byte[] {'h','e', 'y'};
         final int speed = 20;
-        final boolean chat = false;
         final int quality = 9;
         final boolean browseHost = true;
         final LimeXMLDocument xmlDoc = context.mock(LimeXMLDocument.class);
@@ -76,9 +75,9 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
             }});
         
         RemoteFileDesc rfdOrig = new RemoteFileDescImpl(addressOrig, index, fileName, size,
-                clientGUID, speed, chat, quality ,
-                browseHost, xmlDoc, urns, replyToMuticast, 
-                vendor, createTime, http11, addressFactory);
+                clientGUID, speed, quality, browseHost ,
+                xmlDoc, urns, replyToMuticast, vendor, 
+                createTime, http11, addressFactory);
                 
         RemoteFileDesc rfdNew = deserialiser.createClone(rfdOrig, addressNew);
         
@@ -88,7 +87,6 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         assertEquals(size, rfdNew.getSize());
         assertEquals(clientGUID, rfdNew.getClientGUID());
         assertEquals(speed, rfdNew.getSpeed());
-        assertEquals(chat, rfdNew.isChatEnabled());
         assertEquals(quality, rfdNew.getQuality());;
         assertEquals(browseHost, rfdNew.isBrowseHostEnabled());
         assertEquals(xmlDoc, rfdNew.getXMLDocument());
