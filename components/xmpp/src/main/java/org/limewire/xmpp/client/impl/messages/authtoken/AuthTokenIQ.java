@@ -32,10 +32,6 @@ public class AuthTokenIQ extends IQ {
         } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
     }
     
-    public AuthTokenIQ() {
-        
-    }
-    
     public AuthTokenIQ(byte [] authToken) {
         this.authToken = authToken;
     }
