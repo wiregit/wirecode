@@ -19,19 +19,27 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
+/**
+ * Cell editor for the download display tables.  The cell editor contains an
+ * instance of DownloadTableCell that provides the UI component that handles
+ * user input.
+ */
 public class DownloadTableEditor implements TableCellEditor {
-
     
-    private DownloadTableCell cellComponent;
-	    
-    private DownloadActionHandler actionHandler;
-    private DownloadEditorListener editorListener;
-	
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
+
+    private DownloadTableCell cellComponent;
+	
+    private DownloadActionHandler actionHandler;
+    
+    private DownloadEditorListener editorListener;
 
     private DownloadItem editItem;
 
-	public DownloadTableEditor(DownloadTableCell cellComponent) {
+	/**
+	 * Constructs a DownloadTableEditor with the specified cell component.
+	 */
+    public DownloadTableEditor(DownloadTableCell cellComponent) {
 	    this.cellComponent = cellComponent;
 	}	
 
@@ -44,11 +52,13 @@ public class DownloadTableEditor implements TableCellEditor {
         return cellComponent.getComponent();
 	}
 	
+	/**
+	 * Returns the action listener that handles user actions on the editor
+	 * component.
+	 */
 	public ActionListener getEditorListener() {
 	    return this.editorListener;
 	}
-	
-	
 
     /**
      * Binds editor to downloadItems so that the editor automatically updates
@@ -81,8 +91,6 @@ public class DownloadTableEditor implements TableCellEditor {
 	        cellComponent.update(editItem);
         }
 	}
-	
-	
 	
     @Override
 	public final void addCellEditorListener(CellEditorListener lis) {
@@ -134,16 +142,16 @@ public class DownloadTableEditor implements TableCellEditor {
 		return true;
 	}
 	
-
+    /**
+     * The listener that handles actionPerformed events on the editor
+     * component. 
+     */
     private class DownloadEditorListener implements ActionListener {
-
+        @Override
         public void actionPerformed(ActionEvent e) {
             actionHandler.performAction(e.getActionCommand(), editItem);
             cancelCellEditing();
         }
-
     }
     
-	
-	
 }
