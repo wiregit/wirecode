@@ -246,6 +246,18 @@ public final class HashTreeCacheImpl implements HashTreeCache {
 
     @Override
     public synchronized HashTree addHashTree(URN sha1, HashTree tree) {
+        boolean shouldAdd = hashTreeCalculated(sha1, tree);
+        if(shouldAdd) {
+            Future<HashTree> oldFuture = TTREE_MAP.put(sha1, new SimpleFuture<HashTree>(tree));
+            if(oldFuture != null) {
+                oldFuture.cancel(true);
+            }
+            return tree;
+        }
+        return null;
+    }
+    
+    private synchronized boolean hashTreeCalculated(URN sha1, HashTree tree) {
         URN root = tree.getTreeRootUrn();
         addRoot(sha1, root);
         if (tree.isGoodDepth()) {
@@ -253,20 +265,17 @@ public final class HashTreeCacheImpl implements HashTreeCache {
             if(futureRoot != null) {
                 futureRoot.cancel(true);
             }
-            Future<HashTree> oldFuture = TTREE_MAP.put(sha1, new SimpleFuture<HashTree>(tree));
-            if(oldFuture != null) {
-                oldFuture.cancel(true);
-            }
+            
             dirty = true;
             if (LOG.isDebugEnabled())
                 LOG.debug("added hashtree for urn " +
                           sha1 + ";" + tree.getRootHash());
-            return tree;
+            return true;
         } else {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("hashtree for urn " + sha1 + " had bad depth");
             }
-            return null;
+            return false;
         }
     }
     
@@ -404,7 +413,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
     }
 
     /** Simple runnable that processes the hash of a FileDesc. */
-    private class HashTreeRunner implements Callable<HashTree> {        
+    private class HashTreeRunner implements Callable<HashTree> {
         private final FileDesc FD;
         
         HashTreeRunner(FileDesc fd) {
@@ -414,7 +423,8 @@ public final class HashTreeCacheImpl implements HashTreeCache {
         public HashTree call() throws IOException {
             URN sha1 = FD.getSHA1Urn();
             HashTree tree = tigerTreeFactory.createHashTree(FD); // BLOCKING
-            return addHashTree(sha1, tree);
+            hashTreeCalculated(sha1, tree);
+            return tree;
         }
     }
     
