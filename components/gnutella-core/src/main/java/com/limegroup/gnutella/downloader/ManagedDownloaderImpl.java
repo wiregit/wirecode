@@ -38,7 +38,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.PermanentAddress;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
+import org.limewire.listener.EventMulticaster;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
@@ -419,8 +419,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     private long contentLength = -1;
     
-    private final EventListenerList<DownloadStateEvent> listeners = 
-        new EventListenerList<DownloadStateEvent>(); 
+    private final EventMulticaster<DownloadStateEvent> listeners;
     
     protected final DownloadManager downloadManager;
     protected final FileManager fileManager;
@@ -458,6 +457,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * You must set initial source via {@link #addInitialSources},
      * set the save file via {@link #setSaveFile(File, String, boolean)},
      * and call {@link #initialize} prior to starting this download.
+     * @param downloadStateMulticaster TODO
      */
     @Inject
     protected ManagedDownloaderImpl(SaveLocationManager saveLocationManager,
@@ -474,8 +474,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
             RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
-            SocketsManager socketsManager) {
+            SocketsManager socketsManager, 
+            @Named("downloadStateMulticaster") EventMulticaster<DownloadStateEvent> downloadStateMulticaster) {
         super(saveLocationManager);
+        this.listeners = downloadStateMulticaster;
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.incompleteFileManager = incompleteFileManager;
@@ -2585,7 +2587,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             this.stateTime=System.currentTimeMillis()+time;
         }
         if (oldState != newState) {
-            fireEventLater(newState);
+            listeners.broadcast(new DownloadStateEvent(ManagedDownloaderImpl.this, newState));
         }
     }
     
@@ -3136,17 +3138,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return cachedRFDs;
     }
     
-    /**
-     * Fires status event in background executro thread. 
-     */
-    private void fireEventLater(final DownloadState status) {
-        backgroundExecutor.execute(new Runnable() {
-            public void run() {
-                listeners.broadcast(new DownloadStateEvent(ManagedDownloaderImpl.this, status));
-            }
-        });
-    }
-
     public void addListener(EventListener<DownloadStateEvent> listener) {
         listeners.addListener(listener);
     }
