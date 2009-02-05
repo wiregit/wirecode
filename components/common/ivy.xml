@@ -1,17 +1,13 @@
 <ivy-module version="1.0">
     <info organisation="org.limewire" module="common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"/>
-    
-    <!--configurations>
-       	<conf name="build" visibility="private" description="compilation only need api jar" />
-    	<conf name="noexternaljar" description="use only company jar" />
-    	<conf name="withexternaljar" description="use company jar and third party jars" />    
-    </configurations-->
-    
+    <publications>
+        <artifact name="lw-common"/>    
+    </publications>    
     <dependencies>
         <dependency org="commons-logging" name="commons-logging" rev="1.1"/>
         <dependency org="com.ibm.icu" name="icu4j" rev="3.4.4"/>
         <dependency org="com.google.code.guice" name="guice" rev="2.0-snapshot-20080915"/>
-        <dependency org="com.google.code.guice" name="assistedinject" rev="2.0-snapshot-20080523"/>
+        <!--dependency org="com.google.code.guice" name="assistedinject" rev="2.0-snapshot-20080523"/-->
         <!--dependency org="org.limewire" name="lw-test-util" rev="4.13.1-SNAPSHOT"/-->
         <!--dependency org="net.jcip" name="jcip-annotations" rev="1.0"/-->
     </dependencies>

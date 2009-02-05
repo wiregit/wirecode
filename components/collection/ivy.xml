@@ -1,0 +1,8 @@
+<ivy-module version="1.0">
+    <info organisation="org.limewire" module="collection" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"/>
+    
+    <dependencies>
+        <dependency org="net.java.dev.glazedlists" name="glazedlists_java15" rev="1.7.0-lw-20090109"/>
+        <dependency org="org.limewire" name="lw-common" rev="latest.integration"/>
+    </dependencies>
+</ivy-module>

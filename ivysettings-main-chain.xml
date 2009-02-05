@@ -21,6 +21,7 @@
 		<chain name="main" dual="true">
 			<resolver ref="shared"/>
 			<resolver ref="public"/>
+            <resolver ref="limewire-repository"/>
 		</chain>
 	</resolvers>
 </ivysettings>

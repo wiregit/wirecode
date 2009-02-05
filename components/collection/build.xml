@@ -11,13 +11,7 @@
     <import file="../common/build.xml"/>
     
     <target name="initialize" depends="lw-common.initialize" unless="initialized.collection">
-        <do.setup-properties component="collection">
-			<src-classpath>
-				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-				<pathelement location="${limewire.lib.jars}/glazedlists-1.7.0_java15.jar"/>				
-			    <path refid="build.limewire.components.common.buildpath"/>
-			</src-classpath>
-        </do.setup-properties>
+        <do.setup-properties component="collection"/>
     </target>
 	
 	<target name="clean" depends="lw-common.clean">

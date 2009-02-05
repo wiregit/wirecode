@@ -12,15 +12,7 @@
     <import file="../test-util/build.xml"/>
     
     <target name="initialize" depends="lw-test-util.initialize" unless="initialized.common">
-        <do.setup-properties component="common">
-			<src-classpath>
-				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-				<pathelement location="${limewire.lib.jars}/icu4j.jar"/>
-				<pathelement location="${limewire.lib.jars}/guice-snapshot.jar"/>
-				<pathelement location="${limewire.lib.jars}/aopalliance.jar"/>
-				<pathelement location="${limewire.lib.jars}/jcip-annotations.jar"/>
-            </src-classpath>
-        </do.setup-properties>
+        <do.setup-properties component="common"/>
     </target>
 	
 	<target name="clean" depends="initialize, lw-test-util.clean-src">

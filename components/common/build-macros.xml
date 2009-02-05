@@ -34,7 +34,6 @@
     <macrodef name="do.setup-properties" description="Sets up common properties every macro uses.">
     	<attribute name="component"/>
         <attribute name="junit" default="${limewire.lib.jars}/tests/junit.jar"/>
-        <element name="src-classpath" optional="true" description="Additional paths for building source"/>
         <element name="tests-classpath" optional="true" description="Additional paths for running tests"/>
         <element name="build-tests-classpath" optional="true" description="Additional paths for building tests"/>
         <sequential>
@@ -67,7 +66,9 @@
         	<property name="build.limewire.components.@{component}.home"
         		      location="${limewire.components.@{component}.home}/build"/>
         	<property name="build.limewire.components.@{component}.classes"
-        			  location="${build.limewire.components.@{component}.home}/classes"/>	
+        			  location="${build.limewire.components.@{component}.home}/classes"/>
+            <property name="build.limewire.components.@{component}.lib"
+        			  location="${build.limewire.components.@{component}.home}/lib"/>	
         	<property name="build.limewire.components.@{component}.tests"
         			  location="${build.limewire.components.@{component}.home}/tests"/>
         	
@@ -97,7 +98,8 @@
             <property name="tests.writetofileonly" value="false"/>
        	
         	<path id="build.limewire.components.@{component}.classpath">
-        	    <src-classpath/>
+                <!-- TODO parameterize 'default' with ivy-module configuration name -->
+                <fileset dir="${build.limewire.components.@{component}.lib}/default/" includes="**/*"/>
         	</path>
             
             <path id="build.limewire.components.@{component}.buildpath">
@@ -135,9 +137,10 @@
 	</macrodef>
     
     <macrodef name="do.resolve-dependencies" description="retreive dependencies with ivy">
+        <attribute name="component"/>
         <sequential>
             <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
-            <ivy:retrieve/>
+            <ivy:retrieve pattern="${build.limewire.components.@{component}.lib}/[conf]/[type]/[artifact]-[version].[ext]"/>
         </sequential>
     </macrodef>
     
@@ -156,7 +159,7 @@
 	    <sequential>
 	        <do.build-init component="@{component}"/>
 			<mkdir dir="${build.limewire.components.@{component}.classes}"/>
-            <do.resolve-dependencies/>
+            <do.resolve-dependencies component="@{component}"/>
 			<javac destdir		="${build.limewire.components.@{component}.classes}"
  				   debug	    ="${compile.debug}"
 				   deprecation  ="${compile.deprecation}"
@@ -174,6 +177,7 @@
 			    </src>
 				<classpath refid="build.limewire.components.@{component}.classpath"/>
 			</javac>
+            <ivy:publish resolver="local" artifactspattern="${build.limewire.components.@{component}.classes}"/>
 	    </sequential>
 	</macrodef>
     
