@@ -441,7 +441,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
                 throw new IOException("no FDs with SHA1 anymore.");
             }
             
-            URN ttRoot = URN.createTTRootFileFile(FD.getFile()); // BLOCKING
+            URN ttRoot = URN.createTTRootFile(FD.getFile()); // BLOCKING
             List<FileDesc> fds = managedFileList.getFileDescsMatching(FD.getSHA1Urn());
             for(FileDesc fd : fds) {
                 fd.setTTRoot(ttRoot);

@@ -45,7 +45,7 @@ public interface HashTreeCache {
     public void purgeTree(URN sha1);
 
     /**
-     * add a hashtree to the internal list if the tree depth is sufficient
+     * add a hashtree to the internal list if the tree depth is sufficient, null otherwise
      * 
      * @param sha1
      *            the SHA1- <tt>URN</tt> of a file

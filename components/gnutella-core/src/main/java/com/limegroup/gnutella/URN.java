@@ -780,7 +780,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		return type.substring(0,type.indexOf(':', 4)+1); 
 	}
 	
-	public static URN createTTRootFileFile(File file) throws IOException, InterruptedException {
+	public static URN createTTRootFile(File file) throws IOException, InterruptedException {
 	    MessageDigest tt = new MerkleTree(new Tiger());
 	    byte[] buffer = threadLocal.get();
         int read;
