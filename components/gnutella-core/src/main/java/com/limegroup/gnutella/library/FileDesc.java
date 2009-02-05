@@ -61,7 +61,6 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
 
     /**
      * updates this FD as carrying a ttroot.
-     * @return true if we didn't already know about that root
      */
     public void setTTRoot(URN ttroot);
 
