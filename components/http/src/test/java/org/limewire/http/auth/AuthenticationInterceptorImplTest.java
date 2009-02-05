@@ -9,12 +9,15 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
+import org.apache.http.nio.entity.BufferingNHttpEntity;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.NHttpRequestHandler;
 import org.apache.http.nio.protocol.NHttpResponseTrigger;
+import org.apache.http.nio.util.DirectByteBufferAllocator;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.hamcrest.BaseMatcher;
@@ -53,6 +56,14 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
         protectedHandler.setShouldBeCalled(Method.NONE);
         HttpRequest request = new BasicHttpRequest("GET", "/");
         runTest(request, createResponse(1, "WWW-Authenticate: Basic realm=\"secure\"", 401));
+    }
+    
+    public void testProcessEntityRequestNoCredentials() throws Exception {
+        mockery.checking(new Expectations() {{
+            never(authenticator).authenticate(with(any(Credentials.class)));
+        }});
+        protectedHandler.setShouldBeCalled(Method.NONE);
+        runTest(new BasicHttpEntityEnclosingRequest("GET", "/"), false);
     }
 
     public void testGuardedHandlerDoesNotGuard() {
@@ -137,7 +148,7 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
             will(returnValue(true));
         }});
         protectedHandler.setShouldBeCalled(Method.ENTITY_REQUEST);
-        runTest(createEntityEnclosingRequest("hello", "world"));
+        runTest(createEntityEnclosingRequest("hello", "world"), true);
     }
 
     private HttpResponse createResponse(final int times, final String header, final int code) {
@@ -169,10 +180,11 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
         mockery.assertIsSatisfied();
     }
 
-    private void runTest(HttpEntityEnclosingRequest request) throws Exception {
+    private void runTest(HttpEntityEnclosingRequest request, boolean shouldProduceEntityConsumer) throws Exception {
         BasicHttpContext context = new BasicHttpContext();
         requestAuthenticatorImpl.process(request, context);
-        guardedHandler.entityRequest(request, context);
+        ConsumingNHttpEntity entity = guardedHandler.entityRequest(request, context);
+        assertTrue((entity != null) == shouldProduceEntityConsumer);
         assertEquals(protectedHandler.shouldBeCalled, protectedHandler.called);
         mockery.assertIsSatisfied();
     }
@@ -236,7 +248,7 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
                 HttpContext context) throws HttpException, IOException {
             assertNotNull(context.getAttribute(ServerAuthState.AUTH_STATE));
             called = Method.ENTITY_REQUEST;
-            return null;
+            return new BufferingNHttpEntity(new BasicHttpEntity(), new DirectByteBufferAllocator());
         }
 
         @Override
