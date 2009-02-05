@@ -47,7 +47,7 @@
         
     <target name="test-all"
             description="Tests all components and LimeWire tests."
-            depends="compile, lw-tests.test-all, lw-components.test-all, lw-core-glue.test-all">
+            depends="compile, lw-core-glue.test-all, lw-tests.test-all, lw-components.test-all">
         <mkdir dir="${tests.limewire.components.limewire.xml}"/>
         <do.tests2html component="limewire">
             <more-xml-locations>
@@ -121,7 +121,7 @@
             <moretestinfo>
                 <testsources refid="limewire.components.sources.tests"/>
                 <testsources dir="${limewire.components.tests.home}"/>
-                <testsources dir="${limewire.components.core-glue.home}"/>
+                <testsources dir="${limewire.components.core-glue.tests.home}"/>
                 <testresults dir="${tests.limewire.components.all.xml}" includes="TEST-*.xml"/>
                 <testresults dir="${tests.limewire.components.tests.xml}" includes="TEST-*.xml"/>
                 <testresults dir="${tests.limewire.components.core-glue.xml}" includes="TEST-*.xml"/>
