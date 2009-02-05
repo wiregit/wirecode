@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.ui.swing.search;
 
 import java.beans.PropertyChangeEvent;
@@ -10,13 +7,25 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
+/**
+ * A listener to forward DownloadItem property change events to its associated 
+ * visual search result.
+ */
 public class DownloadItemPropertyListener implements PropertyChangeListener {
     private final VisualSearchResult vsr;
 
+    /**
+     * Constructs a DownloadItemPropertyListener for the specified visual
+     * search result.
+     */
     public DownloadItemPropertyListener(VisualSearchResult vsr) {
         this.vsr = vsr;
     }
 
+    /**
+     * Handles a property change event to update the visual search result. 
+     */
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if ("state".equals(evt.getPropertyName())) {
             DownloadState state = (DownloadState) evt.getNewValue();
