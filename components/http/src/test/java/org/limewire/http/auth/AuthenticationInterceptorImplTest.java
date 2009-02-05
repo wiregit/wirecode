@@ -10,6 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.NHttpRequestHandler;
@@ -49,7 +50,7 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
         mockery.checking(new Expectations() {{
             never(authenticator).authenticate(with(any(Credentials.class)));
         }});
-        protectedHandler.setShouldBeCalled(false);
+        protectedHandler.setShouldBeCalled(Method.NONE);
         HttpRequest request = new BasicHttpRequest("GET", "/");
         runTest(request, createResponse(1, "WWW-Authenticate: Basic realm=\"secure\"", 401));
     }
@@ -64,7 +65,7 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
         NHttpRequestHandler guardedHandler = requestAuthenticatorImpl.getGuardedHandler("/test/", handler);
         HttpRequest request = new BasicHttpRequest("GET", "/test/");
         // this one on the other hand should be called
-        handler.setShouldBeCalled(true);
+        handler.setShouldBeCalled(Method.HANDLE);
         
         BasicHttpContext context = new BasicHttpContext();
         final NHttpResponseTrigger trigger = mockery.mock(NHttpResponseTrigger.class);
@@ -95,7 +96,7 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
             }));
             will(returnValue(false));
         }});
-        protectedHandler.setShouldBeCalled(false);
+        protectedHandler.setShouldBeCalled(Method.NONE);
         runTest(createRequest("hello", "world"), createResponse(1, "WWW-Authenticate: Basic realm=\"secure\"", 401));
     }
     
@@ -115,10 +116,30 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
             }));
             will(returnValue(true));
         }});
-        protectedHandler.setShouldBeCalled(false);
+        protectedHandler.setShouldBeCalled(Method.HANDLE);
         runTest(createRequest("hello", "world"), createResponse(0, "", 200));
     }
-    
+
+    public void testProcessValidCredentialsForEntityEnclosingRequest() throws Exception {
+        mockery.checking(new Expectations() {{
+            one(authenticator).authenticate(with(new BaseMatcher<Credentials>() {
+                @Override
+                public boolean matches(Object item) {
+                    Credentials credentials = (Credentials)item;
+                    assertEquals("hello", credentials.getUserPrincipal().getName());
+                    assertEquals("world", credentials.getPassword());
+                    return true;
+                }
+                @Override
+                public void describeTo(Description description) {
+                }
+            }));
+            will(returnValue(true));
+        }});
+        protectedHandler.setShouldBeCalled(Method.ENTITY_REQUEST);
+        runTest(createEntityEnclosingRequest("hello", "world"));
+    }
+
     private HttpResponse createResponse(final int times, final String header, final int code) {
         final HttpResponse response = mockery.mock(HttpResponse.class);
         mockery.checking(new Expectations() {{
@@ -135,7 +156,7 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
         }});
         return response;
     }
-    
+
     private void runTest(HttpRequest request, HttpResponse response) throws Exception {
         BasicHttpContext context = new BasicHttpContext();
         final NHttpResponseTrigger trigger = mockery.mock(NHttpResponseTrigger.class);
@@ -144,7 +165,15 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
         }});
         requestAuthenticatorImpl.process(request, context);
         guardedHandler.handle(request, response, trigger, context);
-        protectedHandler.assertIsSatisfied();
+        assertEquals(protectedHandler.shouldBeCalled, protectedHandler.called);
+        mockery.assertIsSatisfied();
+    }
+
+    private void runTest(HttpEntityEnclosingRequest request) throws Exception {
+        BasicHttpContext context = new BasicHttpContext();
+        requestAuthenticatorImpl.process(request, context);
+        guardedHandler.entityRequest(request, context);
+        assertEquals(protectedHandler.shouldBeCalled, protectedHandler.called);
         mockery.assertIsSatisfied();
     }
     
@@ -161,12 +190,27 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
         return request;
     }
 
+    private HttpEntityEnclosingRequest createEntityEnclosingRequest(String username, String password) {
+        BasicHttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest("GET", "/");
+        request.addHeader(createAuthorizationHeader(username, password));
+        return request;
+    }
+
     private class Unprotectedhandler extends Handler {
         
     }
     
     @RequiresAuthentication
     private class ProtectedHandler extends Handler {
+
+        @Override
+        public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request, HttpContext context) throws HttpException, IOException {
+            ConsumingNHttpEntity entity = super.entityRequest(request, context);
+            ServerAuthState serverAuthState = (ServerAuthState)context.getAttribute(ServerAuthState.AUTH_STATE);
+            assertNotNull(serverAuthState.getCredentials());
+            return entity;
+        }
+
         @Override
         public void handle(HttpRequest arg0, HttpResponse arg1, NHttpResponseTrigger arg2,
                 HttpContext arg3) throws HttpException, IOException {
@@ -177,19 +221,21 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
         }
     }
 
+    enum Method {ENTITY_REQUEST, HANDLE, NONE}
     private class Handler implements NHttpRequestHandler {
+        Method shouldBeCalled;
+        Method called = Method.NONE;
 
-        protected boolean shouldBeCalled;
-        private boolean called = false;
-
-        public void setShouldBeCalled(boolean shouldBeCalled) {
+        public void setShouldBeCalled(Method shouldBeCalled) {
             this.shouldBeCalled = shouldBeCalled;
-            this.called = false;
+            this.called = Method.NONE;
         }
         
         @Override
         public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
                 HttpContext context) throws HttpException, IOException {
+            assertNotNull(context.getAttribute(ServerAuthState.AUTH_STATE));
+            called = Method.ENTITY_REQUEST;
             return null;
         }
 
@@ -198,7 +244,7 @@ public class AuthenticationInterceptorImplTest extends BaseTestCase {
                 NHttpResponseTrigger trigger, HttpContext context) throws HttpException,
                 IOException {
             assertNotNull(context.getAttribute(ServerAuthState.AUTH_STATE));
-            called = true;
+            called = Method.HANDLE;
         }
         
         public boolean assertIsSatisfied() {
