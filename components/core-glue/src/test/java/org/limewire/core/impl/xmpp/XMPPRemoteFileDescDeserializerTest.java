@@ -108,6 +108,12 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
                 quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew);
     }
     
+    /**
+     * Tests the clone function with large values
+     * 
+     *  ERROR?  
+     *   The browseHost param is being lost in the clone
+     */
     public void testCreateCloneMaxBound() {
         
         Mockery context = new Mockery() {
@@ -184,6 +190,44 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         assertEquals(http11, rfdNew.isHTTP11()); // This is failing with http11 == true
                 
         context.assertIsSatisfied();
+    }
+    
+    /**
+     * Confirm XMPPAddressResolver is properly stored and functional 
+     *  after a clone
+     */
+    public void testCreateCloneWithAddressResolver() {
+
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+        
+        final AddressFactory addressFactory = context.mock(AddressFactory.class);
+        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        
+        final XMPPRemoteFileDescDeserializer deserialiser
+            = new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver);
+                        
+        final RemoteFileDesc rfdOrig = context.mock(RemoteFileDesc.class);
+        final XMPPAddress addressNew = context.mock(XMPPAddress.class);
+        
+        context.checking(new Expectations() {
+            {  ignoring(rfdOrig);
+            
+               // Ensure address resolver is active
+               exactly(1).of(addressResolver).getPresence(addressNew);
+               will(returnValue(null));
+            }});
+        
+        
+        RemoteFileDesc rfdNew = deserialiser.createClone(rfdOrig, addressNew);
+        
+        // Invoke a method that uses addressResolver
+        rfdNew.getCredentials();
+        
+        context.assertIsSatisfied();
+        
     }
     
 }
