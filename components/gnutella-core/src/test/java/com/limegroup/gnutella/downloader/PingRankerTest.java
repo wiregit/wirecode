@@ -516,7 +516,7 @@ public class PingRankerTest extends LimeTestCase {
             fail("SHA1 not created");
         }
         return toContext(remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl(host, 1, false), 0, "asdf", TestFile.length(), new byte[16],
-                speed, false, 4, false, null, set, false, "", -1));
+                speed, 4, false, null, set, false, "", -1));
     }
     
     /**

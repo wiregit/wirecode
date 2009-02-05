@@ -42,9 +42,9 @@ public class XMPPRemoteFileDescCreator implements RemoteFileDescCreator {
 
     @Override
     public RemoteFileDesc create(Address address, long index, String filename, long size,
-            byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
-            String vendor, long createTime, boolean http1) {
+            byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
+            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            long createTime, boolean http1) {
         return new XMPPRemoteFileDesc((XMPPAddress)address, index, filename, size, clientGUID, speed, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, addressFactory, addressResolver);
     }
 

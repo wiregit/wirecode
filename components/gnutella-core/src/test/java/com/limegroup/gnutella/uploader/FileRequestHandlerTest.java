@@ -121,7 +121,6 @@ public class FileRequestHandlerTest extends LimeTestCase {
         assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         assertEquals(1234, uploader.getGnutellaPort());
         assertEquals("127.0.0.1", uploader.getHost());
-        assertTrue(uploader.isChatEnabled());
         assertTrue(uploader.isBrowseHostEnabled());
         assertEquals(123456, uploader.getTotalAmountUploaded());
         assertEquals(1, uploader.getUploadBegin());
@@ -146,7 +145,6 @@ public class FileRequestHandlerTest extends LimeTestCase {
         assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         assertEquals(5678, uploader.getGnutellaPort());
         assertEquals("128.0.0.1", uploader.getHost());
-        assertTrue(uploader.isChatEnabled());
         assertTrue(uploader.isBrowseHostEnabled());
     }
     

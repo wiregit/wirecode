@@ -1350,7 +1350,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
         return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, false), 1, "whatever", 10, GUID.makeGuid(), 1,
-                false, 3, false, null, urns, false, "LIME", -1);
+                3, false, null, urns, false, "LIME", -1);
     }
     
     private RemoteFileDesc makeRFD(String sha1) throws Exception {

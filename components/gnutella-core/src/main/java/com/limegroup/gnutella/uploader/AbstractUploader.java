@@ -65,8 +65,6 @@ public abstract class AbstractUploader implements Uploader {
 
     private boolean firstReply;
 
-    private boolean chatEnabled;
-
     private boolean browseHostEnabled;
 
     /**
@@ -230,10 +228,6 @@ public abstract class AbstractUploader implements Uploader {
         return (host != null) ? host : session.getHost();
     }
 
-    public boolean isChatEnabled() {
-        return chatEnabled;
-    }
-
     public boolean isBrowseHostEnabled() {
         return browseHostEnabled;
     }
@@ -319,13 +313,6 @@ public abstract class AbstractUploader implements Uploader {
      */
     public void setBrowseHostEnabled(boolean browseHostEnabled) {
         this.browseHostEnabled = browseHostEnabled;
-    }
-
-    /**
-     * Sets the flag returned by {@link #isChatEnabled()}.
-     */
-    public void setChatEnabled(boolean chatEnabled) {
-        this.chatEnabled = chatEnabled;
     }
 
     /**

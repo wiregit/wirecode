@@ -59,8 +59,8 @@ public class RemoteFileItemFactoryImpl implements RemoteFileItemFactory {
 
         return remoteFileDescFactory.createRemoteFileDesc(address,
                 fileMeta.getIndex(), fileMeta.getName(), fileMeta.getSize(), clientGuid,
-                0, false, 0, true, null, urns, false,
-                null, fileMeta.getCreateTime().getTime());
+                0, 0, true, null, urns, false, null,
+                fileMeta.getCreateTime().getTime());
     }
 
 

@@ -385,12 +385,12 @@ public abstract class DownloadTestCase extends LimeTestCase {
         PushEndpoint copyWithPublicAddress = pushEndpointFactory.createPushEndpoint(pe.getClientGUID(), pe.getProxies(), pe.getFeatures(), pe.getFWTVersion(), new IpPortImpl("127.0.0." + rfdSuffix, 6346));
         
         return remoteFileDescFactory.createRemoteFileDesc(copyWithPublicAddress, 0, savedFile.getName(),
-                TestFile.length(), pe.getClientGUID(), 100, false, 1, false, null, urns, false, "ALT", 0);
+                TestFile.length(), pe.getClientGUID(), 100, 1, false, null, urns, false, "ALT", 0);
     }
 
     protected RemoteFileDesc newRFD(int port, boolean useTLS) throws Exception {
         return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, useTLS), 0, savedFile.getName(), TestFile.length(),
-                GUID.makeGuid(), 100, false, 4, false, null, URN.NO_URN_SET, false, "", -1);
+                GUID.makeGuid(), 100, 4, false, null, URN.NO_URN_SET, false, "", -1);
     }
 
     protected RemoteFileDesc newRFDWithURN(int port, boolean useTLS) throws Exception {
@@ -410,7 +410,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
             fail("SHA1 not created for: " + savedFile, e);
         }
         return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, useTLS), 0, savedFile.getName(), TestFile.length(),
-                GUID.makeGuid(), 100, false, 4, false, null, set, false, "", -1);
+                GUID.makeGuid(), 100, 4, false, null, set, false, "", -1);
     }
 
     /** Returns true if the complete file exists and is complete */

@@ -105,9 +105,8 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
                 rfd.getSize(), // filesize
                 pe.getClientGUID(),
                 rfd.getSpeed(), // speed
-                false, // chat capable
                 rfd.getQuality(), // quality
-                false, // browse hostable
+                false,  // browse hostable
                 rfd.getXMLDocument(), // xml doc
                 rfd.getUrns(), // urns
                 false, // reply to MCast
@@ -139,11 +138,10 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
 
     @Override
     public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
-            long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
-            String vendor, long createTime) {
-        return createRemoteFileDesc(address, index, filename, size, clientGUID, speed, chat, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime,
-                !urns.isEmpty());
+            long size, byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
+            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            long createTime) {
+        return createRemoteFileDesc(address, index, filename, size, clientGUID, speed, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, !urns.isEmpty());
     }
 
     private RemoteFileDesc createRemoteFileDesc(String host, int port, long index, String filename,
@@ -260,11 +258,11 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
                 return createRemoteFileDesc(remoteHostMemento.getAddress(addressFactory, pushEndpointFactory), remoteHostMemento.getIndex(), 
                         remoteHostMemento.getFileName(),
                         remoteHostMemento.getSize(), remoteHostMemento.getClientGuid(),
-                        remoteHostMemento.getSpeed(), remoteHostMemento.isChat(), remoteHostMemento
-                        .getQuality(), remoteHostMemento.isBrowseHost(),
-                        xml(remoteHostMemento.getXml()), remoteHostMemento.getUrns(),
-                        remoteHostMemento.isReplyToMulticast(), 
-                        remoteHostMemento.getVendor(), -1L);
+                        remoteHostMemento.getSpeed(), remoteHostMemento
+                        .getQuality(), remoteHostMemento.isBrowseHost(), xml(remoteHostMemento.getXml()),
+                        remoteHostMemento.getUrns(), remoteHostMemento.isReplyToMulticast(),
+                        remoteHostMemento.getVendor(), 
+                        -1L);
             }
         } catch (SAXException e) {
             throw new InvalidDataException(e);
@@ -285,12 +283,12 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
 
     @Override
     public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
-            long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
-            String vendor, long createTime, boolean http1) {
+            long size, byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
+            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            long createTime, boolean http1) {
         for (RemoteFileDescCreator creator : creators) {
             if (creator.canCreateFor(address)) {
-                return creator.create(address, index, filename, size, clientGUID, speed, chat, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, http1);
+                return creator.create(address, index, filename, size, clientGUID, speed, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, http1);
             }
         }
         return new RemoteFileDescImpl(address, index, filename, size, clientGUID, speed, quality, browseHost,
