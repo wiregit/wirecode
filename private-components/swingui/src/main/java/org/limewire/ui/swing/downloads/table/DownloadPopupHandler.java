@@ -16,6 +16,9 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.I18n;
 
+/**
+ * Popup handler for the download display tables.
+ */
 public class DownloadPopupHandler implements TablePopupHandler {
     private int popupRow = -1;
 
@@ -40,6 +43,10 @@ public class DownloadPopupHandler implements TablePopupHandler {
     private DownloadItem downloadItem;
     private AbstractDownloadTable table;
 
+    /**
+     * Constructs a DownloadPopupHandler using the specified action handler and
+     * display table.
+     */
     public DownloadPopupHandler(DownloadActionHandler actionHandler, AbstractDownloadTable table) {
         this.actionHandler = actionHandler;
         this.table = table;
@@ -206,12 +213,19 @@ public class DownloadPopupHandler implements TablePopupHandler {
         popupMenu.show(component, x, y);
     }
 
+    /**
+     * Returns the index of the table row at the specified (x,y) location.
+     */
     protected int getPopupRow(int x, int y) {
         return table.rowAtPoint(new Point(x, y));
     }
 
+    /**
+     * An ActionListener for the menu items in the popup menu.  
+     */
     private class MenuListener implements ActionListener {
-
+        
+        @Override
         public void actionPerformed(ActionEvent e) {
             actionHandler.performAction(e.getActionCommand(), downloadItem);
             // must cancel editing
@@ -221,5 +235,4 @@ public class DownloadPopupHandler implements TablePopupHandler {
             }
         }
     }
-
 }
