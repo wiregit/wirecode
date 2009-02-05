@@ -68,6 +68,9 @@ public class DownloadTestUtils {
         // (We do the first one separate to ensure that we can cycle from start -> end even if start & end are the same)
         while(timeout > 0 && downloader.getState() != endState) {
             timeout = waitForStatesToEnd(downloader, pump, timeout, middleStates);
+            if(!Arrays.asList(middleStates).contains(downloader.getState()) && downloader.getState() != endState) {
+                AssertComparisons.fail("In unexpected state: " + downloader.getState() + ", expected one of: " + endState + ", or: " + Arrays.asList(middleStates));
+            }
         } 
         
         if(downloader.getState() != endState) {
@@ -77,11 +80,13 @@ public class DownloadTestUtils {
         
     private static long waitForStatesToEnd(Downloader downloader, Runnable pump, long timeout, DownloadState... possibleStates) throws Exception {
         while(timeout > 0 && Arrays.asList(possibleStates).contains(downloader.getState())) {
+//            System.out.println("timeout: " + timeout + ", possible: " + Arrays.asList(possibleStates) + ", current: " + downloader.getState());
             long now = System.currentTimeMillis();
-            Thread.sleep(200);
+            Thread.sleep(50);
             timeout -= System.currentTimeMillis() - now;
             pump.run();
         }
+//        System.out.println("exited. timeout: " + timeout + ", possible: " + Arrays.asList(possibleStates) + ", current: " + downloader.getState());
         return timeout;
     }
 
