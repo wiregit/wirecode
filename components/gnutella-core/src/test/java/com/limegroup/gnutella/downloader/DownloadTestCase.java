@@ -351,23 +351,6 @@ public abstract class DownloadTestCase extends LimeTestCase {
             assertNull("verifying file should be null", vf);
         }
     }
-
-    /**
-     * Performs a generic resume download test.
-     */
-    protected void tResume(File incFile) throws Exception {
-        downloadServices.download(incFile);
-
-        waitForComplete();
-        if (isComplete())
-            LOG.debug("pass" + "\n");
-        else
-            fail("FAILED: complete corrupt");
-
-        IncompleteFileManager ifm = downloadManager.getIncompleteFileManager();
-        VerifyingFile vf = ifm.getEntry(incFile);
-        assertNull("verifying file should be null", vf);
-    }
     
     protected RemoteFileDesc newRFDPush(GUID guid, int port, int suffix) throws Exception {
         return newRFDPush(guid, port, suffix, 1);
