@@ -36,13 +36,14 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
 
     private void loadCustomServer() {
         String custom = SwingUiSettings.USER_DEFINED_XMPP_SERVER.getValue();
-        XMPPAccountConfiguration customConfig;
+        XMPPAccountConfigurationImpl customConfig;
         try {
             customConfig = new XMPPAccountConfigurationImpl(custom, resource);
         } catch(IllegalArgumentException ignored) {
             // Broken or missing custom config - use the default
             customConfig = new XMPPAccountConfigurationImpl(resource);
         }
+        customConfig.setModifyUser(false);
         customConfig.setLabel("Jabber");
         configs.put("Jabber", customConfig);
         String autoLogin = SwingUiSettings.XMPP_AUTO_LOGIN.getValue();

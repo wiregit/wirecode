@@ -24,6 +24,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
 
     private final String resource;
     private final boolean isDebugEnabled;
+    private volatile boolean modifyUser;
     private final boolean requiresDomain;
     private volatile String serviceName;
     private volatile String label;
@@ -34,6 +35,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     public XMPPAccountConfigurationImpl(String configString, String resource)
     throws IllegalArgumentException {
         this.resource = resource;
+        modifyUser = true;
         try {
             StringTokenizer st = new StringTokenizer(configString, ",");
             isDebugEnabled = Boolean.valueOf(st.nextToken());
@@ -56,6 +58,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
 
     public XMPPAccountConfigurationImpl(String resource) {
         this.resource = resource;
+        modifyUser = true;
         isDebugEnabled = false;
         requiresDomain = false;
         serviceName = "";
@@ -102,12 +105,14 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
 
     @Override
     public void setUsername(String username) {
-        // Some servers expect the domain to be included, others don't
-        int at = username.indexOf('@');
-        if(requiresDomain && at == -1)
-            username += "@" + getServiceName(); // Guess the domain
-        else if(!requiresDomain && at > -1)
-            username = username.substring(0, at); // Strip the domain
+        if(modifyUser) {
+            // Some servers expect the domain to be included, others don't
+            int at = username.indexOf('@');
+            if(requiresDomain && at == -1)
+                username += "@" + getServiceName(); // Guess the domain
+            else if(!requiresDomain && at > -1)
+                username = username.substring(0, at); // Strip the domain
+        }
         this.username = username;
     }
 
@@ -147,5 +152,13 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     public String toString() {
         // Return a string that can be parsed back into a config
         return isDebugEnabled + "," + requiresDomain + "," + serviceName + "," + label;
+    }
+
+    /**
+     * If true, the user passed to {@link #setUsername(String)} will be modified
+     * according to the servicename, if false, the user is left alone.
+     */
+    public void setModifyUser(boolean modifyUser) {
+        this.modifyUser = modifyUser;
     }
 }
