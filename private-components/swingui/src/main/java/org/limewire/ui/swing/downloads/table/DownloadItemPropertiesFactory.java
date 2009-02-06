@@ -28,23 +28,40 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Factory class for creating a dialog to display the download item properties.
+ */
 @Singleton
 public class DownloadItemPropertiesFactory implements PropertiesFactory<DownloadItem> {
+    
     private final DialogParam dialogParam;
     
+    /**
+     * Constructs a DownloadItemPropertiesFactory with the specified dialog
+     * parameters.
+     */
     @Inject
     public DownloadItemPropertiesFactory(DialogParam dialogParam) {
         this.dialogParam = dialogParam;
     }
 
+    @Override
     public Properties<DownloadItem> newProperties() {
         return new DownloadItemProperties(dialogParam);
     }
 
-    private static class DownloadItemProperties extends AbstractPropertiableFileDialog implements Properties<DownloadItem>{
+    /**
+     * A dialog to display the download item properties.
+     */
+    private static class DownloadItemProperties extends AbstractPropertiableFileDialog 
+        implements Properties<DownloadItem> {
+        
         private final JPanel download = newPanel(new MigLayout("fill", "[]", "[]"));
         private final LibraryNavigator libraryNavigator;
         
+        /**
+         * Constructs a properties dialog with the specified dialog parameters.
+         */
         private DownloadItemProperties(DialogParam dialogParam) {
             super(dialogParam);
             this.libraryNavigator = dialogParam.getLibraryNavigator();
@@ -62,6 +79,9 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
             showDialog(propertiable.getFileName(), propertiable.getCategory());
         }
 
+        /**
+         * Adds information about the downloading file to the dialog. 
+         */
         private void addDownload(final DownloadItem propertiable) {
             readOnlyInfoModel.setColumnCount(2);
             readOnlyInfoModel.setColumnIdentifiers(new Object[]{tr("Address"), tr("Filename")});
@@ -90,6 +110,10 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
             });
         }
 
+        /**
+         * Prepares the actions to display the downloading file in the OS file
+         * explorer or the library tables.
+         */
         private void addDownloadingFileLocation(final DownloadItem propertiable) {
             location.setLayout(new MigLayout("", "[]10[]15[]", "[top]"));
             location.add(fileLocation, "gapbottom 5,push");
