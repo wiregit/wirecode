@@ -73,14 +73,18 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.EventTableModel;
 
+/**
+ * Base class containing the search results tables for a single category.  
+ * BaseResultPanel contains both the List view and Table view components. 
+ */
 public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
     
     private static final int MAX_DISPLAYED_RESULT_SIZE = 500;
-    private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory;
-    private final Log LOG = LogFactory.getLog(BaseResultPanel.class);
-    
     private static final int TABLE_ROW_HEIGHT = 23;
     private static final int ROW_HEIGHT = 56;
+
+    private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory;
+    private final Log LOG = LogFactory.getLog(BaseResultPanel.class);
     
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
@@ -93,7 +97,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
         new HashMap<VisualSearchResult, RowDisplayResult>();
     
-    private Scrollable visibileComponent;
+    private Scrollable visibleComponent;
     
     private final SearchResultFromWidgetFactory factory;
     private IconManager iconManager;
@@ -103,6 +107,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private final LibraryNavigator libraryNavigator;
     private final LibraryManager libraryManager;
 
+    /**
+     * Constructs a BaseResultPanel with the specified components.
+     */
     BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
@@ -139,7 +146,11 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         setViewType(SearchViewType.LIST);
     }
     
-    private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
+    /**
+     * Configures the List view for search results.
+     */
+    private void configureList(final EventList<VisualSearchResult> eventList, 
+            RowSelectionPreserver preserver, final Navigator navigator, 
             final SearchInfo searchInfo, final PropertiesFactory<VisualSearchResult> properties, 
             final ListViewRowHeightRule rowHeightRule) {
         
@@ -256,6 +267,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         resultsList.addMouseListener(new ResultDownloaderAdaptor());
     }
     
+    /**
+     * Creates a filtered list of visible results using the specified list of 
+     * search results.
+     */
     private EventList<VisualSearchResult> newVisibleFilterList(
             EventList<VisualSearchResult> eventList) {
         return GlazedListsFactory.filterList(eventList, new Matcher<VisualSearchResult>() {
@@ -268,6 +283,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         });
     }
 
+    /**
+     * Configures the Table view for search results.
+     */
     private void configureTable(EventList<VisualSearchResult> eventList,
         final ResultsTableFormat<VisualSearchResult> tableFormat, Navigator navigator,
         PropertiesFactory<VisualSearchResult> properties) {
@@ -291,6 +309,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         resultsTable.addHighlighter(new ColorHighlighter(new DownloadedHighlightPredicate(sortedList), null, tableColors.getDisabledForegroundColor(), null, tableColors.getDisabledForegroundColor()));
     }
 
+    /**
+     * Initializes cell renderers in the Table view column model based on 
+     * column types provided by the specified table format. 
+     */
     protected void setupCellRenderers(final ResultsTableFormat<VisualSearchResult> tableFormat) {
         CalendarRenderer calendarRenderer = new CalendarRenderer();
         IconLabelRenderer iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
@@ -314,18 +336,27 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         }
     }
 
+    /**
+     * Assigns the specified cell renderer to the specified column in the 
+     * Table view column model.   
+     */
     protected void setCellRenderer(int column, TableCellRenderer cellRenderer) {
         TableColumnModel tcm = resultsTable.getColumnModel();
         TableColumn tc = tcm.getColumn(column);
         tc.setCellRenderer(cellRenderer);
     }
     
+    /**
+     * Assigns the specified cell editor to the specified column in the 
+     * Table view column model.   
+     */
     protected void setCellEditor(int column, TableCellEditor editor) {
         TableColumnModel tcm = resultsTable.getColumnModel();
         TableColumn tc = tcm.getColumn(column);
         tc.setCellEditor(editor);
     }
 
+    @Override
     public void download(final VisualSearchResult vsr) {
         try {
             // execute the download preprocessors
@@ -362,6 +393,42 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             }
         }
     }
+
+    /**
+     * Returns the list of visual search results.
+     */
+    public EventList<VisualSearchResult> getResultsEventList() {
+        return baseEventList;
+    }
+
+    /**
+     * Changes whether the list view or table view is displayed.
+     * @param mode LIST or TABLE
+     */
+    public void setViewType(SearchViewType mode) {
+        layout.show(this, mode.name());
+        switch(mode) {
+        case LIST: this.visibleComponent = resultsList; break;
+        case TABLE: this.visibleComponent = resultsTable; break;
+        default: throw new IllegalStateException("unsupported mode: " + mode);
+        }
+    }
+
+    /**
+     * Returns the header component for the scroll pane.  The method returns
+     * null if no header is displayed.
+     */
+    public Component getScrollPaneHeader() {
+        return visibleComponent == resultsTable ?
+            resultsTable.getTableHeader() : null;
+    }
+
+    /**
+     * Returns the results view component currently being displayed. 
+     */
+    public Scrollable getScrollable() {
+        return visibleComponent;
+    }
     
     /**
 	 * Paints the foreground of a table row. 
@@ -377,24 +444,11 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             return result.isSpam();
         }       
     }
-    
-    public EventList<VisualSearchResult> getResultsEventList() {
-        return baseEventList;
-    }
 
     /**
-     * Changes whether the list view or table view is displayed.
-     * @param mode LIST or TABLE
+     * List view listener to handle mouse click event on search result.  When
+     * a result is double-clicked, then downloading is initiated.   
      */
-    public void setViewType(SearchViewType mode) {
-        layout.show(this, mode.name());
-        switch(mode) {
-        case LIST: this.visibileComponent = resultsList; break;
-        case TABLE: this.visibileComponent = resultsTable; break;
-        default: throw new IllegalStateException("unsupported mode: " + mode);
-        }
-    }
-
     private class ResultDownloaderAdaptor extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -408,16 +462,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             }
         }
     }
-
-    public Component getScrollPaneHeader() {
-        return visibileComponent == resultsTable ?
-            resultsTable.getTableHeader() : null;
-    }
-
-    public Scrollable getScrollable() {
-        return visibileComponent;
-    }
-    
+ 
+    /**
+     * Table component to display search results in a vertical list.
+     */
     public static class ListViewTable extends ConfigurableTable<VisualSearchResult> {
         @Resource private Color similarResultParentBackgroundColor;        
         private boolean ignoreRepaints;
