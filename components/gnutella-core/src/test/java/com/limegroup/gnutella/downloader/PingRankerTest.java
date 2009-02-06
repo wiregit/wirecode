@@ -466,6 +466,36 @@ public class PingRankerTest extends LimeTestCase {
     }
     
     /**
+     * Tests that the ranker offers hosts with low round-trip times first
+     */
+    public void testSortedByRoundTripTime() throws Exception {
+        List<RemoteFileDescContext> l = new ArrayList<RemoteFileDescContext>();
+        
+        l.add(newRFDWithURN("1.2.3.4",3));
+        l.add(newRFDWithURN("1.2.3.5",3));
+        l.add(newRFDWithURN("1.2.3.6",3));
+        ranker.addToPool(l);
+        
+        MockPong oneOneThousand = new MockPong(true,true,-1,true,false,true,null);
+        MockPong twoOneThousand = new MockPong(true,true,-1,true,false,true,null);
+        MockPong threeOneThousand = new MockPong(true,true,-1,true,false,true,null);
+        
+        Thread.sleep(1000);
+        ranker.processMessage(oneOneThousand,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.4"),1, spamFilterFactory.createPersonalFilter()));
+        Thread.sleep(1000);
+        ranker.processMessage(twoOneThousand,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.5"),1, spamFilterFactory.createPersonalFilter()));
+        Thread.sleep(1000);
+        ranker.processMessage(threeOneThousand,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.6"),1, spamFilterFactory.createPersonalFilter()));
+        
+        RemoteFileDescContext best = ranker.getBest();
+        assertEquals("1.2.3.4", ((Connectable)best.getAddress()).getAddress());
+        best = ranker.getBest();
+        assertEquals("1.2.3.5", ((Connectable)best.getAddress()).getAddress());
+        best = ranker.getBest();
+        assertEquals("1.2.3.6", ((Connectable)best.getAddress()).getAddress());        
+    }
+    
+    /**
      * Tests that the ranker passes on to other rankers all the hosts it has been
      * told or learned about.
      */

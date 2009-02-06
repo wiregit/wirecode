@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.DualIterator;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
@@ -209,8 +210,16 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         
         pingNewHosts();
         
-        if (LOG.isDebugEnabled())
-            LOG.debug("the best host we came up with is "+ret+" "+ret.getAddress());
+        if (LOG.isDebugEnabled()) {
+            int hosts = verifiedHosts.size() + newHosts.size() +
+                testedLocations.size() + 1;
+            LOG.debug(hosts + " hosts, the best is " + ret.getAddress() +
+                    ", multicast " + ret.isReplyToMulticast() +
+                    ", queue length " + ret.getQueueStatus() +
+                    ", round-trip time " + ret.getRoundTripTime() +
+                    ", firewalled " + isFirewalled(ret) +
+                    ", partial source " + ret.isPartialSource());
+        }
         return ret;
     }
     
@@ -261,6 +270,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
                 toSend.add(ipPort);
             }
             testedLocations.add(rfdContext);
+            rfdContext.recordPingTime(now);
             sent++;
         }
         
@@ -319,7 +329,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     }
     
     /**
-     * Informs the Ranker that a host has replied with a HeadPing
+     * Informs the Ranker that a host has replied with a HeadPong
      */
     public void processMessage(Message m, ReplyHandler handler) {
         
@@ -347,10 +357,13 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             
             rfd = pingedHosts.remove(handler);
             testedLocations.remove(rfd);
+            rfd.recordPongTime(System.currentTimeMillis());
             
             if (LOG.isDebugEnabled()) {
-                LOG.debug("received a pong "+ pong+ " from "+handler +
-                        " for rfd "+rfd+" with PE "+rfd.getAddress());
+                LOG.debug("received a pong " + pong + " from " + handler +
+                        " for rfd " + rfd + " with address " +
+                        rfd.getAddress() + " and round-trip time " +
+                        rfd.getRoundTripTime());
             }
             
             // older push proxies do not route but respond directly, we want to get responses
@@ -372,11 +385,11 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
                 updateContext(rfd, pong);
                 
                 // if the remote host is busy, re-add him for later ranking
-                if (rfd.isBusy()) 
+                if (rfd.isBusy())
                     newHosts.add(rfd);
-                else     
+                else
                     verifiedHosts.add(rfd);
-
+                
                 alts = pong.getAllLocsRFD(rfd.getRemoteFileDesc(), remoteFileDescFactory);
             }
         }
@@ -455,9 +468,23 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
      * class that actually does the preferencing of RFDs
      */
     private static final class RFDComparator implements Comparator<RemoteFileDescContext> {
-        
+
+        @InspectablePrimitive("mcast comparisons")
+        int mcastComparisons = 0;
+        @InspectablePrimitive("queue comparisons")
+        int queueComparisons = 0;
+        @InspectablePrimitive("fw comparisons")
+        int fwComparisons = 0;
+        @InspectablePrimitive("partial comparisons")
+        int partialComparisons = 0;
+        @InspectablePrimitive("rtt comparisons")
+        int rttComparisons = 0;
+        @InspectablePrimitive("hash comparisons")
+        int hashComparisons = 0;
+
         public int compare(RemoteFileDescContext pongA, RemoteFileDescContext pongB) {
             // Multicasts are best
+            mcastComparisons++;
             if (pongA.isReplyToMulticast() != pongB.isReplyToMulticast()) {
                 if (pongA.isReplyToMulticast())
                     return -1;
@@ -465,13 +492,16 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
                     return 1;
             }
             
-            // HeadPongs with highest number of free slots get the highest priority
+            // Prefer sources with free slots (or at least short queues)
+            queueComparisons++;
             if (pongA.getQueueStatus() > pongB.getQueueStatus())
                 return 1;
             else if (pongA.getQueueStatus() < pongB.getQueueStatus())
                 return -1;
-       
-            // Within the same queue rank, firewalled hosts get priority
+            
+            // Prefer firewalled sources - this is designed to balance load by
+            // leaving non-firewalled sources for those who need them
+            fwComparisons++;
             if (isFirewalled(pongA) != isFirewalled(pongB)) {
                 if (isFirewalled(pongA))
                     return -1;
@@ -479,7 +509,9 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
                     return 1;
             }
             
-            // Within the same queue/fwall, partial hosts get priority
+            // Prefer partial sources - this is designed to balance load by
+            // leaving complete sources for those who need them
+            partialComparisons++;
             if (pongA.isPartialSource() != pongB.isPartialSource()) {
                 if (pongA.isPartialSource())
                     return -1;
@@ -487,7 +519,15 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
                     return 1;
             }
             
-            // the two pongs seem completely the same
+            // Prefer nearby sources (low round-trip time)
+            rttComparisons++;
+            if (pongA.getRoundTripTime() > pongB.getRoundTripTime())
+                return 1;
+            else if (pongA.getRoundTripTime() < pongB.getRoundTripTime())
+                return -1;
+            
+            // No preference
+            hashComparisons++;
             return pongA.hashCode() - pongB.hashCode();
         }
     }
