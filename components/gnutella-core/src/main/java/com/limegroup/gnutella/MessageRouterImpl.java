@@ -1950,9 +1950,11 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 queryUnicaster.handleQueryReply(queryReply);
 
             } else {
+                LOG.trace("Dropping reply");
                 handler.countDroppedMessage();
             }
         } else {
+            LOG.trace("Dropping reply with no route table entry");
             handler.countDroppedMessage();
         }
     }

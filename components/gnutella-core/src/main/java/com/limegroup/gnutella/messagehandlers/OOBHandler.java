@@ -93,7 +93,8 @@ public class OOBHandler implements MessageHandler, Runnable {
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("Received RNVM from " + handler.getAddress() +
-                    ":" + handler.getPort());
+                    ":" + handler.getPort() +
+                    " with " + msg.getNumResults() + " results");
         }
         
         int toRequest;
@@ -161,7 +162,8 @@ public class OOBHandler implements MessageHandler, Runnable {
     private void handleOOBReply(QueryReply reply, ReplyHandler handler) {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Handling OOB reply from " + handler.getAddress() +
-                    ":" + handler.getPort());
+                    ":" + handler.getPort() +
+                    " with " + reply.getResultCount() + " results");
         }
         
         // check if ip address of reply and sender of reply match
@@ -192,9 +194,8 @@ public class OOBHandler implements MessageHandler, Runnable {
         
         SecurityToken token = getVerifiedSecurityToken(reply, handler);
         if (token == null) {
-            LOG.debug("Reply has no security token");
             if (!SearchSettings.DISABLE_OOB_V2.getBoolean()) {
-                LOG.debug("Handling OOBv2 reply");
+                LOG.debug("Handling as an OOBv2 reply");
                 router.handleQueryReply(reply, handler);
             }
             return;
@@ -212,6 +213,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         // if query is not of interest anymore return
         GUID queryGUID = new GUID(reply.getGUID());
         if (!router.isQueryAlive(queryGUID)) {
+            LOG.debug("Query is dead - bypassing source");
             router.addBypassedSource(reply, handler);
         }
         else {
@@ -235,7 +237,7 @@ public class OOBHandler implements MessageHandler, Runnable {
                         if(LOG.isDebugEnabled())
                             LOG.debug("Reply has " + added + " new results");                        
                         if(added > 0) {
-                            LOG.debug("Handling OOBv3 reply");
+                            LOG.debug("Handling as an OOBv3 reply");
                             router.handleQueryReply(reply, handler);
                         }
                     } 
@@ -259,6 +261,7 @@ public class OOBHandler implements MessageHandler, Runnable {
 	private SecurityToken getVerifiedSecurityToken(QueryReply reply, ReplyHandler handler) {
 	    byte[] securityBytes = reply.getSecurityToken();
         if (securityBytes == null) {
+            LOG.debug("No security token");
             return null;
         }
 
@@ -272,6 +275,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         }
         catch (InvalidSecurityTokenException e) {
             // invalid security token echoed back
+            LOG.debug("Invalid security token");
         }
         return null;
 	}
