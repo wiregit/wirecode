@@ -18,7 +18,7 @@
     
     <target name="compile"
             description="Compiles all code."
-            depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-tests.compile-src, lw-tests.compile-tests, lw-core-glue.compile-src"/>
+            depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-tests.compile-src, lw-tests.compile-tests, lw-core-glue.compile-src, lw-core-glue.compile-tests"/>
     
     <target name="compile-src"
             description="Compiles all source code (not tests)."
