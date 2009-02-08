@@ -164,19 +164,20 @@ public class HTTPUploaderTest extends LimeTestCase {
             HttpClientUtils.releaseConnection(response);
         }
 
-        method = new HttpGet(host + "/uri-res/N2R?" + urn1);
-        method.addHeader("Chat", "123.123.123.123:456");
-        try {
-            response = client.execute(method);
-            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
-            assertEquals(1, cb.uploads.size());
-            HTTPUploader uploader = (HTTPUploader) cb.uploads.get(0);
-            assertTrue(uploader.isBrowseHostEnabled());
-            assertEquals(456, uploader.getGnutellaPort());
-            assertEquals("123.123.123.123", uploader.getHost());
-        } finally {
-            HttpClientUtils.releaseConnection(response);
-        }
+//        old chat header isn't supported anymore.
+//        method = new HttpGet(host + "/uri-res/N2R?" + urn1);
+//        method.addHeader("Chat", "123.123.123.123:456");
+//        try {
+//            response = client.execute(method);
+//            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+//            assertEquals(1, cb.uploads.size());
+//            HTTPUploader uploader = (HTTPUploader) cb.uploads.get(0);
+//            assertTrue(uploader.isBrowseHostEnabled());
+//            assertEquals(456, uploader.getGnutellaPort());
+//            assertEquals("123.123.123.123", uploader.getHost());
+//        } finally {
+//            HttpClientUtils.releaseConnection(response);
+//        }
     }
 
     public void testAmountRead() throws Exception {
