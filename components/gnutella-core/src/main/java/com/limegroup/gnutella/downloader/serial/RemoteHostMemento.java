@@ -30,6 +30,8 @@ public class RemoteHostMemento implements Serializable {
     
     private static final long serialVersionUID = 1452696797555431199L;
 
+    // NOTE: Never remove items, only add.  Otherwise, mementos serialized with earlier
+    // keys cannot be deserialized.
     private static enum Keys {
         HOST, PORT, FILENAME, INDEX, CLIENTGUID,
         SPEED, SIZE, CHAT, QUALITY, REPLY_TO_MULTICAST,
@@ -111,7 +113,6 @@ public class RemoteHostMemento implements Serializable {
     public byte[] getClientGuid() { return (byte[])propertiesMap.get(Keys.CLIENTGUID); }
     public int getSpeed() { return UnboxUtils.toInt((Integer)propertiesMap.get(Keys.SPEED)); }
     public long getSize() { return UnboxUtils.toLong((Long)propertiesMap.get(Keys.SIZE)); }
-    public boolean isChat() { return UnboxUtils.toBoolean((Boolean)propertiesMap.get(Keys.CHAT)); }
     public int getQuality() { return UnboxUtils.toInt((Integer)propertiesMap.get(Keys.QUALITY)); }
     public boolean isReplyToMulticast() { return UnboxUtils.toBoolean((Boolean)propertiesMap.get(Keys.REPLY_TO_MULTICAST)); }
     public String getXml() { return (String)propertiesMap.get(Keys.XML); }
