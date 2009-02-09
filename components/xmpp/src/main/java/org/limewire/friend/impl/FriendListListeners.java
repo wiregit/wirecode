@@ -28,6 +28,7 @@ class FriendListListeners {
     private final EventBroadcaster<FriendEvent> availableBroadcaster;
     private final EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster;
     private final ConcurrentMap<String, Friend> knownFriends = new ConcurrentHashMap<String, Friend>();
+    private final PresenceListener presenceListener = new PresenceListener();
     
     @Inject
     FriendListListeners(@Named("known") EventBroadcaster<FriendEvent> knownBroadcaster,
@@ -81,26 +82,7 @@ class FriendListListeners {
     
     private void addKnownFriend(User user) {
         if (knownFriends.putIfAbsent(user.getId(), user) == null) {
-            user.addPresenceListener(new EventListener<PresenceEvent>() {
-                @Override
-                public void handleEvent(PresenceEvent event) {
-                    switch(event.getSource().getType()) {
-                    case available:
-                        switch(event.getType()) {
-                        case PRESENCE_NEW:
-                            addPresence(event.getSource());
-                            break;
-                        case PRESENCE_UPDATE:
-                            updatePresence(event.getSource());
-                            break;
-                        }
-                        break;
-                    case unavailable:
-                        removePresence(event.getSource());
-                        break;
-                    }
-                }
-            });
+            user.addPresenceListener(presenceListener);
             knownBroadcaster.broadcast(new FriendEvent(user, FriendEvent.Type.ADDED));
         }
     }
@@ -136,4 +118,24 @@ class FriendListListeners {
         return Collections.unmodifiableCollection(knownFriends.values());        
     }
 
+    private class PresenceListener implements EventListener<PresenceEvent> {
+        @Override
+        public void handleEvent(PresenceEvent event) {
+            switch (event.getSource().getType()) {
+                case available:
+                    switch (event.getType()) {
+                        case PRESENCE_NEW:
+                            addPresence(event.getSource());
+                            break;
+                        case PRESENCE_UPDATE:
+                            updatePresence(event.getSource());
+                            break;
+                    }
+                    break;
+                case unavailable:
+                    removePresence(event.getSource());
+                    break;
+            }
+        }
+    }
 }
