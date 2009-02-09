@@ -42,7 +42,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
     
     public synchronized Presence getFirstPresence(String username) {
         ArrayList<Presence> presences = roster.get(username);
-        return presences == null ? null : presences.get(0);        
+        return (presences == null || presences.isEmpty()) ? null : presences.get(0);
     }
     
     public synchronized User getUser(String username) {

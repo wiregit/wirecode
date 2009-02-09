@@ -4,12 +4,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.limewire.concurrent.ThreadExecutor;
@@ -172,6 +174,17 @@ public class UserImpl implements User {
         }
     }
 
+    @Override
+    public boolean isSubscribed() {
+        switch(rosterEntry.get().getType()) {
+            case both:
+            case to:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     void addPresense(Presence presence) {
         if(LOG.isDebugEnabled()) {
             LOG.debugf("adding presence {0}", presence.getJID());
@@ -213,7 +226,7 @@ public class UserImpl implements User {
     public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
         presenceListeners.addListener(presenceListener);
         for(Presence presence : getPresences().values()) {
-            presenceListener.handleEvent(new PresenceEvent(presence, Presence.EventType.PRESENCE_UPDATE));
+            presenceListener.handleEvent(new PresenceEvent(presence, Presence.EventType.PRESENCE_NEW));
         }
     }
 
