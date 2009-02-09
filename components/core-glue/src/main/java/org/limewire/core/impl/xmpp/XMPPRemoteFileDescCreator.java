@@ -45,7 +45,7 @@ public class XMPPRemoteFileDescCreator implements RemoteFileDescCreator {
             byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
             Set<? extends URN> urns, boolean replyToMulticast, String vendor,
             long createTime, boolean http1) {
-        return new XMPPRemoteFileDesc((XMPPAddress)address, index, filename, size, clientGUID, speed, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, addressFactory, addressResolver);
+        return new XMPPRemoteFileDesc((XMPPAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
     }
 
 }

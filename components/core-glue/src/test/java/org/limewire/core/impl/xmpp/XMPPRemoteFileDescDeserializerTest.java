@@ -46,7 +46,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
     /**
      * Tests the clone method with some random inputs
      */
-    public void testCreateCloneSimple() {
+    public void testPromoteSimple() {
         
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
@@ -69,19 +69,15 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final boolean http11 = true;
         final XMPPAddress addressNew = context.mock(XMPPAddress.class);
         
-        testCreateClone(context, addressOrig, index, fileName, size, clientGUID, speed,
+        testPromote(context, addressOrig, index, fileName, size, clientGUID, speed,
                 quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew);
     }
     
     /**
      * Tests the clone method with empties, nulls, 0s,
      *  negatives, and falses where applicable.
-     *  
-     *  
-     *  ERROR?  
-     *   The http11 param is being lost in the clone
      */
-    public void testCreateCloneMinBound() {
+    public void testPromoteMinBound() {
         
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
@@ -104,17 +100,14 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final boolean http11 = false;
         final XMPPAddress addressNew = null;
         
-        testCreateClone(context, addressOrig, index, fileName, size, clientGUID, speed,
+        testPromote(context, addressOrig, index, fileName, size, clientGUID, speed,
                 quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew);
     }
     
     /**
      * Tests the clone function with large values
-     * 
-     *  ERROR?  
-     *   The browseHost param is being lost in the clone
      */
-    public void testCreateCloneMaxBound() {
+    public void testPromoteMaxBound() {
         
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
@@ -137,11 +130,11 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final boolean http11 = true;
         final XMPPAddress addressNew = context.mock(XMPPAddress.class);
         
-        testCreateClone(context, addressOrig, index, fileName, size, clientGUID, speed,
+        testPromote(context, addressOrig, index, fileName, size, clientGUID, speed,
                 quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew);
     }
     
-    private void testCreateClone(Mockery context,
+    private void testPromote(Mockery context,
             final Address addressOrig,
             final long index,
             final String fileName,
@@ -173,7 +166,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
                 xmlDoc, urns, replyToMuticast, vendor, 
                 createTime, http11, addressFactory);
                 
-        RemoteFileDesc rfdNew = deserialiser.createClone(rfdOrig, addressNew);
+        RemoteFileDesc rfdNew = deserialiser.promoteRemoteFileDescAndExchangeAddress(rfdOrig, addressNew);
         
         assertEquals(addressNew, rfdNew.getAddress());
         assertEquals(index, rfdNew.getIndex());
@@ -182,12 +175,13 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         assertEquals(clientGUID, rfdNew.getClientGUID());
         assertEquals(speed, rfdNew.getSpeed());
         assertEquals(quality, rfdNew.getQuality());;
-        assertEquals(browseHost, rfdNew.isBrowseHostEnabled()); // This is failing when browsehost == false
+        assertTrue(rfdNew.isBrowseHostEnabled());
+        assertFalse(rfdNew.isReplyToMulticast());
         assertEquals(xmlDoc, rfdNew.getXMLDocument());
         assertEquals(urns, rfdNew.getUrns());
         assertEquals(vendor, rfdNew.getVendor());
         assertEquals(createTime, rfdNew.getCreationTime());
-        assertEquals(http11, rfdNew.isHTTP11()); // This is failing with http11 == true
+        assertEquals(http11, rfdNew.isHTTP11());
                 
         context.assertIsSatisfied();
     }
@@ -196,7 +190,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
      * Confirm XMPPAddressResolver is properly stored and functional 
      *  after a clone
      */
-    public void testCreateCloneWithAddressResolver() {
+    public void testPromoteWithAddressResolver() {
 
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
@@ -221,7 +215,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
             }});
         
         
-        RemoteFileDesc rfdNew = deserialiser.createClone(rfdOrig, addressNew);
+        RemoteFileDesc rfdNew = deserialiser.promoteRemoteFileDescAndExchangeAddress(rfdOrig, addressNew);
         
         // Invoke a method that uses addressResolver
         rfdNew.getCredentials();

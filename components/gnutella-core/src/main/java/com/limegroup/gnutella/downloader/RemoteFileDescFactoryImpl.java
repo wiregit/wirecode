@@ -244,10 +244,9 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
                         remoteHostMemento.getFileName(),
                         remoteHostMemento.getSize(), remoteHostMemento.getClientGuid(),
                         remoteHostMemento.getSpeed(), remoteHostMemento
-                        .getQuality(), remoteHostMemento.isBrowseHost(),
-                        xml(remoteHostMemento.getXml()), remoteHostMemento.getUrns(),
-                        remoteHostMemento.isReplyToMulticast(), 
-                        remoteHostMemento.getVendor(), -1L);
+                        .getQuality(), xml(remoteHostMemento.getXml()),
+                        remoteHostMemento.getUrns(), remoteHostMemento.getVendor(),
+                        -1L);
             }
             if (remoteHostMemento.getCustomUrl() != null) {
                 return createUrlRemoteFileDesc(remoteHostMemento.getAddress(addressFactory, pushEndpointFactory),
