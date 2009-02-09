@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,7 +17,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.DualIterator;
 import org.limewire.core.settings.DownloadSettings;
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
@@ -469,22 +467,8 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
      */
     private static final class RFDComparator implements Comparator<RemoteFileDescContext> {
 
-        @InspectablePrimitive("mcast comparisons")
-        int mcastComparisons = 0;
-        @InspectablePrimitive("queue comparisons")
-        int queueComparisons = 0;
-        @InspectablePrimitive("fw comparisons")
-        int fwComparisons = 0;
-        @InspectablePrimitive("partial comparisons")
-        int partialComparisons = 0;
-        @InspectablePrimitive("rtt comparisons")
-        int rttComparisons = 0;
-        @InspectablePrimitive("hash comparisons")
-        int hashComparisons = 0;
-
         public int compare(RemoteFileDescContext pongA, RemoteFileDescContext pongB) {
             // Multicasts are best
-            mcastComparisons++;
             if (pongA.isReplyToMulticast() != pongB.isReplyToMulticast()) {
                 if (pongA.isReplyToMulticast())
                     return -1;
@@ -493,7 +477,6 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             }
             
             // Prefer sources with free slots (or at least short queues)
-            queueComparisons++;
             if (pongA.getQueueStatus() > pongB.getQueueStatus())
                 return 1;
             else if (pongA.getQueueStatus() < pongB.getQueueStatus())
@@ -501,7 +484,6 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             
             // Prefer firewalled sources - this is designed to balance load by
             // leaving non-firewalled sources for those who need them
-            fwComparisons++;
             if (isFirewalled(pongA) != isFirewalled(pongB)) {
                 if (isFirewalled(pongA))
                     return -1;
@@ -511,7 +493,6 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             
             // Prefer partial sources - this is designed to balance load by
             // leaving complete sources for those who need them
-            partialComparisons++;
             if (pongA.isPartialSource() != pongB.isPartialSource()) {
                 if (pongA.isPartialSource())
                     return -1;
@@ -520,14 +501,12 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             }
             
             // Prefer nearby sources (low round-trip time)
-            rttComparisons++;
             if (pongA.getRoundTripTime() > pongB.getRoundTripTime())
                 return 1;
             else if (pongA.getRoundTripTime() < pongB.getRoundTripTime())
                 return -1;
             
             // No preference
-            hashComparisons++;
             return pongA.hashCode() - pongB.hashCode();
         }
     }
