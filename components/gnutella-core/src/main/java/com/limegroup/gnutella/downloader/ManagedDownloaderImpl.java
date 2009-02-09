@@ -3191,4 +3191,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         
     }
+
+    // for tests
+    protected SourceRanker getCurrentSourceRanker() {
+        return ranker;
+    }
 }

@@ -445,12 +445,14 @@ public class DownloadPushTest extends DownloadTestCase {
 
         ManagedDownloaderImpl download = (ManagedDownloaderImpl) downloadServices.download(
                 new RemoteFileDesc[] { rfd }, RemoteFileDesc.EMPTY_LIST, null, false);
+        SourceRanker ranker = download.getCurrentSourceRanker();
+        assertTrue(ranker instanceof FriendsFirstSourceRanker);
         LOG.debug("started download");
 
         // after a while clear the ranker and add the second host.
         Thread.sleep((int) (sleep * 1.5));
-        sourceRankerFactory.getAppropriateRanker().stop();
-        sourceRankerFactory.getAppropriateRanker().setMeshHandler(download);
+        ranker.stop();
+        ranker.setMeshHandler(download);
         download.addDownload(noFile, false);
 
         LOG.debug("waiting for download to complete");
