@@ -1608,7 +1608,7 @@ public class HostCatcher implements Service {
          * The next allowed UDP fetch time.
          * Incremented after each attempted UDP fetch.
          */
-        private long nextAllowedUdpTime = 0; // Immediately
+        private long nextAllowedUdpTime = Long.MAX_VALUE; // Not just yet
         
         /**
          * The next allowed TCP fetch time.
@@ -1618,6 +1618,9 @@ public class HostCatcher implements Service {
         
         /** Milliseconds to wait between multicast fetches. */
         private static final int MULTICAST_INTERVAL = 50 * 1000;
+        
+        /** Milliseconds to wait after trying multicast before falling back to UDP. */
+        private static final int UDP_FALLBACK_DELAY = 5 * 1000;
 
         /** Milliseconds to wait between UDP fetches. */
         private static final int UDP_INTERVAL = 30 * 1000;
@@ -1638,12 +1641,6 @@ public class HostCatcher implements Service {
                 return;
             }
 
-            // If no one's waiting for an endpoint, don't get any.
-            if(_catchersWaiting.isEmpty()) {
-                LOG.trace("No observers waiting");
-                return;
-            }
-
             // If we need endpoints, try any bootstrapping methods that
             // haven't been tried too recently
             if(needsHosts()) {
@@ -1659,8 +1656,8 @@ public class HostCatcher implements Service {
          * connection to the internet, we can fetch if needed.
          */
         void resetFetchTime() {
-            nextAllowedUdpTime = 0;
             nextAllowedMulticastTime = 0;
+            nextAllowedUdpTime = Long.MAX_VALUE;
             nextAllowedTcpTime = Long.MAX_VALUE;
         }
         
@@ -1673,8 +1670,11 @@ public class HostCatcher implements Service {
                     LOG.trace("Need hosts: none known");
                     return true;
                 }
-                if(!connectionServices.isConnected() && _failures > 100) {
-                    LOG.trace("Need hosts: not connected after 100 failures");
+                if(!connectionServices.isConnected() &&
+                        _failures > ConnectionSettings.FAILURES_BEFORE_BOOTSTRAP.getValue()) {
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("Need hosts: not connected after " +
+                                _failures + " failures");
                     return true;
                 }
             }
@@ -1693,8 +1693,15 @@ public class HostCatcher implements Service {
                 PingRequest pr = pingRequestFactory.createMulticastPing();
                 multicastService.get().send(pr);
                 nextAllowedMulticastTime = now + MULTICAST_INTERVAL;
+                // If this is the first multicast fetch, set the UDP fallback time
+                if(nextAllowedUdpTime == Long.MAX_VALUE)
+                    nextAllowedUdpTime = now + UDP_FALLBACK_DELAY;
                 return true;
             }
+            // If we're never going to multicast, fall back to UDP
+            if(nextAllowedUdpTime == Long.MAX_VALUE &&
+                    ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue())
+                nextAllowedUdpTime = now + UDP_FALLBACK_DELAY;
             LOG.trace("Not fetching via multicast");
             return false;
         }
@@ -1731,6 +1738,8 @@ public class HostCatcher implements Service {
     private class BootstrapListener implements TcpBootstrapListener {
         @Override
         public int handleHosts(Collection<? extends Endpoint> hosts) {
+            if(LOG.isInfoEnabled())
+                LOG.info("Received " + hosts.size() + " hosts");
             return add(hosts);
         }
     }
