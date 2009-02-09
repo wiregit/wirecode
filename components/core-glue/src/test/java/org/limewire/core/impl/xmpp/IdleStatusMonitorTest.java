@@ -3,11 +3,13 @@ package org.limewire.core.impl.xmpp;
 
 import junit.framework.TestCase;
 
+import org.jmock.Mockery;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.BroadcastPolicy;
 import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.activity.XmppActivityEvent;
+import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 public class IdleStatusMonitorTest extends TestCase {
@@ -52,7 +54,11 @@ public class IdleStatusMonitorTest extends TestCase {
     }
 
     private void sendConnectionEvent(org.limewire.xmpp.api.client.XMPPConnectionEvent.Type connectionState) {
-        connectionSupport.handleEvent(new XMPPConnectionEvent(new MockXMPPConnection2(), connectionState));
+        
+        Mockery context = new Mockery();
+        XMPPConnection connection = context.mock(XMPPConnection.class);
+        
+        connectionSupport.handleEvent(new XMPPConnectionEvent(connection, connectionState));
     }
     
     public void testIdleState() {
