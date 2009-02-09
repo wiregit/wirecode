@@ -976,12 +976,15 @@ public class HostCatcher implements Service {
         ExtendedEndpoint removed = permanentHosts.insert(e);
         if(removed != e) {
             //Was actually added...
-            if(LOG.isTraceEnabled())
-                LOG.trace("Permanently adding host " + e);
+            if(LOG.isInfoEnabled())
+                LOG.info("Permanently adding host " + e);
             permanentHostsSet.add(e);
-            if(removed != null)
+            if(removed != null) {
                 //...and something else was removed.
+                if(LOG.isTraceEnabled())
+                    LOG.trace("Ejected permanent host " + removed);
                 permanentHostsSet.remove(removed);
+            }
             dirty = true;
             return true;
         } else {
