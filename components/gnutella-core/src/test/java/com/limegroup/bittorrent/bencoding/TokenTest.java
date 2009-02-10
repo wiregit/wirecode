@@ -16,9 +16,9 @@ public class TokenTest extends BaseTestCase {
         byte[] result = (byte[]) parsedObject;
         assertEquals("test", new String(result));
 
-        parsedObject = Token.parse("44:the rain in space stays mostly on the plains".getBytes());
+        parsedObject = Token.parse("44:the rain in spain stays mostly on the plains".getBytes());
         result = (byte[]) parsedObject;
-        assertEquals("the rain in space stays mostly on the plains", new String(result));
+        assertEquals("the rain in spain stays mostly on the plains", new String(result));
     }
 
     public void testParseInt() throws Exception {
