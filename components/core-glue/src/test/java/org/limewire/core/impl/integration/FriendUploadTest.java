@@ -36,12 +36,11 @@ import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.FriendFileList;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Collection of friend upload integration tests.
  */
-public class FriendUploadTest extends LimeTestCase {
+public class FriendUploadTest extends IntegrationTestCase {
 
     private static final String TEST_DIR_NAME = "com/limegroup/gnutella/uploader/data";
 
