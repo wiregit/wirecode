@@ -73,12 +73,15 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
     public void excludeChild(LibraryManagerItem item) {
         if (getRootChildrenAsFiles().contains(item.getFile())) {
             //top level managed folders should not be added to exclude list
-            unexcludeAllSubfolders(item.getFile());
+            removeChild(item);
+            unexcludeUnmanagedSubfolders(item.getFile());
         } else {
             //subfolders of managed folders should be excluded
+            removeChild(item);
             excludeFolder(item.getFile());
+            unexcludeUnmanagedSubfolders(item.getFile());   
         }
-        removeChild(item);
+        System.out.println(excludedSubfolders);
     }
     
     public void unexcludeAllSubfolders(File parent) {
@@ -93,22 +96,24 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
         excludedSubfolders.removeAll(removeList);
     }
     
-    /**Adds parent to list of excluded subfolders.  Removes all subfolders of parent 
-     * with no intermediate managed root or excluded*/
-    private void excludeFolder(File parent) {
+    /**Unexcludes all subfolders with no intermediate managed folder*/    
+    private void unexcludeUnmanagedSubfolders(File parent){
         List<File> unExcludeList = new ArrayList<File>();
         for (File child : excludedSubfolders) {
             if (shouldRemoveFromExcludeList(child, parent)) {
                 unExcludeList.add(child);
             }
         }
-
-        excludedSubfolders.add(parent);
-        excludedSubfolders.removeAll(unExcludeList);
+        excludedSubfolders.removeAll(unExcludeList);      
+    }
+    
+    /**Adds parent to list of excluded subfolders. */
+    private void excludeFolder(File parent) { 
+        excludedSubfolders.add(parent);     
     }
        
     /**
-     * @return true if child is a subfolder of ancestor and there is no intermediate managed root or excluded folder.  
+     * @return true if child is a subfolder of ancestor and there is no intermediate managed folder.  
      */
     private boolean shouldRemoveFromExcludeList(File child, File ancestor) {
         Collection<File> roots = getRootChildrenAsFiles();        
@@ -118,12 +123,9 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
         while (child != null) {
             if (child.equals(ancestor)) {
                 return true;
-            } else if (excludedSubfolders.contains(child)) {
-                return false;// there is an intermediate excluded folder
             } else if (roots.contains(child)) {
                 return false; // there is an intermediate managed folder
             }
-
             child = child.getParentFile();
         }
         
@@ -226,6 +228,7 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
             LibraryManagerItem item) {
         addChild(libraryManagerItemImpl, item);
         excludedSubfolders.remove(item.getFile());
+        unexcludeAllSubfolders(item.getFile());
         
     }    
 }
