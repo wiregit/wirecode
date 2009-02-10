@@ -33,7 +33,6 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RequestCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.FriendFileList;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
@@ -73,7 +72,7 @@ public class FriendUploadTest extends IntegrationTestCase {
         port = acceptor.getPort(false);
         client = injector.getInstance(LimeHttpClient.class);
         fileManager = injector.getInstance(FileManager.class);
-        FileManagerTestUtils.waitForLoad(fileManager, 4 * 1000);
+//        FileManagerTestUtils.waitForLoad(fileManager, 4 * 1000);
         loadFiles();
     }
     
