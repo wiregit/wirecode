@@ -22,6 +22,11 @@ public class CoreBrowseTest extends BaseTestCase {
         super(name);
     }
 
+    /**
+     * Tests that the supplied browse listener is populated with search results
+     * as handleBrowseResult is called on the interal BrowseListeer of the
+     * CoreBrowse object.
+     */
     public void testBasicBrowseListenerPopulation() {
         Mockery context = new Mockery();
         final FriendPresence friendPresence = context.mock(FriendPresence.class);
@@ -74,7 +79,7 @@ public class CoreBrowseTest extends BaseTestCase {
 
         innerBrowseListener.browseFinished(true);
         assertTrue(testBrowseListener.success);
-        
+
         context.assertIsSatisfied();
     }
 

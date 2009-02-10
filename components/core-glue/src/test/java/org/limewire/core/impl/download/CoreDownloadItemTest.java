@@ -21,6 +21,11 @@ public class CoreDownloadItemTest extends BaseTestCase {
         super(name);
     }
 
+    /**
+     * Tests cancel method for the CoreDownloadItem. Ensures that the
+     * downloaders stop method is called. Ensures that a property change event
+     * is fired on the state property with a DownloadState of Cancelled.
+     */
     @SuppressWarnings("unchecked")
     public void testCancel() {
         Mockery context = new Mockery() {
@@ -62,6 +67,10 @@ public class CoreDownloadItemTest extends BaseTestCase {
 
     }
 
+    /**
+     * Test the getCategory method for the CoreDownloadItem. Handles cases where
+     * getFile is available or cases where only getSaveFile is available.
+     */
     @SuppressWarnings("unchecked")
     public void testGetCategory() {
         Mockery context = new Mockery() {

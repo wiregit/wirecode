@@ -25,6 +25,10 @@ public class FriendLibrariesTest extends BaseTestCase {
         super(name);
     }
 
+    /**
+     * Tests search for remote file items in the friends library by name. Using
+     * a single friend and presence in this instance.
+     */
     public void testIndexing1FriendLibraryAndFileByFileNameOnly() {
 
         Mockery context = new Mockery();
@@ -127,6 +131,10 @@ public class FriendLibrariesTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
+    /**
+     * Tests search for remote file items in the friends library by name. Using
+     * a single friend and presence in this instance.
+     */
     public void testIndexing1FriendLibraryAndMultipleFilesByFileNameOnly() {
 
         Mockery context = new Mockery();
@@ -268,7 +276,11 @@ public class FriendLibrariesTest extends BaseTestCase {
         assertContains(matchingItems, remoteFileItem2);
         context.assertIsSatisfied();
     }
-    
+
+    /**
+     * Tests search for remote file items in the friends library by name. Using
+     * a multiple friends and presences.
+     */
     public void testIndexingMultipleFriendLibraryAndMultipleFilesByFileNameOnly() {
 
         Mockery context = new Mockery();
@@ -276,7 +288,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         final EventList<FriendLibrary> friendLibraryList = new BasicEventList<FriendLibrary>();
         final EventList<PresenceLibrary> presenceLibraryList1 = new BasicEventList<PresenceLibrary>();
         final EventList<RemoteFileItem> remoteFileItemList1 = new BasicEventList<RemoteFileItem>();
-        
+
         final EventList<PresenceLibrary> presenceLibraryList2 = new BasicEventList<PresenceLibrary>();
         final EventList<RemoteFileItem> remoteFileItemList2 = new BasicEventList<RemoteFileItem>();
 
@@ -287,7 +299,6 @@ public class FriendLibrariesTest extends BaseTestCase {
         final FriendLibrary friendLibrary2 = context.mock(FriendLibrary.class);
         final PresenceLibrary presenceLibrary2 = context.mock(PresenceLibrary.class);
 
-        
         final RemoteFileItem remoteFileItem1 = context.mock(RemoteFileItem.class);
         final String name1 = "name1";
         final Category category1 = Category.AUDIO;
@@ -302,7 +313,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         final Presence presence1 = context.mock(Presence.class);
         final String presenceId1 = "1";
-        
+
         final Presence presence2 = context.mock(Presence.class);
         final String presenceId2 = "2";
 
@@ -363,7 +374,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
         friendLibraryList.add(friendLibrary1);
         presenceLibraryList1.add(presenceLibrary1);
-        
+
         friendLibraryList.add(friendLibrary2);
         presenceLibraryList2.add(presenceLibrary2);
 
@@ -434,7 +445,10 @@ public class FriendLibrariesTest extends BaseTestCase {
         assertContains(matchingItems, remoteFileItem2);
         context.assertIsSatisfied();
     }
-    
+
+    /**
+     * Testing search for friends files by metadata.
+     */
     public void testIndexingFileMetaData() {
 
         Mockery context = new Mockery();
@@ -478,7 +492,7 @@ public class FriendLibrariesTest extends BaseTestCase {
 
                 for (FilePropertyKey filePropertyKey : FilePropertyKey.getIndexableKeys()) {
                     allowing(remoteFileItem1).getProperty(filePropertyKey);
-                    if(properties1.containsKey(filePropertyKey)) {
+                    if (properties1.containsKey(filePropertyKey)) {
                         will(returnValue(properties1.get(filePropertyKey)));
                     } else {
                         will(returnValue(null));
@@ -545,7 +559,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         matchingItems = friendLibraries.getMatchingItems("na", SearchCategory.ALL);
         assertEquals(1, matchingItems.size());
         assertContains(matchingItems, remoteFileItem1);
-        
+
         suggestions = friendLibraries.getSuggestions("nameo", SearchCategory.ALL);
         assertEquals(1, suggestions.size());
         assertContains(suggestions, album1);
