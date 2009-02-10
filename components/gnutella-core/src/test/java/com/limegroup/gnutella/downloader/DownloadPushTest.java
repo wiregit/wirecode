@@ -512,12 +512,15 @@ public class DownloadPushTest extends DownloadTestCase {
         assertTrue(testUploaders[0].getIncomingGoodAltLocs().contains(alternateLocationFactory.create(rfd2)));
         
         assertEquals(1,testUploaders[0].getIncomingBadAltLocs().size());
-        AlternateLocation current = testUploaders[0].getIncomingBadAltLocs().get(0);
-        
+        AlternateLocation current = testUploaders[0].getIncomingBadAltLocs().get(0);        
         assertTrue(current instanceof PushAltLoc);
         PushAltLoc pcurrent = (PushAltLoc)current;
-        assertTrue(pcurrent.getPushAddress().getProxies().isEmpty());
-        assertTrue(pcurrent.isDemoted());
+        assertEquals(guid.bytes(), pcurrent.getPushAddress().getClientGUID());
+        
+        // Now get the PE from our cache and make sure no proxies exist & its demoted.
+        PushEndpoint pe = injector.getInstance(PushEndpointCache.class).getPushEndpoint(guid);
+        assertTrue("pe: " + pe, pe.getProxies().isEmpty());
+        assertTrue("pe: " + pe, badPushLoc.isDemoted());
         
     }
 }
