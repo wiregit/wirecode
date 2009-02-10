@@ -5,6 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -13,6 +14,7 @@ import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.io.Address;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -92,7 +94,7 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
             
             readOnlyInfo.setShowGrid(true);
             download.add(new JScrollPane(readOnlyInfo));
-            addDownloadingFileLocation(propertiable);
+            addDownloadingFileLocation(propertiable.getDownloadingFile(), propertiable.getCategory());
             
             fileLocation.setText(propertiable.getDownloadingFile().getAbsolutePath());
             final JLabel completionLabel = new JLabel();
@@ -114,7 +116,7 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
          * Prepares the actions to display the downloading file in the OS file
          * explorer or the library tables.
          */
-        private void addDownloadingFileLocation(final DownloadItem propertiable) {
+        private void addDownloadingFileLocation(final File downloadingFile, final Category category) {
             location.setLayout(new MigLayout("", "[]10[]15[]", "[top]"));
             location.add(fileLocation, "gapbottom 5,push");
             location.add(locateOnDisk);
@@ -122,7 +124,7 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
             locateOnDisk.setAction(new AbstractAction(I18n.tr("locate on disk")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    NativeLaunchUtils.launchExplorer(propertiable.getDownloadingFile());
+                    NativeLaunchUtils.launchExplorer(downloadingFile);
                 }
             });
 
@@ -130,7 +132,7 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     setVisible(false);
-                    libraryNavigator.selectInLibrary(propertiable.getDownloadingFile(), propertiable.getCategory());
+                    libraryNavigator.selectInLibrary(downloadingFile, category);
                 }
             });
         }
