@@ -23,7 +23,6 @@ import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
@@ -357,7 +356,7 @@ public class DownloadPushTest extends DownloadTestCase {
         testUploaders[0].stopAfter(900000);
         testUploaders[0].setInterestedInFalts(true);
 
-        TestUploader pusher2 = new TestUploader(injector.getInstance(AlternateLocationFactory.class), uploaderNetworkManager);
+        TestUploader pusher2 = new TestUploader(uploaderNetworkManager);
         pusher2.start("firewalled pusher");
         pusher2.setRate(RATE);
         pusher2.stopAfter(200000);
