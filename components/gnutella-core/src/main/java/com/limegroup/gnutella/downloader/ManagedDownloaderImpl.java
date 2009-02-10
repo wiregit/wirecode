@@ -1299,7 +1299,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 }
             }
         }
-        
+            
         if(l.size() > 0) {
             return addDownloadForced(l,cache);
         } else {
@@ -1329,7 +1329,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     protected synchronized final boolean addDownloadForced(Collection<? extends RemoteFileDesc> c, boolean cache) {
-        LOG.debug("add download forced", new Exception());
+        if(LOG.isDebugEnabled())
+            LOG.debug("add download forced", new Exception());
         // create copy, argument might not be modifiable
         Set<RemoteFileDesc> copy = new HashSet<RemoteFileDesc>(c);
         // remove any rfds we're currently downloading from
