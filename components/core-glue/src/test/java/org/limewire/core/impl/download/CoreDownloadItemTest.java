@@ -2,11 +2,13 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
@@ -57,6 +59,46 @@ public class CoreDownloadItemTest extends BaseTestCase {
         DownloadState downloadState = (DownloadState) propertyChangeEvent.getNewValue();
         assertEquals(DownloadState.CANCELLED, downloadState);
         context.assertIsSatisfied();
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public void testGetCategory() {
+        Mockery context = new Mockery() {
+            {
+                setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+
+        final Downloader downloader = context.mock(Downloader.class);
+        final QueueTimeCalculator queueTimeCalculator = context.mock(QueueTimeCalculator.class);
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).addListener(with(any(EventListener.class)));
+            }
+        });
+        CoreDownloadItem coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator);
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getFile();
+                will(returnValue(new File("test.mp3")));
+            }
+        });
+        Category testCategory1 = coreDownloadItem.getCategory();
+        assertEquals(Category.AUDIO, testCategory1);
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getFile();
+                will(returnValue(null));
+                one(downloader).getSaveFile();
+                will(returnValue(new File("test.txt")));
+            }
+        });
+        Category testCategory2 = coreDownloadItem.getCategory();
+        assertEquals(Category.DOCUMENT, testCategory2);
 
     }
 
