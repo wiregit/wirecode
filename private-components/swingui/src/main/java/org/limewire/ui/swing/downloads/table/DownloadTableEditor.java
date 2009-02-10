@@ -107,6 +107,9 @@ public class DownloadTableEditor implements TableCellEditor {
 				listeners.get(i).editingCanceled(new ChangeEvent(this));
 			}
 		}
+        // Remove reference when editing ends so download item can be GC'd when
+		// finished downloads are cleared.
+        editItem = null;
 	}
 
 	@Override
@@ -139,6 +142,9 @@ public class DownloadTableEditor implements TableCellEditor {
 				listeners.get(i).editingStopped(new ChangeEvent(this));
 			}
 		}
+        // Remove reference when editing ends so download item can be GC'd when
+		// finished downloads are cleared.
+        editItem = null;
 		return true;
 	}
 	
