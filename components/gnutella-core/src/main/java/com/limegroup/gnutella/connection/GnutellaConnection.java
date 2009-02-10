@@ -513,6 +513,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      */
     private void startHandshake(Properties requestHeaders, HandshakeResponder responder,
             GnetConnectObserver observer) throws IOException {
+        if(LOG.isInfoEnabled())
+            LOG.info("Shaking hands with " + getAddress() + ":" + getPort());
+        
         initializeHandshake();
 
         HandshakeWatcher shakeObserver = new HandshakeWatcher(observer);
@@ -537,6 +540,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      */
     private void postHandshakeInitialize(Handshaker shaker) {
         handshakeInitialized(shaker);
+        
+        if(LOG.isInfoEnabled())
+            LOG.info("Shook hands with " + getAddress() + ":" + getPort());
 
         if (isWriteDeflated()) {
             deflater = new Deflater();
@@ -1418,6 +1424,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         }
 
         public void shutdown() {
+            if(LOG.isInfoEnabled())
+                LOG.info("Shutting down handshake with " +
+                        getAddress() + ":" + getPort());
             setHeaders(shaker.getReadHeaders(), shaker.getWrittenHeaders());
             close();
             observer.shutdown();
@@ -1429,12 +1438,18 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         }
 
         public void handleBadHandshake() {
+            if(LOG.isInfoEnabled())
+                LOG.info("Bad handshake with " +
+                        getAddress() + ":" + getPort());
             setHeaders(shaker.getReadHeaders(), shaker.getWrittenHeaders());
             close();
             observer.handleBadHandshake();
         }
 
         public void handleNoGnutellaOk(int code, String msg) {
+            if(LOG.isInfoEnabled())
+                LOG.info("No GNUTELLA OK in handshake with " +
+                        getAddress() + ":" + getPort());
             setHeaders(shaker.getReadHeaders(), shaker.getWrittenHeaders());
             close();
             observer.handleNoGnutellaOk(code, msg);
