@@ -16,11 +16,13 @@ import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.io.GUID;
 import org.limewire.net.address.AddressFactory;
+import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.client.impl.XMPPAddressResolver;
 
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 
 public class XMPPRemoteFileDescTest extends BaseTestCase{
     
@@ -339,13 +341,42 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
 
     }
     
-    /*
-
     public void testToMemento() {
         
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+        
+        final String filename = "test";
+        
+        final XMPPAddress address = context.mock(XMPPAddress.class);
+        final AddressFactory addressFactory = context.mock(AddressFactory.class);
+        final AddressSerializer serialer = context.mock(AddressSerializer.class);
+        
+        XMPPRemoteFileDesc rfd = createRFDwithFilenameCustom(address, addressFactory, null, filename);
+        
+        try {
+            context.checking(new Expectations() {
+                {  
+                    allowing(addressFactory).getSerializer(address.getClass());
+                    will(returnValue(serialer));
+                    allowing(serialer).getAddressType();
+                    will(returnValue("memento"));
+                    allowing(serialer).serialize(address);
+                    will(returnValue(new byte[] {'m','o','r','i'}));
+                }});
+        } 
+        catch (IOException e) {
+        }
+        
+        RemoteHostMemento memento = rfd.toMemento();
+        
+        assertEquals(filename, memento.getFileName());
+        
+        context.assertIsSatisfied();
+        
     }
-
-    */
     
     public XMPPRemoteFileDesc createRFD(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, new byte[] {'x'}, Integer.MIN_VALUE, Integer.MAX_VALUE, null,
@@ -423,6 +454,13 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
     public XMPPRemoteFileDesc createRFDwithGUIDCustom(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver, byte[] guid) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, 
                 guid, 
+                Integer.MIN_VALUE, Integer.MAX_VALUE, null,
+                new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
+    }
+    
+    public XMPPRemoteFileDesc createRFDwithFilenameCustom(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver, String filename) {
+        return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, filename, Long.MAX_VALUE, 
+                new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15},  
                 Integer.MIN_VALUE, Integer.MAX_VALUE, null,
                 new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
