@@ -40,7 +40,6 @@ public class DownloadPopupHandler implements TablePopupHandler {
     
     private MenuListener menuListener;
     private DownloadActionHandler actionHandler;
-    private DownloadItem downloadItem;
     private AbstractDownloadTable table;
 
     /**
@@ -121,8 +120,9 @@ public class DownloadPopupHandler implements TablePopupHandler {
 
     @Override
     public void maybeShowPopup(Component component, int x, int y) {
+        // Save popup row, and get download item.
         popupRow = getPopupRow(x, y);
-        downloadItem = table.getDownloadItem(popupRow);
+        DownloadItem downloadItem = table.getDownloadItem(popupRow);
 
         popupMenu.removeAll();
         DownloadState state = downloadItem.getState();
@@ -227,7 +227,10 @@ public class DownloadPopupHandler implements TablePopupHandler {
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            // Get download item and perform action.
+            DownloadItem downloadItem = table.getDownloadItem(popupRow);
             actionHandler.performAction(e.getActionCommand(), downloadItem);
+            
             // must cancel editing
             Component comp = table.getEditorComponent();
             if (comp != null && comp instanceof TableCellEditor) {
