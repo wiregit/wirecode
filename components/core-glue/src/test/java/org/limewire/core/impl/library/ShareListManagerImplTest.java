@@ -236,6 +236,9 @@ public class ShareListManagerImplTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
+    /**
+     * Tests that files added to various friend libraries are all combined into the combined share list.
+     */
     @SuppressWarnings("unchecked")
     public void testCombinedShareList() {
         Mockery context = new Mockery() {
