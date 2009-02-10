@@ -4,14 +4,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicReference;
+
+import net.jcip.annotations.GuardedBy;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.limewire.concurrent.ThreadExecutor;
@@ -33,8 +33,6 @@ import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPException;
-
-import net.jcip.annotations.GuardedBy;
 
 
 public class UserImpl implements User {
