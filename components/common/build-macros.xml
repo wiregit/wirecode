@@ -103,6 +103,7 @@
             <path id="build.limewire.components.@{component}.buildpath">
                 <path refid="build.limewire.components.@{component}.classpath"/>
                 <pathelement location="${build.limewire.components.@{component}.classes}"/>
+            	<pathelement location="${limewire.components.@{component}.src.resources}"/>
             </path>
             
     	    <path id="build.limewire.components.@{component}.tests.classpath">
