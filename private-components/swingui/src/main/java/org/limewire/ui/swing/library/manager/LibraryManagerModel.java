@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.tree.TreePath;
 
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
+import org.limewire.util.FileUtils;
 
 public class LibraryManagerModel extends AbstractTreeTableModel {
 
@@ -17,8 +18,11 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
     
     private static final int COLUMN_COUNT = 2;
     
-    public LibraryManagerModel(RootLibraryManagerItem item) {
+    private Collection<File> excludedSubfolders;
+    
+    public LibraryManagerModel(RootLibraryManagerItem item, Collection<File> excludedSubfolders) {
         super(item);
+        this.excludedSubfolders = excludedSubfolders;
     }
     
     @Override
@@ -61,9 +65,69 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
         if (parent == null) {
             throw new IllegalStateException("node does not have a parent.");
         }
-
+        
         int index = parent.removeChild(item);
         modelSupport.fireChildRemoved(new TreePath(getPathToRoot(parent)), index, item);
+    }
+    
+    public void excludeChild(LibraryManagerItem item) {
+        if (getRootChildrenAsFiles().contains(item.getFile())) {
+            //top level managed folders should not be added to exclude list
+            unexcludeAllSubfolders(item.getFile());
+        } else {
+            //subfolders of managed folders should be excluded
+            excludeFolder(item.getFile());
+        }
+        removeChild(item);
+    }
+    
+    public void unexcludeAllSubfolders(File parent) {
+        List<File> removeList = new ArrayList<File>();
+        
+        for (File child : excludedSubfolders) {
+            if (FileUtils.isAncestor(parent, child)) {
+                removeList.add(child);
+            }
+        }
+
+        excludedSubfolders.removeAll(removeList);
+    }
+    
+    /**Adds parent to list of excluded subfolders.  Removes all subfolders of parent 
+     * with no intermediate managed root or excluded*/
+    private void excludeFolder(File parent) {
+        List<File> unExcludeList = new ArrayList<File>();
+        for (File child : excludedSubfolders) {
+            if (shouldRemoveFromExcludeList(child, parent)) {
+                unExcludeList.add(child);
+            }
+        }
+
+        excludedSubfolders.add(parent);
+        excludedSubfolders.removeAll(unExcludeList);
+    }
+       
+    /**
+     * @return true if child is a subfolder of ancestor and there is no intermediate managed root or excluded folder.  
+     */
+    private boolean shouldRemoveFromExcludeList(File child, File ancestor) {
+        Collection<File> roots = getRootChildrenAsFiles();        
+        
+        child = child.getParentFile();        
+        
+        while (child != null) {
+            if (child.equals(ancestor)) {
+                return true;
+            } else if (excludedSubfolders.contains(child)) {
+                return false;// there is an intermediate excluded folder
+            } else if (roots.contains(child)) {
+                return false; // there is an intermediate managed folder
+            }
+
+            child = child.getParentFile();
+        }
+        
+        return false;
     }
     
     @Override
@@ -142,20 +206,9 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
     }
     
     public Collection<File> getAllExcludedSubfolders() {
-        Collection<File> excludes = new HashSet<File>();
-        List<LibraryManagerItem> children = getRoot().getChildren();
-        for(LibraryManagerItem child : children) {
-            addExclusions(child, excludes);
-        }
-        return excludes;
+        return excludedSubfolders;
     }
-        
-    private void addExclusions(LibraryManagerItem item, Collection<File> excludes) {
-        excludes.addAll(item.getExcludedChildren());
-        for(LibraryManagerItem child : item.getChildren()) {
-            addExclusions(child, excludes);
-        }
-    }
+  
 
     public void setRootChildren(List<LibraryManagerItem> children) {
         List<LibraryManagerItem> oldChildren = new ArrayList<LibraryManagerItem>(getRoot().getChildren());
@@ -165,6 +218,14 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
         for(LibraryManagerItem child : children) {
             addChild(child, getRoot());
         }
+        
+    }
+
+    /**Adds child to the tree model and removes it from excluded subfolders.*/
+    public void restoreExcludedChild(LibraryManagerItemImpl libraryManagerItemImpl,
+            LibraryManagerItem item) {
+        addChild(libraryManagerItemImpl, item);
+        excludedSubfolders.remove(item.getFile());
         
     }    
 }

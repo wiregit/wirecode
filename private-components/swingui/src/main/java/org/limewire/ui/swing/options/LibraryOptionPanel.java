@@ -308,8 +308,7 @@ public class LibraryOptionPanel extends OptionPanel {
             for(File file : libraryData.getDirectoriesToManageRecursively()) {
                 root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
             }
-
-            treeTableContainer.getTable().setTreeTableModel(new LibraryManagerModel(root));
+            treeTableContainer.getTable().setTreeTableModel(new LibraryManagerModel(root, libraryData.getDirectoriesToExcludeFromManaging()));
             
             Collection<Category> categories = libraryData.getManagedCategories();
             checkBoxes.setSelected(categories);
@@ -420,7 +419,7 @@ public class LibraryOptionPanel extends OptionPanel {
                 root.addChild(new NoChildrenLibraryManagerItem(root, file));
             }
 
-            treeTable.setTreeTableModel(new LibraryManagerModel(root));
+            treeTable.setTreeTableModel(new LibraryManagerModel(root, libraryData.getDirectoriesToExcludeFromManaging()));
             setVisible(!initialList.isEmpty());
         }
     }

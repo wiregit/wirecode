@@ -95,13 +95,14 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
             
             for(LibraryManagerItem child : toRemove) {
                 getLibraryModel().removeChild(child);
+                getLibraryModel().unexcludeAllSubfolders(child.getFile());
             }
         } else {
             // If the item already exists, go through all its excluded children and explicitly add them.
             // work off a copy because we'll be modifying the list as we iterate through it.
             for(File excludedChild : new ArrayList<File>(item.getExcludedChildren())) {
                 expand = true;
-                getLibraryModel().addChild(new LibraryManagerItemImpl(item, libraryData, excludedChild, true), item);
+                getLibraryModel().restoreExcludedChild(new LibraryManagerItemImpl(item, libraryData, excludedChild, true), item);
             }
         }
         

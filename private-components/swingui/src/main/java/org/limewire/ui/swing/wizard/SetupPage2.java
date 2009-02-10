@@ -164,7 +164,7 @@ public class SetupPage2 extends WizardPage {
             root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
         }
         
-        treeTableContainer.getTable().setTreeTableModel(new LibraryManagerModel(root));
+        treeTableContainer.getTable().setTreeTableModel(new LibraryManagerModel(root, libraryData.getDirectoriesToExcludeFromManaging()));
     }
 
     @Override
