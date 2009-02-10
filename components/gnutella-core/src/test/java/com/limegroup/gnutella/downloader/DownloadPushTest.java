@@ -14,10 +14,12 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.rudp.RUDPUtils;
 
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -366,19 +368,12 @@ public class DownloadPushTest extends DownloadTestCase {
         
         GUID guid = new GUID();
 
-        // create a set of the expected proxies and keep a ref to it
-        PushEndpoint pe = pushEndpointFactory.createPushEndpoint(guid.toHexString()
-                + ";1.2.3.4:5;6.7.8.9:10");
-
-        Set<IpPort> expectedProxies = new IpPortSet();
-        expectedProxies.addAll(pe.getProxies());
-
         // register proxies for GUID, this will add 127.0.0.2:10002 to proxies
-        PushAltLoc pushLocFWT = (PushAltLoc) alternateLocationFactory.create(guid.toHexString()
-                + ";5:4.3.2.1;127.0.0.2:" + PPORT_2, TestFile.hash());
-        pushLocFWT.updateProxies(true);
-
-        assertEquals(1, pushLocFWT.getPushAddress().getProxies().size());
+        PushEndpoint cachedPE = pushEndpointFactory.createPushEndpoint(guid.bytes(), new IpPortSet(new IpPortImpl("127.0.0.2", PPORT_2)));
+        PushEndpointCache cache = injector.getInstance(PushEndpointCache.class);
+        GUID retGuid = cache.updateProxiesFor(guid, cachedPE, true);
+        assertSame(retGuid, guid);
+        assertEquals(1, cachedPE.getProxies().size());
 
         RemoteFileDesc openRFD = newRFDWithURN(PORTS[0], false);
         RemoteFileDesc pushRFD2 = newRFDPush(guid, PPORT_2, 1, 2);
@@ -387,18 +382,16 @@ public class DownloadPushTest extends DownloadTestCase {
 
         testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), pusher2, guid, _currentTestName);
 
-        RemoteFileDesc[] now = { pushRFD2 };
-
         // start download with rfd that needs udp push request
-        ManagedDownloader download = (ManagedDownloader) downloadServices.download(now,
-                RemoteFileDesc.EMPTY_LIST, null, false);
+        ManagedDownloader download = (ManagedDownloader) downloadServices.download(
+                new RemoteFileDesc[] { pushRFD2 }, RemoteFileDesc.EMPTY_LIST, null, false);
         Thread.sleep(2000);
         LOG.debug("adding regular downloader");
         // also download from uploader1, so it gets the proxy headers from pusher2
         download.addDownload(openRFD, false);
         waitForComplete();
 
-        List alc = testUploaders[0].getIncomingGoodAltLocs();
+        List<AlternateLocation> alc = testUploaders[0].getIncomingGoodAltLocs();
         assertEquals(1, alc.size());
 
         PushAltLoc pushLoc = (PushAltLoc) alc.iterator().next();
@@ -410,9 +403,9 @@ public class DownloadPushTest extends DownloadTestCase {
         assertTrue(pushEndpoint.getFWTVersion() > 0);
         assertEquals(pushEndpoint.getPort(), FWTPort);
 
+        Set<IpPort> expectedProxies = new IpPortSet(new IpPortImpl("1.2.3.4:5"), new IpPortImpl("6.7.8.9:10"));
         assertEquals("expected: " + expectedProxies + ", actual: " + pushEndpoint.getProxies(), 
                 expectedProxies.size(), pushEndpoint.getProxies().size());
-
         assertTrue(expectedProxies.containsAll(pushEndpoint.getProxies()));
         
         assertEquals(successfulPushes + 1, ((AtomicInteger)((Map)statsTracker.inspect()).get("push connect success")).intValue());

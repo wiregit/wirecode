@@ -17,6 +17,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.FileUtils;
@@ -34,7 +35,6 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
@@ -43,9 +43,9 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.library.FileManager;
@@ -357,17 +357,15 @@ public abstract class DownloadTestCase extends LimeTestCase {
     }
     
     protected RemoteFileDesc newRFDPush(GUID guid, int port, int rfdSuffix, int proxySuffix) throws Exception {
-        PushAltLoc al = (PushAltLoc) alternateLocationFactory.create(guid.toHexString()
-                + ";127.0.0." + proxySuffix + ":" + port, TestFile.hash());
-        al.updateProxies(true);
-
         Set<URN> urns = new HashSet<URN>();
         urns.add(TestFile.hash());
         
-        PushEndpoint pe = al.getPushAddress();
-        PushEndpoint copyWithPublicAddress = pushEndpointFactory.createPushEndpoint(pe.getClientGUID(), pe.getProxies(), pe.getFeatures(), pe.getFWTVersion(), new IpPortImpl("127.0.0." + rfdSuffix, 6346));
+        PushEndpoint pe = pushEndpointFactory.createPushEndpoint(guid.bytes(),
+                new IpPortSet(new IpPortImpl("127.0.0." + proxySuffix, port)), (byte) 0, (byte) 0,
+                new IpPortImpl("127.0.0." + rfdSuffix, 6346));
+        pe.updateProxies(true);
         
-        return remoteFileDescFactory.createRemoteFileDesc(copyWithPublicAddress, 0, savedFile.getName(),
+        return remoteFileDescFactory.createRemoteFileDesc(pe, 0, savedFile.getName(),
                 TestFile.length(), pe.getClientGUID(), 100, 1, false, null, urns, false, "ALT", 0);
     }
 

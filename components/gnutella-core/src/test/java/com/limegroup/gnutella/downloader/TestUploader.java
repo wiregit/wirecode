@@ -41,7 +41,6 @@ import com.limegroup.gnutella.altlocs.AltLocUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -1055,10 +1054,7 @@ public class TestUploader {
 	private void readAlternateLocations (String altHeader, final boolean good) {
         String alternateLocations=HttpTestUtils.extractHeaderValue(altHeader);
         AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
-            public Void apply(AlternateLocation location) {
-                if(location instanceof PushAltLoc)
-                    ((PushAltLoc)location).updateProxies(good);
-                
+            public Void apply(AlternateLocation location) {                
                 if (good) 
                     incomingGoodAltLocs.add(location);
                 else 
