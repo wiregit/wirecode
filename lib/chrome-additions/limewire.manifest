@@ -1,3 +1,0 @@
-content limewire jar:limewire.jar!/content/limewire/ xpcnativewrappers=yes contentaccessible=yes
-override chrome://global/content/netError.xhtml chrome://limewire/content/netError.xhtml
-
