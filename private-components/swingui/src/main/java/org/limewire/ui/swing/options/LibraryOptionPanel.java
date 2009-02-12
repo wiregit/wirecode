@@ -281,7 +281,12 @@ public class LibraryOptionPanel extends OptionPanel {
             LibraryManagerModel model = treeTableContainer.getTable().getLibraryModel();
             Collection<File> manage = model.getRootChildrenAsFiles();
             Collection<File> exclude = model.getAllExcludedSubfolders();
-            libraryData.setManagedOptions(manage, exclude, getManagedCategories());
+            // make sure these settings changed before reloading the Library
+            if(!manage.equals(libraryData.getDirectoriesToManageRecursively())
+                || !exclude.equals(libraryData.getDirectoriesToExcludeFromManaging())
+                || !getManagedCategories().equals(libraryData.getManagedCategories())) {
+                    libraryData.setManagedOptions(manage, exclude, getManagedCategories());
+            }
             
             return manualImportPanel.applyOptions();
         }

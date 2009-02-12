@@ -81,7 +81,7 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
             excludeFolder(item.getFile());
             unexcludeUnmanagedSubfolders(item.getFile());   
         }
-        System.out.println(excludedSubfolders);
+//        System.out.println(excludedSubfolders);
     }
     
     public void unexcludeAllSubfolders(File parent) {

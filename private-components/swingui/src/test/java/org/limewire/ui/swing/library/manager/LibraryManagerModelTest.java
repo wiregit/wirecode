@@ -1,12 +1,18 @@
 package org.limewire.ui.swing.library.manager;
 
-import org.limewire.util.BaseTestCase;
+import junit.framework.Test;
 
-public class LibraryManagerModelTest extends BaseTestCase {
+import org.limewire.ui.swing.util.SwingTestCase;
+
+public class LibraryManagerModelTest extends SwingTestCase {
 
     public LibraryManagerModelTest(String name) {
         super(name);
-        // TODO Auto-generated constructor stub
     }
 
+    public static Test suite() {
+        return buildTestSuite(LibraryManagerModelTest.class);
+    }
+    
+    
 }

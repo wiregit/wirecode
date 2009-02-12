@@ -87,7 +87,7 @@ public class RootLibraryManagerItemTest extends SwingTestCase {
         assertEquals(0, root.getChildren().size());
     }
     
-    public void testReadd() throws Exception {
+    public void testRead() throws Exception {
         RootLibraryManagerItem root = new RootLibraryManagerItem(Arrays.asList(new File[]{baseDir}));
         
         //add new child

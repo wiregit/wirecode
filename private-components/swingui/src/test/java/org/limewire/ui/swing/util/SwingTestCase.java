@@ -1,12 +1,15 @@
 package org.limewire.ui.swing.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 /**
- * Convience methods for testing Swing components. 
+ *
  */
 public abstract class SwingTestCase extends BaseTestCase {
 
@@ -35,6 +38,29 @@ public abstract class SwingTestCase extends BaseTestCase {
         baseDir.mkdirs();
 
         baseDir.deleteOnExit();
+    }
+    
+    /**
+     * Helper function to create a new temporary file of the given size,
+     * with the given name & extension, in the given directory.
+     */
+    public static File createNewNamedTestFile(int size, String name,
+                                              String extension, File directory) throws Exception {
+        if(name.length() < 3) {
+            name = name + "___";
+        }
+        File file = File.createTempFile(name, "." + extension, directory);
+        file.deleteOnExit();
+        OutputStream out = new FileOutputStream(file);
+
+        for (int i=0; i<size; i++) {
+            out.write(name.charAt(i % name.length()));
+        }
+        out.flush();
+        out.close();
+            
+        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".
+        return FileUtils.getCanonicalFile(file);
     }
     
     /**
