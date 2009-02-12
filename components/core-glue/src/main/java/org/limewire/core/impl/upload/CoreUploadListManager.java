@@ -42,9 +42,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
     private static final int PERIOD = 1000;
 
     @Inject
-    public CoreUploadListManager(UploadListenerList uploadListenerList, @Named("backgroundExecutor")
-            ScheduledExecutorService backgroundExecutor,
-            UploadServices uploadServices) {
+    public CoreUploadListManager(UploadServices uploadServices) {
 
         this.uploadServices = uploadServices;
         
@@ -52,6 +50,11 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
         
         ObservableElementList.Connector<UploadItem> uploadConnector = GlazedLists.beanConnector(UploadItem.class);        
         uploadItems = GlazedListsFactory.observableElementList(threadSafeUploadItems, uploadConnector) ;
+    }
+
+    @Inject
+    public void register(UploadListenerList uploadListenerList, @Named("backgroundExecutor")
+            ScheduledExecutorService backgroundExecutor) {
 
         uploadListenerList.addUploadListener(this);
         
@@ -63,9 +66,10 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
                   update();
               }
           };
-          backgroundExecutor.scheduleAtFixedRate(command, 0, PERIOD, TimeUnit.MILLISECONDS);
+          
+          backgroundExecutor.scheduleAtFixedRate(command, PERIOD*2, PERIOD, TimeUnit.MILLISECONDS);
     }
-
+    
     @Override
     public List<UploadItem> getUploadItems() {
         return uploadItems;
