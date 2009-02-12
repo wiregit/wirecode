@@ -233,7 +233,8 @@ public class SearchResultFromWidget extends JPanel {
         }
 
         // Now go back through our submenus & add them in.
-        if (friends.size() > 0 && p2pUsers.size() > 0) {
+        if (friends.size() + friendsDisabled.size() > 0 &&
+                p2pUsers.size() + p2pUsersDisabled.size() > 0) {
             JLabel label = new JLabel(tr("Friends"));
             label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
             comboBoxMenu.add(label);
@@ -246,11 +247,11 @@ public class SearchResultFromWidget extends JPanel {
             for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
                 comboBoxMenu.add(p2pUser);
             }
-        } else if (friends.size() > 0) {
+        } else if (friends.size() + friendsDisabled.size() > 0) {
             for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
                 comboBoxMenu.add(friend);
             }
-        } else if (p2pUsers.size() > 0) {
+        } else if (p2pUsers.size() + p2pUsersDisabled.size() > 0) {
             for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
                 comboBoxMenu.add(p2pUser);
             }
