@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.util.BaseTestCase;
 
 public class CoreUploadListManagerTest extends BaseTestCase {
@@ -20,11 +19,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
      */
     public void testRegister() {
         
-        Mockery context = new Mockery() {
-            {
-                setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
+        Mockery context = new Mockery();
         
         final UploadListenerList uploadListenerList = context.mock(UploadListenerList.class);
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
