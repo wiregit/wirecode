@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent.bencoding;
 
+import java.io.EOFException;
 import java.util.List;
 import java.util.Map;
 
@@ -82,5 +83,15 @@ public class TokenTest extends BaseTestCase {
         assertEquals("test1", index0);
         assertEquals("blah", index1);
 
+    }
+
+    public void testParseEmptyByteArray() throws Exception {
+        try {
+            Token.parse(new byte[] {});
+            fail("There should be nothing ot read.");
+            //TODO potentially parsing this should just return null, should revisit
+        } catch (EOFException e) {
+            // expected
+        }
     }
 }
