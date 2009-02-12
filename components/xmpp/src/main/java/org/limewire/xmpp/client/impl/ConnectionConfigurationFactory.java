@@ -78,8 +78,7 @@ class ConnectionConfigurationFactory {
                     SRVRecord srvRec = (SRVRecord)rec;
                     int priority = srvRec.getPriority();
                     int weight = srvRec.getWeight();
-                    if(priority < lowestPriority
-                            && weight > highestWeight) {
+                    if(priority < lowestPriority && weight > highestWeight) {
                         hostAndPort = new HostAndPort(srvRec.getTarget().toString(), srvRec.getPort());
                         lowestPriority = priority;
                         highestWeight = weight;
@@ -99,9 +98,27 @@ class ConnectionConfigurationFactory {
         private final String host;
         private final int port;
 
-        public HostAndPort(String host, int port) {
-            this.host = host;
-            this.port = port;
+        public HostAndPort(String host, int defaultPort) {
+            int colonIdx = host.indexOf(':');
+            if(colonIdx == -1) {
+                this.host = host;
+                this.port = defaultPort;
+            } else {
+                this.host = host.substring(0, colonIdx);
+                int p = -1;
+                if (colonIdx < host.length() - 1) {
+                    String portS = host.substring(colonIdx+1);
+                    try {
+                        p = Integer.parseInt(portS);
+                    } catch(NumberFormatException nfe) {
+                    }
+                }
+                if(p > 0) {
+                    this.port = p;
+                } else {
+                    this.port = defaultPort;
+                }
+            }
         }
 
         public String getHost() {

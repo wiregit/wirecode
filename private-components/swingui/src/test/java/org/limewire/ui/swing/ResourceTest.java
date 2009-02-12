@@ -34,8 +34,6 @@ public class ResourceTest extends TestCase {
         List<String> leftover = new ArrayList<String>(sanitized);
         
         List<String> validUnused = new ArrayList<String>();
-        validUnused.add("icons/friends/Gmail.png");
-        validUnused.add("icons/friends/LiveJournal.png");
         validUnused.add("icons/lime.ico");
         
         for(String valid : validUnused) {
