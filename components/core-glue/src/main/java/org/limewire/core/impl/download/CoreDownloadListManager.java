@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
@@ -281,7 +282,11 @@ public class CoreDownloadListManager implements DownloadListManager {
             downloader.addListener(new RecentDownloadListener(downloader));
             downloader.addListener(itunesDownloadListenerFactory.createListener(downloader));
             list.add(item);
-            urnMap.put(item.getUrn(), item);
+            URN urn = item.getUrn();
+            if(urn != null) {
+                //the bittorrent File Downloader can have a null urn
+                urnMap.put(item.getUrn(), item);
+            }
         }
 
         @Override
