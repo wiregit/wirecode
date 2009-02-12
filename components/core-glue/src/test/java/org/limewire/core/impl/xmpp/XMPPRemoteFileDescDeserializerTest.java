@@ -18,6 +18,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.RemoteFileDescImpl;
+import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
@@ -71,7 +72,8 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final XMPPAddress addressNew = context.mock(XMPPAddress.class);
         
         testPromote(context, addressOrig, index, fileName, size, clientGUID, speed,
-                quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew);
+                quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew,
+                "hey");
     }
     
     /**
@@ -102,7 +104,8 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final XMPPAddress addressNew = null;
         
         testPromote(context, addressOrig, index, fileName, size, clientGUID, speed,
-                quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew);
+                quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew,
+                null);
     }
     
     /**
@@ -123,7 +126,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final int speed = Integer.MAX_VALUE;
         final int quality = Integer.MAX_VALUE;
         final boolean browseHost = true;
-        final LimeXMLDocument xmlDoc = null;
+        final LimeXMLDocument xmlDoc = context.mock(LimeXMLDocument.class);
         final Set<URN> urns = new HashSet<URN>();
         final boolean replyToMuticast = true;
         final String vendor = "sadasjhdsakhfesndvcbjurfgmxcnm,xvnsdkjfhsdjkfnsdjfn";
@@ -132,7 +135,8 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final XMPPAddress addressNew = context.mock(XMPPAddress.class);
         
         testPromote(context, addressOrig, index, fileName, size, clientGUID, speed,
-                quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew);
+                quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew,
+                "hello");
     }
     
     private void testPromote(Mockery context,
@@ -150,7 +154,8 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
             final String vendor,
             final long createTime,
             final boolean http11,
-            final XMPPAddress addressNew) {
+            final XMPPAddress addressNew,
+            final String xmlCheckString) {
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
         final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
@@ -159,7 +164,14 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
             = new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver);
                         
         context.checking(new Expectations() {
-            {  // Nothing internal to the mocks should be touched.
+            {   
+                if (xmlCheckString != null) {
+                    allowing(xmlDoc).getXMLString();
+                    will(returnValue(xmlCheckString));
+                    ignoring(addressFactory);
+                }
+                
+                // Nothing else internal to the mocks should be touched.
             }});
         
         RemoteFileDesc rfdOrig = new RemoteFileDescImpl(addressOrig, index, fileName, size,
@@ -189,7 +201,21 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         assertEquals(0.0f, rfdNew.getSpamRating());
         assertEquals(Status.INSECURE, rfdNew.getSecureStatus());
         
+        // These calls should no longer have any effect
+        rfdNew.setSecureStatus(Status.FAILED);
+        rfdNew.setSpamRating(100f);
+        assertEquals(0.0f, rfdNew.getSpamRating());
+        assertEquals(Status.INSECURE, rfdNew.getSecureStatus());
+        
+        // These calls should still have an effect
+        rfdNew.setHTTP11(!http11);
+        assertEquals(!http11, rfdNew.isHTTP11());
                 
+        if (xmlCheckString != null) {
+            RemoteHostMemento memento = rfdNew.toMemento();
+            assertEquals(xmlCheckString, memento.getXml());
+        }
+        
         context.assertIsSatisfied();
     }
     
@@ -289,6 +315,8 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         assertFalse(rfdNew.isSpam());
         assertEquals(0.0f, rfdNew.getSpamRating());
         assertEquals(Status.INSECURE, rfdNew.getSecureStatus());
+        assertNotNull(rfdNew.toString());
+        assertNotEquals(rfdNew.toString(), "");
         
         // Invoke a method that uses addressResolver
         rfdNew.getCredentials();
