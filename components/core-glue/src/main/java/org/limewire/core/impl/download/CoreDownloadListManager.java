@@ -6,10 +6,10 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -72,7 +72,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     
     private static final int PERIOD = 1000;
     
-    private Map<org.limewire.core.api.URN, DownloadItem> urnMap = new HashMap<org.limewire.core.api.URN, DownloadItem>();
+    private Map<org.limewire.core.api.URN, DownloadItem> urnMap = new ConcurrentHashMap<org.limewire.core.api.URN, DownloadItem>();
 	
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
@@ -116,7 +116,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             observableDownloadItems.getReadWriteLock().writeLock().unlock();
         }
     }
-	
+    
 	@Override
 	public EventList<DownloadItem> getDownloads() {
 		return observableDownloadItems;
@@ -295,9 +295,8 @@ public class CoreDownloadListManager implements DownloadListManager {
             //don't automatically remove finished downloads or downloads in error states
             if ((item.getState() != DownloadState.DONE || SharingSettings.CLEAR_DOWNLOAD.getValue()) && 
                     item.getState() != DownloadState.ERROR) {
-                list.remove(item);
+                remove(item);
             }
-            urnMap.remove(item.getUrn());
         }
         
         @Override
@@ -366,7 +365,9 @@ public class CoreDownloadListManager implements DownloadListManager {
                 }
             }
 
-            threadSafeDownloadItems.removeAll(finishedItems);
+            for(DownloadItem item : finishedItems) {
+                remove(item);
+            }
         } finally {
             threadSafeDownloadItems.getReadWriteLock().writeLock().unlock();
         }
@@ -374,6 +375,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 
     @Override
     public void remove(DownloadItem item) {
+        urnMap.remove(item.getUrn());
         threadSafeDownloadItems.remove(item);
     }
 

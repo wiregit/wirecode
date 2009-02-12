@@ -1,9 +1,7 @@
 package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -12,6 +10,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.TestPropertyChangeListener;
 
 import com.limegroup.gnutella.Downloader;
 
@@ -109,30 +108,5 @@ public class CoreDownloadItemTest extends BaseTestCase {
         Category testCategory2 = coreDownloadItem.getCategory();
         assertEquals(Category.DOCUMENT, testCategory2);
 
-    }
-
-    /**
-     * Counts all events sent to the PropertyChangeListener. Stores the latest
-     * event in the lastestEvent field.
-     */
-    private final class TestPropertyChangeListener implements PropertyChangeListener {
-
-        private PropertyChangeEvent latestEvent = null;
-
-        private AtomicInteger eventCount = new AtomicInteger(0);
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            this.latestEvent = evt;
-            eventCount.incrementAndGet();
-        }
-
-        public PropertyChangeEvent getLatestEvent() {
-            return latestEvent;
-        }
-
-        public int getEventCount() {
-            return eventCount.intValue();
-        }
     }
 }
