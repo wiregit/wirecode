@@ -6,10 +6,11 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -73,7 +74,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     
     private static final int PERIOD = 1000;
     
-    private Map<org.limewire.core.api.URN, DownloadItem> urnMap = new ConcurrentHashMap<org.limewire.core.api.URN, DownloadItem>();
+    private Map<org.limewire.core.api.URN, DownloadItem> urnMap = Collections.synchronizedMap(new HashMap<org.limewire.core.api.URN, DownloadItem>());
 	
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
