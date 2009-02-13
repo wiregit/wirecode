@@ -93,7 +93,7 @@ public abstract class AbstractUploader implements Uploader {
     
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
     
-    private Exception previousStateSetter = null;
+//    private Exception previousStateSetter = null;
 
     public AbstractUploader(String fileName, HTTPUploadSession session, TcpBandwidthStatistics tcpBandwidthStatistics) {
         this.session = session;
@@ -140,12 +140,12 @@ public abstract class AbstractUploader implements Uploader {
     public void setState(UploadStatus state) {
         if (this.state == state) {
             IllegalStateException ise = new IllegalStateException();
-            ise.initCause(previousStateSetter);
+//            ise.initCause(previousStateSetter);
             throw ise;
         }
         this.lastTransferState = this.state;
         this.state = state;
-        this.previousStateSetter = new Exception();
+//        this.previousStateSetter = new Exception();
     }
 
     /**

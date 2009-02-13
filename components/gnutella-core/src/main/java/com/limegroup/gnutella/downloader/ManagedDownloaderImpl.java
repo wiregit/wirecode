@@ -1304,7 +1304,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 }
             }
         }
-        
+            
         if(l.size() > 0) {
             return addDownloadForced(l,cache);
         } else {
@@ -1334,7 +1334,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     protected synchronized final boolean addDownloadForced(Collection<? extends RemoteFileDesc> c, boolean cache) {
-        LOG.debug("add download forced", new Exception());
+        if(LOG.isDebugEnabled())
+            LOG.debug("add download forced", new Exception());
         // create copy, argument might not be modifiable
         Set<RemoteFileDesc> copy = new HashSet<RemoteFileDesc>(c);
         // remove any rfds we're currently downloading from
@@ -2884,13 +2885,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             URN sha1 = getSha1Urn();
             URN ttroot = tree.getTreeRootUrn();
             tigerTreeCache.get().addRoot(sha1, ttroot);
-            synchronized(fileManager) {
-                List<FileDesc> fds = fileManager.getManagedFileList().getFileDescsMatching(sha1);
-                for(FileDesc fd : fds) {
-                    if (fd == null) // possible for in-network downloads
-                        return;
-                    fd.setTTRoot(ttroot);
-                }
+            List<FileDesc> fds = fileManager.getManagedFileList().getFileDescsMatching(sha1);
+            for(FileDesc fd : fds) {
+                fd.setTTRoot(ttroot);
             }
         }
     }
@@ -3225,5 +3222,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
         }
         
+    }
+
+    // for tests
+    protected SourceRanker getCurrentSourceRanker() {
+        return ranker;
     }
 }

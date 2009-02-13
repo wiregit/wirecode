@@ -204,6 +204,9 @@ public class UploadTest extends LimeTestCase {
     public void tearDown() throws Exception {
         stopServices();
         LimeTestUtils.waitForNIO();
+        injector = null;
+        fileManager = null;
+        uploadManager = null;
     }
 
     private void doSettings() throws UnknownHostException {
@@ -253,6 +256,8 @@ public class UploadTest extends LimeTestCase {
         Acceptor acceptor = injector.getInstance(Acceptor.class);
         acceptor.setListeningPort(0);
         acceptor.shutdown();
+        
+        uploadManager.stop();
     }    
     
     public void testHTTP10Download() throws Exception {
@@ -1008,7 +1013,7 @@ public class UploadTest extends LimeTestCase {
             } else {
                 result = null;
             }
-            assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ" + System.getProperty("line.separator"), result);
+            assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n", result);
         } finally {
             HttpClientUtils.releaseConnection(response);
         }

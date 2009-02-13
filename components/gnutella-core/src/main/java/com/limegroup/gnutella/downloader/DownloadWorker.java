@@ -392,7 +392,9 @@ public class DownloadWorker {
      * Handles a failure of an RFD.
      */
     private void handleRFDFailure() {
-        LOG.debug("rfd failure", new Exception());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("rfd failure", new Exception());
+        }
         rfdContext.incrementFailedCount();
         LOG.debug("handling rfd failure for "+_rfd+" with count now "+ rfdContext.getFailedCount());
         // if this RFD had a failure, try it again.

@@ -246,11 +246,13 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             public void handleEvent(FileDescChangeEvent event) {
                 switch(event.getType()) {
                 case URNS_CHANGED:
-                    rwLock.writeLock().lock();
-                    try {
-                        updateUrnIndex(event.getSource());
-                    } finally {
-                        rwLock.writeLock().unlock();
+                    if(event.getUrn() == null || event.getUrn().isSHA1()) {
+                        rwLock.writeLock().lock();
+                        try {
+                            updateUrnIndex(event.getSource());
+                        } finally {
+                            rwLock.writeLock().unlock();
+                        }
                     }
                     break;
                 }
