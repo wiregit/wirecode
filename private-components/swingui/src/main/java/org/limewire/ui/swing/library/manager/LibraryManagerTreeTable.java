@@ -79,7 +79,7 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
         }
         
         item = parent.getChildFor(directory);
-        
+
         if(item == null) {
             item = new LibraryManagerItemImpl(parent, libraryData, directory, true);
             getLibraryModel().addChild(item, parent);
