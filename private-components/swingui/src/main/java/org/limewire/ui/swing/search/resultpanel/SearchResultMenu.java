@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search.resultpanel;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -11,6 +12,8 @@ import javax.swing.JPopupMenu;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.FileChooser;
+import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * This class implements the menu that is displayed
@@ -48,6 +51,32 @@ public class SearchResultMenu extends JPopupMenu {
                 for(VisualSearchResult visualSearchResult : selectedItems) {
                     if(visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED) {
                         downloadHandler.download(visualSearchResult);
+                    }
+                }
+            }
+        }).setEnabled(downloadEnabled);
+        
+        // Add Download As menu item.
+        add(new AbstractAction(tr("Download As...")) {
+            public void actionPerformed(ActionEvent e) {
+                for (VisualSearchResult visualSearchResult : selectedItems) {
+                    if (visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED) {
+                        // Create suggested file.  We don't specify a directory
+                        // path so we can use the last input directory.  To get
+                        // the default save directory, we could call
+                        // SharingSettings.getSaveDirectory(fileName).
+                        String fileName = visualSearchResult.getFileName();
+                        File suggestedFile = new File(fileName);
+                        
+                        // Prompt user for local file name.
+                        File saveFile = FileChooser.getSaveAsFile(
+                                GuiUtils.getMainFrame(), tr("Download As"), 
+                                suggestedFile);
+                        
+                        // Start download if not cancelled.
+                        if (saveFile != null) {
+                            downloadHandler.download(visualSearchResult, saveFile);
+                        }
                     }
                 }
             }
