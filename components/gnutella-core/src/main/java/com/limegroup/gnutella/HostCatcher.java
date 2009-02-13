@@ -142,6 +142,11 @@ public class HostCatcher implements Service {
      */
     public static final int PONG_MASK = 0xFFFFFF00;
     
+    /**
+     * Delete the host file if it's older than this in milliseconds
+     */
+    static final long STALE_HOST_FILE = 2 * 7 * 24 * 60 * 60 * 1000; // 2 weeks
+    
     private static final Comparator<ExtendedEndpoint> DHT_COMPARATOR = 
         new Comparator<ExtendedEndpoint>() {
         public int compare(ExtendedEndpoint e1, ExtendedEndpoint e2) {
@@ -549,6 +554,12 @@ public class HostCatcher implements Service {
      */
     void read(File hostFile) throws FileNotFoundException, IOException {
         LOG.trace("Reading host file");
+        long now = System.currentTimeMillis();
+        if(now - hostFile.lastModified() > STALE_HOST_FILE) {
+            LOG.info("Deleting stale host file");
+            hostFile.delete();
+            return;
+        }
         BufferedReader in = null;
         try {
             in = new BufferedReader(new FileReader(hostFile));
@@ -1508,7 +1519,6 @@ public class HostCatcher implements Service {
      * Reads the gnutella.net file.
      */
     private void readHostsFile() {
-        LOG.trace("Reading Hosts File");
         // Just gnutella.net
         try {
             read(getHostsFile());
@@ -1526,7 +1536,7 @@ public class HostCatcher implements Service {
      * removal from our hosts list.
      */
     public void recoverHosts() {
-        LOG.debug("Recovering hosts file");
+        LOG.debug("Recovering host file");
         
         synchronized(this) {
             PROBATION_HOSTS.clear();
