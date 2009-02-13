@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -36,6 +37,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.nav.Navigator;
@@ -62,6 +64,7 @@ import org.limewire.ui.swing.table.VisibleTableFormat;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -358,6 +361,11 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
     @Override
     public void download(final VisualSearchResult vsr) {
+        download(vsr, null);
+    }
+
+    @Override
+    public void download(final VisualSearchResult vsr, File saveFile) {
         try {
             // execute the download preprocessors
             for (DownloadPreprocessor preprocessor : downloadPreprocessors) {
@@ -367,18 +375,33 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                     return;
                 }
             }
+
+            // Add download to manager.  If save file is specified, then set
+            // overwrite to true because the user has already confirmed it.
+            DownloadItem di = (saveFile == null) ?
+                    downloadListManager.addDownload(search, vsr.getCoreSearchResults()) :
+                    downloadListManager.addDownload(search, vsr.getCoreSearchResults(), saveFile, true);
             
-            DownloadItem di = downloadListManager.addDownload(
-                search, vsr.getCoreSearchResults());
+            // Add listener, and initialize download state.
             di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-             
             vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+            
         } catch (final SaveLocationException sle) {
-            if(sle.getErrorCode()  == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
+            if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
                 DownloadItem downloadItem = downloadListManager.getDownloadItem(vsr.getUrn());
-                if(downloadItem != null) {
+                if (downloadItem != null) {
                     downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
                     vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+                    if (saveFile != null) {
+                        try {
+                            // Update save file in DownloadItem.
+                            downloadItem.setSaveFile(saveFile, true);
+                        } catch (SaveLocationException ex) {
+                            FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), 
+                                    I18n.tr("Unable to relocate downloading file {0}", ex.getMessage()), 
+                                    I18n.tr("Download"), JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
                 }
             } else {
                 saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
