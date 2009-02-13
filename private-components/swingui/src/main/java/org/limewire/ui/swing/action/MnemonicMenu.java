@@ -42,9 +42,6 @@ public class MnemonicMenu extends javax.swing.JMenu {
         if (item instanceof JCheckBoxMenuItem) {
             item.setUI(new PlainCheckBoxMenuItemUI());
         }
-        else {
-            item.setUI(new PlainMenuItemUI());
-        }
         
         JMenuItem itemReturned = super.add(item);
         return itemReturned;
