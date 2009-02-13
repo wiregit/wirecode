@@ -328,11 +328,11 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
 
         @Override
-        public void handleSearchResult(SearchResult searchResult) {
+        public void handleSearchResult(Search search, SearchResult searchResult) {
         }
         
         @Override
-        public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) {
+        public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {
             // do nothing
         }
         
@@ -342,7 +342,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
         
         @Override
-        public void searchStarted() {
+        public void searchStarted(Search search) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -360,7 +360,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
         
         @Override
-        public void searchStopped() {
+        public void searchStopped(Search search) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -391,12 +391,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
 
         @Override
-        public void searchStarted() {
+        public void searchStarted(Search search) {
             setEnabled(true);
         }
 
-        @Override public void searchStopped() { }
-        @Override public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) { }
-        @Override public void handleSearchResult(SearchResult searchResult) {}
+        @Override public void searchStopped(Search search) { }
+        @Override public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) { }
+        @Override public void handleSearchResult(Search search, SearchResult searchResult) {}
     }
 }

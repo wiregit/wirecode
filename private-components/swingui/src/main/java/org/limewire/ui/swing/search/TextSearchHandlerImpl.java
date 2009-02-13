@@ -84,7 +84,7 @@ class TextSearchHandlerImpl implements SearchHandler {
         
         search.addSearchListener(new SearchListener() {
             @Override
-            public void handleSearchResult(final SearchResult searchResult) {
+            public void handleSearchResult(Search search, final SearchResult searchResult) {
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
@@ -104,15 +104,15 @@ class TextSearchHandlerImpl implements SearchHandler {
             }
 
             @Override
-            public void searchStarted() {
+            public void searchStarted(Search search) {
             }
 
             @Override
-            public void searchStopped() {
+            public void searchStopped(Search search) {
             }
 
             @Override
-            public void handleSponsoredResults(final List<SponsoredResult> sponsoredResults) {
+            public void handleSponsoredResults(Search search, final List<SponsoredResult> sponsoredResults) {
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
@@ -199,7 +199,7 @@ class TextSearchHandlerImpl implements SearchHandler {
             private final AtomicInteger numberOfResults = new AtomicInteger(0);
             
             @Override
-            public void handleSearchResult(SearchResult searchResult) {
+            public void handleSearchResult(Search search, SearchResult searchResult) {
                 if(numberOfResults.addAndGet(1) > 10) {
                     SwingUtils.invokeLater(new Runnable() {
                         public void run() {
@@ -213,9 +213,9 @@ class TextSearchHandlerImpl implements SearchHandler {
                 }
             }
 
-            @Override public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) {}
-            @Override public void searchStarted() {}
-            @Override public void searchStopped() {}                
+            @Override public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {}
+            @Override public void searchStarted(Search search) {}
+            @Override public void searchStopped(Search search) {}                
         });
         
         searchPanel.setFullyConnected(false);
