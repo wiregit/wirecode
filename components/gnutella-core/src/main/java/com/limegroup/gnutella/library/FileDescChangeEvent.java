@@ -2,13 +2,13 @@ package com.limegroup.gnutella.library;
 
 import java.util.List;
 
-import org.limewire.listener.DefaultEvent;
+import org.limewire.listener.DefaultSourceTypeEvent;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public class FileDescChangeEvent extends DefaultEvent<FileDesc, FileDescChangeEvent.Type> {
+public class FileDescChangeEvent extends DefaultSourceTypeEvent<FileDesc, FileDescChangeEvent.Type> {
     
     public static enum Type { URNS_CHANGED, LOAD }
     

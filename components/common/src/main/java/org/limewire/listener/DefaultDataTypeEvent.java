@@ -5,12 +5,12 @@ import org.limewire.util.Objects;
 /**
  * A default, simple implementation of Event.
  */
-public class DefaultEvent<S, E> extends AbstractSourcedEvent<S> implements Event<S, E> {
+public class DefaultDataTypeEvent<D, E> extends DefaultDataEvent<D> implements DataTypeEvent<D, E> {
     
     private final E event;
     
-    public DefaultEvent(S source, E event) {
-        super(source);
+    public DefaultDataTypeEvent(D data, E event) {
+        super(data);
         this.event = Objects.nonNull(event, "event");
     }
 
@@ -33,7 +33,7 @@ public class DefaultEvent<S, E> extends AbstractSourcedEvent<S> implements Event
         if(!obj.getClass().equals(getClass())) {
             return false;
         }
-        return event.equals(((DefaultEvent)obj).getType());
+        return event.equals(((DefaultDataTypeEvent)obj).getType());
     }
 
     @Override

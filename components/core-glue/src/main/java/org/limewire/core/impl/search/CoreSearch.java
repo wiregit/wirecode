@@ -12,6 +12,7 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
+import org.limewire.core.api.search.SearchEvent;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
@@ -22,6 +23,7 @@ import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
 import org.limewire.core.settings.PromotionSettings;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.promotion.PromotionSearcher;
 import org.limewire.promotion.PromotionSearcher.PromotionSearchResultsCallback;
 import org.limewire.promotion.containers.PromotionMessageContainer;
@@ -55,16 +57,19 @@ public class CoreSearch implements Search {
     private final QrListener qrListener = new QrListener();
     private final FriendSearchListener friendSearchListener = new FriendSearchListenerImpl();
     private final ScheduledExecutorService backgroundExecutor;
+    private final EventBroadcaster<SearchEvent> searchEventBroadcaster;
     
     private volatile byte[] searchGuid;
 
     @AssistedInject
-    public CoreSearch(@Assisted
-    SearchDetails searchDetails, SearchServices searchServices,
-            QueryReplyListenerList listenerList, PromotionSearcher promotionSearcher,
+    public CoreSearch(@Assisted SearchDetails searchDetails,
+            SearchServices searchServices,
+            QueryReplyListenerList listenerList,
+            PromotionSearcher promotionSearcher,
             FriendSearcher friendSearcher,
             CachedGeoLocation geoLocation,
-            @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor) {
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            EventBroadcaster<SearchEvent> searchEventBroadcaster) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
@@ -72,6 +77,7 @@ public class CoreSearch implements Search {
         this.friendSearcher = friendSearcher;
         this.geoLocation = geoLocation;
         this.backgroundExecutor = backgroundExecutor;
+        this.searchEventBroadcaster = searchEventBroadcaster;
     }
     
     @Override
@@ -96,13 +102,15 @@ public class CoreSearch implements Search {
         }
         
         for(SearchListener listener : searchListeners) {
-            listener.searchStarted();
+            listener.searchStarted(this);
         }
 
         doSearch(true);
     }
     
     private void doSearch(boolean initial) {
+        searchEventBroadcaster.broadcast(new SearchEvent(this, SearchEvent.Type.STARTED));
+        
         searchGuid = searchServices.newQueryGUID();
         listenerList.addQueryReplyListener(searchGuid, qrListener);
         
@@ -199,7 +207,7 @@ public class CoreSearch implements Search {
         stop();
         
         for(SearchListener listener : searchListeners) {
-            listener.searchStarted();
+            listener.searchStarted(CoreSearch.this);
         }
         
         doSearch(false);
@@ -211,11 +219,12 @@ public class CoreSearch implements Search {
             return;
         }
         
+        searchEventBroadcaster.broadcast(new SearchEvent(this, SearchEvent.Type.STOPPED));
         listenerList.removeQueryReplyListener(searchGuid, qrListener);
         searchServices.stopQuery(new GUID(searchGuid));
         
         for(SearchListener listener : searchListeners) {
-            listener.searchStopped();
+            listener.searchStopped(CoreSearch.this);
         }
     }
 
@@ -228,7 +237,7 @@ public class CoreSearch implements Search {
     private void handleSponsoredResults(SponsoredResult... sponsoredResults) {
         List<SponsoredResult> resultList =  Arrays.asList(sponsoredResults);
         for(SearchListener listener : searchListeners) {
-            listener.handleSponsoredResults(resultList);
+            listener.handleSponsoredResults(CoreSearch.this, resultList);
         }
     }
     
@@ -237,7 +246,7 @@ public class CoreSearch implements Search {
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
                 Set<? extends IpPort> locs) {
             for (SearchListener listener : searchListeners) {
-                listener.handleSearchResult(new RemoteFileDescAdapter(rfd, locs));
+                listener.handleSearchResult(CoreSearch.this, new RemoteFileDescAdapter(rfd, locs));
             }
         }
     }
@@ -247,7 +256,7 @@ public class CoreSearch implements Search {
             for(RemoteFileItem remoteFileItem : results) {
                 SearchResult searchResult = ((CoreRemoteFileItem)remoteFileItem).getSearchResult();
                 for (SearchListener listener : searchListeners) {
-                    listener.handleSearchResult(searchResult);
+                    listener.handleSearchResult(CoreSearch.this, searchResult);
                 }
             }            
         }

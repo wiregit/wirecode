@@ -2,11 +2,11 @@ package org.limewire.listener;
 
 import org.limewire.util.Objects;
 
-public class AbstractSourcedEvent<S> {
+public class DefaultSourceEvent<S> {
     
     private final S source;
     
-    public AbstractSourcedEvent(S source) {
+    public DefaultSourceEvent(S source) {
         this.source = Objects.nonNull(source, "source");
     }
     
@@ -26,7 +26,7 @@ public class AbstractSourcedEvent<S> {
         if(!obj.getClass().equals(getClass())) {
             return false;
         }
-        return source.equals(((AbstractSourcedEvent)obj).getSource());
+        return source.equals(((DefaultSourceEvent)obj).getSource());
     }
 
     @Override

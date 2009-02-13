@@ -16,6 +16,7 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
+import org.limewire.core.api.search.SearchEvent;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
@@ -24,6 +25,7 @@ import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.settings.PromotionSettings;
 import org.limewire.io.Address;
 import org.limewire.io.IpPort;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.promotion.PromotionSearcher;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
@@ -40,6 +42,7 @@ public class CoreSearchTest extends BaseTestCase {
         super(name);
     }
 
+    @SuppressWarnings({ "unchecked", "cast" })
     public void testQueryReplySearchListenerResultsAdded() {
         Mockery context = new Mockery() {
             {
@@ -58,13 +61,19 @@ public class CoreSearchTest extends BaseTestCase {
         final CachedGeoLocation geoLocation = context.mock(CachedGeoLocation.class);
         final ScheduledExecutorService backgroundExecutor = context
                 .mock(ScheduledExecutorService.class);
+        final EventBroadcaster<SearchEvent> searchEventBroadcaster = (EventBroadcaster<SearchEvent>) context
+                .mock(EventBroadcaster.class);
 
         final byte[] searchGuid = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                 16 };
         final SearchListener searchListener = context.mock(SearchListener.class);
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
+        final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
+                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor, searchEventBroadcaster);
+        
         context.checking(new Expectations() {
             {
+                one(searchEventBroadcaster).broadcast(new SearchEvent(coreSearch, SearchEvent.Type.STARTED));
                 one(searchServices).newQueryGUID();
                 will(returnValue(searchGuid));
                 one(listenerList).addQueryReplyListener(with(equal(searchGuid)),
@@ -83,12 +92,10 @@ public class CoreSearchTest extends BaseTestCase {
                 });
                 one(friendSearcher).doSearch(with(equal(searchDetails)),
                         with(any(FriendSearchListener.class)));
-                one(searchListener).searchStarted();
+                one(searchListener).searchStarted(coreSearch);
             }
         });
 
-        CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
-                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor);
         coreSearch.addSearchListener(searchListener);
 
         coreSearch.start();
@@ -116,7 +123,7 @@ public class CoreSearchTest extends BaseTestCase {
                 will(returnValue(null));
                 allowing(remoteFileDesc1).getCreationTime();
                 will(returnValue(5678L));
-                one(searchListener).handleSearchResult(with(new BaseMatcher<SearchResult>() {
+                one(searchListener).handleSearchResult(with(same(coreSearch)), with(new BaseMatcher<SearchResult>() {
                     @Override
                     public boolean matches(Object item) {
                         if (!SearchResult.class.isInstance(item)) {
@@ -143,6 +150,7 @@ public class CoreSearchTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
+    @SuppressWarnings({ "unchecked", "cast" })
     public void testFriendSearchListenerResultsAdded() {
         Mockery context = new Mockery() {
             {
@@ -161,13 +169,19 @@ public class CoreSearchTest extends BaseTestCase {
         final CachedGeoLocation geoLocation = context.mock(CachedGeoLocation.class);
         final ScheduledExecutorService backgroundExecutor = context
                 .mock(ScheduledExecutorService.class);
+        final EventBroadcaster<SearchEvent> searchEventBroadcaster = (EventBroadcaster<SearchEvent>) context
+                .mock(EventBroadcaster.class);
 
         final byte[] searchGuid = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                 16 };
         final SearchListener searchListener = context.mock(SearchListener.class);
         final AtomicReference<FriendSearchListener> friendSearchListener = new AtomicReference<FriendSearchListener>();
+        final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
+                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor, searchEventBroadcaster);
+        
         context.checking(new Expectations() {
             {
+                one(searchEventBroadcaster).broadcast(new SearchEvent(coreSearch, SearchEvent.Type.STARTED));
                 one(searchServices).newQueryGUID();
                 will(returnValue(searchGuid));
                 one(listenerList).addQueryReplyListener(with(equal(searchGuid)),
@@ -186,12 +200,10 @@ public class CoreSearchTest extends BaseTestCase {
                 one(friendSearcher).doSearch(with(equal(searchDetails)),
                         with(any(FriendSearchListener.class)));
                 will(new AssignParameterAction<FriendSearchListener>(friendSearchListener, 1));
-                one(searchListener).searchStarted();
+                one(searchListener).searchStarted(coreSearch);
             }
         });
-
-        CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
-                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor);
+        
         coreSearch.addSearchListener(searchListener);
 
         coreSearch.start();
@@ -203,7 +215,7 @@ public class CoreSearchTest extends BaseTestCase {
             {
                 allowing(coreRemoteFileItem1).getSearchResult();
                 will(returnValue(searchResult1));
-                one(searchListener).handleSearchResult(with(new BaseMatcher<SearchResult>() {
+                one(searchListener).handleSearchResult(with(same(coreSearch)), with(new BaseMatcher<SearchResult>() {
                     @Override
                     public boolean matches(Object item) {
                         if (!SearchResult.class.isInstance(item)) {
