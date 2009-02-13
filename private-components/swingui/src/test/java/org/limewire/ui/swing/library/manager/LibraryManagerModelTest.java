@@ -18,12 +18,26 @@ public class LibraryManagerModelTest extends SwingTestCase {
     private Mockery context;
     private LibraryData libraryData;
     
+    private File firstFolder;
+    private File secondFolder;
+    private File thirdFolder;
+    private File fourthFolder;
+    
     public LibraryManagerModelTest(String name) {
         super(name);
     }
 
     public static Test suite() {
         return buildTestSuite(LibraryManagerModelTest.class);
+    }
+    
+    protected void postTearDown() {
+        super.postTearDown();
+
+        if(firstFolder != null) firstFolder.delete();
+        if(secondFolder != null) secondFolder.delete();
+        if(thirdFolder != null) thirdFolder.delete();
+        if(fourthFolder != null) fourthFolder.delete();
     }
     
     /**
@@ -50,10 +64,9 @@ public class LibraryManagerModelTest extends SwingTestCase {
         //single root with one child
         RootLibraryManagerItem root = new RootLibraryManagerItem(Arrays.asList(new File[]{baseDir}));
         
-        final File childFolder = new File(baseDir, "subFolder");
-        childFolder.mkdir();
+        firstFolder = createFolder(baseDir, "firstFolder");
         
-        LibraryManagerItem item = new LibraryManagerItemImpl(root, libraryData, childFolder, false);
+        LibraryManagerItem item = new LibraryManagerItemImpl(root, libraryData, firstFolder, false);
         
         root.addChild(item);
         
@@ -81,7 +94,7 @@ public class LibraryManagerModelTest extends SwingTestCase {
         //child files
         Collection<File> files = model.getRootChildrenAsFiles();
         assertEquals(1, files.size());
-        assertEquals(childFolder, files.iterator().next());
+        assertEquals(firstFolder, files.iterator().next());
         
         //excluded folders
         files = model.getAllExcludedSubfolders();
@@ -89,7 +102,6 @@ public class LibraryManagerModelTest extends SwingTestCase {
         
         assertEquals(0, model.getIndexOfChild(root, item));
         
-        childFolder.delete();
     }
     
     /**
@@ -99,16 +111,11 @@ public class LibraryManagerModelTest extends SwingTestCase {
     public void testChildrenRecursion() throws Exception {
         setupMockery();
         
-        final File firstFolder = new File(baseDir, "firstFolder");
-        final File secondFolder = new File(firstFolder, "secondFolder");
-        final File thirdFolder = new File(secondFolder, "thirdFolder");
-        final File fourthFolder = new File(secondFolder, "fourthFolder");
+        firstFolder = createFolder(baseDir, "firstFolder");
+        secondFolder = createFolder(firstFolder, "secondFolder");
+        thirdFolder = createFolder(secondFolder, "thirdFolder");
+        fourthFolder = createFolder(secondFolder, "fourthFolder");
 
-        firstFolder.mkdir();
-        secondFolder.mkdir();
-        thirdFolder.mkdir();
-        fourthFolder.mkdir();
-        
         RootLibraryManagerItem root = new RootLibraryManagerItem(Arrays.asList(new File[]{baseDir}));
                
         context.checking(new Expectations() {{
@@ -139,20 +146,13 @@ public class LibraryManagerModelTest extends SwingTestCase {
         assertEquals(2, model.getChildCount(item));
         assertEquals(secondFolder, item.getFile());
         
-        firstFolder.delete();
-        secondFolder.delete();
-        thirdFolder.delete();
-        fourthFolder.delete();
     }
     
     public void testAddRemoveChild() throws Exception {
         setupMockery();
         
-        final File firstFolder = new File(baseDir, "firstFolder");
-        final File secondFolder = new File(firstFolder, "secondFolder");
-        
-        firstFolder.mkdir();
-        secondFolder.mkdir();
+        firstFolder = createFolder(baseDir, "firstFolder");
+        secondFolder = createFolder(firstFolder, "secondFolder");
         
         context.checking(new Expectations() {{
             one(libraryData).isDirectoryAllowed(secondFolder);
@@ -180,18 +180,15 @@ public class LibraryManagerModelTest extends SwingTestCase {
         model.addChild(childItem, firstItem);
         assertEquals(1, model.getChildCount(firstItem));
         assertEquals(0, model.getIndexOfChild(firstItem, childItem));
-        
-        firstFolder.delete();
-        secondFolder.delete();
-    }
-    
+    }    
+           
     /**
      * Removes current children of the root and replaces them with
      * new children.
      */
     public void testReplaceRoots() throws Exception {
-        final File firstFolder = new File(baseDir, "firstFolder");
-        final File secondFolder = new File(baseDir, "secondFolder");
+        firstFolder = createFolder(baseDir, "firstFolder");
+        secondFolder = createFolder(baseDir, "secondFolder");
         
         RootLibraryManagerItem root = new RootLibraryManagerItem(Arrays.asList(new File[]{baseDir}));
         LibraryManagerItem firstItem = new LibraryManagerItemImpl(root, libraryData, firstFolder, true);
@@ -210,25 +207,21 @@ public class LibraryManagerModelTest extends SwingTestCase {
         items = model.getRoot().getChildren();
         assertEquals(1, items.size());
         assertEquals(secondItem, items.get(0));
-        
-        firstFolder.delete();
-        secondFolder.delete();
     }
 
     public void testSingleRootExcludedChild() throws Exception {
         //single root with one excluded child
         RootLibraryManagerItem root = new RootLibraryManagerItem(Arrays.asList(new File[]{baseDir}));
         
-        final File childFolder = new File(baseDir, "subFolder");
-        childFolder.mkdir();
+        firstFolder = createFolder(baseDir, "firstFolder");
         
-        LibraryManagerItem item = new LibraryManagerItemImpl(root, libraryData, childFolder, false);
+        LibraryManagerItem item = new LibraryManagerItemImpl(root, libraryData, firstFolder, false);
         
         root.addChild(item);
         root.removeChild(item);
         
         Collection<File> files = new ArrayList<File>();
-        files.add(childFolder);
+        files.add(firstFolder);
         LibraryManagerModel model = new LibraryManagerModel(root, files);
         
         Collection<File> exclusions = model.getAllExcludedSubfolders();
@@ -252,15 +245,10 @@ public class LibraryManagerModelTest extends SwingTestCase {
         
         RootLibraryManagerItem root = new RootLibraryManagerItem(Arrays.asList(new File[]{baseDir}));
         
-        final File firstFolder = new File(baseDir, "firstFolder");
-        final File secondFolder = new File(firstFolder, "secondFolder");
-        final File anotherFolder = new File(baseDir, "anotherFolder");
-        final File anotherExludedFolder = new File(anotherFolder, "anotherExcludedFolder");
-        
-        firstFolder.mkdir();
-        secondFolder.mkdir();
-        anotherFolder.mkdir();
-        anotherExludedFolder.mkdir();
+        firstFolder = createFolder(baseDir, "firstFolder");
+        secondFolder = createFolder(firstFolder, "secondFolder");
+        thirdFolder = createFolder(baseDir, "anotherFolder");
+        fourthFolder = createFolder(thirdFolder, "anotherExcludedFolder");
         
         context.checking(new Expectations() {{
             one(libraryData).isDirectoryAllowed(secondFolder);
@@ -275,13 +263,13 @@ public class LibraryManagerModelTest extends SwingTestCase {
         firstItem.addChild(secondItem);
         root.addChild(firstItem);
         
-        LibraryManagerItem anotherItem = new LibraryManagerItemImpl(root, libraryData, anotherFolder, false);
+        LibraryManagerItem anotherItem = new LibraryManagerItemImpl(root, libraryData, thirdFolder, false);
         root.addChild(anotherItem);
         
         //add both children of roots as excluded folders
         Collection<File> collection = new ArrayList<File>();
         collection.add(secondFolder);
-        collection.add(anotherExludedFolder);
+        collection.add(fourthFolder);
         
         LibraryManagerModel model = new LibraryManagerModel(root, collection);
         
@@ -298,7 +286,7 @@ public class LibraryManagerModelTest extends SwingTestCase {
         
         //only anotherExcludedChild should still exist in the list
         assertEquals(1, model.getAllExcludedSubfolders().size());
-        assertTrue(model.getAllExcludedSubfolders().contains(anotherExludedFolder));
+        assertTrue(model.getAllExcludedSubfolders().contains(fourthFolder));
     }
     
     /**
@@ -310,15 +298,10 @@ public class LibraryManagerModelTest extends SwingTestCase {
         
         RootLibraryManagerItem root = new RootLibraryManagerItem(Arrays.asList(new File[]{baseDir}));
         
-        final File firstFolder = new File(baseDir, "firstFolder");
-        final File secondFolder = new File(firstFolder, "secondFolder");
-        final File anotherFolder = new File(baseDir, "anotherFolder");
-        final File anotherExludedFolder = new File(anotherFolder, "anotherExcludedFolder");
-        
-        firstFolder.mkdir();
-        secondFolder.mkdir();
-        anotherFolder.mkdir();
-        anotherExludedFolder.mkdir();
+        firstFolder = createFolder(baseDir, "firstFolder");
+        secondFolder = createFolder(firstFolder, "secondFolder");
+        thirdFolder = createFolder(baseDir, "anotherFolder");
+        fourthFolder = createFolder(thirdFolder, "anotherExcludedFolder");
         
         context.checking(new Expectations() {{
             one(libraryData).isDirectoryAllowed(secondFolder);
@@ -330,13 +313,13 @@ public class LibraryManagerModelTest extends SwingTestCase {
         //add two roots
         LibraryManagerItem firstItem = new LibraryManagerItemImpl(root, libraryData, firstFolder, false);
         root.addChild(firstItem);
-        LibraryManagerItem anotherItem = new LibraryManagerItemImpl(root, libraryData, anotherFolder, false);
+        LibraryManagerItem anotherItem = new LibraryManagerItemImpl(root, libraryData, thirdFolder, false);
         root.addChild(anotherItem);
         
         //add both children of roots as excluded folders
         Collection<File> collection = new ArrayList<File>();
         collection.add(secondFolder);
-        collection.add(anotherExludedFolder);
+        collection.add(fourthFolder);
         
         LibraryManagerModel model = new LibraryManagerModel(root, collection);
         
@@ -353,7 +336,7 @@ public class LibraryManagerModelTest extends SwingTestCase {
         
         //only anotherExcludedChild should still exist in the list
         assertEquals(1, model.getAllExcludedSubfolders().size());
-        assertTrue(model.getAllExcludedSubfolders().contains(anotherExludedFolder));
+        assertTrue(model.getAllExcludedSubfolders().contains(fourthFolder));
     }
     
     /**
@@ -366,12 +349,9 @@ public class LibraryManagerModelTest extends SwingTestCase {
         
         RootLibraryManagerItem root = new RootLibraryManagerItem(Arrays.asList(new File[]{baseDir}));
         
-        final File firstFolder = new File(baseDir, "firstFolder");
-        final File secondFolder = new File(firstFolder, "secondFolder");
-        
-        firstFolder.mkdir();
-        secondFolder.mkdir();
-        
+        firstFolder = createFolder(baseDir, "firstFolder");
+        secondFolder = createFolder(firstFolder, "secondFolder");
+                
         context.checking(new Expectations() {{
             one(libraryData).isDirectoryAllowed(secondFolder);
             will(returnValue(true));
@@ -417,15 +397,10 @@ public class LibraryManagerModelTest extends SwingTestCase {
         
         RootLibraryManagerItem root = new RootLibraryManagerItem(Arrays.asList(new File[]{baseDir}));
         
-        final File firstFolder = new File(baseDir, "firstFolder");
-        final File secondFolder = new File(firstFolder, "secondFolder");
-        final File thirdFolder = new File(secondFolder, "thirdFolder");
-        final File fourthFolder = new File(thirdFolder, "fourthFolder");
-
-        firstFolder.mkdir();
-        secondFolder.mkdir();
-        thirdFolder.mkdir();
-        fourthFolder.mkdir();
+        firstFolder = createFolder(baseDir, "firstFolder");
+        secondFolder = createFolder(firstFolder, "secondFolder");
+        thirdFolder = createFolder(secondFolder, "thirdFolder");
+        fourthFolder = createFolder(thirdFolder, "fourthFolder");
         
         context.checking(new Expectations() {{
             one(libraryData).isDirectoryAllowed(secondFolder);
@@ -478,5 +453,11 @@ public class LibraryManagerModelTest extends SwingTestCase {
     private void setupMockery() {
         context = new Mockery();
         libraryData = context.mock(LibraryData.class);
+    }
+    
+    private File createFolder(File parent, String name) {
+        File file = new File(parent, name);
+        file.mkdir();
+        return file;
     }
 }

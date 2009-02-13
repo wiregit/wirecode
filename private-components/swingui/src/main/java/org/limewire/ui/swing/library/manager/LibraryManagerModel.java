@@ -91,7 +91,6 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
                 removeList.add(child);
             }
         }
-
         excludedSubfolders.removeAll(removeList);
     }
     
