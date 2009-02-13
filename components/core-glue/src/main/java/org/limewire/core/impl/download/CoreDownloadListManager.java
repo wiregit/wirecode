@@ -38,6 +38,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.setting.FileSetting;
 
@@ -78,8 +79,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 	
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
-            DownloadListenerList listenerList, @Named("backgroundExecutor")
-            ScheduledExecutorService backgroundExecutor,
+            DownloadListenerList listenerList,
             RemoteFileDescFactory remoteFileDescFactory, ActivityCallback activityCallback, SpamManager spamManager, ItunesDownloadListenerFactory itunesDownloadListenerFactory) {
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
@@ -92,18 +92,20 @@ public class CoreDownloadListManager implements DownloadListManager {
 	    observableDownloadItems = GlazedListsFactory.observableElementList(threadSafeDownloadItems, downloadConnector);
 	    this.queueTimeCalculator = new QueueTimeCalculator(observableDownloadItems);
 	    listenerList.addDownloadListener(new CoreDownloadListener(threadSafeDownloadItems, queueTimeCalculator));
-	    
-	  //TODO: change backgroundExecutor to listener - currently no listener for download progress
-      //hack to force tables to update
-	    Runnable command = new Runnable() {
-            @Override
-            public void run() {
-                update();
-            }
-        };
-        backgroundExecutor.scheduleAtFixedRate(command, 0, PERIOD, TimeUnit.MILLISECONDS);
-
 	}
+	
+	@Inject void register(ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+        //TODO: change backgroundExecutor to listener - currently no listener for download progress
+        //hack to force tables to update
+          Runnable command = new Runnable() {
+              @Override
+              public void run() {
+                  update();
+              }
+          };
+          scheduler.scheduleAtFixedRate("Glue Download Updates", command, 0, PERIOD, TimeUnit.MILLISECONDS, backgroundExecutor);
+	}
+
 
     // forces refresh
     private void update() {

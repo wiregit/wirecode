@@ -12,6 +12,7 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.download.listener.ItunesDownloadListener;
 import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
+import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
@@ -46,8 +47,6 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
-        final ScheduledExecutorService backgroundExecutor = context
-                .mock(ScheduledExecutorService.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
@@ -61,14 +60,22 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
             {
                 one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
                 will(new AssignParameterAction<DownloadListener>(downloadListener, 0));
-                one(backgroundExecutor).scheduleAtFixedRate(with(any(Runnable.class)),
-                        with(any(long.class)), with(any(long.class)), with(any(TimeUnit.class)));
             }
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, listenerList, backgroundExecutor, remoteFileDescFactory,
+                downloadManager, listenerList, remoteFileDescFactory,
                 activityCallback, spamManager, itunesDownloadListenerFactory);
+        
+        final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
+        final ServiceScheduler scheduler = context.mock(ServiceScheduler.class);
+        context.checking(new Expectations() {
+            {
+                one(scheduler).scheduleAtFixedRate(with(any(String.class)), with(any(Runnable.class)), with(any(long.class)),
+                        with(any(long.class)), with(any(TimeUnit.class)), with(same(backgroundExecutor)));
+            }
+        });        
+        coreDownloadListManager.register(scheduler, backgroundExecutor);
 
         final Downloader unfinishedItem1 = context.mock(Downloader.class);
         final Downloader unfinishedItem2 = context.mock(Downloader.class);
@@ -208,8 +215,6 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
-        final ScheduledExecutorService backgroundExecutor = context
-                .mock(ScheduledExecutorService.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
@@ -223,13 +228,11 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
             {
                 one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
                 will(new AssignParameterAction<DownloadListener>(downloadListener, 0));
-                one(backgroundExecutor).scheduleAtFixedRate(with(any(Runnable.class)),
-                        with(any(long.class)), with(any(long.class)), with(any(TimeUnit.class)));
             }
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, listenerList, backgroundExecutor, remoteFileDescFactory,
+                downloadManager, listenerList, remoteFileDescFactory,
                 activityCallback, spamManager, itunesDownloadListenerFactory);
 
         final Downloader unfinishedItem1 = context.mock(Downloader.class);
@@ -319,8 +322,6 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
-        final ScheduledExecutorService backgroundExecutor = context
-                .mock(ScheduledExecutorService.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
@@ -331,15 +332,13 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
-                one(backgroundExecutor).scheduleAtFixedRate(with(any(Runnable.class)),
-                        with(any(long.class)), with(any(long.class)), with(any(TimeUnit.class)));
                 one(downloadManager).downloadsInProgress();
                 will(returnValue(0));
             }
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, listenerList, backgroundExecutor, remoteFileDescFactory,
+                downloadManager, listenerList, remoteFileDescFactory,
                 activityCallback, spamManager, itunesDownloadListenerFactory);
 
         TestPropertyChangeListener listener = new TestPropertyChangeListener();
