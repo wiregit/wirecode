@@ -60,9 +60,9 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         service.login(alice);
         service.login(bob);
         // Allow login, roster, presence, library messages to be sent, received
-        Thread.sleep(SLEEP); // TODO wait()/notify()
-        assertEquals("another automatedtestfriend2 presence has been detected, test cannnot run", 1, aliceRosterListener.countPresences(USERNAME_2));
-        assertEquals("another automatedtestfriend1 presence has been detected, test cannnot run", 1, bobRosterListener.countPresences(USERNAME_1));
+        Thread.sleep(SLEEP * 2); // TODO wait()/notify()
+        assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
+        assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
     }
 
     protected void tearDown() throws Exception {
