@@ -282,25 +282,9 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      * @see java.util.concurrent.Future#get()
      */
     public T get() throws InterruptedException, ExecutionException {
-        final OnewayExchanger<T, ExecutionException> exchanger = new OnewayExchanger<T, ExecutionException>();
-        addDHTFutureListener(new DHTFutureListener<T>() {
-            @Override
-            public void handleCancellationException(CancellationException e) {
-                exchanger.cancel();
-            }
-            @Override
-            public void handleExecutionException(ExecutionException e) {
-                exchanger.setException(e);
-            }
-            @Override
-            public void handleFutureSuccess(T result) {
-                exchanger.setValue(result);
-            }
-            @Override
-            public void handleInterruptedException(InterruptedException e) {
-            }
-        });
-        return exchanger.get();
+        BlockingDHTFutureListener<T> listener = new BlockingDHTFutureListener<T>();
+        addDHTFutureListener(listener);
+        return listener.get();
     }
 
     /*
@@ -309,25 +293,9 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
      */
     public T get(long timeout, TimeUnit unit) 
             throws InterruptedException, ExecutionException, TimeoutException {
-        final OnewayExchanger<T, ExecutionException> exchanger = new OnewayExchanger<T, ExecutionException>();
-        addDHTFutureListener(new DHTFutureListener<T>() {
-            @Override
-            public void handleCancellationException(CancellationException e) {
-                exchanger.cancel();
-            }
-            @Override
-            public void handleExecutionException(ExecutionException e) {
-                exchanger.setException(e);
-            }
-            @Override
-            public void handleFutureSuccess(T result) {
-                exchanger.setValue(result);
-            }
-            @Override
-            public void handleInterruptedException(InterruptedException e) {
-            }
-        });
-        return exchanger.get(timeout, unit);
+        BlockingDHTFutureListener<T> listener = new BlockingDHTFutureListener<T>();
+        addDHTFutureListener(listener);
+        return listener.get(timeout, unit);
     }
     
     /**
