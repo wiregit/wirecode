@@ -10,7 +10,11 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.MatchAndCopy;
+
+import ca.odell.glazedlists.EventList;
 
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -25,24 +29,33 @@ public class CoreUploadListManagerTest extends BaseTestCase {
     /**
      * Ensure the periodic refresher is registered and the manager is
      *  registered as a listener to the upload listeners list.
+     *  
+     *  Try to execute the associated runnable to ensure functionality. 
      */
     public void testRegister() {
         Mockery context = new Mockery();
         
         final UploadListenerList uploadListenerList = context.mock(UploadListenerList.class);
+        final ServiceScheduler scheduler = context.mock(ServiceScheduler.class);
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
         
         final CoreUploadListManager manager = new CoreUploadListManager(null);
         
+        final MatchAndCopy<Runnable> runnableMatcher = new MatchAndCopy<Runnable>(Runnable.class);
+        
         context.checking(new Expectations() {
-            {   exactly(1).of(backgroundExecutor).scheduleAtFixedRate(with(any(Runnable.class)), 
-                    with(any(Integer.class)), with(any(Integer.class)), with(any(TimeUnit.class)));
+            {   exactly(1).of(scheduler).scheduleAtFixedRate(with(any(String.class)),with(runnableMatcher), 
+                    with(any(Integer.class)), with(any(Integer.class)), with(any(TimeUnit.class)),
+                    with(same(backgroundExecutor)));
             
                 exactly(1).of(uploadListenerList).addUploadListener(manager);
             }
         });
         
-        manager.register(uploadListenerList, backgroundExecutor);
+        manager.register(uploadListenerList, scheduler, backgroundExecutor);
+        
+        Runnable updater = runnableMatcher.getLastMatch();
+        updater.run();
     }
     
     /** 
@@ -161,5 +174,32 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         
         manager.removePropertyChangeListener(listener1);
         manager.uploadsCompleted();
+    }
+
+    
+    /** 
+     * Ensure the thread safe upload list is consistent with the model. 
+     */
+    public void testGetSwingThreadSafeUploads() {
+        
+        Mockery context = new Mockery();
+        
+        final Uploader uploader = context.mock(Uploader.class);
+        
+        final CoreUploadListManager manager = new CoreUploadListManager(null);
+                
+        context.checking(new Expectations() {
+            {   
+                allowing(uploader).getUploadType();
+                will(returnValue(UploadType.BROWSE_HOST));
+
+            }});
+        
+        EventList<UploadItem> uploads = manager.getSwingThreadSafeUploads();
+        assertEmpty(uploads);
+        
+        manager.uploadAdded(uploader);
+        assertGreaterThan(-1, uploads.size());
+
     }
 }

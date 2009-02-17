@@ -14,6 +14,7 @@ import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -53,13 +54,11 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
     }
 
     @Inject
-    public void register(UploadListenerList uploadListenerList, @Named("backgroundExecutor")
-            ScheduledExecutorService backgroundExecutor) {
+    public void register(UploadListenerList uploadListenerList,
+            ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService executor) {
 
         uploadListenerList.addUploadListener(this);
         
-        //TODO: change backgroundExecutor to listener - currently no listener for upload progress
-        //hack to force tables to update
           Runnable command = new Runnable() {
               @Override
               public void run() {
@@ -67,7 +66,9 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
               }
           };
           
-          backgroundExecutor.scheduleAtFixedRate(command, PERIOD*2, PERIOD, TimeUnit.MILLISECONDS);
+          scheduler.scheduleAtFixedRate("UI Upload Status Updater", 
+                  command, PERIOD*2, PERIOD,
+                  TimeUnit.MILLISECONDS, executor);
     }
     
     @Override
@@ -138,7 +139,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
     }
     
     // forces refresh
-    private void update() {
+    void update() {
         uploadItems.getReadWriteLock().writeLock().lock();
         try {
             // TODO use TransactionList for these for performance (requires using GlazedLists from head)
@@ -185,5 +186,4 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
     public void remove(UploadItem item) {
         threadSafeUploadItems.remove(item);
     }
-
 }
