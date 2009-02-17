@@ -1,8 +1,8 @@
 <ivy-module version="1.0">
     <info organisation="org.limewire" module="common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"/>
-    <publications>
-        <artifact name="lw-common"/>    
-    </publications>    
+    <!--publications>                
+        <artifact name="common"/>    
+    </publications-->    
     <dependencies>
         <dependency org="commons-logging" name="commons-logging" rev="1.1"/>
         <dependency org="com.ibm.icu" name="icu4j" rev="3.4.4"/>

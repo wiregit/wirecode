@@ -1,18 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="lw-common" basedir="." default="compile-src">
-    <echo message="${basedir}"/>
-	<description>
-		LimeWire component 'common'.
-		This component is required for every other component and contains
-		the most common functionality shared by every component.
-	</description>
-	
-    <import file="build-macros.xml" />
+<project basedir="${basedir}" default="compile-src">
+	<import file="build-macros.xml" />
     <import file="../test-util/build.xml"/>
-    
-    <target name="a" depends="b"/>
-    <target name="b"/>
     
     <target name="initialize" depends="lw-test-util.initialize" unless="initialized.common">
         <do.setup-properties component="common"/>

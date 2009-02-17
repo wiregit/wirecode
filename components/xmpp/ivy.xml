@@ -1,0 +1,17 @@
+<ivy-module version="1.0">
+    <info organisation="org.limewire" module="xmpp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"/>
+    <!--publications>                
+        <artifact name="xmpp"/>    
+    </publications-->
+    <dependencies>
+        <dependency org="org.limewire" name="common" rev="latest.integration"/>
+        <dependency org="org.limewire" name="io" rev="latest.integration"/>
+        <dependency org="org.limewire" name="net" rev="latest.integration"/>
+        <dependency org="org.limewire" name="http" rev="latest.integration"/>
+        <dependency org="org.limewire" name="security" rev="latest.integration"/>
+        <dependency org="org.limewire" name="xmpp-api" rev="latest.integration"/>
+        <dependency org="org.limewire" name="lw-smack" rev="3.2-02032009"/>
+        <dependency org="org.limewire" name="lw-smackx" rev="3.2-02032009"/>
+        <dependency org="commons-codec" name="commons-codec" rev="1.3"/>
+    </dependencies>
+</ivy-module>

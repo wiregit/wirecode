@@ -36,6 +36,7 @@
         <attribute name="junit" default="${limewire.lib.jars}/tests/junit.jar"/>
         <element name="tests-classpath" optional="true" description="Additional paths for running tests"/>
         <element name="build-tests-classpath" optional="true" description="Additional paths for building tests"/>
+        <element name="src-classpath" optional="true" description="Additional paths for building source"/>
         <sequential>
             <property name="initialized.@{component}" value="true"/>
             
@@ -140,6 +141,7 @@
         <attribute name="component"/>
         <sequential>
             <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+            <ivy:resolve file="${limewire.components.@{component}.home}/ivy.xml"/>
             <ivy:retrieve pattern="${build.limewire.components.@{component}.lib}/[conf]/[type]/[artifact]-[version].[ext]"/>
         </sequential>
     </macrodef>
@@ -177,7 +179,6 @@
 			    </src>
 				<classpath refid="build.limewire.components.@{component}.classpath"/>
 			</javac>
-            <ivy:publish resolver="local" artifactspattern="${build.limewire.components.@{component}.classes}"/>
 	    </sequential>
 	</macrodef>
     
@@ -295,6 +296,7 @@
                 <fileset dir="@{resourcedir}" excludes="@{resexclude}"/>
                 <more-jar-elements/>
             </jar>
+            <ivy:publish resolver="local" overwrite="true" forcedeliver="true" artifactspattern="${dist.limewire.components.@{component}.jar}" srcivypattern="${dist.limewire.components.@{component}.jar}/../ivy.xml"/>
         </sequential>
     </macrodef>
     
