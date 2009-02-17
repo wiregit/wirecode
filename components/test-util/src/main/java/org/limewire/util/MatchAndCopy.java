@@ -1,15 +1,18 @@
 package org.limewire.util;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 
 /**
- * A Hamcrest IsInstanceOf style matcher that stores the last match in
- *  a retrievable slot. 
+ * A Hamcrest IsInstanceOf style matcher that stores the matches in
+ *  an ordered list. 
  */
 public class MatchAndCopy<X> extends BaseMatcher<X> {
 
-    private X lastMatch = null;
+    private final List<X> matches = new LinkedList<X>();
     private Class<?> theClass;
     
     public MatchAndCopy(Class<?> theClass) {
@@ -20,7 +23,7 @@ public class MatchAndCopy<X> extends BaseMatcher<X> {
     @Override
     public boolean matches(Object item) {
         if (theClass.isInstance(item)) {
-            lastMatch = (X) item;
+            matches.add((X)item);
             return true;
         }
         return false;
@@ -29,8 +32,12 @@ public class MatchAndCopy<X> extends BaseMatcher<X> {
     @Override
     public void describeTo(Description description) {
     }
+   
+    public List<X> getMatches() {
+        return matches;
+    }
     
     public X getLastMatch() {
-        return lastMatch;
+        return matches.get(matches.size()-1);
     }
 }

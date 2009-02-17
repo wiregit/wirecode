@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.upload.UploadItem;
+import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.util.BaseTestCase;
@@ -16,12 +17,15 @@ import org.limewire.util.MatchAndCopy;
 
 import ca.odell.glazedlists.EventList;
 
+import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.uploader.UploadType;
 
 public class CoreUploadListManagerTest extends BaseTestCase {
 
+    // TODO: test update() with UploadPropertyListener
+    
     public CoreUploadListManagerTest(String name) {
         super(name);
     }
@@ -150,7 +154,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
     
     /**
      * Add a property change listener and trigger an event then verify it is handled, remove the 
-     * listener then verify that it is not notified.
+     * listener then verify that it is not notified.  Verify nothing is notified there are active uploads.
      */
     public void testPropertyChangeListenerUpdates() {
         
@@ -159,21 +163,48 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final PropertyChangeListener listener1 = context.mock(PropertyChangeListener.class);
         final PropertyChangeListener listener2 = context.mock(PropertyChangeListener.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null);
+        // TODO: Do we really need this dependence in CoreUploadListManager 
+        final UploadServices uploadServices = context.mock(UploadServices.class);
+        
+        final CoreUploadListManager manager = new CoreUploadListManager(uploadServices);
         
         context.checking(new Expectations() {
             {   
-                exactly(1).of(listener1).propertyChange(with(any(PropertyChangeEvent.class)));
-                exactly(2).of(listener2).propertyChange(with(any(PropertyChangeEvent.class)));
+                exactly(2).of(listener1).propertyChange(with(any(PropertyChangeEvent.class)));
+                exactly(3).of(listener2).propertyChange(with(any(PropertyChangeEvent.class)));
                 
+                // First invocation -- normal empty
+                one(uploadServices).getNumUploads();
+                will(returnValue(0));
+                
+                // Second invocation -- bit strange
+                one(uploadServices).getNumUploads();
+                will(returnValue(-1));
+                
+                // Third invocation -- normal
+                one(uploadServices).getNumUploads();
+                will(returnValue(0));
+                
+                // Final invocation -- has active uploads
+                one(uploadServices).getNumUploads();
+                will(returnValue(5));
             }});
         
         manager.addPropertyChangeListener(listener1);
         manager.addPropertyChangeListener(listener2);
+        manager.updateUploadsCompleted();
+        
+        // This should always fire the listeners
         manager.uploadsCompleted();
         
         manager.removePropertyChangeListener(listener1);
-        manager.uploadsCompleted();
+        manager.updateUploadsCompleted();
+        manager.updateUploadsCompleted();
+        
+        manager.updateUploadsCompleted();
+        
+        context.assertIsSatisfied();
+        
     }
 
     
@@ -200,6 +231,90 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         
         manager.uploadAdded(uploader);
         assertGreaterThan(-1, uploads.size());
+        
+        manager.remove(uploads.get(0));
+        assertEmpty(uploads);
 
+        context.assertIsSatisfied();
+    }
+    
+    /** 
+     * Adds a number of uploads in various states to the manager then fires the clear
+     *  finished action and ensures the completed uploads are removed.
+     */
+    public void testClearFinished() {
+        Mockery context = new Mockery();
+        
+        final UploadItem uploadDone = context.mock(UploadItem.class);
+        final UploadItem uploadBrowseHostDone = context.mock(UploadItem.class);
+        final UploadItem uploadUnableToUpload = context.mock(UploadItem.class);
+        final UploadItem uploadUploading1 = context.mock(UploadItem.class);
+        final UploadItem uploadUploading2 = context.mock(UploadItem.class);
+        final UploadItem uploadUploading3 = context.mock(UploadItem.class);
+        
+        final CoreUploadListManager manager = new CoreUploadListManager(null);
+                
+        context.checking(new Expectations() {
+            {   
+                allowing(uploadDone).getState();
+                will(returnValue(UploadState.DONE));
+                ignoring(uploadDone);
+                
+                allowing(uploadBrowseHostDone).getState();
+                will(returnValue(UploadState.BROWSE_HOST_DONE));
+                ignoring(uploadBrowseHostDone);
+                
+                allowing(uploadUnableToUpload).getState();
+                will(returnValue(UploadState.UNABLE_TO_UPLOAD));
+                ignoring(uploadUnableToUpload);
+                
+                allowing(uploadUploading1).getState();
+                will(returnValue(UploadState.QUEUED));
+                ignoring(uploadUploading1);
+                
+                allowing(uploadUploading2).getState();
+                will(returnValue(UploadState.WAITING));
+                ignoring(uploadUploading2);
+                
+                allowing(uploadUploading3).getState();
+                will(returnValue(UploadState.BROWSE_HOST));
+                ignoring(uploadUploading3);
+                
+            }});
+        
+        List<UploadItem> items = manager.getUploadItems();
+        
+        // First pass: Do a clear with only a complete upload 
+        items.add(uploadBrowseHostDone);
+        manager.clearFinished();
+        assertEmpty(items);
+        
+        // Second pass: Do a clear with uncomplete uploads;
+        items.add(uploadUploading1);
+        items.add(uploadUploading2);
+        manager.clearFinished();
+        assertContains(items, uploadUploading1);
+        assertContains(items, uploadUploading2);
+        
+        // Third pass: Updates of variegated status
+        items.add(uploadUploading3);
+        items.add(uploadDone);
+        items.add(uploadUploading1);
+        items.add(uploadBrowseHostDone);
+        items.add(uploadUploading2);
+        items.add(uploadUnableToUpload);
+        items.add(uploadUploading2); // Duplicate
+        
+        manager.clearFinished();
+        
+        assertNotContains(items, uploadDone);
+        assertNotContains(items, uploadBrowseHostDone);
+        assertNotContains(items, uploadUnableToUpload);
+        assertContains(items, uploadUploading1);
+        assertContains(items, uploadUploading2);
+        assertContains(items, uploadUploading3);
+        
+        context.assertIsSatisfied();
     }
 }
+

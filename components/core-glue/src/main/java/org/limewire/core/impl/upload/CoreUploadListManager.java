@@ -166,14 +166,21 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
         }
     }
 
+    /**
+     * Thread safe method which removes any finished uploads from management.
+     */
     @Override
     public void clearFinished() {
         List<UploadItem> finishedItems = new ArrayList<UploadItem>();
         threadSafeUploadItems.getReadWriteLock().writeLock().lock();
         try {
-            for(UploadItem item : threadSafeUploadItems){
-                if(item.getState() == UploadState.DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD || item.getState() == UploadState.BROWSE_HOST_DONE){
-                    finishedItems.add(item);
+            for(UploadItem item : threadSafeUploadItems) {
+                switch (item.getState()) {
+                    case DONE :
+                    case BROWSE_HOST_DONE :
+                    case UNABLE_TO_UPLOAD :
+                        finishedItems.add(item);
+                        break;
                 }
             }
             threadSafeUploadItems.removeAll(finishedItems);
@@ -182,6 +189,9 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
         }
     }
     
+    /** 
+     * Thread safe method which force removes an upload item from management. 
+     */
     @Override
     public void remove(UploadItem item) {
         threadSafeUploadItems.remove(item);

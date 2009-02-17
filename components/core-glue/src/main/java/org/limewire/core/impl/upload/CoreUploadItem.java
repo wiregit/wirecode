@@ -60,9 +60,6 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public UploadState getState() {
-        
-       
-        
         switch (uploader.getState()) {
         case CANCELLED:
             return UploadState.CANCELED;
