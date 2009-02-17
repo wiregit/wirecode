@@ -143,16 +143,11 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         
         GuiUtils.assignResources(this);        
         
-        setTransferHandler(new DownloadableTransferHandler(downloadListManager, saveLocationExceptionHandler));	    
-        
         setBackgroundPainter(barPainterFactory.createDownloadSummaryBarPainter());                
 
 		createBorderGradients();
         
         navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);	
-
-        // handle individual completed downloads
-        downloadListManager.addPropertyChangeListener(this);
 
         chokeList = GlazedListsFactory.rangeList(allList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
@@ -301,6 +296,40 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		
 		setVisibility(false);
 	}
+    
+    @Inject
+    public void register(DownloadListManager downloadListManager, SaveLocationExceptionHandler saveLocationExceptionHandler) {
+        setTransferHandler(new DownloadableTransferHandler(downloadListManager, saveLocationExceptionHandler));
+        
+        // handle individual completed downloads
+        downloadListManager.addPropertyChangeListener(this);
+        
+        downloadListManager.getDownloads().addListEventListener(new ListEventListener<DownloadItem>() {
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+              //only show the notification messages if the tray downloads are forced to be invisible
+                if(forceInvisible) {
+                    while(listChanges.nextBlock()) {
+                        if(listChanges.getType() == ListEvent.INSERT){
+                            int index = listChanges.getIndex();
+                            final DownloadItem downloadItem = listChanges.getSourceList().get(index);
+                            SwingUtils.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    notifier.showMessage(new Notification(I18n.tr("Download Started"), downloadItem.getFileName(), new AbstractAction(I18n.tr("Show")) {
+                                        @Override
+                                        public void actionPerformed(ActionEvent e) {
+                                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select();
+                                        }
+                                    }));
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        });
+    }
     
     private void createBorderGradients() {
         firstBorderGradient = new GradientPaint(0, 1, borderTopGradient, 0, panelHeight - 1, borderBottomGradient);

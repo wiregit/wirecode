@@ -230,13 +230,6 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         }
     }
     
-    @Override
-    public void showDownloads() {
-        if(guiCallback != null) {
-            guiCallback.showDownloads();
-        }
-    }
-    
     public void setGuiCallback(GuiCallback guiCallback) {
         this.guiCallback = guiCallback;
     }
