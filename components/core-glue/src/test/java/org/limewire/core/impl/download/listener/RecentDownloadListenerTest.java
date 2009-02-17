@@ -99,8 +99,10 @@ public class RecentDownloadListenerTest extends BaseTestCase {
         Mockery context = new Mockery();
         final Downloader downloader1 = context.mock(CoreDownloader.class);
         final File saveFile1 = new File("testComplete2Files_1");
+        saveFile1.setLastModified(1);
         final Downloader downloader2 = context.mock(CoreDownloader.class);
         final File saveFile2 = new File("testComplete2Files_2");
+        saveFile2.setLastModified(2);
 
         context.checking(new Expectations() {
             {
@@ -139,9 +141,10 @@ public class RecentDownloadListenerTest extends BaseTestCase {
         Mockery context = new Mockery();
         final Downloader downloader1 = context.mock(CoreDownloader.class);
         final File saveFile1 = new File("testComplete2Files_1");
+        saveFile1.setLastModified(1);
         final Downloader downloader2 = context.mock(CoreDownloader.class);
         final File saveFile2 = new File("testComplete2Files_2");
-
+        saveFile2.setLastModified(2);
         context.checking(new Expectations() {
             {
                 one(downloader1).getState();
