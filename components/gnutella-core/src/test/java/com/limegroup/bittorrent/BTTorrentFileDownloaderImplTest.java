@@ -517,10 +517,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public void showDownloads() {
-            }
-
-            @Override
             public void handleSaveLocationException(DownloadAction downLoadAction,
                     SaveLocationException sle, boolean supportsNewSaveDir) {
                 
