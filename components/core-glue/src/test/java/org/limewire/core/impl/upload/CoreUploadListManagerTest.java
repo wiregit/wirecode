@@ -1,7 +1,5 @@
 package org.limewire.core.impl.upload;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
@@ -10,7 +8,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
