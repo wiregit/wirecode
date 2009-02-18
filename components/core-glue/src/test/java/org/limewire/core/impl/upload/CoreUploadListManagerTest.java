@@ -24,7 +24,7 @@ import com.limegroup.gnutella.uploader.UploadType;
 
 public class CoreUploadListManagerTest extends BaseTestCase {
 
-    // TODO: test update() with UploadPropertyListener
+    // TODO: test update()
     
     public CoreUploadListManagerTest(String name) {
         super(name);
@@ -313,6 +313,50 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         assertContains(items, uploadUploading1);
         assertContains(items, uploadUploading2);
         assertContains(items, uploadUploading3);
+        
+        context.assertIsSatisfied();
+    }
+    
+    /** 
+     * Verify property listener function on UploadItems by adding an upload and 
+     *  force firing a change event.  Verify only cancelled uploads are
+     *  removed from management. 
+     */
+    public void testPropertyListenerSimple() {
+        Mockery context = new Mockery();
+        
+        final Uploader uploader = context.mock(Uploader.class);
+                
+        final CoreUploadListManager manager = new CoreUploadListManager(null);
+                
+        context.checking(new Expectations() {
+            {   // Initial probe on add
+                allowing(uploader).getUploadType();
+                will(returnValue(UploadType.BROWSE_HOST));
+                one(uploader).getState();
+                will(returnValue(UploadStatus.CONNECTING));
+
+                // First event listener firing should not remove the upload
+                one(uploader).getState();
+                will(returnValue(UploadStatus.UPLOADING));
+
+                // Second event listener firing should remove the upload
+                allowing(uploader).getState();
+                will(returnValue(UploadStatus.CANCELLED));
+            }
+        });
+        
+        List<UploadItem> items = manager.getUploadItems();
+        
+        manager.uploadAdded(uploader);
+        
+        CoreUploadItem item = (CoreUploadItem)items.get(0);
+        
+        item.fireDataChanged();
+        assertContains(items, item);
+        
+        item.fireDataChanged();
+        assertNotContains(items, item);
         
         context.assertIsSatisfied();
     }
