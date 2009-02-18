@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.settings.SharingSettings;
@@ -26,8 +27,6 @@ import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.uploader.UploadType;
 
 public class CoreUploadListManagerTest extends BaseTestCase {
-
-    // TODO: test update()
     
     public CoreUploadListManagerTest(String name) {
         super(name);
@@ -166,7 +165,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final PropertyChangeListener listener1 = context.mock(PropertyChangeListener.class);
         final PropertyChangeListener listener2 = context.mock(PropertyChangeListener.class);
         
-        // TODO: Do we really need this dependence in CoreUploadListManager 
+        // Do we really need this dependence in CoreUploadListManager? 
         final UploadServices uploadServices = context.mock(UploadServices.class);
         
         final CoreUploadListManager manager = new CoreUploadListManager(uploadServices);
@@ -331,7 +330,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
     /** 
      * Verify property listener function on UploadItems by adding an upload and 
      *  force firing a change event.  Verify only cancelled uploads are
-     *  removed from management. 
+     *  removed from management. Tests end to end integration between listener and manager.
      */
     public void testPropertyListenerSimple() {
         Mockery context = new Mockery();
@@ -372,9 +371,61 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
     
+    /**
+     * Manually add several upload items of different types to the manager and fire update.
+     *  Ensure the correct items have their listeners fired.
+     */
     public void testUpdate() {
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }};
         
+        final CoreUploadItem itemDone = context.mock(CoreUploadItem.class);
+        final CoreUploadItem itemBrowseHostDone = context.mock(CoreUploadItem.class); 
+        final CoreUploadItem item1 = context.mock(CoreUploadItem.class);
+        final CoreUploadItem item2 = context.mock(CoreUploadItem.class);
+        final CoreUploadItem item3 = context.mock(CoreUploadItem.class);
+        
+        final CoreUploadListManager manager = new CoreUploadListManager(null);
+        
+        context.checking(new Expectations() {
+            {
+                allowing(itemDone).getState();
+                will(returnValue(UploadState.DONE));
+                allowing(itemBrowseHostDone).getState();
+                will(returnValue(UploadState.BROWSE_HOST_DONE));
+                allowing(item1).getState();
+                will(returnValue(UploadState.CANCELED));
+                allowing(item2).getState();
+                will(returnValue(UploadState.QUEUED));
+                allowing(item3).getState();
+                will(returnValue(UploadState.WAITING));
+                
+                // Assertions
+                exactly(1).of(itemDone).addPropertyChangeListener(with(any(PropertyChangeListener.class)));
+                exactly(1).of(itemBrowseHostDone).addPropertyChangeListener(with(any(PropertyChangeListener.class)));
+                exactly(1).of(item1).addPropertyChangeListener(with(any(PropertyChangeListener.class)));
+                exactly(1).of(item2).addPropertyChangeListener(with(any(PropertyChangeListener.class)));
+                exactly(1).of(item3).addPropertyChangeListener(with(any(PropertyChangeListener.class)));
+                
+                never(itemDone).fireDataChanged();
+                never(itemBrowseHostDone).fireDataChanged();
+                exactly(1).of(item1).fireDataChanged();
+                exactly(1).of(item2).fireDataChanged();
+                exactly(1).of(item3).fireDataChanged();
+            }});
+        
+        List<UploadItem> items = manager.getUploadItems();
+        
+        items.add(item1);
+        items.add(itemDone);
+        items.add(item2);
+        items.add(item3);
+        items.add(itemBrowseHostDone);
+        
+        manager.update();
+        
+        context.assertIsSatisfied();
     }
-    
 }
 
