@@ -28,7 +28,7 @@ import com.limegroup.gnutella.uploader.UploadType;
 
 class CoreUploadItem implements UploadItem {
 
-    private Uploader uploader;
+    private final Uploader uploader;
 
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
     
@@ -113,9 +113,11 @@ class CoreUploadItem implements UploadItem {
         return result;
     }
 
+    /**
+     * Tests if the Uploaders from construction are equal
+     */
     @Override
     public boolean equals(Object obj) {
-        // equal if Uploaders are equal
         if (this == obj)
             return true;
         if (obj == null)

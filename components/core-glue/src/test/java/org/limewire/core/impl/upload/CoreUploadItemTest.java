@@ -2,6 +2,7 @@ package org.limewire.core.impl.upload;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.net.InetAddress;
 
 import org.jmock.Expectations;
@@ -9,11 +10,11 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.upload.UploadItem.BrowseType;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
-import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.bittorrent.BTUploader;
 import com.limegroup.gnutella.CategoryConverter;
+import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.uploader.HTTPUploader;
@@ -85,6 +86,7 @@ public class CoreUploadItemTest extends BaseTestCase {
         CoreUploadItem upload1 = new CoreUploadItem(uploader1);
         CoreUploadItem upload2 = new CoreUploadItem(uploader2);
         CoreUploadItem upload3 = new CoreUploadItem(null);
+        CoreUploadItem upload4 = new CoreUploadItem(null);
         
         assertEquals(upload1, upload1);
         assertNotEquals(upload1, upload2);
@@ -95,8 +97,10 @@ public class CoreUploadItemTest extends BaseTestCase {
         assertNotEquals(upload3, upload1);
         assertNotEquals(upload3, upload2);
         assertEquals(upload3, upload3);
+        assertEquals(upload3, upload4);
 
         assertNotEquals("not equals", upload1);
+        assertNotEquals(null, upload1);
                 
         context.assertIsSatisfied();
     }
@@ -160,9 +164,6 @@ public class CoreUploadItemTest extends BaseTestCase {
         testGetHostWithAnyBrowseAndFileName(UploadStatus.COMPLETE);
     }
     
-    // this test is a bit ridiculous, functionality should not be 
-    //  in CoreUploadItem
-    // Functionality is too closely related to HTTPUploader and GnutellaPresence
     public void testGetHostWithoutFileName() {
         
         Mockery context = new Mockery() {
@@ -200,12 +201,47 @@ public class CoreUploadItemTest extends BaseTestCase {
         
         CoreUploadItem upload = new CoreUploadItem(uploader);
         
-        assertEquals(new GnutellaPresence(uploader, host+":"+port).getFriend().getRenderName(), upload.getHost());
-   
+        assertNotNull(upload.getHost());
+        assertNotEquals("", upload.getHost());
+        
+        // Is consistent?
+        assertEquals(upload.getHost(), upload.getHost());
+        
         context.assertIsSatisfied();
     }
-    
-    
+ 
+    public void testGetHostBTWithoutFileName() {
+        
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }};
+        
+        final Uploader uploader = context.mock(BTUploader.class);
+         
+        final String fileName = "";
+        final String host = "qvueotilevne.ers";
+        
+        context.checking(new Expectations() {
+            {
+                atLeast(1).of(uploader).getState();
+                will(returnValue(UploadStatus.BROWSE_HOST));
+                atLeast(1).of(uploader).getFileName();
+                will(returnValue(fileName));
+                
+                allowing(uploader).getUploadType();
+                will(returnValue(UploadType.BROWSE_HOST));
+                
+                atLeast(1).of(uploader).getHost();
+                will(returnValue(host));
+            }});
+        
+        CoreUploadItem upload = new CoreUploadItem(uploader);
+        
+        assertEquals(host, upload.getHost());
+        
+        context.assertIsSatisfied();
+    }
+     
     public void testGetHostNormal() {
         Mockery context = new Mockery();
         
@@ -287,8 +323,6 @@ public class CoreUploadItemTest extends BaseTestCase {
         
         context.checking(new Expectations() {
             { 
-                allowing(uploaderNormal);
-                allowing(uploaderBittorrent);
             }});
         
         CoreUploadItem upload1 = new CoreUploadItem(uploaderNormal);
@@ -300,5 +334,141 @@ public class CoreUploadItemTest extends BaseTestCase {
         assertEquals(UploadItemType.GNUTELLA, upload3.getUploadItemType());
         
         context.assertIsSatisfied();        
+    }
+    
+    public void testGetQueuePosition() {
+        Mockery context = new Mockery();
+        
+        final Uploader uploader1 = context.mock(Uploader.class);
+        final Uploader uploader2 = context.mock(Uploader.class);
+        final Uploader uploader3 = context.mock(Uploader.class);
+        
+        final int queuePos1 = 0;
+        final int queuePos2 = Integer.MAX_VALUE;
+        final int queuePos3 = Integer.MIN_VALUE;
+        
+        context.checking(new Expectations() {
+            {   allowing(uploader1).getQueuePosition();
+                will(returnValue(queuePos1));
+                allowing(uploader2).getQueuePosition();
+                will(returnValue(queuePos2));
+                allowing(uploader3).getQueuePosition();
+                will(returnValue(queuePos3));
+            }});
+        
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3);
+        
+        assertEquals(queuePos1, upload1.getQueuePosition());
+        assertEquals(queuePos2, upload2.getQueuePosition());
+        assertEquals(queuePos3, upload3.getQueuePosition());
+        
+        context.assertIsSatisfied();                
+    }
+    
+    public void testGetNumUploadConnections() {
+        Mockery context = new Mockery();
+        
+        final Uploader uploader1 = context.mock(Uploader.class);
+        final Uploader uploader2 = context.mock(Uploader.class);
+        final Uploader uploader3 = context.mock(Uploader.class);
+        
+        final int numConnections1 = 0;
+        final int numConnections2 = Integer.MAX_VALUE;
+        final int numConnections3 = Integer.MIN_VALUE;
+        
+        context.checking(new Expectations() {
+            {   allowing(uploader1).getNumUploadConnections();
+                will(returnValue(numConnections1));
+                allowing(uploader2).getNumUploadConnections();
+                will(returnValue(numConnections2));
+                allowing(uploader3).getNumUploadConnections();
+                will(returnValue(numConnections3));
+            }});
+        
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3);
+        
+        assertEquals(numConnections1, upload1.getNumUploadConnections());
+        assertEquals(numConnections2, upload2.getNumUploadConnections());
+        assertEquals(numConnections3, upload3.getNumUploadConnections());
+        
+        context.assertIsSatisfied();                
+    }
+    
+    public void testGetFile() {
+        Mockery context = new Mockery();
+        
+        final Uploader uploader1 = context.mock(Uploader.class);
+        final Uploader uploader2 = context.mock(Uploader.class);
+        final Uploader uploader3 = context.mock(Uploader.class);
+        
+        final File file1 = new File("abc.t");
+        final File file2 = new File("/a/b/c.t");
+        final File file3 = null;
+        
+        context.checking(new Expectations() {
+            {   allowing(uploader1).getFile();
+                will(returnValue(file1));
+                allowing(uploader2).getFile();
+                will(returnValue(file2));
+                allowing(uploader3).getFile();
+                will(returnValue(file3));
+            }});
+        
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3);
+        
+        assertEquals(file1, upload1.getFile());
+        assertEquals(file2, upload2.getFile());
+        assertEquals(file3, upload3.getFile());
+        
+        context.assertIsSatisfied();                
+    }
+    
+    public void testGetUploadSpeed() throws InsufficientDataException {
+       Mockery context = new Mockery();
+        
+       final Uploader uploaderException = context.mock(Uploader.class);
+        final Uploader uploader1 = context.mock(Uploader.class);
+        final Uploader uploader2 = context.mock(Uploader.class);
+        final Uploader uploader3 = context.mock(Uploader.class);
+        
+        final float speed1 = 0;
+        final float speed2 = Float.MAX_VALUE;
+        final float speed3 = Float.MIN_VALUE;
+        
+        context.checking(new Expectations() {
+            {
+                allowing(uploaderException).measureBandwidth();
+                allowing(uploader1).measureBandwidth();
+                allowing(uploader2).measureBandwidth();
+                allowing(uploader3).measureBandwidth();
+                
+                allowing(uploaderException).getMeasuredBandwidth();
+                will(throwException(new InsufficientDataException()));
+                
+                allowing(uploader1).getMeasuredBandwidth();
+                will(returnValue(speed1));
+                allowing(uploader2).getMeasuredBandwidth();
+                will(returnValue(speed2));
+                allowing(uploader3).getMeasuredBandwidth();
+                will(returnValue(speed3));
+            }});
+        
+        CoreUploadItem uploadException = new CoreUploadItem(uploaderException);
+        CoreUploadItem upload1 = new CoreUploadItem(uploader1);
+        CoreUploadItem upload2 = new CoreUploadItem(uploader2);
+        CoreUploadItem upload3 = new CoreUploadItem(uploader3);
+        
+        assertEquals(0f, uploadException.getUploadSpeed());
+        assertEquals(speed1, upload1.getUploadSpeed());
+        assertEquals(speed2, upload2.getUploadSpeed());
+        assertEquals(speed3, upload3.getUploadSpeed());
+        
+        context.assertIsSatisfied();                
     }
 }
