@@ -288,6 +288,7 @@
         <sequential>
             <do.dist-init component="@{component}"/>
             <delete file="${dist.limewire.components.@{component}.jar}"/>
+            <mkdir dir="${limewire.components.@{component}.src.resources}"/>
             <jar destfile="${dist.limewire.components.@{component}.jar}"
             	 compress="@{compress}"
                  basedir="@{basedir}"

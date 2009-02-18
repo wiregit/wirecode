@@ -67,7 +67,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
 
     @Override
     public boolean isDebugEnabled() {
-        return isDebugEnabled;
+        return true;
     }
 
     @Override

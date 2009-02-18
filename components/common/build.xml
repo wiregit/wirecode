@@ -11,9 +11,6 @@
     <import file="build-macros.xml" />
     <import file="../test-util/build.xml"/>
     
-    <target name="a" depends="b"/>
-    <target name="b"/>
-    
     <target name="initialize" depends="lw-test-util.initialize" unless="initialized.common">
         <do.setup-properties component="common"/>
     </target>
