@@ -477,7 +477,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
     private class DownloadFromFriendLibraryAction extends AbstractAction {
         public DownloadFromFriendLibraryAction() {
-            super(tr("<html><u>{0}</u></html>", "View Files"));
+            super(tr("<html><u>{0}</u></html>", "Browse Files"));
         }
 
         @Override

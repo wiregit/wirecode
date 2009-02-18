@@ -101,9 +101,9 @@ public class SearchResultFromWidget extends JPanel {
     }
 
     private Action getLibraryAction(final RemoteHost person) {
-        return new AbstractAction(tr("View Files")) {
+        return new AbstractAction(tr("Browse Files")) {
             {
-                putValue(SINGULAR_ACTION_NAME, tr("View Files of {0}", person.getFriendPresence().getFriend().getRenderName()));
+                putValue(SINGULAR_ACTION_NAME, tr("Browse Files of {0}", person.getFriendPresence().getFriend().getRenderName()));
             }
         
             @Override
