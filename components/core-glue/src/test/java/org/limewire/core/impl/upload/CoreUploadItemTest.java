@@ -8,9 +8,11 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.upload.UploadItem.BrowseType;
+import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.util.BaseTestCase;
 
+import com.limegroup.bittorrent.BTUploader;
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -84,17 +86,17 @@ public class CoreUploadItemTest extends BaseTestCase {
         CoreUploadItem upload2 = new CoreUploadItem(uploader2);
         CoreUploadItem upload3 = new CoreUploadItem(null);
         
-        assertTrue(upload1.equals(upload1));
-        assertFalse(upload1.equals(upload2));
-        assertFalse(upload1.equals(upload3));
-        assertFalse(upload2.equals(upload1));
-        assertTrue(upload2.equals(upload2));
-        assertFalse(upload2.equals(upload3));
-        assertFalse(upload3.equals(upload1));
-        assertFalse(upload3.equals(upload2));
-        assertTrue(upload3.equals(upload3));
+        assertEquals(upload1, upload1);
+        assertNotEquals(upload1, upload2);
+        assertNotEquals(upload1, upload3);
+        assertNotEquals(upload2, upload1);
+        assertEquals(upload2, upload2);
+        assertNotEquals(upload2, upload3);
+        assertNotEquals(upload3, upload1);
+        assertNotEquals(upload3, upload2);
+        assertEquals(upload3, upload3);
 
-        assertFalse(upload1.equals("not equals"));
+        assertNotEquals("not equals", upload1);
                 
         context.assertIsSatisfied();
     }
@@ -162,11 +164,10 @@ public class CoreUploadItemTest extends BaseTestCase {
     //  in CoreUploadItem
     // Functionality is too closely related to HTTPUploader and GnutellaPresence
     public void testGetHostWithoutFileName() {
+        
         Mockery context = new Mockery() {
-            {
-                setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }};
         
         final Uploader uploader = context.mock(HTTPUploader.class);
         final InetAddress addr = context.mock(InetAddress.class);
@@ -275,5 +276,29 @@ public class CoreUploadItemTest extends BaseTestCase {
         testGetBrowseType(UploadStatus.LIMIT_REACHED, "asds", BrowseType.NONE);
     }
     
-    
+    public void testGetUploadItemType() {
+        
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }};
+        
+        final Uploader uploaderNormal = context.mock(Uploader.class);
+        final Uploader uploaderBittorrent = context.mock(BTUploader.class);
+        
+        context.checking(new Expectations() {
+            { 
+                allowing(uploaderNormal);
+                allowing(uploaderBittorrent);
+            }});
+        
+        CoreUploadItem upload1 = new CoreUploadItem(uploaderNormal);
+        CoreUploadItem upload2 = new CoreUploadItem(uploaderBittorrent);
+        CoreUploadItem upload3 = new CoreUploadItem(null);
+        
+        assertEquals(UploadItemType.GNUTELLA, upload1.getUploadItemType());
+        assertEquals(UploadItemType.BITTORRENT, upload2.getUploadItemType());
+        assertEquals(UploadItemType.GNUTELLA, upload3.getUploadItemType());
+        
+        context.assertIsSatisfied();        
+    }
 }
