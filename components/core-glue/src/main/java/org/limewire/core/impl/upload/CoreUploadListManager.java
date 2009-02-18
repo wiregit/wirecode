@@ -30,7 +30,7 @@ import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.Uploader;
 
 @Singleton
-public class CoreUploadListManager implements UploadListener, UploadListManager{
+public class CoreUploadListManager implements UploadListener, UploadListManager {
 
     private final UploadServices uploadServices;
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
@@ -55,9 +55,14 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
 
     @Inject
     public void register(UploadListenerList uploadListenerList) {
-        uploadListenerList.addUploadListener(this);        
+        uploadListenerList.addUploadListener(this);       
     }
     
+    /**
+     * Prepare and install the (polling) monitor service.  This service will only be started when
+     *  the stage keyed by *this* object is initiated.
+     */
+    // TODO: Come up with a reasonable strategy for ServiceRegistry custom stage keys (Strings vs Hashes?)
     @Inject
     public void register(ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService executor) {
 
@@ -69,8 +74,8 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
           };
           
           scheduler.scheduleAtFixedRate("UI Upload Status Monitor", 
-                  command, PERIOD*2, PERIOD,
-                  TimeUnit.MILLISECONDS, executor);
+                  command, 0, PERIOD,
+                  TimeUnit.MILLISECONDS, executor).in(this);
     }
     
     @Override
