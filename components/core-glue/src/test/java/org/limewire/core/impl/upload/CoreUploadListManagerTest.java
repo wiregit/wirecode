@@ -214,7 +214,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
     /** 
      * Ensure the thread safe upload list is consistent with the model. 
      */
-    public void testGetSwingThreadSafeUploads() {
+    public void testGetSwingThreadSafeUploads() throws InterruptedException, InvocationTargetException {
         
         Mockery context = new Mockery();
         
@@ -244,14 +244,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
            }
         };
         
-        try {
-            SwingUtilities.invokeAndWait(edtTask);
-        }
-        catch (InterruptedException e) {
-            fail("The EDT Task was unexpectedly interrupted");
-        } catch (InvocationTargetException e) {
-            fail(e.getMessage());
-        }        
+        SwingUtilities.invokeAndWait(edtTask);
 
         context.assertIsSatisfied();
     }
