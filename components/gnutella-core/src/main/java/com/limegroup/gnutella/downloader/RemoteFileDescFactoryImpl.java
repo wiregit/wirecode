@@ -12,10 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.protocol.HTTP;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
@@ -225,13 +227,24 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
                 throw new IOException("Got " + response.getStatusLine().getStatusCode()
                         + " instead of 200 for URL: " + uri);
 
-            long length = -1;
-            if (response.getEntity() != null) {
-                length = response.getEntity().getContentLength();
+            // Head requests are not going to have an entity, so we cannot
+            // get the content length by looking at the entity.
+            // Instead, we have to parse the header.
+            Header contentLength = response.getFirstHeader(HTTP.CONTENT_LEN);
+            if(contentLength != null) {
+                try {
+                    long len = Long.parseLong(contentLength.getValue());
+                    if(len < 0) {
+                        throw new IOException("Invalid length: " + len);
+                    } else {
+                        return len;
+                    }
+                } catch(NumberFormatException nfe) {
+                    throw new IOException("can't parse content length", nfe);
+                }
+            } else {
+                throw new IOException("no content length header");
             }
-            if (length < 0)
-                throw new IOException("No content length");
-            return length;
         } finally {
             client.releaseConnection(response);
         }

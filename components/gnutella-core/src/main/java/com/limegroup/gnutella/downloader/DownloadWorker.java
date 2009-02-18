@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.NoSuchElementException;
@@ -763,8 +762,7 @@ public class DownloadWorker {
                         + type + " to: " + _rfd);
             _connectObserver = observer;
             try {
-                Socket socket = socketsManager.connect(
-                        new InetSocketAddress(connectable.getAddress(), connectable.getPort()),
+                Socket socket = socketsManager.connect(connectable.getInetSocketAddress(),
                         NORMAL_CONNECT_TIME, observer, type);
                 if (!observer.isShutdown())
                     observer.setSocket(socket);
