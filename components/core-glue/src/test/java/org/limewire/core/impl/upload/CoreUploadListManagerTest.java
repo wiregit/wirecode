@@ -1,10 +1,16 @@
 package org.limewire.core.impl.upload;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -226,14 +232,29 @@ public class CoreUploadListManagerTest extends BaseTestCase {
 
             }});
         
-        EventList<UploadItem> uploads = manager.getSwingThreadSafeUploads();
-        assertEmpty(uploads);
+        Runnable edtTask = new Runnable() {
+
+            @Override
+            public void run() {
+                EventList<UploadItem> uploads = manager.getSwingThreadSafeUploads();
+                assertEmpty(uploads);
+                
+                manager.uploadAdded(uploader);
+                assertGreaterThan(-1, uploads.size());
+                
+                manager.remove(uploads.get(0));
+                assertEmpty(uploads);        
+           }
+        };
         
-        manager.uploadAdded(uploader);
-        assertGreaterThan(-1, uploads.size());
-        
-        manager.remove(uploads.get(0));
-        assertEmpty(uploads);
+        try {
+            SwingUtilities.invokeAndWait(edtTask);
+        }
+        catch (InterruptedException e) {
+            fail("The EDT Task was unexpectedly interrupted");
+        } catch (InvocationTargetException e) {
+            fail(e.getMessage());
+        }        
 
         context.assertIsSatisfied();
     }
@@ -360,5 +381,10 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         
         context.assertIsSatisfied();
     }
+    
+    public void testUpdate() {
+        
+    }
+    
 }
 
