@@ -65,7 +65,6 @@ public class CoreDownloadListManager implements DownloadListManager {
 	private EventList<DownloadItem> swingThreadDownloadItems;
 	private final DownloadManager downloadManager;
 	private final RemoteFileDescFactory remoteFileDescFactory;
-	private final QueueTimeCalculator queueTimeCalculator;
     private final ActivityCallback activityCallback;
     private final SpamManager spamManager;
     private final ItunesDownloadListenerFactory itunesDownloadListenerFactory;
@@ -79,8 +78,8 @@ public class CoreDownloadListManager implements DownloadListManager {
 	
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
-            DownloadListenerList listenerList,
             RemoteFileDescFactory remoteFileDescFactory, ActivityCallback activityCallback, SpamManager spamManager, ItunesDownloadListenerFactory itunesDownloadListenerFactory) {
+	    
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
 	    this.activityCallback = activityCallback;
@@ -90,22 +89,28 @@ public class CoreDownloadListManager implements DownloadListManager {
         threadSafeDownloadItems = GlazedListsFactory.threadSafeList(new BasicEventList<DownloadItem>());
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
 	    observableDownloadItems = GlazedListsFactory.observableElementList(threadSafeDownloadItems, downloadConnector);
-	    this.queueTimeCalculator = new QueueTimeCalculator(observableDownloadItems);
-	    listenerList.addDownloadListener(new CoreDownloadListener(threadSafeDownloadItems, queueTimeCalculator));
 	}
 	
-	@Inject void register(ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
-        //TODO: change backgroundExecutor to listener - currently no listener for download progress
-        //hack to force tables to update
-          Runnable command = new Runnable() {
+	@Inject 
+	void register(DownloadListenerList listenerList) {
+	    
+	    listenerList.addDownloadListener(new CoreDownloadListener(threadSafeDownloadItems,
+                new QueueTimeCalculator(observableDownloadItems)));
+	    
+	}
+	
+	@Inject 
+    void register(ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+
+	      Runnable command = new Runnable() {
               @Override
               public void run() {
                   update();
               }
           };
-          scheduler.scheduleAtFixedRate("Glue Download Updates", command, 0, PERIOD, TimeUnit.MILLISECONDS, backgroundExecutor);
+     
+          scheduler.scheduleAtFixedRate("UI Download Status Monitor", command, PERIOD*2, PERIOD, TimeUnit.MILLISECONDS, backgroundExecutor);
 	}
-
 
     // forces refresh
     private void update() {

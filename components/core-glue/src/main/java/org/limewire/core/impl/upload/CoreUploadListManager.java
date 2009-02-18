@@ -54,11 +54,13 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
     }
 
     @Inject
-    public void register(UploadListenerList uploadListenerList,
-            ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService executor) {
+    public void register(UploadListenerList uploadListenerList) {
+        uploadListenerList.addUploadListener(this);        
+    }
+    
+    @Inject
+    public void register(ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService executor) {
 
-        uploadListenerList.addUploadListener(this);
-        
           Runnable command = new Runnable() {
               @Override
               public void run() {
@@ -66,7 +68,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
               }
           };
           
-          scheduler.scheduleAtFixedRate("UI Upload Status Updater", 
+          scheduler.scheduleAtFixedRate("UI Upload Status Monitor", 
                   command, PERIOD*2, PERIOD,
                   TimeUnit.MILLISECONDS, executor);
     }

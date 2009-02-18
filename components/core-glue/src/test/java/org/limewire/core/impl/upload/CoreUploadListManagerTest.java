@@ -58,7 +58,8 @@ public class CoreUploadListManagerTest extends BaseTestCase {
             }
         });
         
-        manager.register(uploadListenerList, scheduler, backgroundExecutor);
+        manager.register(uploadListenerList);
+        manager.register(scheduler, backgroundExecutor);
         
         Runnable updater = runnableMatcher.getLastMatch();
         updater.run();

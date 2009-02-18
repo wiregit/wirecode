@@ -64,7 +64,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, listenerList, remoteFileDescFactory,
+                downloadManager, remoteFileDescFactory,
                 activityCallback, spamManager, itunesDownloadListenerFactory);
         
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
@@ -75,6 +75,8 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
                         with(any(long.class)), with(any(TimeUnit.class)), with(same(backgroundExecutor)));
             }
         });        
+        
+        coreDownloadListManager.register(listenerList);
         coreDownloadListManager.register(scheduler, backgroundExecutor);
 
         final Downloader unfinishedItem1 = context.mock(Downloader.class);
@@ -232,8 +234,10 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, listenerList, remoteFileDescFactory,
+                downloadManager, remoteFileDescFactory,
                 activityCallback, spamManager, itunesDownloadListenerFactory);
+        
+        coreDownloadListManager.register(listenerList);
 
         final Downloader unfinishedItem1 = context.mock(Downloader.class);
         final Downloader unfinishedItem2 = context.mock(Downloader.class);
@@ -338,9 +342,11 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, listenerList, remoteFileDescFactory,
+                downloadManager, remoteFileDescFactory,
                 activityCallback, spamManager, itunesDownloadListenerFactory);
 
+        coreDownloadListManager.register(listenerList);
+        
         TestPropertyChangeListener listener = new TestPropertyChangeListener();
         coreDownloadListManager.addPropertyChangeListener(listener);
         coreDownloadListManager.updateDownloadsCompleted();
