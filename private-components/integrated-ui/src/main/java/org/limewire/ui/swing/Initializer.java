@@ -454,7 +454,7 @@ public final class Initializer {
         SwingUtils.invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                splashRef.set(new SplashWindow(splashImage, isPro, Locale.getDefault(), 4));
+                splashRef.set(new SplashWindow(splashImage, isPro, LocaleUtils.getCurrentLocale(), 4));
                 if(!isStartup) {
                     splashRef.get().begin();
                     stopwatch.resetAndLog("begin splash window");
