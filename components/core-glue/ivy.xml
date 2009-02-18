@@ -12,6 +12,7 @@
         <dependency org="org.mozilla" name="mozswing" rev="2008-08-26"/>
         <dependency org="mozilla" name="mozilla-glue" rev="mozswing1.9-06242008"/>
         <dependency org="net.sf.jacob-project" name="jacob" rev="1.14.1"/>
+        <!--dependency org="jacob.jar" name="net.sf.jacob-project" rev="1.14.1"/--> 
         <dependency org="iTunes" name="iTunes" rev="0.0.1"/>
     </dependencies>
 </ivy-module>

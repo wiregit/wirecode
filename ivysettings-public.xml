@@ -18,10 +18,12 @@
 -->
 <ivysettings>
 	<resolvers>
-		<chain name="main">
-			<resolver ref="shared"/>
-			<resolver ref="public"/>
-            <resolver ref="limewire-repository"/>
+        <chain name="public">
+			<ibiblio name="ibiblio" m2compatible="true"/> 
+            <!--ibiblio name="people.apache" root="http://people.apache.org/repo/m2-snapshot-repository" m2compatible="true"/-->
+            <ibiblio name="java-dev" root="http://download.java.net/maven/2" m2compatible="true"/>
+            <ibiblio name="laughingpanda" root="http://www.laughingpanda.org/maven2/" m2compatible="true"/>
+            <ibiblio name="xnap" root="http://xnap-commons.sourceforge.net/repository" m2compatible="true"/>
 		</chain>
 	</resolvers>
 </ivysettings>

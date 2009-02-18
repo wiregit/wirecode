@@ -140,6 +140,9 @@
     <macrodef name="do.resolve-dependencies" description="retreive dependencies with ivy">
         <attribute name="component"/>
         <sequential>
+            <!-- TODO parameterize 'default' with ivy-module configuration name -->
+            <!-- TODO see same comment above -->
+            <mkdir dir="${build.limewire.components.@{component}.lib}/default"/>
             <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
             <ivy:resolve file="${limewire.components.@{component}.home}/ivy.xml"/>
             <ivy:retrieve pattern="${build.limewire.components.@{component}.lib}/[conf]/[type]/[artifact]-[version].[ext]"/>
@@ -159,6 +162,7 @@
 	    <element name="more-src-paths" optional="true"/>
 	    <attribute name="excludes" default=""/>
 	    <sequential>
+            <echo message="compiling @{component}..." />
 	        <do.build-init component="@{component}"/>
 			<mkdir dir="${build.limewire.components.@{component}.classes}"/>
             <do.resolve-dependencies component="@{component}"/>

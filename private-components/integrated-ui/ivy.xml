@@ -1,0 +1,11 @@
+<ivy-module version="1.0">
+    <info organisation="org.limewire" module="integrated-ui" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"/>
+    <!--publications>                
+        <artifact name="integrated-ui"/>    
+    </publications-->
+    <dependencies>
+        <dependency org="org.limewire" name="swing-ui" rev="latest.integration"/>
+        <dependency org="org.limewire" name="core-glue" rev="latest.integration"/>
+        <dependency org="org.limewire" name="mojito-ui" rev="latest.integration"/>
+    </dependencies>
+</ivy-module>

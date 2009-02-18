@@ -7,8 +7,8 @@
         <dependency org="commons-logging" name="commons-logging" rev="1.1"/>
         <dependency org="com.ibm.icu" name="icu4j" rev="3.4.4"/>
         <dependency org="com.google.code.guice" name="guice" rev="2.0-snapshot-20080915"/>
-        <!--dependency org="com.google.code.guice" name="assistedinject" rev="2.0-snapshot-20080523"/-->
+        <dependency org="com.google.code.guice" name="assistedinject" rev="2.0-snapshot-20080523"/>
         <!--dependency org="org.limewire" name="lw-test-util" rev="4.13.1-SNAPSHOT"/-->
-        <!--dependency org="net.jcip" name="jcip-annotations" rev="1.0"/-->
+        <dependency org="net.jcip" name="jcip-annotations" rev="1.0"/>
     </dependencies>
 </ivy-module>

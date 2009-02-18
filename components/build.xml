@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="lw-components" basedir="." default="compile-src" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="lw-components" basedir="." default="compile-ivy" xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<description>
 	    Catch-all buildfile for every component.
@@ -8,8 +8,8 @@
     
 	<property name="limewire.home" location="${basedir}/.."/>
 	
-    <!--import file="common/build-macros.xml" />
-    <import file="common/build.xml" />
+    <import file="common/build-macros.xml" />
+    <!--import file="common/build.xml" />
     <import file="collection/build.xml"/>
     <import file="security/build.xml"/>
     <import file="io/build.xml"/>
@@ -38,7 +38,7 @@
     <target name="compile-ivy">
         <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
         <ivy:buildlist reference="build-path" onMissingDescriptor="skip">
-          <fileset dir="." includes="**/build.xml" excludes="build.xml"/>
+          <fileset dir="." includes="**/build.xml" excludes="build.xml, core-glue/*"/>
         </ivy:buildlist>
         <echo message="${ivy.sorted.modules}"/>
         <subant target="jar" buildpathref="build-path"/>        

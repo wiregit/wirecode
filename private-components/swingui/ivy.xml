@@ -1,0 +1,27 @@
+<ivy-module version="1.0">
+    <info organisation="org.limewire" module="integrated-ui" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"/>
+    <!--publications>                
+        <artifact name="integrated-ui"/>    
+    </publications-->
+    <dependencies>
+        <dependency org="org.limewire" name="common" rev="latest.integration"/>
+        <dependency org="org.limewire" name="core-api" rev="latest.integration"/>
+        <dependency org="org.limewire" name="collection" rev="latest.integration"/>
+        <dependency org="org.limewire" name="core-settings" rev="latest.integration"/>
+        <dependency org="org.swinglabs" name="swingx" rev="0.9.4"/>
+        <dependency org="org.jdesktop" name="appframework" rev="1.0.3"/>
+        <dependency org="org.bushe.swing.event" name="EventBus" rev="1.2b"/>
+        <dependency org="org.limewire" name="mock-core" rev="latest.integration"/>
+        <dependency org="org.mozilla" name="mozswing" rev="2008-08-26"/>
+        <dependency org="mozilla" name="mozdom4java" rev="mozswing1.9-06242008"/>
+        <dependency org="mozilla" name="mozswing-interfaces" rev="1.9"/>
+        <dependency org="mozilla" name="mozila-glue" rev="mozswing1.9-06242008"/>
+        <dependency org="mozilla" name="jna" rev="mozswing1.9-06242008"/>
+        <dependency org="org.limewire" name="jdic" rev="20061102-lw-1"/>
+        <dependency org="xnap-commons" name="gettext-commons" rev="0.9.1"/>
+        <dependency org="org.limewire" name="miglayout" rev="1.0"/>
+        <dependency org="org.limewire" name="jxlayer" rev="3.0"/>
+        <dependency org="mrjadapter" name="mrjadapter" rev="1.0.9"/>
+        <dependency org="log4j" name="log4j" rev="1.2.14"/>
+    </dependencies>
+</ivy-module>

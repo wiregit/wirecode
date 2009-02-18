@@ -1,29 +1,33 @@
-<project name="lw-core" default="compile" basedir=".">
+<project name="lw-core" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="limewire.home" location="${basedir}/.."/>
     
     <import file="../components/build.xml"/>
     
-    <target name="initialize" depends="lw-components.initialize" unless="initialized.core">
+    <target name="initialize" unless="initialized.core">
         <property name="initialized.core" 			  value="true"/>
         <property name="limewire.core.home"           location="${limewire.home}/core"/>
         <property name="limewire.core.src"  		  location="${limewire.core.home}"/>
         <property name="build.limewire.core.classes"  location="${limewire.core.home}"/>
+        <property name="build.limewire.core.home.lib" location="${limewire.core.home}/lib"/>
         <path id="build.limewire.core.classpath">
-            <fileset dir="${limewire.lib.jars}" includes="**/*.jar" excludes="tests/**"/>
-            <path refid="build.limewire.components.classes.core"/>
+            <fileset dir="${build.limewire.core.home.lib}/default/" includes="**/*"/>
         </path>
+        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        <ivy:resolve file="${limewire.core.home}/ivy.xml"/>
+        <ivy:retrieve pattern="${build.limewire.core.home.lib}/[conf]/[type]/[artifact]-[version].[ext]"/>
     </target>
     
     <!-- compiles the core & components -->
+    <!-- TODO 
     <target name="compile-all"
             description="Compiles the components and the core."
-            depends="initialize, lw-components.compile-core-src, compile-core"/>
+            depends="initialize, lw-components.compile-core-src, compile-core"/ -->
     
 	<!-- builds only the core -->
 	<target name="compile-core" 
 	        description="Compiles just the core."
-	        depends="initialize, lw-components.compile-core">
+	        depends="initialize">
 	    <javac destdir      ="${build.limewire.core.classes}"
 			   debug	    ="${compile.debug}"
 			   deprecation  ="${compile.deprecation}"
@@ -39,9 +43,10 @@
 	</target>
     
     <!-- cleans the core & components -->
+    <!-- TODO 
     <target name="clean-all" 
             description="Cleans the classfiles generated from compiling the components and core."
-            depends="initialize, lw-components.clean-src, clean-core"/>
+            depends="initialize, lw-components.clean-src, clean-core"/-->
 	
 	<!-- cleans only the core -->
 	<target name="clean-core"
@@ -55,6 +60,17 @@
     <target name="clean" description="Cleans just the core" depends="clean-core"/>
     <target name="compile" description="Compiles just the core" depends="compile-core"/>
     
+    <target name="jar" depends="initialize">
+        <jar destfile="core.jar"
+            	 compress="@{compress}"
+                 basedir="${build.limewire.core.classes}"
+                 includes="**/*.class"
+                 excludes="@{excludes}"
+            >
+            </jar>
+            <ivy:publish resolver="local" overwrite="true" forcedeliver="true" artifactspattern="core.jar" srcivypattern="core.jar/../ivy.xml"/>
+    </target>
+    
     <!--
        everything below is just to erase the targets from 'ant -p'
        they are listed because we import the component's buildfile.
@@ -67,7 +83,6 @@
     <target name="compile-core-src"/>
     <target name="compile-ui-src"/>
     <target name="compile-tests"/>
-	<target name="jar"/>
     <target name="javadoc"/>
     <target name="test"/>
     <target name="test-all"/>

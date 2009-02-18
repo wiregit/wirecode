@@ -6,6 +6,6 @@
     <dependencies>
         <dependency org="org.limewire" name="mojito" rev="latest.integration"/>
         <dependency org="commons-collections" name="commons-collections" rev="3.2"/>
-        <dependency org="jung" name="jung" rev="1.6.0"/>
+        <!--dependency org="jung" name="jung" rev="1.6.0"/-->
     </dependencies>
 </ivy-module>
