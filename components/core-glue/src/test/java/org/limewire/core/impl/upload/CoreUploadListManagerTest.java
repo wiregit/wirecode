@@ -240,7 +240,10 @@ public class CoreUploadListManagerTest extends BaseTestCase {
                 assertGreaterThan(-1, uploads.size());
                 
                 manager.remove(uploads.get(0));
-                assertEmpty(uploads);        
+                assertEmpty(uploads);
+                
+                uploads = manager.getSwingThreadSafeUploads();
+                assertEmpty(uploads);
            }
         };
         

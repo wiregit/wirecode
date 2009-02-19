@@ -99,8 +99,8 @@ public class CoreUploadItemTest extends BaseTestCase {
         assertEquals(upload3, upload3);
         assertEquals(upload3, upload4);
 
+        assertFalse(upload1.equals(null));  // MUST assertFalse here since assertNotEquals bails with null
         assertNotEquals("not equals", upload1);
-        assertNotEquals(null, upload1);
                 
         context.assertIsSatisfied();
     }
