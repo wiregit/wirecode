@@ -61,14 +61,15 @@
     <target name="compile" description="Compiles just the core" depends="compile-core"/>
     
     <target name="jar" depends="initialize">
-        <jar destfile="core.jar"
+        <mkdir dir="${limewire.core.home}/dist"/>
+        <jar destfile="${limewire.core.home}/dist/core.jar"
             	 compress="@{compress}"
                  basedir="${build.limewire.core.classes}"
                  includes="**/*.class"
                  excludes="@{excludes}"
             >
             </jar>
-            <ivy:publish resolver="local" overwrite="true" forcedeliver="true" artifactspattern="core.jar" srcivypattern="core.jar/../ivy.xml"/>
+            <ivy:publish resolver="local" overwrite="true" forcedeliver="true" artifactspattern="${limewire.core.home}/dist/core.jar" srcivypattern="${limewire.core.home}/dist/ivy.xml"/>
     </target>
     
     <!--

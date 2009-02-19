@@ -1,14 +1,28 @@
 <!-- top level ant file -->
-<project name="limewire" default="compile-src" basedir=".">
+<project name="limewire" default="compile-ivy" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="limewire.home" location="${basedir}"/>
 
     <import file="components/build.xml"/>
     <import file="core/build.xml"/>
-    <import file="tests/build.xml" />
+    <!--import file="tests/build.xml" /-->
     <import file="components/core-glue/build.xml"/>
     
-    <target name="initialize" depends="lw-core.initialize, lw-tests.initialize, lw-components.initialize, lw-core-glue.initialize" unless="initialized.limewire">
+    <target name="compile-ivy">
+        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        <ivy:buildlist reference="build-path" onMissingDescriptor="skip">
+          <fileset dir="." includes="components/*/build.xml,core/build.xml,private-components/*/build.xml" excludes="build.xml"/>
+        </ivy:buildlist>
+        <echo message="${ivy.sorted.modules}"/>
+        <subant target="jar" buildpathref="build-path"/>        
+    </target>
+    
+    <target name="clean-deps">
+        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        <ivy:cleancache />                                                              
+    </target>
+    
+    <!--target name="initialize" unless="initialized.limewire">
         <property name="limewire.components.limewire.home"
                   location="${limewire.home}"/>
         <property name="limewire.components.limewire.tests"
@@ -87,7 +101,6 @@
             depends="compile, lw-tests.test-package"/>
     
     <target name="jar" depends="compile-src, lw-components.jar, lw-core-glue.jar">
-        <!-- get the list of jars in a space separated list without dirnames -->
         <fileset dir="${limewire.lib.jars}" includes="**/*.jar" id="alljars"/>
         <pathconvert property="classpath" refid="alljars" pathsep=" ">
             <mapper type = "flatten" />
@@ -107,7 +120,6 @@
         </jar>
     </target> 
     
-    <!-- TODO: implement -->
     <target name="clean-dist"/>
         
     <target name="javadoc">
@@ -164,40 +176,32 @@
         <gettext-merge keysFile="limewire.pot" poDirectory="lib/messagebundles"/>
     </target>
 
-    <!-- generate two jars, one with almost complete translations, and a remaining one -->
     <target name="lw-bundle-messages"
             description="Rebuilds messages and bundles them"
             depends="init.gettext">
 
-        <!-- clean up -->
         <delete dir="lib/messagebundles/org"/>
     
-        <!-- generate default bundle for complete messages -->
         <gettext-generate-default targetBundle="org.limewire.i18n.Messages"
                                   outputDirectory="lib/messagebundles" 
                                   potfile="lib/messagebundles/limewire.pot"/>
     
-        <!-- generate complete bundles -->
         <gettext-dist targetBundle="org.limewire.i18n.Messages"
                       poDirectory="lib/messagebundles"
                       outputDirectory="lib/messagebundles"
                       percentage="${translation.cutoff}"/>
     
-        <!-- generate the empty en.po file without percentage  -->
         <gettext-dist targetBundle="org.limewire.i18n.Messages"
                       outputDirectory="lib/messagebundles">
             <fileset dir="lib/messagebundles" includes="en.po"/>
         </gettext-dist>
         
-        <!-- jar them -->
         <jar destfile="lib/jars/messages.jar" 
              basedir="lib/messagebundles"
              includes="org/**"/>
             
-        <!-- clean up -->
         <delete dir="lib/messagebundles/org"/>
             
-        <!-- generate incomplete ones -->
         <gettext-dist targetBundle="org.limewire.i18n.Messages"
                       poDirectory="lib/messagebundles"
                       outputDirectory="lib/messagebundles"
@@ -208,21 +212,18 @@
             <fileset dir="lib/messagebundles/org/limewire/i18n/" includes="**/Messages_en*"/>
         </delete>
     
-        <!-- jar them -->
         <jar destfile="lib/jars/compile/messages.jar"
              basedir="lib/messagebundles"
              includes="org/**"/>
         
-        <!-- clean up -->
         <delete dir="lib/messagebundles/org"/>
     </target>
 
-    <!-- mask imported targets -->
     <target name="test"/>
     <target name="test-package"/>
     <target name="compile-core"/>
     <target name="compile-core-src"/>
     <target name="compile-ui-src"/>
-    <target name="compile-gui"/>
+    <target name="compile-gui"/-->
 
 </project>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="lw-private-components" basedir="." default="compile-src">
+<project name="lw-private-components" basedir="." default="compile-ivy"  xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<description>
 	    Catch-all buildfile for every private component.
@@ -10,17 +10,22 @@
 	
 	<import file="build-macros.xml"/>
 	<import file="../components/test-util/build.xml"/>
-    <import file="swingui/build.xml" />
-    <import file="mock-core/build.xml" />
-    <import file="integrated-ui/build.xml"/>
     
-    <target name="initialize" depends="lw-swingui.initialize, lw-mock-core.initialize, lw-integrated-ui.initialize" unless="initialized.private-all">
+    <target name="compile-ivy">
+        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        <ivy:buildlist reference="build-path" onMissingDescriptor="skip">
+          <fileset dir="." includes="**/build.xml" excludes="build.xml"/>
+        </ivy:buildlist>
+        <echo message="${ivy.sorted.modules}"/>
+        <subant target="jar" buildpathref="build-path"/>        
+    </target>
+    
+    <!--target name="initialize" depends="lw-swingui.initialize, lw-mock-core.initialize, lw-integrated-ui.initialize" unless="initialized.private-all">
         <do.setup-private-properties component="private-all">
 			<add-tests-classpath>
             	<path refid="tests.limewire.components.swingui.classpath"/>
 	            <path refid="tests.limewire.components.mock-core.classpath"/>
 	            <path refid="tests.limewire.components.integrated-ui.classpath"/>
-                <!-- Add as components are added. -->
 		    </add-tests-classpath>
         </do.setup-private-properties>    
         
@@ -29,14 +34,12 @@
     		<include name="${limewire.components.swingui.relative.antglob.allsources}"/>
 			<include name="${limewire.components.mock-core.relative.antglob.allsources}"/>
 			<include name="${limewire.components.integrated-ui.relative.antglob.allsources}"/>
-               <!-- Add as components are added! -->
 		</fileset>
     
 		<fileset id="limewire.components.sources.private-tests" dir="${limewire.components.home}">
 			<include name="${limewire.components.swingui.relative.antglob.tests}"/>
 			<include name="${limewire.components.mock-core.relative.antglob.tests}"/>
 			<include name="${limewire.components.integrated-ui.relative.antglob.tests}"/>
-            <!-- Add as components are added! -->
 		</fileset>
     
     </target>
@@ -100,7 +103,6 @@
                 <fileset dir="${build.limewire.components.swingui.tests}" includes="**/*Test.class"/>
     	        <fileset dir="${build.limewire.components.mock-core.tests}" includes="**/*Test.class"/>
     	        <fileset dir="${build.limewire.components.integrated-ui.tests}" includes="**/*Test.class"/>
-                <!-- Add as tests are added. -->
 	         </testLocations>
 	    </do.test-all>
 	</target>
@@ -116,10 +118,8 @@
 			<more-jar-elements>
 			    <fileset dir="${build.limewire.components.swingui.classes}" />
 	    	    <fileset dir="${limewire.components.swingui.src.resources}" />
-			    <!--<fileset dir="${build.limewire.components.mock-core.classes}"/>-->
     	        <fileset dir="${build.limewire.components.integrated-ui.classes}" />
                 <fileset dir="${build.limewire.components.core-glue.classes}" />
-                <!-- Add as components & resources are added. -->
 
 			</more-jar-elements>
         </do.jar>
@@ -154,5 +154,5 @@
     			<testsources refid="limewire.components.sources.private-tests"/>
 			</moretestinfo>
 	    </do.clover2html>
-    </target>
+    </target-->
 </project>

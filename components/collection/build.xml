@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="lw-collection" basedir="." default="compile-src">
-    <property name="component" value="common"/>
+    <property name="component" value="collection"/>
     <import file="../common/generic-build.xml"/>	
 </project>
