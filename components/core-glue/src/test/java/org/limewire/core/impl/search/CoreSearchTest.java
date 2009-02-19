@@ -91,14 +91,7 @@ public class CoreSearchTest extends BaseTestCase {
                 one(searchServices).query(searchGuid, searchDetails.getSearchQuery(), "",
                         MediaType.getAnyTypeMediaType());
                 one(backgroundExecutor).execute(with(any(Runnable.class)));
-                will(new CustomAction("Run runnable") {
-                    @Override
-                    public Object invoke(Invocation invocation) throws Throwable {
-                        Runnable runnable = (Runnable) invocation.getParameter(0);
-                        runnable.run();
-                        return null;
-                    }
-                });
+                will(new ExecuteRunnableAction());
                 one(friendSearcher).doSearch(with(equal(searchDetails)),
                         with(any(FriendSearchListener.class)));
                 one(searchListener).searchStarted(coreSearch);
@@ -133,26 +126,7 @@ public class CoreSearchTest extends BaseTestCase {
                 allowing(remoteFileDesc1).getCreationTime();
                 will(returnValue(5678L));
                 one(searchListener).handleSearchResult(with(same(coreSearch)),
-                        with(new BaseMatcher<SearchResult>() {
-                            @Override
-                            public boolean matches(Object item) {
-                                if (!SearchResult.class.isInstance(item)) {
-                                    return false;
-                                }
-
-                                SearchResult searchResult = (SearchResult) item;
-
-                                if (!fileName1.equals(searchResult.getFileName())) {
-                                    return false;
-                                }
-                                return true;
-                            }
-
-                            @Override
-                            public void describeTo(Description description) {
-
-                            }
-                        }));
+                        with(new SearchResultMatcher(fileName1)));
             }
         });
         queryReplyListener.get().handleQueryReply(remoteFileDesc1, queryReply1, ipPorts);
@@ -201,14 +175,7 @@ public class CoreSearchTest extends BaseTestCase {
                 one(searchServices).query(searchGuid, searchDetails.getSearchQuery(), "",
                         MediaType.getAnyTypeMediaType());
                 one(backgroundExecutor).execute(with(any(Runnable.class)));
-                will(new CustomAction("Run runnable") {
-                    @Override
-                    public Object invoke(Invocation invocation) throws Throwable {
-                        Runnable runnable = (Runnable) invocation.getParameter(0);
-                        runnable.run();
-                        return null;
-                    }
-                });
+                will(new ExecuteRunnableAction());
                 one(friendSearcher).doSearch(with(equal(searchDetails)),
                         with(any(FriendSearchListener.class)));
                 will(new AssignParameterAction<FriendSearchListener>(friendSearchListener, 1));
@@ -222,28 +189,16 @@ public class CoreSearchTest extends BaseTestCase {
 
         final CoreRemoteFileItem coreRemoteFileItem1 = context.mock(CoreRemoteFileItem.class);
         final SearchResult searchResult1 = context.mock(SearchResult.class);
+        final String fileName1 = "filename1";
 
         context.checking(new Expectations() {
             {
                 allowing(coreRemoteFileItem1).getSearchResult();
                 will(returnValue(searchResult1));
+                allowing(searchResult1).getFileName();
+                will(returnValue(fileName1));
                 one(searchListener).handleSearchResult(with(same(coreSearch)),
-                        with(new BaseMatcher<SearchResult>() {
-                            @Override
-                            public boolean matches(Object item) {
-                                if (!SearchResult.class.isInstance(item)) {
-                                    return false;
-                                }
-
-                                SearchResult searchResult = (SearchResult) item;
-                                return searchResult == searchResult1;
-                            }
-
-                            @Override
-                            public void describeTo(Description description) {
-
-                            }
-                        }));
+                        with(new SearchResultMatcher(fileName1)));
             }
         });
 
@@ -300,14 +255,7 @@ public class CoreSearchTest extends BaseTestCase {
                 one(searchServices).query(searchGuid, searchDetails.getSearchQuery(), "",
                         MediaType.getAnyTypeMediaType());
                 exactly(2).of(backgroundExecutor).execute(with(any(Runnable.class)));
-                will(new CustomAction("Run runnable") {
-                    @Override
-                    public Object invoke(Invocation invocation) throws Throwable {
-                        Runnable runnable = (Runnable) invocation.getParameter(0);
-                        runnable.run();
-                        return null;
-                    }
-                });
+                will(new ExecuteRunnableAction());
                 one(friendSearcher).doSearch(with(equal(searchDetails)),
                         with(any(FriendSearchListener.class)));
                 one(searchListener).searchStarted(coreSearch);
@@ -324,35 +272,6 @@ public class CoreSearchTest extends BaseTestCase {
         coreSearch.addSearchListener(searchListener);
 
         coreSearch.start();
-
-        final RemoteFileDesc remoteFileDesc1 = context.mock(RemoteFileDesc.class);
-        final QueryReply queryReply1 = context.mock(QueryReply.class);
-        final Set<IpPort> ipPorts = new HashSet<IpPort>();
-        final Address address1 = context.mock(Address.class);
-        final byte[] guid1 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-        final String fileName1 = "remote file name 1.txt";
-        context.checking(new Expectations() {
-            {
-                allowing(remoteFileDesc1).getAddress();
-                will(returnValue(address1));
-                allowing(remoteFileDesc1).getClientGUID();
-                will(returnValue(guid1));
-                allowing(address1).getAddressDescription();
-                will(returnValue("address 1 description"));
-                allowing(remoteFileDesc1).getFileName();
-
-                will(returnValue(fileName1));
-                allowing(remoteFileDesc1).getSize();
-                will(returnValue(1234L));
-                allowing(remoteFileDesc1).getXMLDocument();
-                will(returnValue(null));
-                allowing(remoteFileDesc1).getCreationTime();
-                will(returnValue(5678L));
-                one(searchListener).handleSearchResult(with(same(coreSearch)),
-                        with(new SearchResultMatcher(fileName1)));
-            }
-        });
-        queryReplyListener.get().handleQueryReply(remoteFileDesc1, queryReply1, ipPorts);
 
         final PromotionMessageContainer result = context.mock(PromotionMessageContainer.class);
         final PromotionOptions options = context.mock(PromotionOptions.class);
@@ -382,6 +301,19 @@ public class CoreSearchTest extends BaseTestCase {
         });
         promotionResultCallback.get().process(result);
         context.assertIsSatisfied();
+    }
+
+    private final class ExecuteRunnableAction extends CustomAction {
+        private ExecuteRunnableAction() {
+            super("Run a Runnable");
+        }
+
+        @Override
+        public Object invoke(Invocation invocation) throws Throwable {
+            Runnable runnable = (Runnable) invocation.getParameter(0);
+            runnable.run();
+            return null;
+        }
     }
 
     private final class SearchResultMatcher extends BaseMatcher<SearchResult> {
@@ -426,7 +358,7 @@ public class CoreSearchTest extends BaseTestCase {
             assertEquals(title, result1.getTitle());
             assertEquals(displayUrl, result1.getVisibleUrl());
             assertEquals(url, result1.getUrl());
-            
+
             return true;
         }
 
