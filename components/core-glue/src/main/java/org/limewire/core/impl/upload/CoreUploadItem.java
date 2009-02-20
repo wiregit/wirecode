@@ -202,9 +202,9 @@ class CoreUploadItem implements UploadItem {
     
     @Override
     public long getRemainingUploadTime() {
-        double remaining = (getFileSize() - getTotalAmountUploaded()) / 1024.0;
         float speed = getUploadSpeed();
         if (speed > 0) {
+            double remaining = (getFileSize() - getTotalAmountUploaded()) / 1024.0;
             return (long) (remaining / speed);
         } else {
             return UNKNOWN_TIME;
