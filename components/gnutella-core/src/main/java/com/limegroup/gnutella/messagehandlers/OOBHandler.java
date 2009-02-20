@@ -23,6 +23,7 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -46,6 +47,13 @@ import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 public class OOBHandler implements MessageHandler, Runnable {
     
     private static final Log LOG = LogFactory.getLog(OOBHandler.class);
+    
+    /** How long to remember the port associated with each address */
+    private static final int RESPONDER_PORT_LIFETIME = 60 * 1000;
+    /** How long to remember ignored addresses */
+    private static final int IGNORED_ADDRESS_LIFETIME = 10 * 60 * 1000;
+    /** Magic port number that means an address should be ignored */
+    private static final int IGNORE = -1;
 	
 	private final MessageRouter router;
 	
@@ -57,8 +65,17 @@ public class OOBHandler implements MessageHandler, Runnable {
     
     private final NetworkInstanceUtils networkInstanceUtils;
 	
-    private final Map<Integer,OOBSession> OOBSessions =
-        Collections.synchronizedMap(new HashMap<Integer, OOBSession>());
+    private final Map<Integer,OOBSession> sessions =
+        Collections.synchronizedMap(new HashMap<Integer,OOBSession>());
+    
+    /**
+     * The port associated with each responding address and the time at which
+     * it was recorded. This is used to detect addresses that respond from
+     * multiple ports and also to record misbehaving addresses; if the port
+     * is IGNORE, RNVMs from the address should be ignored.
+     */
+    private final Map<Integer,ResponderPort> responderPorts =
+        Collections.synchronizedMap(new HashMap<Integer,ResponderPort>());
     
     @Inject
 	public OOBHandler(MessageRouter router, 
@@ -97,6 +114,11 @@ public class OOBHandler implements MessageHandler, Runnable {
                     " with " + msg.getNumResults() + " results");
         }
         
+        // Only allow responses from one port per address
+        byte[] handlerAddress = handler.getInetAddress().getAddress();
+        if(shouldIgnore (handlerAddress, handler.getPort()))
+            return;
+        
         int toRequest;
         
         if(!router.isQueryAlive(g) ||
@@ -113,10 +135,10 @@ public class OOBHandler implements MessageHandler, Runnable {
             SecurityToken t = new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest), 
                     MACCalculatorRepositoryManager); 
             int hash = Arrays.hashCode(t.getBytes());
-            synchronized(OOBSessions) {
-                if (!OOBSessions.containsKey(hash)) {
-                    OOBSessions.put(hash,new OOBSession(t, toRequest, new GUID(msg.getGUID()), true));
-                    ack = new LimeACKVendorMessage(g, toRequest,t);
+            synchronized(sessions) {
+                if(!sessions.containsKey(hash)) {
+                    sessions.put(hash, new OOBSession(t, toRequest, new GUID(msg.getGUID()), true));
+                    ack = new LimeACKVendorMessage(g, toRequest, t);
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Sending OOBv3 LimeACK to " +
                                 handler.getAddress() + ":" + handler.getPort());
@@ -165,10 +187,14 @@ public class OOBHandler implements MessageHandler, Runnable {
                     ":" + handler.getPort() +
                     " with " + reply.getResultCount() + " results");
         }
+                
+        // Only allow responses from one port per address
+        byte[] handlerAddress = handler.getInetAddress().getAddress();
+        if(shouldIgnore (handlerAddress, handler.getPort()))
+            return;
         
         // check if ip address of reply and sender of reply match
         // and update address of reply if necessary
-        byte[] handlerAddress = handler.getInetAddress().getAddress(); 
         if (!Arrays.equals(handlerAddress, reply.getIPBytes())) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Reply has wrong address " + reply.getIP() +
@@ -192,8 +218,15 @@ public class OOBHandler implements MessageHandler, Runnable {
             }
         }
         
-        SecurityToken token = getVerifiedSecurityToken(reply, handler);
-        if (token == null) {
+        SecurityToken token = null;
+        try {
+            token = getVerifiedSecurityToken(reply, handler);
+        } catch(InvalidSecurityTokenException e) {
+            LOG.debug("Invalid security token");
+            return;
+        }
+        if(token == null) {
+            LOG.debug("No security token");
             if (!SearchSettings.DISABLE_OOB_V2.getBoolean()) {
                 LOG.debug("Handling as an OOBv2 reply");
                 router.handleQueryReply(reply, handler);
@@ -203,8 +236,6 @@ public class OOBHandler implements MessageHandler, Runnable {
         
         int numResps = reply.getResultCount();
         outOfBandStatistics.addReceivedResponse(numResps);
-        
-        int requestedResponseCount = token.getBytes()[0] & 0xFF;
         
         /*
          * Router will handle the reply if it
@@ -217,12 +248,12 @@ public class OOBHandler implements MessageHandler, Runnable {
             router.addBypassedSource(reply, handler);
         }
         else {
-            synchronized (OOBSessions) {
+            synchronized(sessions) {
                 int hashKey = Arrays.hashCode(token.getBytes());
-                OOBSession session = OOBSessions.get(hashKey);
-                if (session == null) {
-                    session = new OOBSession(token, requestedResponseCount, queryGUID, false);
-                    OOBSessions.put(hashKey, session);
+                OOBSession session = sessions.get(hashKey);
+                if(session == null) {
+                    LOG.debug("Query is alive but OOB session has expired");
+                    return;
                 }
 
                 int remaining = session.getRemainingResultsCount() - numResps;
@@ -245,7 +276,50 @@ public class OOBHandler implements MessageHandler, Runnable {
                         LOG.debug("Error getting results");
                         // ignore packet
                     }
+                } else {
+                    Integer address = ByteUtils.leb2int(handlerAddress, 0);
+                    long now = System.currentTimeMillis();
+                    synchronized(responderPorts) {
+                        ResponderPort rp = responderPorts.get(address);
+                        if(rp == null || rp.port != IGNORE) {
+                            LOG.debug("Ignoring address with too many results");
+                            // Too many results - ignore the address for a while
+                            rp = new ResponderPort(IGNORE, now);
+                            responderPorts.put(address, rp);
+                        } else {
+                            // Continue ignoring the address
+                            rp.timestamp = now;
+                        }
+                    }
                 }
+            }
+        }
+    }
+    
+    private boolean shouldIgnore(byte[] addr, int port) {
+        Integer address = ByteUtils.leb2int(addr, 0);
+        long now = System.currentTimeMillis();
+        synchronized(responderPorts) {
+            ResponderPort rp = responderPorts.get(address);
+            if(rp == null || rp.hasExpired(now)) {
+                // No port is known for this address
+                rp = new ResponderPort(port, now);
+                responderPorts.put(address, rp);
+                return false;
+            } else if(rp.port == IGNORE) {
+                // Continue ignoring the address
+                rp.timestamp = now;
+                return true;
+            } else if(rp.port != port) {
+                LOG.debug("Ignoring address with too many ports");
+                // Too many ports - ignore the address for a while
+                rp = new ResponderPort(IGNORE, now);
+                responderPorts.put(address, rp);
+                return true;
+            }
+            else {
+                // Same port as before
+                return false;
             }
         }
     }
@@ -255,57 +329,83 @@ public class OOBHandler implements MessageHandler, Runnable {
      * against the handler, the number of results requested and the GUID of
      * the reply.
      *
-     * @return null if there is no security token in the reply or the security
-     * token did not validate
+     * @return the security token, or null if there is no security token
+     * @throws InvalidSecurityTokenException if the security token is invalid
      */
-	private SecurityToken getVerifiedSecurityToken(QueryReply reply, ReplyHandler handler) {
-	    byte[] securityBytes = reply.getSecurityToken();
-        if (securityBytes == null) {
-            LOG.debug("No security token");
+    private SecurityToken getVerifiedSecurityToken(QueryReply reply, ReplyHandler handler)
+    throws InvalidSecurityTokenException {
+        byte[] securityBytes = reply.getSecurityToken();
+        if(securityBytes == null)
             return null;
-        }
+        OOBSecurityToken oobKey = new OOBSecurityToken(securityBytes,
+                MACCalculatorRepositoryManager);
+        OOBSecurityToken.OOBTokenData data = 
+            new OOBSecurityToken.OOBTokenData(handler, reply.getGUID(),
+                    securityBytes[0] & 0xFF);
+        if(oobKey.isFor(data))
+            return oobKey;
+        else
+            throw new InvalidSecurityTokenException("invalid token");
+    }
 
-        try {
-            OOBSecurityToken oobKey = new OOBSecurityToken(securityBytes, MACCalculatorRepositoryManager);
-            OOBSecurityToken.OOBTokenData data = 
-                new OOBSecurityToken.OOBTokenData(handler, reply.getGUID(), securityBytes[0] & 0xFF);
-            if (oobKey.isFor(data)) {
-                return oobKey;
+	private void expire() {
+	    synchronized(sessions) {
+            if(LOG.isDebugEnabled())
+                LOG.debug(sessions.size() + " OOB sessions");
+	        Iterator<Map.Entry<Integer,OOBSession>> iter =
+                sessions.entrySet().iterator();
+	        while(iter.hasNext()) {
+	            if(!router.isQueryAlive(iter.next().getValue().getGUID()))
+	                iter.remove();
+	        }
+        }
+        long now = System.currentTimeMillis();
+        synchronized(responderPorts) {
+            if(LOG.isDebugEnabled())
+                LOG.debug(responderPorts.size() + " responder ports");
+            Iterator<Map.Entry<Integer,ResponderPort>> iter =
+                responderPorts.entrySet().iterator();
+            while(iter.hasNext()) {
+                if(iter.next().getValue().hasExpired(now))
+                    iter.remove();
             }
-        }
-        catch (InvalidSecurityTokenException e) {
-            // invalid security token echoed back
-            LOG.debug("Invalid security token");
-        }
-        return null;
-	}
-
-    private void expire() {
-		synchronized (OOBSessions) {
-			for (Iterator<Map.Entry<Integer, OOBSession>> iter = 
-			    OOBSessions.entrySet().iterator(); iter.hasNext();) {
-			    if (!router.isQueryAlive(iter.next().getValue().getGUID()))
-			        iter.remove();
-			}
-		}
+	    }
 	}
 	
 	public void run() {
 		expire();
 	}
+    
+    private static class ResponderPort {
+        final int port;
+        long timestamp;
+        
+        ResponderPort(int port, long timestamp) {
+            this.port = port;
+            this.timestamp = timestamp;
+        }
+        
+        boolean hasExpired(long now) {
+            if(port == IGNORE)
+                return now - timestamp > IGNORED_ADDRESS_LIFETIME;
+            else
+                return now - timestamp > RESPONDER_PORT_LIFETIME;
+        }
+    }
 
     @InspectableContainer
     @SuppressWarnings("unused")
-	private class OOBInspectable  {
+	private class OOBInspectable {
 
         @InspectionPoint("oob sessions")
-        public final Inspectable oobSessions = new Inspectable(){
+        public final Inspectable oobSessions = new Inspectable() {
             public Object inspect() {
                 List<Object> list;
-                synchronized (OOBSessions) {
-                    list = new ArrayList<Object>(OOBSessions.size());
-                    for (OOBSession o : OOBSessions.values()) 
+                synchronized(sessions) {
+                    list = new ArrayList<Object>(sessions.size());
+                    for(OOBSession o : sessions.values()) {
                         list.add(o.inspect());
+                    }
                 }
                 return list;
             }
