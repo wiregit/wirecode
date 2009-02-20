@@ -1,5 +1,5 @@
-<ivy-module version="1.0">
-    <info organisation="org.limewire" module="integrated-ui" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"/>
+<ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="org.limewire" module="integrated-ui"/>
     <!--publications>                
         <artifact name="integrated-ui"/>    
     </publications-->
