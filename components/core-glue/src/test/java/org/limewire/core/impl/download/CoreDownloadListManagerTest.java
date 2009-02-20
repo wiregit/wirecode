@@ -652,6 +652,44 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         DownloadItem downloadItemResult = coreDownloadListManager.addDownload(remoteFileItem);
         assertEquals(downloadItem, downloadItemResult);
+        
+        // overwrite true saveFile null
+        context.checking(new Expectations() {
+            {
+                one(downloadManager).download(remoteFileDescs, Collections.EMPTY_LIST, null, true, null, null);
+                will(returnValue(downloader));
+                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
+                will(returnValue(downloadItem));
+                one(remoteFileItem).getCategory();
+                will(returnValue(category));
+                one(remoteFileItem).getRfd();
+                will(returnValue(remoteFileDesc));
+            }
+        });
+
+        downloadItemResult = coreDownloadListManager.addDownload(remoteFileItem, null, true);
+        assertEquals(downloadItem, downloadItemResult);
+        
+        // overwrite true saveFile non null.
+        final String fileName = "somename.txt";
+        final File parentDir = new File("/tmp/somedir/");
+        final File saveFile = new File(parentDir, fileName);
+        
+        context.checking(new Expectations() {
+            {
+                one(downloadManager).download(remoteFileDescs, Collections.EMPTY_LIST, null, true, parentDir, fileName);
+                will(returnValue(downloader));
+                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
+                will(returnValue(downloadItem));
+                one(remoteFileItem).getCategory();
+                will(returnValue(category));
+                one(remoteFileItem).getRfd();
+                will(returnValue(remoteFileDesc));
+            }
+        });
+
+        downloadItemResult = coreDownloadListManager.addDownload(remoteFileItem, saveFile, true);
+        assertEquals(downloadItem, downloadItemResult);
 
         context.assertIsSatisfied();
     }
