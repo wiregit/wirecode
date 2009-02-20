@@ -25,6 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
@@ -40,13 +41,18 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.SharingFilterComboBox;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
@@ -81,6 +87,8 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.MatcherEditor.Event;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
@@ -615,4 +623,81 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             sharingLabel.setText(I18n.tr("What I'm Sharing With {0}", friendRenderName));
         }
     }
+    
+    @Override
+    protected <T extends FileItem> void addCategorySizeListener(Category category,
+            Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
+        // Comment this out & return null if you don't want sizes added to library panels.
+        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredList);
+        filteredList.addListEventListener(listener);
+        addDisposable(listener);
+    }
+    
+    /**
+     * Hide any category that has no files in it.
+     */
+    private class ButtonSizeListener<T> implements Disposable, ListEventListener<T>, SettingListener {
+        private final Category category;
+        private final Action action;
+        private final FilterList<T> list;
+        
+        private ButtonSizeListener(Category category, Action action, FilterList<T> list) {
+            this.category = category;
+            this.action = action;
+            this.list = list;
+            action.putValue(Action.NAME, I18n.tr(category.toString()));
+            setText();
+            if(category == Category.PROGRAM) {
+                LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
+            }
+            
+            sharingMatchingEditor.addMatcherEditorListener(new MatcherEditor.Listener<LocalFileItem>(){
+                @Override
+                public void changedMatcher(Event<LocalFileItem> matcherEvent) {
+                    setText();
+                }
+            });
+        }
+
+        private void setText() {
+            if(sharingMatchingEditor.getCurrentFilter() == null) {
+                //disable other category if size is 0
+                if(category == Category.OTHER) {
+                    action.setEnabled(list.size() > 0);
+                } else if(category == Category.PROGRAM) { // hide program category is not enabled
+                    action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
+                } else {
+                    action.setEnabled(true);
+                }
+            } else {
+                if(category == Category.PROGRAM) { // hide program category is not enabled
+                    action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
+                }
+                //disable any category if size is 0
+                action.setEnabled(list.size() > 0);
+            }
+        }
+        
+        @Override
+        public void dispose() {
+            list.removeListEventListener(this);
+            if(category == Category.PROGRAM) {
+                LibrarySettings.ALLOW_PROGRAMS.removeSettingListener(this);
+            }
+        }
+
+        @Override
+        public void listChanged(ListEvent<T> listChanges) {
+            setText();
+        }
+
+        @Override
+        public void settingChanged(SettingEvent evt) {
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    setText();                    
+                }
+            });
+        }
+    }    
 }
