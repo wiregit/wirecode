@@ -2,6 +2,7 @@ package org.limewire.core.impl.download;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -9,11 +10,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.download.listener.ItunesDownloadListener;
 import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
+import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.EventListener;
@@ -26,6 +29,7 @@ import ca.odell.glazedlists.EventList;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -590,6 +594,63 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         downloadItemResult = coreDownloadListManager.addTorrentDownload(file, true);
+        assertEquals(downloadItem, downloadItemResult);
+
+        context.assertIsSatisfied();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void testAddRemoteFileItemDownload() throws Exception {
+        Mockery context = new Mockery() {
+            {
+                setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+
+        final DownloadManager downloadManager = context.mock(DownloadManager.class);
+        final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
+        final RemoteFileDescFactory remoteFileDescFactory = context
+                .mock(RemoteFileDescFactory.class);
+        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
+        final SpamManager spamManager = context.mock(SpamManager.class);
+        final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
+                .mock(ItunesDownloadListenerFactory.class);
+
+        context.checking(new Expectations() {
+            {
+                one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
+            }
+        });
+
+        CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
+                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
+                itunesDownloadListenerFactory);
+        coreDownloadListManager.register(listenerList);
+
+        final DownloadItem downloadItem = context.mock(DownloadItem.class);
+        final Downloader downloader = context.mock(Downloader.class);
+
+        final CoreRemoteFileItem remoteFileItem = context.mock(CoreRemoteFileItem.class);
+
+        final RemoteFileDesc remoteFileDesc = context.mock(RemoteFileDesc.class);
+        final RemoteFileDesc[] remoteFileDescs = new RemoteFileDesc[]{remoteFileDesc};
+        final Category category = Category.AUDIO;
+         
+        // overwrite false saveFile null
+        context.checking(new Expectations() {
+            {
+                one(downloadManager).download(remoteFileDescs, Collections.EMPTY_LIST, null, false, null, null);
+                will(returnValue(downloader));
+                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
+                will(returnValue(downloadItem));
+                one(remoteFileItem).getCategory();
+                will(returnValue(category));
+                one(remoteFileItem).getRfd();
+                will(returnValue(remoteFileDesc));
+            }
+        });
+
+        DownloadItem downloadItemResult = coreDownloadListManager.addDownload(remoteFileItem);
         assertEquals(downloadItem, downloadItemResult);
 
         context.assertIsSatisfied();
