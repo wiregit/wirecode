@@ -26,6 +26,7 @@ import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.settings.PromotionSettings;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.io.Address;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.promotion.PromotionSearcher;
@@ -382,5 +383,37 @@ public class CoreSearchTest extends BaseTestCase {
         public SearchType getSearchType() {
             return searchType;
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void testStop() {
+        Mockery context = new Mockery();
+        
+        final byte[] guid = new byte[] {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+        
+        final EventBroadcaster<SearchEvent> searchEventBroadcaster = context.mock(EventBroadcaster.class);
+        final QueryReplyListenerList listenerList = context.mock(QueryReplyListenerList.class);
+        final SearchServices searchServices = context.mock(SearchServices.class);
+        final SearchListener listener = context.mock(SearchListener.class);
+        
+        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, searchEventBroadcaster);
+        
+        context.checking(new Expectations() {
+            {
+                exactly(1).of(searchEventBroadcaster).broadcast(with(any(SearchEvent.class)));
+                exactly(1).of(listenerList).removeQueryReplyListener(with(same(guid)),
+                        with(any(QueryReplyListener.class)));
+                exactly(1).of(searchServices).stopQuery(new GUID(guid));
+                exactly(1).of(listener).searchStopped(search);
+            }});
+            
+        search.stop();
+
+        search.searchGuid = guid;
+        search.processingStarted.set(true);
+        search.addSearchListener(listener);
+        search.stop();
+        
+        context.assertIsSatisfied();
     }
 }

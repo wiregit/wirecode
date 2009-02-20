@@ -51,7 +51,7 @@ public class CoreSearch implements Search {
      * -cannot start a search that has already been processed
      * -stopping a search only stops searches that have already been processed.
      */
-    private final AtomicBoolean processingStarted = new AtomicBoolean(false);
+    final AtomicBoolean processingStarted = new AtomicBoolean(false);
 
     private final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
     private final QrListener qrListener = new QrListener();
@@ -59,7 +59,7 @@ public class CoreSearch implements Search {
     private final ScheduledExecutorService backgroundExecutor;
     private final EventBroadcaster<SearchEvent> searchEventBroadcaster;
     
-    private volatile byte[] searchGuid;
+    volatile byte[] searchGuid;
 
     @AssistedInject
     public CoreSearch(@Assisted SearchDetails searchDetails,
@@ -183,7 +183,7 @@ public class CoreSearch implements Search {
     /**
      * Strips "http://" and anything after ".com" (or .whatever) from the url
      */
-    private String stripURL(String url){
+    private static String stripURL(String url){
         int dotIndex = url.indexOf('.');
         int endIndex = url.indexOf('/', dotIndex);
         endIndex = endIndex == -1 ? url.length() :  endIndex;
