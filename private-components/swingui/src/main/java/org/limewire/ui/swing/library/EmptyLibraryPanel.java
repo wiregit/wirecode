@@ -97,6 +97,10 @@ public class EmptyLibraryPanel extends LibraryPanel {
     @Override
     protected void addMainPanels() {
     }
+    
+    @Override
+    protected void addNavPanel() {
+    }
 
     private class ViewSharedLibraryAction extends AbstractAction {
 

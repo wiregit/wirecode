@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Arrays;
 import java.util.Collections;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -35,6 +36,9 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
+/**
+ * Inner Navigator in a given LibraryPanel.
+ */
 class LibrarySelectionPanel extends JPanel implements Disposable {
     
     @Resource private Color backgroundColor;
@@ -85,6 +89,11 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         super.setLayout(layout);
         add(selectionGrow, "dock south, aligny baseline, growy");
     }
+
+    public void addComponent(JComponent component, String params) {
+        add(component, params);
+    }
+    
     
     /**
      * Adds an info panel for the specified catalog and its file list. 

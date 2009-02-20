@@ -1,21 +1,21 @@
 package org.limewire.ui.swing.library;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TooManyListenersException;
@@ -26,12 +26,17 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -45,18 +50,21 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.core.settings.LibrarySettings;
+import org.limewire.core.impl.library.FriendLibraries;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.MessageComponent;
+import org.limewire.ui.swing.components.SharingFilterComboBox;
+import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
@@ -66,6 +74,7 @@ import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
+import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
@@ -75,6 +84,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -86,6 +96,9 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.impl.ThreadSafeList;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
@@ -107,9 +120,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private final LibraryNavigator libraryNavigator;
     private final Map<Category, LibraryOperable<LocalFileItem>> selectableMap;
     private final ShareWidgetFactory shareFactory;    
+    
+//    private final ThreadSafeList<SharingTarget> allFriendsThreadSafe;
    
-    private ShareWidget<Category> categoryShareWidget = null;
-    private ShareWidget<LocalFileItem[]> multiShareWidget = null;
+//    private ShareWidget<Category> categoryShareWidget = null;
+//    private ShareWidget<LocalFileItem[]> multiShareWidget = null;
     
     /** Map of JXLayers and categories they exist in */
     private Map<Category, JXLayer> map = new HashMap<Category, JXLayer>();
@@ -122,6 +137,17 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
      * set of known friends helps keep correct share numbers
      */
     private final Set<String> knownFriends = new HashSet<String>();
+    
+//    private ShareListManager shareListManager;
+    
+    private SharingFilterComboBox sharingComboBox;
+    private final SharingMatchingEditor sharingMatchingEditor;
+    
+    private MessagePanel messagePanel;
+//    private LimeComboBox filterComboBox;
+//    private JPopupMenu comboBoxMenu;
+//    private FriendFilter friendFilter;
+//    private FriendMatcher friendMatcher;
 
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
@@ -135,7 +161,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                           GhostDragGlassPane ghostPane,
                           ListenerSupport<XMPPConnectionEvent> connectionListeners,
                           ShareListManager shareListManager,
-                          TextFieldDecorator textFieldDecorator) {
+                          TextFieldDecorator textFieldDecorator,
+                          ComboBoxDecorator comboDecorator) {
         
         super(headerBarFactory, textFieldDecorator);
         
@@ -149,16 +176,69 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         this.playerPanel = player;
         this.selectableMap = new EnumMap<Category, LibraryOperable<LocalFileItem>>(Category.class);
         this.connectionListeners = connectionListeners;
+//        this.shareListManager = shareListManager;
+        
+//        allFriendsThreadSafe = GlazedListsFactory.threadSafeList(new BasicEventList<SharingTarget>());
+//        allFriendsThreadSafe.add(SharingTarget.GNUTELLA_SHARE);
         
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
 
-        getHeaderPanel().setText(I18n.tr("My Library"));
+        sharingMatchingEditor = new SharingMatchingEditor();
+        sharingComboBox = new SharingFilterComboBox(sharingMatchingEditor, shareListManager);
+        sharingComboBox.setMaximumSize(new Dimension(100, 30));
+        sharingComboBox.setPreferredSize(sharingComboBox.getMaximumSize());
+//        filterComboBox = new LimeComboBox();
+        comboDecorator.decorateLightFullComboBox(sharingComboBox);
+//        filterComboBox.setText("Sharing With...");
+        getSelectionPanel().add(sharingComboBox, "gaptop 5, gapbottom 5, alignx 50%");
         
-        categoryShareWidget = shareFactory.createCategoryShareWidget();
-        multiShareWidget = shareFactory.createMultiFileShareWidget();
-        createMyCategories(libraryManager.getLibraryManagedList());
+        sharingComboBox.addSelectionListener(new SelectionListener(){
+            @Override
+            public void selectionChanged(Action item) {
+                messagePanel.setMessage(item.toString());
+                messagePanel.setVisible(true);
+            }
+        });
+        
+//        comboBoxMenu = new JPopupMenu();
+//        filterComboBox.overrideMenu(comboBoxMenu);
+//        comboBoxMenu.addPopupMenuListener(new PopupMenuListener() {
+//            @Override
+//            public void popupMenuCanceled(PopupMenuEvent e) {
+////                if(!poppedUpPeople.equals(people)) {
+//                    filterComboBox.setClickForcesVisible(true);
+////                }
+//            }
+//            
+//            @Override
+//            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+////                if(!poppedUpPeople.equals(people)) {
+//                filterComboBox.setClickForcesVisible(true);
+////                }
+//            }
+//            
+//            @Override
+//            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+//                filterComboBox.setClickForcesVisible(false);
+////                poppedUpPeople = people;
+//                updateMenus();
+//            }
+//        });
+        
+//        getHeaderPanel().setText(I18n.tr("My Library"));
+        
+//        categoryShareWidget = shareFactory.createCategoryShareWidget();
+//        multiShareWidget = shareFactory.createMultiFileShareWidget();
+//        createMyCategories(libraryManager.getLibraryManagedList());
+        
+//        friendFilter = new FriendFilter();
+//        friendMatcher = new FriendMatcher();
+//        friendMatcher.setFriendList(shareListManager.getGnutellaShareList().getSwingModel());
+        FilterList<LocalFileItem> friendFilterList = GlazedListsFactory.filterList(libraryManager.getLibraryManagedList().getSwingModel(), 
+                sharingMatchingEditor);
+        createMyCategories(friendFilterList);
         createMyPlaylists();
         selectFirstVisible();
 
@@ -196,7 +276,48 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             }
         });
     }
-
+    
+//    /**
+//     * Applies a universal filter to the main eventList. 
+//     */
+//    public void setFriendFilter(Friend friend) {
+//        if(friend.getId().equals(Friend.P2P_FRIEND_ID))
+//            friendFilter.setFriendList(shareListManager.getGnutellaShareList().getSwingModel());
+//        else
+//            friendFilter.setFriendList(shareListManager.getFriendShareList(friend).getSwingModel());
+//    }
+//    
+//    private class MenuAction extends AbstractAction {
+//        private final Friend friend;
+//        
+//        public MenuAction(Friend friend) {
+//            this.friend = friend;
+//            putValue(Action.NAME, friend.getRenderName());
+//        }
+//        
+//        @Override
+//        public void actionPerformed(ActionEvent e) {
+//            setFriendFilter(friend);
+//        }
+//    }
+//    
+//    private void updateMenus() {      
+//        comboBoxMenu.removeAll();  
+//        
+//        JLabel label = new JLabel(tr("Sharing With"));
+//        label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
+//        comboBoxMenu.add(label);
+//        
+//        for(SharingTarget target : allFriendsThreadSafe) {
+//            JMenuItem submenu = new JMenuItem(new MenuAction(target.getFriend()));
+//            filterComboBox.decorateMenuComponent(submenu);
+//            submenu.setBorder(BorderFactory.createEmptyBorder(0,5,0,0));
+//            
+//            comboBoxMenu.add(submenu);
+//        }
+//        
+//    }
+    
     @Inject
     public void register(@Named("known") ListenerSupport<FriendEvent> knownFriendsListeners) {
         this.knownFriendsListeners = knownFriendsListeners;
@@ -210,9 +331,13 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
         switch (event.getType()) {
             case ADDED:
+                sharingComboBox.addFriend(event.getSource());
+//                allFriendsThreadSafe.add(new SharingTarget(event.getSource()));
                 knownFriends.add(friend.getId());
                 break;
             case REMOVED:
+                sharingComboBox.removeFriend(event.getSource());
+//                allFriendsThreadSafe.remove(new SharingTarget(event.getSource()));
             case DELETE:
                 knownFriends.remove(friend.getId());
                 break;
@@ -222,7 +347,24 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         getSelectionPanel().updateCollectionShares(knownFriends);
     }
     
-    private void createMyCategories(LibraryFileList libraryFileList) {
+    @Override
+    protected void layoutComponent() {
+        setLayout(new MigLayout("fill, gap 0, insets 0"));
+
+        addHeaderPanel();
+        addMessage();
+        addNavPanel();
+        addMainPanels();
+    }
+    
+    private void addMessage() {
+        messagePanel = new MessagePanel();
+        
+        add(messagePanel, "dock north, growx, hidemode 3");  
+    }
+    
+    private void createMyCategories(EventList<LocalFileItem> sourceList) {
+//    private void createMyCategories(LibraryFileList libraryFileList) {
         // Display heading.
         addHeading(new HeadingPanel(I18n.tr("CATEGORIES")), false);
         
@@ -237,7 +379,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 };
             }
             
-            FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(libraryFileList.getSwingModel(), new CategoryFilter(category));
+            FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(sourceList//libraryFileList.getSwingModel()
+                    , new CategoryFilter(category));
             addCategory(categoryIconManager.getIcon(category), category, 
                     createMyCategoryAction(category, filtered), filtered, callback);
             addDisposable(filtered);
@@ -302,12 +445,13 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         return scrollPane;
     }
     
-    @Override
-    protected <T extends FileItem> JComponent createCategoryButton(Action action, Category category, FilterList<T> filteredAllFileList) {
-        MySelectionPanel component = new MySelectionPanel(action, new ShareCategoryAction(category), category, this);
-        addNavigation(component.getButton());
-        return component;
-    }
+//    @Override
+//    protected <T extends FileItem> JComponent createCategoryButton(Action action, Category category, FilterList<T> filteredAllFileList) {
+//        MySelectionPanel component = new MySelectionPanel(action, //new ShareCategoryAction(category), 
+//                category, this);
+//        addNavigation(component.getButton());
+//        return component;
+//    }
     
     /**
      * Adds the playlists to the container. 
@@ -374,8 +518,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     public void dispose() {
         super.dispose();
         
-        categoryShareWidget.dispose();
-        multiShareWidget.dispose();
+//        categoryShareWidget.dispose();
+//        multiShareWidget.dispose();
         knownFriendsListeners.removeListener(this);
     }
     
@@ -406,121 +550,122 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         }
     }
     
-    /**
-     * Display the Share Collection widget when pressed
-     */
-    private class ShareCategoryAction extends AbstractAction {
-
-        private Category category;
-        
-        public ShareCategoryAction(Category category) {
-            this.category = category;
-            
-            putValue(Action.NAME, I18n.tr("share"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share collection"));
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
-                SelectAllable<LocalFileItem> selectAllable = selectableMap.get(category);
-                selectAllable.selectAll();
-                List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();
-
-                if (selectedItems.size() > 0) {
-                    multiShareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
-                    multiShareWidget.show(null);
-                } else {
-                   JPopupMenu popup = new JPopupMenu();
-                   popup.add(new JLabel(I18n.tr("Add files to My Library from Tools > Options to share them")));
-                   
-                   Point mousePoint = getMousePosition(true);
-                   if(mousePoint != null) {
-                       //move popup 15 pixels to the right so the mouse doesn't obscure the first word
-                       popup.show(MyLibraryPanel.this, mousePoint.x + 15, mousePoint.y);
-                   }
-                }
-            } else {
-                categoryShareWidget.setShareable(category);
-                categoryShareWidget.show((JComponent)e.getSource());
-            }
-        }
-    }
-    
-    //TODO: use a button painter and JXButton
-    private static class MySelectionPanel extends JPanel {
-        @Resource Color selectedBackground;
-        @Resource Color selectedTextColor;
-        @Resource Color textColor;
-        @Resource Font shareButtonFont;
-        
-        private JButton button;
-        private HyperlinkButton shareButton;
-        private LibraryPanel libraryPanel;
-        
-        public MySelectionPanel(Action action, Action shareAction, Category category, LibraryPanel panel) {
-            super(new MigLayout("insets 0, fill, hidemode 3"));
-
-            this.libraryPanel = panel;
-            
-            GuiUtils.assignResources(this);
-            setOpaque(false);
-
-            button = new JButton(action);           
-            button.setContentAreaFilled(false);
-            button.setBorderPainted(false);
-            button.setFocusPainted(false);
-            button.setBorder(BorderFactory.createEmptyBorder(2,8,2,0));
-            button.setHorizontalAlignment(SwingConstants.LEFT);
-            button.setOpaque(false);
-            button.getAction().addPropertyChangeListener(new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
-                        if(Boolean.TRUE.equals(evt.getNewValue())) {
-                            setOpaque(true);
-                            setBackground(selectedBackground);
-                            button.setForeground(selectedTextColor);
-                            if(shareButton != null) {
-                                shareButton.setVisible(true);
-                            }
-                        } else {
-                            setOpaque(false);
-                            button.setForeground(textColor);
-                            if(shareButton != null) {
-                                shareButton.setVisible(false);
-                            }
-                        }
-                        repaint();
-                    } else if(evt.getPropertyName().equals("enabled")) {
-                        boolean value = (Boolean)evt.getNewValue();
-                        setVisible(value);
-                        //select first category if this category is hidden
-                        if(value == false && button.getAction().getValue(Action.SELECTED_KEY) != null && 
-                                button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
-                            libraryPanel.selectFirstVisible();
-                        }
-                    }
-                }
-                    
-            });
-            
-            add(button, "growx, push");
-            
-            // only add a share category button if its an audio/video/image category
-            if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
-                shareButton = new HyperlinkButton(shareAction);
-                shareButton.setBorder(BorderFactory.createEmptyBorder(2,0,2,4));
-                shareButton.setVisible(false);
-                shareButton.setFont(shareButtonFont);
-                add(shareButton, "wrap");
-            }
-        }
-        
-        public JButton getButton() {
-            return button;
-        }
-    }
+//    /**
+//     * Display the Share Collection widget when pressed
+//     */
+//    private class ShareCategoryAction extends AbstractAction {
+//
+//        private Category category;
+//        
+//        public ShareCategoryAction(Category category) {
+//            this.category = category;
+//            
+//            putValue(Action.NAME, I18n.tr("share"));
+//            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share collection"));
+//        }
+//        
+//        @Override
+//        public void actionPerformed(ActionEvent e) {
+//            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
+//                SelectAllable<LocalFileItem> selectAllable = selectableMap.get(category);
+//                selectAllable.selectAll();
+//                List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();
+//
+//                if (selectedItems.size() > 0) {
+//                    multiShareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+//                    multiShareWidget.show(null);
+//                } else {
+//                   JPopupMenu popup = new JPopupMenu();
+//                   popup.add(new JLabel(I18n.tr("Add files to My Library from Tools > Options to share them")));
+//                   
+//                   Point mousePoint = getMousePosition(true);
+//                   if(mousePoint != null) {
+//                       //move popup 15 pixels to the right so the mouse doesn't obscure the first word
+//                       popup.show(MyLibraryPanel.this, mousePoint.x + 15, mousePoint.y);
+//                   }
+//                }
+//            } else {
+//                categoryShareWidget.setShareable(category);
+//                categoryShareWidget.show((JComponent)e.getSource());
+//            }
+//        }
+//    }
+//    
+//    //TODO: use a button painter and JXButton
+//    private static class MySelectionPanel extends JPanel {
+//        @Resource Color selectedBackground;
+//        @Resource Color selectedTextColor;
+//        @Resource Color textColor;
+//        @Resource Font shareButtonFont;
+//        
+//        private JButton button;
+////        private HyperlinkButton shareButton;
+//        private LibraryPanel libraryPanel;
+//        
+//        public MySelectionPanel(Action action, //Action shareAction, 
+//                Category category, LibraryPanel panel) {
+//            super(new MigLayout("insets 0, fill, hidemode 3"));
+//
+//            this.libraryPanel = panel;
+//            
+//            GuiUtils.assignResources(this);
+//            setOpaque(false);
+//
+//            button = new JButton(action);           
+//            button.setContentAreaFilled(false);
+//            button.setBorderPainted(false);
+//            button.setFocusPainted(false);
+//            button.setBorder(BorderFactory.createEmptyBorder(2,8,2,0));
+//            button.setHorizontalAlignment(SwingConstants.LEFT);
+//            button.setOpaque(false);
+//            button.getAction().addPropertyChangeListener(new PropertyChangeListener() {
+//                @Override
+//                public void propertyChange(PropertyChangeEvent evt) {
+//                    if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+//                        if(Boolean.TRUE.equals(evt.getNewValue())) {
+//                            setOpaque(true);
+//                            setBackground(selectedBackground);
+//                            button.setForeground(selectedTextColor);
+////                            if(shareButton != null) {
+////                                shareButton.setVisible(true);
+////                            }
+//                        } else {
+//                            setOpaque(false);
+//                            button.setForeground(textColor);
+////                            if(shareButton != null) {
+////                                shareButton.setVisible(false);
+////                            }
+//                        }
+//                        repaint();
+//                    } else if(evt.getPropertyName().equals("enabled")) {
+//                        boolean value = (Boolean)evt.getNewValue();
+//                        setVisible(value);
+//                        //select first category if this category is hidden
+//                        if(value == false && button.getAction().getValue(Action.SELECTED_KEY) != null && 
+//                                button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
+//                            libraryPanel.selectFirstVisible();
+//                        }
+//                    }
+//                }
+//                    
+//            });
+//            
+//            add(button, "growx, push");
+////            
+////            // only add a share category button if its an audio/video/image category
+////            if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
+////                shareButton = new HyperlinkButton(shareAction);
+////                shareButton.setBorder(BorderFactory.createEmptyBorder(2,0,2,4));
+////                shareButton.setVisible(false);
+////                shareButton.setFont(shareButtonFont);
+////                add(shareButton, "wrap");
+////            }
+//        }
+//        
+//        public JButton getButton() {
+//            return button;
+//        }
+//    }
 
     public LibraryFileList getLibrary() {
         return libraryManager.getLibraryManagedList();
@@ -648,6 +793,81 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             label.setText(text);
             
             add(label, "growx, push");
+        }
+    }
+    
+//    private class FriendMatcher implements Matcher<LocalFileItem> {
+//
+//        private EventList<LocalFileItem> friendList;
+//        
+//        public void setFriendList(EventList<LocalFileItem> friendList) {
+//            this.friendList = friendList;
+//        }
+//        
+//        @Override
+//        public boolean matches(LocalFileItem item) {
+//            if(friendList == null)
+//                return true;
+//            else 
+//                return friendList.contains(item);
+//        }
+//    }
+//    
+//    
+//    private class FriendFilter extends AbstractMatcherEditor<LocalFileItem> implements ListEventListener<LocalFileItem> {
+//
+//        private EventList<LocalFileItem> friendList;
+//        private FriendMatcher matcher = new FriendMatcher();
+//        
+//        public void setFriendList(EventList<LocalFileItem> friendList) {
+//            if(this.friendList != null)
+//                this.friendList.removeListEventListener(this);
+//            this.friendList = friendList;
+//            if(friendList != null)
+//                this.friendList.addListEventListener(this);
+//            
+//            matcher.setFriendList(friendList);
+//            
+//            if(friendList == null)
+//                fireMatchAll();
+//            else
+//                fireChanged(matcher);
+//            
+//        }
+//
+//        @Override
+//        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+//            
+//        }       
+//    }
+    
+    private class MessagePanel extends JPanel {
+        private final JLabel sharingLabel;
+        private final JButton showAllButton;
+        
+        public MessagePanel() {            
+            setLayout(new MigLayout("fill, gap 0, insets 0"));
+            setBackground(Color.GREEN);
+            
+            sharingLabel = new JLabel();
+            
+            showAllButton = new JButton(I18n.tr("Show All Files"));
+            showAllButton.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    sharingMatchingEditor.setFriendList(null);
+                    MessagePanel.this.setVisible(false);
+                }
+            });
+            
+            add(sharingLabel, "push");
+            add(showAllButton, "alignx right");
+            
+            setVisible(false);
+        }
+        
+        public void setMessage(String friendRenderName) {
+            sharingLabel.setText(I18n.tr("What I'm Sharing With {0}", friendRenderName));
         }
     }
 }

@@ -59,7 +59,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         });
         shareLabel.setOpaque(false);
         shareLabel.setName("FriendsSignIn.ShareLabel");
-        add(shareLabel, "alignx center, gaptop 3");
+        add(shareLabel, "alignx center, gaptop 3, gapbottom 6");
         add(loginPanel, "growx, gaptop 4");
         add(loggedInPanel, "growx, gaptop 4");
         

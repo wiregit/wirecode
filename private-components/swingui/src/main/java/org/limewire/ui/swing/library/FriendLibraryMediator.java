@@ -39,7 +39,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     
     private final EmptyLibraryFactory emptyFactory;
     private final FriendLibraryFactory factory;
-    private final FriendSharingPanelFactory sharingFactory;
+//    private final FriendSharingPanelFactory sharingFactory;
     private final LibraryManager libraryManager;
     private final ShareListManager shareListManager;
     private final ChatFriendListPane friendsPane;
@@ -55,12 +55,13 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 
     @AssistedInject
     public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
-            FriendSharingPanelFactory sharingFactory, LibraryManager libraryManager, ShareListManager shareListManager,
+//            FriendSharingPanelFactory sharingFactory, 
+            LibraryManager libraryManager, ShareListManager shareListManager,
             @Named("available") ListenerSupport<FriendEvent> availListeners, 
             ChatFriendListPane friendsPane, ChatFramePanel friendsPanel) {
         this.factory = factory;
         this.friend = friend;        
-        this.sharingFactory = sharingFactory;
+//        this.sharingFactory = sharingFactory;
         this.emptyFactory = emptyFactory;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -423,9 +424,9 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     public void showSharingCard() {
         if(!disposed) {
             if(!isSharingCardSet()) {
-                setSharingCard(sharingFactory.createPanel(this, friend, 
-                        libraryManager.getLibraryManagedList().getSwingModel(),
-                        shareListManager.getOrCreateFriendShareList(friend)));
+//                setSharingCard(sharingFactory.createPanel(this, friend, 
+//                        libraryManager.getLibraryManagedList().getSwingModel(),
+//                        shareListManager.getOrCreateFriendShareList(friend)));
             }
             super.showSharingCard();            
         }

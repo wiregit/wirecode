@@ -76,18 +76,23 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     private PromptTextField filterField;        
     
     public AbstractFileListPanel(HeaderBarDecorator headerBarFactory, TextFieldDecorator textFieldDecorator) {        
-        setLayout(new MigLayout("fill, gap 0, insets 0", "[][][grow]", "[][grow]"));
-
         cardPanel.setLayout(cardLayout);              
         filterField = createFilterField(textFieldDecorator, I18n.tr("Search Library..."));
         headerPanel = createHeaderBar(headerBarFactory);
         headerPanel.setLayout(new MigLayout("insets 0, gap 0, fill, alignx right"));
         headerPanel.add(filterField, "gapbefore push, cell 1 0, gapafter 10");
-        
-        add(headerPanel, "span, grow, wrap");
-        addMainPanels();
+               
+        layoutComponent();
         
         addDisposable(selectionPanel);
+    }
+    
+    protected void layoutComponent() {
+        setLayout(new MigLayout("fill, gap 0, insets 0"));
+        
+        addHeaderPanel();
+        addNavPanel();
+        addMainPanels();
     }
     
     // TODO: This should not be necessary
@@ -107,10 +112,17 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         return selectionPanel;
     }
     
-    protected void addMainPanels() {
-        add(selectionPanel, "growy");
+    protected void addHeaderPanel() {
+        add(headerPanel, "dock north, growx");       
+    }
+    
+    protected void addNavPanel() {
+        add(selectionPanel, "dock west");
         // TODO: move to properties -- funky because this class gets subclassed.
-        add(Line.createVerticalLine(Color.decode("#696969")), "growy, width 1!");
+        add(Line.createVerticalLine(Color.decode("#696969")), "dock west, width 1!");        
+    }
+    
+    protected void addMainPanels() {
         add(cardPanel, "grow");
     }
     
@@ -491,7 +503,6 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     private static class SelectionPanel extends JPanel {
         @Resource Color selectedBackground;
-        @Resource Font selectedTextFont;
         @Resource Color selectedTextColor;
         @Resource Font textFont;
         @Resource Color textColor;
@@ -500,24 +511,20 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         private AbstractFileListPanel libraryPanel;
         
         public SelectionPanel(Action action, AbstractFileListPanel library) {
-            super(new BorderLayout());
+            super(new MigLayout("insets 0, fill, hidemode 3"));
 
             this.libraryPanel = library;
             
             GuiUtils.assignResources(this);
+            setOpaque(false);
             
-            button = new JButton(action);
-            
-            add(button, BorderLayout.CENTER);
-            
+            button = new JButton(action);           
             button.setContentAreaFilled(false);
             button.setBorderPainted(false);
             button.setFocusPainted(false);
             button.setBorder(BorderFactory.createEmptyBorder(2,8,2,8));
             button.setHorizontalAlignment(SwingConstants.LEFT);
-            
-            setOpaque(false);
-
+            button.setOpaque(false);
             button.getAction().addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
@@ -542,6 +549,8 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
                     }
                 }
             });
+            
+            add(button, "growx, push");
         }        
         
         public JButton getButton() {

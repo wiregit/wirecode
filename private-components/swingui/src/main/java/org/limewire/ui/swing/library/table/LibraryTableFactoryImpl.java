@@ -19,7 +19,6 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
@@ -28,15 +27,12 @@ import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
-import org.limewire.ui.swing.dnd.SharingLibraryTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
-import org.limewire.ui.swing.library.sharing.SharingCheckBoxRendererEditor;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
-import org.limewire.ui.swing.library.table.menu.ShareLibraryPopupHandler;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidgetFactory;
 import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
@@ -176,14 +172,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         } catch (TooManyListenersException ingoreException) {
         }
         return imagePanel;
-    }
-    
-    @Override
-    public LibraryImagePanel createSharingImagePanel(EventList<LocalFileItem> eventList,
-            JScrollPane scrollPane, LocalFileList currentFriendList) {
-        return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), eventList,
-                libraryManager.getLibraryManagedList(), scrollPane,
-                subPanelFactory, null, currentFriendList);
     }
 
     /**
@@ -359,69 +347,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         return libTable;
 
     }    
-
-    /**
-     * Creates a table for sharing files from your library with a friend.
-     */
-    @Override
-    public <T extends LocalFileItem> LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, LocalFileList friendFileList, Friend friend) {
-        final LibraryTable<T> libTable;
-        SortedList<T> sortedList = new SortedList<T>(eventList);
-        
-        switch (category) {
-        case AUDIO:
-            libTable = new SharedAudioLibraryTable<T>(sortedList, new SharedAudioTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedAudioTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedAudioTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            break;
-        case VIDEO:
-            libTable = new LibraryTable<T>(sortedList, new SharedVideoTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.LENGTH_INDEX).setCellRenderer(timeRenderer);
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.NAME_INDEX).setCellRenderer(nameRenderer);
-            break;
-        case DOCUMENT:
-            libTable = new LibraryTable<T>(sortedList, new SharedDocumentTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedDocumentTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
-            libTable.getColumnModel().getColumn(SharedDocumentTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
-            libTable.getColumnModel().getColumn(SharedDocumentTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedDocumentTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            break;
-        case OTHER:
-            libTable = new LibraryTable<T>(sortedList, new SharedOtherTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedOtherTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
-            libTable.getColumnModel().getColumn(SharedOtherTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
-            libTable.getColumnModel().getColumn(SharedOtherTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedOtherTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            break;
-        case PROGRAM:
-            libTable = new LibraryTable<T>(sortedList, new SharedProgramTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedProgramTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
-            libTable.getColumnModel().getColumn(SharedProgramTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
-            libTable.getColumnModel().getColumn(SharedProgramTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedProgramTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown category: " + category);
-        }
-        
-        libTable.setPopupHandler(new ShareLibraryPopupHandler(friendFileList, castToLocalLibraryTable(libTable), category, libraryManager, 
-                    magnetLinkFactory, localItemPropFactory));
-        
-
-        libTable.setTransferHandler(new SharingLibraryTransferHandler(libTable, friendFileList));
-        try {
-            libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable,ghostPane, friend));
-        } catch (TooManyListenersException ignoreException) {            
-        } 
-        
-        EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());
-        libTable.setDropMode(DropMode.ON);
-        
-        return libTable;
-    }
 
     @SuppressWarnings( { "unchecked", "cast" })
     private LibraryTable<RemoteFileItem> castToRemoteLibraryTable(LibraryTable table) {
