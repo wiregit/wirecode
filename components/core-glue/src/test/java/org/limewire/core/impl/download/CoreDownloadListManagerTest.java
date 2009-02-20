@@ -1,5 +1,6 @@
 package org.limewire.core.impl.download;
 
+import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -12,6 +13,7 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.download.listener.ItunesDownloadListener;
 import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
+import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssignParameterAction;
@@ -24,6 +26,7 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 public class CoreDownloadListManagerTest extends BaseTestCase {
@@ -64,18 +67,20 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory,
-                activityCallback, spamManager, itunesDownloadListenerFactory);
-        
-        final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
+                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
+                itunesDownloadListenerFactory);
+
+        final ScheduledExecutorService backgroundExecutor = context
+                .mock(ScheduledExecutorService.class);
         final ServiceScheduler scheduler = context.mock(ServiceScheduler.class);
         context.checking(new Expectations() {
             {
-                one(scheduler).scheduleAtFixedRate(with(any(String.class)), with(any(Runnable.class)), with(any(long.class)),
-                        with(any(long.class)), with(any(TimeUnit.class)), with(same(backgroundExecutor)));
+                one(scheduler).scheduleAtFixedRate(with(any(String.class)),
+                        with(any(Runnable.class)), with(any(long.class)), with(any(long.class)),
+                        with(any(TimeUnit.class)), with(same(backgroundExecutor)));
             }
-        });        
-        
+        });
+
         coreDownloadListManager.register(listenerList);
         coreDownloadListManager.register(scheduler, backgroundExecutor);
 
@@ -234,9 +239,9 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory,
-                activityCallback, spamManager, itunesDownloadListenerFactory);
-        
+                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
+                itunesDownloadListenerFactory);
+
         coreDownloadListManager.register(listenerList);
 
         final Downloader unfinishedItem1 = context.mock(Downloader.class);
@@ -342,11 +347,11 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory,
-                activityCallback, spamManager, itunesDownloadListenerFactory);
+                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
+                itunesDownloadListenerFactory);
 
         coreDownloadListManager.register(listenerList);
-        
+
         TestPropertyChangeListener listener = new TestPropertyChangeListener();
         coreDownloadListManager.addPropertyChangeListener(listener);
         coreDownloadListManager.updateDownloadsCompleted();
@@ -371,6 +376,94 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         assertEquals(0, listener.getEventCount());
         assertNull(listener.getLatestEvent());
+
+        context.assertIsSatisfied();
+    }
+
+    public void testAddMagnetDownload() throws Exception {
+        Mockery context = new Mockery() {
+            {
+                setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+
+        final DownloadManager downloadManager = context.mock(DownloadManager.class);
+        final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
+        final RemoteFileDescFactory remoteFileDescFactory = context
+                .mock(RemoteFileDescFactory.class);
+        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
+        final SpamManager spamManager = context.mock(SpamManager.class);
+        final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
+                .mock(ItunesDownloadListenerFactory.class);
+
+        context.checking(new Expectations() {
+            {
+                one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
+            }
+        });
+
+        CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
+                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
+                itunesDownloadListenerFactory);
+        coreDownloadListManager.register(listenerList);
+
+        final MagnetLinkImpl magnetLink = context.mock(MagnetLinkImpl.class);
+        final MagnetOptions magnetOptions = context.mock(MagnetOptions.class);
+        final DownloadItem downloadItem = context.mock(DownloadItem.class);
+        final Downloader downloader = context.mock(Downloader.class);
+        
+        //overwrite false and null saveFile
+        context.checking(new Expectations() {
+            {
+                one(magnetLink).getMagnetOptions();
+                will(returnValue(magnetOptions));
+                one(downloadManager).download(magnetOptions, false, null, null);
+                will(returnValue(downloader));
+                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
+                will(returnValue(downloadItem));
+                
+            }
+        });
+        
+        DownloadItem downloadItemResult = coreDownloadListManager.addDownload(magnetLink, null, false);
+        assertEquals(downloadItem, downloadItemResult);
+        
+        //overwrite true and null saveFile
+        context.checking(new Expectations() {
+            {
+                one(magnetLink).getMagnetOptions();
+                will(returnValue(magnetOptions));
+                one(downloadManager).download(magnetOptions, true, null, null);
+                will(returnValue(downloader));
+                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
+                will(returnValue(downloadItem));
+                
+            }
+        });
+        
+        downloadItemResult = coreDownloadListManager.addDownload(magnetLink, null, true);
+        assertEquals(downloadItem, downloadItemResult);
+        
+        //overwrite true and nonnull saveFile
+        final String fileName = "somename.txt";
+        final File parentDir = new File("/tmp/somedir/");
+        final File saveFile = new File(parentDir, fileName);
+        
+        context.checking(new Expectations() {
+            {
+                one(magnetLink).getMagnetOptions();
+                will(returnValue(magnetOptions));
+                one(downloadManager).download(magnetOptions, true, parentDir, fileName);
+                will(returnValue(downloader));
+                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
+                will(returnValue(downloadItem));
+                
+            }
+        });
+        
+        downloadItemResult = coreDownloadListManager.addDownload(magnetLink, saveFile, true);
+        assertEquals(downloadItem, downloadItemResult);
+        
         
         context.assertIsSatisfied();
     }
