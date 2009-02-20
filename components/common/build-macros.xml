@@ -145,7 +145,7 @@
             <mkdir dir="${build.limewire.components.@{component}.lib}/default"/>
             <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
             <ivy:resolve file="${limewire.components.@{component}.home}/ivy.xml"/>
-            <ivy:retrieve pattern="${build.limewire.components.@{component}.lib}/[conf]/[type]/[artifact]-[version].[ext]"/>
+            <ivy:retrieve pattern="${build.limewire.components.@{component}.lib}/[conf]/[type]/[artifact]-[revision].[ext]"/>
         </sequential>
     </macrodef>
     
@@ -501,7 +501,7 @@
 	   classpath="${gettexttasks.jar}"/>
 	</target>
 
-    <target name="clean"/> <!-- Must write a real target for this when importing. -->
+    <!--target name="clean"/-->
     <target name="with.clover"/> <!-- Must write a real target for this when importing -->
     <target name="initialize"/> <!-- Must write a real target for this when importing -->
     <target name="test-all"/> <!-- Must write a real target for this when importing -->

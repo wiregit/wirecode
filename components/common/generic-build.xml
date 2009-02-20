@@ -2,17 +2,16 @@
 
 <project basedir="." default="compile-src">
 	<import file="build-macros.xml" />
-    <import file="../test-util/build.xml"/>
     
-    <target name="initialize" depends="lw-test-util.initialize" unless="initialized.common">
+    <target name="initialize" unless="initialized.common">
         <do.setup-properties component="${component}"/>
     </target>
 	
-	<target name="clean" depends="initialize, lw-test-util.clean-src">
+	<target name="clean" depends="initialize">
 	    <do.clean component="${component}"/>
 	</target>
     
-    <target name="compile" depends="initialize, lw-test-util.compile-src">
+    <target name="compile" depends="initialize">
     	<do.compile component="${component}"/>
     </target>
 	
@@ -24,11 +23,11 @@
 	    <do.clean-src component="${component}"/>
 	</target>
 	
-	<target name="compile-tests" depends="initialize, compile-src, lw-test-util.compile-src">
+	<target name="compile-tests" depends="initialize, compile-src">
 	    <do.compile-tests component="${component}"/>
 	</target>
     
-	<target name="clean-tests" depends="initialize, lw-test-util.clean-src">
+	<target name="clean-tests" depends="initialize">
 	    <do.clean-tests component="${component}"/>
 	</target>
 	
