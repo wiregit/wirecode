@@ -2,7 +2,9 @@ package org.limewire.core.impl.download;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -12,12 +14,16 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.search.Search;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.download.listener.ItunesDownloadListener;
 import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
+import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.io.Address;
+import org.limewire.io.IpPort;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssignParameterAction;
@@ -691,6 +697,125 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         downloadItemResult = coreDownloadListManager.addDownload(remoteFileItem, saveFile, true);
         assertEquals(downloadItem, downloadItemResult);
 
+        context.assertIsSatisfied();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void testAddSearchDownload() throws Exception {
+        Mockery context = new Mockery() {
+            {
+                setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+
+        final DownloadManager downloadManager = context.mock(DownloadManager.class);
+        final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
+        final RemoteFileDescFactory remoteFileDescFactory = context
+                .mock(RemoteFileDescFactory.class);
+        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
+        final SpamManager spamManager = context.mock(SpamManager.class);
+        final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
+                .mock(ItunesDownloadListenerFactory.class);
+
+        context.checking(new Expectations() {
+            {
+                one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
+            }
+        });
+
+        CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
+                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
+                itunesDownloadListenerFactory);
+        coreDownloadListManager.register(listenerList);
+
+        final DownloadItem downloadItem = context.mock(DownloadItem.class);
+        final Downloader downloader = context.mock(Downloader.class);
+
+        final Search search = context.mock(Search.class);
+        final RemoteFileDescAdapter searchResult = context.mock(RemoteFileDescAdapter.class);
+        final List<RemoteFileDescAdapter> searchResults = Collections.singletonList(searchResult);
+        final RemoteFileDesc remoteFileDesc = context.mock(RemoteFileDesc.class);
+        final RemoteFileDesc[] remoteFileDescs = new RemoteFileDesc[]{remoteFileDesc};
+        final List<IpPort> alts = new ArrayList<IpPort>();
+        final URN urn1 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
+        final Address address = context.mock(Address.class);
+        final Category category = Category.AUDIO;
+        
+        // overwrite false saveFile null
+        context.checking(new Expectations() {
+            {
+                one(remoteFileDesc).getSHA1Urn();
+                will(returnValue(urn1));
+                one(remoteFileDesc).getAddress();
+                will(returnValue(address));
+                one(searchResult).getRfd();
+                will(returnValue(remoteFileDesc));
+                one(searchResult).getAlts();
+                will(returnValue(alts));
+                one(searchResult).getCategory();
+                will(returnValue(category));
+                one(downloadManager).download(remoteFileDescs, Collections.EMPTY_LIST, null, false, null, null);
+                will(returnValue(downloader));
+                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
+                will(returnValue(downloadItem));
+                one(spamManager).handleUserMarkedGood(searchResults);
+            }
+        });
+
+        DownloadItem downloadItemResult = coreDownloadListManager.addDownload(search, searchResults);
+        assertEquals(downloadItem, downloadItemResult);
+        
+        // overwrite true saveFile null
+        context.checking(new Expectations() {
+            {
+                one(remoteFileDesc).getSHA1Urn();
+                will(returnValue(urn1));
+                one(remoteFileDesc).getAddress();
+                will(returnValue(address));
+                one(searchResult).getRfd();
+                will(returnValue(remoteFileDesc));
+                one(searchResult).getAlts();
+                will(returnValue(alts));
+                one(searchResult).getCategory();
+                will(returnValue(category));
+                one(downloadManager).download(remoteFileDescs, Collections.EMPTY_LIST, null, true, null, null);
+                will(returnValue(downloader));
+                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
+                will(returnValue(downloadItem));
+                one(spamManager).handleUserMarkedGood(searchResults);
+            }
+        });
+
+        downloadItemResult = coreDownloadListManager.addDownload(search, searchResults, null, true);
+        assertEquals(downloadItem, downloadItemResult);
+        
+        // overwrite true saveFile non-null
+        final String fileName = "somename.txt";
+        final File parentDir = new File("/tmp/somedir/");
+        final File saveFile = new File(parentDir, fileName);
+        context.checking(new Expectations() {
+            {
+                one(remoteFileDesc).getSHA1Urn();
+                will(returnValue(urn1));
+                one(remoteFileDesc).getAddress();
+                will(returnValue(address));
+                one(searchResult).getRfd();
+                will(returnValue(remoteFileDesc));
+                one(searchResult).getAlts();
+                will(returnValue(alts));
+                one(searchResult).getCategory();
+                will(returnValue(category));
+                one(downloadManager).download(remoteFileDescs, Collections.EMPTY_LIST, null, true, parentDir, fileName);
+                will(returnValue(downloader));
+                one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
+                will(returnValue(downloadItem));
+                one(spamManager).handleUserMarkedGood(searchResults);
+            }
+        });
+
+        downloadItemResult = coreDownloadListManager.addDownload(search, searchResults, saveFile, true);
+        assertEquals(downloadItem, downloadItemResult);
+        
         context.assertIsSatisfied();
     }
 }
