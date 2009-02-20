@@ -377,10 +377,7 @@ public class LimeComboBox extends JXButton {
                 selectedAction = action;
                 selectedComponent = (JComponent)label.getParent();
                 selectedLabel = label;
-                // Fire the parent listeners
-                for (SelectionListener listener : selectionListeners) {
-                    listener.selectionChanged(action);
-                }
+			    fireChangeEvent(action);
                 repaint();
                 menu.setVisible(false);
             }
@@ -471,6 +468,13 @@ public class LimeComboBox extends JXButton {
         if (getText() == null) {
             menu.add(Box.createHorizontalStrut(getWidth()-4));
         }   
+    }
+    
+    protected void fireChangeEvent(Action action) {
+        // Fire the parent listeners
+        for (SelectionListener listener : selectionListeners) {
+            listener.selectionChanged(action);
+        }
     }
     
     private void initMenu() {        

@@ -23,6 +23,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -39,9 +40,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     
     private final EmptyLibraryFactory emptyFactory;
     private final FriendLibraryFactory factory;
-//    private final FriendSharingPanelFactory sharingFactory;
-    private final LibraryManager libraryManager;
-    private final ShareListManager shareListManager;
+    private final LibraryNavigator libraryNavigator;
     private final ChatFriendListPane friendsPane;
     private final ChatFramePanel friendsPanel;
     
@@ -55,21 +54,19 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 
     @AssistedInject
     public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
-//            FriendSharingPanelFactory sharingFactory, 
             LibraryManager libraryManager, ShareListManager shareListManager,
             @Named("available") ListenerSupport<FriendEvent> availListeners, 
-            ChatFriendListPane friendsPane, ChatFramePanel friendsPanel) {
+            ChatFriendListPane friendsPane, ChatFramePanel friendsPanel,
+            LibraryNavigator libraryNavigator) {
         this.factory = factory;
         this.friend = friend;        
-//        this.sharingFactory = sharingFactory;
         this.emptyFactory = emptyFactory;
-        this.libraryManager = libraryManager;
-        this.shareListManager = shareListManager;
         this.friendsPane = friendsPane;
         this.friendsPanel = friendsPanel;
         this.friendFileList = shareListManager.getOrCreateFriendShareList(friend);
         this.availListeners = availListeners;
         this.availListeners.addListener(this);
+        this.libraryNavigator = libraryNavigator;
         
         createEmptyCard();
         showEmptyCard();
@@ -86,7 +83,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         } else {
             emptyPanelMessage = new Message(friendFileList.getSwingModel(), MessageTypes.OFFLINE);
         }
-        setEmptyCard(emptyFactory.createEmptyLibrary(friend, friendFileList, FriendLibraryMediator.this, emptyPanelMessage, emptyPanelMessage.getComponent()));
+        setEmptyCard(emptyFactory.createEmptyLibrary(friend, friendFileList, emptyPanelMessage, emptyPanelMessage.getComponent()));
     }
     
     /**
@@ -109,9 +106,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 removeEventListener(true);
                 this.eventList = null;
                 emptyPanelMessage.setMessageType(MessageTypes.LW_CONNECTION_ERROR);
-                if(!isSharingCardShown()) {
-                    showEmptyCard();
-                }
+                showEmptyCard();
                 break;
             case LOADED:
                 // must do this here also, may skip loading step all together
@@ -121,9 +116,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 } 
                 if(eventList.size() == 0) {
                     emptyPanelMessage.setMessageType(MessageTypes.LW_NO_FILES);
-                    if(!isSharingCardShown()) {
-                        showEmptyCard();
-                    }
+                    showEmptyCard();
                     registerEventListener();
                 } else {
                     showLibrary();
@@ -136,9 +129,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 } 
                 if(eventList.size() == 0) {
 	                emptyPanelMessage.setMessageType(MessageTypes.LW_LOADING);
-	                if(!isSharingCardShown()) {
-	                    showEmptyCard();
-	                }
+                    showEmptyCard();
 	                registerEventListener();
                 } else {
                     showLibrary();
@@ -168,7 +159,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     private void showLibrary() {
         if(isEmptyCardShown()) {
             removeEventListener(true);
-            setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
+            setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList));
             super.showLibraryCard();
         }
     }
@@ -182,18 +173,14 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 //if friend signed on, show online view
                 if(event.getSource().getId().equals(friend.getId())) {
                     emptyPanelMessage.setMessageType(MessageTypes.ONLINE);
-                    if(!isSharingCardShown()) {
-                        showEmptyCard();
-                    }
+                    showEmptyCard();
                 }
                 break;
             case REMOVED:
                 //if this friend signed off, show offline view
                 if(event.getSource().getId().equals(friend.getId())) {
                     emptyPanelMessage.setMessageType(MessageTypes.OFFLINE);
-                    if(!isSharingCardShown()) {
-                        showEmptyCard();
-                    }
+                    showEmptyCard();
                 }
                 break;
             }
@@ -419,18 +406,6 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             friendList.removeListEventListener(this);
         }
     }
-
-    @Override
-    public void showSharingCard() {
-        if(!disposed) {
-            if(!isSharingCardSet()) {
-//                setSharingCard(sharingFactory.createPanel(this, friend, 
-//                        libraryManager.getLibraryManagedList().getSwingModel(),
-//                        shareListManager.getOrCreateFriendShareList(friend)));
-            }
-            super.showSharingCard();            
-        }
-    }
     
     /**
      * Action which displays the sharing view for this friend
@@ -441,7 +416,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         }
         @Override
         public void actionPerformed(ActionEvent e) {
-            showSharingCard();
+            libraryNavigator.selectFriendShareList(friend);
         }
     }
     

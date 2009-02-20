@@ -1,54 +1,55 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.Action;
+import javax.swing.JPopupMenu;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendEvent;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.library.ShareListManager;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.SharingMatchingEditor;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.util.I18n;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-import com.google.inject.name.Named;
-
+/**
+ * Drop down combo box for filtering My Library with a Sharing View.
+ */
 public class SharingFilterComboBox extends LimeComboBox {
 
-    private final Map<Friend, MenuAction> menuMap = new HashMap<Friend, MenuAction>();
-    
+    private final Set<Friend> menuList = new HashSet<Friend>();
+
     private final SharingMatchingEditor matchingEditor;
+
+    private JPopupMenu menu = new JPopupMenu();
     
-    private final ShareListManager shareListManager;
-    
-    @AssistedInject
-    public SharingFilterComboBox(@Assisted SharingMatchingEditor matchingEditor, @Assisted ShareListManager shareListManager) {
+    public SharingFilterComboBox(SharingMatchingEditor matchingEditor) {
         this.matchingEditor = matchingEditor;
-        this.shareListManager = shareListManager;
         
-        addFriend(new FullLibrary());
-        addFriend(SharingTarget.GNUTELLA_SHARE.getFriend());
+        overrideMenu(menu);
+        
+        setText(I18n.tr("What I'm Sharing"));
+        
+        SharingListener listener = new SharingListener();
+        menu.addPopupMenuListener(listener);
+    }
+    
+    public void selectFriend(Friend friend) {
+        matchingEditor.setFriend(friend);
+
+        MenuAction action = new MenuAction(friend);
+        fireChangeEvent(action);
     }
     
     public void addFriend(Friend friend) {
-        MenuAction menuAction = new MenuAction(friend);
-        menuMap.put(friend, menuAction);
-        addAction(menuAction);
+        menuList.add(friend);
     }
     
     public void removeFriend(Friend friend) {
-        MenuAction action = menuMap.remove(friend);
-        removeAction(action);
+        menuList.remove(friend);
     }
         
     private class MenuAction extends AbstractAction {
@@ -62,12 +63,9 @@ public class SharingFilterComboBox extends LimeComboBox {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(friend.getId() == null) 
-                matchingEditor.setFriendList(null);
-            else if(friend.getId().equals(Friend.P2P_FRIEND_ID))
-                matchingEditor.setFriendList(shareListManager.getGnutellaShareList().getSwingModel());
-            else
-                matchingEditor.setFriendList(shareListManager.getFriendShareList(friend).getSwingModel());
+            matchingEditor.setFriend(friend);
+            
+            SharingFilterComboBox.this.fireChangeEvent(this);
         }
         
         public String toString() {
@@ -75,26 +73,21 @@ public class SharingFilterComboBox extends LimeComboBox {
         }
     }
     
-    private class FullLibrary implements Friend {
-
+    private class SharingListener implements PopupMenuListener {        
         @Override
-        public String getFirstName() {return null;}
+        public void popupMenuCanceled(PopupMenuEvent e) {}
+        
         @Override
-        public Map<String, FriendPresence> getFriendPresences() {return null;}
+        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+        
         @Override
-        public String getId() {return null;}
-        @Override
-        public String getName() {return null;}
-        @Override
-        public Network getNetwork() {return null;}
-        @Override
-        public boolean isAnonymous() {return false;}
-        @Override
-        public void setName(String name) {}
-
-        @Override
-        public String getRenderName() {
-            return I18n.tr("Sharing With...");
+        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+            menu.removeAll();         
+           
+            menu.add(new MenuAction(SharingTarget.GNUTELLA_SHARE.getFriend()));
+            for(Friend friend : menuList) {
+                menu.add(new MenuAction(friend));
+            }
         }
     }
 }

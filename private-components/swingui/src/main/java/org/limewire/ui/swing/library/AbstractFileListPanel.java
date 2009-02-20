@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.library;
 
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -35,8 +34,8 @@ import org.limewire.core.api.library.FriendFileList;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HeaderBar;
-import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;

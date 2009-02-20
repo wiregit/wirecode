@@ -38,7 +38,6 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
     public FriendLibraryPanel(@Assisted Friend friend,
                     @Assisted FriendFileList friendFileList,
                     @Assisted EventList<RemoteFileItem> eventList, 
-                    @Assisted FriendLibraryMediator mediator,
                     CategoryIconManager categoryIconManager, 
                     LibraryTableFactory tableFactory,
                     DownloadListManager downloadListManager,
@@ -63,7 +62,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         
         //don't show share button for browse hosts
         if(!friend.isAnonymous()) {
-            addButtonToHeader(new ViewSharedLibraryAction(mediator), buttonDecorator);
+            addButtonToHeader(new ViewSharedLibraryAction(libraryNavigator), buttonDecorator);
         }
         
         createMyCategories(eventList);
@@ -80,17 +79,17 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
     } 
     
     private class ViewSharedLibraryAction extends AbstractAction {
-        private final FriendLibraryMediator friendLibraryMediator;
-
-        public ViewSharedLibraryAction(FriendLibraryMediator friendLibraryMediator) {
-            this.friendLibraryMediator = friendLibraryMediator;
+        private final LibraryNavigator libraryNavigator;
+        
+        public ViewSharedLibraryAction(LibraryNavigator libraryNavigator){ //FriendLibraryMediator friendLibraryMediator) {
+            this.libraryNavigator = libraryNavigator;
             putValue(Action.NAME, I18n.tr("Share"));
             putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share your files with {0}", friend.getRenderName()));
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            friendLibraryMediator.showSharingCard();
+            libraryNavigator.selectFriendShareList(friend);
         }
     }
 }

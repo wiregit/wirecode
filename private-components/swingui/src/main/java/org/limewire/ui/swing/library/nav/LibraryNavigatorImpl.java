@@ -325,16 +325,14 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     
     @Override
     public void selectFriendShareList(Friend friend) {
-        for(NavList list : allLists) {
-            if(list.selectFriendShareList(friend) != null) {
-                break;
-            }
-        }
+        myLibrary.select();
+        myLibraryPanel.showSharingState(friend);
     }
     
     @Override
     public void selectLibrary() {
         myLibrary.select();
+        myLibraryPanel.showAllFiles();
     }
 
     @Override

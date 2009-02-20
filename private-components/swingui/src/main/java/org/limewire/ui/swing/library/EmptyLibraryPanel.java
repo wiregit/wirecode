@@ -20,6 +20,7 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -40,23 +41,25 @@ public class EmptyLibraryPanel extends LibraryPanel {
     private Color backgroundColor;
     
     private final Friend friend;
-    private final FriendLibraryMediator mediator;
+
+    private final LibraryNavigator libraryNavigator;
         
     @AssistedInject
     public EmptyLibraryPanel(@Assisted Friend friend,
             @Assisted FriendFileList friendFileList,
-            @Assisted FriendLibraryMediator mediator, 
             @Assisted Disposable messageComponent,
             @Assisted JComponent component,
             HeaderBarDecorator headerBarFactory,
             ButtonDecorator buttonDecorator,
+            LibraryNavigator libraryNavigator, 
             TextFieldDecorator textFieldDecorator) {
         super(headerBarFactory, textFieldDecorator);
   
         GuiUtils.assignResources(this);
         
         this.friend = friend;
-        this.mediator = mediator;
+        this.libraryNavigator = libraryNavigator;
+
         if(!friend.isAnonymous()) {
             addButtonToHeader(new ViewSharedLibraryAction(), buttonDecorator);
         }
@@ -111,7 +114,7 @@ public class EmptyLibraryPanel extends LibraryPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            mediator.showSharingCard();
+            libraryNavigator.selectFriendShareList(friend);
         }
     }
 }
