@@ -11,8 +11,6 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.api.Invocation;
-import org.jmock.lib.action.CustomAction;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
@@ -36,6 +34,7 @@ import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.promotion.containers.PromotionMessageContainer.PromotionOptions;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ExecuteRunnableAction;
 import org.limewire.util.MediaType;
 
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -301,19 +300,6 @@ public class CoreSearchTest extends BaseTestCase {
         });
         promotionResultCallback.get().process(result);
         context.assertIsSatisfied();
-    }
-
-    private final class ExecuteRunnableAction extends CustomAction {
-        private ExecuteRunnableAction() {
-            super("Run a Runnable");
-        }
-
-        @Override
-        public Object invoke(Invocation invocation) throws Throwable {
-            Runnable runnable = (Runnable) invocation.getParameter(0);
-            runnable.run();
-            return null;
-        }
     }
 
     private final class SearchResultMatcher extends BaseMatcher<SearchResult> {
