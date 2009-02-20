@@ -60,7 +60,7 @@ public class OpenFileAction extends AbstractAction {
             for (final File file : files) {
                 if (file.exists()) {
                     try {
-                        downloadListManager.addTorrentDownload(file, null,
+                        downloadListManager.addTorrentDownload(file, 
                                 false);
                     } catch (SaveLocationException sle) {
                         saveLocationExceptionHandler.handleSaveLocationException(
@@ -69,7 +69,7 @@ public class OpenFileAction extends AbstractAction {
                                     public void download(File saveFile, boolean overwrite)
                                             throws SaveLocationException {
                                         downloadListManager.addTorrentDownload(
-                                                file, saveFile, overwrite);
+                                                file, overwrite);
                                     }
                                 }, sle, false);
                     }
