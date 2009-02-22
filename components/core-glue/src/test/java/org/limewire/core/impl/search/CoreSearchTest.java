@@ -1,8 +1,10 @@
 package org.limewire.core.impl.search;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -12,6 +14,7 @@ import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -77,7 +80,7 @@ public class CoreSearchTest extends BaseTestCase {
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
                 promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
-                searchEventBroadcaster);
+                searchEventBroadcaster, null);
 
         context.checking(new Expectations() {
             {
@@ -162,7 +165,7 @@ public class CoreSearchTest extends BaseTestCase {
         final AtomicReference<FriendSearchListener> friendSearchListener = new AtomicReference<FriendSearchListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
                 promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
-                searchEventBroadcaster);
+                searchEventBroadcaster, null);
 
         context.checking(new Expectations() {
             {
@@ -236,7 +239,7 @@ public class CoreSearchTest extends BaseTestCase {
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
                 promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
-                searchEventBroadcaster);
+                searchEventBroadcaster, null);
 
         final GeocodeInformation geocodeInformation = null;
 
@@ -383,6 +386,11 @@ public class CoreSearchTest extends BaseTestCase {
         public SearchType getSearchType() {
             return searchType;
         }
+        
+        @Override
+        public Map<FilePropertyKey, String> getAdvancedDetails() {
+            return Collections.emptyMap();
+        }
     }
     
     @SuppressWarnings("unchecked")
@@ -396,7 +404,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchServices searchServices = context.mock(SearchServices.class);
         final SearchListener listener = context.mock(SearchListener.class);
         
-        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, searchEventBroadcaster);
+        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null);
         
         context.checking(new Expectations() {
             {

@@ -43,8 +43,11 @@ import org.limewire.ui.swing.painter.factories.SearchTabPainterFactory;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchBar;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
+import org.limewire.ui.swing.search.UiSearchListener;
+import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.mozilla.browser.MozillaInitialization;
@@ -58,8 +61,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final SearchBar searchBar;
     
     private final FancyTabList searchList;
-    private final Navigator navigator;
-        
+    private final Navigator navigator;        
     private final NavItem homeNav;
         
     @Inject
@@ -73,16 +75,26 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     FancyTabListFactory fancyTabListFactory,
                     BarPainterFactory barPainterFactory,
                     SearchTabPainterFactory tabPainterFactory,
-                    final LibraryNavigator libraryNavigator) {        
+                    final LibraryNavigator libraryNavigator,
+                    AdvancedSearchPanel advancedSearchPanel) {        
         GuiUtils.assignResources(this);
         
-        this.searchBar = searchBar;        
+        this.searchBar = searchBar;
         this.navigator = navigator;
         this.searchBar.addSearchActionListener(new Searcher(searchHandler));        
         
         setName("WireframeTop");
         
         setBackgroundPainter(barPainterFactory.createTopBarPainter());
+        
+        // add advanced search into the navigator, for use elsewhere.
+        navigator.createNavItem(NavCategory.LIMEWIRE, AdvancedSearchPanel.NAME, advancedSearchPanel);
+        advancedSearchPanel.addSearchListener(new UiSearchListener() {
+            @Override
+            public void searchTriggered(SearchInfo searchInfo) {
+                searchHandler.doSearch(searchInfo);
+            }
+        });
         
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);      
         JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
@@ -142,7 +154,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         navigator.addNavigationListener(new NavigationListener() {
             @Override
             public void categoryRemoved(NavCategory category) {
-                if(category == NavCategory.SEARCH) {
+                if(category == NavCategory.SEARCH_RESULTS) {
                     libraryNavigator.selectLibrary();
                 }
             }
@@ -164,7 +176,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         String title, final JComponent searchPanel, final Search search) {
         
         final NavItem item = navigator.createNavItem(
-            NavCategory.SEARCH, title, searchPanel);
+            NavCategory.SEARCH_RESULTS, title, searchPanel);
         final SearchAction action = new SearchAction(item);
         search.addSearchListener(action);
 
@@ -257,10 +269,11 @@ class TopPanel extends JXPanel implements SearchNavigator {
             // Get search text, and do search if non-empty.
             String searchText = searchBar.getSearchText();
             if (!searchText.isEmpty()) {
-                searchHandler.doSearch(
+                if(searchHandler.doSearch(
                         DefaultSearchInfo.createKeywordSearch(searchText,  
-                                searchBar.getCategory()));
-                searchBar.selectAllSearchText();
+                                searchBar.getCategory()))) {
+                    searchBar.selectAllSearchText();
+                }
             }
         }
     }

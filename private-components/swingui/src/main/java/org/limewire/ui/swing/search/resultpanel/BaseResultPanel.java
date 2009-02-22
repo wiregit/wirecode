@@ -192,7 +192,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
-           searchInfo.getQuery(), 
+           searchInfo.getSearchQuery(), 
                     navigator, this, 
                     displayLimit);
         
@@ -203,7 +203,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             tc.setCellRenderer(renderer);
         }
 
-        ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(searchInfo.getQuery(), 
+        ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(searchInfo.getSearchQuery(), 
                 navigator, this, displayLimit);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
@@ -235,7 +235,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                             VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
                             RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
                             if (result == null || result.isStale(vsr)) {
-                                result = rowHeightRule.getDisplayResult(vsr, searchInfo.getQuery());
+                                result = rowHeightRule.getDisplayResult(vsr, searchInfo.getSearchQuery());
                                 vsrToRowDisplayResultMap.put(vsr, result);
                             } 
                             int newRowHeight = result.getConfig().getRowHeight();
