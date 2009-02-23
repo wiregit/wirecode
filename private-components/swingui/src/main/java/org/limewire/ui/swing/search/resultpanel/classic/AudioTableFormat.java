@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search.resultpanel.classic;
 import java.awt.Component;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.jdesktop.swingx.decorator.SortKey;
@@ -66,6 +67,17 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
         return super.getColumnClass(column);
     }
     
+    @Override
+    public Comparator getColumnComparator(int column) {
+        switch (column) {
+        case QUALITY_INDEX:
+            return getQualityComparator();
+        default:
+            return super.getColumnComparator(column);
+        }
+    }    
+    
+    @Override
     public Object getColumnValue(VisualSearchResult vsr, int column) {
         switch(column) {
             case FROM_INDEX: return vsr;
