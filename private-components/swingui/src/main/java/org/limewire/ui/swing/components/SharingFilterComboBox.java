@@ -106,7 +106,7 @@ public class SharingFilterComboBox extends LimeComboBox {
             if(friend != null)
                 putValue(Action.NAME, friend.getRenderName());
             putValue(Action.SMALL_ICON, icon);
-            setForeground(friendColor);
+            // TODO: was this important? setForeground(friendColor);
         }
         
         @Override

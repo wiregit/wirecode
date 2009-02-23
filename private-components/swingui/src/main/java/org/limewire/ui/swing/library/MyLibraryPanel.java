@@ -138,7 +138,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                           LibraryTableFactory tableFactory,
                           CategoryIconManager categoryIconManager,
                           ShareWidgetFactory shareFactory,
-                          HeaderBarDecorator headerBarFactory,
+                          HeaderBarDecorator headerBarDecorator,
                           PlayerPanel player, 
                           GhostDragGlassPane ghostPane,
                           ListenerSupport<XMPPConnectionEvent> connectionListeners,
@@ -147,7 +147,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                           ComboBoxDecorator comboDecorator,
                           ButtonDecorator buttonDecorator) {
         
-        super(headerBarFactory, textFieldDecorator);
+        super(headerBarDecorator, textFieldDecorator);
         
         GuiUtils.assignResources(this);
         
@@ -171,7 +171,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
         buttonDecorator.decorateLightFullButton(messagePanel.getButton());
         
-        comboDecorator.decorateLightFullComboBox(sharingComboBox);
+        comboDecorator.decorateLinkComboBox(sharingComboBox);
         getSelectionPanel().add(sharingComboBox, "gaptop 5, gapbottom 5, alignx 50%, hidemode 3");
         
         sharingComboBox.addSelectionListener(new SelectionListener(){
@@ -223,9 +223,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             @Override
             public void actionPerformed(ActionEvent e) {
                 MyLibraryPanel.this.repaint();
-                repaintTimer.stop();
             }
         });
+        repaintTimer.setRepeats(false);
     }
     
     @Inject
