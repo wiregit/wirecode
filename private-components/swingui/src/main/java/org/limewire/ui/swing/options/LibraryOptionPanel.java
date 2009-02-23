@@ -340,6 +340,7 @@ public class LibraryOptionPanel extends OptionPanel {
                     if(libraryData.isDirectoryAllowed(folder)) {
                         treeTableContainer.getTable().addDirectory(folder);
                     } else {
+                        // {0}: name of folder
                         FocusJOptionPane.showMessageDialog(LibraryManagerOptionPanel.this, I18n.tr(
                                 "You selected: {0}\n\nLimeWire cannot manage "
                                         + "this folder because it is either not a folder "

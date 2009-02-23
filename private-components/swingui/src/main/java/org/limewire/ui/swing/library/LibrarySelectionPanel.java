@@ -144,6 +144,7 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
             this.sharedList = sharedList;
             this.category = category;
 
+            // {0}: category (Audio, Video, etc)
             categoryLabel = new JLabel(I18n.tr("{0} Info", category));
             categoryLabel.setFont(categoryFont);
             categoryLabel.setForeground(fontColor);

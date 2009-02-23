@@ -28,8 +28,10 @@ public class MultiFileShareWidget implements ShareWidget<LocalFileItem[]>{
     @Override
     public void setShareable(LocalFileItem[] files){
         this.files = files;
-        sharePanel.setTitleLabel(I18n.tr("Share {0} {1} files", files.length, files[0].getCategory().getSingularName()));
-        sharePanel.setTopLabel(I18n.tr("Shared {0} files with:", files.length));
+        // {0} number of files, {1}: type of file (Image, Document...)
+        sharePanel.setTitleLabel(I18n.trn("Share {0} {1} file", "Share {0} {1} files", files.length, files.length, files[0].getCategory().getSingularName()));
+        // {0}: number of files 
+        sharePanel.setTopLabel(I18n.trn("Shared {0} file with:", "Shared {0} files with:", files.length));
     }
 
     @Override

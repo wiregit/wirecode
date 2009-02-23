@@ -180,7 +180,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         //FontUtils.bold(launchButton);
         FontUtils.underline(launchButton); 
         
-        removeLinkSpacer = new JLabel(I18n.tr("- "));
+        removeLinkSpacer = new JLabel("- ");
         removeLinkSpacer.setMinimumSize(new Dimension(0,cancelLink.getPreferredSize().height));
         removeLinkSpacer.setFont(statusFontPlainMin);
         removeLinkSpacer.setForeground(errorLabelColour);

@@ -92,8 +92,9 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
             shareButton.setToolTipText(I18n.tr("Share this file with a friend"));
         }
         
-        if(friendCount > 0) {   
-            shareButton.setText(I18n.tr("share ({0})",GuiUtils.toLocalizedInteger(item.getFriendShareCount())));
+        if(friendCount > 0) { 
+            // {0}: number of friends file is shared with already
+            shareButton.setText(I18n.tr("share ({0})", GuiUtils.toLocalizedInteger(item.getFriendShareCount())));
         } else {
             shareButton.setText(I18n.tr("share"));
             shareButton.setIcon(null);

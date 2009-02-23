@@ -290,7 +290,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                 case VIDEO:
                 case IMAGE:
                     if(friendList.isCategoryAutomaticallyAdded(category)) {
-                        action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
+                        action.putValue(Action.NAME, I18n.tr(category.toString()) + " " + I18n.tr("(all)"));
                         break;
                     }
                 default:
@@ -580,7 +580,8 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             
             label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category.getSingularName(), getFullPanelName()));
             messageComponent.decorateHeaderLabel(label);
-            
+
+            // {0}: name of category (Audio, Video...)
             minLabel = new JLabel(I18n.tr("New {0} files that are added to your Library will be automatically shared with this person", category.getSingularName()));
             messageComponent.decorateSubLabel(minLabel);
 
