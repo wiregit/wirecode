@@ -94,8 +94,6 @@ public class ComboBoxDecorator {
     public void decorateLinkComboBox(JXButton box) {
         buttonDecorator.decorateLinkButton(box);
         box.setIcon(miniRegIcon);
-        box.setRolloverIcon(miniHoverIcon);
-        box.setPressedIcon(miniDownIcon);
         box.setBorder(BorderFactory.createEmptyBorder(2,6,3,15));
         
         tryInstallHandCursor(box);

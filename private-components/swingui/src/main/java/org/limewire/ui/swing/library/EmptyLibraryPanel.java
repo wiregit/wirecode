@@ -16,6 +16,7 @@ import org.limewire.core.api.library.FriendFileList;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
@@ -67,9 +68,11 @@ public class EmptyLibraryPanel extends LibraryPanel {
         createEmptyPanel(component);
         getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
         setTransferHandler(new LocalFileListTransferHandler(friendFileList));
-        
-        // TODO: Filter box should not be added in the first place
-        removeFilterBox();
+    }
+    
+    @Override
+    protected PromptTextField createFilterField(TextFieldDecorator decorator, String prompt) {
+        return null;
     }
     
     protected String getFullPanelName() {

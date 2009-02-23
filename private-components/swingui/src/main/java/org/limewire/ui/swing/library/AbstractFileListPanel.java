@@ -79,7 +79,10 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         filterField = createFilterField(textFieldDecorator, I18n.tr("Search Library..."));
         headerPanel = createHeaderBar(headerBarFactory);
         headerPanel.setLayout(new MigLayout("insets 0, gap 0, fill, alignx right"));
-        headerPanel.add(filterField, "gapbefore push, cell 1 0, gapafter 10");
+        
+        if (filterField != null) {
+            headerPanel.add(filterField, "gapbefore push, cell 1 0, gapafter 10");
+        }
                
         layoutComponent();
         
@@ -92,12 +95,6 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         addHeaderPanel();
         addNavPanel();
         addMainPanels();
-    }
-    
-    // TODO: This should not be necessary
-    protected void removeFilterBox() {
-        headerPanel.remove(filterField);
-        filterField = null;
     }
     
     protected abstract HeaderBar createHeaderBar(HeaderBarDecorator headerBarFactory);

@@ -194,6 +194,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         
         shareAllComboBox = new LimeComboBox();
         shareAllComboBox.setText("Share");
+        comboDecorator.decorateDarkFullComboBox(shareAllComboBox);
         
         addHeaderComponent(shareAllComboBox, "cell 0 0, alignx left");
         addHeaderComponent(playerPanel, "cell 0 0, grow");
