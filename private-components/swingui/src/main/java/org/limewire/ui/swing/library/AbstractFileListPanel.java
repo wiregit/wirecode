@@ -30,7 +30,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FriendFileList;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HeaderBar;
@@ -263,8 +262,8 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
      * the left-side of the display.  If <code>newSection</code> is true, then
      * empty space is inserted above the new heading.  
      */
-    protected <T extends FileItem> void addHeading(JComponent heading, boolean newSection) {
-        if (newSection) {
+    protected <T extends FileItem> void addHeading(JComponent heading, Catalog.Type catalog) {
+        if (catalog == Catalog.Type.PLAYLIST) {
             selectionPanel.add(heading, "growx, gaptop 40");
         } else {
             selectionPanel.add(heading, "growx");
@@ -273,22 +272,17 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     /** Adds a catalog to the InnerNav Info bar for My Library views*/
     protected<T extends FileItem> void addLibraryInfoBar(Catalog catalog, EventList<T> fileList) {
-        selectionPanel.addCard(catalog, fileList, null, null, false);
+        selectionPanel.addCard(catalog, fileList, false);
     }
     
     /** Adds a category to the InnerNav Info bar for My Library views*/
     protected<T extends FileItem> void addLibraryInfoBar(Category category, EventList<T> fileList) {
-        selectionPanel.addCard(category, fileList, null, null, false);
-    }
-    
-    /** Adds a category to the InnerNav Info bar for Sharing views*/
-    protected<T extends FileItem> void addSharingInfoBar(Category category, EventList<T> fileList, FriendFileList friendList, FilterList<T> sharedList) {
-        selectionPanel.addCard(category, fileList, friendList, sharedList, false);
+        selectionPanel.addCard(category, fileList, false);
     }
     
     /** Adds a category to the InnerNav Info bar for Friend views*/
     protected<T extends FileItem> void addFriendInfoBar(Category category, EventList<T> fileList) {
-        selectionPanel.addCard(category, fileList, null, null, true);
+        selectionPanel.addCard(category, fileList, true);
     }
 
     /** Adds a listener to the catalog so things can bind to the action. */
@@ -365,13 +359,14 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
      * is visible, returns that category.
      */
     private Catalog getPrev(int selectedIndex) {
-        for(int i = catalogOrder.size() + selectedIndex; i > catalogOrder.size(); i--) {
+        for(int i = catalogOrder.size() + selectedIndex; i >= selectedIndex; i--) {
             int index = i % catalogOrder.size();
             ButtonItem current = catalogTables.get(catalogOrder.get(index));
             if(current.isEnabled())
                 return catalogOrder.get(index);
         }
-        return catalogOrder.get(selectedIndex);
+        // if no categories are visible, return null
+        return null;
     }
     
     private class Next extends AbstractAction {

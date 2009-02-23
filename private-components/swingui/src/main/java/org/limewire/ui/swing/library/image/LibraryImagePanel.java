@@ -24,6 +24,7 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
 import org.limewire.ui.swing.library.LibraryOperable;
+import org.limewire.ui.swing.library.SharingMatchingEditor;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -60,8 +61,7 @@ public class LibraryImagePanel extends JPanel
     private final Map<File, LibraryImageSubPanel> panelMap;
 
     private final LocalFileList fileList;
-    private final LocalFileList currentFriendFileList;
-    
+    private final SharingMatchingEditor sharingMatcherEditor;
     
     private JScrollPane scrollPane;
     
@@ -69,7 +69,7 @@ public class LibraryImagePanel extends JPanel
             LocalFileList fileList, JScrollPane scrollPane,
             LibraryImageSubPanelFactory factory,
             ShareWidget<File> shareWidget,
-            LocalFileList selectedFriendList) {       
+            SharingMatchingEditor sharingMatcherEditor) {       
         super(new VerticalLayout());
         
         GuiUtils.assignResources(this); 
@@ -79,7 +79,7 @@ public class LibraryImagePanel extends JPanel
         this.scrollPane = scrollPane;
         this.factory = factory;
         this.shareWidget = shareWidget;
-        this.currentFriendFileList = selectedFriendList;
+        this.sharingMatcherEditor = sharingMatcherEditor;
         
         groupingList = GlazedListsFactory.groupingList(eventList, groupingComparator);
         
@@ -130,12 +130,7 @@ public class LibraryImagePanel extends JPanel
     
     
     private void createSubPanel(File parent, EventList<LocalFileItem> list){
-        LibraryImageSubPanel subPanel;
-        if(shareWidget != null )
-            subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, shareWidget);
-        else {
-            subPanel = factory.createSharingLibraryImageSubPanel(parent, list, fileList, currentFriendFileList);
-        }
+        LibraryImageSubPanel subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, shareWidget, sharingMatcherEditor);
         panelMap.put(parent, subPanel);
         add(subPanel);
     }

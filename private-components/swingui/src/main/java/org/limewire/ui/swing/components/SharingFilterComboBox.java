@@ -98,6 +98,9 @@ public class SharingFilterComboBox extends LimeComboBox {
         return item;
     }
          
+    /**
+     * MenuAction for a shared list
+     */
     private class MenuAction extends AbstractAction {
         private final Friend friend;
         
@@ -106,7 +109,6 @@ public class SharingFilterComboBox extends LimeComboBox {
             if(friend != null)
                 putValue(Action.NAME, friend.getRenderName());
             putValue(Action.SMALL_ICON, icon);
-            // TODO: was this important? setForeground(friendColor);
         }
         
         @Override
@@ -121,6 +123,10 @@ public class SharingFilterComboBox extends LimeComboBox {
         }
     }
     
+    /**
+     * Listens for combo box selection and creates the 
+     * menu of shared lists to choose from.
+     */
     private class SharingListener implements PopupMenuListener {        
         @Override
         public void popupMenuCanceled(PopupMenuEvent e) {}
@@ -143,6 +149,9 @@ public class SharingFilterComboBox extends LimeComboBox {
         }
     }
     
+    /**
+     * Compares two friends names for sorting.
+     */
     private static class FriendComparator implements Comparator<Friend> {
         @Override
         public int compare(Friend o1, Friend o2) {

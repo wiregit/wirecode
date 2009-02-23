@@ -10,6 +10,8 @@ import javax.swing.TransferHandler;
 
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.ShareListManager;
+import org.limewire.ui.swing.library.SharingMatchingEditor;
 import org.limewire.ui.swing.util.DNDUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -17,12 +19,16 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public class MyLibraryTransferHandler extends TransferHandler {
 
-    EventSelectionModel<LocalFileItem> selectionModel;
-    private LibraryFileList libraryManagedList;
-
-    public MyLibraryTransferHandler(EventSelectionModel<LocalFileItem> selectionModel, LibraryFileList libraryManagedList) {
+    private final EventSelectionModel<LocalFileItem> selectionModel;
+    private final LibraryFileList libraryManagedList;
+    private final ShareListManager shareListManager;
+    private final SharingMatchingEditor sharingMatcherEditor;
+    
+    public MyLibraryTransferHandler(EventSelectionModel<LocalFileItem> selectionModel, LibraryFileList libraryManagedList, ShareListManager shareListManager, SharingMatchingEditor sharingMatcherEditor) {
         this.selectionModel = selectionModel;
         this.libraryManagedList = libraryManagedList;
+        this.shareListManager = shareListManager;
+        this.sharingMatcherEditor = sharingMatcherEditor;
     }
 
     @Override
@@ -50,10 +56,19 @@ public class MyLibraryTransferHandler extends TransferHandler {
         }
 
         for (File file : fileList) {
+            // if is a folder
             if(file.isDirectory()) {
-                libraryManagedList.addFolder(file);
+                //if not in filtered mode
+                if(sharingMatcherEditor.getCurrentFriend() == null)
+                    libraryManagedList.addFolder(file);
+                else
+                    shareListManager.getFriendShareList(sharingMatcherEditor.getCurrentFriend()).addFolder(file);
             } else {
-                libraryManagedList.addFile(file);
+                //if not in filtered mode
+                if(sharingMatcherEditor.getCurrentFriend() == null)
+                    libraryManagedList.addFile(file);
+                else
+                    shareListManager.getFriendShareList(sharingMatcherEditor.getCurrentFriend()).addFile(file);
             }
         }
         return true;

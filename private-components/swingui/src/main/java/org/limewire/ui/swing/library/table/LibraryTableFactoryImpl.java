@@ -27,6 +27,7 @@ import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
+import org.limewire.ui.swing.library.SharingMatchingEditor;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
@@ -149,35 +150,11 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 //        });
 //    }
 //    
-    /**
-     * Creates an panel that displays images as thumbnails.
-     */
-    @Override
-    public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList,
-            JScrollPane scrollPane, ShareWidget<File> sharePanel) {
-        LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), eventList,
-                libraryManager.getLibraryManagedList(), scrollPane, subPanelFactory,
-                sharePanel, null);       
-
-        TransferHandler noDragTransferHandler = new MyLibraryTransferHandler(null, libraryManager.getLibraryManagedList()){
-            @Override
-            public int getSourceActions(JComponent comp) {
-                return NONE;
-            }
-        };
-        
-        imagePanel.setTransferHandler(noDragTransferHandler);
-        try {
-            imagePanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(imagePanel, ghostPane));
-        } catch (TooManyListenersException ingoreException) {
-        }
-        return imagePanel;
-    }
 
     /**
      * Creates a table for MyLibrary
      */
-    public <T extends LocalFileItem> LibraryTable<T> createMyTable(Category category, EventList<T> eventList) {
+    public <T extends LocalFileItem> LibraryTable<T> createMyTable(Category category, EventList<T> eventList, SharingMatchingEditor sharingMatchingEditor) {
 
         final LibraryTable<T> libTable;
         SortedList<T> sortedList = new SortedList<T>(eventList);
@@ -211,13 +188,13 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             throw new IllegalArgumentException("Unknown category: " + category);
         }
 
-        libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
+        libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList(), shareListManager, sharingMatchingEditor));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                 category, libraryManager, shareListManager, magnetLinkFactory,
                 localItemPropFactory, shareFactory));
         
         try {
-            libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane));
+            libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane, sharingMatchingEditor));
         } catch (TooManyListenersException ingoreException) {
         }
 
@@ -225,8 +202,31 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setDropMode(DropMode.ON);
 
         return libTable;
-
     }    
+    
+
+    @Override
+    public LibraryImagePanel createMyImagePanel(EventList<LocalFileItem> eventList,
+            JScrollPane scrollPane, ShareWidget<File> sharePanel,
+            SharingMatchingEditor sharingMatchingEditor) {
+        LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), eventList,
+                libraryManager.getLibraryManagedList(), scrollPane, subPanelFactory,
+                sharePanel, sharingMatchingEditor);       
+
+        TransferHandler noDragTransferHandler = new MyLibraryTransferHandler(null, libraryManager.getLibraryManagedList(), shareListManager, sharingMatchingEditor){
+            @Override
+            public int getSourceActions(JComponent comp) {
+                return NONE;
+            }
+        };
+        
+        imagePanel.setTransferHandler(noDragTransferHandler);
+        try {
+            imagePanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(imagePanel, ghostPane, sharingMatchingEditor));
+        } catch (TooManyListenersException ingoreException) {
+        }
+        return imagePanel;
+    }
     
     /**
      * Creates a table when viewing a Friend's Library or performing a BrowseHost

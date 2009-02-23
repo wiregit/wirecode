@@ -130,6 +130,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private MessagePanel messagePanel;
     
     private LimeComboBox shareAllComboBox;
+    private GhostDropTargetListener ghostDropTargetListener;
 
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
@@ -202,9 +203,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         playerPanel.setPreferredSize(new Dimension(999,999));
 
         
-        setTransferHandler(new MyLibraryTransferHandler(null, libraryManager.getLibraryManagedList()));
+        setTransferHandler(new MyLibraryTransferHandler(null, libraryManager.getLibraryManagedList(), shareListManager, sharingMatchingEditor));
+        ghostDropTargetListener = new GhostDropTargetListener(this,ghostPane, sharingMatchingEditor);
         try {
-            getDropTarget().addDropTargetListener(new GhostDropTargetListener(this,ghostPane));
+            getDropTarget().addDropTargetListener(ghostDropTargetListener);
         } catch (TooManyListenersException ignoreException) {            
         }      
         
@@ -258,13 +260,13 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     
     public void showSharingState(Friend friend) {
         sharingComboBox.selectFriend(friend);
-        
     }
     
     public void showAllFiles() {
         sharingMatchingEditor.setFriend(null);
         sharingComboBox.setVisible(true);
         messagePanel.setVisible(false);
+        hideEmptyFriend();
     }
     
     @Override
@@ -285,7 +287,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     
     private void createMyCategories(EventList<LocalFileItem> sourceList) {
         // Display heading.
-        addHeading(new HeadingPanel(I18n.tr("CATEGORIES")), false);
+        addHeading(new HeadingPanel(I18n.tr("CATEGORIES")), Catalog.Type.CATEGORY);
         
         for(Category category : Category.getCategoriesInOrder()) {        
             CatalogSelectionCallback callback = null;
@@ -315,7 +317,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         if (category != Category.IMAGE) {
-            LibraryTable<LocalFileItem> table = tableFactory.createMyTable(category, filterList);
+            LibraryTable<LocalFileItem> table = tableFactory.createMyTable(category, filterList, sharingMatchingEditor);
             table.enableMyLibrarySharing(fileShareWidget);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
             selectableMap.put(category, table);
@@ -325,7 +327,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         } else { //Category.IMAGE 
             scrollPane = new JScrollPane();
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            LibraryImagePanel imagePanel = tableFactory.createImagePanel(filterList, scrollPane, fileShareWidget);
+            LibraryImagePanel imagePanel = tableFactory.createMyImagePanel(filterList, scrollPane, fileShareWidget, sharingMatchingEditor);
             selectableMap.put(category, imagePanel);
             scrollPane.setViewportView(imagePanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());            
@@ -342,7 +344,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                         if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
                             JPanel panel = new JPanel(new MigLayout("fill"));
                             panel.setOpaque(false);
-                            panel.add(getMessageComponent(), "align 50% 40%");
+                            panel.add(getFirstTimeMessageComponent(), "align 50% 40%");
                             JXLayer layer = map.get(category);
                             layer.getGlassPane().add(panel);
                             layer.getGlassPane().setVisible(true);
@@ -354,14 +356,15 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                     }
                 }
             });
-            // this shouldn't be necesarry, the panel above isn't fill the viewport if we don't set this at
-            // jxlayer creation time. 
-            LockableUI blurUI = new LockedUI(category);
-            JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
-            map.put(category, jxlayer);
-            return jxlayer;
         }
-        return scrollPane;
+        // this shouldn't be necesarry, the panel above isn't fill the viewport if we don't set this at
+        // jxlayer creation time. 
+        LockableUI blurUI = new LockedUI();
+        JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
+        map.put(category, jxlayer);
+        return jxlayer;
+//
+//        return scrollPane;
     }
     
     /**
@@ -369,7 +372,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
      */
     private void createMyPlaylists() {
         // Display heading.
-        addHeading(new HeadingPanel(I18n.tr("PLAYLISTS")), true);
+        addHeading(new HeadingPanel(I18n.tr("PLAYLISTS")), Catalog.Type.PLAYLIST);
 
         Playlist playlist = new Playlist(I18n.tr("Quicklist"));
 
@@ -405,7 +408,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         
         // TODO create factory method createPlaylistTable()
-        LibraryTable<LocalFileItem> table = tableFactory.createMyTable(Category.AUDIO, filterList);
+        LibraryTable<LocalFileItem> table = tableFactory.createMyTable(Category.AUDIO, filterList, sharingMatchingEditor);
         // TODO review for possible inclusion/exclusion
         //table.enableMyLibrarySharing(fileShareWidget);
         //table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
@@ -424,6 +427,20 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private LibraryTableModel<LocalFileItem> getTableModel(LibraryTable table){
         return (LibraryTableModel<LocalFileItem>)table.getModel();
     }   
+    
+//    private void showEmptyFriend() {
+//        JPanel panel = new JPanel(new MigLayout("fill"));
+//        panel.setOpaque(false);
+//        panel.add(getEmptyLibraryMessageComponent(), "align 50% 40%");
+//        JXLayer layer = map.get(null);
+//        layer.getGlassPane().add(panel);
+//        layer.getGlassPane().setVisible(true);
+//    }
+    
+    private void hideEmptyFriend() {
+//        JXLayer layer = map.get(null);
+//        layer.getGlassPane().setVisible(false);
+    }
     
     @Override
     public void dispose() {
@@ -488,7 +505,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private class LockedUI extends LockableUI {
         private JXPanel panel;
         
-        public LockedUI(Category category, LayerEffect... lockedEffects) {
+        public LockedUI(LayerEffect... lockedEffects) {
             panel = new JXPanel(new MigLayout("aligny 50%, alignx 50%"));
             panel.setVisible(false);
         }
@@ -523,7 +540,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     /**
      * Creates the MessageComponent when the user first signs in.
      */
-    public MessageComponent getMessageComponent() {
+    public MessageComponent getFirstTimeMessageComponent() {
         MessageComponent messageComponent;
         messageComponent = new MessageComponent(6, 22, 18, 6);
         
@@ -559,6 +576,26 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
         return messageComponent;
     }
+    
+    public MessageComponent getEmptyLibraryMessageComponent() {
+        MessageComponent messageComponent;
+        messageComponent = new MessageComponent(6, 22, 18, 6);
+        
+        JLabel headerLabel = new JLabel(I18n.tr("What Now?"));
+        messageComponent.decorateHeaderLabel(headerLabel);
+        
+        JLabel minLabel = new JLabel(I18n.tr("Share entire categories or individual files with your friends."));
+        messageComponent.decorateSubLabel(minLabel);
+        
+        JLabel secondMinLabel = new JLabel(I18n.tr("Chat with them about using LimeWire 5"));
+        messageComponent.decorateSubLabel(secondMinLabel);
+
+        messageComponent.addComponent(headerLabel, "push, wrap");
+        messageComponent.addComponent(minLabel, "wrap, gapright 16");
+        messageComponent.addComponent(secondMinLabel, "gapright 16");
+
+        return messageComponent;
+    }
 
     /**
      * Component used to display catalog heading in the category/playlist
@@ -588,6 +625,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         }
     }
     
+    /**
+     * Message bar that sits atop main panel. Displayed when filtering on a sharing list.
+     */
     private class MessagePanel extends JPanel {
         @Resource 
         private Color backgroundColor;
@@ -635,10 +675,45 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     @Override
     protected <T extends FileItem> void addCategorySizeListener(Category category,
             Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
-        // Comment this out & return null if you don't want sizes added to library panels.
         ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredList);
         filteredList.addListEventListener(listener);
         addDisposable(listener);
+    }
+    
+    protected <T extends FileItem> void addCatalogSizeListener(Catalog catalog,
+            Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
+        PlayListListener<T> listener = new PlayListListener<T>(action);
+        addDisposable(listener);
+    }
+    
+    private class PlayListListener<T> implements Disposable {
+        private Action action;
+        
+        public PlayListListener(Action action) {
+            this.action = action;
+            
+            sharingMatchingEditor.addMatcherEditorListener(new MatcherEditor.Listener<LocalFileItem>(){
+                @Override
+                public void changedMatcher(Event<LocalFileItem> matcherEvent) {
+                    updateList();
+                }
+            });
+        }
+        
+        private void updateList() {
+            //if not filtering
+            if(sharingMatchingEditor.getCurrentFilter() == null) {
+                action.setEnabled(true);
+            } else {
+                action.setEnabled(false);
+            }
+        }
+        
+        @Override
+        public void dispose() {
+            // TODO Auto-generated method stub
+            
+        }
     }
     
     /**
@@ -668,6 +743,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         }
 
         private void setText() {
+            //if not filtering
             if(sharingMatchingEditor.getCurrentFilter() == null) {
                 //disable other category if size is 0
                 if(category == Category.OTHER) {

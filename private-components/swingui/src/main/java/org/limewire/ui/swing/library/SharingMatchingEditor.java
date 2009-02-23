@@ -5,14 +5,16 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 
-public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> {
+public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> implements ListEventListener<LocalFileItem> {
 
     private EventList<LocalFileItem> friendList;
     private FriendMatcher matcher = new FriendMatcher();
-    
+    private Friend currentFriend;
     
     private final ShareListManager shareListManager;
     
@@ -21,6 +23,8 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
     }
     
     public void setFriend(Friend friend) {
+        currentFriend = friend;
+        
         if(friend == null || friend.getId() == null) 
             setFriendList(null);
         else if(friend.getId().equals(Friend.P2P_FRIEND_ID))
@@ -29,12 +33,16 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
             setFriendList(shareListManager.getFriendShareList(friend).getSwingModel());
     }
     
+    public Friend getCurrentFriend() {
+        return currentFriend;
+    }
+    
     private void setFriendList(EventList<LocalFileItem> friendList) {
-//        if(this.friendList != null)
-//            this.friendList.removeListEventListener(this);
+        if(this.friendList != null)
+            this.friendList.removeListEventListener(this);
         this.friendList = friendList;
-//        if(friendList != null)
-//            this.friendList.addListEventListener(this);
+        if(friendList != null)
+            this.friendList.addListEventListener(this);
         
         matcher.setFriendList(friendList);
         
@@ -63,5 +71,10 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
             else 
                 return friendList.contains(item);
         }
+    }
+
+    @Override
+    public void listChanged(ListEvent<LocalFileItem> listChanges) {
+        fireChanged(matcher);
     }
 }
