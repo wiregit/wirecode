@@ -601,7 +601,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         public MessagePanel() {            
             GuiUtils.assignResources(this);
             
-            setLayout(new MigLayout("fill, alignx 50%, gap 0, insets 2 5 2 5"));
+            setLayout(new MigLayout("fill, alignx 50%, gap 0, insets 2 10 2 10"));
             setBackground(backgroundColor);
             
             sharingLabel = new JLabel();
