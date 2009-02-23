@@ -33,13 +33,9 @@ public class ToolsMenu extends MnemonicMenu {
     public ToolsMenu(final Provider<AdvancedToolsPanel> advancedProvider,
             final Navigator navigator,
             SearchHandler searchHandler, final LibraryManager libraryManager, final Provider<UploadPanel> uploadPanelProvider) {
+        super(I18n.tr("&Tools"));
 
-        // TODO fberger
-        // super(I18n.tr("&Tools"));
-        super(I18n.tr("Tools"));
-
-//        add(new AbstractAction(I18n.tr("&Downloads")) {
-        add(new AbstractAction(I18n.tr("Downloads")) {
+        add(new AbstractAction(I18n.tr("&Downloads")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NavItem navItem = navigator
@@ -48,8 +44,7 @@ public class ToolsMenu extends MnemonicMenu {
             }
         });
         
-//        add(new AbstractAction(I18n.tr("&Uploads")) {
-        add(new AbstractAction(I18n.tr("Uploads")) {
+        add(new AbstractAction(I18n.tr("&Uploads")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 
@@ -63,8 +58,7 @@ public class ToolsMenu extends MnemonicMenu {
         });
         add(createWhatsNewSubmenu(searchHandler));
         addSeparator();
-//        add(new AbstractAction(I18n.tr("&Advanced Tools...")) {
-        add(new AbstractAction(I18n.tr("Advanced Tools...")) {
+        add(new AbstractAction(I18n.tr("&Advanced Tools...")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AdvancedToolsPanel advancedTools = advancedProvider.get();
@@ -73,8 +67,7 @@ public class ToolsMenu extends MnemonicMenu {
         });
         if (!OSUtils.isMacOSX()) {
             addSeparator();
-//            add(new AbstractAction(I18n.tr("&Options...")) {
-            add(new AbstractAction(I18n.tr("Options...")) {
+            add(new AbstractAction(I18n.tr("&Options...")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     new OptionsDisplayEvent().publish();
@@ -84,15 +77,13 @@ public class ToolsMenu extends MnemonicMenu {
     }
 
     private JMenu createWhatsNewSubmenu(final SearchHandler searchHandler) {
-        // JMenu menu = new MnemonicMenu(I18n.tr("&What's New Search"));
-        JMenu menu = new MnemonicMenu(I18n.tr("What's New Search"));
+        JMenu menu = new MnemonicMenu(I18n.tr("&What's New Search"));
         for (final SearchCategory category : SearchCategory.values()) {
             if (category == SearchCategory.OTHER) {
                 continue;
             }
 
-            // TODO fberger: change back to menu name
-            Action action = new AbstractAction(SearchCategoryUtils.getName(category)) {
+            Action action = new AbstractAction(SearchCategoryUtils.getWhatsNewMenuName(category)) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     searchHandler.doSearch(DefaultSearchInfo.createWhatsNewSearch(category));
