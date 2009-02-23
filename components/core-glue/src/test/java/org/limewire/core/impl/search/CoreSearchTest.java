@@ -104,6 +104,13 @@ public class CoreSearchTest extends BaseTestCase {
         coreSearch.addSearchListener(searchListener);
 
         coreSearch.start();
+        
+        try {
+            coreSearch.start();
+            fail("Illegal search repeat not handled");
+        } catch (IllegalStateException e) {
+            // Expected
+        }
 
         final RemoteFileDesc remoteFileDesc1 = context.mock(RemoteFileDesc.class);
         final QueryReply queryReply1 = context.mock(QueryReply.class);
