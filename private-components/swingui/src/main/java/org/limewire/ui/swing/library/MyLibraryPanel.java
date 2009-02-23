@@ -34,7 +34,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
 import org.jdesktop.jxlayer.plaf.ext.LockableUI;
-import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
@@ -54,7 +53,6 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.ShareAllComboBox;
 import org.limewire.ui.swing.components.SharingFilterComboBox;
@@ -173,10 +171,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
         sharingMatchingEditor = new SharingMatchingEditor(shareListManager);
         sharingComboBox = new SharingFilterComboBox(sharingMatchingEditor);
-        sharingComboBox.setMaximumSize(new Dimension(120, 30));
-        sharingComboBox.setPreferredSize(sharingComboBox.getMaximumSize());
-        
         comboDecorator.decorateLinkComboBox(sharingComboBox);
+        sharingComboBox.setText(I18n.tr("What I'm Sharing"));
+        
         getSelectionPanel().add(sharingComboBox, "gaptop 5, gapbottom 5, alignx 50%, hidemode 3");
         
         sharingComboBox.addSelectionListener(new SelectionListener(){

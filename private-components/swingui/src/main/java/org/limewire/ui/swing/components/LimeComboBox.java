@@ -23,6 +23,7 @@ import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
@@ -228,6 +229,12 @@ public class LimeComboBox extends JXButton {
         }
     }
 
+    @Override
+    public void setBorder(Border border) {
+        super.setBorder(border);        
+        ResizeUtils.updateSize(this, actions);
+    }
+   
     /** Sets the cursor that will be shown when the button is hovered-over. */
     public void setMouseOverCursor(Cursor cursor) {
         mouseOverCursor = cursor;

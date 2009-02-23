@@ -114,7 +114,8 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
             g.drawString(object.getText(), object.getInsets().left, textBaseline);
             
             if (icon != null) {
-                icon.paintIcon(object, g, object.getWidth() - object.getInsets().right + 3, 
+                icon.paintIcon(object, g, 
+                        object.getWidth() - icon.getIconWidth()/2 - 10, 
                         object.getHeight()/2 - icon.getIconHeight()/2);
             }
         } 

@@ -61,8 +61,6 @@ public class SharingFilterComboBox extends LimeComboBox {
         
         overrideMenu(menu);
         
-        setText(I18n.tr("What I'm Sharing"));
-        
         subMenuText = decorateLabel(new JLabel(I18n.tr("with:")));
         
         SharingListener listener = new SharingListener();
