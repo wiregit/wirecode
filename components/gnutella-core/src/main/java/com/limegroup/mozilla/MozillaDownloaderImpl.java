@@ -287,7 +287,6 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
 
     @Override
     public void finish() {
-        pause();
         download.cancelDownload();
         download.removeDownload();
         shouldBeRemoved.set(true);
