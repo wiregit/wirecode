@@ -53,8 +53,10 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.MessageComponent;
+import org.limewire.ui.swing.components.ShareAllComboBox;
 import org.limewire.ui.swing.components.SharingFilterComboBox;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
@@ -64,6 +66,7 @@ import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
+import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
@@ -82,6 +85,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -129,7 +133,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     
     private MessagePanel messagePanel;
     
-    private LimeComboBox shareAllComboBox;
+    private ShareAllComboBox shareAllComboBox;
     private GhostDropTargetListener ghostDropTargetListener;
 
     @Inject
@@ -146,7 +150,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                           ShareListManager shareListManager,
                           TextFieldDecorator textFieldDecorator,
                           ComboBoxDecorator comboDecorator,
-                          ButtonDecorator buttonDecorator) {
+                          ButtonDecorator buttonDecorator,
+                          XMPPService xmppService,
+                          FriendsSignInPanel friendSignInPanel) {
         
         super(headerBarDecorator, textFieldDecorator);
         
@@ -169,8 +175,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         sharingComboBox = new SharingFilterComboBox(sharingMatchingEditor);
         sharingComboBox.setMaximumSize(new Dimension(120, 30));
         sharingComboBox.setPreferredSize(sharingComboBox.getMaximumSize());
-
-        buttonDecorator.decorateLightFullButton(messagePanel.getButton());
         
         comboDecorator.decorateLinkComboBox(sharingComboBox);
         getSelectionPanel().add(sharingComboBox, "gaptop 5, gapbottom 5, alignx 50%, hidemode 3");
@@ -193,8 +197,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         this.knownFriends.add(Friend.P2P_FRIEND_ID);
         getSelectionPanel().updateCollectionShares(knownFriends);
         
-        shareAllComboBox = new LimeComboBox();
-        shareAllComboBox.setText("Share");
+        shareAllComboBox = new ShareAllComboBox(shareListManager.getGnutellaShareList(), xmppService, friendSignInPanel);
         comboDecorator.decorateDarkFullComboBox(shareAllComboBox);
         
         addHeaderComponent(shareAllComboBox, "cell 0 0, alignx left");
@@ -637,19 +640,19 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         private Font labelFont;
         
         private final JLabel sharingLabel;
-        private final JXButton showAllButton;
+        private final HyperlinkButton showAllButton;
         
         public MessagePanel() {            
             GuiUtils.assignResources(this);
             
-            setLayout(new MigLayout("fill, alignx 50%, gap 0, insets 2 10 2 10"));
+            setLayout(new MigLayout("fill, alignx 50%, gap 0, insets 2 10 2 10", "", "25!"));
             setBackground(backgroundColor);
             
             sharingLabel = new JLabel();
             sharingLabel.setForeground(labelColor);
             sharingLabel.setFont(labelFont);
             
-            showAllButton = new JXButton(I18n.tr("Show All Files"));
+            showAllButton = new HyperlinkButton(I18n.tr("Show All Files"));
             showAllButton.addActionListener(new ActionListener(){
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -661,10 +664,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             add(showAllButton);
             
             setVisible(false);
-        }
-        
-        public JXButton getButton() {
-            return showAllButton;
         }
         
         public void setMessage(String friendRenderName) {
