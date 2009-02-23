@@ -16,6 +16,15 @@
         <echo message="${ivy.sorted.modules}"/>
         <subant target="jar" buildpathref="build-path"/>        
     </target>
+
+    <target name="clean">
+        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        <ivy:buildlist reference="build-path" onMissingDescriptor="skip">
+          <fileset dir="." includes="components/*/build.xml,core/build.xml,private-components/*/build.xml" excludes="build.xml"/>
+        </ivy:buildlist>
+        <echo message="${ivy.sorted.modules}"/>
+        <subant target="clean" buildpathref="build-path"/>        
+    </target>
     
     <target name="clean-deps">
         <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>

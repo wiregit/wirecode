@@ -1,14 +1,17 @@
 <ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
-    <info organisation="org.limewire" module="common" />
-    <!--publications>                
-        <artifact name="common"/>    
-    </publications-->
+    <info organisation="org.limewire" module="common"/>
+    <configurations>
+        <include file="common-configurations.xml"/>
+    </configurations>
+    <publications>
+        <artifact name="common" conf="master"/>
+    </publications>
     <dependencies>
-        <dependency org="commons-logging" name="commons-logging" rev="1.1"/>
-        <dependency org="com.ibm.icu" name="icu4j" rev="3.4.4"/>
-        <dependency org="com.google.code.guice" name="guice" rev="2.0-snapshot-20080915"/>
-        <dependency org="com.google.code.guice" name="assistedinject" rev="2.0-snapshot-20080523"/>        
-        <dependency org="net.jcip" name="jcip-annotations" rev="1.0"/>
+        <dependency org="commons-logging" name="commons-logging" rev="1.1" conf="compile,runtime"/>
+        <dependency org="com.ibm.icu" name="icu4j" rev="3.4.4" conf="compile,runtime"/>
+        <dependency org="com.google.code.guice" name="guice" rev="2.0-snapshot-20080915" conf="compile,runtime"/>
+        <!--dependency org="com.google.code.guice" name="assistedinject" rev="2.0-snapshot-20080523" conf="default"/-->
+        <!--dependency org="net.jcip" name="jcip-annotations" rev="1.0" conf="default"/-->
         <dependency org="org.limewire" name="lw-test-util" rev="latest.integration" conf="test"/>
     </dependencies>
 </ivy-module>

@@ -62,5 +62,9 @@
     <target name="clover2html" depends="initialize">
         <do.clover2html component="${component}"/>
     </target>
+
+    <target name="runtime" depends="initialize">
+        <do.resolve-dependencies component="${component}" conf="runtime"/>
+    </target>
 	
 </project>

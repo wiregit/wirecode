@@ -1,9 +1,15 @@
 <ivy-module version="1.0"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
     <info organisation="org.limewire" module="core-settings"/>
-    <!--publications>                
-        <artifact name="core-settings"/>    
-    </publications-->
+    <configurations>
+        <include file="../common/common-configurations.xml"/>
+    </configurations>
+    <publications>
+        <artifact name="core-settings" conf="master"/>
+    </publications>
     <dependencies>
-        <dependency org="org.limewire" name="setting" rev="latest.integration"/>
+        <dependency org="org.limewire" name="setting" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="common" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="commons-logging" name="commons-logging" rev="1.1" conf="compile,runtime"/>
+        <dependency org="com.google.code.guice" name="guice" rev="2.0-snapshot-20080915" conf="compile,runtime"/>
     </dependencies>
 </ivy-module>

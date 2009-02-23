@@ -13,9 +13,6 @@
         <path id="build.limewire.core.classpath">
             <fileset dir="${build.limewire.core.home.lib}/default/" includes="**/*"/>
         </path>
-        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
-        <ivy:resolve file="${limewire.core.home}/ivy.xml"/>
-        <ivy:retrieve pattern="${build.limewire.core.home.lib}/[conf]/[type]/[artifact]-[version].[ext]"/>
     </target>
     
     <!-- compiles the core & components -->
@@ -28,6 +25,9 @@
 	<target name="compile-core" 
 	        description="Compiles just the core."
 	        depends="initialize">
+        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        <ivy:resolve file="${limewire.core.home}/ivy.xml"/>
+        <ivy:retrieve pattern="${build.limewire.core.home.lib}/[conf]/[type]/[artifact]-[version].[ext]"/>
 	    <javac destdir      ="${build.limewire.core.classes}"
 			   debug	    ="${compile.debug}"
 			   deprecation  ="${compile.deprecation}"
@@ -54,13 +54,15 @@
             depends="initialize">
 		<delete>
 			<fileset dir="${build.limewire.core.classes}" includes="**/*.class"/>
+            <fileset dir="${build.limewire.core.home.lib}" includes="**/*"/>
+            <fileset dir="${limewire.core.home}/dist" includes="**/*"/>
 		</delete>
 	</target>
     
     <target name="clean" description="Cleans just the core" depends="clean-core"/>
     <target name="compile" description="Compiles just the core" depends="compile-core"/>
     
-    <target name="jar" depends="initialize">
+    <target name="jar" depends="initialize,compile-core">
         <mkdir dir="${limewire.core.home}/dist"/>
         <jar destfile="${limewire.core.home}/dist/core.jar"
             	 compress="@{compress}"
@@ -69,7 +71,8 @@
                  excludes="@{excludes}"
             >
             </jar>
-            <ivy:publish resolver="local" overwrite="true" forcedeliver="true" artifactspattern="${limewire.core.home}/dist/core.jar" srcivypattern="${limewire.core.home}/dist/ivy.xml"/>
+        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        <ivy:publish resolver="local" overwrite="true" forcedeliver="true" artifactspattern="${limewire.core.home}/dist/core.jar" srcivypattern="${limewire.core.home}/dist/ivy.xml"/>
     </target>
     
     <!--
