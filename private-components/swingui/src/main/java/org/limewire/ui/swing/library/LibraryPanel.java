@@ -1,24 +1,16 @@
 package org.limewire.ui.swing.library;
 
 import javax.swing.Action;
-import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.settings.LibrarySettings;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 class LibraryPanel extends AbstractFileListPanel {
 
