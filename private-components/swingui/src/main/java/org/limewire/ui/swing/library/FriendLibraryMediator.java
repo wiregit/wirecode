@@ -1,10 +1,12 @@
 package org.limewire.ui.swing.library;
 
-import java.awt.event.ActionEvent;
-
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
@@ -17,9 +19,7 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
-import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
@@ -241,15 +241,18 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 	 * what state their friend is in. 
 	 */
     private class Message implements ListEventListener<LocalFileItem>, Disposable {                
+        
+        private static final String SHARE_ANCHOR = "<a href='#share'>";
+        private static final String CHAT_ANCHOR = "<a href='#chat'>";
+        private static final String CLOSING_ANCHOR = "</a>";
+        
+        
         private MessageComponent messageComponent;
         
         private EventList<LocalFileItem> friendList;
         private MessageTypes messageType;
         private final JLabel firstLabel;
-        private final JLabel chatLabel;
-        private final JLabel shareLabel;;
-        private final HyperlinkButton shareLink;
-        private final HyperlinkButton chatLink;
+        private final JTextPane shareLabel;
         
         public Message(EventList<LocalFileItem> friendList, MessageTypes messageType) {
             this.friendList = friendList;
@@ -261,25 +264,34 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             firstLabel = new JLabel();
             messageComponent.decorateHeaderLabel(firstLabel);
 
-            shareLink = new HyperlinkButton(new ShowSharingAction());
-            messageComponent.decorateFont(shareLink);
-
-            shareLabel = new JLabel();
+            shareLabel = new JTextPane();
+            shareLabel.setContentType("text/html");
+            shareLabel.setOpaque(false);
+            shareLabel.setEditable(false);
+            shareLabel.setBorder(null);
+            shareLabel.setSelectionColor(null);
+            shareLabel.addHyperlinkListener(new HyperlinkListener() {
+                @Override
+                public void hyperlinkUpdate(HyperlinkEvent e) {
+                    if (e.getEventType() == EventType.ACTIVATED) {
+                        String target = e.getDescription();
+                        if (target.equals("#share")) {
+                            showSharingCard();
+                        } else if (target.equals("#chat")) {
+                            friendsPanel.setChatPanelVisible(true);
+                            friendsPane.fireConversationStarted(friend.getId());
+                        } else {
+                            throw new IllegalStateException("unknown target: " + target);
+                        }
+                    }
+                }
+            });
             messageComponent.decorateSubLabel(shareLabel);
 
-            chatLink = new HyperlinkButton(new ChatWithAction());
-            messageComponent.decorateFont(chatLink);
-
-            chatLabel = new JLabel();
-            messageComponent.decorateSubLabel(chatLabel);
-            
             setMessage();
             
             messageComponent.addComponent(firstLabel, "span, gapbottom 0, wrap");
-            messageComponent.addComponent(shareLink,"");
             messageComponent.addComponent(shareLabel,"");
-            messageComponent.addComponent(chatLink,"");
-            messageComponent.addComponent(chatLabel,"");
             
             setMessage();
         }
@@ -312,13 +324,15 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 */
         private void setOfflineMessage() {
             firstLabel.setText(I18n.tr("{0} is offline", friend.getRenderName()));
-            if(friendList.size() == 1)
-                setShareText(I18n.tr("Sharing"), I18n.tr("1 file with your friend."));
-            else if(friendList.size() > 1)
-                setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with your friend.", friendFileList.size()));
-            else
-                setShareText(I18n.tr("Share"), I18n.tr("files with your friend."));
-            setChatText(null, null);
+            if(!friendList.isEmpty()) {
+                // {0}, {1}: html tags, {2}: number of files shared
+                setShareText(I18n.trn("{0}Sharing{1} {2} file with your friend.", "{0}Sharing{1} {2} files with our friend.", 
+                        friendList.size(), SHARE_ANCHOR, CLOSING_ANCHOR, friendList.size()));
+            }
+            else {
+                // {0}, {1}: html tags
+                setShareText(I18n.tr("{0}Share{1} files with your friend.", SHARE_ANCHOR, CLOSING_ANCHOR));
+            }
         }
         
         /**
@@ -326,15 +340,14 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 */
         private void setOnlineMessage() {
             firstLabel.setText(I18n.tr("{0} isn't on LimeWire", friend.getRenderName()));
-            if(friendList.size() == 1){
-                setShareText(I18n.tr("Sharing"), I18n.tr("1 file with your friend. "));
-                setChatText(I18n.tr("Chat"), I18n.tr("about using LimeWire 5."));
-            } else if(friendList.size() > 1){
-                setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with your friend. ", friendFileList.size()));
-                setChatText(I18n.tr("Chat"), I18n.tr("about using LimeWire 5."));
-            } else{
-                setShareText(I18n.tr("Share"), I18n.tr("files with your friend and"));
-                setChatText(I18n.tr("chat"), I18n.tr("about using LimeWire 5."));
+            if(!friendList.isEmpty()) {
+                // {0}, {1}: html tags, {2}: number of files shared
+                setShareText(I18n.trn("{0}Sharing{1} {2} file with your friend.", "{0}Sharing{1} {2} files with your friend.", friendList.size(), SHARE_ANCHOR, CLOSING_ANCHOR, friendFileList.size()) + " "
+                        // {0}, {1}: html tags
+                        + I18n.tr("{0}Chat{1} about using LimeWire 5.", CHAT_ANCHOR, CLOSING_ANCHOR));
+            } else {
+                // {0}, {1}, {2}, {3}: html tags
+                setShareText(I18n.tr("{0}Share{1} files with your friend and {2}chat{3} about using LimeWire 5.", SHARE_ANCHOR, CLOSING_ANCHOR, CHAT_ANCHOR, CLOSING_ANCHOR));
             }
         }
         
@@ -342,14 +355,11 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 * Friend signed onto LimeWire and currently retrieving their Library.
 		 */
         private void setLWLoading() {
+            hideShareText();
             if(!friend.isAnonymous()) {
                 firstLabel.setText(I18n.tr("Loading {0}'s files...", friend.getRenderName()));
-                setShareText(null, null);
-                setChatText(null, null);
             } else {
                 firstLabel.setText(I18n.tr("Loading files..."));
-                setShareText(null, null);
-                setChatText(null, null);
             }
         }
         
@@ -359,13 +369,11 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         private void setLWNoFiles() {
             if(!friend.isAnonymous()) {
                 firstLabel.setText(I18n.tr("{0} isn't sharing with you", friend.getRenderName()));
-                setShareText(null, null);
-                setChatText(I18n.tr("Chat"), I18n.tr("about sharing with you."));
+                setShareText(I18n.tr("{0}Chat{1} about sharing with you.", CHAT_ANCHOR, CLOSING_ANCHOR));
             } else {
                 //this should never happen
                 firstLabel.setText(I18n.tr("This person isn't sharing any files with you."));
-                setShareText(null, null);
-                setChatText(null, null);
+                hideShareText();
             }
         }
         
@@ -373,14 +381,11 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 * Friend signed onto LimeWire, browse failed.
 		 */
         private void setLWConnectionError() {
+            hideShareText();
             if(!friend.isAnonymous()) {
                 firstLabel.setText(I18n.tr("There was a problem viewing {0}'s files.", friend.getRenderName()));
-                setShareText(null, null);
-                setChatText(null, null);
             } else {
                 firstLabel.setText(I18n.tr("There was a problem viewing this person's files."));
-                setShareText(null, null);
-                setChatText(null, null);
             }
         }
         
@@ -388,26 +393,15 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
          * Sets the text of the share link and share label. If the share text is null,
          * both the link and the label are hidden.
          */
-        private void setShareText(String shareLinkText, String shareText) {
-            shareLink.setVisible(shareText != null);
-            shareLabel.setVisible(shareText != null);
-            
-            shareLink.setText(shareLinkText);
-            shareLabel.setText(shareText);
+        private void setShareText(String shareText) {
+            shareLabel.setVisible(true);
+            shareLabel.setText("<body>" + shareText + "</body>");
         }
         
-        /**
-         * Sets the text of the chat link and chat label. If the chat text is null,
-         * both the link and the label are hidden.
-         */
-        private void setChatText(String chatLinkText, String chat) {
-            chatLink.setVisible(chat != null);
-            chatLabel.setVisible(chat != null);
-            
-            chatLink.setText(chatLinkText);
-            chatLabel.setText(chat);
+        private void hideShareText() {
+            shareLabel.setVisible(false);
         }
-
+        
         @Override
         public void listChanged(ListEvent<LocalFileItem> listChanges) {
             setMessage();
@@ -428,34 +422,6 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                         shareListManager.getOrCreateFriendShareList(friend)));
             }
             super.showSharingCard();            
-        }
-    }
-    
-    /**
-     * Action which displays the sharing view for this friend
-     */
-    private class ShowSharingAction extends AbstractAction {
-        public ShowSharingAction() {
-            putValue(AbstractAction.NAME, I18n.tr("Share"));
-        }
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            showSharingCard();
-        }
-    }
-    
-    /**
-     * Action which displays the chat window and starts a chat with
-     * this friend.
-     */
-    private class ChatWithAction extends AbstractAction {
-        public ChatWithAction() {
-            putValue(AbstractAction.NAME, I18n.tr("Chat"));
-        }
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            friendsPanel.setChatPanelVisible(true);
-            friendsPane.fireConversationStarted(friend.getId());
         }
     }
 }
