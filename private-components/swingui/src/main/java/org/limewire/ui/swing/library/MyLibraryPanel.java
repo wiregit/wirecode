@@ -53,6 +53,7 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.SharingFilterComboBox;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
@@ -127,6 +128,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private final SharingMatchingEditor sharingMatchingEditor;
     
     private MessagePanel messagePanel;
+    
+    private LimeComboBox shareAllComboBox;
 
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
@@ -189,6 +192,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         this.knownFriends.add(Friend.P2P_FRIEND_ID);
         getSelectionPanel().updateCollectionShares(knownFriends);
         
+        shareAllComboBox = new LimeComboBox();
+        shareAllComboBox.setText("Share");
+        
+        addHeaderComponent(shareAllComboBox, "cell 0 0, alignx left");
         addHeaderComponent(playerPanel, "cell 0 0, grow");
         playerPanel.setMaximumSize(new Dimension(999,999));
         playerPanel.setPreferredSize(new Dimension(999,999));

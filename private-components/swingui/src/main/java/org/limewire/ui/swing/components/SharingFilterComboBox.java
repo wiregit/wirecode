@@ -115,7 +115,7 @@ public class SharingFilterComboBox extends LimeComboBox {
             
             SharingFilterComboBox.this.fireChangeEvent(this);
         }
-        
+
         public String toString() {
             return friend.getRenderName();
         }
