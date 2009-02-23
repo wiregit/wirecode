@@ -50,8 +50,6 @@ public class ShareAllComboBox extends LimeComboBox {
         
         overrideMenu(menu);
         
-        setText(I18n.tr("Share"));
-        
         createActions(gnutellaFileList);
         
         SharingListener listener = new SharingListener();

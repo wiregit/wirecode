@@ -196,6 +196,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         
         shareAllComboBox = new ShareAllComboBox(shareListManager.getGnutellaShareList(), xmppService, friendSignInPanel);
         comboDecorator.decorateDarkFullComboBox(shareAllComboBox);
+        shareAllComboBox.setText(I18n.tr("Share"));
         
         addHeaderComponent(shareAllComboBox, "cell 0 0, alignx left");
         addHeaderComponent(playerPanel, "cell 0 0, grow");
