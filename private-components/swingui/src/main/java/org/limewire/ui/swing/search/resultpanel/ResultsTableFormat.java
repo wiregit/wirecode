@@ -30,11 +30,20 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     
     private final String sortID;
 
+    /**
+     * Constructs a ResultsTableFormat with the specified array of column
+     * descriptors.
+     */
     public ResultsTableFormat(ColumnStateInfo... columnInfo) {
         this("", -1, -1, -1, columnInfo);
     }
     
-    public ResultsTableFormat(String sortID, int nameColumn, int fromColumn, int spamColumn, ColumnStateInfo... columnInfo) {
+    /**
+     * Constructs a ResultsTableFormat with the specified sort identifier,
+     * Name/From/Spam column indices, and array of column descriptors.
+     */
+    public ResultsTableFormat(String sortID, int nameColumn, int fromColumn, 
+            int spamColumn, ColumnStateInfo... columnInfo) {
         super(columnInfo);
         this.sortID = sortID;
         this.nameColumn = nameColumn;
@@ -114,6 +123,10 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
         return new NameComparator();
     }
     
+    public Comparator getQualityComparator() {
+        return new QualityComparator();
+    }
+    
     public IsSpamComparator getSpamComparator() {
         return new IsSpamComparator();
     }
@@ -158,6 +171,27 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
                 name =  result.getPropertyString(FilePropertyKey.TITLE);
             }
             return name;
+        }
+    }
+
+    /**
+     * Compares the quality value for a pair of VisualSearchResult objects.
+     */
+    public static class QualityComparator implements Comparator<VisualSearchResult> {
+        @Override
+        public int compare(VisualSearchResult o1, VisualSearchResult o2) {
+            Object quality1 = o1.getProperty(FilePropertyKey.QUALITY);
+            Object quality2 = o2.getProperty(FilePropertyKey.QUALITY);
+            
+            if (quality1 instanceof Long) {
+                if (quality2 instanceof Long) {
+                    return ((Long) quality1).compareTo((Long) quality2);
+                } else {
+                    return 1;
+                }
+            } else {
+                return (quality2 instanceof Long) ? -1 : 0;
+            }
         }
     }
     
