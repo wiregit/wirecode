@@ -54,7 +54,10 @@ public class OOBHandler implements MessageHandler, Runnable {
     private static final int IGNORED_ADDRESS_LIFETIME = 10 * 60 * 1000;
     /** Magic port number that means an address should be ignored */
     private static final int IGNORE = -1;
-	
+    /** Don't ignore localhost (used for testing) */
+    private static final int LOCALHOST =
+        ByteUtils.leb2int(new byte[]{127, 0, 0, 1}, 0);
+
 	private final MessageRouter router;
 	
 	private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
@@ -298,6 +301,8 @@ public class OOBHandler implements MessageHandler, Runnable {
     
     private boolean shouldIgnore(byte[] addr, int port) {
         Integer address = ByteUtils.leb2int(addr, 0);
+        if(address == LOCALHOST)
+            return false;
         long now = System.currentTimeMillis();
         synchronized(responderPorts) {
             ResponderPort rp = responderPorts.get(address);
