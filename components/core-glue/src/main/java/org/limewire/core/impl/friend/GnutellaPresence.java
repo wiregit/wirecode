@@ -10,13 +10,13 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * An implementation of FriendPresence for a Gnutella address.  For example,
@@ -115,10 +115,10 @@ public class GnutellaPresence implements FriendPresence {
             int i3 = ByteUtils.ubyte2int(addr[2]);
             int i4 = ByteUtils.ubyte2int(addr[3]);
             
-            if(LimeWireUtils.isTestingVersion())
-                return i1 + "." + i2 + "." + i3 + "." + i4;
-            else
+            if(SearchSettings.FRIENDLY_ADDRESS_DESCRIPTIONS.getValue())
                 return adjs[i1] + nouns[i2] + "-" + i3 + "-" + i4;
+            else
+                return i1 + "." + i2 + "." + i3 + "." + i4;
         } else {
             return address.getAddressDescription();
         }

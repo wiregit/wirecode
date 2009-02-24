@@ -330,6 +330,12 @@ public final class SearchSettings extends LimeProps {
     public static final FloatSetting FILTER_SPAM_RESULTS =
         FACTORY.createFloatSetting("FILTER_SPAM_RESULTS_2", 0.85f, 0.5f, 1.0f);
     
+    /**
+     * Whether to replace IP addresses with friendly-looking strings
+     */
+    public static final BooleanSetting FRIENDLY_ADDRESS_DESCRIPTIONS =
+        FACTORY.createBooleanSetting("FRIENDLY_ADDRESS_DESCRIPTIONS", true);
+
 	/**
      * Do not issue query keys more than this often
      */
