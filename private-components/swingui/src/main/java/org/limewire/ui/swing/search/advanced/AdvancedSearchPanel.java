@@ -1,0 +1,116 @@
+package org.limewire.ui.swing.search.advanced;
+
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.properties.PropertyDictionary;
+import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.search.UiSearchListener;
+import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.I18n;
+
+import com.google.inject.Inject;
+
+/** The container for advanced searching. */
+public class AdvancedSearchPanel extends JXPanel {
+    
+    public static final String NAME = "ADVANCED_SEARCH";
+    
+    private final List<UiSearchListener> uiSearchListeners = new ArrayList<UiSearchListener>();
+    private final PropertyDictionary propertyDictionary;
+    
+    private final Action searchAction;
+    private AdvancedPanel visibleComponent = null;
+
+    @Inject
+    public AdvancedSearchPanel(PropertyDictionary propertyDictionary) {
+        this.propertyDictionary = propertyDictionary;
+        
+        setLayout(new MigLayout("hidemode 3"));
+        
+        JLabel heading = new JLabel(I18n.tr("Advanced Search"));
+        JLabel description = new JLabel(I18n.tr("Search for the following type of file:"));
+        FontUtils.bold(heading);
+        FontUtils.changeSize(heading, 5);
+        FontUtils.changeSize(description, 3);
+        add(heading, "wrap");
+        add(description, "gapleft 1, gaptop 6, wrap");
+        addCategory(SearchCategory.AUDIO, createAudioFields());
+        addCategory(SearchCategory.VIDEO, createVideoFields());
+        addCategory(SearchCategory.IMAGE, createImageFields());
+        addCategory(SearchCategory.DOCUMENT, createDocumentFields());
+        addCategory(SearchCategory.PROGRAM, createProgramFields());
+        searchAction = new AbstractAction(I18n.tr("Advanced Search")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(visibleComponent != null) {
+                    SearchInfo info = visibleComponent.getSearchInfo();
+                    if(info != null) {
+                        for(UiSearchListener uiSearchListener : uiSearchListeners) {
+                            uiSearchListener.searchTriggered(info);
+                        }
+                    }
+                }
+            }
+        };
+        add(new JButton(searchAction), "gapbefore push");
+    }
+    
+    private AdvancedPanel createProgramFields() {
+        return new AdvancedProgramPanel();
+    }
+
+    private AdvancedPanel createDocumentFields() {
+        return new AdvancedDocumentPanel();
+    }
+
+    private AdvancedPanel createImageFields() {
+        return new AdvancedImagePanel();
+    }
+
+    private AdvancedPanel createVideoFields() {
+        return new AdvancedVideoPanel(propertyDictionary);
+    }
+
+    private AdvancedPanel createAudioFields() {
+        return new AdvancedAudioPanel(propertyDictionary);
+    }
+
+    private void addCategory(SearchCategory category, final AdvancedPanel component) {
+        HyperlinkButton button = new HyperlinkButton(new AbstractAction(I18n.tr(category.getCategory().getPluralName())) {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if(visibleComponent != component) {
+                    if(visibleComponent != null) {
+                        visibleComponent.setVisible(false);
+                    }
+                    visibleComponent = component;
+                    component.setVisible(true);
+                } else {
+                    visibleComponent.setVisible(false);
+                    visibleComponent = null;
+                }
+            }
+        });
+        add(button, "gapleft 6, gaptop 6, wrap");
+        add(component, "wmin 200, growx, gapleft 6, gaptop 6, gapbottom 6, wrap");
+        component.setVisible(false);
+    }
+
+    /** Adds a listener that will be notified when an advanced search is triggered. */
+    public void addSearchListener(UiSearchListener uiSearchListener) {
+        uiSearchListeners.add(uiSearchListener);
+    }
+
+}
