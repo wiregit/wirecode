@@ -431,4 +431,58 @@ public class CoreSearchTest extends BaseTestCase {
         
         context.assertIsSatisfied();
     }
+    
+    @SuppressWarnings("unchecked")
+    public void testRestart() {
+        Mockery context = new Mockery();
+        
+        final byte[] guid1 = new byte[] {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+        final byte[] guid2 = new byte[] {0,1,2,3,4,5,6,'x','n',9,10,11,12,13,14,15};
+        
+        final EventBroadcaster<SearchEvent> searchEventBroadcaster = context.mock(EventBroadcaster.class);
+        final QueryReplyListenerList listenerList = context.mock(QueryReplyListenerList.class);
+        final SearchServices searchServices = context.mock(SearchServices.class);
+        final SearchListener listener = context.mock(SearchListener.class);
+        final SearchDetails details = context.mock(SearchDetails.class);
+        
+        final CoreSearch search = new CoreSearch(details, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null);
+        
+        context.checking(new Expectations() {
+            {
+                exactly(1).of(searchEventBroadcaster).broadcast(new SearchEvent(search, SearchEvent.Type.STOPPED));
+                exactly(1).of(listenerList).removeQueryReplyListener(with(same(guid1)),
+                        with(any(QueryReplyListener.class)));
+                exactly(1).of(searchServices).stopQuery(new GUID(guid1));
+                exactly(1).of(listener).searchStopped(search);
+                exactly(1).of(listener).searchStarted(with(any(Search.class)));
+                exactly(1).of(searchEventBroadcaster).broadcast(new SearchEvent(search, SearchEvent.Type.STARTED));
+                exactly(1).of(listenerList).addQueryReplyListener(with(same(guid2)),
+                        with(any(QueryReplyListener.class)));
+                exactly(1).of(searchServices).queryWhatIsNew(with(same(guid2)),
+                        with(same(MediaType.getOtherMediaType())));
+                
+                allowing(searchServices).newQueryGUID();
+                will(returnValue(guid2));
+                allowing(details).getSearchType();
+                will(returnValue(SearchType.WHATS_NEW));
+                allowing(details).getSearchCategory();
+                will(returnValue(SearchCategory.OTHER));
+                
+            }});
+            
+        
+        try {
+            search.repeat();
+            fail("Should not be able to repeat a search that has not started");
+        } catch (IllegalStateException e) {
+            // Expected
+        }
+
+        search.searchGuid = guid1;
+        search.processingStarted.set(true);
+        search.addSearchListener(listener);
+        search.repeat();
+        
+        context.assertIsSatisfied();
+    }
 }

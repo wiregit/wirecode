@@ -54,7 +54,7 @@ public class CoreSearch implements Search {
     private final CachedGeoLocation geoLocation;
     private final LimeXMLDocumentFactory xmlDocumentFactory;
 
-    /*
+    /**
      * A search is considered processed when it is acted upon (started or stopped)
      * -cannot repeat a search that has not yet been processed
      * -cannot start a search that has already been processed
@@ -68,6 +68,9 @@ public class CoreSearch implements Search {
     private final ScheduledExecutorService backgroundExecutor;
     private final EventBroadcaster<SearchEvent> searchEventBroadcaster;
     
+    /**
+     * The guid of the last active search
+     */
     volatile byte[] searchGuid;
 
     @AssistedInject
