@@ -78,10 +78,13 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         return friend.getFirstName();
     } 
     
+    /**
+	 * Opens My Library and applies a filter on this friend.
+	 */
     private class ViewSharedLibraryAction extends AbstractAction {
         private final LibraryNavigator libraryNavigator;
         
-        public ViewSharedLibraryAction(LibraryNavigator libraryNavigator){ //FriendLibraryMediator friendLibraryMediator) {
+        public ViewSharedLibraryAction(LibraryNavigator libraryNavigator){
             this.libraryNavigator = libraryNavigator;
             putValue(Action.NAME, I18n.tr("Share"));
             putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share your files with {0}", friend.getRenderName()));

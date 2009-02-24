@@ -8,6 +8,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.File;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -131,7 +133,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private SharingFilterComboBox sharingComboBox;
     private final SharingMatchingEditor sharingMatchingEditor;
     
-    private MessagePanel messagePanel;
+    private SharingMessagePanel messagePanel;
     private NotSharingPanel notSharingPanel;
     
     private ShareAllComboBox shareAllComboBox;
@@ -172,7 +174,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
         sharingMatchingEditor = new SharingMatchingEditor(shareListManager);
-        sharingComboBox = new SharingFilterComboBox(sharingMatchingEditor);
+        sharingComboBox = new SharingFilterComboBox(sharingMatchingEditor, this);
         comboDecorator.decorateLinkComboBox(sharingComboBox);
         sharingComboBox.setText(I18n.tr("What I'm Sharing"));
         
@@ -232,6 +234,20 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             }
         });
         repaintTimer.setRepeats(false);
+        
+        addComponentListener(new ComponentListener(){
+            // when changing views, reset to show all files
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                showAllFiles();
+            }
+            @Override
+            public void componentMoved(ComponentEvent e) {}
+            @Override
+            public void componentResized(ComponentEvent e) {}
+            @Override
+            public void componentShown(ComponentEvent e) {}
+        });
     }
     
     @Inject
@@ -261,10 +277,16 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         getSelectionPanel().updateCollectionShares(knownFriends);
     }
     
+    /**
+	 * Will programtically select a friend to filter on.
+	 */
     public void showSharingState(Friend friend) {
         sharingComboBox.selectFriend(friend);
     }
     
+    /**
+	 * Will cancel filtering and return My Library to a normal state.
+	 */
     public void showAllFiles() {
         sharingMatchingEditor.setFriend(null);
         sharingComboBox.setVisible(true);
@@ -272,6 +294,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         hideEmptyFriend();
     }
     
+    /**
+	 * Override the components to add in our message panel that gets displayed
+     * above the table and nav when filtering on a friend.
+	 */
     @Override
     protected void layoutComponent() {
         setLayout(new MigLayout("fill, gap 0, insets 0"));
@@ -282,8 +308,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         addMainPanels();
     }
     
+    /**
+	 * Panel to display above nav and table when filtering is enabled.
+	 */
     private void addMessage() {
-        messagePanel = new MessagePanel();
+        messagePanel = new SharingMessagePanel();
         
         add(messagePanel, "dock north, growx, hidemode 3");  
     }
@@ -359,8 +388,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 }
             });
         }
-        // this shouldn't be necesarry, the panel above isn't fill the viewport if we don't set this at
-        // jxlayer creation time. 
+		// The glass layer we display messages in.
         LockableUI blurUI = new LockedUI();
         JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
         map.put(category, jxlayer);
@@ -428,6 +456,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         return (LibraryTableModel<LocalFileItem>)table.getModel();
     }   
     
+    /**
+	 * Displays the Not Sharing Message in this category.
+	 */
     private void showEmptyFriend(Category category) {
         if(category != null) {
             JPanel panel = new JPanel(new MigLayout("fill"));
@@ -440,6 +471,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         }
     }
     
+    /**
+	 * Hides the Not Sharing Message in this particular category.
+	 */
     private void hideEmptyFriend(Category category) {
         if(category != null) {
             JXLayer layer = map.get(category);
@@ -447,6 +481,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         }
     }
     
+    /**
+	 * Hides the Not Sharing Message in all the tables.
+	 */
     private void hideEmptyFriend() {
         for(Category category : Category.values()) {
             JXLayer layer = map.get(category);
@@ -492,6 +529,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     }
 
     public void selectItem(File file, Category category) {
+        showAllFiles();
         select(category);
         selectableMap.get(category).selectAndScrollTo(file);
     }
@@ -505,10 +543,15 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     }
 
     public void selectItem(URN urn, Category category) {
+        showAllFiles();
         select(category);
         selectableMap.get(category).selectAndScrollTo(urn);        
     }    
     
+    /**
+	 * Returns the Table that is currently shown. Returns null if a playlist
+	 * is being shown.
+	 */ 
     public SelectAllable<LocalFileItem> getTable() {
         Category category = getSelectedCategory();
         if(category == null)
@@ -558,6 +601,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     
     /**
      * Creates the MessageComponent when the user first signs in.
+	 * This message is displayed atop the table and gives helpful
+     * advice about what to do
      */
     public MessageComponent getFirstTimeMessageComponent() {
         MessageComponent messageComponent;
@@ -596,6 +641,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         return messageComponent;
     }
     
+    /**
+	 * Returns the MessageComponent when not sharing with a friend.
+	 */
     public MessageComponent getEmptyLibraryMessageComponent(Friend friend) {
         if(notSharingPanel == null) {
             notSharingPanel = new NotSharingPanel();          
@@ -617,7 +665,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             messageComponent = new MessageComponent(6, 22, 18, 6);
             
             headerLabel = new JLabel();
-            messageComponent.decorateSubLabel(headerLabel);
+            messageComponent.decorateHeaderLabel(headerLabel);
             
             hyperlinkButton = new HyperlinkButton(I18n.tr("Show all Files"));
             hyperlinkButton.addActionListener(new ActionListener(){
@@ -632,7 +680,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         }
     
         public void setFriend(Friend friend) {
-            headerLabel.setText("<html>" + I18n.tr("Not Sharing with {0}", "<b>" + friend.getRenderName() + "</b></html>"));
+            headerLabel.setText(I18n.tr("Not Sharing with {0}", friend.getRenderName()));
         }
         
         public MessageComponent getMessageComponent() {
@@ -671,7 +719,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     /**
      * Message bar that sits atop main panel. Displayed when filtering on a sharing list.
      */
-    private class MessagePanel extends JPanel {
+    private class SharingMessagePanel extends JPanel {
         @Resource 
         private Color backgroundColor;
         @Resource
@@ -682,15 +730,19 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         private Icon gnutellaIcon;
         @Resource
         private Icon friendIcon;
+        @Resource
+        private Color bottomLine;
         
         private final JLabel sharingLabel;
         private final HyperlinkButton showAllButton;
         
-        public MessagePanel() {            
+        public SharingMessagePanel() {            
             GuiUtils.assignResources(this);
             
             setLayout(new MigLayout("fill, alignx 50%, gap 0, insets 2 10 2 10", "", "25!"));
             setBackground(backgroundColor);
+            
+            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, bottomLine));
             
             sharingLabel = new JLabel();
             sharingLabel.setForeground(labelColor);
@@ -713,7 +765,12 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             setVisible(false);
         }
         
+        /**	Sets the Friend's name to display when filtering on a Friend*/
         public void setMessage(Friend friend) {
+            if(friend == null || friend.getId() == null) {
+                setVisible(false);
+                return;
+            }
             if(friend.getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
                 sharingLabel.setIcon(gnutellaIcon);
             else

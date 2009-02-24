@@ -21,7 +21,6 @@ public interface LibraryTableFactory {
      */
     <T extends LocalFileItem> LibraryTable<T> createMyTable(Category category, EventList<T> eventList, SharingMatchingEditor sharingMatchingEditor);
     
-    
     /**
      * Creates an image list for My Library
      */

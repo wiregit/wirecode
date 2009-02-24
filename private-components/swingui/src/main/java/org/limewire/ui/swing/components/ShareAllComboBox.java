@@ -110,6 +110,7 @@ public class ShareAllComboBox extends LimeComboBox {
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             menu.removeAll();        
             
+            // if not logged in don't show options for friends.
             if(!xmppService.isLoggedIn()) {
                 menu.add(decorateItem(shareAllAction));
                 menu.add(decorateItem(unshareAllAction));
@@ -129,6 +130,10 @@ public class ShareAllComboBox extends LimeComboBox {
         }
     }
     
+    /**
+	 *	If Gnutella is chosen, shares all the files in the current table with Gnutella.
+	 *  If a friend is selected, opens the Multi-file share widget
+	 */
     private class ShareAllAction extends AbstractAction {    
         private final boolean isGnutella;
         
@@ -170,6 +175,10 @@ public class ShareAllComboBox extends LimeComboBox {
         }
     }
     
+    /**
+	 *	If Gnutella is chosen, unshares all the files in the current table with Gnutella.
+	 *  If a friend is selected, opens the Multi-file unshare widget
+	 */
     private class UnShareAllAction extends AbstractAction {
         private final boolean isGnutella;
         
@@ -206,13 +215,15 @@ public class ShareAllComboBox extends LimeComboBox {
                 }
             } else {
                 MultiFileShareModel model = new MultiFileShareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
-                model.shareFriend(SharingTarget.GNUTELLA_SHARE);   
+                model.unshareFriend(SharingTarget.GNUTELLA_SHARE);   
             }
         }
     }
     
+    /**
+     * Opens the signon screen.
+     */
     private class SignedOutAction extends AbstractAction {
-
         public SignedOutAction() {
             putValue(Action.NAME, I18n.tr("Sign in to share with friends"));
         }

@@ -77,6 +77,7 @@ public class GhostDropTargetListener implements DropTargetListener {
         SwingUtilities.convertPointFromScreen(p, ghostPane); 
 
         ghostPane.setPoint(p);
+        //if filtering, set drop target name to friend filtering on
         if(sharingMatchingEditor != null)
             ghostPane.setText(sharingMatchingEditor.getCurrentFriend());
         else

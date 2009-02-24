@@ -66,9 +66,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
     private AudioPlayer player;
 
-    // only accessed on EDT
-  //  private List<SharingTarget> friendList = new ArrayList<SharingTarget>();
-
     private DownloadListManager downloadListManager;
 
     private MagnetLinkFactory magnetLinkFactory;
@@ -133,23 +130,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
     }
 
-//    @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownFriends) {
-//        knownFriends.addListener(new EventListener<FriendEvent>() {
-//            @Override
-//            @SwingEDTEvent
-//            public void handleEvent(FriendEvent event) {
-//                switch(event.getType()) {
-//                case ADDED:
-//                    friendList.add(new SharingTarget(event.getSource()));
-//                    break;
-//                case REMOVED:
-//                    friendList.remove(new SharingTarget(event.getSource()));
-//                    break;
-//                }
-//            }
-//        });
-//    }
-//    
 
     /**
      * Creates a table for MyLibrary
@@ -204,7 +184,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         return libTable;
     }    
     
-
+	/**
+	 * Creates Image Library for My Library which displays thumbnails.
+	 */
     @Override
     public LibraryImagePanel createMyImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, ShareWidget<File> sharePanel,

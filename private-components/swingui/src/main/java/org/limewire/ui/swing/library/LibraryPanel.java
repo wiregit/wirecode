@@ -12,6 +12,7 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 
 import ca.odell.glazedlists.FilterList;
 
+//TODO: there's so little left. should just pull this up to AbstractFileListPanel
 class LibraryPanel extends AbstractFileListPanel {
 
     public LibraryPanel(HeaderBarDecorator headerBarFactory, TextFieldDecorator textFieldDecorator) {
@@ -36,61 +37,4 @@ class LibraryPanel extends AbstractFileListPanel {
     protected <T extends FileItem> void addCategorySizeListener(Category category, Action action,
             FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
     }
-    
-//    @Override
-//    protected <T extends FileItem> void addCategorySizeListener(Category category,
-//            Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
-//        // Comment this out & return null if you don't want sizes added to library panels.
-//        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredList);
-//        filteredList.addListEventListener(listener);
-//        addDisposable(listener);
-//    }
-//    
-//    private static class ButtonSizeListener<T> implements Disposable, ListEventListener<T>, SettingListener {
-//        private final Category category;
-//        private final Action action;
-//        private final FilterList<T> list;
-//        
-//        private ButtonSizeListener(Category category, Action action, FilterList<T> list) {
-//            this.category = category;
-//            this.action = action;
-//            this.list = list;
-//            action.putValue(Action.NAME, I18n.tr(category.toString()));
-//            setText();
-//            if(category == Category.PROGRAM) {
-//                LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
-//            }
-//        }
-//
-//        private void setText() {
-//            //disable other category if size is 0
-//            if(category == Category.OTHER) {
-//                action.setEnabled(list.size() > 0);
-//            } else if(category == Category.PROGRAM) { // hide program category is not enabled
-//                action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
-//            }
-//        }
-//        
-//        @Override
-//        public void dispose() {
-//            list.removeListEventListener(this);
-//            if(category == Category.PROGRAM) {
-//                LibrarySettings.ALLOW_PROGRAMS.removeSettingListener(this);
-//            }
-//        }
-//
-//        @Override
-//        public void listChanged(ListEvent<T> listChanges) {
-//            setText();
-//        }
-//
-//        @Override
-//        public void settingChanged(SettingEvent evt) {
-//            SwingUtilities.invokeLater(new Runnable(){
-//                public void run() {
-//                    setText();                    
-//                }
-//            });
-//        }
-//    }
 }

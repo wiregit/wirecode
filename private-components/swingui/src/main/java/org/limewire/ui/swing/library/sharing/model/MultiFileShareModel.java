@@ -24,6 +24,7 @@ public class MultiFileShareModel implements LibraryShareModel {
     
     @Override
     public void shareFriend(final SharingTarget friend) {
+    	//perform actual sharing on background thread.
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {
                 for (LocalFileItem item : fileItems) {
@@ -40,6 +41,7 @@ public class MultiFileShareModel implements LibraryShareModel {
     
     @Override
     public void unshareFriend(final SharingTarget friend) {
+    	//perform actual unsharing on background thread
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {
                 for (LocalFileItem item : fileItems) {

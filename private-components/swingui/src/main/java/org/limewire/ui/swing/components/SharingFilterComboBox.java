@@ -17,12 +17,14 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.library.SharingMatchingEditor;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -30,6 +32,8 @@ import org.limewire.ui.swing.util.I18n;
 
 /**
  * Drop down combo box for filtering My Library with a Sharing View.
+ * The view remains My Library but only shows files that are currently shared
+ * with the selected friend.
  */
 public class SharingFilterComboBox extends LimeComboBox {
 
@@ -54,8 +58,11 @@ public class SharingFilterComboBox extends LimeComboBox {
     
     private JComponent subMenuText;
     
-    public SharingFilterComboBox(SharingMatchingEditor matchingEditor) {
+    private MyLibraryPanel myLibraryPanel;
+    
+    public SharingFilterComboBox(SharingMatchingEditor matchingEditor, MyLibraryPanel myLibraryPanel) {
         this.matchingEditor = matchingEditor;
+        this.myLibraryPanel = myLibraryPanel;
         
         GuiUtils.assignResources(this);
         
@@ -67,6 +74,10 @@ public class SharingFilterComboBox extends LimeComboBox {
         menu.addPopupMenuListener(listener);
     }
     
+    /**
+	 * Selects a friend in the combo box. This is a convience method for
+	 * selecting a friend share view programatically outside of My Library.
+	 */
     public void selectFriend(Friend friend) {
         matchingEditor.setFriend(friend);
 
@@ -74,12 +85,24 @@ public class SharingFilterComboBox extends LimeComboBox {
         fireChangeEvent(action);
     }
     
+    /**
+	 * Adds a friend to the list to be displayed.
+	 */
     public void addFriend(Friend friend) {
         menuList.add(friend);
     }
     
+    /**
+	 * Removes a friend from the list to be displayed.
+	 */
     public void removeFriend(Friend friend) {
         menuList.remove(friend);
+        if(menuList.size() == 0)
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    myLibraryPanel.showAllFiles();  
+                }
+            });
     }
     
     private JComponent decorateLabel(JComponent component) {
