@@ -42,7 +42,7 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
     }
        
     /** 
-     * Can be used to create a foreground painter with unique pressed and hover font colours
+     * Can be used to create a foreground painter with unique overlaid pressed and hover font colours
      *  and a right aligned icon.  
      *  
      *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
@@ -52,13 +52,13 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
     }
     
     /** 
-     * Can be used to create a foreground painter with unique pressed and hover font style and colours
+     * Can be used to create a foreground painter with unique overlaid pressed and hover font style and colours
      *  with a right aligned icon.  
      *  
      *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
      */    
     public ButtonForegroundPainter(Paint hoverForeground, Paint pressedForeground, Paint disabledForeground,
-            Font pressedFont, Font hoverFont, Font disabledFont) {
+            Font hoverFont, Font pressedFont, Font disabledFont) {
         
         this.pressedForeground = pressedForeground;
         this.hoverForeground = hoverForeground;
