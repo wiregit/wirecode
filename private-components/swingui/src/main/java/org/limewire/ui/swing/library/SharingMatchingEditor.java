@@ -99,9 +99,20 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
 
     /**
      *  When the friend filterlist is updated, notify the matcher of changes.
+     *  
+     *  Its important here to selectively fire the appropriate filter notification.
+     *  Using constrained/relaxed increases the speed of the matcher updateer.
      */
     @Override
     public void listChanged(ListEvent<LocalFileItem> listChanges) {
-        fireChanged(matcher);
+        while(listChanges.next()) {
+            // remove an item
+            if(listChanges.getType() == 0) {
+                fireConstrained(matcher);
+            } else { //add or update item
+                fireRelaxed(matcher);
+            }
+        }
+
     }
 }
