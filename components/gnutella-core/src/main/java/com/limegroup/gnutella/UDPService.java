@@ -445,14 +445,19 @@ public class UDPService implements ReadWriteObserver {
 	private void updateState(Message message, InetSocketAddress addr) {
         _lastReceivedAny = System.currentTimeMillis();
         
-        if (isValidForIncoming(addr))
+        if (isValidForIncoming(addr)) {
+            if(!_acceptedSolicitedIncoming)
+                LOG.info("Can receive solicited UDP");
             _acceptedSolicitedIncoming = true;
+        }
         
 	    if (!isGUESSCapable()) {
             if (message instanceof PingRequest) {
                 GUID guid = new GUID(message.getGUID());
                 if(CONNECT_BACK_GUID.equals(guid) && isValidForIncoming(addr)) {
                     synchronized (this) {
+                        if(!_acceptedUnsolicitedIncoming)
+                            LOG.info("Can receive unsolicited UDP");
                         _acceptedUnsolicitedIncoming = true;
                         _lastReportedPort = networkManager.getPort(); // sent by the connect back request
                         ConnectionSettings.HAS_STABLE_PORT.setValue(true);
@@ -913,6 +918,8 @@ public class UDPService implements ReadWriteObserver {
                                 if ((_acceptedUnsolicitedIncoming && 
                                      (_lastUnsolicitedIncomingTime < currTime))
                                     || (!_acceptedUnsolicitedIncoming)) {
+                                    if(ml._gotIncoming && !_acceptedUnsolicitedIncoming)
+                                        LOG.info("Can receive unsolicited UDP");
                                     // we set according to the message listener
                                     _acceptedUnsolicitedIncoming = 
                                         ml._gotIncoming;
