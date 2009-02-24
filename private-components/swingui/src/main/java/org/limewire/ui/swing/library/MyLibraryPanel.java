@@ -78,6 +78,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -168,7 +169,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
-
         sharingMatchingEditor = new SharingMatchingEditor(shareListManager);
         sharingComboBox = new SharingFilterComboBox(sharingMatchingEditor);
         comboDecorator.decorateLinkComboBox(sharingComboBox);
@@ -194,7 +194,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         this.knownFriends.add(Friend.P2P_FRIEND_ID);
         getSelectionPanel().updateCollectionShares(knownFriends);
         
-        shareAllComboBox = new ShareAllComboBox(shareListManager.getGnutellaShareList(), xmppService, friendSignInPanel);
+        shareAllComboBox = new ShareAllComboBox(shareListManager, xmppService, friendSignInPanel, shareFactory, this);
         comboDecorator.decorateDarkFullComboBox(shareAllComboBox);
         shareAllComboBox.setText(I18n.tr("Share"));
         
@@ -499,6 +499,14 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         selectableMap.get(category).selectAndScrollTo(urn);        
     }    
     
+    public SelectAllable<LocalFileItem> getTable() {
+        Category category = getSelectedCategory();
+        if(category == null)
+            return null;
+        else
+            return selectableMap.get(category);
+    }
+    
     /**
      * Creates a locked layer over a table. This layer prevents the user from
      * interacting with the contents underneath it.
@@ -650,14 +658,16 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             sharingLabel.setForeground(labelColor);
             sharingLabel.setFont(labelFont);
             
+
             showAllButton = new HyperlinkButton(I18n.tr("Show All Files"));
+            FontUtils.bold(showAllButton);
             showAllButton.addActionListener(new ActionListener(){
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     showAllFiles();
                 }
             });
-            
+
             add(sharingLabel, "push");
             add(showAllButton);
             

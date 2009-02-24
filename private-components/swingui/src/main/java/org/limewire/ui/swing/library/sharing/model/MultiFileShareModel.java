@@ -6,6 +6,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 public class MultiFileShareModel implements LibraryShareModel {
     private final LocalFileItem[] fileItems;
@@ -22,28 +23,36 @@ public class MultiFileShareModel implements LibraryShareModel {
     }   
     
     @Override
-    public void shareFriend(SharingTarget friend) {
-        for (LocalFileItem item : fileItems) {
-            if (friend.isGnutellaNetwork()) {
-                gnutellaList.addFile(item.getFile());
-            } else {
-                shareListManager.getOrCreateFriendShareList(friend.getFriend()).addFile(
-                        item.getFile());
+    public void shareFriend(final SharingTarget friend) {
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                for (LocalFileItem item : fileItems) {
+                    if (friend.isGnutellaNetwork()) {
+                        gnutellaList.addFile(item.getFile());
+                    } else {
+                        shareListManager.getOrCreateFriendShareList(friend.getFriend()).addFile(
+                                item.getFile());
+                    }
+                }
             }
-        }
+        });
     }
     
     @Override
-    public void unshareFriend(SharingTarget friend) {
-        for (LocalFileItem item : fileItems) {
-            if (friend.isGnutellaNetwork()) {
-                gnutellaList.removeFile(item.getFile());
-            } else {
-                // TODO: need to handle share all settings here
-                shareListManager.getOrCreateFriendShareList(friend.getFriend()).removeFile(
-                        item.getFile());
+    public void unshareFriend(final SharingTarget friend) {
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                for (LocalFileItem item : fileItems) {
+                    if (friend.isGnutellaNetwork()) {
+                        gnutellaList.removeFile(item.getFile());
+                    } else {
+                        // TODO: need to handle share all settings here
+                        shareListManager.getOrCreateFriendShareList(friend.getFriend()).removeFile(
+                                item.getFile());
+                    }
+                }
             }
-        }
+        });
     }
 
     

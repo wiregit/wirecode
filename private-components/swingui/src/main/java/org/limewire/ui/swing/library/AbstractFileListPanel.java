@@ -189,6 +189,10 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         selectionPanel.showCard(category);
     }
     
+    protected Category getSelectedCategory() {
+        return (currentItem != null) ? currentItem.getCatalog().getCategory() : null;
+    }
+    
     protected void selectFirstVisible() {
         select(getNext(0));
     }

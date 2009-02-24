@@ -2,18 +2,28 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.util.List;
 
 import javax.swing.Action;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.library.GnutellaFileList;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
+import org.limewire.ui.swing.library.MyLibraryPanel;
+import org.limewire.ui.swing.library.SelectAllable;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
+import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
+import org.limewire.ui.swing.library.sharing.SharingTarget;
+import org.limewire.ui.swing.library.sharing.model.MultiFileShareModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -33,6 +43,9 @@ public class ShareAllComboBox extends LimeComboBox {
     
     private final XMPPService xmppService;
     private final FriendsSignInPanel friendsSignInPanel;
+    private final ShareWidgetFactory shareWidgetFactory;
+    private final MyLibraryPanel myLibraryPanel;
+    private final ShareListManager shareListManager;
     
     private JPopupMenu menu = new JPopupMenu();
     
@@ -42,25 +55,29 @@ public class ShareAllComboBox extends LimeComboBox {
     private AbstractAction unshareAllFriendAction;
     private AbstractAction signedOutAction;
     
-    public ShareAllComboBox(GnutellaFileList gnutellaFileList, XMPPService xmppService, FriendsSignInPanel friendsSignInPanel) {
+    public ShareAllComboBox(ShareListManager shareListManager, XMPPService xmppService, FriendsSignInPanel friendsSignInPanel, ShareWidgetFactory shareWidgetFactory,
+            MyLibraryPanel myLibraryPanel) {
         this.xmppService = xmppService;
         this.friendsSignInPanel = friendsSignInPanel;
-        
+        this.shareWidgetFactory = shareWidgetFactory;
+        this.myLibraryPanel = myLibraryPanel;
+        this.shareListManager = shareListManager;
+                
         GuiUtils.assignResources(this);
         
         overrideMenu(menu);
         
-        createActions(gnutellaFileList);
+        createActions();
         
         SharingListener listener = new SharingListener();
         menu.addPopupMenuListener(listener);
     }
     
-    private void createActions(GnutellaFileList gnutellaFileList) {
-        shareAllAction = new ShareAllAction(gnutellaFileList);
-        unshareAllAction = new UnShareAllAction(gnutellaFileList);
-        shareAllFriendAction = new ShareAllAction(null);
-        unshareAllFriendAction = new UnShareAllAction(null);
+    private void createActions() {
+        shareAllAction = new ShareAllAction(true);
+        unshareAllAction = new UnShareAllAction(true);
+        shareAllFriendAction = new ShareAllAction(false);
+        unshareAllFriendAction = new UnShareAllAction(false);
         signedOutAction = new SignedOutAction();
     }
     
@@ -112,13 +129,13 @@ public class ShareAllComboBox extends LimeComboBox {
         }
     }
     
-    private class ShareAllAction extends AbstractAction {
-        private final GnutellaFileList fileList;
+    private class ShareAllAction extends AbstractAction {    
+        private final boolean isGnutella;
         
-        public ShareAllAction(GnutellaFileList fileList) {
-            this.fileList = fileList;
+        public ShareAllAction(boolean isGnutella) {
+            this.isGnutella = isGnutella;
             
-            if(fileList == null) {
+            if(!isGnutella) {
                 putValue(Action.NAME, I18n.tr("Share all with friend..."));
             } else {
                 putValue(Action.NAME, I18n.tr("Share all with P2P Network"));
@@ -127,17 +144,39 @@ public class ShareAllComboBox extends LimeComboBox {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            SelectAllable<LocalFileItem> selectAllable = myLibraryPanel.getTable();
+            selectAllable.selectAll();
+            List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();
+            
+            if(!isGnutella) {                
+                if (selectedItems.size() > 0) {
+                    ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileShareWidget();
+                    shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+                    shareWidget.show(GuiUtils.getMainFrame());
+                } else {
+                   JPopupMenu popup = new JPopupMenu();
+                   popup.add(new JLabel(I18n.tr("Add files to My Library from Tools > Options to share them")));
+                   
+                   Point mousePoint = getMousePosition(true);
+                   if(mousePoint != null) {
+                       //move popup 15 pixels to the right so the mouse doesn't obscure the first word
+                       popup.show(ShareAllComboBox.this, mousePoint.x + 15, mousePoint.y);
+                   }
+                }
+            } else {
+                MultiFileShareModel model = new MultiFileShareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+                model.shareFriend(SharingTarget.GNUTELLA_SHARE);
+            }
         }
     }
     
     private class UnShareAllAction extends AbstractAction {
-        private final GnutellaFileList fileList;
+        private final boolean isGnutella;
         
-        public UnShareAllAction(GnutellaFileList fileList) {
-            this.fileList = fileList;
+        public UnShareAllAction(boolean isGnutella) {
+            this.isGnutella = isGnutella;
             
-            if(fileList == null) {
+            if(!isGnutella) {
                 putValue(Action.NAME, I18n.tr("Unshare all with friend..."));
             } else {
                 putValue(Action.NAME, I18n.tr("Unshare all with P2P Network"));
@@ -146,7 +185,29 @@ public class ShareAllComboBox extends LimeComboBox {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            SelectAllable<LocalFileItem> selectAllable = myLibraryPanel.getTable();
+            selectAllable.selectAll();
+            List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();
+            
+            if(!isGnutella) {                
+                if (selectedItems.size() > 0) {
+                    ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileUnshareWidget();
+                    shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+                    shareWidget.show(GuiUtils.getMainFrame());
+                } else {
+                   JPopupMenu popup = new JPopupMenu();
+                   popup.add(new JLabel(I18n.tr("Add files to My Library from Tools > Options to share them")));
+                   
+                   Point mousePoint = getMousePosition(true);
+                   if(mousePoint != null) {
+                       //move popup 15 pixels to the right so the mouse doesn't obscure the first word
+                       popup.show(ShareAllComboBox.this, mousePoint.x + 15, mousePoint.y);
+                   }
+                }
+            } else {
+                MultiFileShareModel model = new MultiFileShareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+                model.shareFriend(SharingTarget.GNUTELLA_SHARE);   
+            }
         }
     }
     
