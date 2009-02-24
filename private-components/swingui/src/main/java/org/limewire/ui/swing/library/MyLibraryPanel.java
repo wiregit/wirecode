@@ -69,6 +69,7 @@ import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
+import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
@@ -179,7 +180,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         sharingComboBox.addSelectionListener(new SelectionListener(){
             @Override
             public void selectionChanged(Action item) {
-                messagePanel.setMessage(item.toString());
+                messagePanel.setMessage(sharingMatchingEditor.getCurrentFriend());
                 messagePanel.setVisible(true);
                 sharingComboBox.setVisible(false);
             }
@@ -644,6 +645,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         private Color labelColor;
         @Resource
         private Font labelFont;
+        @Resource
+        private Icon gnutellaIcon;
+        @Resource
+        private Icon friendIcon;
         
         private final JLabel sharingLabel;
         private final HyperlinkButton showAllButton;
@@ -660,6 +665,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             
 
             showAllButton = new HyperlinkButton(I18n.tr("Show All Files"));
+            showAllButton.setFont(labelFont);
             FontUtils.bold(showAllButton);
             showAllButton.addActionListener(new ActionListener(){
                 @Override
@@ -674,8 +680,12 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             setVisible(false);
         }
         
-        public void setMessage(String friendRenderName) {
-            sharingLabel.setText(I18n.tr("What I'm Sharing With {0}", friendRenderName));
+        public void setMessage(Friend friend) {
+            if(friend.getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                sharingLabel.setIcon(gnutellaIcon);
+            else
+                sharingLabel.setIcon(friendIcon);
+            sharingLabel.setText( "<html>" + I18n.tr("What I'm Sharing With {0}", "<b>" + friend.getRenderName() + "</b></html>"));
         }
     }
     
