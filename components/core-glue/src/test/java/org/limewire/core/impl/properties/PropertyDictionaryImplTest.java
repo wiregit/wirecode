@@ -2,6 +2,9 @@ package org.limewire.core.impl.properties;
 
 import java.util.List;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Guice;
@@ -17,6 +20,10 @@ public class PropertyDictionaryImplTest extends BaseTestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(PropertyDictionaryImplTest.class);
+    }
+    
     @Override
     protected void setUp() throws Exception {
         Injector injector = Guice.createInjector(Stage.DEVELOPMENT);
