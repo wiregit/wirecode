@@ -99,7 +99,7 @@
             <property name="tests.writetofileonly" value="false"/>
        	
         	<path id="build.limewire.components.@{component}.classpath">
-                <!-- TODO parameterize 'default' with ivy-module configuration name -->
+                <!-- TODO parameterize 'compile' with ivy-module configuration name -->
                 <fileset dir="${build.limewire.components.@{component}.lib}/compile/" includes="**/*"/>
         	</path>
             
@@ -109,11 +109,9 @@
             </path>
             
     	    <path id="build.limewire.components.@{component}.tests.classpath">
-	        	<path refid="build.limewire.components.@{component}.buildpath"/>
-    	        <path refid="build.limewire.components.test-util.buildpath"/>
-    	    	<fileset dir="${limewire.tests.jars}" includes="jmock/*.jar"/>
-    	        <pathelement location="@{junit}"/>
-    	        <build-tests-classpath/>
+	        	<!-- TODO parameterize 'test' with ivy-module configuration name -->
+                <pathelement location="${build.limewire.components.@{component}.classes}"/>
+                <fileset dir="${build.limewire.components.@{component}.lib}/test/" includes="**/*"/>
     	    </path>
         	
         	<path id="tests.limewire.components.@{component}.classpath">
@@ -137,12 +135,25 @@
 		</sequential>
 	</macrodef>
     
+    <macrodef name="do.ivy" description="calculate dependancies and run an ant task">
+        <attribute name="target"/>
+        <attribute name="includes"/>
+        <attribute name="excludes" default="build.xml"/>
+        <attribute name="root" default=""/>
+        <sequential>
+            <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+            <ivy:buildlist reference="build-path" onMissingDescriptor="skip" root="@{root}">
+              <fileset dir="." includes="@{includes}" excludes="@{excludes}"/>
+            </ivy:buildlist>
+            <echo message="${ivy.sorted.modules}"/>
+            <subant target="@{target}" buildpathref="build-path"/>    
+        </sequential>
+    </macrodef>
+    
     <macrodef name="do.resolve-dependencies" description="retreive dependencies with ivy">
         <attribute name="component"/>
         <attribute name="conf"/>
         <sequential>
-            <!-- TODO parameterize 'default' with ivy-module configuration name -->
-            <!-- TODO see same comment above -->
             <mkdir dir="${build.limewire.components.@{component}.lib}/@{conf}"/>
             <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
             <ivy:resolve  conf="@{conf}"

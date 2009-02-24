@@ -17,6 +17,7 @@
    under the License.    
 -->
 <ivysettings>
+    <properties file="./dependencies.props"/>
 	<settings defaultResolver="default"/>
     <include url="./ivysettings-limewire.xml"/>
 	<include url="./ivysettings-public.xml"/>

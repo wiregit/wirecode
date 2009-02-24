@@ -1,37 +1,30 @@
 <!-- top level ant file -->
-<project name="limewire" default="compile-ivy" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="limewire" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="limewire.home" location="${basedir}"/>
 
-    <import file="components/build.xml"/>
-    <import file="core/build.xml"/>
+    <import file="components/common/build-macros.xml"/>
+    <!--import file="components/build.xml"/-->
+    <!--import file="core/build.xml"/-->
     <!--import file="tests/build.xml" /-->
-    <import file="components/core-glue/build.xml"/>
+    <!--import file="components/core-glue/build.xml"/-->
     
-    <target name="compile-ivy">
-        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
-        <ivy:buildlist reference="build-path" onMissingDescriptor="skip">
-          <fileset dir="." includes="components/*/build.xml,core/build.xml,private-components/*/build.xml" excludes="build.xml"/>
-        </ivy:buildlist>
-        <echo message="${ivy.sorted.modules}"/>
-        <subant target="jar" buildpathref="build-path"/>        
+    <target name="compile" depends="initialize">
+        <do.ivy includes="components/*/build.xml,core/build.xml,private-components/*/build.xml"
+                target="jar"/>
     </target>
 
     <target name="clean">
-        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
-        <ivy:buildlist reference="build-path" onMissingDescriptor="skip">
-          <fileset dir="." includes="components/*/build.xml,core/build.xml,private-components/*/build.xml" excludes="build.xml"/>
-        </ivy:buildlist>
-        <echo message="${ivy.sorted.modules}"/>
-        <subant target="clean" buildpathref="build-path"/>        
+        <do.ivy includes="components/*/build.xml,core/build.xml,private-components/*/build.xml"
+                target="clean"/>        
     </target>
     
-    <target name="clean-deps">
+    <target name="clean-cache">
         <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
         <ivy:cleancache />                                                              
     </target>
     
-    <!--target name="initialize" unless="initialized.limewire">
+    <target name="initialize" unless="initialized.limewire">
         <property name="limewire.components.limewire.home"
                   location="${limewire.home}"/>
         <property name="limewire.components.limewire.tests"
@@ -39,7 +32,7 @@
         <do.setup-properties component="limewire"/>
     </target>
     
-    <target name="compile"
+    <!--target name="compile"
             description="Compiles all code."
             depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-tests.compile-src, lw-tests.compile-tests, lw-core-glue.compile-src"/>
     
@@ -66,12 +59,14 @@
             description="Cleans artifacts from compiling tests."
             depends="initialize, lw-components.clean-tests, lw-tests.clean, lw-core-glue.clean-tests">
         <do.clean-testData component="limewire"/>
-    </target>
+    </target-->
         
     <target name="test-all"
             description="Tests all components and LimeWire tests."
-            depends="compile, lw-tests.test-all, lw-components.test-all, lw-core-glue.test-all">
+            depends="compile">
         <mkdir dir="${tests.limewire.components.limewire.xml}"/>
+        <do.ivy includes="components/*/build.xml,core/build.xml,tests/build.xml,private-components/*/build.xml"
+                target="test-all"/>
         <do.tests2html component="limewire">
             <more-xml-locations>
                 <fileset dir="${tests.limewire.components.all.xml}" includes="TEST-*.xml"/>
@@ -90,7 +85,7 @@
         </do.tests2html>
     </target>
     
-    <target name="test-components"
+    <!--target name="test-components"
             description="Tests all components"
             depends="compile, lw-components.test-all">
          <mkdir dir="${tests.limewire.components.limewire.xml}"/>
@@ -107,9 +102,9 @@
     
     <target name="test-pkg-lw"
             description="Tests a single package in limewire/tests.  (Useful for testing outside of the normal directory.)  Requires: -Dpackage="
-            depends="compile, lw-tests.test-package"/>
+            depends="compile, lw-tests.test-package"/-->
     
-    <target name="jar" depends="compile-src, lw-components.jar, lw-core-glue.jar">
+    <target name="jar" depends="compile">
         <fileset dir="${limewire.lib.jars}" includes="**/*.jar" id="alljars"/>
         <pathconvert property="classpath" refid="alljars" pathsep=" ">
             <mapper type = "flatten" />
@@ -233,6 +228,6 @@
     <target name="compile-core"/>
     <target name="compile-core-src"/>
     <target name="compile-ui-src"/>
-    <target name="compile-gui"/-->
+    <target name="compile-gui"/>
 
 </project>

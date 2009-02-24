@@ -155,17 +155,15 @@
             <include name="${limewire.components.swarm.relative.antglob.tests}"/>
 		</fileset>
     
-    </target>
+    </target-->
 	
 	<target name="clean"
-	        description="Cleans all generated data in every component."
-          depends="lw-setting.clean, lw-statistic.clean, lw-rudp.clean, lw-nio.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean, lw-test-util.clean, mojito.clean, mojito-ui.clean, lw-http.clean, lw-net.clean, lw-promotion.clean, lw-geocode.clean, lw-lwsserver.clean, lw-xmpp.clean, lw-player.clean, lw-core-api.clean, lw-core-settings.clean, lw-xmpp-api.clean, lw-player-api.clean, lw-swarm.clean"
-          >
-	    <do.clean component="all"/>
+	        description="Cleans all generated data in every component.">
+	    <do.ivy includes="*/build.xml" target="clean"/>
     </target>
     
     
-    <target name="compile"
+    <!--target name="compile"
         	description="Compiles the source and tests of every component."
         	depends="compile-core, compile-ui"/>
     

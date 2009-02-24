@@ -10,7 +10,8 @@
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="commons-logging" name="commons-logging" rev="1.1" conf="compile,runtime"/>
-        <dependency org="com.google.code.guice" name="guice" rev="2.0-snapshot-20080915" conf="compile,runtime"/>
+        <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
+        <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
     </dependencies>
 </ivy-module>
