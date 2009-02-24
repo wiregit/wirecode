@@ -74,6 +74,11 @@ public class MockVisualSearchResult implements VisualSearchResult {
         return val == null ? null : val.toString();
     }
     
+    @Override
+    public String getNameProperty(boolean useAudioArtist) {
+        return name;
+    }
+    
     public void setSimilarResults(List<VisualSearchResult> similarResults) {
         this.similarResults = similarResults;
     }
