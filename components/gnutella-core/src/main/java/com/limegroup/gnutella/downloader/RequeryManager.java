@@ -45,7 +45,7 @@ class RequeryManager implements DHTEventListener {
      * 
      * @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_GNUTELLA_REQUERIES 
      */
-    static long TIME_BETWEEN_REQUERIES = 5L * 60L * 1000L;  //5 minutes
+    static long TIME_BETWEEN_REQUERIES = 3L * 60L * 1000L;  //3 minutes
     
     private final RequeryListener requeryListener;
     

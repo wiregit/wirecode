@@ -4,14 +4,9 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.settings.LibrarySettings;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
@@ -98,20 +93,7 @@ public class ToolsMenu extends MnemonicMenu {
                     searchHandler.doSearch(DefaultSearchInfo.createWhatsNewSearch(category));
                 }
             };
-            final JMenuItem item = menu.add(action);
-            if (category == SearchCategory.PROGRAM) {
-                item.setVisible(LibrarySettings.ALLOW_PROGRAMS.getValue());
-                LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {
-                    @Override
-                    public void settingChanged(SettingEvent evt) {
-                        SwingUtilities.invokeLater(new Runnable(){
-                            public void run() {
-                                item.setVisible(LibrarySettings.ALLOW_PROGRAMS.getValue());                                
-                            }
-                        });
-                    }
-                });
-            }
+            menu.add(action);
         }
         return menu;
     }

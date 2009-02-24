@@ -196,8 +196,12 @@ class CoreDownloadItem implements DownloadItem {
     }
     
     @Override
-    public int getQueuePosition(){
-        return downloader.getQueuePosition();
+    public int getRemoteQueuePosition(){
+        if(downloader.getState() == com.limegroup.gnutella.Downloader.DownloadStatus.REMOTE_QUEUED) {
+            return downloader.getQueuePosition();
+        } else { 
+            return -1;
+        }
     }
     
     private DownloadState convertState(DownloadStatus status) {
@@ -234,13 +238,14 @@ class CoreDownloadItem implements DownloadItem {
 
         case PAUSED:
             return DownloadState.PAUSED;
-
         
-        case WAITING_FOR_USER:
-        case GAVE_UP://"GAVE_UP" means no sources - Is this really an error state?
-        case WAITING_FOR_GNET_RESULTS://should WAITING_FOR_GNET_RESULTS be in CONNECTING?
+        case WAITING_FOR_GNET_RESULTS:
         case ITERATIVE_GUESSING:
         case QUERYING_DHT:
+            return DownloadState.TRYING_AGAIN;
+            
+        case WAITING_FOR_USER:
+        case GAVE_UP:
             return DownloadState.STALLED;
 
         case ABORTED:
@@ -253,9 +258,8 @@ class CoreDownloadItem implements DownloadItem {
         case INVALID:
             return DownloadState.ERROR;
             
-              //FIXME remove RuntimeException when we are out of alpha 
         default:
-            throw new RuntimeException("Unknown State: " + status);
+            throw new IllegalStateException("Unknown State: " + status);
         }
     }
 
@@ -284,22 +288,34 @@ class CoreDownloadItem implements DownloadItem {
             return ErrorState.DISK_PROBLEM;
         case INVALID:
             return ErrorState.FILE_NOT_SHARABLE;
-        case GAVE_UP://"GAVE_UP" means no sources
+        case GAVE_UP://TODO: not using this because GAVE_UP is STALLED, not ERROR
             return ErrorState.UNABLE_TO_CONNECT;
         default:
             return ErrorState.NONE;
         }
     }
+    
+    @Override
+    public boolean isSearchAgainEnabled() {
+        return downloader.getState() == com.limegroup.gnutella.Downloader.DownloadStatus.WAITING_FOR_USER;
+    }    
 
     @Override
-    public long getRemainingQueueTime() {
-        if(queueTimeCalculator == null){
-            return DownloadItem.UNKNOWN_TIME;
+    public long getRemainingTimeInState() {
+        long remaining = downloader.getRemainingStateTime();
+        // Change a few state times explicitly.
+        switch(downloader.getState()) {
+        case QUEUED:
+            remaining = queueTimeCalculator.getRemainingQueueTime(this);
+            break;
+        case QUERYING_DHT:
+            remaining = UNKNOWN_TIME;
+            break;
         }
-        if(downloader.getState() == DownloadStatus.BUSY){
-            return downloader.getRemainingStateTime();
+        if(remaining == Integer.MAX_VALUE) {
+            remaining = UNKNOWN_TIME;
         }
-        return queueTimeCalculator.getRemainingQueueTime(this);
+        return remaining;
     }
 
  

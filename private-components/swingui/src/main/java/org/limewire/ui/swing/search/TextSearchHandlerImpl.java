@@ -11,8 +11,6 @@ import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.core.api.lifecycle.LifeCycleEvent;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.search.Search;
-import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
@@ -53,25 +51,8 @@ class TextSearchHandlerImpl implements SearchHandler {
     }
 
     @Override
-    public void doSearch(final SearchInfo info) {
-        final SearchCategory searchCategory = info.getSearchCategory();
-
-        final Search search = searchFactory.createSearch(new SearchDetails() {
-            @Override
-            public SearchCategory getSearchCategory() {
-                return searchCategory;
-            }
-            
-            @Override
-            public String getSearchQuery() {
-                return info.getQuery();
-            }
-            
-            @Override
-            public SearchType getSearchType() {
-                return info.getSearchType();
-            }
-        });
+    public boolean doSearch(final SearchInfo info) {
+        final Search search = searchFactory.createSearch(info);
         
         String panelTitle = info.getTitle();
         final SearchResultsModel model = searchResultsModelFactory.createSearchResultsModel();
@@ -124,6 +105,7 @@ class TextSearchHandlerImpl implements SearchHandler {
         
         addConnectionWarnings(search, searchPanel, item);        
         startSearch(search, searchPanel, item);
+        return true;
     }
 
     private void startSearch(final Search search, final SearchResultsPanel searchPanel, NavItem navItem) {

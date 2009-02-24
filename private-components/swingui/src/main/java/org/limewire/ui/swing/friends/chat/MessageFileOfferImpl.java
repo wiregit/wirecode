@@ -72,6 +72,7 @@ public class MessageFileOfferImpl extends AbstractMessageImpl implements Message
             switch (downloadState) {
                 case REMOTE_QUEUED:
                 case LOCAL_QUEUED:
+                case TRYING_AGAIN:
                 case CONNECTING:
                 case PAUSED:
                 case FINISHING:

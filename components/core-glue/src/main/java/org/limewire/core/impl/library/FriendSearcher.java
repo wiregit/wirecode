@@ -19,6 +19,7 @@ public class FriendSearcher {
     }
     
     public void doSearch(SearchDetails searchDetails, FriendSearchListener listener) {
+        // TODO: Support advanced search.
         Collection<RemoteFileItem>results = libraries.getMatchingItems(searchDetails.getSearchQuery(), searchDetails.getSearchCategory());
         listener.handleFriendResults(results);
     }
