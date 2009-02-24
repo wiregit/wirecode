@@ -1557,7 +1557,6 @@ public class HostCatcher implements Service {
         synchronized(this) {
             PROBATION_HOSTS.clear();
             EXPIRED_HOSTS.clear();
-            _failures = 0;
             FETCHER.resetFetchTime();
             udpHostCache.resetData();
             udpHostCache.loadDefaults();
@@ -1612,6 +1611,11 @@ public class HostCatcher implements Service {
     private class Bootstrapper implements Runnable {
         
         /**
+         * The time at which we started to think about bootstrapping
+         */
+        private long firstBootstrapCheck = 0;
+        
+        /**
          * The next allowed multicast time.
          * Incremented after each attempted multicast fetch.
          */
@@ -1653,11 +1657,14 @@ public class HostCatcher implements Service {
                 LOG.trace("Not bootstrapping");
                 return;
             }
+            
+            long now = System.currentTimeMillis();
+            if(firstBootstrapCheck == 0)
+                firstBootstrapCheck = now;
 
             // If we need endpoints, try any bootstrapping methods that
             // haven't been tried too recently
-            if(needsHosts()) {
-                long now = System.currentTimeMillis();
+            if(needsHosts(now)) {
                 multicastFetch(now);
                 udpHostCacheFetch(now);
                 tcpHostCacheFetch(now);
@@ -1677,17 +1684,18 @@ public class HostCatcher implements Service {
         /**
          * Determines whether or not we need more hosts.
          */
-        private synchronized boolean needsHosts() {
+        private synchronized boolean needsHosts(long now) {
             synchronized(HostCatcher.this) { 
                 if(getNumHosts() == 0) {
                     LOG.trace("Need hosts: none known");
                     return true;
                 }
+                long delay = now - firstBootstrapCheck;
                 if(!connectionServices.isConnected() &&
-                        _failures > ConnectionSettings.FAILURES_BEFORE_BOOTSTRAP.getValue()) {
+                        delay > ConnectionSettings.BOOTSTRAP_DELAY.getValue()) {
                     if(LOG.isTraceEnabled())
                         LOG.trace("Need hosts: not connected after " +
-                                _failures + " failures");
+                                delay + " milliseconds");
                     return true;
                 }
             }
