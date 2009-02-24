@@ -132,6 +132,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private final SharingMatchingEditor sharingMatchingEditor;
     
     private MessagePanel messagePanel;
+    private NotSharingPanel notSharingPanel;
     
     private ShareAllComboBox shareAllComboBox;
     private GhostDropTargetListener ghostDropTargetListener;
@@ -312,7 +313,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     }
 
     private JComponent createMyCategoryAction(final Category category, EventList<LocalFileItem> filtered) {        
-        //TODO: can this be a singleton??? 
         final ShareWidget<File> fileShareWidget = shareFactory.createFileShareWidget();
         addDisposable(fileShareWidget);             
         JScrollPane scrollPane;        
@@ -365,8 +365,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
         map.put(category, jxlayer);
         return jxlayer;
-//
-//        return scrollPane;
     }
     
     /**
@@ -430,18 +428,30 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         return (LibraryTableModel<LocalFileItem>)table.getModel();
     }   
     
-//    private void showEmptyFriend() {
-//        JPanel panel = new JPanel(new MigLayout("fill"));
-//        panel.setOpaque(false);
-//        panel.add(getEmptyLibraryMessageComponent(), "align 50% 40%");
-//        JXLayer layer = map.get(null);
-//        layer.getGlassPane().add(panel);
-//        layer.getGlassPane().setVisible(true);
-//    }
+    private void showEmptyFriend(Category category) {
+        if(category != null) {
+            JPanel panel = new JPanel(new MigLayout("fill"));
+            panel.setOpaque(false);
+            panel.add(getEmptyLibraryMessageComponent(sharingMatchingEditor.getCurrentFriend()), "align 50% 40%");
+            JXLayer layer = map.get(category);
+            layer.getGlassPane().removeAll();
+            layer.getGlassPane().add(panel);
+            layer.getGlassPane().setVisible(true);
+        }
+    }
+    
+    private void hideEmptyFriend(Category category) {
+        if(category != null) {
+            JXLayer layer = map.get(category);
+            layer.getGlassPane().setVisible(false);
+        }
+    }
     
     private void hideEmptyFriend() {
-//        JXLayer layer = map.get(null);
-//        layer.getGlassPane().setVisible(false);
+        for(Category category : Category.values()) {
+            JXLayer layer = map.get(category);
+            layer.getGlassPane().setVisible(false);
+        }
     }
     
     @Override
@@ -470,7 +480,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 NativeLaunchUtils.launchExplorer(file);
                 break;
             case IMAGE:
-                //TODO: image double click
             case VIDEO:
             case DOCUMENT:
                 NativeLaunchUtils.safeLaunchFile(file);
@@ -587,26 +596,50 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         return messageComponent;
     }
     
-    public MessageComponent getEmptyLibraryMessageComponent() {
-        MessageComponent messageComponent;
-        messageComponent = new MessageComponent(6, 22, 18, 6);
-        
-        JLabel headerLabel = new JLabel(I18n.tr("What Now?"));
-        messageComponent.decorateHeaderLabel(headerLabel);
-        
-        JLabel minLabel = new JLabel(I18n.tr("Share entire categories or individual files with your friends."));
-        messageComponent.decorateSubLabel(minLabel);
-        
-        JLabel secondMinLabel = new JLabel(I18n.tr("Chat with them about using LimeWire 5"));
-        messageComponent.decorateSubLabel(secondMinLabel);
-
-        messageComponent.addComponent(headerLabel, "push, wrap");
-        messageComponent.addComponent(minLabel, "wrap, gapright 16");
-        messageComponent.addComponent(secondMinLabel, "gapright 16");
-
-        return messageComponent;
+    public MessageComponent getEmptyLibraryMessageComponent(Friend friend) {
+        if(notSharingPanel == null) {
+            notSharingPanel = new NotSharingPanel();          
+        }
+        notSharingPanel.setFriend(friend);
+        return notSharingPanel.getMessageComponent();
     }
 
+    /**
+     * Message to be displayed when filtering on a friend and 
+     * not sharing anything with them.
+     */
+    private class NotSharingPanel {
+        private MessageComponent messageComponent;
+        private JLabel headerLabel;
+        private HyperlinkButton hyperlinkButton;
+        
+        public NotSharingPanel() {
+            messageComponent = new MessageComponent(6, 22, 18, 6);
+            
+            headerLabel = new JLabel();
+            messageComponent.decorateSubLabel(headerLabel);
+            
+            hyperlinkButton = new HyperlinkButton(I18n.tr("Show all Files"));
+            hyperlinkButton.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    showAllFiles();
+                }
+            });
+            
+            messageComponent.addComponent(headerLabel, "wrap, gapright 16");
+            messageComponent.addComponent(hyperlinkButton, "gapright 16");
+        }
+    
+        public void setFriend(Friend friend) {
+            headerLabel.setText("<html>" + I18n.tr("Not Sharing with {0}", "<b>" + friend.getRenderName() + "</b></html>"));
+        }
+        
+        public MessageComponent getMessageComponent() {
+            return messageComponent;
+        }
+    }
+    
     /**
      * Component used to display catalog heading in the category/playlist
      * navigation bar.
@@ -770,12 +803,16 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 } else {
                     action.setEnabled(true);
                 }
-            } else {
+            } else { //filtering on a friend
                 if(category == Category.PROGRAM) { // hide program category is not enabled
                     action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
                 }
                 //disable any category if size is 0
                 action.setEnabled(list.size() > 0);
+                if(list.size() > 0)
+                    hideEmptyFriend(category);
+                else
+                    showEmptyFriend(category);
             }
         }
         
