@@ -42,6 +42,7 @@ public class DownloadItemPropertyListener implements PropertyChangeListener {
                 setDownloadState(BasicDownloadState.DOWNLOADED);
                 break;
             case ERROR:
+            case TRYING_AGAIN:
             case CONNECTING:
             case LOCAL_QUEUED:
             case PAUSED:
