@@ -25,6 +25,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.util.StringUtils;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Comparable {
     private static final Pattern FIND_HTML_MARKUP = Pattern.compile("[<][/]?[\\w =\"\\./:#\\-\\!\\&\\?]*[>]");
@@ -143,6 +144,27 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         }
     }
 
+    @Override
+    public String getNameProperty(boolean useAudioArtist) {
+        // Get name and title values.
+        String name = getPropertyString(FilePropertyKey.NAME);
+        String title = getPropertyString(FilePropertyKey.TITLE);
+        
+        // For audio files, use non-blank title, prefixed by non-blank artist.
+        if (getCategory().equals(Category.AUDIO) && !StringUtils.isEmpty(title)) {
+            String artist = getPropertyString(FilePropertyKey.AUTHOR);
+            if (useAudioArtist && !StringUtils.isEmpty(artist)) {
+                name = artist + " - " + title;
+            } else {
+                name = title;
+            }
+        }
+        
+        // Return result.
+        return name;
+    }
+    
+    @Override
     public void addSimilarSearchResult(VisualSearchResult similarResult) {
         similarResults.add(similarResult);
     }
