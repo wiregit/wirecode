@@ -25,6 +25,7 @@ public class CoreGlueLibraryModule extends AbstractModule {
         bind(MagnetLinkFactory.class).to(MagnetLinkFactoryImpl.class);
         bind(PresenceLibraryBrowser.class);
         bind(FriendSearcher.class);
+        bind(BackupManager.class);
         
         EventMulticaster<FriendShareListEvent> friendShareListMulticaster = new EventMulticasterImpl<FriendShareListEvent>(); 
         bind(new TypeLiteral<EventListener<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
