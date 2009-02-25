@@ -324,7 +324,7 @@
                          overwrite="true"
                          forcedeliver="true"
                          artifactspattern="${dist.limewire.components.@{component}.jar}"
-                         srcivypattern="${dist.limewire.components.@{component}.jar}/../ivy.xml"/>
+                         srcivypattern="${dist.limewire.components.@{component}.home}/ivy.xml"/>
         </sequential>
     </macrodef>
     
