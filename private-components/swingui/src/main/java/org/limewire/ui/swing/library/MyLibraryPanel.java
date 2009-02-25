@@ -296,7 +296,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         hideEmptyFriend();
         //reselect the current category in case we filtered on a friend that wasn't 
         //sharing anything
-        select(getSelectedCategory());
+        Category category = getSelectedCategory();
+        if(category == null)
+            selectFirstVisible();
+        else
+            select(category);
     }
     
     /**
