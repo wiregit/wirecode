@@ -214,6 +214,7 @@
 	<macrodef name="do.compile-tests" description="Compiles test code and copies resources tests use.">
 	    <attribute name="component"/>
 		<sequential>
+            <mkdir dir="${limewire.components.@{component}.tests}"/>
 			<mkdir dir="${build.limewire.components.@{component}.tests}"/>
             <do.resolve-dependencies component="@{component}" conf="test"/>
 			<javac destdir		="${build.limewire.components.@{component}.tests}"
