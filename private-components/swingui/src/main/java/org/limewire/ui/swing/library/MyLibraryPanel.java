@@ -174,7 +174,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
         sharingMatchingEditor = new SharingMatchingEditor(shareListManager);
-        sharingComboBox = new SharingFilterComboBox(sharingMatchingEditor, this);
+        sharingComboBox = new SharingFilterComboBox(sharingMatchingEditor, this, shareListManager);
         comboDecorator.decorateLinkComboBox(sharingComboBox);
         sharingComboBox.setText(I18n.tr("What I'm Sharing"));
         
@@ -275,6 +275,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 return;
         }
         getSelectionPanel().updateCollectionShares(knownFriends);
+    }
+    
+    public Category getCategory() {
+        return getSelectedCategory();
     }
     
     /**
@@ -428,6 +432,12 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         
         addDisposable(filtered);
         addLibraryInfoBar(playlist, filtered);
+    }
+    
+    @Override
+    protected void playListSelected(boolean value) {
+        // hide the share button when a playlist is shown
+        shareAllComboBox.setVisible(!value);
     }
     
     /**
@@ -781,7 +791,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 sharingLabel.setIcon(gnutellaIcon);
             else
                 sharingLabel.setIcon(friendIcon);
-            sharingLabel.setText( "<html>" + I18n.tr("What I'm Sharing With {0}", "<b>" + friend.getRenderName() + "</b></html>"));
+            sharingLabel.setText( "<html>" + I18n.tr("What I'm Sharing With {0}", boldName(friend.getRenderName())) + "</html>");
+        }
+        
+        private String boldName(String name) {
+            return "<b>" + name  + "</b>";
         }
     }
     
@@ -824,8 +838,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         
         @Override
         public void dispose() {
-            // TODO Auto-generated method stub
-            
         }
     }
     

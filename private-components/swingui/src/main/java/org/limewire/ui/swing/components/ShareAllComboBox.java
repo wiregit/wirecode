@@ -2,20 +2,20 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
 import javax.swing.Action;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.MyLibraryPanel;
@@ -110,22 +110,37 @@ public class ShareAllComboBox extends LimeComboBox {
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             menu.removeAll();        
             
-            // if not logged in don't show options for friends.
-            if(!xmppService.isLoggedIn()) {
-                menu.add(decorateItem(shareAllAction));
-                menu.add(decorateItem(unshareAllAction));
-                
-                menu.addSeparator();
-                
-                menu.add(decorateDisabledfItem(signedOutAction));
+            // if document category is selected and document sharing with p2p is disabled
+            if(myLibraryPanel.getCategory() == Category.DOCUMENT && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
+                // if not logged in
+                if(!xmppService.isLoggedIn()) {
+                    menu.add(decorateDisabledfItem(new DisabledDocumentAction()));
+                } else {
+                    menu.add(decorateDisabledfItem(new DisabledDocumentAction()));
+                    
+                    menu.addSeparator();
+                    
+                    menu.add(decorateItem(shareAllFriendAction));
+                    menu.add(decorateItem(unshareAllFriendAction));
+                }
             } else {
-                menu.add(decorateItem(shareAllAction));
-                menu.add(decorateItem(shareAllFriendAction));
-                
-                menu.addSeparator();
-                
-                menu.add(decorateItem(unshareAllAction));
-                menu.add(decorateItem(unshareAllFriendAction));
+                // if not logged in don't show options for friends.
+                if(!xmppService.isLoggedIn()) {
+                    menu.add(decorateItem(shareAllAction));
+                    menu.add(decorateItem(unshareAllAction));
+                    
+                    menu.addSeparator();
+                    
+                    menu.add(decorateDisabledfItem(signedOutAction));
+                } else {
+                    menu.add(decorateItem(shareAllAction));
+                    menu.add(decorateItem(shareAllFriendAction));
+                    
+                    menu.addSeparator();
+                    
+                    menu.add(decorateItem(unshareAllAction));
+                    menu.add(decorateItem(unshareAllFriendAction));
+                }
             }
         }
     }
@@ -158,16 +173,7 @@ public class ShareAllComboBox extends LimeComboBox {
                     ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileShareWidget();
                     shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
                     shareWidget.show(GuiUtils.getMainFrame());
-                } else {
-                   JPopupMenu popup = new JPopupMenu();
-                   popup.add(new JLabel(I18n.tr("Add files to My Library from Tools > Options to share them")));
-                   
-                   Point mousePoint = getMousePosition(true);
-                   if(mousePoint != null) {
-                       //move popup 15 pixels to the right so the mouse doesn't obscure the first word
-                       popup.show(ShareAllComboBox.this, mousePoint.x + 15, mousePoint.y);
-                   }
-                }
+                } 
             } else {
                 MultiFileShareModel model = new MultiFileShareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
                 model.shareFriend(SharingTarget.GNUTELLA_SHARE);
@@ -203,15 +209,6 @@ public class ShareAllComboBox extends LimeComboBox {
                     ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileUnshareWidget();
                     shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
                     shareWidget.show(GuiUtils.getMainFrame());
-                } else {
-                   JPopupMenu popup = new JPopupMenu();
-                   popup.add(new JLabel(I18n.tr("Add files to My Library from Tools > Options to share them")));
-                   
-                   Point mousePoint = getMousePosition(true);
-                   if(mousePoint != null) {
-                       //move popup 15 pixels to the right so the mouse doesn't obscure the first word
-                       popup.show(ShareAllComboBox.this, mousePoint.x + 15, mousePoint.y);
-                   }
                 }
             } else {
                 MultiFileShareModel model = new MultiFileShareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
@@ -231,6 +228,19 @@ public class ShareAllComboBox extends LimeComboBox {
         @Override
         public void actionPerformed(ActionEvent e) {
             friendsSignInPanel.signIn();
+        }
+    }
+    
+    /**
+     * Action when P2P Document sharing is disabled.
+     */
+    private class DisabledDocumentAction extends AbstractAction {
+        public DisabledDocumentAction() {
+            putValue(Action.NAME, I18n.tr("Go to Tools/Options/Security to enable Document sharing with the P2P Network"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
         }
     }
 }

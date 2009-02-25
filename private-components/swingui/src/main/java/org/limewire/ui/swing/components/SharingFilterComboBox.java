@@ -23,6 +23,7 @@ import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.library.SharingMatchingEditor;
@@ -53,16 +54,17 @@ public class SharingFilterComboBox extends LimeComboBox {
     private final Set<Friend> menuList = new HashSet<Friend>();
 
     private final SharingMatchingEditor matchingEditor;
-
+    private final MyLibraryPanel myLibraryPanel;
+    private final ShareListManager shareListManager;
+    
     private JPopupMenu menu = new JPopupMenu();
     
     private JComponent subMenuText;
-    
-    private MyLibraryPanel myLibraryPanel;
-    
-    public SharingFilterComboBox(SharingMatchingEditor matchingEditor, MyLibraryPanel myLibraryPanel) {
+        
+    public SharingFilterComboBox(SharingMatchingEditor matchingEditor, MyLibraryPanel myLibraryPanel, ShareListManager shareListManager) {
         this.matchingEditor = matchingEditor;
         this.myLibraryPanel = myLibraryPanel;
+        this.shareListManager = shareListManager;
         
         GuiUtils.assignResources(this);
         
@@ -81,7 +83,7 @@ public class SharingFilterComboBox extends LimeComboBox {
     public void selectFriend(Friend friend) {
         matchingEditor.setFriend(friend);
 
-        MenuAction action = new MenuAction(friend, null);
+        MenuAction action = new MenuAction(friend, 0, null);
         fireChangeEvent(action);
     }
     
@@ -125,10 +127,10 @@ public class SharingFilterComboBox extends LimeComboBox {
     private class MenuAction extends AbstractAction {
         private final Friend friend;
         
-        public MenuAction(Friend friend, Icon icon) {
+        public MenuAction(Friend friend, int count, Icon icon) {
             this.friend = friend;
             if(friend != null)
-                putValue(Action.NAME, friend.getRenderName());
+                putValue(Action.NAME, friend.getRenderName() + "  (" + count + ")");
             putValue(Action.SMALL_ICON, icon);
         }
         
@@ -160,12 +162,12 @@ public class SharingFilterComboBox extends LimeComboBox {
             menu.removeAll();        
             menu.add(subMenuText);
            
-            menu.add(decorateItem(new MenuAction(SharingTarget.GNUTELLA_SHARE.getFriend(), gnutellaIcon)));
+            menu.add(decorateItem(new MenuAction(SharingTarget.GNUTELLA_SHARE.getFriend(), shareListManager.getGnutellaShareList().size(), gnutellaIcon)));
             
             List<Friend> sortedFriends = new ArrayList<Friend>(menuList);
             Collections.sort(sortedFriends, new FriendComparator());
             for(Friend friend : sortedFriends) {
-                menu.add(decorateItem(new MenuAction(friend, friendIcon)));
+                menu.add(decorateItem(new MenuAction(friend, shareListManager.getFriendShareList(friend).size(), friendIcon)));
             }
         }
     }

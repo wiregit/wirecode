@@ -391,9 +391,11 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         }
     }
     
+    protected void playListSelected(boolean value) {
+    }
+    
     private class SelectionAction extends AbstractAction {
-        
-        public SelectionAction(Icon icon, Catalog catalog, ButtonItem buttonItem, final CatalogSelectionCallback callback) {
+        public SelectionAction(Icon icon, final Catalog catalog, ButtonItem buttonItem, final CatalogSelectionCallback callback) {
             super(catalog.getName(), icon);
             
             putValue("limewire.category", catalog);
@@ -402,6 +404,10 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
                 @Override
                 public void itemSelect(boolean selected) {
                     putValue(SELECTED_KEY, selected);
+                    
+                    if(catalog.getType() == Catalog.Type.PLAYLIST) {
+                        playListSelected(selected);
+                    }
                     
                     if (callback != null) {
                         callback.catalogSelected((Catalog)getValue("limewire.category"), selected);

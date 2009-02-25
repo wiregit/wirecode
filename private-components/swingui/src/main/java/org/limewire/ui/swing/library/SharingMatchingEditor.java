@@ -96,7 +96,7 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
             if(friendList == null)
                 return true;
             else 
-                return friendList.contains(item.getUrn());
+                return friendList.contains(item.getFile());
         }
     }
 
@@ -110,12 +110,11 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
     public void listChanged(ListEvent<LocalFileItem> listChanges) {
         while(listChanges.next()) {
             // remove an item
-            if(listChanges.getType() == 0) {
+            if(listChanges.getType() == ListEvent.DELETE) {
                 fireConstrained(matcher);
             } else { //add or update item
                 fireRelaxed(matcher);
             }
         }
-
     }
 }

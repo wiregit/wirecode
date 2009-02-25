@@ -12,6 +12,7 @@ import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.library.SharingMatchingEditor;
+import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.util.DNDUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -61,12 +62,16 @@ public class MyLibraryTransferHandler extends TransferHandler {
                 //if not in filtered mode
                 if(sharingMatcherEditor.getCurrentFriend() == null)
                     libraryManagedList.addFolder(file);
+                else if(sharingMatcherEditor.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                    shareListManager.getGnutellaShareList().addFolder(file);
                 else
                     shareListManager.getFriendShareList(sharingMatcherEditor.getCurrentFriend()).addFolder(file);
             } else {
                 //if not in filtered mode
                 if(sharingMatcherEditor.getCurrentFriend() == null)
                     libraryManagedList.addFile(file);
+                else if(sharingMatcherEditor.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                    shareListManager.getGnutellaShareList().addFile(file);
                 else
                     shareListManager.getFriendShareList(sharingMatcherEditor.getCurrentFriend()).addFile(file);
             }
