@@ -143,7 +143,7 @@ public class ShareAllComboBox extends LimeComboBox {
             if(!isGnutella) {
                 putValue(Action.NAME, I18n.tr("Share all with friend..."));
             } else {
-                putValue(Action.NAME, I18n.tr("Share all with P2P Network"));
+                putValue(Action.NAME, I18n.tr("Share all with the P2P Network"));
             }
         }
         
@@ -188,7 +188,7 @@ public class ShareAllComboBox extends LimeComboBox {
             if(!isGnutella) {
                 putValue(Action.NAME, I18n.tr("Unshare all with friend..."));
             } else {
-                putValue(Action.NAME, I18n.tr("Unshare all with P2P Network"));
+                putValue(Action.NAME, I18n.tr("Unshare all with the P2P Network"));
             }
         }
         

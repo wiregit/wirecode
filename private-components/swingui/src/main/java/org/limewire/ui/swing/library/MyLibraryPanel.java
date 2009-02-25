@@ -405,7 +405,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         // Display heading.
         addHeading(new HeadingPanel(I18n.tr("PLAYLISTS")), Catalog.Type.PLAYLIST);
 
-        Playlist playlist = new Playlist(I18n.tr("Quicklist"));
+        Catalog playlist = new Catalog(Catalog.Type.PLAYLIST, I18n.tr("Quicklist"));
 
         CatalogSelectionCallback callback = new CatalogSelectionCallback() {
             @Override
@@ -433,7 +433,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     /**
      * Creates the component used to display a single playlist.
      */
-    private JComponent createMyPlaylistAction(Playlist playlist, EventList<LocalFileItem> filtered) {
+    private JComponent createMyPlaylistAction(Catalog playlist, EventList<LocalFileItem> filtered) {
         // Create filtered list.
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
@@ -683,7 +683,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         }
     
         public void setFriend(Friend friend) {
-            headerLabel.setText(I18n.tr("Not Sharing with {0}", friend.getRenderName()));
+            if(friend.getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                headerLabel.setText(I18n.tr("You are not sharing any files with the {0}", friend.getRenderName()));
+            else
+                headerLabel.setText(I18n.tr("You are not sharing any files with {0}", friend.getRenderName()));
         }
         
         public MessageComponent getMessageComponent() {
