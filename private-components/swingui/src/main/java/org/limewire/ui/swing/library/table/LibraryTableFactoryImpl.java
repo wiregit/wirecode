@@ -469,7 +469,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         playlist.addPlaylistListener(new PlaylistListener() {
             @Override
             public void listChanged(Playlist playlist) {
-                System.out.println("playlistChanged");
+                //System.out.println("playlistChanged");
                 sortedList.setComparator(new Comparator<T>() {
                     @Override
                     public int compare(T o1, T o2) {
@@ -485,13 +485,13 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         sortedList.addListEventListener(new ListEventListener<T>() {
             @Override
             public void listChanged(ListEvent<T> listChanges) {
-                System.out.println("listChanged: reordering=" + listChanges.isReordering());
+                //System.out.println("listChanged: reordering=" + listChanges.isReordering());
                 if (listChanges.isReordering()) {
                     // Reorder files in playlist.
                     File[] files = new File[sortedList.size()];
                     for (int i = 0; i < sortedList.size(); i++) {
                         LocalFileItem item = sortedList.get(i);
-                        System.out.println("** " + item.getFile().getAbsolutePath());
+                        //System.out.println("** " + item.getFile().getAbsolutePath());
                         files[i] = item.getFile();
                     }
                     playlist.reorderFiles(files);
