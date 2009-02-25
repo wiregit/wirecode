@@ -4,12 +4,13 @@
 	<import file="build-macros.xml" />
     
     <target name="ivy-taskdef" unless="ivy-taskdef.complete">
+        <echo message="defining ivy"/>
         <property name="ivy-taskdef.complete" value="true"/>
         <taskdef resource="org/apache/ivy/ant/antlib.xml"
     	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"/>
     </target>
     
-    <target name="initialize, ivy-taskdef" unless="initialized.common">
+    <target name="initialize" unless="initialized.common">
         <do.setup-properties component="${component}"/>
     </target>
 	
