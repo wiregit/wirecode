@@ -15,12 +15,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
-import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.URN;
-
 
 /**
  * A repository of content responses.
@@ -122,7 +120,7 @@ class ContentCache {
             oos.writeObject(responses);
             oos.flush();
         } catch (IOException e) {
-            ErrorService.error(e);
+            LOG.error(e);
         } finally {
             IOUtils.close(oos);
         }
