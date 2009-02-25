@@ -52,11 +52,9 @@
 	<target name="clean-core"
 	        description="Cleans just the core classes."
             depends="initialize">
-		<delete >
-			<fileset dir="${build.limewire.core.classes}" includes="**/*.class"/>
-            <fileset dir="${build.limewire.core.home.lib}" includes="**/*" erroronmissingdir="false"/>
-            <fileset dir="${limewire.core.home}/dist" includes="**/*" erroronmissingdir="false" />
-		</delete>
+        <delete dir="${build.limewire.core.classes}" includes="**/*.class"/>
+        <delete dir="${build.limewire.core.home.lib}"/>
+        <delete dir="${limewire.core.home}/dist"/>
 	</target>
     
     <target name="clean" description="Cleans just the core" depends="clean-core"/>
