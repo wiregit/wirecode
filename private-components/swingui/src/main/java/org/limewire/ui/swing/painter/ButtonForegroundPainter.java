@@ -108,6 +108,7 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
         
         Font font = object.getFont();
         
+        // TODO: Should be cached.
         switch (fontTransform) {
             case NO_CHANGE :
                 break;
