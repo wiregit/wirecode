@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library;
 
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 
@@ -19,7 +20,7 @@ import ca.odell.glazedlists.matchers.Matcher;
  */
 public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> implements ListEventListener<LocalFileItem> {
 
-    private EventList<LocalFileItem> friendList;
+    private FriendFileList friendList;
     private FriendMatcher matcher = new FriendMatcher();
     private Friend currentFriend;
     
@@ -39,9 +40,9 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
         if(friend == null || friend.getId() == null) 
             setFriendList(null);
         else if(friend.getId().equals(Friend.P2P_FRIEND_ID))
-            setFriendList(shareListManager.getGnutellaShareList().getModel());
+            setFriendList(shareListManager.getGnutellaShareList());
         else
-            setFriendList(shareListManager.getFriendShareList(friend).getModel());
+            setFriendList(shareListManager.getFriendShareList(friend));
     }
     
     /**
@@ -52,12 +53,12 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
         return currentFriend;
     }
     
-    private void setFriendList(EventList<LocalFileItem> friendList) {
+    private void setFriendList(FriendFileList friendList) {
         if(this.friendList != null)
-            this.friendList.removeListEventListener(this);
+            this.friendList.getSwingModel().removeListEventListener(this);
         this.friendList = friendList;
         if(friendList != null)
-            this.friendList.addListEventListener(this);
+            this.friendList.getSwingModel().addListEventListener(this);
         
         matcher.setFriendList(friendList);
         
@@ -73,7 +74,9 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
 	 * Returns the current EventList that is being used to filter with.
 	 */
     public EventList<LocalFileItem> getCurrentFilter() {
-        return friendList;
+        if(friendList == null)
+            return null;
+        return friendList.getSwingModel();
     }
     
     /**
@@ -82,9 +85,9 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
 	 */
     private class FriendMatcher implements Matcher<LocalFileItem> {
 
-        private EventList<LocalFileItem> friendList;
+        private FriendFileList friendList;
         
-        public void setFriendList(EventList<LocalFileItem> friendList) {
+        public void setFriendList(FriendFileList friendList) {
             this.friendList = friendList;
         }
         
@@ -93,7 +96,7 @@ public class SharingMatchingEditor extends AbstractMatcherEditor<LocalFileItem> 
             if(friendList == null)
                 return true;
             else 
-                return friendList.contains(item);
+                return friendList.contains(item.getUrn());
         }
     }
 

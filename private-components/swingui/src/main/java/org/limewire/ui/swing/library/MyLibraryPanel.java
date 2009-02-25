@@ -292,6 +292,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         sharingComboBox.setVisible(true);
         messagePanel.setVisible(false);
         hideEmptyFriend();
+        //reselect the current category in case we filtered on a friend that wasn't 
+        //sharing anything
+        select(getSelectedCategory());
     }
     
     /**
