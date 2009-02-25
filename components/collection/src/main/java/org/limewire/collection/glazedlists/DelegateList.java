@@ -16,7 +16,7 @@ public class DelegateList<E> implements EventList<E> {
 
     private final CompositeList<E> compositeList;
     private EventList<E> currentDelegate;
-    private List<DelegateListener> listeners = new CopyOnWriteArrayList<DelegateListener>();
+    private List<DelegateListener<E>> listeners = new CopyOnWriteArrayList<DelegateListener<E>>();
     
     public DelegateList(ListEventPublisher publisher, ReadWriteLock lock) {
         this.compositeList = new CompositeList<E>(publisher, lock);
@@ -39,6 +39,9 @@ public class DelegateList<E> implements EventList<E> {
                 }
                 currentDelegate = delegateList;
                 compositeList.addMemberList(currentDelegate);
+                for(DelegateListener<E> listener : listeners) {
+                    listener.delegateChanged(this, currentDelegate);
+                }
             }
         } finally {
             delegateList.getReadWriteLock().writeLock().unlock();    
