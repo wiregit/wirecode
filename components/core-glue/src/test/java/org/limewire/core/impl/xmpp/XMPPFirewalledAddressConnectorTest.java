@@ -234,4 +234,28 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         
         return new PushedSocketConnectObserver(fwAddress, connectObserver);
     }
+    
+    /* TODO: Finish this text case!
+    public void testConnectSimple() {
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }};
+
+        final ConnectObserver observer = context.mock(ConnectObserver.class);    
+        final XMPPFirewalledAddress address = context.mock(XMPPFirewalledAddress.class);
+        
+        final FirewalledAddress fwAddress = context.mock(FirewalledAddress.class);
+        final GUID guid = new GUID(new byte[] {'X','x',1,2,3,4,'.','.','.',5,6,9,'n', 10,'x','X'});
+        
+        final XMPPFirewalledAddressConnector connector 
+            = new XMPPFirewalledAddressConnector(null, null, null, null, null, null);
+        
+        context.checking(new Expectations() {
+            {   allowing(address).getFirewalledAddress();
+                will(returnValue(fwAddress));
+            }});
+        
+        connector.connect(address, observer);
+    }
+    */
 }
