@@ -23,8 +23,8 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
+import org.limewire.ui.swing.library.DelegateListChanger;
 import org.limewire.ui.swing.library.LibraryOperable;
-import org.limewire.ui.swing.library.SharingMatchingEditor;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -61,7 +61,7 @@ public class LibraryImagePanel extends JPanel
     private final Map<File, LibraryImageSubPanel> panelMap;
 
     private final LocalFileList fileList;
-    private final SharingMatchingEditor sharingMatcherEditor;
+    private final DelegateListChanger listChanger;
     
     private JScrollPane scrollPane;
     
@@ -69,7 +69,7 @@ public class LibraryImagePanel extends JPanel
             LocalFileList fileList, JScrollPane scrollPane,
             LibraryImageSubPanelFactory factory,
             ShareWidget<File> shareWidget,
-            SharingMatchingEditor sharingMatcherEditor) {       
+            DelegateListChanger listChanger) {       
         super(new VerticalLayout());
         
         GuiUtils.assignResources(this); 
@@ -79,7 +79,7 @@ public class LibraryImagePanel extends JPanel
         this.scrollPane = scrollPane;
         this.factory = factory;
         this.shareWidget = shareWidget;
-        this.sharingMatcherEditor = sharingMatcherEditor;
+        this.listChanger = listChanger;
         
         groupingList = GlazedListsFactory.groupingList(eventList, groupingComparator);
         
@@ -130,7 +130,7 @@ public class LibraryImagePanel extends JPanel
     
     
     private void createSubPanel(File parent, EventList<LocalFileItem> list){
-        LibraryImageSubPanel subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, shareWidget, sharingMatcherEditor);
+        LibraryImageSubPanel subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, shareWidget, listChanger);
         panelMap.put(parent, subPanel);
         add(subPanel);
     }

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.components;
+package org.limewire.ui.swing.library;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -25,8 +25,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.MyLibraryPanel;
-import org.limewire.ui.swing.library.SharingMatchingEditor;
+import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -53,7 +52,7 @@ public class SharingFilterComboBox extends LimeComboBox {
     
     private final Set<Friend> menuList = new HashSet<Friend>();
 
-    private final SharingMatchingEditor matchingEditor;
+    private final DelegateListChanger listChanger;
     private final MyLibraryPanel myLibraryPanel;
     private final ShareListManager shareListManager;
     
@@ -61,8 +60,8 @@ public class SharingFilterComboBox extends LimeComboBox {
     
     private JComponent subMenuText;
         
-    public SharingFilterComboBox(SharingMatchingEditor matchingEditor, MyLibraryPanel myLibraryPanel, ShareListManager shareListManager) {
-        this.matchingEditor = matchingEditor;
+    public SharingFilterComboBox(DelegateListChanger listChanger, MyLibraryPanel myLibraryPanel, ShareListManager shareListManager) {
+        this.listChanger = listChanger;
         this.myLibraryPanel = myLibraryPanel;
         this.shareListManager = shareListManager;
         
@@ -81,7 +80,7 @@ public class SharingFilterComboBox extends LimeComboBox {
 	 * selecting a friend share view programatically outside of My Library.
 	 */
     public void selectFriend(Friend friend) {
-        matchingEditor.setFriend(friend);
+        listChanger.setFriend(friend);
 
         MenuAction action = new MenuAction(friend, 0, null);
         fireChangeEvent(action);
@@ -136,7 +135,7 @@ public class SharingFilterComboBox extends LimeComboBox {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            matchingEditor.setFriend(friend);
+            listChanger.setFriend(friend);
             
             SharingFilterComboBox.this.fireChangeEvent(this);
         }

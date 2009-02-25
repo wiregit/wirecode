@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.library.SharingMatchingEditor;
+import org.limewire.ui.swing.library.DelegateListChanger;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 
 import ca.odell.glazedlists.EventList;
@@ -17,7 +17,7 @@ public interface LibraryImageSubPanelFactory {
 
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
-            ShareWidget<File> shareWidget, SharingMatchingEditor sharingMatcherEditor);
+            ShareWidget<File> shareWidget, DelegateListChanger listChanger);
 
     public LibraryImageSubPanel createSharingLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,

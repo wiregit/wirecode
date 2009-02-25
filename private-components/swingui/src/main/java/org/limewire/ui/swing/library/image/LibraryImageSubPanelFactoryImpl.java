@@ -21,7 +21,7 @@ import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ThumbnailManager;
-import org.limewire.ui.swing.library.SharingMatchingEditor;
+import org.limewire.ui.swing.library.DelegateListChanger;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditor;
@@ -68,7 +68,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     @Override
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
-            ShareWidget<File> shareWidget, SharingMatchingEditor sharingMatcherEditor) {
+            ShareWidget<File> shareWidget, DelegateListChanger listChanger) {
 
         LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList);
         panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, shareWidgetFactory, libraryManager, localFilePropFactory));
@@ -76,7 +76,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         ImageList list = panel.getImageList();
         list.setImageCellRenderer(enableMyLibraryRenderer(list));
         panel.setImageEditor(enableMyLibraryEditor(shareWidget, panel));
-        TransferHandler transferHandler = new MyLibraryTransferHandler(getSelectionModel(list), libraryManager.getLibraryManagedList(), shareListManager, sharingMatcherEditor);
+        TransferHandler transferHandler = new MyLibraryTransferHandler(getSelectionModel(list), libraryManager.getLibraryManagedList(), shareListManager, listChanger);
         list.setTransferHandler(transferHandler);
         panel.setTransferHandler(transferHandler);
         return panel;

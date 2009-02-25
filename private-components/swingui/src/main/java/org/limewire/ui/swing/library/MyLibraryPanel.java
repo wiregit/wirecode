@@ -37,6 +37,7 @@ import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
 import org.jdesktop.jxlayer.plaf.ext.LockableUI;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.collection.glazedlists.DelegateList;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
@@ -57,7 +58,6 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.ShareAllComboBox;
-import org.limewire.ui.swing.components.SharingFilterComboBox;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
@@ -94,8 +94,6 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.matchers.MatcherEditor.Event;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
@@ -131,7 +129,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private final Set<String> knownFriends = new HashSet<String>();
     
     private SharingFilterComboBox sharingComboBox;
-    private final SharingMatchingEditor sharingMatchingEditor;
+    
+    private final DelegateListChanger delegateListChanger;
     
     private SharingMessagePanel messagePanel;
     private NotSharingPanel notSharingPanel;
@@ -173,8 +172,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
-        sharingMatchingEditor = new SharingMatchingEditor(shareListManager);
-        sharingComboBox = new SharingFilterComboBox(sharingMatchingEditor, this, shareListManager);
+        DelegateList<LocalFileItem> baseLibraryList = new DelegateList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
+        delegateListChanger = new DelegateListChanger(baseLibraryList, libraryManager, shareListManager);
+        sharingComboBox = new SharingFilterComboBox(delegateListChanger, this, shareListManager);
         comboDecorator.decorateLinkComboBox(sharingComboBox);
         sharingComboBox.setText(I18n.tr("What I'm Sharing"));
         
@@ -183,15 +183,13 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         sharingComboBox.addSelectionListener(new SelectionListener(){
             @Override
             public void selectionChanged(Action item) {
-                messagePanel.setMessage(sharingMatchingEditor.getCurrentFriend());
+                messagePanel.setMessage(delegateListChanger.getCurrentFriend());
                 messagePanel.setVisible(true);
                 sharingComboBox.setVisible(false);
             }
         });
         
-        FilterList<LocalFileItem> friendFilterList = GlazedListsFactory.filterList(libraryManager.getLibraryManagedList().getSwingModel(), 
-                sharingMatchingEditor);
-        createMyCategories(friendFilterList);
+        createMyCategories(baseLibraryList);
         createMyPlaylists();
         selectFirstVisible();
 
@@ -208,8 +206,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         playerPanel.setPreferredSize(new Dimension(999,999));
 
         
-        setTransferHandler(new MyLibraryTransferHandler(null, libraryManager.getLibraryManagedList(), shareListManager, sharingMatchingEditor));
-        ghostDropTargetListener = new GhostDropTargetListener(this,ghostPane, sharingMatchingEditor);
+        setTransferHandler(new MyLibraryTransferHandler(null, libraryManager.getLibraryManagedList(), shareListManager, delegateListChanger));
+        ghostDropTargetListener = new GhostDropTargetListener(this,ghostPane, delegateListChanger);
         try {
             getDropTarget().addDropTargetListener(ghostDropTargetListener);
         } catch (TooManyListenersException ignoreException) {            
@@ -292,7 +290,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 	 * Will cancel filtering and return My Library to a normal state.
 	 */
     public void showAllFiles() {
-        sharingMatchingEditor.setFriend(null);
+        delegateListChanger.setFriend(null);
         sharingComboBox.setVisible(true);
         messagePanel.setVisible(false);
         hideEmptyFriend();
@@ -355,7 +353,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         if (category != Category.IMAGE) {
-            LibraryTable<LocalFileItem> table = tableFactory.createMyTable(category, filterList, sharingMatchingEditor);
+            LibraryTable<LocalFileItem> table = tableFactory.createMyTable(category, filterList, delegateListChanger);
             table.enableMyLibrarySharing(fileShareWidget);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
             selectableMap.put(category, table);
@@ -365,7 +363,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         } else { //Category.IMAGE 
             scrollPane = new JScrollPane();
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            LibraryImagePanel imagePanel = tableFactory.createMyImagePanel(filterList, scrollPane, fileShareWidget, sharingMatchingEditor);
+            LibraryImagePanel imagePanel = tableFactory.createMyImagePanel(filterList, scrollPane, fileShareWidget, delegateListChanger);
             selectableMap.put(category, imagePanel);
             scrollPane.setViewportView(imagePanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());            
@@ -449,7 +447,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         
         // TODO create factory method createPlaylistTable()
-        LibraryTable<LocalFileItem> table = tableFactory.createMyTable(Category.AUDIO, filterList, sharingMatchingEditor);
+        LibraryTable<LocalFileItem> table = tableFactory.createMyTable(Category.AUDIO, filterList, delegateListChanger);
         // TODO review for possible inclusion/exclusion
         //table.enableMyLibrarySharing(fileShareWidget);
         //table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
@@ -476,7 +474,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         if(category != null) {
             JPanel panel = new JPanel(new MigLayout("fill"));
             panel.setOpaque(false);
-            panel.add(getEmptyLibraryMessageComponent(sharingMatchingEditor.getCurrentFriend()), "align 50% 40%");
+            panel.add(getEmptyLibraryMessageComponent(delegateListChanger.getCurrentFriend()), "align 50% 40%");
             JXLayer layer = map.get(category);
             layer.getGlassPane().removeAll();
             layer.getGlassPane().add(panel);
@@ -819,9 +817,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         public PlayListListener(Action action) {
             this.action = action;
             
-            sharingMatchingEditor.addMatcherEditorListener(new MatcherEditor.Listener<LocalFileItem>(){
+            delegateListChanger.addListener(new DelegateList.DelegateListener<LocalFileItem>() {
                 @Override
-                public void changedMatcher(Event<LocalFileItem> matcherEvent) {
+                public void delegateChanged(DelegateList<LocalFileItem> delegateList,
+                        EventList<LocalFileItem> theDelegate) {
                     updateList();
                 }
             });
@@ -829,7 +828,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         
         private void updateList() {
             //if not filtering
-            if(sharingMatchingEditor.getCurrentFilter() == null) {
+            if(delegateListChanger.getCurrentFriend() == null) {
                 action.setEnabled(true);
             } else {
                 action.setEnabled(false);
@@ -859,9 +858,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
             }
             
-            sharingMatchingEditor.addMatcherEditorListener(new MatcherEditor.Listener<LocalFileItem>(){
+            delegateListChanger.addListener(new DelegateList.DelegateListener<LocalFileItem>() {
                 @Override
-                public void changedMatcher(Event<LocalFileItem> matcherEvent) {
+                public void delegateChanged(DelegateList<LocalFileItem> delegateList,
+                        EventList<LocalFileItem> theDelegate) {
                     setText();
                 }
             });
@@ -869,7 +869,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
         private void setText() {
             //if not filtering
-            if(sharingMatchingEditor.getCurrentFilter() == null) {
+            if(delegateListChanger.getCurrentFriend() == null) {
                 //disable other category if size is 0
                 if(category == Category.OTHER) {
                     action.setEnabled(list.size() > 0);

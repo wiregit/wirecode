@@ -10,7 +10,7 @@ import java.awt.dnd.DropTargetListener;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.friend.Friend;
-import org.limewire.ui.swing.library.SharingMatchingEditor;
+import org.limewire.ui.swing.library.DelegateListChanger;
 
 /**
  * Listens to drag and drop events. When files are dragged onto a
@@ -27,27 +27,27 @@ public class GhostDropTargetListener implements DropTargetListener {
     private final GhostDragGlassPane ghostDragGlassPane;
     private final Component parent;
     private final Friend friend;
-    private final SharingMatchingEditor sharingMatchingEditor;
+    private final DelegateListChanger listChanger;
     
     public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane) {
         this.parent = parent;
         this.ghostDragGlassPane = ghostDragGlassPane;
         this.friend = null;
-        this.sharingMatchingEditor = null;
+        this.listChanger = null;
     }
     
     public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, Friend friend) {
         this.parent = parent;
         this.ghostDragGlassPane = ghostDragGlassPane;
         this.friend = friend;
-        this.sharingMatchingEditor = null;
+        this.listChanger = null;
     }
     
-    public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, SharingMatchingEditor sharingMatchingEditor) {
+    public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, DelegateListChanger listChanger) {
         this.parent = parent;
         this.ghostDragGlassPane = ghostDragGlassPane;
         this.friend = null;
-        this.sharingMatchingEditor = sharingMatchingEditor;
+        this.listChanger = listChanger;
     }
     
     @Override
@@ -78,8 +78,8 @@ public class GhostDropTargetListener implements DropTargetListener {
 
         ghostPane.setPoint(p);
         //if filtering, set drop target name to friend filtering on
-        if(sharingMatchingEditor != null)
-            ghostPane.setText(sharingMatchingEditor.getCurrentFriend());
+        if(listChanger != null)
+            ghostPane.setText(listChanger.getCurrentFriend());
         else
             ghostPane.setText(friend);
     }

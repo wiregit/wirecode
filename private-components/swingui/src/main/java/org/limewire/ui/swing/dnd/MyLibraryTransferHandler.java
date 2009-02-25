@@ -11,7 +11,7 @@ import javax.swing.TransferHandler;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.ui.swing.library.SharingMatchingEditor;
+import org.limewire.ui.swing.library.DelegateListChanger;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.util.DNDUtils;
 
@@ -23,13 +23,15 @@ public class MyLibraryTransferHandler extends TransferHandler {
     private final EventSelectionModel<LocalFileItem> selectionModel;
     private final LibraryFileList libraryManagedList;
     private final ShareListManager shareListManager;
-    private final SharingMatchingEditor sharingMatcherEditor;
+    private final DelegateListChanger listChanger;
     
-    public MyLibraryTransferHandler(EventSelectionModel<LocalFileItem> selectionModel, LibraryFileList libraryManagedList, ShareListManager shareListManager, SharingMatchingEditor sharingMatcherEditor) {
+    public MyLibraryTransferHandler(EventSelectionModel<LocalFileItem> selectionModel,
+            LibraryFileList libraryManagedList, ShareListManager shareListManager,
+            DelegateListChanger listChanger) {
         this.selectionModel = selectionModel;
         this.libraryManagedList = libraryManagedList;
         this.shareListManager = shareListManager;
-        this.sharingMatcherEditor = sharingMatcherEditor;
+        this.listChanger = listChanger;
     }
 
     @Override
@@ -60,20 +62,20 @@ public class MyLibraryTransferHandler extends TransferHandler {
             // if is a folder
             if(file.isDirectory()) {
                 //if not in filtered mode
-                if(sharingMatcherEditor.getCurrentFriend() == null)
+                if(listChanger.getCurrentFriend() == null)
                     libraryManagedList.addFolder(file);
-                else if(sharingMatcherEditor.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                else if(listChanger.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
                     shareListManager.getGnutellaShareList().addFolder(file);
                 else
-                    shareListManager.getFriendShareList(sharingMatcherEditor.getCurrentFriend()).addFolder(file);
+                    shareListManager.getFriendShareList(listChanger.getCurrentFriend()).addFolder(file);
             } else {
                 //if not in filtered mode
-                if(sharingMatcherEditor.getCurrentFriend() == null)
+                if(listChanger.getCurrentFriend() == null)
                     libraryManagedList.addFile(file);
-                else if(sharingMatcherEditor.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                else if(listChanger.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
                     shareListManager.getGnutellaShareList().addFile(file);
                 else
-                    shareListManager.getFriendShareList(sharingMatcherEditor.getCurrentFriend()).addFile(file);
+                    shareListManager.getFriendShareList(listChanger.getCurrentFriend()).addFile(file);
             }
         }
         return true;
