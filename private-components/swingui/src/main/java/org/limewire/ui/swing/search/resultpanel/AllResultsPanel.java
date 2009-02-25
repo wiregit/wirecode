@@ -22,8 +22,14 @@ import ca.odell.glazedlists.EventList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+/**
+ * Panel containing the search result tables for all file types.
+ */
 public class AllResultsPanel extends BaseResultPanel {
 
+    /**
+     * Constructs an AllResultsPanel with the specified components.
+     */
     @AssistedInject
     public AllResultsPanel(
         @Assisted EventList<VisualSearchResult> eventList,
@@ -44,7 +50,7 @@ public class AllResultsPanel extends BaseResultPanel {
         super(listViewEditorRendererFactory, eventList, tableFormat,
             downloadListManager, search, searchInfo, preserver, navigator, properties, rowHeightRule, 
             saveLocationExceptionHandler, searchResultFromWidget, iconManager, categoryIconManager,
-            libraryNavigator, libraryManager);
+            libraryNavigator, libraryManager, true);
     }
     
     @Override

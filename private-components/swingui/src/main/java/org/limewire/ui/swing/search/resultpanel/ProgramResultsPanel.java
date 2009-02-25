@@ -43,7 +43,7 @@ public class ProgramResultsPanel extends BaseResultPanel {
         super(listViewEditorRendererFactory, eventList, tableFormat, downloadListManager,
             search, searchInfo, preserver, navigator, properties, rowHeightRule, 
             saveLocationExceptionHandler, searchResultFromWidget, iconManager, categoryIconManager,
-            libraryNavigator, libraryManager);
+            libraryNavigator, libraryManager, false);
     }
     
     @Override

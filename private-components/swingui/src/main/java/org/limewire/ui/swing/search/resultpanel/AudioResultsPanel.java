@@ -45,7 +45,7 @@ public class AudioResultsPanel extends BaseResultPanel {
         super(listViewEditorRendererFactory, eventList, new AudioTableFormat(), downloadListManager,
             search, searchInfo, preserver, navigator, properties, rowHeightRule, saveLocationExceptionHandler,
             searchResultFromWidget, iconManager, categoryIconManager,
-            libraryNavigator, libraryManager);
+            libraryNavigator, libraryManager, false);
     }
     
     @Override

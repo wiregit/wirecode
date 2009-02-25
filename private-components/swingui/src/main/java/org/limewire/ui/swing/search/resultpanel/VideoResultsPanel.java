@@ -44,7 +44,7 @@ public class VideoResultsPanel extends BaseResultPanel {
         super(listViewEditorRendererFactory, eventList, new VideoTableFormat(), downloadListManager,
             search, searchInfo, preserver, navigator, properties, rowHeightRule, 
             saveLocationExceptionHandler, searchResultFromWidget, iconManager, categoryIconManager,
-            libraryNavigator, libraryManager);
+            libraryNavigator, libraryManager, false);
         
     }
     

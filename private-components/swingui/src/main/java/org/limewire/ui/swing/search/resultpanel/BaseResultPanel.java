@@ -109,6 +109,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     
     private final LibraryNavigator libraryNavigator;
     private final LibraryManager libraryManager;
+    private final boolean showAudioArtist;
 
     /**
      * Constructs a BaseResultPanel with the specified components.
@@ -125,7 +126,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             SaveLocationExceptionHandler saveLocationExceptionHandler,
             SearchResultFromWidgetFactory fromWidgetFactory, IconManager iconManager, CategoryIconManager categoryIconManager,
             LibraryNavigator libraryNavigator,
-            LibraryManager libraryManager) {
+            LibraryManager libraryManager,
+            boolean showAudioArtist) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
@@ -138,6 +140,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         this.downloadPreprocessors.add(new LicenseWarningDownloadPreprocessor());
         this.libraryNavigator = libraryNavigator;
         this.libraryManager = libraryManager;
+        this.showAudioArtist = showAudioArtist;
         
         setLayout(layout);
                 
@@ -318,7 +321,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
      */
     protected void setupCellRenderers(final ResultsTableFormat<VisualSearchResult> tableFormat) {
         CalendarRenderer calendarRenderer = new CalendarRenderer();
-        IconLabelRenderer iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
+        IconLabelRenderer iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager, showAudioArtist);
         TableCellRenderer defaultRenderer = new DefaultLibraryRenderer();
         
         int columnCount = tableFormat.getColumnCount();
