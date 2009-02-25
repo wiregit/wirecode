@@ -75,7 +75,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     public AbstractFileListPanel(HeaderBarDecorator headerBarFactory, TextFieldDecorator textFieldDecorator) {        
         cardPanel.setLayout(cardLayout);              
-        filterField = createFilterField(textFieldDecorator, I18n.tr("Search Library..."));
+        filterField = createFilterField(textFieldDecorator, I18n.tr("Find..."));
         headerPanel = createHeaderBar(headerBarFactory);
         headerPanel.setLayout(new MigLayout("insets 0, gap 0, fill, alignx right"));
         
