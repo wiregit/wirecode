@@ -6,6 +6,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.ButtonForegroundPainter;
 import org.limewire.ui.swing.painter.DarkButtonBackgroundPainter;
+import org.limewire.ui.swing.painter.GreenButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.LightButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.PopupButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
@@ -77,6 +78,15 @@ public class ButtonPainterFactory {
      */
     public ButtonBackgroundPainter createLightFullButtonBackgroundPainter() {
         return new LightButtonBackgroundPainter();
+    }
+    
+    /**
+     * Creates a background painter for buttons with the green colour scheme.
+     *  These are usually placed on components with generally lighter colouring
+     *  that the dark buttons.
+     */
+    public ButtonBackgroundPainter createGreenFullButtonBackgroundPainter() {
+        return new GreenButtonBackgroundPainter();
     }
     
     /**

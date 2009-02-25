@@ -98,6 +98,16 @@ public class ButtonDecorator {
         button.setForeground(lightFullTextForeground);
         button.setFont(lightFullTextFont);
     }
+    
+    public void decorateGreenFullButton(JXButton button) {
+        button.setForegroundPainter(painterFactory.createLightFullButtonForegroundPainter());
+        button.setBackgroundPainter(painterFactory.createGreenFullButtonBackgroundPainter());
+
+        decorateGeneral(button);
+        
+        button.setForeground(lightFullTextForeground);
+        button.setFont(lightFullTextFont);
+    }
         
     private static void decorateGeneral(JXButton button) {
         button.setOpaque(false);
