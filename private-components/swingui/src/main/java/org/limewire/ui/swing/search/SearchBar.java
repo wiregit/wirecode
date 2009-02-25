@@ -19,8 +19,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.AutoCompleteDictionary;
+import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -66,7 +66,7 @@ public class SearchBar extends JXPanel {
     private final IconButton searchButton;
     
     private final HistoryAndFriendAutoCompleter autoCompleter;
-    private final FriendAutoCompleters friendLibraries;
+    private final FriendAutoCompleterFactory friendAutoCompleterFactory;
     private final AutoCompleteDictionary searchHistory;
     private final Navigator navigator;
     
@@ -75,7 +75,7 @@ public class SearchBar extends JXPanel {
     
     @Inject
     public SearchBar(ComboBoxDecorator comboBoxDecorator, 
-            final FriendAutoCompleters friendLibraries,
+            final FriendAutoCompleterFactory friendAutoCompleterFactory,
             @Named("searchHistory") AutoCompleteDictionary searchHistory,
             CategoryIconManager categoryIconManager,
             TextFieldDecorator textFieldDecorator,
@@ -83,10 +83,10 @@ public class SearchBar extends JXPanel {
         super(new MigLayout("ins 0, gapx 0, gapy 0"));
     
         GuiUtils.assignResources(this);
-
+        
+        this.friendAutoCompleterFactory = friendAutoCompleterFactory;
         this.navigator = navigator;
         this.searchHistory = searchHistory;
-        this.friendLibraries = friendLibraries;
         this.autoCompleter = new HistoryAndFriendAutoCompleter();
         this.categoryToSearch = SearchCategory.forId(SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue());
         
@@ -153,10 +153,10 @@ public class SearchBar extends JXPanel {
         
         autoCompleter.setSuggestionsShown(SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
         if (actionToSelect != null) {
-            autoCompleter.setSuggestionDictionary(friendLibraries.getDictionary(categoryToSearch));
+            autoCompleter.setSuggestionDictionary(friendAutoCompleterFactory.getDictionary(categoryToSearch));
             comboBox.setSelectedAction(actionToSelect);
         } else {
-            autoCompleter.setSuggestionDictionary(friendLibraries.getDictionary(SearchCategory.ALL));
+            autoCompleter.setSuggestionDictionary(friendAutoCompleterFactory.getDictionary(SearchCategory.ALL));
         }
         
         setOpaque(false);
@@ -254,7 +254,7 @@ public class SearchBar extends JXPanel {
         @Override
         public void actionPerformed(ActionEvent arg0) {
             categoryToSearch = category;            
-            autoCompleter.setSuggestionDictionary(friendLibraries.getDictionary(category));
+            autoCompleter.setSuggestionDictionary(friendAutoCompleterFactory.getDictionary(category));
         }
     }
 

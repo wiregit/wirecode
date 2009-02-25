@@ -13,8 +13,11 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.components.BasicAutoCompleter;
 import org.limewire.ui.swing.components.CollectionBackedComboBoxModel;
+import org.limewire.ui.swing.components.DropDownListAutoCompleteControl;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchInfo;
 
@@ -25,16 +28,21 @@ abstract class AdvancedPanel extends JPanel {
         new EnumMap<FilePropertyKey, JComponent>(FilePropertyKey.class);
     private final SearchCategory category;
 
+    private final FriendAutoCompleterFactory friendAutoCompleterFactory;
+    
     /** Constructs an AdvancedPanel that will search the given category. */
-    public AdvancedPanel(SearchCategory category) {
+    public AdvancedPanel(SearchCategory category, FriendAutoCompleterFactory friendAutoCompleterFactory) {
         super(new MigLayout("fill", "[]related[grow]", ""));
         this.category = category;
+        this.friendAutoCompleterFactory = friendAutoCompleterFactory;
     }
         
     /** Adds a new JTextField that will search using the given FilePropertyKey. */ 
     protected void addField(String name, FilePropertyKey key) {
         add(new JLabel(name));
         JTextField textField = new JTextField();
+        final DropDownListAutoCompleteControl autoCompleteControl = DropDownListAutoCompleteControl.install(textField, new BasicAutoCompleter(friendAutoCompleterFactory.getDictionary(category, key)));
+        autoCompleteControl.setAutoComplete(true);
         add(textField, "growx, wrap");
         componentMap.put(key, textField);
     }

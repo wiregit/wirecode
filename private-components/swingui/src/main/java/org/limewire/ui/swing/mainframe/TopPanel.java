@@ -21,7 +21,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FancyTabList;
@@ -67,7 +66,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @Inject
     public TopPanel(final SearchHandler searchHandler,
                     Navigator navigator,
-                    final FriendAutoCompleters friendLibraries,
                     final HomePanel homePanel,
                     final StorePanel storePanel,
                     final LeftPanel leftPanel,

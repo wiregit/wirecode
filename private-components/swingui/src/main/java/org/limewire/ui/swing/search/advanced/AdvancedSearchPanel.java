@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -32,11 +33,12 @@ public class AdvancedSearchPanel extends JXPanel {
     
     private final Action searchAction;
     private AdvancedPanel visibleComponent = null;
+    private final FriendAutoCompleterFactory friendAutoCompleterFactory;
 
     @Inject
-    public AdvancedSearchPanel(PropertyDictionary propertyDictionary) {
+    public AdvancedSearchPanel(PropertyDictionary propertyDictionary, FriendAutoCompleterFactory friendAutoCompleterFactory) {
         this.propertyDictionary = propertyDictionary;
-        
+        this.friendAutoCompleterFactory = friendAutoCompleterFactory;
         setLayout(new MigLayout("hidemode 3"));
         
         JLabel heading = new JLabel(I18n.tr("Advanced Search"));
@@ -68,23 +70,23 @@ public class AdvancedSearchPanel extends JXPanel {
     }
     
     private AdvancedPanel createProgramFields() {
-        return new AdvancedProgramPanel();
+        return new AdvancedProgramPanel(friendAutoCompleterFactory);
     }
 
     private AdvancedPanel createDocumentFields() {
-        return new AdvancedDocumentPanel();
+        return new AdvancedDocumentPanel(friendAutoCompleterFactory);
     }
 
     private AdvancedPanel createImageFields() {
-        return new AdvancedImagePanel();
+        return new AdvancedImagePanel(friendAutoCompleterFactory);
     }
 
     private AdvancedPanel createVideoFields() {
-        return new AdvancedVideoPanel(propertyDictionary);
+        return new AdvancedVideoPanel(propertyDictionary, friendAutoCompleterFactory);
     }
 
     private AdvancedPanel createAudioFields() {
-        return new AdvancedAudioPanel(propertyDictionary);
+        return new AdvancedAudioPanel(propertyDictionary, friendAutoCompleterFactory);
     }
 
     private void addCategory(SearchCategory category, final AdvancedPanel component) {
