@@ -1,13 +1,17 @@
 package org.limewire.ui.swing.search.advanced;
 
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -132,22 +136,36 @@ public class AdvancedSearchPanel extends JXPanel {
     }
 
     private void addCategory(final SearchCategory category, final AdvancedPanel component) {
-        JXButton button = new JXButton(new AbstractAction(I18n.tr(category.getCategory().getPluralName())) {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                visibleComponent = component;
-                inputLayout.show(inputPanel, category.getCategory().toString());
-                searchButton.setVisible(true);
-            }
-        });
+        final JXButton button = new JXButton(I18n.tr(category.getCategory().getPluralName()));
+                
         button.setModel(new JToggleButton.ToggleButtonModel());
         buttonDecorator.decorateMiniButton(button);
         button.setFont(headingFont);
         
         selectorPanel.add(button);
         inputPanel.add(component, category.getCategory().toString());
+        
+        button.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent event) {
+                if (event.getStateChange() == ItemEvent.SELECTED) {
+                    visibleComponent = component;
+                    inputLayout.show(inputPanel, category.getCategory().toString());
+                    unpdateSelection(button);
+                }
+            }
+        });
     }
 
+    private void unpdateSelection(JButton button) {
+        button.setSelected(true);
+        for ( Component comp : selectorPanel.getComponents() ) {
+            if (comp instanceof JButton && button != comp) {
+                ((JButton)comp).setSelected(false);
+            }
+        }
+    }
+    
     /** Adds a listener that will be notified when an advanced search is triggered. */
     public void addSearchListener(UiSearchListener uiSearchListener) {
         uiSearchListeners.add(uiSearchListener);
