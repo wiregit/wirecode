@@ -6,6 +6,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 public class MultiFileUnshareModel implements LibraryShareModel {
     private final LocalFileItem[] fileItems;
@@ -26,16 +27,21 @@ public class MultiFileUnshareModel implements LibraryShareModel {
     }
     
     @Override
-    public void unshareFriend(SharingTarget friend) {
-        for (LocalFileItem item : fileItems) {
-            if (friend.isGnutellaNetwork()) {
-                gnutellaList.removeFile(item.getFile());
-            } else {
-                // TODO: need to handle share all settings here
-                shareListManager.getOrCreateFriendShareList(friend.getFriend()).removeFile(
-                        item.getFile());
+    public void unshareFriend(final SharingTarget friend) {
+        //perform actual unsharing on background thread
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                for (LocalFileItem item : fileItems) {
+                    if (friend.isGnutellaNetwork()) {
+                        gnutellaList.removeFile(item.getFile());
+                    } else {
+                        // TODO: need to handle share all settings here
+                        shareListManager.getOrCreateFriendShareList(friend.getFriend()).removeFile(
+                                item.getFile());
+                    }
+                }
             }
-        }
+        });
     }
 
     

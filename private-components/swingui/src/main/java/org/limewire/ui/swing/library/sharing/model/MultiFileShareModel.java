@@ -41,6 +41,9 @@ public class MultiFileShareModel implements LibraryShareModel {
     
     @Override
     public void unshareFriend(final SharingTarget friend) {
+    //TODO: this should probably throw an exception
+    //   see MultiFileUnshareModel.shareFriend, but don't want
+    //   to break anything on the bugfix that may be using this.
     	//perform actual unsharing on background thread
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {

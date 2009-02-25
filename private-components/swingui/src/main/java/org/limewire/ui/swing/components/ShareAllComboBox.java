@@ -24,6 +24,7 @@ import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.sharing.model.MultiFileShareModel;
+import org.limewire.ui.swing.library.sharing.model.MultiFileUnshareModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -211,7 +212,7 @@ public class ShareAllComboBox extends LimeComboBox {
                     shareWidget.show(GuiUtils.getMainFrame());
                 }
             } else {
-                MultiFileShareModel model = new MultiFileShareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+                MultiFileUnshareModel model = new MultiFileUnshareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
                 model.unshareFriend(SharingTarget.GNUTELLA_SHARE);   
             }
         }
