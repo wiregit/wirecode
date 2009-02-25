@@ -32,7 +32,7 @@
 	<property name="compile.target"			value="1.6"/>
     
     <taskdef resource="org/apache/ivy/ant/antlib.xml"
-    	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar" loaderref="ivy.loader"/>
+    	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar" loaderref="custom.tasks.loader"/>
     
     <macrodef name="do.setup-properties" description="Sets up common properties every macro uses.">
     	<attribute name="component"/>
@@ -460,7 +460,7 @@
         <attribute name="defaultfileset" default="${limewire.components.@{component}.home}"/>
         <sequential>
 	        <antcall target="clover-guard"/>
-            <taskdef resource="cloverlib.xml" classpath="${cloverjar}"/>
+            <taskdef resource="cloverlib.xml" classpath="${cloverjar}" loaderref="custom.tasks.loader"/>
             <mkdir dir="${clover.limewire.components.@{component}.home}"/>
             <clover-setup initString="${clover.limewire.components.@{component}.db}">
               <!--  <statementContext name="log" regexp="^LOG\..*"/>
@@ -512,16 +512,16 @@
 	<target name="init.gettext" description="Loads the gettext ant tasks">
 	 <taskdef name="gettext-extract"
        classname="org.xnap.commons.ant.gettext.GettextExtractKeysTask"
-       classpath="${gettexttasks.jar}"/>
+       classpath="${gettexttasks.jar}" loaderref="custom.tasks.loader"/>
 	 <taskdef name="gettext-merge"
        classname="org.xnap.commons.ant.gettext.GettextMergeKeysTask"
-       classpath="${gettexttasks.jar}"/>
+       classpath="${gettexttasks.jar}" loaderref="custom.tasks.loader"/>
 	 <taskdef name="gettext-dist"
        classname="org.xnap.commons.ant.gettext.GettextDistTask"
-       classpath="${gettexttasks.jar}"/>
+       classpath="${gettexttasks.jar}" loaderref="custom.tasks.loader"/>
       <taskdef name="gettext-generate-default"
 	   classname="org.xnap.commons.ant.gettext.GenerateDefaultBundleTask"
-	   classpath="${gettexttasks.jar}"/>
+	   classpath="${gettexttasks.jar}" loaderref="custom.tasks.loader"/>
 	</target>
 
     <!--target name="clean"/-->
