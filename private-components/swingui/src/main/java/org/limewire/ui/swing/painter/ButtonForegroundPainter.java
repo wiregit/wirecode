@@ -109,6 +109,8 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
         Font font = object.getFont();
         
         switch (fontTransform) {
+            case NO_CHANGE :
+                break;
             case ADD_UNDERLINE :
                 font = FontUtils.deriveUnderline(font, true);
                 break;
