@@ -174,7 +174,7 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
 
         private final FirewalledAddress firewalledAddress;
         private final ConnectObserver observer;
-        private final AtomicBoolean acceptedOrFailed = new AtomicBoolean(false);
+        final AtomicBoolean acceptedOrFailed = new AtomicBoolean(false);
 
         public PushedSocketConnectObserver(FirewalledAddress firewalledAddress, ConnectObserver observer) {
             this.firewalledAddress = firewalledAddress;

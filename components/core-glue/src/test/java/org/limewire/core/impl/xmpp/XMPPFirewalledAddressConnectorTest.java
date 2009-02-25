@@ -1,6 +1,8 @@
 package org.limewire.core.impl.xmpp;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -101,7 +103,7 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
             }};
         
             
-        final InetAddress inetAddress = context.mock(InetAddress.class);    
+        final InetAddress inetAddress = context.mock(InetAddress.class);
             
         final ConnectObserver connectObserverA = context.mock(ConnectObserver.class);    
         final FirewalledAddress fwAddressA = context.mock(FirewalledAddress.class);
@@ -109,7 +111,7 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 16 };
         final Socket socketA = context.mock(Socket.class);
         final Connectable connectableA = context.mock(Connectable.class);
-        
+
         final ConnectObserver connectObserverB = context.mock(ConnectObserver.class);    
         final FirewalledAddress fwAddressB = context.mock(FirewalledAddress.class);
         final byte[] guidB = new byte[] { 1, 2, 3, 4, 5, 6, '\'', 'n', 9, 10, 11, 12, 13, 14, 15,
@@ -117,12 +119,17 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final Socket socketB = context.mock(Socket.class);
         final Connectable connectableB = context.mock(Connectable.class);
         
+        final Socket socketAwithIOE = context.mock(Socket.class);
+        final Socket socketAwithBadAddr = context.mock(Socket.class);
+        final InputStream isWithIOE = context.mock(InputStream.class);
+        final OutputStream osWithIOE = context.mock(OutputStream.class);
+        
         final XMPPFirewalledAddressConnector connector 
             = new XMPPFirewalledAddressConnector(null, null, null, null, null, null);
         
         context.checking(new Expectations() {
             {
-                
+                // Non critical actions
                 allowing(fwAddressA).getClientGuid();
                 will(returnValue(new GUID(guidA)));
                 allowing(fwAddressA).getPublicAddress();
@@ -135,6 +142,12 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 allowing(fwAddressB).getPublicAddress();
                 will(returnValue(connectableB));
                 allowing(socketB).getInetAddress();
+                will(returnValue(inetAddress));
+                
+                allowing(socketAwithBadAddr).getInetAddress();
+                will(returnValue(null));
+                
+                allowing(socketAwithIOE).getInetAddress();
                 will(returnValue(inetAddress));
                 
                 allowing(connectableA).getAddress();
@@ -150,7 +163,22 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 will(returnValue(80));
                 allowing(connectableB).getInetAddress();
                 will(returnValue(inetAddress));
+
+
+                // The bad socket should be closed
+                allowing(socketAwithIOE).getInputStream();
+                will(returnValue(isWithIOE));
+                allowing(socketAwithIOE).getOutputStream();
+                will(returnValue(osWithIOE));
+                exactly(1).of(socketAwithIOE).close();
+                exactly(1).of(isWithIOE).close();
+                exactly(1).of(osWithIOE).close();
                 
+                // Assertions
+                
+                // Forced for testing an IOE
+                exactly(1).of(connectObserverA).handleConnect(socketAwithIOE);
+                will(throwException(new IOException("forced exception")));
                 exactly(1).of(connectObserverA).handleConnect(socketA);
                 exactly(1).of(connectObserverB).handleConnect(socketB);
                 
@@ -165,7 +193,10 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         // No matching observers have been set therefore nothing should be grabbed
         assertFalse(connector.acceptPushedSocket("blah", 10, guidA, socketA));
         
-        connector.observers.add(new PushedSocketConnectObserver(fwAddressA, connectObserverA));
+        PushedSocketConnectObserver pushedSocketConnectObserverA 
+            = new PushedSocketConnectObserver(fwAddressA, connectObserverA);
+        
+        connector.observers.add(pushedSocketConnectObserverA);
         connector.observers.add(createRandomObserver(context));
         connector.observers.add(new PushedSocketConnectObserver(fwAddressB, connectObserverB));
         connector.observers.add(createRandomObserver(context));
@@ -173,6 +204,17 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         // These should be handled correctly
         assertTrue(connector.acceptPushedSocket("asdsad", -1, guidA, socketA));
         assertTrue(connector.acceptPushedSocket("asdsadsad", 10, guidB, socketB));
+        
+        // Repeat should fail
+        assertFalse(connector.acceptPushedSocket("asdsad", -1, guidA, socketA));
+        
+        // Try for A with a bad address
+        pushedSocketConnectObserverA.acceptedOrFailed.set(false);
+        assertFalse(connector.acceptPushedSocket("blah", 10, guidA, socketAwithBadAddr));
+        
+        // Try for A with a bad socket -- returns true, exception suppressed, and socket closed
+        pushedSocketConnectObserverA.acceptedOrFailed.set(false);
+        assertTrue(connector.acceptPushedSocket("blah", 10, guidA, socketAwithIOE));
         
         context.assertIsSatisfied();
         
