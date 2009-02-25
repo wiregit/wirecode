@@ -138,5 +138,6 @@
 	<classpathentry kind="lib" path="lib/jars/swing-worker-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-0.9.4.jar" sourcepath="lib/sources/swingx-0.9.4-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
+	<classpathentry kind="lib" path="lib/jars/s3.jar" sourcepath="lib/sources/s3-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
