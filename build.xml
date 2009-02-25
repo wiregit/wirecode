@@ -9,12 +9,18 @@
     <!--import file="tests/build.xml" /-->
     <!--import file="components/core-glue/build.xml"/-->
     
+    <target name="ivy-taskdef" unless="ivy-taskdef.complete">
+        <property name="ivy-taskdef.complete" value="true"/>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+    	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"/>
+    </target>
+    
     <target name="compile" depends="initialize">
         <do.ivy includes="components/*/build.xml,core/build.xml,private-components/*/build.xml"
                 target="jar"/>
     </target>
 
-    <target name="clean">
+    <target name="clean" depends="initialize">
         <do.ivy includes="components/*/build.xml,core/build.xml,private-components/*/build.xml"
                 target="clean"/>        
     </target>
@@ -24,7 +30,7 @@
         <ivy:cleancache />                                                              
     </target>
     
-    <target name="initialize" unless="initialized.limewire">
+    <target name="initialize" depends="ivy-taskdef" unless="initialized.limewire">
         <property name="limewire.components.limewire.home"
                   location="${limewire.home}"/>
         <property name="limewire.components.limewire.tests"
