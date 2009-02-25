@@ -32,6 +32,16 @@ public class ButtonPainterFactory {
     @Resource private Color darkFullDownTextForeground;
     @Resource private Color darkFullDisabledTextForeground;
     
+    @Resource private int miniArcWidth;
+    @Resource private int miniArcHeight;
+    @Resource private Color miniBackgroundPressed;
+    @Resource private Color miniBackgroundRollover;
+    
+    @Resource private int linkArcWidth;
+    @Resource private int linkArcHeight;
+    @Resource private Color linkBackgroundPressed;
+    @Resource private Color linkBackgroundRollover;
+    
     @Inject
     ButtonPainterFactory() {
         GuiUtils.assignResources(this);
@@ -46,10 +56,18 @@ public class ButtonPainterFactory {
     }
     
     /**
+     * Creates the foreground painter for pop up button style used
+     *  in the link like combo boxes. 
+     */
+    public ButtonForegroundPainter createLinkButtonForegroundPainter() {
+        return new ButtonForegroundPainter();
+    }
+    
+    /**
      * Creates light styled foreground painter. 
      */
     public ButtonForegroundPainter createLightFullButtonForegroundPainter() {
-        return new ButtonForegroundPainter(null, null, null);
+        return new ButtonForegroundPainter();
     }
     
     /**
@@ -68,9 +86,21 @@ public class ButtonPainterFactory {
      *  action can be made.
      */
     public PopupButtonBackgroundPainter createMiniButtonBackgroundPainter() {
-        return new PopupButtonBackgroundPainter();
+        return new PopupButtonBackgroundPainter(miniBackgroundPressed,
+                miniBackgroundRollover, miniArcWidth, miniArcHeight);
     }
 
+    /**
+     * Creates the default background painter for the buttons used for link
+     *  like combo boxes. At this time these buttons have no background painted until a
+     *  mouse over event.  When the mouse is over they pop out to indicate an 
+     *  action can be made.
+     */
+    public PopupButtonBackgroundPainter createLinkButtonBackgroundPainter() {
+        return new PopupButtonBackgroundPainter(linkBackgroundPressed, 
+                linkBackgroundRollover, linkArcWidth, linkArcHeight);
+    }
+    
     /**
      * Creates a background painter for buttons with the lighter colour scheme.
      *  These are usually placed on components with generally lighter colouring

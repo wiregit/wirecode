@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.painter;
 
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 
@@ -23,6 +24,11 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
     private final Paint hoverForeground;
     private final Paint disabledForeground;
     
+    private final Font pressedFont;
+    private final Font hoverFont;
+    private final Font disabledFont;
+    
+    
     /**
      * Creates a button foreground painter that does not
      *  change it's font colour based on mouse state.
@@ -31,20 +37,36 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
      *          buttons since it will ignore the default app style
      *          -- instead use the factory
      */
-    ButtonForegroundPainter() {
+    public ButtonForegroundPainter() {
         this(null, null, null);
     }
        
     /** 
-     * Can be used to create a foreground painter with unique pressed and hover font colours
+     * Can be used to create a foreground painter with unique overlaid pressed and hover font colours
      *  and a right aligned icon.  
      *  
      *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
      */
     public ButtonForegroundPainter(Paint hoverForeground, Paint pressedForeground, Paint disabledForeground) {
+        this(hoverForeground, pressedForeground, disabledForeground, null, null, null);        
+    }
+    
+    /** 
+     * Can be used to create a foreground painter with unique overlaid pressed and hover font style and colours
+     *  with a right aligned icon.  
+     *  
+     *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
+     */    
+    public ButtonForegroundPainter(Paint hoverForeground, Paint pressedForeground, Paint disabledForeground,
+            Font hoverFont, Font pressedFont, Font disabledFont) {
+        
         this.pressedForeground = pressedForeground;
         this.hoverForeground = hoverForeground;
         this.disabledForeground = disabledForeground;
+        
+        this.pressedFont = pressedFont;
+        this.hoverFont = hoverFont;
+        this.disabledFont = disabledFont;
         
         setCacheable(false);
     }
@@ -57,17 +79,21 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
         
         Icon icon = null;
         Paint foreground = null;
+        Font font = null;
          
         if (!object.isEnabled()) {
             foreground = disabledForeground;
+            font = disabledFont;
         }
-        else if (object.getModel().isPressed()) {
+        else if (object.getModel().isPressed() || object.getModel().isSelected()) {
             icon = object.getPressedIcon();
-            foreground = pressedForeground; 
+            foreground = pressedForeground;
+            font = pressedFont;
         }
         else if (object.getModel().isRollover() || object.hasFocus()) {
             icon = object.getRolloverIcon();
             foreground = hoverForeground;
+            font = hoverFont;
         }
         else {
             icon = object.getIcon();
@@ -77,14 +103,19 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
             foreground = object.getForeground();
         }
         
-        g.setFont(object.getFont());
+        if (font == null) {
+            font = object.getFont();
+        }
+        
         g.setPaint(foreground);
+        g.setFont(font);
         
         if (object.getText() != null) {
             g.drawString(object.getText(), object.getInsets().left, textBaseline);
             
             if (icon != null) {
-                icon.paintIcon(object, g, object.getWidth() - object.getInsets().right + 3, 
+                icon.paintIcon(object, g, 
+                        object.getWidth() - icon.getIconWidth()/2 - 10, 
                         object.getHeight()/2 - icon.getIconHeight()/2);
             }
         } 

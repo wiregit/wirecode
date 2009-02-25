@@ -30,6 +30,7 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.UiSearchListener;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -139,8 +140,9 @@ public class AdvancedSearchPanel extends JXPanel {
         final JXButton button = new JXButton(I18n.tr(category.getCategory().getPluralName()));
                 
         button.setModel(new JToggleButton.ToggleButtonModel());
-        buttonDecorator.decorateMiniButton(button);
+        buttonDecorator.decorateLinkButton(button);
         button.setFont(headingFont);
+        FontUtils.underline(button);
         
         selectorPanel.add(button);
         inputPanel.add(component, category.getCategory().toString());
@@ -152,6 +154,7 @@ public class AdvancedSearchPanel extends JXPanel {
                     visibleComponent = component;
                     inputLayout.show(inputPanel, category.getCategory().toString());
                     unpdateSelection(button);
+                    searchButton.setVisible(true);
                 }
             }
         });
