@@ -11,6 +11,7 @@ import org.limewire.ui.swing.painter.LightButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.PopupButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
+import org.limewire.ui.swing.painter.ButtonForegroundPainter.FontTransform;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -41,6 +42,7 @@ public class ButtonPainterFactory {
     @Resource private int linkArcHeight;
     @Resource private Color linkBackgroundPressed;
     @Resource private Color linkBackgroundRollover;
+    @Resource private Color linkDownTextForeground;
     
     @Inject
     ButtonPainterFactory() {
@@ -60,7 +62,8 @@ public class ButtonPainterFactory {
      *  in the link like combo boxes. 
      */
     public ButtonForegroundPainter createLinkButtonForegroundPainter() {
-        return new ButtonForegroundPainter();
+        return new ButtonForegroundPainter(null, linkDownTextForeground, null,
+                FontTransform.NO_CHANGE, FontTransform.REMOVE_UNDERLINE, FontTransform.NO_CHANGE);
     }
     
     /**

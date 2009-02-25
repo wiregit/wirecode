@@ -103,8 +103,8 @@ public class AdvancedSearchPanel extends JXPanel {
         buttonDecorator.decorateGreenFullButton(searchButton);
         searchButton.setFont(headingFont);
         searchButton.setVisible(false);
-        inputPanel.add(searchButton, "gapbefore push, gapright 5");
-        add(inputPanel, "gapleft 45");
+        inputPanel.add(searchButton, "gapbefore push, gapright 5, gaptop 5");
+        add(inputPanel, "gapleft 45, gaptop 4");
     }
     
     private AdvancedPanel createProgramFields() {
@@ -139,7 +139,7 @@ public class AdvancedSearchPanel extends JXPanel {
         
         ResizeUtils.forceWidth(component, 300);
         component.setVisible(false);
-        inputPanel.add(component, "gaptop 5");
+        inputPanel.add(component);
         
         button.addItemListener(new ItemListener() {
             @Override

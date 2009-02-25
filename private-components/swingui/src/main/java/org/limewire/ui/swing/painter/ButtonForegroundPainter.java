@@ -10,6 +10,7 @@ import javax.swing.Icon;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.ui.swing.components.LimeComboBox;
+import org.limewire.ui.swing.util.FontUtils;
 
 /**
  * Painter to be used to extend general font and icon behaviour to all
@@ -17,6 +18,8 @@ import org.limewire.ui.swing.components.LimeComboBox;
  *  to avoid resource duplication.  
  *  
  *  NOTE: Will not respect icon alignment
+ *  
+ *  TODO: COmment again
  */
 public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
 
@@ -24,10 +27,9 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
     private final Paint hoverForeground;
     private final Paint disabledForeground;
     
-    private final Font pressedFont;
-    private final Font hoverFont;
-    private final Font disabledFont;
-    
+    private final FontTransform pressedTransform;
+    private final FontTransform hoverTransform;
+    private final FontTransform disabledTransform;
     
     /**
      * Creates a button foreground painter that does not
@@ -48,7 +50,8 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
      *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
      */
     public ButtonForegroundPainter(Paint hoverForeground, Paint pressedForeground, Paint disabledForeground) {
-        this(hoverForeground, pressedForeground, disabledForeground, null, null, null);        
+        this(hoverForeground, pressedForeground, disabledForeground, 
+                FontTransform.NO_CHANGE, FontTransform.NO_CHANGE, FontTransform.NO_CHANGE);        
     }
     
     /** 
@@ -58,15 +61,15 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
      *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
      */    
     public ButtonForegroundPainter(Paint hoverForeground, Paint pressedForeground, Paint disabledForeground,
-            Font hoverFont, Font pressedFont, Font disabledFont) {
+            FontTransform hoverTransform, FontTransform pressedTransform, FontTransform disabledTransform) {
         
         this.pressedForeground = pressedForeground;
         this.hoverForeground = hoverForeground;
         this.disabledForeground = disabledForeground;
         
-        this.pressedFont = pressedFont;
-        this.hoverFont = hoverFont;
-        this.disabledFont = disabledFont;
+        this.pressedTransform = pressedTransform;
+        this.hoverTransform = hoverTransform;
+        this.disabledTransform = disabledTransform;
         
         setCacheable(false);
     }
@@ -79,21 +82,21 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
         
         Icon icon = null;
         Paint foreground = null;
-        Font font = null;
+        FontTransform fontTransform = FontTransform.NO_CHANGE;
          
         if (!object.isEnabled()) {
             foreground = disabledForeground;
-            font = disabledFont;
+            fontTransform = disabledTransform;
         }
         else if (object.getModel().isPressed() || object.getModel().isSelected()) {
             icon = object.getPressedIcon();
             foreground = pressedForeground;
-            font = pressedFont;
+            fontTransform = pressedTransform;
         }
         else if (object.getModel().isRollover() || object.hasFocus()) {
             icon = object.getRolloverIcon();
             foreground = hoverForeground;
-            font = hoverFont;
+            fontTransform = hoverTransform;
         }
         else {
             icon = object.getIcon();
@@ -103,8 +106,15 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
             foreground = object.getForeground();
         }
         
-        if (font == null) {
-            font = object.getFont();
+        Font font = object.getFont();
+        
+        switch (fontTransform) {
+            case ADD_UNDERLINE :
+                font = FontUtils.deriveUnderline(font, true);
+                break;
+            case REMOVE_UNDERLINE :
+                font = FontUtils.deriveUnderline(font, false);
+                break;
         }
         
         g.setPaint(foreground);
@@ -140,6 +150,10 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
         }
 
         
+    }
+    
+    public enum FontTransform {
+        NO_CHANGE, ADD_UNDERLINE, REMOVE_UNDERLINE;
     }
 
 }
