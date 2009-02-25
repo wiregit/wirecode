@@ -57,8 +57,8 @@ import ca.odell.glazedlists.TransformedList;
  */
 abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
-    private final Map<Category, ButtonItem> categoryTables = new HashMap<Category, ButtonItem>();
-    private final List<Category> categoryOrder = new ArrayList<Category>();
+    private final Map<Catalog, ButtonItem> catalogTables = new HashMap<Catalog, ButtonItem>();
+    private final List<Catalog> catalogOrder = new ArrayList<Catalog>();
     private final List<Disposable> disposableList = new ArrayList<Disposable>();
     
     private final JPanel cardPanel = new JPanel();
@@ -136,26 +136,51 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     /**
-	 * Selects which category to show in the info panel. If Id
+     * Selects the specified catalog for display.  If <code>catalog</code> is
+     * null, then no catalog is displayed.
+     */
+    protected void select(Catalog catalog) {
+        // Clear filter text when catalog view changes.
+        Catalog oldCatalog = (currentItem != null) ? currentItem.getCatalog() : null;
+        if ((catalog == null) || !catalog.equals(oldCatalog)) {
+            filterField.setText(null);
+        }
+        
+        if (currentItem != null) {
+            currentItem.fireSelected(false);
+        }
+        
+        if (catalog != null) {
+            currentItem = catalogTables.get(catalog);
+            currentItem.fireSelected(true);
+            cardLayout.show(cardPanel, catalog.getId());
+        }    
+        selectionPanel.showCard(catalog);
+    }
+    
+    /**
+	 * Selects which category to show in the info panel.  If <code>category</code>
 	 * is null, than no category should be shown. This is accomplished
      * be hiding the entire card layout.
+     * TODO revise to forward call to select(Catalog)
 	 */
-    protected void select(Category id) {
+    protected void select(Category category) {
         // Clear filter text when category view changes.
-        Category oldCategory = (currentItem != null) ? currentItem.getCategory() : null;
-        if (id != oldCategory) {
+        Category oldCategory = (currentItem != null) ? currentItem.getCatalog().getCategory() : null; 
+        if (category != oldCategory) {
             filterField.setText(null);
         }
         
         if(currentItem != null)
             currentItem.fireSelected(false);
         
-        if(id != null) {
-            currentItem = categoryTables.get(id);
+        if(category != null) {
+            Catalog catalog = new Catalog(category);
+            currentItem = catalogTables.get(catalog);
             currentItem.fireSelected(true);
-            cardLayout.show(cardPanel, id.name());
+            cardLayout.show(cardPanel, catalog.getId());
         }    
-        selectionPanel.showCard(id);
+        selectionPanel.showCard(category);
     }
     
     protected void selectFirstVisible() {
@@ -179,29 +204,69 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         });
     }
     
+    /**
+     * Adds the specified catalog to the available list in the container.
+     */
+    protected <T extends FileItem> void addCatalog(Icon icon, Catalog catalog,
+            JComponent component, FilterList<T> filteredAllFileList, FilterList<T> filteredList,
+            CatalogSelectionCallback callback) {
+        cardPanel.add(component, catalog.getId());
+        
+        ButtonItem item = new ButtonItemImpl(catalog);
+        catalogTables.put(catalog, item);
+        catalogOrder.add(catalog);
+        
+        Action action = new SelectionAction(icon, catalog, item, callback);
+        JComponent button = createCatalogButton(action, catalog, filteredAllFileList);
+        
+        ((ButtonItemImpl) item).setAction(action);
+        
+        addCatalogSizeListener(catalog, action, filteredAllFileList, filteredList);
+        selectionPanel.add(button, "growx");
+    }
+    
     /** Adds the given category to the list of categories in the left. */
     protected <T extends FileItem> void addCategory(Icon icon, Category category, 
-            JComponent component, FilterList<T> filteredList, CategorySelectionCallback callback) {
+            JComponent component, FilterList<T> filteredList, CatalogSelectionCallback callback) {
         addCategory(icon, category, component, null, filteredList, callback);
     }
     
     /** Adds the given category to the list of categories in the left. */
     protected <T extends FileItem> void addCategory(Icon icon, Category category, 
             JComponent component, FilterList<T> filteredAllFileList, FilterList<T> filteredList,
-            CategorySelectionCallback callback) {
-        cardPanel.add(component, category.name());
+            CatalogSelectionCallback callback) {
+        Catalog catalog = new Catalog(category); 
+        cardPanel.add(component, catalog.getId());
         
-        ButtonItem item = new ButtonItemImpl(category);
-        categoryTables.put(category, item);
-        categoryOrder.add(category);
+        ButtonItem item = new ButtonItemImpl(catalog);
+        catalogTables.put(catalog, item);
+        catalogOrder.add(catalog);
         
-        Action action = new SelectionAction(icon, category, item, callback);
+        Action action = new SelectionAction(icon, catalog, item, callback);
         JComponent button = createCategoryButton(action, category, filteredAllFileList);
         
         ((ButtonItemImpl) item).setAction(action);
         
         addCategorySizeListener(category, action, filteredAllFileList, filteredList);
         selectionPanel.add(button, "growx");
+    }
+    
+    /**
+     * Adds the specified heading component to the category selection panel on
+     * the left-side of the display.  If <code>newSection</code> is true, then
+     * empty space is inserted above the new heading.  
+     */
+    protected <T extends FileItem> void addHeading(JComponent heading, boolean newSection) {
+        if (newSection) {
+            selectionPanel.add(heading, "growx, gaptop 40");
+        } else {
+            selectionPanel.add(heading, "growx");
+        }
+    }
+    
+    /** Adds a catalog to the InnerNav Info bar for My Library views*/
+    protected<T extends FileItem> void addLibraryInfoBar(Catalog catalog, EventList<T> fileList) {
+        selectionPanel.addCard(catalog, fileList, null, null, false);
     }
     
     /** Adds a category to the InnerNav Info bar for My Library views*/
@@ -218,18 +283,30 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     protected<T extends FileItem> void addFriendInfoBar(Category category, EventList<T> fileList) {
         selectionPanel.addCard(category, fileList, null, null, true);
     }
+
+    /** Adds a listener to the catalog so things can bind to the action. */
+    protected <T extends FileItem> void addCatalogSizeListener(Catalog catalog,
+            Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
+        // Do nothing.
+    }
     
     /** Adds a listener to the category so things can bind to the action, if necessary. */
     protected abstract <T extends FileItem> void addCategorySizeListener(Category category, Action action,
             FilterList<T> filteredAllFileList, FilterList<T> filteredList);
     
-    
-    /** Creates the category button & adds navigation listeners to it. */
-    protected <T extends FileItem> JComponent createCategoryButton(Action action, Category category, FilterList<T> filteredAllFileList) {
+    /** Creates a catalog selection button using the specified action. */
+    protected <T extends FileItem> JComponent createCatalogButton(Action action,
+            Catalog catalog, FilterList<T> filteredAllFileList) {
         SelectionPanel component = new SelectionPanel(action, this);
         addNavigation(component.getButton());
         return component;
-    }    
+    }
+    
+    /** Creates the category button & adds navigation listeners to it. */
+    protected <T extends FileItem> JComponent createCategoryButton(Action action,
+            Category category, FilterList<T> filteredAllFileList) {
+        return createCatalogButton(action, new Catalog(category), filteredAllFileList);
+    }
 
     @Override
     public void dispose() {
@@ -238,9 +315,9 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     private void selectNext() {
-        for(int i = 0; i < categoryOrder.size(); i++) {
-            if(categoryOrder.get(i).equals(currentItem.getCategory())) {
-                if(i == categoryOrder.size() -1)
+        for(int i = 0; i < catalogOrder.size(); i++) {
+            if(catalogOrder.get(i).equals(currentItem.getCatalog())) {
+                if(i == catalogOrder.size() -1)
                     select(getNext(0));
                 else
                     select(getNext(i+1));
@@ -253,22 +330,22 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
      * Returns the next visible category. If only the currently selected category
      * is visible, returns that category.
      */
-    private Category getNext(int selectedIndex) {
-        for(int i = selectedIndex; i < categoryOrder.size() + selectedIndex; i++) {
-            int index = i % categoryOrder.size();
-            ButtonItem current = categoryTables.get(categoryOrder.get(index));
+    private Catalog getNext(int selectedIndex) {
+        for(int i = selectedIndex; i < catalogOrder.size() + selectedIndex; i++) {
+            int index = i % catalogOrder.size();
+            ButtonItem current = catalogTables.get(catalogOrder.get(index));
             if(current.isEnabled())
-                return categoryOrder.get(index);
+                return catalogOrder.get(index);
         }
         // if no categories are visible, return null
         return null;
     }
     
     private void selectPrev() {
-        for(int i = 0; i < categoryOrder.size(); i++) {
-            if(categoryOrder.get(i).equals(currentItem.getCategory())) {
+        for(int i = 0; i < catalogOrder.size(); i++) {
+            if(catalogOrder.get(i).equals(currentItem.getCatalog())) {
                 if(i == 0) {
-                    select(getPrev(categoryOrder.size()-1));
+                    select(getPrev(catalogOrder.size()-1));
                 } else
                     select(getPrev(i-1));
                 break;
@@ -280,14 +357,14 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
      * Returns the previous visible category. If only the currently selected category
      * is visible, returns that category.
      */
-    private Category getPrev(int selectedIndex) {
-        for(int i = categoryOrder.size() + selectedIndex; i > categoryOrder.size(); i--) {
-            int index = i % categoryOrder.size();
-            ButtonItem current = categoryTables.get(categoryOrder.get(index));
+    private Catalog getPrev(int selectedIndex) {
+        for(int i = catalogOrder.size() + selectedIndex; i > catalogOrder.size(); i--) {
+            int index = i % catalogOrder.size();
+            ButtonItem current = catalogTables.get(catalogOrder.get(index));
             if(current.isEnabled())
-                return categoryOrder.get(index);
+                return catalogOrder.get(index);
         }
-        return categoryOrder.get(selectedIndex);
+        return catalogOrder.get(selectedIndex);
     }
     
     private class Next extends AbstractAction {
@@ -310,10 +387,10 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     private class SelectionAction extends AbstractAction {
         
-        public SelectionAction(Icon icon, Category category, ButtonItem buttonItem, final CategorySelectionCallback callback) {
-            super(I18n.tr(category.toString()), icon);
+        public SelectionAction(Icon icon, Catalog catalog, ButtonItem buttonItem, final CatalogSelectionCallback callback) {
+            super(catalog.getName(), icon);
             
-            putValue("limewire.category", category);
+            putValue("limewire.category", catalog);
             
             buttonItem.addButtonItemListener(new ButtonItemListener(){
                 @Override
@@ -321,7 +398,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
                     putValue(SELECTED_KEY, selected);
                     
                     if (callback != null) {
-                        callback.categorySelected((Category)getValue("limewire.category"), selected);
+                        callback.catalogSelected((Catalog)getValue("limewire.category"), selected);
                     }
                 }
             });
@@ -329,16 +406,16 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            select((Category)getValue("limewire.category"));
+            select((Catalog)getValue("limewire.category"));
         }
     }
     
     /**
-     * Allows a category creator to define a method to notify back any selection
-     *  events on this category 
+     * Allows a catalog creator to define a method to receive notification
+     * messages on any selection events on this catalog.
      */
-    protected interface CategorySelectionCallback {
-        public void categorySelected(Category category, boolean selected);
+    protected interface CatalogSelectionCallback {
+        public void catalogSelected(Catalog catalog, boolean selected);
     }
     
     private interface ButtonItem {
@@ -349,7 +426,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         
         public void select();
         
-        public Category getCategory();
+        public Catalog getCatalog();
         
         public boolean isEnabled();
     }
@@ -362,11 +439,11 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         
         private final List<ButtonItemListener> listeners = new CopyOnWriteArrayList<ButtonItemListener>();
         
-        private Category category;
+        private Catalog catalog;
         private Action action;
         
-        public ButtonItemImpl(Category category) {
-            this.category = category;
+        public ButtonItemImpl(Catalog catalog) {
+            this.catalog = catalog;
         }
         
         public void setAction(Action action) {
@@ -383,12 +460,12 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
 
         @Override
         public void select() {
-            AbstractFileListPanel.this.select(getCategory());
+            AbstractFileListPanel.this.select(getCatalog());
         }
 
         @Override
-        public Category getCategory() {
-            return category;
+        public Catalog getCatalog() {
+            return catalog;
         }
         
         @Override

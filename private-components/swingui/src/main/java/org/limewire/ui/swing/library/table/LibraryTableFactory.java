@@ -9,6 +9,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.core.api.playlist.Playlist;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 
@@ -40,4 +41,9 @@ public interface LibraryTableFactory {
      * Creates an image list for sharing files with a specified Friend
      */
     LibraryImagePanel createSharingImagePanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, LocalFileList friendFileList);
+    
+    /**
+     * Creates a table for a playlist.
+     */
+    <T extends LocalFileItem> LibraryTable<T> createPlaylistTable(Playlist playlist, EventList<T> eventList);
 }

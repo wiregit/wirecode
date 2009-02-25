@@ -86,11 +86,34 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         add(selectionGrow, "dock south, aligny baseline, growy");
     }
     
+    /**
+     * Adds an info panel for the specified catalog and its file list. 
+     */
     @SuppressWarnings("unchecked")
+    public<T extends FileItem> void addCard(Catalog catalog, EventList<T> fileList, FriendFileList friendFileList, FilterList<T> sharedList, boolean isFriendView) {
+        InfoPanel panel = new InfoPanel(catalog, fileList, friendFileList, sharedList, isFriendView);
+        categoryInfoPanels.put(catalog.getId(), panel);
+        cardPanel.add(panel, catalog.getId());
+    }
+    
     public<T extends FileItem> void addCard(Category category, EventList<T> fileList, FriendFileList friendFileList, FilterList<T> sharedList, boolean isFriendView) {
-        InfoPanel panel = new InfoPanel(category, fileList, friendFileList, sharedList, isFriendView);
-        categoryInfoPanels.put(category.name(), panel);
-        cardPanel.add(panel, category.name());
+        addCard(new Catalog(category), fileList, friendFileList, sharedList, isFriendView);
+    }
+    
+    /**
+     * Displays the specified catalog info panel.  If <code>catalog</code> is
+     * null, then the entire card panel is hidden since there is no catalog
+     * visible in this library.
+     */
+    public void showCard(Catalog catalog) {
+        if (catalog == null) {
+            cardPanel.setVisible(false);
+        } else {
+            if (!cardPanel.isVisible()) {
+                cardPanel.setVisible(true);
+            }
+            cardLayout.show(cardPanel, catalog.getId());
+        }
     }
     
     /**
@@ -102,9 +125,7 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         if(category == null) 
             cardPanel.setVisible(false);
         else {
-            if(!cardPanel.isVisible())
-                cardPanel.setVisible(true);
-            cardLayout.show(cardPanel, category.name());
+            showCard(new Catalog(category));
         }
     }
     
@@ -130,11 +151,11 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         private final EventList<T> fileList;
         private final FilterList<T> sharedList;
         private final FriendFileList friendList;
-        private final Category category;
+        private final Catalog catalog;
         private StringArraySetting shareNewAlwaysSetting;
         private SettingListener categoryCollectionListener;
         
-        public InfoPanel(Category category, EventList<T> fileList, FriendFileList friendList, FilterList<T> sharedList, boolean isFriendView) {
+        public InfoPanel(Catalog catalog, EventList<T> fileList, FriendFileList friendList, FilterList<T> sharedList, boolean isFriendView) {
             super(new MigLayout("fillx, gap 0, insets 5 10 5 0, hidemode 3"));
             
             GuiUtils.assignResources(this);
@@ -142,10 +163,9 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
             this.fileList = fileList;
             this.friendList = friendList;
             this.sharedList = sharedList;
-            this.category = category;
+            this.catalog = catalog;
 
-            // {0}: category (Audio, Video, etc)
-            categoryLabel = new JLabel(I18n.tr("{0} Info", category));
+            categoryLabel = new JLabel(I18n.tr("{0} Info", catalog.getName()));
             categoryLabel.setFont(categoryFont);
             categoryLabel.setForeground(fontColor);
 
@@ -215,7 +235,8 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         private StringArraySetting getShareCategorySetting() {
             StringArraySetting shareNewAlwaysSetting = null;
 
-            switch (category) {
+            if (catalog.getCategory() != null) {
+                switch (catalog.getCategory()) {
                 case AUDIO:
                     shareNewAlwaysSetting = LibrarySettings.SHARE_NEW_AUDIO_ALWAYS;
                     break;
@@ -226,6 +247,7 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
                     shareNewAlwaysSetting = LibrarySettings.SHARE_NEW_IMAGES_ALWAYS;
                     break;
                 default:
+                }
             }
             return shareNewAlwaysSetting;
         }
@@ -248,15 +270,20 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
             if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
                 sharingLabel.setText(I18n.tr("Sharing: {0}", count));
             } else {
-                switch(category) {
-                case AUDIO:
-                case VIDEO:
-                case IMAGE:
-                    if(friendList.isCategoryAutomaticallyAdded(category)) {
-                        sharingLabel.setText(I18n.tr("Sharing: all"));
-                        break;
+                Category category = catalog.getCategory();
+                if (category != null) {
+                    switch(category) {
+                    case AUDIO:
+                    case VIDEO:
+                    case IMAGE:
+                        if(friendList.isCategoryAutomaticallyAdded(category)) {
+                            sharingLabel.setText(I18n.tr("Sharing: all"));
+                            break;
+                        }
+                    default:
+                        sharingLabel.setText(I18n.tr("Sharing: {0}", count));
                     }
-                default:
+                } else {
                     sharingLabel.setText(I18n.tr("Sharing: {0}", count));
                 }
             }

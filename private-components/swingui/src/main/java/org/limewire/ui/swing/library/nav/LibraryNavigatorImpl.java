@@ -42,6 +42,7 @@ import org.limewire.ui.swing.dnd.MyLibraryNavTransferHandler;
 import org.limewire.ui.swing.friends.FriendRequestPanel;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.AllFriendsLibraryPanel;
+import org.limewire.ui.swing.library.Catalog;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
 import org.limewire.ui.swing.library.MyLibraryPanel;
@@ -84,6 +85,8 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final JScrollPane friendsScrollArea;
     private final FriendRequestPanel friendRequestPanel;
     private final GhostDragGlassPane ghostPane;
+
+    private Catalog activeCatalog;
     
     private Friend selectedFriend = null;
 
@@ -340,23 +343,42 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     @Override
     public void selectInLibrary(URN urn, Category category) {
         myLibrary.select();
-        myLibraryPanel.selectItem(urn, category);
+        myLibraryPanel.selectItem(urn, new Catalog(category));
     }
     
     @Override
     public void selectInLibrary(File file, Category category) {
         myLibrary.select();
-        myLibraryPanel.selectItem(file, category);
+        myLibraryPanel.selectItem(file, new Catalog(category));
     }
     
+    // TODO REMOVE - revise PlayerPanel to call new methods
     @Override
     public File getPreviousInLibrary(File file, Category category) {
-        return myLibraryPanel.getPreviousItem(file, category);
+        //return myLibraryPanel.getPreviousItem(file, category);
+        return getPreviousInLibrary(file);
+    }
+    
+    // TODO REVIEW - revise PlayerPanel to call new methods
+    @Override
+    public File getNextInLibrary(File file, Category category) {
+        //return myLibraryPanel.getNextItem(file, category);
+        return getNextInLibrary(file);
     }
     
     @Override
-    public File getNextInLibrary(File file, Category category) {
-        return myLibraryPanel.getNextItem(file, category);
+    public File getPreviousInLibrary(File file) {
+        return myLibraryPanel.getPreviousItem(file, activeCatalog);
+    }
+    
+    @Override
+    public File getNextInLibrary(File file) {
+        return myLibraryPanel.getNextItem(file, activeCatalog);
+    }
+    
+    @Override
+    public void setActiveCatalog(Catalog catalog) {
+        this.activeCatalog = catalog;
     }
     
     private void ensureFriendVisible(Friend friend) {
