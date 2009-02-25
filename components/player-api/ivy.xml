@@ -6,6 +6,7 @@
     <publications>
         <artifact name="player-api" conf="master"/>
     </publications>
-    <!--dependencies>
-    </dependencies-->
+    <dependencies>
+        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
+    </dependencies>
 </ivy-module>
