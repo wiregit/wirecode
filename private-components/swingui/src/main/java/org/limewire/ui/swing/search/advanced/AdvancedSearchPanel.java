@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.advanced;
 
-import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -33,6 +32,7 @@ import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
 
@@ -64,7 +64,6 @@ public class AdvancedSearchPanel extends JXPanel {
 
     private final JPanel selectorPanel;
     private final JPanel inputPanel;
-    private final CardLayout inputLayout;
     
     @Resource private Font headingFont;
 
@@ -80,7 +79,7 @@ public class AdvancedSearchPanel extends JXPanel {
         
         GuiUtils.assignResources(this);
         
-        setLayout(new MigLayout("insets 0, gap 0, hidemode 3, nogrid"));
+        setLayout(new MigLayout("insets 0, gap 0, hidemode 3"));
         
         HeaderBar heading = new HeaderBar(I18n.tr("Advanced Search"));
         headerDecorator.decorateBasic(heading);
@@ -93,16 +92,7 @@ public class AdvancedSearchPanel extends JXPanel {
         selectorPanel.setOpaque(false);
         add(selectorPanel, "gapleft 30, gaptop 5, wrap");
 
-        inputLayout = new CardLayout();
-        inputPanel = new JPanel(inputLayout);
-        //ResizeUtils.forceWidth(inputPanel, 300);
-        inputPanel.setOpaque(false);
-        JPanel emptyPanel = new JPanel();
-        emptyPanel.setOpaque(false);
-        String emptyName = "xad@#$as$#!Xe";
-        inputPanel.add(emptyPanel, emptyName);
-        inputLayout.show(inputPanel, emptyName);
-        add(inputPanel, "gapleft 45, gaptop 15, wrap");
+        inputPanel = new JPanel(new MigLayout("insets 0, gap 0, hidemode 3, wrap"));
         
         addCategory(SearchCategory.AUDIO, createAudioFields());
         addCategory(SearchCategory.VIDEO, createVideoFields());
@@ -113,7 +103,8 @@ public class AdvancedSearchPanel extends JXPanel {
         buttonDecorator.decorateGreenFullButton(searchButton);
         searchButton.setFont(headingFont);
         searchButton.setVisible(false);
-        add(searchButton, "gapleft 345");
+        inputPanel.add(searchButton, "gapbefore push, gapright 5");
+        add(inputPanel, "gapleft 45");
     }
     
     private AdvancedPanel createProgramFields() {
@@ -145,22 +136,31 @@ public class AdvancedSearchPanel extends JXPanel {
         FontUtils.underline(button);
         
         selectorPanel.add(button);
-        inputPanel.add(component, category.getCategory().toString());
+        
+        ResizeUtils.forceWidth(component, 300);
+        component.setVisible(false);
+        inputPanel.add(component, "gaptop 5");
         
         button.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
                 if (event.getStateChange() == ItemEvent.SELECTED) {
+                    
+                    // Update visibility so invisible panels don't effect size
+                    if (visibleComponent != null) {
+                        visibleComponent.setVisible(false);
+                    }
+                    component.setVisible(true);
                     visibleComponent = component;
-                    inputLayout.show(inputPanel, category.getCategory().toString());
-                    unpdateSelection(button);
+                    
+                    updateSelection(button);
                     searchButton.setVisible(true);
                 }
             }
         });
     }
 
-    private void unpdateSelection(JButton button) {
+    private void updateSelection(JButton button) {
         button.setSelected(true);
         for ( Component comp : selectorPanel.getComponents() ) {
             if (comp instanceof JButton && button != comp) {
