@@ -36,6 +36,7 @@ import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.playlist.PlaylistFileItem;
 import org.limewire.ui.swing.library.playlist.PlaylistLibraryTable;
+import org.limewire.ui.swing.library.playlist.PlaylistPopupHandler;
 import org.limewire.ui.swing.library.playlist.PlaylistTableFormat;
 import org.limewire.ui.swing.library.playlist.PlaylistTransferHandler;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
@@ -446,10 +447,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
                 new PlaylistTableFormat<T>(), player,
                 saveLocationExceptionHandler, shareTableRendererEditorFactory);
         
-        // TODO create PlaylistPopupHandler/PlaylistPopupMenu
-        libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
-                Category.AUDIO, libraryManager, shareListManager, magnetLinkFactory,
-                localItemPropFactory, shareFactory));
+        // Install popup menu handler.
+        libTable.setPopupHandler(new PlaylistPopupHandler(libTable, playlist,
+                localItemPropFactory));
 
         // Install transfer handler to reorder playlist items.
         libTable.setTransferHandler(new PlaylistTransferHandler(playlist));
