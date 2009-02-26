@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.dnd;
 
+import static org.limewire.ui.swing.library.playlist.TransferablePlaylistData.PLAYLIST_DATA_FLAVOR;
+
 import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.util.Arrays;
@@ -10,6 +12,7 @@ import javax.swing.TransferHandler;
 
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.library.playlist.TransferablePlaylistData;
 import org.limewire.ui.swing.util.DNDUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -27,7 +30,8 @@ public class MyLibraryTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport info) {
-        return !info.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR) && DNDUtils.containsFileFlavors(info);
+        return (!info.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR) && DNDUtils.containsFileFlavors(info))
+            || info.isDataFlavorSupported(TransferablePlaylistData.PLAYLIST_DATA_FLAVOR);
     }
 
     @Override
@@ -38,6 +42,12 @@ public class MyLibraryTransferHandler extends TransferHandler {
     public boolean importData(TransferHandler.TransferSupport info) {
         if (!info.isDrop()) {
             return false;
+        }
+        
+        // Accept playlist data without importing - files will be removed from
+        // the playlist.
+        if (info.isDataFlavorSupported(PLAYLIST_DATA_FLAVOR)) {
+            return true;
         }
 
         // Get the string that is being dropped.
