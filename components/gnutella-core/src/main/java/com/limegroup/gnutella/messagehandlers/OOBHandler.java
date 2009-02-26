@@ -190,14 +190,10 @@ public class OOBHandler implements MessageHandler, Runnable {
                     ":" + handler.getPort() +
                     " with " + reply.getResultCount() + " results");
         }
-                
-        // Only allow responses from one port per address
-        byte[] handlerAddress = handler.getInetAddress().getAddress();
-        if(shouldIgnore (handlerAddress, handler.getPort()))
-            return;
         
         // check if ip address of reply and sender of reply match
         // and update address of reply if necessary
+        byte[] handlerAddress = handler.getInetAddress().getAddress();
         if (!Arrays.equals(handlerAddress, reply.getIPBytes())) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Reply has wrong address " + reply.getIP() +
