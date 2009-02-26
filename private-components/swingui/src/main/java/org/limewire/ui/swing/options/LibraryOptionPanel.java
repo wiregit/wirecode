@@ -42,6 +42,7 @@ import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HorizonalCheckBoxListPanel;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.library.manager.ExcludedFolderCollectionManager;
+import org.limewire.ui.swing.library.manager.ExcludedFolderCollectionManagerImpl;
 import org.limewire.ui.swing.library.manager.LibraryManagerItem;
 import org.limewire.ui.swing.library.manager.LibraryManagerItemImpl;
 import org.limewire.ui.swing.library.manager.LibraryManagerModel;
@@ -74,12 +75,11 @@ public class LibraryOptionPanel extends OptionPanel {
     public LibraryOptionPanel(LibraryManager libraryManager, 
             Provider<ShareListManager> shareListManager,
             IconManager iconManager,
-            @Named("known") Collection<Friend> knownFriends,
-            ExcludedFolderCollectionManager excludedFolders) {
+            @Named("known") Collection<Friend> knownFriends) {
         this.iconManager = iconManager;
         this.shareListManager = shareListManager;
         this.knownFriends = knownFriends;
-        this.excludedFolders = excludedFolders;
+        this.excludedFolders = new ExcludedFolderCollectionManagerImpl();
         this.libraryManagerPanel = new LibraryManagerOptionPanel(libraryManager.getLibraryData()); 
         this.shareCategoryPanel = new ShareCategoryPanel();
         this.playerPanel = new UsePlayerPanel();
