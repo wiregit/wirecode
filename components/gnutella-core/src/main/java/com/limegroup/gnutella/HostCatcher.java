@@ -567,9 +567,12 @@ public class HostCatcher implements Service {
     void read(File hostFile) throws FileNotFoundException, IOException {
         LOG.trace("Reading host file");
         long now = System.currentTimeMillis();
-        if(now - hostFile.lastModified() > STALE_HOST_FILE) {
-            LOG.info("Deleting stale host file");
-            hostFile.delete();
+        long lastModified = hostFile.lastModified(); // 0 if file does not exist
+        if(now - lastModified > STALE_HOST_FILE) {
+            if(lastModified > 0) {
+                LOG.info("Deleting stale host file");
+                hostFile.delete();
+            }
             return; // Hit the bootstrap hosts instead
         }
         BufferedReader in = null;
@@ -689,43 +692,18 @@ public class HostCatcher implements Service {
             endpoint.setUDPHostCache(true);
         }
         
-        if(!isValidHost(endpoint) && !isLocalOrPrivate) {
+        // Make a temporary exception for local addresses so we can extract
+        // the packed endpoints and UHCs - we'll check validity again later 
+        if(!isValidHost(endpoint) && !isLocalOrPrivate)
             return false;
-        }
-        
-        int dhtVersion = pr.getDHTVersion();
-        if(dhtVersion > -1) {
-            DHTMode mode = pr.getDHTMode();
-            endpoint.setDHTVersion(dhtVersion);
-            endpoint.setDHTMode(mode);
-            
-            if(dhtManager.get().isRunning()) {
-                // Send active and passive DHT endpoints to the DHT manager
-                if(mode.equals(DHTMode.ACTIVE)) {
-                    SocketAddress address = new InetSocketAddress(
-                            endpoint.getAddress(), endpoint.getPort());
-                    dhtManager.get().addActiveDHTNode(address);
-                } else if(mode.equals(DHTMode.PASSIVE)) {
-                    SocketAddress address = new InetSocketAddress(
-                            endpoint.getAddress(), endpoint.getPort());
-                    dhtManager.get().addPassiveDHTNode(address);
-                }
-            }
-        }
-        
-        if(pr.supportsUnicast()) {
-            queryUnicaster.get().addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
-        }
-        
-        // if the pong carried packed IP/Ports, add those as their own
-        // endpoints.
+
+        // If the pong carries packed IP/Ports, add them
         Collection<IpPort> packed = pr.getPackedIPPorts();
-        if(LOG.isTraceEnabled() && !packed.isEmpty())
-            LOG.trace("Pong contains " + packed.size() + " packed hosts");
         if(ConnectionSettings.FILTER_CLASS_C.getValue())
             packed = NetworkUtils.filterOnePerClassC(packed);
-        rank(packed);
-        
+        if(LOG.isDebugEnabled() && !packed.isEmpty())
+            LOG.debug("Pong contains " + packed.size() + " packed endpoints");
+        rank(packed); // FIXME: why ping them before checking validity?
         for(IpPort ipp : packed) {            
             ExtendedEndpoint ep;
             if(ipp instanceof ExtendedEndpoint) {
@@ -739,25 +717,48 @@ public class HostCatcher implements Service {
                     ep.setTLSCapable(((Connectable)ipp).isTLSCapable());
                 }
             }
-            
-            if(isValidHost(ep)) {
+            if(isValidHost(ep))
                 add(ep, GOOD_PRIORITY);
-            } else {
-                if(LOG.isInfoEnabled())
-                    LOG.info("Not adding invalid packed host " + ep);
-            }
         }
-        
-        // if the pong carried packed UDP host caches, add those as their
-        // own endpoints.
+
+        // If the pong carries packed UDP host caches, add them
         packed = pr.getPackedUDPHostCaches();
-        if(LOG.isTraceEnabled() && !packed.isEmpty())
-            LOG.trace("Pong contains " + packed.size() + " packed UHCs");
+        if(LOG.isDebugEnabled() && !packed.isEmpty())
+            LOG.debug("Pong contains " + packed.size() + " packed UHCs");
         for(IpPort ipp : packed) {
             ExtendedEndpoint ep =
                 new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
             ep.setUDPHostCache(true);
             addUDPHostCache(ep);
+        }
+
+        // If the pong came from a local address but we let it through
+        // to extract the packed endpoints and UHCs, throw it away now
+        if(!isValidHost(endpoint))
+            return true;
+
+        int dhtVersion = pr.getDHTVersion();
+        if(dhtVersion > -1) {
+            DHTMode mode = pr.getDHTMode();
+            endpoint.setDHTVersion(dhtVersion);
+            endpoint.setDHTMode(mode);
+
+            if(dhtManager.get().isRunning()) {
+                // Send active and passive DHT endpoints to the DHT manager
+                if(mode.equals(DHTMode.ACTIVE)) {
+                    SocketAddress address = new InetSocketAddress(
+                            endpoint.getAddress(), endpoint.getPort());
+                    dhtManager.get().addActiveDHTNode(address);
+                } else if(mode.equals(DHTMode.PASSIVE)) {
+                    SocketAddress address = new InetSocketAddress(
+                            endpoint.getAddress(), endpoint.getPort());
+                    dhtManager.get().addPassiveDHTNode(address);
+                }
+            }
+        }
+
+        if(pr.supportsUnicast()) {
+            queryUnicaster.get().addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
         
         // if it was a UDPHostCache pong, just add it as that.
