@@ -293,7 +293,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         delegateListChanger.setFriend(null);
         sharingComboBox.setVisible(true);
         messagePanel.setVisible(false);
-        hideEmptyFriend();
+//        hideEmptyFriend();
         //reselect the current category in case we filtered on a friend that wasn't 
         //sharing anything
         Category category = getSelectedCategory();
@@ -373,18 +373,38 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             scrollPane.setBorder(BorderFactory.createEmptyBorder());            
             addDisposable(imagePanel);
         }           
+        
+        // The glass layer we display messages in.
+        LockableUI blurUI = new LockedUI();
+        JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
+        map.put(category, jxlayer);
+        
         // only do this if the message hasn't been shown before
-        if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
+        if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true || 
+            SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true) {
             connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
                 @Override
                 @SwingEDTEvent
                 public void handleEvent(XMPPConnectionEvent event) {
                     switch(event.getType()) { 
                     case CONNECTED:
-                        if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
+                        if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true && 
+                           SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true) {
                             JPanel panel = new JPanel(new MigLayout("fill"));
                             panel.setOpaque(false);
-                            panel.add(getFirstTimeMessageComponent(), "align 50% 40%");
+                            panel.add(getFirstTimeMyLibraryMessageAndSignedInComponent(), "align 50% 40%");
+                            JXLayer layer = map.get(category);
+                            layer.getGlassPane().add(panel);
+                            layer.getGlassPane().setVisible(true);
+                            if(!SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.getValue()) {
+                                libraryNavigator.selectLibrary();
+                                SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
+                            }
+                            SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.setValue(true);
+                        } else if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
+                            JPanel panel = new JPanel(new MigLayout("fill"));
+                            panel.setOpaque(false);
+                            panel.add(getFirstTimeLoggedInMessageComponent(), "align 50% 40%");
                             JXLayer layer = map.get(category);
                             layer.getGlassPane().add(panel);
                             layer.getGlassPane().setVisible(true);
@@ -396,11 +416,17 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                     }
                 }
             });
+            
+            if(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true) {
+                JPanel panel = new JPanel(new MigLayout("fill"));
+                panel.setOpaque(false);
+                panel.add(getFirstTimeMyLibraryMessageComponent(), "align 50% 40%");
+                JXLayer layer = map.get(category);
+                layer.getGlassPane().add(panel);
+                layer.getGlassPane().setVisible(true);
+            }
         }
-		// The glass layer we display messages in.
-        LockableUI blurUI = new LockedUI();
-        JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
-        map.put(category, jxlayer);
+
         return jxlayer;
     }
     
@@ -619,14 +645,14 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 	 * This message is displayed atop the table and gives helpful
      * advice about what to do
      */
-    public MessageComponent getFirstTimeMessageComponent() {
+    public MessageComponent getFirstTimeLoggedInMessageComponent() {
         MessageComponent messageComponent;
         messageComponent = new MessageComponent(6, 22, 18, 6);
         
         JLabel headerLabel = new JLabel(I18n.tr("What Now?"));
         messageComponent.decorateHeaderLabel(headerLabel);
         
-        JLabel minLabel = new JLabel(I18n.tr("Share entire categories or individual files with your friends."));
+        JLabel minLabel = new JLabel(I18n.tr("Click the share button to share or unshare files with a friend"));
         messageComponent.decorateSubLabel(minLabel);
         
         JLabel secondMinLabel = new JLabel(I18n.tr("Chat with them about using LimeWire 5"));
@@ -652,6 +678,85 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         messageComponent.addComponent(headerLabel, "push, wrap");
         messageComponent.addComponent(minLabel, "wrap, gapright 16");
         messageComponent.addComponent(secondMinLabel, "gapright 16");
+
+        return messageComponent;
+    }
+    
+    /**
+     * Creates the MessageComponent when the user goes to My Library
+     * for the first time.
+     */
+    public MessageComponent getFirstTimeMyLibraryMessageComponent() {
+        MessageComponent messageComponent;
+        messageComponent = new MessageComponent(6, 22, 18, 6);
+        
+        JLabel headerLabel = new JLabel(I18n.tr("No more shared folders"));
+        messageComponent.decorateHeaderLabel(headerLabel);
+        
+        JLabel minLabel = new JLabel(I18n.tr("Click the share button to share or unshare files with the P2P Network"));
+        messageComponent.decorateSubLabel(minLabel);
+        
+        JButton cancelButton = new JButton(closeButton);
+        cancelButton.setBorder(BorderFactory.createEmptyBorder());
+        cancelButton.setRolloverIcon(closeHoverButton);
+        cancelButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        cancelButton.setContentAreaFilled(false);
+        cancelButton.setFocusPainted(false);
+        cancelButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for(JXLayer layer : map.values()) {
+                    layer.getGlassPane().setVisible(false);
+                }
+                SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.setValue(false);
+            }
+        });
+
+        messageComponent.addComponent(cancelButton, "span, alignx right");
+        messageComponent.addComponent(headerLabel, "push, wrap");
+        messageComponent.addComponent(minLabel, "wrap, gapright 16");
+
+        return messageComponent;
+    }
+    
+    /**
+     * Creates the MessageComponent when the user first signs in.
+     * This message is displayed atop the table and gives helpful
+     * advice about what to do
+     */
+    public MessageComponent getFirstTimeMyLibraryMessageAndSignedInComponent() {
+        MessageComponent messageComponent;
+        messageComponent = new MessageComponent(6, 22, 18, 6);
+        
+        JLabel headerLabel = new JLabel(I18n.tr("No more shared folders"));
+        messageComponent.decorateHeaderLabel(headerLabel);
+        
+        JLabel minLabel = new JLabel(I18n.tr("Click the share button to share or unshare files with the P2P Network"));
+        messageComponent.decorateSubLabel(minLabel);
+        
+        JLabel minLabel2 = new JLabel(I18n.tr("Click the share button to share or unshare files with a friend"));
+        messageComponent.decorateSubLabel(minLabel2);
+        
+        JButton cancelButton = new JButton(closeButton);
+        cancelButton.setBorder(BorderFactory.createEmptyBorder());
+        cancelButton.setRolloverIcon(closeHoverButton);
+        cancelButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        cancelButton.setContentAreaFilled(false);
+        cancelButton.setFocusPainted(false);
+        cancelButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for(JXLayer layer : map.values()) {
+                    layer.getGlassPane().setVisible(false);
+                }
+                SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.setValue(false);
+                SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.setValue(false);
+            }
+        });
+
+        messageComponent.addComponent(cancelButton, "span, alignx right");
+        messageComponent.addComponent(headerLabel, "push, wrap");
+        messageComponent.addComponent(minLabel, "wrap, gapright 16");
 
         return messageComponent;
     }
