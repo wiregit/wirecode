@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search.advanced;
 
+import java.awt.Font;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -12,11 +13,13 @@ import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.CollectionBackedComboBoxModel;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.util.GuiUtils;
 
 /** An abstract panel for creating advanced searches. */
 abstract class AdvancedPanel extends JPanel {
@@ -25,16 +28,24 @@ abstract class AdvancedPanel extends JPanel {
         new EnumMap<FilePropertyKey, JComponent>(FilePropertyKey.class);
     private final SearchCategory category;
 
+    @Resource private Font font; 
+    
     /** Constructs an AdvancedPanel that will search the given category. */
     public AdvancedPanel(SearchCategory category) {
-        super(new MigLayout("fill", "[]related[grow]", ""));
+        super(new MigLayout("fillx", "[]related[grow]", ""));
+        
         this.category = category;
+
+        GuiUtils.assignResources(this);
     }
         
     /** Adds a new JTextField that will search using the given FilePropertyKey. */ 
     protected void addField(String name, FilePropertyKey key) {
-        add(new JLabel(name));
+        JLabel label = new JLabel(name);
+        label.setFont(font);
+        add(label);
         JTextField textField = new JTextField();
+        textField.setFont(font);
         add(textField, "growx, wrap");
         componentMap.put(key, textField);
     }
@@ -44,8 +55,11 @@ abstract class AdvancedPanel extends JPanel {
      * The contents of the combo are all the possible values.
      */
     protected void addField(String name, FilePropertyKey key, List<String> possibleValues) {
-        add(new JLabel(name));
+        JLabel label = new JLabel(name);
+        label.setFont(font);
+        add(label);
         JComboBox comboBox = new JComboBox(new CollectionBackedComboBoxModel(possibleValues));
+        comboBox.setFont(font);
         add(comboBox, "growx, wrap");
         componentMap.put(key, comboBox);
     }

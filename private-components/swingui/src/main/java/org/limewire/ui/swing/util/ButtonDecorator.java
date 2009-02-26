@@ -23,6 +23,9 @@ public class ButtonDecorator {
     @Resource private Font  miniTextFont;
     @Resource private Color miniTextForeground;
     
+    @Resource private Font  linkTextFont;
+    @Resource private Color linkTextForeground;
+    
     @Resource private Font  lightFullTextFont;
     @Resource private Color lightFullTextForeground;
     
@@ -34,6 +37,9 @@ public class ButtonDecorator {
         GuiUtils.assignResources(this);
         
         this.painterFactory = painterFactory;
+        
+        // TODO: Underline can not be set using resources?
+        linkTextFont = FontUtils.deriveUnderline(linkTextFont, true);
     }
     
     public void decorateMiniButton(JXButton button) {
@@ -45,6 +51,17 @@ public class ButtonDecorator {
         
         button.setForeground(miniTextForeground);
         button.setFont(miniTextFont);
+    }
+    
+    public void decorateLinkButton(JXButton button) {
+        button.setForegroundPainter(painterFactory.createLinkButtonForegroundPainter());
+        button.setBackgroundPainter(painterFactory.createLinkButtonBackgroundPainter());
+        
+        decorateGeneral(button);
+        button.setBorder(BorderFactory.createEmptyBorder(2,6,3,6));
+        
+        button.setForeground(linkTextForeground);
+        button.setFont(linkTextFont);
     }
     
     public void decorateDarkFullButton(JXButton button, AccentType accent) {
@@ -97,6 +114,16 @@ public class ButtonDecorator {
         button.setForeground(lightFullTextForeground);
         button.setFont(lightFullTextFont);
     }
+        
+    public void decorateGreenFullButton(JXButton button) {
+        button.setForegroundPainter(painterFactory.createLightFullButtonForegroundPainter());
+        button.setBackgroundPainter(painterFactory.createGreenFullButtonBackgroundPainter());
+
+        decorateGeneral(button);
+        
+        button.setForeground(lightFullTextForeground);
+        button.setFont(lightFullTextFont);
+    }    
         
     private static void decorateGeneral(JXButton button) {
         button.setOpaque(false);

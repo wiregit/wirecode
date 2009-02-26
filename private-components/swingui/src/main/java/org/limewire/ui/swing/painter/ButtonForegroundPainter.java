@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.painter;
 
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 
@@ -9,6 +10,7 @@ import javax.swing.Icon;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.ui.swing.components.LimeComboBox;
+import org.limewire.ui.swing.util.FontUtils;
 
 /**
  * Painter to be used to extend general font and icon behaviour to all
@@ -16,12 +18,18 @@ import org.limewire.ui.swing.components.LimeComboBox;
  *  to avoid resource duplication.  
  *  
  *  NOTE: Will not respect icon alignment
+ *  
+ *  TODO: COmment again
  */
 public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
 
     private final Paint pressedForeground;
     private final Paint hoverForeground;
     private final Paint disabledForeground;
+    
+    private final FontTransform pressedTransform;
+    private final FontTransform hoverTransform;
+    private final FontTransform disabledTransform;
     
     /**
      * Creates a button foreground painter that does not
@@ -31,20 +39,37 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
      *          buttons since it will ignore the default app style
      *          -- instead use the factory
      */
-    ButtonForegroundPainter() {
+    public ButtonForegroundPainter() {
         this(null, null, null);
     }
        
     /** 
-     * Can be used to create a foreground painter with unique pressed and hover font colours
+     * Can be used to create a foreground painter with unique overlaid pressed and hover font colours
      *  and a right aligned icon.  
      *  
      *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
      */
     public ButtonForegroundPainter(Paint hoverForeground, Paint pressedForeground, Paint disabledForeground) {
+        this(hoverForeground, pressedForeground, disabledForeground, 
+                FontTransform.NO_CHANGE, FontTransform.NO_CHANGE, FontTransform.NO_CHANGE);        
+    }
+    
+    /** 
+     * Can be used to create a foreground painter with unique overlaid pressed and hover font style and colours
+     *  with a right aligned icon.  
+     *  
+     *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
+     */    
+    public ButtonForegroundPainter(Paint hoverForeground, Paint pressedForeground, Paint disabledForeground,
+            FontTransform hoverTransform, FontTransform pressedTransform, FontTransform disabledTransform) {
+        
         this.pressedForeground = pressedForeground;
         this.hoverForeground = hoverForeground;
         this.disabledForeground = disabledForeground;
+        
+        this.pressedTransform = pressedTransform;
+        this.hoverTransform = hoverTransform;
+        this.disabledTransform = disabledTransform;
         
         setCacheable(false);
     }
@@ -57,17 +82,21 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
         
         Icon icon = null;
         Paint foreground = null;
+        FontTransform fontTransform = FontTransform.NO_CHANGE;
          
         if (!object.isEnabled()) {
             foreground = disabledForeground;
+            fontTransform = disabledTransform;
         }
-        else if (object.getModel().isPressed()) {
+        else if (object.getModel().isPressed() || object.getModel().isSelected()) {
             icon = object.getPressedIcon();
-            foreground = pressedForeground; 
+            foreground = pressedForeground;
+            fontTransform = pressedTransform;
         }
         else if (object.getModel().isRollover() || object.hasFocus()) {
             icon = object.getRolloverIcon();
             foreground = hoverForeground;
+            fontTransform = hoverTransform;
         }
         else {
             icon = object.getIcon();
@@ -77,14 +106,29 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
             foreground = object.getForeground();
         }
         
-        g.setFont(object.getFont());
+        Font font = object.getFont();
+        
+        // TODO: Should be cached.
+        switch (fontTransform) {
+            case NO_CHANGE :
+                break;
+            case ADD_UNDERLINE :
+                font = FontUtils.deriveUnderline(font, true);
+                break;
+            case REMOVE_UNDERLINE :
+                font = FontUtils.deriveUnderline(font, false);
+                break;
+        }
+        
         g.setPaint(foreground);
+        g.setFont(font);
         
         if (object.getText() != null) {
             g.drawString(object.getText(), object.getInsets().left, textBaseline);
             
             if (icon != null) {
-                icon.paintIcon(object, g, object.getWidth() - object.getInsets().right + 3, 
+                icon.paintIcon(object, g, 
+                        object.getWidth() - icon.getIconWidth()/2 - 10, 
                         object.getHeight()/2 - icon.getIconHeight()/2);
             }
         } 
@@ -109,6 +153,10 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
         }
 
         
+    }
+    
+    public enum FontTransform {
+        NO_CHANGE, ADD_UNDERLINE, REMOVE_UNDERLINE;
     }
 
 }
