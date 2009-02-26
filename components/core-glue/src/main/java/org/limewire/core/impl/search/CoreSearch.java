@@ -204,10 +204,17 @@ public class CoreSearch implements Search {
     private String createAdvancedQueryString(Category category, Map<FilePropertyKey, String> advancedSearch) {
         List<NameValue<String>> nvs = new ArrayList<NameValue<String>>();
         for(Map.Entry<FilePropertyKey, String> entry : advancedSearch.entrySet()) {
-            nvs.add(new NameValue<String>(FilePropertyKeyPopulator.getLimeXmlName(category, entry.getKey()), entry.getValue()));
+            String xmlName = FilePropertyKeyPopulator.getLimeXmlName(category, entry.getKey());
+            if(xmlName != null) {
+                nvs.add(new NameValue<String>(xmlName, entry.getValue()));
+            }
         }
-        return xmlDocumentFactory.createLimeXMLDocument(nvs,
-                FilePropertyKeyPopulator.getLimeXmlSchemaUri(category)).getXMLString();
+        if(nvs.isEmpty()) {
+            return "";
+        } else {
+            return xmlDocumentFactory.createLimeXMLDocument(nvs,
+                    FilePropertyKeyPopulator.getLimeXmlSchemaUri(category)).getXMLString();
+        }
     }
 
     private String createCompositeQueryFromAdvanced(Category category, Map<FilePropertyKey, String> advancedSearch) {
