@@ -20,7 +20,7 @@ import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ThumbnailManager;
-import org.limewire.ui.swing.library.DelegateListChanger;
+import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditor;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditorFactory;
@@ -75,7 +75,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     @Override
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
-            ShareWidget<File> shareWidget, DelegateListChanger listChanger) {
+            ShareWidget<File> shareWidget, LibraryListSourceChanger listChanger) {
 
         LibraryImageFolderComboBox comboBox = new LibraryImageFolderComboBox(xmppService, sharingActionFactory, friendSignInPanel);
         comboDecorator.decorateLinkComboBox(comboBox);

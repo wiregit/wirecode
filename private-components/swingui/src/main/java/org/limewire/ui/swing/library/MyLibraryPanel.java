@@ -37,8 +37,8 @@ import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
 import org.jdesktop.jxlayer.plaf.ext.LockableUI;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.collection.glazedlists.DelegateList;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.collection.glazedlists.PluggableList;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
@@ -130,7 +130,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     
     private SharingFilterComboBox sharingComboBox;
     
-    private final DelegateListChanger delegateListChanger;
+    private final LibraryListSourceChanger delegateListChanger;
     
     private SharingMessagePanel messagePanel;
     private NotSharingPanel notSharingPanel;
@@ -174,8 +174,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
-        DelegateList<LocalFileItem> baseLibraryList = new DelegateList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
-        delegateListChanger = new DelegateListChanger(baseLibraryList, libraryManager, shareListManager);
+        PluggableList<LocalFileItem> baseLibraryList = new PluggableList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
+        delegateListChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager, shareListManager);
         sharingComboBox = new SharingFilterComboBox(delegateListChanger, this, shareListManager);
         comboDecorator.decorateLinkComboBox(sharingComboBox);
         sharingComboBox.setText(I18n.tr("What I'm Sharing"));
@@ -932,10 +932,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         public PlayListListener(Action action) {
             this.action = action;
             
-            delegateListChanger.addListener(new DelegateList.DelegateListener<LocalFileItem>() {
+            delegateListChanger.addListener(new LibraryListSourceChanger.FriendChangedListener() {
                 @Override
-                public void delegateChanged(DelegateList<LocalFileItem> delegateList,
-                        EventList<LocalFileItem> theDelegate) {
+                public void friendChanged() {
                     updateList();
                 }
             });
@@ -973,10 +972,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
             }
             
-            delegateListChanger.addListener(new DelegateList.DelegateListener<LocalFileItem>() {
+            delegateListChanger.addListener(new LibraryListSourceChanger.FriendChangedListener() {
                 @Override
-                public void delegateChanged(DelegateList<LocalFileItem> delegateList,
-                        EventList<LocalFileItem> theDelegate) {
+                public void friendChanged() {
                     setText();
                 }
             });

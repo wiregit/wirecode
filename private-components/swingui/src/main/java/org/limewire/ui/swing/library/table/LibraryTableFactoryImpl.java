@@ -27,7 +27,7 @@ import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
-import org.limewire.ui.swing.library.DelegateListChanger;
+import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
@@ -140,7 +140,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
      * Creates a table for MyLibrary
      */
     public <T extends LocalFileItem> LibraryTable<T> createMyTable(Category category,
-            EventList<T> eventList, DelegateListChanger listChanger) {
+            EventList<T> eventList, LibraryListSourceChanger listChanger) {
 
         final LibraryTable<T> libTable;
         SortedList<T> sortedList = new SortedList<T>(eventList);
@@ -196,7 +196,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     @Override
     public LibraryImagePanel createMyImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, ShareWidget<File> sharePanel,
-            DelegateListChanger listChanger) {
+            LibraryListSourceChanger listChanger) {
         LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), eventList,
                 libraryManager.getLibraryManagedList(), scrollPane, subPanelFactory,
                 sharePanel, listChanger);

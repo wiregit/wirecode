@@ -52,7 +52,7 @@ public class SharingFilterComboBox extends LimeComboBox {
     
     private final Set<Friend> menuList = new HashSet<Friend>();
 
-    private final DelegateListChanger listChanger;
+    private final LibraryListSourceChanger listChanger;
     private final MyLibraryPanel myLibraryPanel;
     private final ShareListManager shareListManager;
     
@@ -60,7 +60,7 @@ public class SharingFilterComboBox extends LimeComboBox {
     
     private JComponent subMenuText;
         
-    public SharingFilterComboBox(DelegateListChanger listChanger, MyLibraryPanel myLibraryPanel, ShareListManager shareListManager) {
+    public SharingFilterComboBox(LibraryListSourceChanger listChanger, MyLibraryPanel myLibraryPanel, ShareListManager shareListManager) {
         this.listChanger = listChanger;
         this.myLibraryPanel = myLibraryPanel;
         this.shareListManager = shareListManager;

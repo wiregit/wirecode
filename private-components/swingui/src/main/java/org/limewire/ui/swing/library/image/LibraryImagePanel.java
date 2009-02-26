@@ -23,7 +23,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
-import org.limewire.ui.swing.library.DelegateListChanger;
+import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -61,7 +61,7 @@ public class LibraryImagePanel extends JPanel
     private final Map<File, LibraryImageSubPanel> panelMap;
 
     private final LocalFileList fileList;
-    private final DelegateListChanger listChanger;
+    private final LibraryListSourceChanger listChanger;
     
     private JScrollPane scrollPane;
     
@@ -69,7 +69,7 @@ public class LibraryImagePanel extends JPanel
             LocalFileList fileList, JScrollPane scrollPane,
             LibraryImageSubPanelFactory factory,
             ShareWidget<File> shareWidget,
-            DelegateListChanger listChanger) {       
+            LibraryListSourceChanger listChanger) {       
         super(new VerticalLayout());
         
         GuiUtils.assignResources(this); 

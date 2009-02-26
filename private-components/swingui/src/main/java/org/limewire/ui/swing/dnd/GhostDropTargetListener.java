@@ -10,7 +10,7 @@ import java.awt.dnd.DropTargetListener;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.friend.Friend;
-import org.limewire.ui.swing.library.DelegateListChanger;
+import org.limewire.ui.swing.library.LibraryListSourceChanger;
 
 /**
  * Listens to drag and drop events. When files are dragged onto a
@@ -27,7 +27,7 @@ public class GhostDropTargetListener implements DropTargetListener {
     private final GhostDragGlassPane ghostDragGlassPane;
     private final Component parent;
     private final Friend friend;
-    private final DelegateListChanger listChanger;
+    private final LibraryListSourceChanger listChanger;
     
     public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane) {
         this.parent = parent;
@@ -43,7 +43,7 @@ public class GhostDropTargetListener implements DropTargetListener {
         this.listChanger = null;
     }
     
-    public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, DelegateListChanger listChanger) {
+    public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, LibraryListSourceChanger listChanger) {
         this.parent = parent;
         this.ghostDragGlassPane = ghostDragGlassPane;
         this.friend = null;

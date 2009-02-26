@@ -11,7 +11,7 @@ import javax.swing.TransferHandler;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.ui.swing.library.DelegateListChanger;
+import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.util.DNDUtils;
 
@@ -23,11 +23,11 @@ public class MyLibraryTransferHandler extends TransferHandler {
     private final EventSelectionModel<LocalFileItem> selectionModel;
     private final LibraryFileList libraryManagedList;
     private final ShareListManager shareListManager;
-    private final DelegateListChanger listChanger;
+    private final LibraryListSourceChanger listChanger;
     
     public MyLibraryTransferHandler(EventSelectionModel<LocalFileItem> selectionModel,
             LibraryFileList libraryManagedList, ShareListManager shareListManager,
-            DelegateListChanger listChanger) {
+            LibraryListSourceChanger listChanger) {
         this.selectionModel = selectionModel;
         this.libraryManagedList = libraryManagedList;
         this.shareListManager = shareListManager;
