@@ -67,7 +67,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         
         createMyCategories(eventList);
         selectFirstVisible();
-        getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
+        getHeaderPanel().setText(I18n.tr("Browse files from {0}", getFullPanelName()));
     }
     
     protected String getFullPanelName() {
@@ -86,8 +86,8 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         
         public ViewSharedLibraryAction(LibraryNavigator libraryNavigator){
             this.libraryNavigator = libraryNavigator;
-            putValue(Action.NAME, I18n.tr("Share"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share your files with {0}", friend.getRenderName()));
+            putValue(Action.NAME, I18n.tr("What I'm sharing"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show what you're sharing with {0}", friend.getRenderName()));
         }
         
         @Override
