@@ -1,6 +1,7 @@
 package org.limewire.util;
 
 import java.io.File;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -15,7 +16,7 @@ import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
 /** Utility test-case class that others can extend for easier testing. */ 
-public abstract class BaseTestCase extends AssertComparisons {
+public abstract class BaseTestCase extends AssertComparisons implements UncaughtExceptionHandler {
     
     protected volatile static Class _testClass;
     private   final static Timer _testKillerTimer = new Timer(true);
@@ -56,6 +57,9 @@ public abstract class BaseTestCase extends AssertComparisons {
     public BaseTestCase(String name) {
         super(name);
         _testClass = getClass();
+        ErrorUtils.setCallback(this);
+        Thread.setDefaultUncaughtExceptionHandler(this);
+        Thread.currentThread().setUncaughtExceptionHandler(this);
     }
     
     /**
@@ -361,6 +365,11 @@ public abstract class BaseTestCase extends AssertComparisons {
     protected void tearDown() throws Exception {
         super.tearDown();
         setExpectedException(null);
+    }
+    
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        error(e);
     }
 }       
 

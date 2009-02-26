@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
+import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.ConnectionSettings;
@@ -37,6 +38,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.PermanentAddress;
+import org.limewire.listener.AsynchronousMulticaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.net.ConnectivityChangeEvent;
@@ -475,9 +477,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
             RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
             SocketsManager socketsManager, 
-            @Named("downloadStateMulticaster") EventMulticaster<DownloadStateEvent> downloadStateMulticaster) {
+            @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue) {
         super(saveLocationManager);
-        this.listeners = downloadStateMulticaster;
+        this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
         this.incompleteFileManager = incompleteFileManager;

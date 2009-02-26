@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.InvalidDataException;
-import org.limewire.listener.EventMulticaster;
 import org.limewire.net.SocketsManager;
 
 import com.google.inject.Inject;
@@ -62,13 +62,13 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
             ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
             SocketsManager socketsManager, 
-            @Named("downloadStateMulticaster") EventMulticaster<DownloadStateEvent> downloadStateMulticaster) throws SaveLocationException {
+            @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue) throws SaveLocationException {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, 
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider, socketsManager, downloadStateMulticaster);
+                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider, socketsManager, downloadStateProcessingQueue);
     }
     
     /* (non-Javadoc)

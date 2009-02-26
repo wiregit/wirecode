@@ -3,8 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.util.Comparator;
 
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.listener.AsynchronousMulticaster;
-import org.limewire.listener.EventMulticaster;
+import org.limewire.concurrent.ListeningExecutorService;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -53,8 +52,8 @@ public class LimeWireDownloadModule extends AbstractModule {
         bind(new TypeLiteral<Comparator<RemoteFileDescContext>>(){}).to(PingedRemoteFileDescComparator.class);
     }
     
-    @Provides @Singleton @Named("downloadStateMulticaster") EventMulticaster<DownloadStateEvent> multicaster() {
-        return new AsynchronousMulticaster<DownloadStateEvent>(ExecutorsHelper.newProcessingQueue("DownloadStateMulticaster"));
+    @Provides @Singleton @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue() {
+        return ExecutorsHelper.newProcessingQueue("downloadStateProcessingQueue");
     }
 
 }

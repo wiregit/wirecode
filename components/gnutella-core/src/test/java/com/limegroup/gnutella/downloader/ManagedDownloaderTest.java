@@ -17,8 +17,13 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.collection.Range;
+import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
@@ -26,8 +31,10 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.listener.EventListener;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
+import org.limewire.util.ExecuteRunnableAction;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -536,6 +543,45 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		// SaveLocationException.FILESYSTEM_ERROR is not really reproducible
 	}
 	
+	@SuppressWarnings("unchecked")
+    public void testDownloadStatusEventsPublishedToCorrectListeners() {
+	    Mockery context = new Mockery(){{
+	        setImposteriser(ClassImposteriser.INSTANCE);
+	    }};
+	    
+	    final SaveLocationManager saveLocationManager = context.mock(SaveLocationManager.class);
+	    final RequeryManager requeryManager = context.mock(RequeryManager.class);
+	    final RequeryManagerFactory requeryManagerFactory = context.mock(RequeryManagerFactory.class);
+	    final ListeningExecutorService downloadProcessingQueue = context.mock(ListeningExecutorService.class);
+	    
+	    final EventListener<DownloadStateEvent> downloadListener1 = context.mock(EventListener.class);
+        final EventListener<DownloadStateEvent> downloadListener2 = context.mock(EventListener.class);
+        
+	    context.checking(new Expectations() {{
+	        allowing(requeryManagerFactory).createRequeryManager(with(any(RequeryListener.class)));
+	        will(returnValue(requeryManager));
+	        allowing(downloadProcessingQueue).execute(with(any(Runnable.class)));
+	        will(new ExecuteRunnableAction());
+	    }});
+	    
+	    ManagedDownloaderImpl managedDownloaderImpl1 = new ManagedDownloaderImpl(saveLocationManager, null, null, null, null, null, null, requeryManagerFactory, null, null, null, null, null, null, null, null, null, null, background, null, null, null, null, null, null, downloadProcessingQueue);
+	    managedDownloaderImpl1.addListener(downloadListener1);
+        
+        ManagedDownloaderImpl managedDownloaderImpl2 = new ManagedDownloaderImpl(saveLocationManager, null, null, null, null, null, null, requeryManagerFactory, null, null, null, null, null, null, null, null, null, null, background, null, null, null, null, null, null, downloadProcessingQueue);
+        managedDownloaderImpl2.addListener(downloadListener2);
+        
+	    context.checking(new Expectations() {{
+	        one(downloadListener1).handleEvent(with(any(DownloadStateEvent.class)));
+	    }});
+	    managedDownloaderImpl1.setState(DownloadState.ABORTED);
+	    
+	    context.checking(new Expectations() {{
+            one(downloadListener2).handleEvent(with(any(DownloadStateEvent.class)));
+        }});
+        managedDownloaderImpl2.setState(DownloadState.CONNECTING);
+	    
+	    context.assertIsSatisfied();
+	}
     
     private RemoteFileDesc newRFD(String name) throws Exception {
         return newRFD(name, null);

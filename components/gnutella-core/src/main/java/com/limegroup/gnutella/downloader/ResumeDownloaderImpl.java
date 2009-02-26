@@ -3,8 +3,8 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.SaveLocationManager;
-import org.limewire.listener.EventMulticaster;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.Objects;
 
@@ -63,14 +63,14 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
             Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
             ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
             SocketsManager socketsManager, 
-            @Named("downloadStateMulticaster") EventMulticaster<DownloadStateEvent> downloadStateMulticaster) {
+            @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, 
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
                 tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider,
-                socketsManager, downloadStateMulticaster);
+                socketsManager, downloadStateProcessingQueue);
     }
     
     /* (non-Javadoc)
