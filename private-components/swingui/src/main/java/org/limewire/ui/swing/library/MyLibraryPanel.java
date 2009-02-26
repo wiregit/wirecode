@@ -378,29 +378,28 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
      * Creates the component used to display a single playlist.
      */
     private JComponent createMyPlaylistAction(Playlist playlist, EventList<LocalFileItem> filtered) {
-        // Convert to list containing PlaylistFileItem elements, which 
-        // provide the position index.
+        // Convert the list to one containing PlaylistFileItem elements, which 
+        // include the playlist position index.
         EventList<? extends LocalFileItem> functionList = 
             GlazedListsFactory.functionList(filtered, new PlaylistFileItemFunction(playlist));
         
-        // TODO Create filtered list?
-        //EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
-        //        new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
+        // Note that the playlist is not filtered using the filter text field.
+        // To revise this, we could apply a TextComponentMatcherEditor to the 
+        // function list using a LibraryTextFilterator.
         
         // Create playlist table using factory.
-        LibraryTable<? extends LocalFileItem> table = 
+        LibraryTable<? extends LocalFileItem> table =
             tableFactory.createPlaylistTable(playlist, functionList);
         
         // Enable sharing - this also applies the saved column settings.
-        //table.enableMyLibrarySharing(fileShareWidget);
         table.enableSharing();
 
         // Install double-click handler.
         table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(
                 new Catalog(playlist), getTableModel(table)));
         
-        // Add table to selectable map.  This is used to select the
-        // next/previous item for the media player.
+        // Add table to selectable map.  The map is referenced when we select
+        // the next/previous item for the media player.
         selectableMap.put(new Catalog(playlist), table);
         
         // Add table for disposal.
@@ -438,10 +437,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
         @Override
         public void handleDoubleClick(int row) {
-            libraryNavigator.setActiveCatalog(catalog);
             File file = model.getFileItem(row).getFile();
             switch (model.getFileItem(row).getCategory()){
             case AUDIO:
+                libraryNavigator.setActiveCatalog(catalog);
                 PlayerUtils.playOrLaunch(file);
                 break;
             case OTHER:
