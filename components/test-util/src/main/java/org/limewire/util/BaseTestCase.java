@@ -57,9 +57,6 @@ public abstract class BaseTestCase extends AssertComparisons implements Uncaught
     public BaseTestCase(String name) {
         super(name);
         _testClass = getClass();
-        ErrorUtils.setCallback(this);
-        Thread.setDefaultUncaughtExceptionHandler(this);
-        Thread.currentThread().setUncaughtExceptionHandler(this);
     }
     
     /**
@@ -233,6 +230,8 @@ public abstract class BaseTestCase extends AssertComparisons implements Uncaught
     protected void preSetUp() throws Exception {
         _testThread = Thread.currentThread();
         ErrorUtils.setCallback(this);
+        Thread.setDefaultUncaughtExceptionHandler(this);
+        Thread.currentThread().setUncaughtExceptionHandler(this);
         setupTestTimer();
     }
     
