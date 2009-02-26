@@ -224,7 +224,7 @@ public class CoreSearch implements Search {
                 sb.append(value + " ");
             }
         }
-        return QueryUtils.createQueryString(sb.toString(), true);
+        return QueryUtils.createQueryString(sb.toString().trim(), true);
     }
 
     /**
