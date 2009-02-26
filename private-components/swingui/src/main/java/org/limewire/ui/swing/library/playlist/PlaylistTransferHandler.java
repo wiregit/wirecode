@@ -1,16 +1,21 @@
 package org.limewire.ui.swing.library.playlist;
 
+import static org.limewire.ui.swing.library.playlist.TransferablePlaylistData.PLAYLIST_DATA_FLAVOR;
+
 import java.awt.Component;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.InputEvent;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.Playlist;
-import org.limewire.ui.swing.dnd.LocalFileTransferable;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
@@ -20,16 +25,23 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
  * actions to reorder the files in a playlist. 
  */
 public class PlaylistTransferHandler extends TransferHandler {
+    private static Log LOG = LogFactory.getLog(PlaylistTransferHandler.class);
     
     private final Playlist playlist;
+    
+    /** Indicator that determines whether files were reordered. */
+    private boolean reordered;
 
     /**
-     * Constructs a PlaylistTransferHandler.
+     * Constructs a PlaylistTransferHandler for the specified playlist.
      */
     public PlaylistTransferHandler(Playlist playlist) {
         this.playlist = playlist;
     }
 
+    /**
+     * Creates a Transferable object containing the files for transfer.
+     */
     @Override
     protected Transferable createTransferable(JComponent c) {
         if (c instanceof PlaylistLibraryTable) {
@@ -47,32 +59,64 @@ public class PlaylistTransferHandler extends TransferHandler {
             }
             
             // Create transferable data.
-            return new LocalFileTransferable(files);
+            return new TransferablePlaylistData(files);
         }
         
         return null;
     }
 
+    /**
+     * Returns the type of transfer operations supported by the component.
+     */
     @Override
     public int getSourceActions(JComponent c) {
         return COPY_OR_MOVE;
     }
 
+    /**
+     * Initiates drag operation to reorder or move files.
+     */
     @Override
     public void exportAsDrag(JComponent comp, InputEvent e, int action) {
+        // Reset indicator.
+        reordered = false;
+        
+        // Start drag operation.
         super.exportAsDrag(comp, e, action);
     }
 
+    /**
+     * Invoked after data is exported.  This method will remove files from
+     * the playlist if they were not reordered within the list.
+     */
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
-        // TODO if move then remove data?
-        //System.out.println("exportDone: source=" + source.getClass().getSimpleName() + ", action=" + action);
-        super.exportDone(source, data, action);
+        if ((action == MOVE) && !reordered) {
+            try {
+                // Get files to remove.
+                File[] files = (File[]) data.getTransferData(PLAYLIST_DATA_FLAVOR);
+
+                // Remove files from playlist.
+                for (File file : files) {
+                    playlist.removeFile(file);
+                }
+                
+            } catch (UnsupportedFlavorException ufx) {
+                LOG.error("Error removing playlist files", ufx);
+            } catch (IOException iox) {
+                LOG.error("Error removing playlist files", iox);
+            }
+        }
     }
 
+    /**
+     * Returns true if the component can accept the drop operation.
+     */
     @Override
     public boolean canImport(TransferSupport support) {
-        boolean canImport = support.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR);
+        // Verify data flavors.  Only files dragged within the playlist table
+        // can be accepted at this time.
+        boolean canImport = support.isDataFlavorSupported(PLAYLIST_DATA_FLAVOR);
         
         if (canImport && support.isDrop()) {
             support.setShowDropLocation(false);
@@ -81,39 +125,48 @@ public class PlaylistTransferHandler extends TransferHandler {
         return canImport;
     }
 
+    /**
+     * Imports the transfer data into the component.
+     */
     @Override
     public boolean importData(TransferSupport support) {
+        // Verify drop operation.
         if (!support.isDrop()) {
             return false;
         }
         
+        // Verify target component.
         Component component = support.getComponent();
         if (!(component instanceof PlaylistLibraryTable)) {
             return false;
         }
         
-        if (support.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR)) {
+        if (support.isDataFlavorSupported(PLAYLIST_DATA_FLAVOR)) {
+            // Get target row for drop.
             PlaylistLibraryTable<?> libTable = (PlaylistLibraryTable<?>) component;
             int dropRow = libTable.rowAtPoint(support.getDropLocation().getDropPoint());
             
             try {
-                Transferable data = support.getTransferable();
-                File[] files = (File[]) data.getTransferData(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR);
+                // Set reorder indicator so files are not removed when done.
+                reordered = true;
 
-                // TODO REMOVE DEBUGGING
-                //System.out.println("importData: dropRow=" + dropRow + ", items=" + files.length);
-                                
+                // Get files to insert.
+                Transferable data = support.getTransferable();
+                File[] files = (File[]) data.getTransferData(PLAYLIST_DATA_FLAVOR);
+
+                // Insert files into the playlist.
                 for (File file : files) {
-                    //System.out.println("-> adding " + file.getAbsolutePath());
-                    // TODO eventList.add(dropRow, fileItem);
                     playlist.addFile(dropRow, file);
                 }
-                
+
+                // Return success.
                 return true;
                 
-            } catch (Exception ex) {
-                // TODO log error
-                ex.printStackTrace();
+            } catch (UnsupportedFlavorException ufx) {
+                LOG.error("Error moving playlist files", ufx);
+                return false;
+            } catch (IOException iox) {
+                LOG.error("Error moving playlist files", iox);
                 return false;
             }
         }

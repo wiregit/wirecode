@@ -25,11 +25,14 @@ public class PlaylistButtonDropListener extends DropTargetAdapter {
         this.playlist = playlist;
     }
     
+    /**
+     * Handles drag enter event on component to accept or reject the drag
+     * operation. 
+     */
     @Override
     public void dragEnter(DropTargetDragEvent dtde) {
         // Verify data flavors.
-        if (//!dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) &&
-            !dtde.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR)) {
+        if (!dtde.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR)) {
             dtde.rejectDrag();
             return;
         }
@@ -41,11 +44,14 @@ public class PlaylistButtonDropListener extends DropTargetAdapter {
             dtde.rejectDrag();
         }
     }
-    
+
+    /**
+     * Handles drop action on component.
+     */
     @Override
     public void drop(DropTargetDropEvent dtde) {
-        // Verify data flavors.
-        // TODO accept DataFlavor.javaFileListFlavor, add file to Library
+        // Verify data flavors.  At present, only files dragged from the 
+        // Library are accepted.
         if (!dtde.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR)) {
             dtde.rejectDrop();
             return;
@@ -109,10 +115,6 @@ public class PlaylistButtonDropListener extends DropTargetAdapter {
         // Get transfer files based on data flavor.
         if (data.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR)) {
             return (File[]) data.getTransferData(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR);
-            
-        //} else if (data.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-        //    List fileList = (List) data.getTransferData(DataFlavor.javaFileListFlavor);
-        //    return (File[]) fileList.toArray();
         }
 
         // Return empty array if no files to transfer.
