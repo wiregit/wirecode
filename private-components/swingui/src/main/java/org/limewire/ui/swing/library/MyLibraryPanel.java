@@ -137,6 +137,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     
     private ShareAllComboBox shareAllComboBox;
     private GhostDropTargetListener ghostDropTargetListener;
+    private XMPPService xmppService;
 
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
@@ -168,6 +169,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         this.playerPanel = player;
         this.selectableMap = new EnumMap<Category, LibraryOperable<LocalFileItem>>(Category.class);
         this.connectionListeners = connectionListeners;
+        this.xmppService = xmppService;
         
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
@@ -293,7 +295,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         delegateListChanger.setFriend(null);
         sharingComboBox.setVisible(true);
         messagePanel.setVisible(false);
-//        hideEmptyFriend();
+        if(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true || 
+                (xmppService.isLoggedIn() && SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true))
+                ;
+        else
+            hideEmptyFriend();
         //reselect the current category in case we filtered on a friend that wasn't 
         //sharing anything
         Category category = getSelectedCategory();
