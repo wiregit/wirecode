@@ -43,6 +43,10 @@ class MockPlaylist implements Playlist {
     }
 
     @Override
+    public void clear() {
+    }
+    
+    @Override
     public boolean canAdd(File file) {
         return false;
     }

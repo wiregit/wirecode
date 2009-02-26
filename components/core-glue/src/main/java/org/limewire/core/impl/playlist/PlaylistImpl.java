@@ -105,6 +105,15 @@ class PlaylistImpl implements Playlist {
             }
         }
     }
+
+    @Override
+    public void clear() {
+        // Remove all items from playlist.
+        itemList.clear();
+        // Update filter on local file items, and notify listeners.  
+        matcherEditor.update();
+        fireListChanged();
+    }
     
     @Override
     public boolean canAdd(File file) {

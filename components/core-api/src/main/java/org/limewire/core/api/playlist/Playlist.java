@@ -50,6 +50,11 @@ public interface Playlist {
     void reorderFiles(File[] files);
     
     /**
+     * Clears the playlist.
+     */
+    void clear();
+    
+    /**
      * Returns true if the specified file can be added to the playlist.
      */
     boolean canAdd(File file);
