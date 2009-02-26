@@ -1,9 +1,7 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
 
-import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
@@ -13,7 +11,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.PromptTextField;
@@ -21,7 +18,6 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -42,8 +38,6 @@ public class EmptyLibraryPanel extends LibraryPanel {
     private Color backgroundColor;
     
     private final Friend friend;
-
-    private final LibraryNavigator libraryNavigator;
         
     @AssistedInject
     public EmptyLibraryPanel(@Assisted Friend friend,
@@ -52,21 +46,16 @@ public class EmptyLibraryPanel extends LibraryPanel {
             @Assisted JComponent component,
             HeaderBarDecorator headerBarFactory,
             ButtonDecorator buttonDecorator,
-            LibraryNavigator libraryNavigator, 
             TextFieldDecorator textFieldDecorator) {
         super(headerBarFactory, textFieldDecorator);
   
         GuiUtils.assignResources(this);
         
         this.friend = friend;
-        this.libraryNavigator = libraryNavigator;
 
-        if(!friend.isAnonymous()) {
-            addButtonToHeader(new ViewSharedLibraryAction(), buttonDecorator);
-        }
         addDisposable(messageComponent);
         createEmptyPanel(component);
-        getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
+        getHeaderPanel().setText(I18n.tr("Browse Files from {0}", getFullPanelName()));
         setTransferHandler(new LocalFileListTransferHandler(friendFileList));
     }
     
@@ -106,18 +95,5 @@ public class EmptyLibraryPanel extends LibraryPanel {
     
     @Override
     protected void addNavPanel() {
-    }
-
-    private class ViewSharedLibraryAction extends AbstractAction {
-
-        public ViewSharedLibraryAction() {
-            putValue(Action.NAME, I18n.tr("Share"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share your files with {0}", friend.getRenderName()));
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            libraryNavigator.selectFriendShareList(friend);
-        }
     }
 }

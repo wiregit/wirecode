@@ -1,11 +1,9 @@
 package org.limewire.ui.swing.library.image;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -16,21 +14,22 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
+import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
+import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.DelegateListChanger;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
-import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditor;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditorFactory;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler;
-import org.limewire.ui.swing.library.table.menu.ShareImageLibraryPopupHandler;
+import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
@@ -50,19 +49,27 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
 
     private final PropertiesFactory<LocalFileItem> localFilePropFactory;
-    private final ShareWidgetFactory shareWidgetFactory;
+    private final SharingActionFactory sharingActionFactory;
+    private final FriendsSignInPanel friendSignInPanel;
     private final ShareListManager shareListManager;
+    private final XMPPService xmppService;
+    private final ComboBoxDecorator comboDecorator;
     
     @Inject
     public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager, 
-            ShareTableRendererEditorFactory shareTableRendererEditorFactory, ShareWidgetFactory shareWidgetFactory, 
-            PropertiesFactory<LocalFileItem> localFilePropFactory, ShareListManager shareListManager) {
+            ShareTableRendererEditorFactory shareTableRendererEditorFactory, SharingActionFactory sharingActionFactory, 
+            PropertiesFactory<LocalFileItem> localFilePropFactory, ShareListManager shareListManager,
+            XMPPService xmppService, FriendsSignInPanel friendSignInPanel,
+            ComboBoxDecorator comboDecorator) {
         this.thumbnailManager = thumbnailManager;
         this.libraryManager = libraryManager;
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
-        this.shareWidgetFactory = shareWidgetFactory;
+        this.sharingActionFactory = sharingActionFactory;
         this.localFilePropFactory = localFilePropFactory;
         this.shareListManager = shareListManager;
+        this.xmppService = xmppService;
+        this.friendSignInPanel = friendSignInPanel;
+        this.comboDecorator = comboDecorator;
     }
     
     @Override
@@ -70,33 +77,19 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
             EventList<LocalFileItem> eventList, LocalFileList fileList,
             ShareWidget<File> shareWidget, DelegateListChanger listChanger) {
 
-        LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList);
-        panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, shareWidgetFactory, libraryManager, localFilePropFactory));
-        panel.addShareFolderButtonAction(new MyLibraryShareFolderAction(panel.getImageList(), shareWidgetFactory.createMultiFileShareWidget()));
+        LibraryImageFolderComboBox comboBox = new LibraryImageFolderComboBox(xmppService, sharingActionFactory, friendSignInPanel);
+        comboDecorator.decorateLinkComboBox(comboBox);
+        
+        LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList, comboBox);
+        panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, sharingActionFactory, libraryManager, localFilePropFactory, xmppService));
+        comboBox.setSelectAllable(panel);
+        
         ImageList list = panel.getImageList();
         list.setImageCellRenderer(enableMyLibraryRenderer(list));
         panel.setImageEditor(enableMyLibraryEditor(shareWidget, panel));
         TransferHandler transferHandler = new MyLibraryTransferHandler(getSelectionModel(list), libraryManager.getLibraryManagedList(), shareListManager, listChanger);
         list.setTransferHandler(transferHandler);
         panel.setTransferHandler(transferHandler);
-        return panel;
-    }
-
-    @Override
-    public LibraryImageSubPanel createSharingLibraryImageSubPanel(File parentFolder,
-            EventList<LocalFileItem> eventList, LocalFileList fileList,
-            LocalFileList currentFriendFileList) {
-        LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList);
-        panel.setPopupHandler(new ShareImageLibraryPopupHandler(currentFriendFileList, panel, libraryManager, localFilePropFactory));
-        panel.addShareFolderButtonAction(new SharingLibraryShareFolderAction(currentFriendFileList, eventList, panel));
-        ImageList list = panel.getImageList();
-        list.setImageCellRenderer(enableSharingRenderer(list, currentFriendFileList));
-        panel.setImageEditor(enableSharingEditor(currentFriendFileList));
-        
-        TransferHandler transferHandler = new LocalFileListTransferHandler(currentFriendFileList);
-        list.setTransferHandler(transferHandler);
-        panel.setTransferHandler(transferHandler);
-        
         return panel;
     }
     
@@ -121,28 +114,6 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         ShareAction action = new ShareAction(I18n.tr("Sharing"), shareWidget, parent);
         ShareTableRendererEditor shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(action);
         action.setEditor(shareEditor);
-        shareEditor.setPreferredSize(subPanelDimension);
-        shareEditor.setSize(subPanelDimension);
-        shareEditor.setOpaque(false);
-        shareEditor.setVisible(false);
-                
-        return shareEditor;
-    }
-
-    private ImageCellRenderer enableSharingRenderer(ImageList imageList, LocalFileList fileList) {
-        LibraryImageCellRenderer renderer = new LibraryImageCellRenderer(imageList.getFixedCellWidth(), imageList.getFixedCellHeight() - 2, thumbnailManager);
-        renderer.setOpaque(false);
-        JComponent buttonRenderer = new SharingCheckBoxSubPanel(fileList);
-        buttonRenderer.setPreferredSize(subPanelDimension);
-        buttonRenderer.setSize(subPanelDimension);
-        renderer.setButtonComponent(buttonRenderer);
-
-        return renderer;
-    }
-    
-    
-    private TableRendererEditor enableSharingEditor(LocalFileList fileList) {
-        SharingCheckBoxEditor shareEditor = new SharingCheckBoxEditor(fileList);
         shareEditor.setPreferredSize(subPanelDimension);
         shareEditor.setSize(subPanelDimension);
         shareEditor.setOpaque(false);
@@ -183,56 +154,4 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
                 parent.getImageList().setSelectedIndex(index);
         }
     }
-    
-    private final class MyLibraryShareFolderAction extends AbstractAction {
-
-        private ImageList imageList;
-
-        private ShareWidget<LocalFileItem[]> shareWidget;
-
-        public MyLibraryShareFolderAction(ImageList imageList,
-                ShareWidget<LocalFileItem[]> shareWidget) {
-            this.imageList = imageList;
-            this.shareWidget = shareWidget;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            imageList.setSelectionInterval(0, imageList.getModel().getSize() - 1);
-            // TODO: deselect all other imageLists.
-            List<LocalFileItem> itemList = imageList.getSelectedItems();
-            LocalFileItem[] items = itemList.toArray(new LocalFileItem[itemList.size()]);
-            shareWidget.setShareable(items);
-            shareWidget.show(null);
-        }
-
-    }
-
-    private final class SharingLibraryShareFolderAction extends AbstractAction {
-
-        private LocalFileList currentFriendFileList;
-
-        private EventList<LocalFileItem> allFiles;
-
-        private Component repaintComponent;
-
-        public SharingLibraryShareFolderAction(LocalFileList currentFriendFileList,
-                EventList<LocalFileItem> allFiles, Component repaintComponent) {
-            this.currentFriendFileList = currentFriendFileList;
-            this.allFiles = allFiles;
-            this.repaintComponent = repaintComponent;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            for (LocalFileItem fileItem : allFiles) {
-                if (!currentFriendFileList.contains(fileItem.getFile())) {
-                    currentFriendFileList.addFile(fileItem.getFile());
-                }
-            }
-            repaintComponent.repaint();
-        }
-
-    }
-
 }

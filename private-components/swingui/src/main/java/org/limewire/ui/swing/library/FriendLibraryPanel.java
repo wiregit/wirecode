@@ -1,9 +1,6 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-
-import javax.swing.Action;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadListManager;
@@ -11,7 +8,6 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
@@ -60,11 +56,6 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
         
-        //don't show share button for browse hosts
-        if(!friend.isAnonymous()) {
-            addButtonToHeader(new ViewSharedLibraryAction(libraryNavigator), buttonDecorator);
-        }
-        
         createMyCategories(eventList);
         selectFirstVisible();
         getHeaderPanel().setText(I18n.tr("Browse files from {0}", getFullPanelName()));
@@ -77,22 +68,4 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
     protected String getShortPanelName() {
         return friend.getFirstName();
     } 
-    
-    /**
-	 * Opens My Library and applies a filter on this friend.
-	 */
-    private class ViewSharedLibraryAction extends AbstractAction {
-        private final LibraryNavigator libraryNavigator;
-        
-        public ViewSharedLibraryAction(LibraryNavigator libraryNavigator){
-            this.libraryNavigator = libraryNavigator;
-            putValue(Action.NAME, I18n.tr("What I'm sharing"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show what you're sharing with {0}", friend.getRenderName()));
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            libraryNavigator.selectFriendShareList(friend);
-        }
-    }
 }

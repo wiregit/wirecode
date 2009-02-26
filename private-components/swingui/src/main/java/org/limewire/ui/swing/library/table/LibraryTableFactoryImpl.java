@@ -34,6 +34,7 @@ import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
+import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidgetFactory;
 import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
@@ -49,6 +50,7 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -91,8 +93,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final IconManager iconManager;
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
-
-    private ShareWidgetFactory shareFactory;
+    private final SharingActionFactory sharingActionFactory;
+    private final XMPPService xmppService;
 
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager,
@@ -110,7 +112,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             ShareWidgetFactory shareFactory,
             GhostDragGlassPane ghostPane, 
             CategoryIconManager categoryIconManager,
-            SearchResultFromWidgetFactory fromWidgetfactory) {
+            SearchResultFromWidgetFactory fromWidgetfactory,
+            SharingActionFactory sharingActionFactory,
+            XMPPService xmppService) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -122,9 +126,10 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.downloadItemPropFactory = downloadItemPropFactory;
         this.subPanelFactory = factory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
-        this.shareFactory = shareFactory;
         this.ghostPane = ghostPane;
         this.fromWidgetFactory = fromWidgetfactory;
+        this.sharingActionFactory = sharingActionFactory;
+        this.xmppService = xmppService;
         
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
@@ -172,7 +177,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList(), shareListManager, listChanger));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                 category, libraryManager, shareListManager, magnetLinkFactory,
-                localItemPropFactory, shareFactory));
+                localItemPropFactory, sharingActionFactory, xmppService));
         
         try {
             libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane, listChanger));

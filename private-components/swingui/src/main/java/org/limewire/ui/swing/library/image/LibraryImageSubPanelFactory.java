@@ -18,8 +18,4 @@ public interface LibraryImageSubPanelFactory {
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
             ShareWidget<File> shareWidget, DelegateListChanger listChanger);
-
-    public LibraryImageSubPanel createSharingLibraryImageSubPanel(File parentFolder,
-            EventList<LocalFileItem> eventList, LocalFileList fileList,
-            LocalFileList currentFriendFileList);
 }

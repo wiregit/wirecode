@@ -166,7 +166,7 @@ public class SharingFilterComboBox extends LimeComboBox {
             List<Friend> sortedFriends = new ArrayList<Friend>(menuList);
             Collections.sort(sortedFriends, new FriendComparator());
             for(Friend friend : sortedFriends) {
-                menu.add(decorateItem(new MenuAction(friend, shareListManager.getFriendShareList(friend).size(), friendIcon)));
+                menu.add(decorateItem(new MenuAction(friend, shareListManager.getOrCreateFriendShareList(friend).size(), friendIcon)));
             }
         }
     }

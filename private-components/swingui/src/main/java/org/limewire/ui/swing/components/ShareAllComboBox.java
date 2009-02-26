@@ -25,6 +25,7 @@ import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.sharing.model.MultiFileShareModel;
 import org.limewire.ui.swing.library.sharing.model.MultiFileUnshareModel;
+import org.limewire.ui.swing.library.table.menu.actions.DisabledFriendLoginAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -56,8 +57,8 @@ public class ShareAllComboBox extends LimeComboBox {
     private AbstractAction unshareAllFriendAction;
     private AbstractAction signedOutAction;
     
-    public ShareAllComboBox(ShareListManager shareListManager, XMPPService xmppService, FriendsSignInPanel friendsSignInPanel, ShareWidgetFactory shareWidgetFactory,
-            MyLibraryPanel myLibraryPanel) {
+    public ShareAllComboBox(XMPPService xmppService, ShareWidgetFactory shareWidgetFactory,
+            MyLibraryPanel myLibraryPanel, FriendsSignInPanel friendsSignInPanel, ShareListManager shareListManager) {
         this.xmppService = xmppService;
         this.friendsSignInPanel = friendsSignInPanel;
         this.shareWidgetFactory = shareWidgetFactory;
@@ -79,7 +80,7 @@ public class ShareAllComboBox extends LimeComboBox {
         unshareAllAction = new UnShareAllAction(true);
         shareAllFriendAction = new ShareAllAction(false);
         unshareAllFriendAction = new UnShareAllAction(false);
-        signedOutAction = new SignedOutAction();
+        signedOutAction = new DisabledFriendLoginAction(I18n.tr("Sign in to share with friends"), friendsSignInPanel);
     }
     
     private JMenuItem decorateItem(AbstractAction action) {
@@ -116,13 +117,13 @@ public class ShareAllComboBox extends LimeComboBox {
                 // if not logged in
                 if(!xmppService.isLoggedIn()) {
                     menu.add(decorateDisabledfItem(new DisabledDocumentAction()));
-                } else {
-                    menu.add(decorateDisabledfItem(new DisabledDocumentAction()));
+                } else {                   
+                    menu.add(decorateItem(shareAllFriendAction));
+                    menu.add(decorateItem(unshareAllFriendAction));
                     
                     menu.addSeparator();
                     
-                    menu.add(decorateItem(shareAllFriendAction));
-                    menu.add(decorateItem(unshareAllFriendAction));
+                    menu.add(decorateDisabledfItem(new DisabledDocumentAction()));
                 }
             } else {
                 // if not logged in don't show options for friends.
@@ -157,7 +158,7 @@ public class ShareAllComboBox extends LimeComboBox {
             this.isGnutella = isGnutella;
             
             if(!isGnutella) {
-                putValue(Action.NAME, I18n.tr("Share all with friend..."));
+                putValue(Action.NAME, I18n.tr("Share all with Friend..."));
             } else {
                 putValue(Action.NAME, I18n.tr("Share all with the P2P Network"));
             }
@@ -193,7 +194,7 @@ public class ShareAllComboBox extends LimeComboBox {
             this.isGnutella = isGnutella;
             
             if(!isGnutella) {
-                putValue(Action.NAME, I18n.tr("Unshare all with friend..."));
+                putValue(Action.NAME, I18n.tr("Unshare all with Friend..."));
             } else {
                 putValue(Action.NAME, I18n.tr("Unshare all with the P2P Network"));
             }
@@ -215,20 +216,6 @@ public class ShareAllComboBox extends LimeComboBox {
                 MultiFileUnshareModel model = new MultiFileUnshareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
                 model.unshareFriend(SharingTarget.GNUTELLA_SHARE);   
             }
-        }
-    }
-    
-    /**
-     * Opens the signon screen.
-     */
-    private class SignedOutAction extends AbstractAction {
-        public SignedOutAction() {
-            putValue(Action.NAME, I18n.tr("Sign in to share with friends"));
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            friendsSignInPanel.signIn();
         }
     }
     

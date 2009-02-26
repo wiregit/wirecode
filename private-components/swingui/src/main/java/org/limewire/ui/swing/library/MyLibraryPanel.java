@@ -196,7 +196,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         this.knownFriends.add(Friend.P2P_FRIEND_ID);
         getSelectionPanel().updateCollectionShares(knownFriends);
         
-        shareAllComboBox = new ShareAllComboBox(shareListManager, xmppService, friendSignInPanel, shareFactory, this);
+        shareAllComboBox = new ShareAllComboBox(xmppService, shareFactory, this, friendSignInPanel, shareListManager);
         comboDecorator.decorateDarkFullComboBox(shareAllComboBox);
         shareAllComboBox.setText(I18n.tr("Share"));
         

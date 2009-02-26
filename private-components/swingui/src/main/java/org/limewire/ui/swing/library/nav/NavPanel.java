@@ -376,7 +376,7 @@ public class NavPanel extends JXPanel {
         @Override
         public void handlePopupMouseEvent(MouseEvent e) {
             JPopupMenu menu = new JPopupMenu();
-            menu.add(new JMenuItem(new AbstractAction(I18n.tr("Share")) {
+            menu.add(new JMenuItem(new AbstractAction(I18n.tr("What I'm Sharing")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     libraryNavigator.selectFriendShareList(friend);
