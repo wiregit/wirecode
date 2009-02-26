@@ -88,7 +88,7 @@
             <pathelement location="${build.limewire.components.xmpp-api.classes}"/>
             <pathelement location="${build.limewire.components.player-api.classes}"/>
             <pathelement location="${build.limewire.components.swarm.classes}"/>
-            <!-- test-util not added purposely, as the classes are required for tests only -->
+	       	<!-- test-util not added purposely, as the classes are required for tests only -->
             
             <!-- Add as core components are added. -->
         </path>

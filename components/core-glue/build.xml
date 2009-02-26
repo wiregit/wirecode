@@ -17,6 +17,11 @@
 			    <pathelement location="${build.limewire.core.classes}"/>
 			    <path refid="build.limewire.components.classes.core"/>
 			</src-classpath>
+        	
+        	<tests-classpath>
+			    <path refid="tests.limewire.components.all.classpath"/>
+			    <pathelement location="${limewire.lib.messagebundles}"/>
+		    </tests-classpath>
         </do.setup-properties>
     </target>
 	
