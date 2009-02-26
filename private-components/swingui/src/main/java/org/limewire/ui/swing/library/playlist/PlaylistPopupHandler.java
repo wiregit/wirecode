@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.Playlist;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -20,13 +21,14 @@ public class PlaylistPopupHandler implements TablePopupHandler {
     private final PlaylistPopupMenu popupMenu;
 
     /**
-     * Constructs a PlaylistPopupHandler for the specified playlist table.
+     * Constructs a PlaylistPopupHandler for the specified playlist table,
+     * playlist, library navigator, and properties factory.
      */
     public PlaylistPopupHandler(LibraryTable<? extends LocalFileItem> table,
-            Playlist playlist,
+            Playlist playlist, LibraryNavigator libraryNavigator,
             PropertiesFactory<LocalFileItem> propertiesFactory) {
         this.table = table;
-        this.popupMenu = new PlaylistPopupMenu(playlist, propertiesFactory);
+        this.popupMenu = new PlaylistPopupMenu(playlist, libraryNavigator, propertiesFactory);
     }
     
     @Override

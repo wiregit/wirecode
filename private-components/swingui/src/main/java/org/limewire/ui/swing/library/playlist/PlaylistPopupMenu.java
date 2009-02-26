@@ -8,6 +8,8 @@ import javax.swing.JPopupMenu;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.Catalog;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.menu.actions.LocateFileAction;
 import org.limewire.ui.swing.library.table.menu.actions.PlayAction;
 import org.limewire.ui.swing.library.table.menu.actions.ViewFileInfoAction;
@@ -20,17 +22,20 @@ import org.limewire.ui.swing.util.I18n;
 public class PlaylistPopupMenu extends JPopupMenu {
 
     private final Playlist playlist;
+    private final LibraryNavigator libraryNavigator;
     private final PropertiesFactory<LocalFileItem> propertiesFactory;
     
     private List<LocalFileItem> fileItemList;
 
     /**
-     * Constructs a PlaylistPopupMenu for the specified playlist and properties
-     * factory.
+     * Constructs a PlaylistPopupMenu for the specified playlist, library
+     * navigator, and properties factory.
      */
     public PlaylistPopupMenu(Playlist playlist, 
+            LibraryNavigator libraryNavigator,
             PropertiesFactory<LocalFileItem> propertiesFactory) {
         this.playlist = playlist;
+        this.libraryNavigator = libraryNavigator;
         this.propertiesFactory = propertiesFactory;
     }
 
@@ -58,7 +63,7 @@ public class PlaylistPopupMenu extends JPopupMenu {
         removeAll();
 
         // Add Play menu item.
-        add(new PlayAction(firstItem)).setEnabled(playActionEnabled);
+        add(new PlayAction(libraryNavigator, new Catalog(playlist), firstItem)).setEnabled(playActionEnabled);
 
         // Add Locate File menu item.
         addSeparator();

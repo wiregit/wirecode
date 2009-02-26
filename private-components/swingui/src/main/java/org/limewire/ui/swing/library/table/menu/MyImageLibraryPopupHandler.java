@@ -9,6 +9,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanel;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -19,10 +20,11 @@ public class MyImageLibraryPopupHandler implements TablePopupHandler {
     private MyLibraryPopupMenu popupMenu;
 
     public MyImageLibraryPopupHandler(LibraryImageSubPanel imagePanel,
-            ShareWidgetFactory shareWidgetFactory, LibraryManager libraryManager, PropertiesFactory<LocalFileItem> localFilePropFactory) {
+            ShareWidgetFactory shareWidgetFactory, LibraryManager libraryManager, 
+            PropertiesFactory<LocalFileItem> localFilePropFactory, LibraryNavigator libraryNavigator) {
         this.imagePanel = imagePanel;
         this.popupMenu = new MyLibraryPopupMenu(Category.IMAGE,
-                libraryManager, shareWidgetFactory, localFilePropFactory);
+                libraryManager, shareWidgetFactory, localFilePropFactory, libraryNavigator);
 
     }
 

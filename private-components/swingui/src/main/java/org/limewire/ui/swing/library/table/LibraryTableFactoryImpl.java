@@ -4,7 +4,6 @@ import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.TooManyListenersException;
 
@@ -25,7 +24,6 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.playlist.Playlist;
-import org.limewire.core.api.playlist.PlaylistListener;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
@@ -34,7 +32,7 @@ import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.dnd.SharingLibraryTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
-import org.limewire.ui.swing.library.playlist.PlaylistFileItem;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.playlist.PlaylistLibraryTable;
 import org.limewire.ui.swing.library.playlist.PlaylistPopupHandler;
 import org.limewire.ui.swing.library.playlist.PlaylistTableFormat;
@@ -63,8 +61,6 @@ import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
@@ -107,6 +103,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final IconManager iconManager;
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
+    private final LibraryNavigator libraryNavigator;
 
     private ShareWidgetFactory shareFactory;
 
@@ -126,7 +123,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             ShareWidgetFactory shareFactory,
             GhostDragGlassPane ghostPane, 
             CategoryIconManager categoryIconManager,
-            SearchResultFromWidgetFactory fromWidgetfactory) {
+            SearchResultFromWidgetFactory fromWidgetfactory,
+            LibraryNavigator libraryNavigator) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -141,6 +139,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.shareFactory = shareFactory;
         this.ghostPane = ghostPane;
         this.fromWidgetFactory = fromWidgetfactory;
+        this.libraryNavigator = libraryNavigator;
         
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
@@ -236,7 +235,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                 category, libraryManager, shareListManager, magnetLinkFactory,
-                localItemPropFactory, shareFactory));
+                localItemPropFactory, shareFactory, libraryNavigator));
         
         try {
             libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane));
@@ -418,7 +417,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         }
         
         libTable.setPopupHandler(new ShareLibraryPopupHandler(friendFileList, castToLocalLibraryTable(libTable), category, libraryManager, 
-                    magnetLinkFactory, localItemPropFactory));
+                    magnetLinkFactory, localItemPropFactory, libraryNavigator));
         
 
         libTable.setTransferHandler(new SharingLibraryTransferHandler(libTable, friendFileList));
@@ -438,66 +437,26 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
      */
     @Override
     public <T extends LocalFileItem> LibraryTable<T> createPlaylistTable(
-            final Playlist playlist, EventList<T> eventList) {
+            Playlist playlist, EventList<T> eventList) {
         // Create sorted list.
-        final SortedList<T> sortedList = new SortedList<T>(eventList);
+        SortedList<T> sortedList = new SortedList<T>(eventList);
 
         // Create table.
-        final LibraryTable<T> libTable = new PlaylistLibraryTable<T>(sortedList, 
+        LibraryTable<T> libTable = new PlaylistLibraryTable<T>(playlist, sortedList, 
                 new PlaylistTableFormat<T>(), player,
                 saveLocationExceptionHandler, shareTableRendererEditorFactory);
         
         // Install popup menu handler.
         libTable.setPopupHandler(new PlaylistPopupHandler(libTable, playlist,
-                localItemPropFactory));
+                libraryNavigator, localItemPropFactory));
 
         // Install transfer handler to reorder playlist items.
         libTable.setTransferHandler(new PlaylistTransferHandler(playlist));
         
-        // TODO revise/install table drag-and-drop handlers to:
+        // Possible drag-and-drop upgrades:
+        // - Start drag to category buttons to remove file from playlist
+        // - Use GhostDropTargetListener to display image on drag operation
         // - Accept drop from OS file explorer to add file to library/playlist
-        // - Start drag to library to remove file from playlist
-        //libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
-        //try {
-        //    libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane));
-        //} catch (TooManyListenersException ignoreException) {
-        //}
-        // TODO enable drop mode
-        //libTable.setDropMode(DropMode.ON);
-        
-        // TODO refactor
-        playlist.addPlaylistListener(new PlaylistListener() {
-            @Override
-            public void listChanged(Playlist playlist) {
-                //System.out.println("playlistChanged");
-                sortedList.setComparator(new Comparator<T>() {
-                    @Override
-                    public int compare(T o1, T o2) {
-                        int idx1 = ((PlaylistFileItem) o1).getIndex();
-                        int idx2 = ((PlaylistFileItem) o2).getIndex();
-                        return (idx1 < idx2) ? -1 : ((idx1 > idx2) ? 1 : 0);
-                    }
-                });
-            }
-        });
-        
-        // TODO refactor
-        sortedList.addListEventListener(new ListEventListener<T>() {
-            @Override
-            public void listChanged(ListEvent<T> listChanges) {
-                //System.out.println("listChanged: reordering=" + listChanges.isReordering());
-                if (listChanges.isReordering()) {
-                    // Reorder files in playlist.
-                    File[] files = new File[sortedList.size()];
-                    for (int i = 0; i < sortedList.size(); i++) {
-                        LocalFileItem item = sortedList.get(i);
-                        //System.out.println("** " + item.getFile().getAbsolutePath());
-                        files[i] = item.getFile();
-                    }
-                    playlist.reorderFiles(files);
-                }
-            }
-        });
         
         // Install sort support.
         EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());

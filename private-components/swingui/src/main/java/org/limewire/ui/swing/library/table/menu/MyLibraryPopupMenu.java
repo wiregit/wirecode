@@ -10,6 +10,8 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.Catalog;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.menu.actions.DeleteAction;
@@ -38,13 +40,17 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private final PropertiesFactory<LocalFileItem> propertiesFactory;
 
     private final ShareWidgetFactory shareFactory;
+    
+    private final LibraryNavigator libraryNavigator;
 
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
-            ShareWidgetFactory shareFactory, PropertiesFactory<LocalFileItem> propertiesFactory) {
+            ShareWidgetFactory shareFactory, PropertiesFactory<LocalFileItem> propertiesFactory,
+            LibraryNavigator libraryNavigator) {
         this.libraryManager = libraryManager;
         this.shareFactory = shareFactory;
         this.category = category;
         this.propertiesFactory = propertiesFactory;
+        this.libraryNavigator = libraryNavigator;
     }
 
     public void setFileItems(List<LocalFileItem> items) {
@@ -85,7 +91,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         switch (category) {
         case AUDIO:
         case VIDEO:
-            add(new PlayAction(firstItem)).setEnabled(playActionEnabled);
+            add(new PlayAction(libraryNavigator, new Catalog(category), firstItem)).setEnabled(playActionEnabled);
             break;
         case IMAGE:
         case DOCUMENT:
