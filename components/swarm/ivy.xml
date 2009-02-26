@@ -17,5 +17,7 @@
         <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
         <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
         <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
+        <dependency org="org.mortbay.jetty" name="org.mortbay.jetty" rev="${org.mortbay.jetty.version}" conf="test"/>
+        <dependency org="org.mortbay.jetty" name="javax.servlet" rev="${javax.servlet.version}" conf="test"/>
     </dependencies>
 </ivy-module>
