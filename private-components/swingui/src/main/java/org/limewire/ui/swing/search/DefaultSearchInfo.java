@@ -32,7 +32,7 @@ public class DefaultSearchInfo implements SearchInfo {
                 sb.append(value + " ");
             }
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
     
     /** Creates a new SearchInfo for the given What's New search. */

@@ -226,8 +226,8 @@ public class CoreSearch implements Search {
             if (value != null && value.trim().length() > 1) {
                 sb.append(value + " ");
             }
-        }
-        return QueryUtils.createQueryString(sb.toString(), true);
+        }        
+        return QueryUtils.createQueryString(sb.toString().trim(), true);
     }
 
     /**
