@@ -18,9 +18,9 @@ public class MultiFileUnshareWidget implements ShareWidget<LocalFileItem[]>{
     private ShareListManager shareListManager;
     
     public MultiFileUnshareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog){
-        unsharePanel = new LibrarySharePanel(allFriends, shapeDialog);
+        unsharePanel = new LibrarySharePanel(allFriends, shapeDialog, true, false);
         this.shareListManager = shareListManager;
-        unsharePanel.setComboBoxVisible(false);
+
         unsharePanel.addShareListener(new ShareListener() {
             @Override
             public void sharingChanged(FriendShareEvent event) {

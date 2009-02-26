@@ -15,9 +15,17 @@ public class MultiFileShareWidget implements ShareWidget<LocalFileItem[]>{
     private LocalFileItem[] files;
     private ShareListManager shareListManager;
     
-    public MultiFileShareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog){
+    public MultiFileShareWidget(ShareListManager shareListManager, 
+            ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog) {
         this.shareListManager = shareListManager;
         sharePanel = new LibrarySharePanel(allFriends, shapeDialog);
+    }
+    
+    public MultiFileShareWidget(ShareListManager shareListManager, 
+            ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog,
+            boolean canShowP2P) {
+        this.shareListManager = shareListManager;
+        sharePanel = new LibrarySharePanel(allFriends, shapeDialog, canShowP2P);
     }
     
     @Override
