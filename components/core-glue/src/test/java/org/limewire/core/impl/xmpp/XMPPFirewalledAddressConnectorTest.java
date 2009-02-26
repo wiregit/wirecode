@@ -3,8 +3,12 @@ package org.limewire.core.impl.xmpp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -15,10 +19,19 @@ import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.FirewalledAddress;
+import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.observer.ConnectObserver;
+import org.limewire.rudp.AbstractNBSocketChannel;
+import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.MatchAndCopy;
+import org.limewire.xmpp.api.client.ConnectBackRequestSender;
+import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.client.impl.XMPPFirewalledAddress;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 
@@ -235,27 +248,137 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         return new PushedSocketConnectObserver(fwAddress, connectObserver);
     }
     
-    /* TODO: Finish this text case!
-    public void testConnectSimple() {
+    /**
+     * Go through the simply success case of XMPPFirewalledAddressConnector::connect() 
+     *  and confirm the basic interactions.
+     *  
+     * After manually fire some of the exception handling code and make sure the events
+     *  are processed correctly. 
+     */
+    @SuppressWarnings("unchecked")
+    public void testConnectSimple() throws IOException {
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
             }};
 
+        final NetworkManager networkManager = context.mock(NetworkManager.class);
+        final ConnectBackRequestSender connectRequestSender = context.mock(ConnectBackRequestSender.class);
+        final Provider<UDPSelectorProvider> udpSelectorProviderProvider = context.mock(Provider.class);
+        final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
+        final Provider<SocketProcessor> socketProcessorProvider = context.mock(Provider.class);
+        
         final ConnectObserver observer = context.mock(ConnectObserver.class);    
         final XMPPFirewalledAddress address = context.mock(XMPPFirewalledAddress.class);
         
         final FirewalledAddress fwAddress = context.mock(FirewalledAddress.class);
         final GUID guid = new GUID(new byte[] {'X','x',1,2,3,4,'.','.','.',5,6,9,'n', 10,'x','X'});
         
+        final XMPPAddress xmppAddress = context.mock(XMPPAddress.class);
+        
+        final Connectable publicConnectable = context.mock(Connectable.class);
+        final InetAddress inetAddr = context.mock(InetAddress.class);
+        final InetSocketAddress inetSocketAddr = context.mock(InetSocketAddress.class);
+        
+        final UDPSelectorProvider udpSelectorProvider = context.mock(UDPSelectorProvider.class);
+        final AbstractNBSocketChannel socketChanel = context.mock(AbstractNBSocketChannel.class);
+        final AbstractNBSocket socket = context.mock(AbstractNBSocket.class);
+        
+        final Socket socketForConnect = context.mock(Socket.class);
+        
+        final IOException forcedIOE = new IOException("forced");
+        
+        final SocketProcessor socketProcessor = context.mock(SocketProcessor.class);
+        
+        final MatchAndCopy<ConnectObserver> connectObserverCollector 
+            = new MatchAndCopy<ConnectObserver>(ConnectObserver.class);
+    
+        final MatchAndCopy<Runnable> runnableCollector = new MatchAndCopy<Runnable>(Runnable.class);
+        
         final XMPPFirewalledAddressConnector connector 
-            = new XMPPFirewalledAddressConnector(null, null, null, null, null, null);
+            = new XMPPFirewalledAddressConnector(connectRequestSender, null, networkManager,
+                    backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
         
         context.checking(new Expectations() {
             {   allowing(address).getFirewalledAddress();
                 will(returnValue(fwAddress));
+                
+                allowing(fwAddress).getClientGuid();
+                will(returnValue(guid));
+                allowing(fwAddress).getPublicAddress();
+                will(returnValue(publicConnectable));
+                
+                allowing(networkManager).getPublicAddress();
+                will(returnValue(publicConnectable));
+                
+                allowing(publicConnectable).getAddress();
+                will(returnValue("40.1.0.0"));
+                allowing(publicConnectable).getPort();
+                will(returnValue(427));
+                allowing(publicConnectable).getInetAddress();
+                will(returnValue(inetAddr));
+                allowing(publicConnectable).getInetSocketAddress();
+                will(returnValue(inetSocketAddr));
+                
+                allowing(address).getXmppAddress();
+                will(returnValue(xmppAddress));
+                allowing(xmppAddress).getFullId();
+                will(returnValue("403"));
+                
+                allowing(networkManager).supportsFWTVersion();
+                will(returnValue(407));
+                
+                allowing(udpSelectorProviderProvider).get();
+                will(returnValue(udpSelectorProvider));
+                allowing(udpSelectorProvider).openSocketChannel();
+                will(returnValue(socketChanel));
+                allowing(socketChanel).socket();
+                will(returnValue(socket));
+                
+                allowing(socketProcessorProvider).get();
+                will(returnValue(socketProcessor));
+                
+                // Assertions
+                exactly(1).of(networkManager).acceptedIncomingConnection();
+                
+                exactly(1).of(connectRequestSender).send("403", publicConnectable, guid, 407);
+                will(returnValue(true));
+                
+                exactly(1).of(socket).connect(with(same(inetSocketAddr)),
+                        with(any(Integer.class)), with(connectObserverCollector));
+                
+                exactly(1).of(backgroundExecutor).schedule(with(runnableCollector), 
+                        with(any(Integer.class)), with((any(TimeUnit.class))));
+                
+                exactly(1).of(observer).handleIOException(forcedIOE);
+                exactly(1).of(observer).handleIOException(with(any(ConnectException.class)));
+                exactly(1).of(observer).handleIOException(with(any(IOException.class)));
+                
+                exactly(1).of(socketProcessor).processSocket(socketForConnect, "GIV");
             }});
         
+        // Connect
         connector.connect(address, observer);
+ 
+        // ...
+        assertNotEmpty(connector.observers);
+        PushedSocketConnectObserver pushedConnectObserver = connector.observers.get(0);
+        ConnectObserver connectObserver = connectObserverCollector.getLastMatch();
+        Runnable expirerRunnable = runnableCollector.getLastMatch();
+        
+        // Make sure the observers are properly linked by simulating some events
+        connectObserver.shutdown();
+        pushedConnectObserver.acceptedOrFailed.set(false);
+        connectObserver.handleIOException(forcedIOE);
+        connectObserver.handleIOException(forcedIOE);
+        pushedConnectObserver.acceptedOrFailed.set(false);
+        connectObserver.handleConnect(socketForConnect);
+        
+        // Force expire the connection.  Ensures
+        //  the event is captured and observer is removed
+        expirerRunnable.run();
+        assertEmpty(connector.observers);
+        
+        context.assertIsSatisfied();
     }
-    */
+    
 }
