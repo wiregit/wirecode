@@ -13,7 +13,7 @@ public class MagnetFactoryImpl implements MagnetFactory {
 
     @Override
     public boolean isMagnetLink(URI uri) {
-        return uri != null && "magnet".equals(uri.getScheme());
+        return "magnet".equalsIgnoreCase(uri.getScheme());
     }
 
     @Override
