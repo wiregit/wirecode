@@ -13,6 +13,9 @@ public class PlaylistFileItemFunction implements Function<LocalFileItem, Playlis
 
     private final Playlist playlist;
     
+    /**
+     * Constructs a PlaylistFileItemFunction for the specified playlist.
+     */
     public PlaylistFileItemFunction(Playlist playlist) {
         this.playlist = playlist;
     }
