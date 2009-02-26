@@ -548,9 +548,12 @@ public class HostCatcher implements Service {
     void read(File hostFile) throws FileNotFoundException, IOException {
         LOG.trace("Reading host file");
         long now = System.currentTimeMillis();
-        if(now - hostFile.lastModified() > STALE_HOST_FILE) {
-            LOG.info("Deleting stale host file");
-            hostFile.delete();
+        long lastModified = hostFile.lastModified(); // 0 if file does not exist
+        if(now - lastModified > STALE_HOST_FILE) {
+            if(lastModified > 0) {
+                LOG.info("Deleting stale host file");
+                hostFile.delete();
+            }
             return;
         }
         BufferedReader in = null;
@@ -668,10 +671,51 @@ public class HostCatcher implements Service {
             endpoint.setUDPHostCache(true);
         }
         
-        if(!isValidHost(endpoint) && !isLocalOrPrivate) {
+        // Make a temporary exception for local addresses so we can extract
+        // the packed endpoints and UHCs - we'll check validity again later 
+        if(!isValidHost(endpoint) && !isLocalOrPrivate)
             return false;
+        
+        // If the pong carries packed IP/Ports, add them
+        Collection<IpPort> packed = pr.getPackedIPPorts();
+        if(ConnectionSettings.FILTER_CLASS_C.getValue())
+            packed = NetworkUtils.filterOnePerClassC(packed);
+        if(LOG.isDebugEnabled())
+            LOG.debug("Pong contains " + packed.size() + " packed endpoints");
+        rank(packed); // FIXME: why ping them before checking validity?
+        for(IpPort ipp : packed) {            
+            ExtendedEndpoint ep;
+            if(ipp instanceof ExtendedEndpoint) {
+                ep = (ExtendedEndpoint)ipp;
+            } else {
+                ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+                if(ipp instanceof Connectable) {
+                    // When more items other than TLS are added to HostInfo,
+                    // it would make more sense to make this something like:
+                    // ep.addHostInfo(ipp);
+                    ep.setTLSCapable(((Connectable)ipp).isTLSCapable());
+                }
+            }
+            if(isValidHost(ep))
+                add(ep, GOOD_PRIORITY);
         }
         
+        // If the pong carries packed UDP host caches, add them
+        packed = pr.getPackedUDPHostCaches();
+        if(LOG.isDebugEnabled())
+            LOG.debug("Pong contains " + packed.size() + " packed UHCs");
+        for(IpPort ipp : packed) {
+            ExtendedEndpoint ep =
+                new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+            ep.setUDPHostCache(true);
+            addUDPHostCache(ep);
+        }
+        
+        // If the pong came from a local address but we let it through
+        // to extract the packed endpoints and UHCs, throw it away now
+        if(!isValidHost(endpoint))
+            return true;
+
         int dhtVersion = pr.getDHTVersion();
         if(dhtVersion > -1) {
             DHTMode mode = pr.getDHTMode();
@@ -696,46 +740,13 @@ public class HostCatcher implements Service {
             queryUnicaster.get().addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
         
-        // if the pong carried packed IP/Ports, add those as their own
-        // endpoints.
-        Collection<IpPort> packed = pr.getPackedIPPorts();
-        if(ConnectionSettings.FILTER_CLASS_C.getValue())
-            packed = NetworkUtils.filterOnePerClassC(packed);
-        rank(packed);
-        
-        for(IpPort ipp : packed) {            
-            ExtendedEndpoint ep;
-            if(ipp instanceof ExtendedEndpoint) {
-                ep = (ExtendedEndpoint)ipp;
-            } else {
-                ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
-                if(ipp instanceof Connectable) {
-                    // When more items other than TLS are added to HostInfo,
-                    // it would make more sense to make this something like:
-                    // ep.addHostInfo(ipp);
-                    ep.setTLSCapable(((Connectable)ipp).isTLSCapable());
-                }
-            }
-            
-            if(isValidHost(ep))
-                add(ep, GOOD_PRIORITY);
-        }
-        
-        // if the pong carried packed UDP host caches, add those as their
-        // own endpoints.
-        for(IpPort ipp : pr.getPackedUDPHostCaches()) {
-            ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
-            ep.setUDPHostCache(true);
-            addUDPHostCache(ep);
-        }
-        
         // if it was a UDPHostCache pong, just add it as that.
         if(endpoint.isUDPHostCache())
             return addUDPHostCache(endpoint);
         
         if(pr.isTLSCapable())
             endpoint.setTLSCapable(true);
-
+        
         //Add the endpoint, forcing it to be high priority if marked pong from 
         //an ultrapeer.
             
