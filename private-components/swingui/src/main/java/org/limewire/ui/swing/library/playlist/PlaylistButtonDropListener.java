@@ -14,14 +14,14 @@ import org.limewire.ui.swing.dnd.LocalFileTransferable;
 /**
  * A DropTargetListener installed on playlist buttons to accept drop operations.
  */
-public class PlaylistDropTargetListener extends DropTargetAdapter {
+public class PlaylistButtonDropListener extends DropTargetAdapter {
     
     private final Playlist playlist;
 
     /**
      * Constructs a PlaylistDropTargetListener for the specified playlist.
      */
-    public PlaylistDropTargetListener(Playlist playlist) {
+    public PlaylistButtonDropListener(Playlist playlist) {
         this.playlist = playlist;
     }
     
