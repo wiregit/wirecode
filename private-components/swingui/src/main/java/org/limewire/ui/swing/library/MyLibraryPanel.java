@@ -66,7 +66,7 @@ import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.library.playlist.PlaylistDropTargetListener;
+import org.limewire.ui.swing.library.playlist.PlaylistButtonDropListener;
 import org.limewire.ui.swing.library.playlist.PlaylistFileItemFunction;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
@@ -330,7 +330,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         
         // Install listener to accept drops on playlist button.
         if (catalog.getType() == Catalog.Type.PLAYLIST) {
-            new DropTarget(button, new PlaylistDropTargetListener(catalog.getPlaylist()));
+            new DropTarget(button, new PlaylistButtonDropListener(catalog.getPlaylist()));
         }
         
         return button;
