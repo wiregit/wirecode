@@ -352,20 +352,6 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         myLibraryPanel.selectItem(file, new Catalog(category));
     }
     
-    // TODO REMOVE - revise PlayerPanel to call new methods
-    @Override
-    public File getPreviousInLibrary(File file, Category category) {
-        //return myLibraryPanel.getPreviousItem(file, category);
-        return getPreviousInLibrary(file);
-    }
-    
-    // TODO REVIEW - revise PlayerPanel to call new methods
-    @Override
-    public File getNextInLibrary(File file, Category category) {
-        //return myLibraryPanel.getNextItem(file, category);
-        return getNextInLibrary(file);
-    }
-    
     @Override
     public File getPreviousInLibrary(File file) {
         return myLibraryPanel.getPreviousItem(file, activeCatalog);

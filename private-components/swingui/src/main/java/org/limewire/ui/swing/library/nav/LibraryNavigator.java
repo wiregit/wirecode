@@ -29,21 +29,16 @@ public interface LibraryNavigator {
     /** Selects the library without any specific file being selected. */
     void selectLibrary();
     
-    // TODO REMOVE - revise PlayerPanel to call new methods
-    /** Returns the file item before the one passed in your library. */
-    File getPreviousInLibrary(File file, Category category);
-    
-    // TODO REMOVE - revise PlayerPanel to call new methods
-    /** Returns the file item after the one passed in your library. */
-    File getNextInLibrary(File file, Category category);
-    
     /** Returns the previous file in the active catalog. */
     File getPreviousInLibrary(File file);
     
     /** Returns the next file in the active catalog. */
     File getNextInLibrary(File file);
     
-    /** Sets the active catalog for the media player. */
+    /**
+     * Sets the active catalog in the library.  This method is called when
+     * file playing is started in the media player.
+     */
     void setActiveCatalog(Catalog catalog);
     
     /**
