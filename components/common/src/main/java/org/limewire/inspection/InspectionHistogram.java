@@ -32,8 +32,9 @@ public class InspectionHistogram<K> implements Inspectable {
         counts.put(key, already + value);
     }
     
-    public synchronized Object inspect() {
-        return new HashMap<Object,Long>(counts);
+    @Override
+    public synchronized Map<K, Long> inspect() {
+        return new HashMap<K, Long>(counts);
     }
     
     @Override

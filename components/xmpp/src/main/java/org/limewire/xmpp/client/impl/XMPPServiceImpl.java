@@ -1,13 +1,20 @@
 package org.limewire.xmpp.client.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionHistogram;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 import org.limewire.lifecycle.Asynchronous;
@@ -63,6 +70,42 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
     // Connections that are logged in or logging in
     final List<XMPPConnectionImpl> connections;
     private boolean multipleConnectionsAllowed;   
+    
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private class LazyInspectableContainer {
+        @InspectionPoint("xmpp service")
+        private final Inspectable inspectable = new Inspectable() {
+            @Override
+            public Object inspect() {
+                Map<Object, Object> map = new HashMap<Object, Object>();
+                map.put("loggedIn", isLoggedIn());
+                collectFriendStatistics(map);
+                return map;
+            }
+            
+            private void collectFriendStatistics(Map<Object, Object> data) {
+                int count = 0;
+                XMPPConnection connection = getActiveConnection();
+                InspectionHistogram<Integer> presencesHistogram = new InspectionHistogram<Integer>();
+                if (connection != null) {
+                    for (User user : connection.getUsers()) {
+                        Map<String, Presence> presences = user.getPresences();
+                        presencesHistogram.count(presences.size());
+                        for (Presence presence : presences.values()) {
+                            if (presence.hasFeatures(LimewireFeature.ID)) {
+                                count++;
+                                // break from inner presence loop, count each user only once
+                                break;
+                            }
+                        }
+                    }
+                }
+                data.put("limewire friends", count);
+                data.put("presences", presencesHistogram.inspect());
+            }
+        };
+    }
 
     @Inject
     public XMPPServiceImpl(EventBroadcaster<RosterEvent> rosterBroadcaster,
@@ -286,4 +329,5 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
             connection.setMode(mode);
         }
     }
+    
 }

@@ -13,14 +13,12 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.Comparators;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.MessageSettings;
-
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.lifecycle.Service;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.RPNParser;
-
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -215,6 +213,22 @@ class FileManagerImpl implements FileManager, Service {
                 ret.put("match",matched);
                 ret.put("total",total);
                 return ret;
+            }
+        };
+        
+        @InspectionPoint("friend file lists")
+        public final Inspectable FRIEND = new Inspectable() {
+            @Override
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                synchronized (FileManagerImpl.this) {
+                    List<Integer> sizes = new ArrayList<Integer>(friendFileLists.size());
+                    for (FriendFileList friendFileList : friendFileLists.values()) {
+                        sizes.add(friendFileList.size());
+                    }
+                    data.put("sizes", sizes);
+                }
+                return data;
             }
         };
     }

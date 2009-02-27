@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
@@ -18,6 +20,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.AbstractNBSocket;
@@ -81,6 +86,24 @@ public class TorrentManagerImpl implements TorrentManager {
     private final ScheduledExecutorService threadPool;
 
     private final IncomingConnectionHandler incomingConnectionHandler;
+    
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private class LazyInspectableContainer {
+        @InspectionPoint("torrent manager")
+        private final Inspectable inspectable = new Inspectable() {
+            @Override
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                synchronized (TorrentManagerImpl.this) {
+                    data.put("active", _active.size());
+                    data.put("seeding", _seeding.size());
+                    data.put("starting", _starting.size());
+                }
+                return data;
+            }
+        };
+    }
     
     @Inject
     public TorrentManagerImpl(FileManager fileManager,
