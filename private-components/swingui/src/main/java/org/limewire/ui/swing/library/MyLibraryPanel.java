@@ -328,7 +328,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         // Create catalog selection button.
         JComponent button = super.createCatalogButton(action, catalog, filteredAllFileList);
         
-        // Install listener to accept drops on playlist button.
+        // Install listener to accept drops on playlist button.  We should
+        // consider installing a TransferHandler instead of a DropTarget.
         if (catalog.getType() == Catalog.Type.PLAYLIST) {
             new DropTarget(button, new PlaylistButtonDropListener(catalog.getPlaylist()));
         }
@@ -345,6 +346,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         addHeading(new HeadingPanel(I18n.tr("PLAYLISTS")), true);
 
         // Get playlists from manager.
+        playlistManager.renameDefaultPlaylist(I18n.tr("Quicklist"));
         List<Playlist> playlists = playlistManager.getPlaylists();
         for (Playlist playlist : playlists) {
             // Create library catalog.
@@ -391,8 +393,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         LibraryTable<? extends LocalFileItem> table =
             tableFactory.createPlaylistTable(playlist, functionList);
         
-        // Enable sharing - this also applies the saved column settings.
-        table.enableSharing();
+        // Apply saved column settings to table.
+        table.applySavedColumnSettings();
 
         // Install double-click handler.
         table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(
