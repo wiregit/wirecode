@@ -721,7 +721,8 @@ public class HostCatcher implements Service {
             ExtendedEndpoint ep =
                 new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
             ep.setUDPHostCache(true);
-            addUDPHostCache(ep);
+            if(isValidHost(ep))
+                addUDPHostCache(ep);
         }
 
         // If the pong came from a local address but we let it through
@@ -901,7 +902,7 @@ public class HostCatcher implements Service {
      * @param priority the priority of the endpoint
      * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
      */
-    public boolean add(Endpoint host, int priority) {
+    private boolean add(Endpoint host, int priority) {
         if(host instanceof ExtendedEndpoint)
             return add((ExtendedEndpoint)host, priority);
         //need ExtendedEndpoint for the locale
@@ -1026,11 +1027,6 @@ public class HostCatcher implements Service {
     public boolean isValidHost(Endpoint host) {
         if(LOG.isTraceEnabled())
             LOG.trace("Validating host " + host);
-        // caches will validate for themselves.
-        if(host.isUDPHostCache()) {
-            LOG.trace("Host is valid: UHC");
-            return true;
-        }
         
         byte[] addr;
         try {
@@ -1323,6 +1319,7 @@ public class HostCatcher implements Service {
         if(!connectionManager.get().isLocaleMatched()) {
             if(LOCALE_SET_MAP.containsKey(loc)) {
                 Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
+                // Iterate in a random order
                 for(ExtendedEndpoint e : base.keySet()) {
                     if(locales.contains(e)) {
                         LOG.trace("Found a host with matching locale");
@@ -1333,9 +1330,6 @@ public class HostCatcher implements Service {
                 }
             }
         }
-        
-        // TODO: why do we choose deterministically if we're matching
-        // locales and randomly if we're not?
         if(ret == null) {
             LOG.trace("Did not find a host with matching locale");
             ret = base.getKeyAt(RND.nextInt(base.size()));
