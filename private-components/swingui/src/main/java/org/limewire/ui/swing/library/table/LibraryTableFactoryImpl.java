@@ -443,7 +443,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     public <T extends LocalFileItem> LibraryTable<T> createPlaylistTable(
             Playlist playlist, EventList<T> eventList) {
         // Create sorted list.
-        SortedList<T> sortedList = new SortedList<T>(eventList);
+        SortedList<T> sortedList = GlazedListsFactory.sortedList(eventList);
 
         // Create table.
         LibraryTable<T> libTable = new PlaylistLibraryTable<T>(playlist, sortedList, 
