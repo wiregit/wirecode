@@ -1,7 +1,11 @@
 package org.limewire.ui.swing.library.playlist;
 
+import java.awt.Component;
 import java.io.File;
 import java.util.Comparator;
+
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.decorator.SortController;
 import org.limewire.core.api.library.LocalFileItem;
@@ -9,6 +13,7 @@ import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistListener;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFormat;
 import org.limewire.ui.swing.library.table.PlayRendererEditor;
@@ -73,6 +78,7 @@ public class PlaylistLibraryTable<T extends LocalFileItem> extends LibraryTable<
         getColumnModel().getColumn(PlaylistTableFormat.LENGTH_INDEX).setCellRenderer(new TimeRenderer());
         getColumnModel().getColumn(PlaylistTableFormat.SIZE_INDEX).setCellRenderer(new FileSizeRenderer());
         getColumnModel().getColumn(PlaylistTableFormat.TITLE_INDEX).setCellRenderer(new NameRenderer());
+        getColumnModel().getColumn(PlaylistTableFormat.NUMBER_INDEX).setCellRenderer(new PositionRenderer());
     }
 
     @Override
@@ -172,6 +178,33 @@ public class PlaylistLibraryTable<T extends LocalFileItem> extends LibraryTable<
             sortedList.removeListEventListener(this);
             playlist = null;
             sortedList = null;
+        }
+    }
+
+    /**
+     * Cell renderer for the position column.  PositionRenderer displays the
+     * playlist position index as a 1-based integer.
+     */
+    private static class PositionRenderer extends DefaultLibraryRenderer {
+
+        public PositionRenderer() {
+            setHorizontalAlignment(SwingConstants.CENTER);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, 
+                Object value, boolean isSelected, boolean hasFocus, 
+                int row, int column) {
+            
+            super.getTableCellRendererComponent(table, value, isSelected, 
+                    hasFocus, row, column);
+            
+            // Convert position value to 1-based integer.
+            if (value instanceof Number) {
+                setText(String.valueOf(((Number) value).intValue() + 1));
+            }
+            
+            return this;
         }
     }
 }
