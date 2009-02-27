@@ -172,7 +172,7 @@ public class ShareAllComboBox extends LimeComboBox {
             
             if(!isGnutella) {                
                 if (selectedItems.size() > 0) {
-                    ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileShareWidget();
+                    ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileFriendOnlyShareWidget();
                     shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
                     shareWidget.show(GuiUtils.getMainFrame());
                 } 

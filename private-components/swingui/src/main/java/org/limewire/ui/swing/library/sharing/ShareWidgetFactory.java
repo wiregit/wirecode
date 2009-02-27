@@ -13,6 +13,6 @@ public interface ShareWidgetFactory {
     ShareWidget<LocalFileItem[]> createMultiFileFriendOnlyShareWidget();
 
     ShareWidget<LocalFileItem[]> createMultiFileUnshareWidget();
-
+    
     ShareWidget<Category> createCategoryShareWidget();
 }
