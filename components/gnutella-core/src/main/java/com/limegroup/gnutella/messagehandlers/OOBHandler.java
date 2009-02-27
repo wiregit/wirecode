@@ -276,26 +276,20 @@ public class OOBHandler implements MessageHandler, Runnable {
                         // ignore packet
                     }
                 } else {
-                    Integer address = ByteUtils.leb2int(handlerAddress, 0);
-                    long now = System.currentTimeMillis();
-                    synchronized(responderPorts) {
-                        ResponderPort rp = responderPorts.get(address);
-                        if(rp == null || rp.port != IGNORE) {
-                            LOG.debug("Ignoring address with too many results");
-                            // Too many results - ignore the address for a while
-                            rp = new ResponderPort(IGNORE, now);
-                            responderPorts.put(address, rp);
-                        } else {
-                            // Continue ignoring the address
-                            rp.timestamp = now;
-                        }
-                    }
+                    tooManyResults(handlerAddress);
                 }
             }
         }
     }
     
+    /**
+     * Returns true if a message from the given address and port
+     * should be ignored because the address is responding from
+     * multiple ports.
+     */
     private boolean shouldIgnore(byte[] addr, int port) {
+        if(!SearchSettings.OOB_IGNORE_MULTIPLE_PORTS.getValue())
+            return false;
         Integer address = ByteUtils.leb2int(addr, 0);
         if(address == LOCALHOST)
             return false;
@@ -321,6 +315,28 @@ public class OOBHandler implements MessageHandler, Runnable {
             else {
                 // Same port as before
                 return false;
+            }
+        }
+    }
+    
+    /**
+     * Ignores an address that sent more results than it offered.
+     */
+    private void tooManyResults(byte[] addr) {
+        if(!SearchSettings.OOB_IGNORE_EXCESS_RESULTS.getValue())
+            return;
+        Integer address = ByteUtils.leb2int(addr, 0);
+        long now = System.currentTimeMillis();
+        synchronized(responderPorts) {
+            ResponderPort rp = responderPorts.get(address);
+            if(rp == null || rp.port != IGNORE) {
+                LOG.debug("Ignoring address with too many results");
+                // Too many results - ignore the address for a while
+                rp = new ResponderPort(IGNORE, now);
+                responderPorts.put(address, rp);
+            } else {
+                // Continue ignoring the address
+                rp.timestamp = now;
             }
         }
     }
