@@ -1242,65 +1242,53 @@ public class HostCatcher implements Service {
     }
 
     /**
-     * @requires this' monitor held
-     * @modifies this
-     * @effects returns the highest priority endpoint in queue, regardless
-     *  of quick-connect settings, etc.  Returns null if this is empty.
+     * Removes and returns the best available host, or null if no hosts are
+     * available. Protected so tests can override it.
+     * 
+     * LOCKING: this
      */
     protected ExtendedEndpoint getAnEndpointInternal() {
-        // If we're already an ultrapeer and we know about hosts with free
-        // ultrapeer slots, try them.
-        if(connectionServices.isSupernode() &&
-                !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
-            LOG.trace("UP: returning host with free UP slots");
-            return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
-                                    
-        } 
-        // Otherwise, if we're already a leaf and we know about ultrapeers with
-        // free leaf slots, try those.
-        else if(connectionServices.isShieldedLeaf() && 
-                !FREE_LEAF_SLOTS_SET.isEmpty()) {
-            LOG.trace("Leaf: returning host with free leaf slots");
-            return preferenceWithLocale(FREE_LEAF_SLOTS_SET);
-        } 
-        // Otherwise, assume we'll be a leaf and we're trying to connect, since
-        // this is more common than wanting to become an ultrapeer and because
-        // we want to fill any remaining leaf slots if we can.
-        else if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
-            LOG.trace("Returning host with free UP slots");
-            return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
-        } 
-        // Otherwise, might as well use the leaf slots hosts up as well
-        // since we added them to the size and they can give us other info
-        else if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
-            LOG.trace("Returning host with free leaf slots");
-            Iterator<ExtendedEndpoint> iter = FREE_LEAF_SLOTS_SET.keySet().iterator();
-            ExtendedEndpoint ee = iter.next();
-            FREE_LEAF_SLOTS_SET.remove(ee);
-            return ee;
-        } 
-        else if(!ENDPOINT_QUEUE.isEmpty()) {
+        if(connectionServices.isActiveSuperNode()) {
+            // Ultrapeer - prefer hosts with free ultrapeer slots
+            if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+                LOG.trace("UP: returning host with free UP slots");
+                return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
+            }
+            if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
+                LOG.trace("UP: returning host with free leaf slots");
+                return preferenceWithLocale(FREE_LEAF_SLOTS_SET);
+            }
+        } else {
+            // Leaf or undecided - prefer hosts with free leaf slots
+            if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
+                LOG.trace("Returning host with free leaf slots");
+                return preferenceWithLocale(FREE_LEAF_SLOTS_SET);
+            }
+            if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+                LOG.trace("Returning host with free UP slots");
+                return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
+            }
+        }
+        // No free slots
+        if(!ENDPOINT_QUEUE.isEmpty()) {
             LOG.trace("Returning ordinary host");
-            //pop e from queue and remove from set.
-            ExtendedEndpoint e= ENDPOINT_QUEUE.extractMax();
-            ExtendedEndpoint removed=ENDPOINT_SET.remove(e);
-            //check that e actually was in set.
-            assert removed == e : "Rep. invariant for HostCatcher broken.";
-            return e;
-        } 
-        else if(!restoredHosts.isEmpty()) {
-            LOG.trace("Returning restored host with long uptime");
-            // highest partition has highest uptimes
+            ExtendedEndpoint removed1 = ENDPOINT_QUEUE.extractMax();
+            ExtendedEndpoint removed2 = ENDPOINT_SET.remove(removed1);
+            assert removed1 == removed2 : "Invariant for HostCatcher broken";
+            return removed1;
+        }
+        // Getting pretty desperate now
+        if(!restoredHosts.isEmpty()) {
+            LOG.trace("Returning restored host with high uptime");
+            // Last partition has highest uptimes
             List<ExtendedEndpoint> best = uptimePartitions.getLastPartition();
-            ExtendedEndpoint e = best.remove((int)(Math.random() * best.size()));
-            return e;
+            ExtendedEndpoint ee =
+                best.remove((int)(Math.random() * best.size()));
+            return ee;
         }
-        else {
-            LOG.trace("No hosts to return");
-            return null;
-        }
+        LOG.trace("No hosts to return");
+        return null;
     }
-
     
     /**
      * tries to return an endpoint that matches the locale of this client
