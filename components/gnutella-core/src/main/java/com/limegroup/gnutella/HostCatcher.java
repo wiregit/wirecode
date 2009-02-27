@@ -245,13 +245,6 @@ public class HostCatcher implements Service {
     private UDPHostCache udpHostCache;
     
     /**
-     * Count for the number of hosts that we have not been able to connect to.
-     * This is used for degenerate cases where we ultimately have to hit the 
-     * bootstrap hosts.
-     */
-    private int _failures;
-    
-    /**
      * <tt>Set</tt> of hosts we were unable to create TCP connections with
      * and should therefore not be tried again.  Fixed size.
      * 
@@ -427,7 +420,6 @@ public class HostCatcher implements Service {
                             permanentHostsSet.size() + " permanent, " +
                             restoredHosts.size() + " restored, " +
                             udpHostCache.getSize() + " UHCs, " +
-                            _failures + " failures, " +
                             EXPIRED_HOSTS.size() + " expired, " +
                             PROBATION_HOSTS.size() + " on probation, " +
                             _catchersWaiting.size() + " waiting");
@@ -1264,7 +1256,6 @@ public class HostCatcher implements Service {
         if(success) {
             ee.recordConnectionSuccess();
         } else {
-            _failures++;
             ee.recordConnectionFailure();
         }
         addPermanent(ee);
