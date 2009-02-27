@@ -197,14 +197,14 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
             CatalogSelectionCallback callback) {
         cardPanel.add(component, catalog.getId());
         
-        ButtonItem item = new ButtonItemImpl(catalog);
+        ButtonItemImpl item = new ButtonItemImpl(catalog);
         catalogTables.put(catalog, item);
         catalogOrder.add(catalog);
         
         Action action = new SelectionAction(icon, catalog, item, callback);
         JComponent button = createCatalogButton(action, catalog, filteredAllFileList);
         
-        ((ButtonItemImpl) item).setAction(action);
+        item.setAction(action);
         
         addCatalogSizeListener(catalog, action, filteredAllFileList, filteredList);
         selectionPanel.add(button, "growx");
@@ -223,14 +223,14 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         Catalog catalog = new Catalog(category); 
         cardPanel.add(component, catalog.getId());
         
-        ButtonItem item = new ButtonItemImpl(catalog);
+        ButtonItemImpl item = new ButtonItemImpl(catalog);
         catalogTables.put(catalog, item);
         catalogOrder.add(catalog);
         
         Action action = new SelectionAction(icon, catalog, item, callback);
         JComponent button = createCategoryButton(action, category, filteredAllFileList);
         
-        ((ButtonItemImpl) item).setAction(action);
+        item.setAction(action);
         
         addCategorySizeListener(category, action, filteredAllFileList, filteredList);
         selectionPanel.add(button, "growx");
