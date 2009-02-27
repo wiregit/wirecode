@@ -85,6 +85,7 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
         if(item == null) {
             item = new LibraryManagerItemImpl(parent, libraryData, excludedFolders, directory);
             getLibraryModel().addChild(item, parent);
+            getLibraryModel().getAllExcludedSubfolders().remove(item.getFile());
             getLibraryModel().unexcludeAllSubfolders(item.getFile());
             
             removeDuplicateRoots(root, directory);
@@ -93,12 +94,12 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
             
             // If the item already exists, go through all its excluded children and explicitly add them.
             // work off a copy because we'll be modifying the list as we iterate through it.
-            for(File excludedChild : getExcludedChildren(item.getFile())) {
+            for(File excludedChild : getExcludedDescendents(item.getFile())) {
                 expand = true;
-                getLibraryModel().addChild(new LibraryManagerItemImpl(item, libraryData, excludedFolders, excludedChild), item);
-                getLibraryModel().getAllExcludedSubfolders().remove(item.getFile());
-                getLibraryModel().unexcludeAllSubfolders(item.getFile());
+                LibraryManagerItem excludedParent = findParent(item, excludedChild);
+                getLibraryModel().addChild(new LibraryManagerItemImpl(excludedParent, libraryData, excludedFolders, excludedChild), excludedParent);
             }
+            getLibraryModel().unexcludeAllSubfolders(item.getFile());
         }
         
         TreePath path = new TreePath(getLibraryModel().getPathToRoot(item));
@@ -113,10 +114,10 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
     /**
      * Returns the excluded children of this file
      */
-    private List<File> getExcludedChildren(File parent) {
+    private List<File> getExcludedDescendents(File parent) {
         List<File> excludedChildren = new ArrayList<File>();
         for(File file : getLibraryModel().getAllExcludedSubfolders()) {
-            if(file.getParentFile().equals(parent))
+            if(FileUtils.isAncestor(parent, file))
                 excludedChildren.add(file);
         }
         return excludedChildren;
