@@ -9,11 +9,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.limewire.core.api.friend.Friend;
+import org.limewire.inspection.InspectionHistogram;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
-import org.limewire.core.api.friend.Friend;
 
 import com.limegroup.gnutella.tigertree.HashTreeCache;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileList {
@@ -26,6 +28,11 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
     
     /** A list of application shared files. */
     private final AtomicInteger applicationShared = new AtomicInteger();
+    
+    /** Number of files removed from this list **/
+    private final AtomicInteger numRemoved = new AtomicInteger();
+    
+    private final InspectionHistogram<String> addedFilesByType = new InspectionHistogram<String>();
     
     public GnutellaFileListImpl(LibraryFileData data, ManagedFileListImpl managedList, HashTreeCache treeCache) {
         super(data, managedList, Friend.P2P_FRIEND_ID, treeCache); // @'s added to avoid clashes with xmpp ids.
@@ -68,6 +75,12 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
     protected boolean addFileDescImpl(FileDesc fileDesc) {
         if(super.addFileDescImpl(fileDesc)) {
             numBytes.addAndGet(fileDesc.getFileSize());
+            // inspection code
+            LimeXMLDocument doc = fileDesc.getXMLDocument();
+            if (doc != null) {
+                addedFilesByType.count(doc.getSchemaDescription());
+            }
+            // inspection code end
             if(LibraryUtils.isApplicationSpecialShare(fileDesc.getFile())) {
                 applicationShared.incrementAndGet();
             }
@@ -77,11 +90,12 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
             return false;
         }
     }
-    
+        
     @Override
     protected boolean removeFileDescImpl(FileDesc fileDesc) {
         if (super.removeFileDescImpl(fileDesc)) {
             numBytes.addAndGet(-fileDesc.getFileSize());
+            numRemoved.incrementAndGet();
             if(LibraryUtils.isApplicationSpecialShare(fileDesc.getFile())) {
                 applicationShared.decrementAndGet();
             }
@@ -95,8 +109,10 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
     @SuppressWarnings("unchecked")
     @Override
     public Object inspect() {        
-        Map<String,Object> inspections = (Map<String,Object>)super.inspect();
-        inspections.put("size of files", numBytes.get());        
+        Map<Object,Object> inspections = (Map<Object,Object>)super.inspect();
+        inspections.put("size of files", numBytes.get());
+        inspections.put("removed", numRemoved.get());
+        inspections.put("file types", addedFilesByType.inspect());
         return inspections;
     }
     

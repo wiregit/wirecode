@@ -320,4 +320,5 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
             connection.setMode(mode);
         }
     }
+    
 }

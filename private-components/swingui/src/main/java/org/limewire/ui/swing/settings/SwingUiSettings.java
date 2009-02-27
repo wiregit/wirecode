@@ -232,6 +232,7 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createBooleanSetting("ONLINE_CONTACTS_COLLAPSED", false);
     
     /** If the LimeWire media player is enabled. */
+    @InspectablePrimitive("player enabled")
     public static final BooleanSetting PLAYER_ENABLED =
         FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
     

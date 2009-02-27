@@ -39,8 +39,11 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureTask;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -190,6 +193,20 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     /** The revision of the managedFolder update. */
     private final AtomicInteger managedFolderRevision = new AtomicInteger(0);
+    
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private class LazyInspectableContainer {
+        @InspectionPoint("managed files")
+        private final Inspectable inspectable = new Inspectable() {
+            @Override
+            public Object inspect() {
+                Map<String, Object> data = new HashMap<String, Object>();
+                data.put("size", size());
+                return data;
+            }
+        };
+    }
 
     @Inject
     ManagedFileListImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,

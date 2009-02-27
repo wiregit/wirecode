@@ -5,10 +5,12 @@ import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
+import org.limewire.inspection.InspectionHistogram;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.util.DebugRunnable;
-import org.limewire.util.MediaType;
 import org.limewire.util.I18NConvert;
+import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -37,6 +39,9 @@ public class SearchServicesImpl implements SearchServices {
     private final Provider<QueryRequestFactory> queryRequestFactory;
     private final BrowseHostHandlerManager browseHostHandlerManager;
     private final OutOfBandStatistics outOfBandStatistics;
+
+    @InspectionPoint("searches by type")
+    private final InspectionHistogram<String> searchesByType = new InspectionHistogram<String>();
     
     @Inject
     public SearchServicesImpl(Provider<ResponseVerifier> responseVerifier,
@@ -171,6 +176,11 @@ public class SearchServicesImpl implements SearchServices {
             
             
                 recordAndSendQuery(qr, type);
+                if (type != null) {
+                    searchesByType.count(type.getSchema());
+                } else {
+                    searchesByType.count("no type");
+                }
             }
     }
 
