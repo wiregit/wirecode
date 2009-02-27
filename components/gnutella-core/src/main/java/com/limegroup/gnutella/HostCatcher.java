@@ -1277,7 +1277,7 @@ public class HostCatcher implements Service {
      * LOCKING: this
      */
     protected ExtendedEndpoint getAnEndpointInternal() {
-        if(connectionServices.isActiveSuperNode()) {
+        if(connectionServices.isSupernode()) {
             // Ultrapeer - prefer hosts with free ultrapeer slots
             if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
                 LOG.trace("UP: returning host with free UP slots");
