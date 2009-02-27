@@ -133,7 +133,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private final LibraryListSourceChanger delegateListChanger;
     
     private SharingMessagePanel messagePanel;
-    private NotSharingPanel notSharingPanel;
     
     private ShareAllComboBox shareAllComboBox;
     private GhostDropTargetListener ghostDropTargetListener;
@@ -295,10 +294,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         delegateListChanger.setFriend(null);
         sharingComboBox.setVisible(true);
         messagePanel.setVisible(false);
-        if(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true || 
-                (xmppService.isLoggedIn() && SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true))
-                ;
-        else
+        if(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == false && 
+                (xmppService.isLoggedIn() && SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == false))
             hideEmptyFriend();
         //reselect the current category in case we filtered on a friend that wasn't 
         //sharing anything
@@ -400,18 +397,19 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                             panel.setOpaque(false);
                             panel.add(getFirstTimeMyLibraryMessageAndSignedInComponent(), "align 50% 40%");
                             JXLayer layer = map.get(category);
+                            layer.getGlassPane().removeAll();
                             layer.getGlassPane().add(panel);
                             layer.getGlassPane().setVisible(true);
                             if(!SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.getValue()) {
                                 libraryNavigator.selectLibrary();
                                 SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
                             }
-                            SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.setValue(true);
                         } else if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
                             JPanel panel = new JPanel(new MigLayout("fill"));
                             panel.setOpaque(false);
                             panel.add(getFirstTimeLoggedInMessageComponent(), "align 50% 40%");
                             JXLayer layer = map.get(category);
+                            layer.getGlassPane().removeAll();
                             layer.getGlassPane().add(panel);
                             layer.getGlassPane().setVisible(true);
                             if(!SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.getValue()) {
@@ -426,8 +424,12 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             if(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true) {
                 JPanel panel = new JPanel(new MigLayout("fill"));
                 panel.setOpaque(false);
-                panel.add(getFirstTimeMyLibraryMessageComponent(), "align 50% 40%");
+                if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) 
+                    panel.add(getFirstTimeMyLibraryMessageAndSignedInComponent(), "align 50% 40%");
+                else
+                    panel.add(getFirstTimeMyLibraryMessageComponent(), "align 50% 40%");
                 JXLayer layer = map.get(category);
+                layer.getGlassPane().removeAll();
                 layer.getGlassPane().add(panel);
                 layer.getGlassPane().setVisible(true);
             }
@@ -512,7 +514,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             panel.setOpaque(false);
             panel.add(getEmptyLibraryMessageComponent(delegateListChanger.getCurrentFriend()), "align 50% 40%");
             JXLayer layer = map.get(category);
-            layer.getGlassPane().removeAll();
+            layer.getGlassPane().removeAll(); 
             layer.getGlassPane().add(panel);
             layer.getGlassPane().setVisible(true);
         }
@@ -771,9 +773,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 	 * Returns the MessageComponent when not sharing with a friend.
 	 */
     public MessageComponent getEmptyLibraryMessageComponent(Friend friend) {
-        if(notSharingPanel == null) {
-            notSharingPanel = new NotSharingPanel();          
-        }
+        NotSharingPanel notSharingPanel = new NotSharingPanel();          
         notSharingPanel.setFriend(friend);
         return notSharingPanel.getMessageComponent();
     }
@@ -945,7 +945,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             if(delegateListChanger.getCurrentFriend() == null) {
                 action.setEnabled(true);
             } else {
-                action.setEnabled(false);
+                action.setEnabled(false); 
+                if(getSelectedCategory() == null)
+                    select(Category.AUDIO);
             }
         }
         
@@ -982,7 +984,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
         private void setText() {
             //if not filtering
-            if(delegateListChanger.getCurrentFriend() == null) {
+            if(delegateListChanger.getCurrentFriend() == null || delegateListChanger.getCurrentFriend().getId() == null) {
                 //disable other category if size is 0
                 if(category == Category.OTHER) {
                     action.setEnabled(list.size() > 0);

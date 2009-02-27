@@ -336,7 +336,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
      * is visible, returns that category.
      */
     private Catalog getNext(int selectedIndex) {
-        for(int i = selectedIndex; i < catalogOrder.size() + selectedIndex; i++) {
+        for(int i = selectedIndex; i <= catalogOrder.size() + selectedIndex; i++) {
             int index = i % catalogOrder.size();
             ButtonItem current = catalogTables.get(catalogOrder.get(index));
             if(current.isEnabled())
