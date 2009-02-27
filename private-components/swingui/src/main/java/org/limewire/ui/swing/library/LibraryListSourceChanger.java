@@ -46,7 +46,7 @@ public class LibraryListSourceChanger {
         }
         
         for(FriendChangedListener listener : listeners) {
-            listener.friendChanged();
+            listener.friendChanged(currentFriend);
         }
     }
     
@@ -58,8 +58,10 @@ public class LibraryListSourceChanger {
         return currentFriend;
     }
     
+    /** A listener for when the friend in the library changes. */
     public static interface FriendChangedListener {
-        public void friendChanged();
+        /** Notification that the current visible friend has changed. */
+        public void friendChanged(Friend currentFriend);
     }
 
 }

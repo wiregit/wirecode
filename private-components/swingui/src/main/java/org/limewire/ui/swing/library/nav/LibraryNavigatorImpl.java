@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.Collections;
+import java.util.Map;
 import java.util.TooManyListenersException;
 
 import javax.swing.AbstractAction;
@@ -25,6 +27,8 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
@@ -44,7 +48,9 @@ import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.AllFriendsLibraryPanel;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
+import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.library.MyLibraryPanel;
+import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
@@ -68,7 +74,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private static final Log LOG = LogFactory.getLog(LibraryNavigatorImpl.class);
     
     private final NavPanel myLibrary;
-//    private final NavPanel p2pNetwork;
+    private final NavPanel p2pNetwork;
     private final NavPanel allFriends;
     private final NavList limewireList;
     private final NavList onlineList;
@@ -120,7 +126,9 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         setOpaque(false);
         setScrollableTracksViewportHeight(false);
         
-        myLibrary = initializePanel(I18n.tr("My Library"), myLibraryPanel, "LibraryNavigator.myLibrary");
+        String libraryTitle = I18n.tr("My Library");
+        NavItem libraryNavItem = navigator.createNavItem(NavCategory.LIBRARY, libraryTitle, myLibraryPanel);
+        myLibrary = initializePanel(I18n.tr("My Library"),  createLibraryAction(libraryNavItem), "LibraryNavigator.myLibrary");
         myLibrary.updateLibraryState(myLibraryPanel.getLibrary().getState());
         myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, myLibraryPanel.getLibrary(), saveLocationExceptionHandler));
         try {
@@ -138,13 +146,13 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         });
         
-//        p2pNetwork = initializePanel(I18n.tr("P2P Network"), p2pNetworkSharingPanel, "LibraryNavigator.p2pNetwork");
-//        p2pNetwork.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getGnutellaShareList()));
-//        try {
-//            p2pNetwork.getDropTarget().addDropTargetListener(new GhostDropTargetListener(p2pNetwork,ghostPane, I18n.tr("P2P Network")));
-//        } catch (TooManyListenersException ignoreException) {            
-//        }  
-        
+        p2pNetwork = initializePanel(I18n.tr("P2P Network"), createP2PAction(libraryNavItem), "LibraryNavigator.p2pNetwork"); 
+        p2pNetwork.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getGnutellaShareList()));
+        try {
+            p2pNetwork.getDropTarget().addDropTargetListener(new GhostDropTargetListener(p2pNetwork,ghostPane, new FriendAdapter(I18n.tr("the P2P Network"))));
+        } catch (TooManyListenersException ignoreException) {            
+        }  
+                
         allFriends = initializePanel(I18n.tr("All Friends"), allFriendsLibraryPanel, "LibraryNavigator.allFriends");
         allFriends.addActionListener(new ActionListener() {
             @Override
@@ -173,10 +181,9 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         allFriends.setTopGap(2);
         allFriends.setBottomGap(2);
         
-        addItem(myLibrary, this, "growx, wmin 0, wrap", null, null);//p2pNetwork.getAction());
-//        addItem(p2pNetwork, this, "growx, wmin 0, wrap", myLibrary.getAction(), allFriends.getAction());
-        addItem(allFriends, this, "growx, wmin 0, wrap", null,//p2pNetwork.getAction(),
-                new MoveAction(limewireList, true));
+        addItem(myLibrary, this, "growx, wmin 0, wrap", null, p2pNetwork.getAction());
+        addItem(p2pNetwork, this, "growx, wmin 0, wrap", myLibrary.getAction(), allFriends.getAction());
+        addItem(allFriends, this, "growx, wmin 0, wrap", p2pNetwork.getAction(), new MoveAction(limewireList, true));
         addItem(friendsPanel, this, "growx, wmin 0, wrap", null, null);
         addItem(friendRequestPanel, this, "growx, wmin 0, wrap, gaptop 2, hidemode 3", null, null);
         addItem(friendsScrollArea, this, "grow, wmin 0, wrap",  null, null);
@@ -197,13 +204,106 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         }
     }    
     
-    private NavPanel initializePanel(String title, JComponent component, String name) {
-        NavPanel panel = navPanelFactory.createNavPanel(createAction(title, component), null, null);
+    private Action createLibraryAction(final NavItem item) {
+        // When "My Library" is clicked, we want to remove any filter.
+        final Action action = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                item.select();
+                LibraryNavigatorImpl.this.myLibraryPanel.showAllFiles();
+            }
+        };
+        // When the NavItem becomes selected, we only want to select
+        // this action if P2P Network IS NOT the current filter.
+        item.addNavItemListener(new NavItemListener() {
+            public void itemRemoved() {
+            }
+
+            public void itemSelected(boolean selected) {
+                Friend currentFriend = myLibraryPanel.getCurrentFriend();
+                boolean p2pSelected = currentFriend != null && currentFriend.getId().equals(Friend.P2P_FRIEND_ID);
+                action.putValue(Action.SELECTED_KEY, selected && !p2pSelected);
+            }
+        });
+
+        action.addPropertyChangeListener(new PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+                    if (evt.getNewValue().equals(Boolean.TRUE)) {
+                        item.select();
+                    }
+                }
+            }
+        });        
+        action.putValue(NavigatorUtils.NAV_ITEM, item);
+        
+        // Add a listener for changing friends, so that we can select the action
+        // if the item is selected.
+        myLibraryPanel.addFriendListener(new LibraryListSourceChanger.FriendChangedListener() {
+            @Override
+            public void friendChanged(Friend currentFriend) {
+                boolean p2pSelected = currentFriend != null && currentFriend.getId().equals(Friend.P2P_FRIEND_ID);
+                action.putValue(Action.SELECTED_KEY, item.isSelected() && !p2pSelected);
+            }
+        });
+        
+        return action;
+    }
+    
+    private Action createP2PAction(final NavItem libraryItem) {
+        final Action action = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectP2pNetworkShareList();
+            }
+        };
+        // When the NavItem becomes selected, we only want to select
+        // this action if P2P Network IS the current filter.
+        libraryItem.addNavItemListener(new NavItemListener() {
+            public void itemRemoved() {
+            }
+
+            public void itemSelected(boolean selected) {
+                Friend currentFriend = myLibraryPanel.getCurrentFriend();
+                boolean p2pSelected = currentFriend != null && currentFriend.getId().equals(Friend.P2P_FRIEND_ID);
+                action.putValue(Action.SELECTED_KEY, selected && p2pSelected);
+            }
+        });
+
+        action.addPropertyChangeListener(new PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+                    if (evt.getNewValue().equals(Boolean.TRUE)) {
+                        libraryItem.select();
+                    }
+                }
+            }
+        });        
+        action.putValue(NavigatorUtils.NAV_ITEM, libraryItem);
+        
+        // Add a listener for changing friends, so that we can select the action
+        // if the item is selected.
+        myLibraryPanel.addFriendListener(new LibraryListSourceChanger.FriendChangedListener() {
+            @Override
+            public void friendChanged(Friend currentFriend) {
+                boolean p2pSelected = currentFriend != null && currentFriend.getId().equals(Friend.P2P_FRIEND_ID);
+                action.putValue(Action.SELECTED_KEY, libraryItem.isSelected() && p2pSelected);
+            }
+        });
+        return action;
+    }
+    
+    private NavPanel initializePanel(String title, Action action, String name) {
+        NavPanel panel = navPanelFactory.createNavPanel(action, null, null);
         panel.setTitle(title);
         panel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
         panel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
         panel.setName(name);                
         return panel;
+    }
+    
+    private NavPanel initializePanel(String title, JComponent component, String name) {
+        return initializePanel(title, createAction(title, component), name);        
     }    
     
     @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownListeners,
@@ -322,6 +422,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         }
     }
+    
+    private void selectP2pNetworkShareList() {
+        myLibrary.select();
+        myLibraryPanel.showSharingState(SharingTarget.GNUTELLA_SHARE.getFriend());
+    }    
     
     @Override
     public void selectFriendShareList(Friend friend) {
@@ -505,6 +610,46 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             } else {
                 navList.selectLast();
             }
+        }
+    }
+    
+    private static class FriendAdapter implements Friend {
+        private final String text;
+        
+       private FriendAdapter(String text) {
+           this.text = text;
+       }
+        
+        @Override
+        public String getFirstName() {
+            return text;
+        }
+        @Override
+        public Map<String, FriendPresence> getFriendPresences() {
+            return Collections.emptyMap();
+        }
+        @Override
+        public String getId() {
+            return text;
+        }
+        @Override
+        public String getName() {
+            return text;
+        }
+        @Override
+        public Network getNetwork() {
+            return null;
+        }
+        @Override
+        public String getRenderName() {
+            return text;
+        }
+        @Override
+        public boolean isAnonymous() {
+            return false;
+        }
+        @Override
+        public void setName(String name) {
         }
     }
 }
