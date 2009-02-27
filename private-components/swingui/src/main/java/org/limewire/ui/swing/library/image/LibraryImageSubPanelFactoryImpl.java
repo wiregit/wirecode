@@ -14,6 +14,7 @@ import javax.swing.TransferHandler;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
@@ -51,17 +52,20 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     private final PropertiesFactory<LocalFileItem> localFilePropFactory;
     private final ShareWidgetFactory shareWidgetFactory;
     private final LibraryNavigator libraryNavigator;
+    private final PlaylistManager playlistManager;
     
     @Inject
     public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager, 
             ShareTableRendererEditorFactory shareTableRendererEditorFactory, ShareWidgetFactory shareWidgetFactory, 
-            PropertiesFactory<LocalFileItem> localFilePropFactory, LibraryNavigator libraryNavigator) {
+            PropertiesFactory<LocalFileItem> localFilePropFactory, 
+            LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.thumbnailManager = thumbnailManager;
         this.libraryManager = libraryManager;
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         this.shareWidgetFactory = shareWidgetFactory;
         this.localFilePropFactory = localFilePropFactory;
         this.libraryNavigator = libraryNavigator;
+        this.playlistManager = playlistManager;
     }
     
     @Override
@@ -70,7 +74,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
             ShareWidget<File> shareWidget) {
 
         LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList);
-        panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, shareWidgetFactory, libraryManager, localFilePropFactory, libraryNavigator));
+        panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, shareWidgetFactory, libraryManager, localFilePropFactory, libraryNavigator, playlistManager));
         panel.addShareFolderButtonAction(new MyLibraryShareFolderAction(panel.getImageList(), shareWidgetFactory.createMultiFileShareWidget()));
         ImageList list = panel.getImageList();
         list.setImageCellRenderer(enableMyLibraryRenderer(list));

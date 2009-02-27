@@ -4,11 +4,14 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.List;
 
+import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.playlist.Playlist;
+import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.Catalog;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
@@ -42,15 +45,18 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private final ShareWidgetFactory shareFactory;
     
     private final LibraryNavigator libraryNavigator;
+    
+    private final PlaylistManager playlistManager;
 
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
             ShareWidgetFactory shareFactory, PropertiesFactory<LocalFileItem> propertiesFactory,
-            LibraryNavigator libraryNavigator) {
+            LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.libraryManager = libraryManager;
         this.shareFactory = shareFactory;
         this.category = category;
         this.propertiesFactory = propertiesFactory;
         this.libraryNavigator = libraryNavigator;
+        this.playlistManager = playlistManager;
     }
 
     public void setFileItems(List<LocalFileItem> items) {
@@ -71,10 +77,19 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         boolean shareActionEnabled = false;
         boolean removeActionEnabled = false;
         boolean deleteActionEnabled = false;
+        boolean playlistActionEnabled = true;
 
         for (LocalFileItem localFileItem : fileItems) {
             if (localFileItem.isShareable()) {
                 shareActionEnabled = true;
+                break;
+            }
+        }
+
+        // Disable playlist action if any selected files are incomplete.
+        for (LocalFileItem localFileItem : fileItems) {
+            if (localFileItem.isIncomplete()) {
+                playlistActionEnabled = false;
                 break;
             }
         }
@@ -113,6 +128,21 @@ public class MyLibraryPopupMenu extends JPopupMenu {
                     shareActionEnabled);
         }
 
+        // Create playlist sub-menu for audio files.
+        if (category == Category.AUDIO) {
+            JMenu playlistMenu = new JMenu(I18n.tr("Add to playlist"));
+            
+            // Add action for each playlist.
+            List<Playlist> playlistList = playlistManager.getPlaylists();
+            for (Playlist playlist : playlistList) {
+                playlistMenu.add(new PlaylistAction(playlist));
+            }
+            
+            // Add sub-menu to popup menu.
+            playlistMenu.setEnabled(playlistActionEnabled);
+            add(playlistMenu);
+        }
+        
         addSeparator();
         if (category != Category.PROGRAM && category != Category.OTHER) {
             add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
@@ -145,6 +175,25 @@ public class MyLibraryPopupMenu extends JPopupMenu {
             ShareWidget<File> shareWidget = shareWidgetFactory.createFileShareWidget();
             shareWidget.setShareable(localFileItem.getFile());
             shareWidget.show(GuiUtils.getMainFrame());
+        }
+    }
+    
+    /**
+     * Menu action to add files to a playlist.
+     */
+    private class PlaylistAction extends AbstractAction {
+        private final Playlist playlist;
+        
+        public PlaylistAction(Playlist playlist) {
+            super(playlist.getName());
+            this.playlist = playlist;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            for (LocalFileItem fileItem : fileItems) {
+                playlist.addFile(fileItem.getFile());
+            }
         }
     }
 }

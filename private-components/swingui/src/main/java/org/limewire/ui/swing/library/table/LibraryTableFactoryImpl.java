@@ -24,6 +24,7 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.playlist.Playlist;
+import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
@@ -104,6 +105,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
     private final LibraryNavigator libraryNavigator;
+    private final PlaylistManager playlistManager;
 
     private ShareWidgetFactory shareFactory;
 
@@ -124,7 +126,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             GhostDragGlassPane ghostPane, 
             CategoryIconManager categoryIconManager,
             SearchResultFromWidgetFactory fromWidgetfactory,
-            LibraryNavigator libraryNavigator) {
+            LibraryNavigator libraryNavigator,
+            PlaylistManager playlistManager) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -140,6 +143,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.ghostPane = ghostPane;
         this.fromWidgetFactory = fromWidgetfactory;
         this.libraryNavigator = libraryNavigator;
+        this.playlistManager = playlistManager;
         
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
@@ -235,7 +239,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                 category, libraryManager, shareListManager, magnetLinkFactory,
-                localItemPropFactory, shareFactory, libraryNavigator));
+                localItemPropFactory, shareFactory, libraryNavigator, playlistManager));
         
         try {
             libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane));
