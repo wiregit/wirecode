@@ -21,21 +21,22 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
  */
 class PlaylistImpl implements Playlist {
 
-    private final String name;
     private final MediaType mediaType;
     private final List<PlaylistItem> itemList;
     private final PlaylistMatcherEditor matcherEditor;
-    private final CopyOnWriteArrayList<PlaylistListener> playlistListeners;
+    private final List<PlaylistListener> playlistListeners;
+
+    private String name;
 
     /**
      * Constructs a Playlist with the specified name.
      */
     public PlaylistImpl(String name) {
-        this.name = name;
         this.mediaType = MediaType.getAudioMediaType();
         this.itemList = Collections.synchronizedList(new ArrayList<PlaylistItem>());
         this.matcherEditor = new PlaylistMatcherEditor();
         this.playlistListeners = new CopyOnWriteArrayList<PlaylistListener>(); 
+        this.name = name;
     }
 
     @Override
@@ -52,7 +53,16 @@ class PlaylistImpl implements Playlist {
     public String getName() {
         return name;
     }
+    
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
+    /**
+     * Adds the specified file to the end of the playlist.
+     * At present, the same file cannot be added multiple times.
+     */
     @Override
     public void addFile(File file) {
         if (!contains(file)) {
@@ -64,6 +74,10 @@ class PlaylistImpl implements Playlist {
         }
     }
 
+    /**
+     * Adds the specified file at the specified index in the playlist.  
+     * At present, the same file cannot be added multiple times.
+     */
     @Override
     public void addFile(int index, File file) {
         // Find file in current playlist.  If it already exists, remove the

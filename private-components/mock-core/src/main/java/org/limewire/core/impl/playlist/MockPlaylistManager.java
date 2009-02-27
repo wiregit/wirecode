@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
-import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -16,16 +15,23 @@ import com.google.inject.Singleton;
 @Singleton
 class MockPlaylistManager implements PlaylistManager {
 
+    private final Playlist defaultPlaylist;
     private final List<Playlist> playlistList;
     
     @Inject
     public MockPlaylistManager() {
         // Create the only playlist currently supported.
+        this.defaultPlaylist = new MockPlaylist("Quicklist");
         this.playlistList = Arrays.asList(new Playlist[] {
-            new PlaylistImpl(I18n.tr("Quicklist"))
+                defaultPlaylist
         });
     }
 
+    @Override
+    public void renameDefaultPlaylist(String name) {
+        defaultPlaylist.setName(name);
+    }
+    
     @Override
     public List<Playlist> getPlaylists() {
         return playlistList;

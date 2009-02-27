@@ -8,6 +8,11 @@ import java.util.List;
 public interface PlaylistManager {
 
     /**
+     * Renames the default playlist.
+     */
+    void renameDefaultPlaylist(String name);
+    
+    /**
      * Returns a list of available playlists.
      */
     List<Playlist> getPlaylists();

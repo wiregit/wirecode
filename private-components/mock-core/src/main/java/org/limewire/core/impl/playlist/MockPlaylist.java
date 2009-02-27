@@ -13,6 +13,15 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
  */
 class MockPlaylist implements Playlist {
 
+    private String name;
+
+    /**
+     * Constructs a Playlist with the specified name.
+     */
+    public MockPlaylist(String name) {
+        this.name = name;
+    }
+    
     @Override
     public void addPlaylistListener(PlaylistListener listener) {
     }
@@ -23,7 +32,12 @@ class MockPlaylist implements Playlist {
 
     @Override
     public String getName() {
-        return null;
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

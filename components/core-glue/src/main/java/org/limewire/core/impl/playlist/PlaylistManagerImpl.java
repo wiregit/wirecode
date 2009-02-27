@@ -7,7 +7,6 @@ import java.util.List;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.listener.EventListener;
-import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,6 +20,7 @@ import com.limegroup.gnutella.library.ManagedFileList;
 class PlaylistManagerImpl implements PlaylistManager {
     
     private final ManagedFileList managedList;
+    private final Playlist defaultPlaylist;
     private final List<Playlist> playlistList;
 
     /**
@@ -31,8 +31,9 @@ class PlaylistManagerImpl implements PlaylistManager {
         this.managedList = managedList;
         
         // Create the only playlist currently supported.
+        this.defaultPlaylist = new PlaylistImpl("Quicklist");
         this.playlistList = Arrays.asList(new Playlist[] {
-            new PlaylistImpl(I18n.tr("Quicklist"))
+                defaultPlaylist
         });
     }
 
@@ -55,6 +56,14 @@ class PlaylistManagerImpl implements PlaylistManager {
                 }
             }
         });
+    }
+    
+    /**
+     * Renames the default playlist.
+     */
+    @Override
+    public void renameDefaultPlaylist(String name) {
+        defaultPlaylist.setName(name);
     }
     
     /**

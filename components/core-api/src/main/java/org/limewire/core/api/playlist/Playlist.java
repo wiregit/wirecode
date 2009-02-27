@@ -28,6 +28,11 @@ public interface Playlist {
      * Returns the name of the playlist.
      */
     String getName();
+    
+    /**
+     * Sets the name of the playlist.
+     */
+    void setName(String name);
 
     /**
      * Adds the specified file to the end of the playlist.
