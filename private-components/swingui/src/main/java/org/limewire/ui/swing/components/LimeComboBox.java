@@ -3,6 +3,7 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
@@ -113,7 +114,7 @@ public class LimeComboBox extends JXButton {
         item.setBorder(BorderFactory.createEmptyBorder(0,1,0,0));
         return item;
     }
-    
+
     /**
      * A helper method for creating menu items painted in the default style of an 
      *  overridden menu.
@@ -249,6 +250,15 @@ public class LimeComboBox extends JXButton {
     public void forceResize() {
         ResizeUtils.updateSize(this, actions);
     }
+    
+    // TODO: Resize model must be redone so this is not necessary
+    @Override
+    public void setFont(Font f) {
+        super.setFont(f);
+        menuDirty = true;
+        ResizeUtils.updateSize(this, actions);
+    }
+    
 
     /** Sets the cursor that will be shown when the button is hovered-over. */
     public void setMouseOverCursor(Cursor cursor) {
