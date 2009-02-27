@@ -142,19 +142,23 @@ public class PlaylistTransferHandler extends TransferHandler {
         }
         
         if (support.isDataFlavorSupported(PLAYLIST_DATA_FLAVOR)) {
-            // Get target row for drop.
+            // Get target row for drop, and verify.
             PlaylistLibraryTable<?> libTable = (PlaylistLibraryTable<?>) component;
             int dropRow = libTable.rowAtPoint(support.getDropLocation().getDropPoint());
+            if (dropRow < 0) {
+                return false;
+            }
             
             try {
                 // Set reorder indicator so files are not removed when done.
                 reordered = true;
 
-                // Get files to insert.
+                // Get files to move.
                 Transferable data = support.getTransferable();
                 File[] files = (File[]) data.getTransferData(PLAYLIST_DATA_FLAVOR);
 
-                // Insert files into the playlist.
+                // Move files in the playlist.  This assumes that a file can 
+                // appear only once in the playlist.
                 for (File file : files) {
                     playlist.addFile(dropRow, file);
                 }
