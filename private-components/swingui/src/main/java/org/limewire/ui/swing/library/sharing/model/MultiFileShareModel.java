@@ -82,6 +82,9 @@ public class MultiFileShareModel implements LibraryShareModel {
  
     @Override
     public boolean isShared(SharingTarget friend) {
+        //this is purposefully left unimplemented for performance purposes.
+        //the user experience is poor when multiple files are selected and
+        //have to be checked against all friends
         return false;
     }
 
