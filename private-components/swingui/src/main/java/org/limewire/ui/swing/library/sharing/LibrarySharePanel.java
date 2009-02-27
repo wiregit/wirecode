@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -91,16 +92,9 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
 
     private static final int SHARED_ROW_COUNT = 10;        
     
-    @Resource
-    private int panelWidth;
-    
     private JXPanel titlePanel;
     private JXPanel tablePanel;
     private JXPanel bottomPanel;
-    @Resource
-    private Color bottomPanelTopGradient;
-    @Resource
-    private Color bottomPanelBottomGradient;
     
     private GradientPaint bottomGradient;
     
@@ -141,46 +135,13 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     private JCheckBox gnutellaCheckBox;
     
     private JXPanel mainPanel;
-    
-    /**
-     * arc for RoundedRect
-     */
-    @Resource
-    private int arc = 10;
-
-    private JButton closeButton;
-    @Resource
-    private Icon closeIcon;
-    @Resource
-    private Icon closeIconRollover;
-    @Resource
-    private Icon closeIconPressed;   
-     
-    
     private ShapeDialog dialog;
-    
     private BasicComboPopup comboPopup;
-    
-   // private TextMatcherEditor<SharingTarget> textMatcher;
-    
-    @Resource
-    private Icon removeIcon;
-    @Resource
-    private Icon removeIconRollover;
-    @Resource
-    private Icon removeIconPressed;   
-    @Resource
-    private int shareTableIndent = 15;   
-    @Resource
-    private Color dividerColor;
-    @Resource
-    private Color borderColor;
-    @Resource
-    private Color titleFontColor;
-    
+    private JButton closeButton;
+
     private final List<ShareListener> shareListeners = new CopyOnWriteArrayList<ShareListener>();
     
-    private Action up = new AbstractAction() {
+    private final Action up = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(!friendCombo.isPopupVisible()){
@@ -195,7 +156,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         }
     };
 
-    private Action down = new AbstractAction() {
+    private final Action down = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(!friendCombo.isPopupVisible()){
@@ -209,6 +170,31 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
             }
         }
     };    
+
+    
+    /**
+     * arc for RoundedRect
+     */
+    @Resource private int arc = 10;
+    @Resource private Icon closeIcon;
+    @Resource private Icon closeIconRollover;
+    @Resource private Icon closeIconPressed;   
+    
+    @Resource private int panelWidth;
+    @Resource private Color bottomPanelTopGradient;
+    @Resource private Color bottomPanelBottomGradient;
+    
+    @Resource private Icon checkBoxIcon;
+    @Resource private Icon checkBoxSelectedIcon;
+    @Resource private Font checkBoxFont;
+    
+    @Resource private Icon removeIcon;
+    @Resource private Icon removeIconRollover;
+    @Resource private Icon removeIconPressed;   
+    @Resource private int shareTableIndent = 15;   
+    @Resource private Color dividerColor;
+    @Resource private Color borderColor;
+    @Resource private Color titleFontColor;
     
     public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog) {
         this(allFriends, dialog, true);
@@ -296,6 +282,9 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     private void initializeGnutellaCheckBox() {
         gnutellaCheckBox = new JCheckBox(I18n.tr("Share with the P2P Nework"));
         gnutellaCheckBox.setOpaque(false);
+        gnutellaCheckBox.setIcon(checkBoxIcon);
+        gnutellaCheckBox.setSelectedIcon(checkBoxSelectedIcon);
+        gnutellaCheckBox.setFont(checkBoxFont);
     }
     
     private void initializePainters(){
