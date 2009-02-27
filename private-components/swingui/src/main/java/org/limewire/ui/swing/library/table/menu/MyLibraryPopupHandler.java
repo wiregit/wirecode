@@ -10,10 +10,11 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.LibraryTable;
+import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.xmpp.api.client.XMPPService;
 
 public class MyLibraryPopupHandler implements TablePopupHandler {
     private LibraryTable<LocalFileItem> table;
@@ -22,9 +23,10 @@ public class MyLibraryPopupHandler implements TablePopupHandler {
 
     public MyLibraryPopupHandler(LibraryTable<LocalFileItem> table, Category category, LibraryManager libraryManager,
             ShareListManager shareListManager, MagnetLinkFactory magnetFactory,
-            PropertiesFactory<LocalFileItem> propertiesFactory, ShareWidgetFactory shareFactory) {
+            PropertiesFactory<LocalFileItem> propertiesFactory, SharingActionFactory sharingActionFactory,
+            XMPPService xmppService) {
         this.table = table;
-        this.popupMenu = new MyLibraryPopupMenu(category, libraryManager, shareFactory, propertiesFactory);
+        this.popupMenu = new MyLibraryPopupMenu(category, libraryManager, sharingActionFactory, propertiesFactory, xmppService);
     }
 
     @Override
@@ -41,10 +43,9 @@ public class MyLibraryPopupHandler implements TablePopupHandler {
        if (selectedItems.size() <= 1 || !selectedItems.contains(selectedItem)) {
            selectedItems.clear();
            table.setRowSelectionInterval(popupRow, popupRow);
-           selectedItems.add(selectedItem);
        }
        
-       popupMenu.setFileItems(selectedItems);
+       popupMenu.setSelectable(table);
        popupMenu.show(component, x, y);
     }
 }

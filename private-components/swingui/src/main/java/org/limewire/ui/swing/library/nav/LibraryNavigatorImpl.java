@@ -45,7 +45,6 @@ import org.limewire.ui.swing.library.AllFriendsLibraryPanel;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
 import org.limewire.ui.swing.library.MyLibraryPanel;
-import org.limewire.ui.swing.library.P2PNetworkSharingPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
@@ -69,7 +68,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private static final Log LOG = LogFactory.getLog(LibraryNavigatorImpl.class);
     
     private final NavPanel myLibrary;
-    private final NavPanel p2pNetwork;
+//    private final NavPanel p2pNetwork;
     private final NavPanel allFriends;
     private final NavList limewireList;
     private final NavList onlineList;
@@ -93,7 +92,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             DownloadListManager downloadListManager,
             ShareListManager shareListManager,
             MyLibraryPanel myLibraryPanel,
-            P2PNetworkSharingPanel p2pNetworkSharingPanel,
+//            P2PNetworkSharingPanel p2pNetworkSharingPanel,
             AllFriendsLibraryPanel allFriendsLibraryPanel,
             NavPanelFactory navPanelFactory,
             FriendLibraryMediatorFactory friendLibraryMediatorFactory,
@@ -139,12 +138,12 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         });
         
-        p2pNetwork = initializePanel(I18n.tr("P2P Network"), p2pNetworkSharingPanel, "LibraryNavigator.p2pNetwork");
-        p2pNetwork.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getGnutellaShareList()));
-        try {
-            p2pNetwork.getDropTarget().addDropTargetListener(new GhostDropTargetListener(p2pNetwork,ghostPane, I18n.tr("P2P Network")));
-        } catch (TooManyListenersException ignoreException) {            
-        }  
+//        p2pNetwork = initializePanel(I18n.tr("P2P Network"), p2pNetworkSharingPanel, "LibraryNavigator.p2pNetwork");
+//        p2pNetwork.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getGnutellaShareList()));
+//        try {
+//            p2pNetwork.getDropTarget().addDropTargetListener(new GhostDropTargetListener(p2pNetwork,ghostPane, I18n.tr("P2P Network")));
+//        } catch (TooManyListenersException ignoreException) {            
+//        }  
         
         allFriends = initializePanel(I18n.tr("All Friends"), allFriendsLibraryPanel, "LibraryNavigator.allFriends");
         allFriends.addActionListener(new ActionListener() {
@@ -174,9 +173,10 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         allFriends.setTopGap(2);
         allFriends.setBottomGap(2);
         
-        addItem(myLibrary, this, "growx, wmin 0, wrap", null, p2pNetwork.getAction());
-        addItem(p2pNetwork, this, "growx, wmin 0, wrap", myLibrary.getAction(), allFriends.getAction());
-        addItem(allFriends, this, "growx, wmin 0, wrap", p2pNetwork.getAction(), new MoveAction(limewireList, true));
+        addItem(myLibrary, this, "growx, wmin 0, wrap", null, null);//p2pNetwork.getAction());
+//        addItem(p2pNetwork, this, "growx, wmin 0, wrap", myLibrary.getAction(), allFriends.getAction());
+        addItem(allFriends, this, "growx, wmin 0, wrap", null,//p2pNetwork.getAction(),
+                new MoveAction(limewireList, true));
         addItem(friendsPanel, this, "growx, wmin 0, wrap", null, null);
         addItem(friendRequestPanel, this, "growx, wmin 0, wrap, gaptop 2, hidemode 3", null, null);
         addItem(friendsScrollArea, this, "grow, wmin 0, wrap",  null, null);
@@ -325,16 +325,14 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     
     @Override
     public void selectFriendShareList(Friend friend) {
-        for(NavList list : allLists) {
-            if(list.selectFriendShareList(friend) != null) {
-                break;
-            }
-        }
+        myLibrary.select();
+        myLibraryPanel.showSharingState(friend);
     }
     
     @Override
     public void selectLibrary() {
         myLibrary.select();
+        myLibraryPanel.showAllFiles();
     }
 
     @Override

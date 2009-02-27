@@ -9,9 +9,10 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanel;
-import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
+import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.xmpp.api.client.XMPPService;
 
 public class MyImageLibraryPopupHandler implements TablePopupHandler {
     private LibraryImageSubPanel imagePanel;
@@ -19,10 +20,11 @@ public class MyImageLibraryPopupHandler implements TablePopupHandler {
     private MyLibraryPopupMenu popupMenu;
 
     public MyImageLibraryPopupHandler(LibraryImageSubPanel imagePanel,
-            ShareWidgetFactory shareWidgetFactory, LibraryManager libraryManager, PropertiesFactory<LocalFileItem> localFilePropFactory) {
+            SharingActionFactory sharingActionFactory, LibraryManager libraryManager, 
+            PropertiesFactory<LocalFileItem> localFilePropFactory, XMPPService xmppService) {
         this.imagePanel = imagePanel;
         this.popupMenu = new MyLibraryPopupMenu(Category.IMAGE,
-                libraryManager, shareWidgetFactory, localFilePropFactory);
+                libraryManager, sharingActionFactory, localFilePropFactory, xmppService);
 
     }
 
@@ -45,10 +47,9 @@ public class MyImageLibraryPopupHandler implements TablePopupHandler {
         if (selectedItems.size() <= 1 || !selectedItems.contains(selectedItem)) {
             selectedItems.clear();
             imagePanel.setSelectedIndex(popupRow);
-            selectedItems.add(selectedItem);
         } 
 
-        popupMenu.setFileItems(selectedItems);
+        popupMenu.setSelectable(imagePanel);
         popupMenu.show(component, x, y);
     }
 }

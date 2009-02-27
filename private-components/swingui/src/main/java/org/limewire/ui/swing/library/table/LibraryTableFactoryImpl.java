@@ -19,7 +19,6 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
@@ -28,15 +27,14 @@ import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
-import org.limewire.ui.swing.dnd.SharingLibraryTransferHandler;
+import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
-import org.limewire.ui.swing.library.sharing.SharingCheckBoxRendererEditor;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
-import org.limewire.ui.swing.library.table.menu.ShareLibraryPopupHandler;
+import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidgetFactory;
 import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
@@ -52,6 +50,7 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -68,9 +67,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private ShareListManager shareListManager;
 
     private AudioPlayer player;
-
-    // only accessed on EDT
-  //  private List<SharingTarget> friendList = new ArrayList<SharingTarget>();
 
     private DownloadListManager downloadListManager;
 
@@ -97,8 +93,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final IconManager iconManager;
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
-
-    private ShareWidgetFactory shareFactory;
+    private final SharingActionFactory sharingActionFactory;
+    private final XMPPService xmppService;
 
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager,
@@ -116,7 +112,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             ShareWidgetFactory shareFactory,
             GhostDragGlassPane ghostPane, 
             CategoryIconManager categoryIconManager,
-            SearchResultFromWidgetFactory fromWidgetfactory) {
+            SearchResultFromWidgetFactory fromWidgetfactory,
+            SharingActionFactory sharingActionFactory,
+            XMPPService xmppService) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -128,68 +126,21 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.downloadItemPropFactory = downloadItemPropFactory;
         this.subPanelFactory = factory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
-        this.shareFactory = shareFactory;
         this.ghostPane = ghostPane;
         this.fromWidgetFactory = fromWidgetfactory;
+        this.sharingActionFactory = sharingActionFactory;
+        this.xmppService = xmppService;
         
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
     }
 
-//    @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownFriends) {
-//        knownFriends.addListener(new EventListener<FriendEvent>() {
-//            @Override
-//            @SwingEDTEvent
-//            public void handleEvent(FriendEvent event) {
-//                switch(event.getType()) {
-//                case ADDED:
-//                    friendList.add(new SharingTarget(event.getSource()));
-//                    break;
-//                case REMOVED:
-//                    friendList.remove(new SharingTarget(event.getSource()));
-//                    break;
-//                }
-//            }
-//        });
-//    }
-//    
-    /**
-     * Creates an panel that displays images as thumbnails.
-     */
-    @Override
-    public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList,
-            JScrollPane scrollPane, ShareWidget<File> sharePanel) {
-        LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), eventList,
-                libraryManager.getLibraryManagedList(), scrollPane, subPanelFactory,
-                sharePanel, null);       
-
-        TransferHandler noDragTransferHandler = new MyLibraryTransferHandler(null, libraryManager.getLibraryManagedList()){
-            @Override
-            public int getSourceActions(JComponent comp) {
-                return NONE;
-            }
-        };
-        
-        imagePanel.setTransferHandler(noDragTransferHandler);
-        try {
-            imagePanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(imagePanel, ghostPane));
-        } catch (TooManyListenersException ingoreException) {
-        }
-        return imagePanel;
-    }
-    
-    @Override
-    public LibraryImagePanel createSharingImagePanel(EventList<LocalFileItem> eventList,
-            JScrollPane scrollPane, LocalFileList currentFriendList) {
-        return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), eventList,
-                libraryManager.getLibraryManagedList(), scrollPane,
-                subPanelFactory, null, currentFriendList);
-    }
 
     /**
      * Creates a table for MyLibrary
      */
-    public <T extends LocalFileItem> LibraryTable<T> createMyTable(Category category, EventList<T> eventList) {
+    public <T extends LocalFileItem> LibraryTable<T> createMyTable(Category category,
+            EventList<T> eventList, LibraryListSourceChanger listChanger) {
 
         final LibraryTable<T> libTable;
         SortedList<T> sortedList = new SortedList<T>(eventList);
@@ -223,13 +174,13 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             throw new IllegalArgumentException("Unknown category: " + category);
         }
 
-        libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
+        libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList(), shareListManager, listChanger));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                 category, libraryManager, shareListManager, magnetLinkFactory,
-                localItemPropFactory, shareFactory));
+                localItemPropFactory, sharingActionFactory, xmppService));
         
         try {
-            libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane));
+            libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane, listChanger));
         } catch (TooManyListenersException ingoreException) {
         }
 
@@ -237,7 +188,33 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setDropMode(DropMode.ON);
 
         return libTable;
+    }    
 
+	/**
+	 * Creates Image Library for My Library which displays thumbnails.
+	 */
+    @Override
+    public LibraryImagePanel createMyImagePanel(EventList<LocalFileItem> eventList,
+            JScrollPane scrollPane, ShareWidget<File> sharePanel,
+            LibraryListSourceChanger listChanger) {
+        LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), eventList,
+                libraryManager.getLibraryManagedList(), scrollPane, subPanelFactory,
+                sharePanel, listChanger);
+
+        TransferHandler noDragTransferHandler = new MyLibraryTransferHandler(null, libraryManager
+                .getLibraryManagedList(), shareListManager, listChanger) {
+            @Override
+            public int getSourceActions(JComponent comp) {
+                return NONE;
+            }
+        };
+        
+        imagePanel.setTransferHandler(noDragTransferHandler);
+        try {
+            imagePanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(imagePanel, ghostPane, listChanger));
+        } catch (TooManyListenersException ingoreException) {
+        }
+        return imagePanel;
     }    
     
     /**
@@ -359,69 +336,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         return libTable;
 
     }    
-
-    /**
-     * Creates a table for sharing files from your library with a friend.
-     */
-    @Override
-    public <T extends LocalFileItem> LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, LocalFileList friendFileList, Friend friend) {
-        final LibraryTable<T> libTable;
-        SortedList<T> sortedList = new SortedList<T>(eventList);
-        
-        switch (category) {
-        case AUDIO:
-            libTable = new SharedAudioLibraryTable<T>(sortedList, new SharedAudioTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedAudioTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedAudioTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            break;
-        case VIDEO:
-            libTable = new LibraryTable<T>(sortedList, new SharedVideoTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.LENGTH_INDEX).setCellRenderer(timeRenderer);
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedVideoTableFormat.NAME_INDEX).setCellRenderer(nameRenderer);
-            break;
-        case DOCUMENT:
-            libTable = new LibraryTable<T>(sortedList, new SharedDocumentTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedDocumentTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
-            libTable.getColumnModel().getColumn(SharedDocumentTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
-            libTable.getColumnModel().getColumn(SharedDocumentTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedDocumentTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            break;
-        case OTHER:
-            libTable = new LibraryTable<T>(sortedList, new SharedOtherTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedOtherTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
-            libTable.getColumnModel().getColumn(SharedOtherTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
-            libTable.getColumnModel().getColumn(SharedOtherTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedOtherTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            break;
-        case PROGRAM:
-            libTable = new LibraryTable<T>(sortedList, new SharedProgramTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(SharedProgramTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
-            libTable.getColumnModel().getColumn(SharedProgramTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
-            libTable.getColumnModel().getColumn(SharedProgramTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            libTable.getColumnModel().getColumn(SharedProgramTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown category: " + category);
-        }
-        
-        libTable.setPopupHandler(new ShareLibraryPopupHandler(friendFileList, castToLocalLibraryTable(libTable), category, libraryManager, 
-                    magnetLinkFactory, localItemPropFactory));
-        
-
-        libTable.setTransferHandler(new SharingLibraryTransferHandler(libTable, friendFileList));
-        try {
-            libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable,ghostPane, friend));
-        } catch (TooManyListenersException ignoreException) {            
-        } 
-        
-        EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());
-        libTable.setDropMode(DropMode.ON);
-        
-        return libTable;
-    }
 
     @SuppressWarnings( { "unchecked", "cast" })
     private LibraryTable<RemoteFileItem> castToRemoteLibraryTable(LibraryTable table) {
