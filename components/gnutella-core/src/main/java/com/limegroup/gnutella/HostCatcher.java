@@ -1621,7 +1621,7 @@ public class HostCatcher implements Service {
         private static final int TCP_FALLBACK_DELAY = 40 * 1000;
         
         /** Milliseconds to wait between TCP fetches. */
-        private static final int TCP_INTERVAL = 60 * 1000;        
+        private static final int TCP_INTERVAL = 5 * 60 * 1000;        
         
         /**
          * Determines whether or not it is time to get more hosts,
