@@ -5,7 +5,6 @@ import java.io.File;
 import java.util.Comparator;
 
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.decorator.SortController;
 import org.limewire.core.api.library.LocalFileItem;
@@ -186,10 +185,6 @@ public class PlaylistLibraryTable<T extends LocalFileItem> extends LibraryTable<
      * playlist position index as a 1-based integer.
      */
     private static class PositionRenderer extends DefaultLibraryRenderer {
-
-        public PositionRenderer() {
-            setHorizontalAlignment(SwingConstants.CENTER);
-        }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, 
