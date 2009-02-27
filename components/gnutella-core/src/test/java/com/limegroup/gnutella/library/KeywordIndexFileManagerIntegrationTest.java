@@ -281,6 +281,65 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
     }
 
     /**
+     * Test a query with both query string (file name) and metadata (xml).
+     *
+     * 1. The query string matches, but the metadata does not. This is not a match.
+     *    Verify that the matching file's FileDesc does not increase its hit count
+     *
+     * 2. Both query string and metadata match. This is a match. Verify that the
+     *    matching file's FileDesc increases its hit count by 1.
+     *
+     * Test a query which only contains the query string (no metadata).
+     *
+     * 1. The query string matches both in the file name and in the metadata.  This is a match.
+     *    Verify that the matching file's FileDesc increases its hit count by 1.
+     *
+     * 2. The query string matches only in the file name. This is a match. Verify that
+     *    the matching file's FileDesc increases its hit count by 1.
+     *
+     * Test written for LWC-2923
+     */
+    public void testQueryStringAndMetadataMatchEffectOnFileHitCount() throws Exception {
+        waitForLoad();
+
+        File eightFourSixFile = createNewNamedTestFile(10, "matching file.mp3");
+        LimeXMLDocument eightFourSixXml = limeXMLDocumentFactory.createLimeXMLDocument(
+            FileManagerTestUtils.buildAudioXMLString("artist=\"sixty seven\" album=\"blah blah\" genre=\"blah blah file\" "));
+        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+        l1.add(eightFourSixXml);
+        FileListChangedEvent fileAdded = addIfShared(eightFourSixFile, l1);
+        FileDesc fileAddedDesc = fileAdded.getFileDesc();
+        int fileDescHitCount = 0;
+
+        assertEquals(0, fileAddedDesc.getHitCount());
+
+        // Query containing query string and metadata, matches a file with query string, but not metadata
+        // Does NOT count as a match
+        responses = keywordIndex.query(queryRequestFactory.createQuery("matching", FileManagerTestUtils.buildAudioXMLString("genre=\"nonmatching\"")));
+        assertEquals(0, responses.length);
+        assertEquals(0, fileAddedDesc.getHitCount());
+
+        // Query containing query string and metadata, matches same file with both query string and metadata
+        // Counts as a match, hit count should be incremented
+        responses = keywordIndex.query(queryRequestFactory.createQuery("matching", FileManagerTestUtils.buildAudioXMLString("genre=\"file\"")));
+        assertEquals(1, responses.length);
+        assertEquals(++fileDescHitCount, fileAddedDesc.getHitCount());
+
+        // Query containing only query string, matches same file with both query string and metadata
+        // Counts as a match, hit count should be incremented
+        responses = keywordIndex.query(queryRequestFactory.createQuery("file"));
+        assertEquals(1, responses.length);
+        assertEquals(++fileDescHitCount, fileAddedDesc.getHitCount());
+
+        // Query containing only query string, matches a file with only in query string
+        // Counts as a match, hit count should be incremented
+        responses = keywordIndex.query(queryRequestFactory.createQuery("matching"));
+        assertEquals(1, responses.length);
+        assertEquals(++fileDescHitCount, fileAddedDesc.getHitCount());
+    }
+
+
+    /**
      * Given the following shared files:
      *
      * #1. An audio file with title "one two three four"

@@ -146,9 +146,30 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         });
     }
 
+    @Override
     public Response[] query(QueryRequest request) {
         Set<Response> responses = QueryProcessor.processQuery(request, this);
+        incrementHitCount(responses);
         return responses.toArray(new Response[responses.size()]);
+    }
+
+    /**
+     * Increment hit counts for files which matched a query
+     *
+     * @param matches set of Response objects
+     */
+    private void incrementHitCount(Set<Response> matches) {
+        FileList fileList = fileManager.getManagedFileList();
+
+        for (Response resp : matches) {
+            long index = resp.getIndex();
+
+            // casting to int because Response originally created with positive int
+            FileDesc desc = fileList.getFileDescForIndex((int)index);
+            if(desc != null) {
+                desc.incrementHitCount();
+            }
+        }
     }
 
     private Set<Response> queryMetaData(QueryRequest request) {
@@ -203,8 +224,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 //desc can bet null if items were removed after the IntSet matches were built
                 if ((filter != null) && !filter.allow(desc.getFileName()))
                     continue;
-    
-                desc.incrementHitCount();
+
                 activityCallback.handleSharedFileUpdate(desc.getFile());
     
                 Response resp = responseFactory.get().createResponse(desc);
@@ -588,13 +608,12 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 // fd is store file, shouldn't be returning query hits for
                 // it then..
                 continue;
-            } else { // we found a file with the right name
-                res = responseFactory.get().createResponse(fd);
-                res.setDocument(null);
-                fd.incrementHitCount();
-                activityCallback.handleSharedFileUpdate(fd.getFile());
             }
-        
+
+            // we found a file with the right name
+            res = responseFactory.get().createResponse(fd);
+            res.setDocument(null);
+            activityCallback.handleSharedFileUpdate(fd.getFile());
             res.setDocument(currDoc);
             responses.add(res);
         }
