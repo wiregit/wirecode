@@ -1378,6 +1378,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             if (l == null)
                 classCNetworks.put(classC,new ArrayList<Endpoint>());
         } catch (UnknownHostException uhe) {
+            LOG.info("Exception while initializing connection", uhe);
             // this will cause the connection to fail, ignore
         }
     }
@@ -2359,17 +2360,17 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             
             // If this was an invalid endpoint, try again.
             while(!isConnectableHost(incoming) || attemptClassC(incoming)) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Ignoring unconnectable host: " + incoming);
+                if(LOG.isInfoEnabled())
+                    LOG.info("Ignoring unconnectable host: " + incoming);
                 incoming = hostCatcher.get().getAnEndpointImmediate(this);
                 if(incoming == null) {
-                    LOG.debug("No hosts available, waiting on a new one...");
+                    LOG.info("No hosts available, waiting on a new one");
                     return; // if we didn't get one immediate, the callback is scheduled
                 }
             }
             
-            if(LOG.isDebugEnabled())
-                LOG.debug("Starting fetch for connectable host: " + incoming);
+            if(LOG.isInfoEnabled())
+                LOG.info("Starting fetch for connectable host: " + incoming);
 
             this.endpoint = incoming;
             ConnectType type = endpoint.isTLSCapable() && networkManager.isOutgoingTLSEnabled() ? 
@@ -2418,7 +2419,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
                 // Failures because of locale aren't really a failure.
                 hostCatcher.get().add(endpoint, true, connection.getLocalePref());
             } else {
-                hostCatcher.get().doneWithConnect(endpoint, true);
+                hostCatcher.get().doneWithConnect(endpoint, false);
                 hostCatcher.get().putHostOnProbation(endpoint);
             }
         }
