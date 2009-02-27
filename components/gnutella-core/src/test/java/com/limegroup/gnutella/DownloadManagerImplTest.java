@@ -25,7 +25,7 @@ public class DownloadManagerImplTest extends LimeTestCase {
         
         Downloader dummyDownloader = createDummyDownloader();
         assertFalse(downloadManager.contains(dummyDownloader));
-        downloader.stop(true);
+        downloader.stop();
     }
 
     private Downloader createDummyDownloader() {

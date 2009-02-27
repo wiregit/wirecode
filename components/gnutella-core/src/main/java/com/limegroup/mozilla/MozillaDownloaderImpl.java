@@ -265,7 +265,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     }
 
     @Override
-    public void stop(boolean deleteFile) {
+    public void stop() {
         finish();
         downloadManager.remove(this, true);
     }
@@ -372,6 +372,11 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
                download.setDiskError();
            }
         }
+    }
+
+    @Override
+    public void deleteIncompleteFiles() {
+        FileUtils.delete(getIncompleteFile(), false);
     }
 
 }

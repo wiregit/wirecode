@@ -47,9 +47,8 @@ public class CoreDownloadItemTest extends BaseTestCase {
 
         context.checking(new Expectations() {
             {
-                one(downloader).stop(true);
-                one(downloader).getFile();
-                will(returnValue(null));
+                one(downloader).stop();
+                one(downloader).deleteIncompleteFiles();
             }
         });
 

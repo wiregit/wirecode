@@ -387,7 +387,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                push.close(); 
            }
            
-           download.stop(false);
+           download.stop();
            
        } finally { 
            ss.close(); 
@@ -454,7 +454,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         assertEquals(10, pr.getIndex());
         assertFalse(pr.isFirewallTransferPush());
         
-        downloader.stop(false);
+        downloader.stop();
     }
 
     public void testCanReactToBadPushProxy() throws Exception {

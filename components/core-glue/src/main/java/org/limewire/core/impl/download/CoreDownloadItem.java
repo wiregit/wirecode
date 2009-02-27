@@ -19,7 +19,6 @@ import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
-import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
@@ -57,10 +56,7 @@ class CoreDownloadItem implements DownloadItem {
                 fireDataChanged();
                 if (event.getType() == com.limegroup.gnutella.Downloader.DownloadState.ABORTED) {
                     //attempt to delete ABORTED file
-                    File file = CoreDownloadItem.this.downloader.getFile();
-                    if (file != null) {
-                        FileUtils.forceDelete(file);
-                    }
+                    CoreDownloadItem.this.downloader.deleteIncompleteFiles();
                 }
             }           
         });
@@ -90,12 +86,9 @@ class CoreDownloadItem implements DownloadItem {
     public void cancel() {
         cancelled = true;
         support.firePropertyChange("state", null, getState());
-        File file = downloader.getFile();
-        downloader.stop(true);
-        //attempt to delete file will not catch some aborted files necessary here for deleting files in error or stalled states
-        if (file != null) {
-            FileUtils.forceDelete(file);
-        }
+        downloader.stop();
+        downloader.deleteIncompleteFiles();
+        //TODO there is a race condition with the delete action, the stop does not happen right away. should revisit how this will be handled.
     }
 
     @Override

@@ -125,7 +125,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
         assertEquals(amountDownloaded, downloader.getAmountRead());
                 
         DownloadMemento memento = downloader.toMemento();
-        downloader.stop(false);
+        downloader.stop();
         
         // Verify that in a new instance of LW, things are still right.
         Injector newInjector = LimeTestUtils.createInjector();
@@ -138,7 +138,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
         // Check same state as before serialization.
         DownloadTestUtils.waitForState(newDownloader, DownloadState.WAITING_FOR_USER);
         assertEquals(amountDownloaded, newDownloader.getAmountRead());
-        newDownloader.stop(false);
+        newDownloader.stop();
     }
 
 }

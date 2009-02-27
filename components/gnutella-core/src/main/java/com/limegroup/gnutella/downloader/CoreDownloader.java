@@ -20,10 +20,10 @@ public interface CoreDownloader extends Downloader, ListenerSupport<DownloadStat
      * Sets the inactive priority of this download.
      */
     public void setInactivePriority(int priority);
-    
+
     /**
-     * Returns the guid that was used for query from which this download
-     * was triggered, or null.
+     * Returns the guid that was used for query from which this download was
+     * triggered, or null.
      */
     public GUID getQueryGUID();
 
@@ -33,8 +33,7 @@ public interface CoreDownloader extends Downloader, ListenerSupport<DownloadStat
     public void startDownload();
 
     /**
-     * @return whether the download is still alive and cannot be
-     * restarted.
+     * @return whether the download is still alive and cannot be restarted.
      */
     public boolean isAlive();
 
@@ -44,22 +43,19 @@ public interface CoreDownloader extends Downloader, ListenerSupport<DownloadStat
     public boolean shouldBeRestarted();
 
     /**
-     * @return whether the download should be removed from 
-     * the waiting list.
+     * @return whether the download should be removed from the waiting list.
      */
     public boolean shouldBeRemoved();
 
     /**
-     * Handles state changes and other operations while
-     * inactive.
+     * Handles state changes and other operations while inactive.
      */
     public void handleInactivity();
 
     public boolean isQueuable();
 
     /**
-     * Cleans up any resources before this downloader 
-     * is completely disposed.
+     * Cleans up any resources before this downloader is completely disposed.
      */
     public void finish();
 
@@ -75,17 +71,17 @@ public interface CoreDownloader extends Downloader, ListenerSupport<DownloadStat
      * Returns the type of download
      */
     public DownloaderType getDownloadType();
-    
+
     /** Constructs a memento that will be used for serialization. */
     DownloadMemento toMemento();
-    
+
     /**
      * Initializes this object from the given memento.
      * 
      * @throws InvalidDataException if the memento contains invalid data.
      */
     void initFromMemento(DownloadMemento memento) throws InvalidDataException;
-    
+
     /**
      * Indicator of whether this downloader supports a memento or not.
      */

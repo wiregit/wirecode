@@ -99,7 +99,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	 * (To stop a seeding torrent it must be stopped from the
 	 * uploads pane)
 	 */
-	public void stop(boolean deleteFile) {
+	public void stop() {
 		if (torrent.isActive() &&
 				torrent.getState() != TorrentState.SEEDING) {
 			torrent.stop();
@@ -539,6 +539,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
      */
     public TorrentContext getTorrentContext() {
         return torrentContext;
+    }
+
+    @Override
+    public void deleteIncompleteFiles() {
+        //TODO assert that complete or aborted?
+        torrentFileSystem.deleteIncompleteFiles();
     }
 
 }

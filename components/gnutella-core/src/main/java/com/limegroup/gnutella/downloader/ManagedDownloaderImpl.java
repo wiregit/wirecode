@@ -669,7 +669,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 } catch(Throwable t) {
                     // if any unhandled errors occurred, remove this
                     // download completely and message the error.
-                    ManagedDownloaderImpl.this.stop(false);
+                    ManagedDownloaderImpl.this.stop();
                     setState(DownloadState.ABORTED);
                     downloadManager.remove(ManagedDownloaderImpl.this, true);
                     
@@ -1480,7 +1480,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     public synchronized void pause() {
         // do not pause if already stopped.
         if(!stopped && !isCompleted()) {
-            stop(false);
+            stop();
             stopped = false;
             paused = true;
             // if we're already inactive, mark us as paused immediately.
@@ -1524,7 +1524,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * <code>deleteFile</code> is true, then the file is deleted. 
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#stop()
      */
-    public void stop(boolean deleteFile) {
+    public void stop() {
     
         if(paused) {
             stopped = true;
@@ -1554,11 +1554,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 else
                     LOG.warn("MANAGER: no thread to interrupt");
             }
-        }
-
-        if (deleteFile && incompleteFile != null) {
-            // Remove file from incomplete file list.
-            incompleteFileManager.removeEntry(incompleteFile);
         }
     }
 
@@ -1923,7 +1918,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     public void handleResponse(URN urn, ContentResponseData response) {
                         if(response != null && !response.isOK()) {
                             invalidated = true;
-                            stop(false);
+                            stop();
                         }
                     }
                 }, 5000);           
@@ -2306,7 +2301,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     LOG.warn("MANAGER: terminating because of stop|pause");
                     throw new InterruptedException();
                 }
-                stop(false);
+                stop();
                 reportDiskProblem(dio);
                 return DownloadState.DISK_PROBLEM;
             }
@@ -2537,7 +2532,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 }
 
                 if (delete)
-                    stop(false);
+                    stop();
                 else 
                     commonOutFile.setDiscardUnverified(false);
                 
@@ -3198,5 +3193,17 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     // for tests
     protected SourceRanker getCurrentSourceRanker() {
         return ranker;
+    }
+
+    @Override
+    public void deleteIncompleteFiles() {
+        //TODO assert that complete or aborted?
+        File incompleteFile = getIncompleteFile();
+        
+        if (incompleteFile != null) {
+            // Remove file from incomplete file list.
+            incompleteFileManager.removeEntry(incompleteFile);
+            FileUtils.delete(incompleteFile, false);
+        }
     }
 }

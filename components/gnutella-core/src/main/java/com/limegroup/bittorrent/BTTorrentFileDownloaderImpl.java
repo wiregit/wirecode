@@ -300,7 +300,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         return false;
     }
 
-    public void stop(boolean deleteFile) {
+    public void stop() {
         finish();
         downloadManager.remove(this, true);
     }
@@ -425,5 +425,10 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         if (DownloadState.COMPLETE == event.getType()) {
             downloadManager.remove(this, true);
         }
+    }
+
+    @Override
+    public void deleteIncompleteFiles() {
+        //incomplete file is only stored in memory, nothing to delete.
     }
 }

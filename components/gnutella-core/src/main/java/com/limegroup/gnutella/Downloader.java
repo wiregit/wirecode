@@ -57,11 +57,10 @@ public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadSt
     
     
     /**
-     * Stops this download if it is not already stopped.  If 
-     * <code>deleteFile</code> is true, then the file is deleted. 
+     * Stops this download if it is not already stopped. 
      * @modifies this
      */
-    public void stop(boolean deleteFile);
+    public void stop();
     
     /**
      * Pauses this download.  If the download is already paused or stopped, does nothing.
@@ -317,5 +316,12 @@ public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadSt
     
     /** Gets all sources as addresses */
     public List<Address> getSourcesAsAddresses();
+    
+    /**
+     * Deletes the incomplete files for this downloader.
+     * The downloader should handle the possibility of this method being called multiple times.
+     */
+    public void deleteIncompleteFiles();
+
 }
 

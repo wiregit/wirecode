@@ -320,7 +320,7 @@ public class RequeryDownloadTest extends LimeTestCase {
             //b) No match: keep waiting for results
             Thread.sleep(2000); // sleep a bit and make sure nothing happened in the meantime.
             assertEquals("downloader should wait for user", DownloadState.WAITING_FOR_GNET_RESULTS, downloader.getState());
-            downloader.stop(false);
+            downloader.stop();
         }
     }
     

@@ -316,4 +316,13 @@ public class TorrentFileSystem {
 			ret += f.length();
 		return ret;
 	}
+
+	/**
+	 * Deletes the incomplete files for this torrent file system.
+	 * The torrent file system should handle the possibility of this method being called multiple times.
+	 */
+    public void deleteIncompleteFiles() {
+        File parent = _incompleteFile.getParentFile();
+        FileUtils.deleteRecursive(parent);
+    }
 }
