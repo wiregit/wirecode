@@ -442,7 +442,7 @@ public class LibraryManagerModelTest extends SwingTestCase {
         assertContains(model.getAllExcludedSubfolders(), secondItem.getFile());
         
         //readd second folder's child, third folder
-        LibraryManagerItem thirdItem = secondItem.getChildFor(thirdFolder);
+        LibraryManagerItem thirdItem = new LibraryManagerItemImpl(root, libraryData, excludedFolders, thirdFolder);
         model.addChild(thirdItem, root);
         
         assertEquals(1, model.getAllExcludedSubfolders().size());
