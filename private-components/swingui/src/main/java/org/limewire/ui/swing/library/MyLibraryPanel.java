@@ -43,6 +43,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -120,9 +121,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private final Map<Catalog, LibraryOperable<? extends LocalFileItem>> selectableMap;
     private final ShareWidgetFactory shareFactory;    
     private final PlaylistManager playlistManager;
+    private final ShareListManager shareListManager;
     
     /** Map of JXLayers and categories they exist in */
     private Map<Category, JXLayer> map = new HashMap<Category, JXLayer>();
+    private Map<Category, LockableUI> lockMap = new HashMap<Category, LockableUI>();
     
     private Timer repaintTimer;
     private ListenerSupport<XMPPConnectionEvent> connectionListeners;
@@ -176,6 +179,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         this.connectionListeners = connectionListeners;
         this.xmppService = xmppService;
         this.playlistManager = playlistManager;
+        this.shareListManager = shareListManager;
         
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
@@ -296,8 +300,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         currentFriendFilterChanger.setFriend(null);
         sharingComboBox.setVisible(true);
         messagePanel.setVisible(false);
-        if(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == false && 
-                (xmppService.isLoggedIn() && SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == false))
+        
+        // don't hide the overlay if its the first time seeing the library or
+        // im logged in and its the first time logging in
+        if(!(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true ||
+                (xmppService.isLoggedIn() && SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true)))
             hideEmptyFriend();
         //reselect the current category in case we filtered on a friend that wasn't 
         //sharing anything
@@ -384,6 +391,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         LockableUI blurUI = new LockedUI();
         JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
         map.put(category, jxlayer);
+        lockMap.put(category, blurUI);
         
         // only do this if the message hasn't been shown before
         if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true || 
@@ -407,6 +415,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                                 libraryNavigator.selectLibrary();
                                 SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
                             }
+                            SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.setValue(false);
+                            SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.setValue(false);
                         } else if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
                             JPanel panel = new JPanel(new MigLayout("fill"));
                             panel.setOpaque(false);
@@ -419,6 +429,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                                 libraryNavigator.selectLibrary();
                                 SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
                             }
+                            SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.setValue(false);
                         }
                     }
                 }
@@ -435,6 +446,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 layer.getGlassPane().removeAll();
                 layer.getGlassPane().add(panel);
                 layer.getGlassPane().setVisible(true);
+                SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.setValue(false);
             }
         }
 
@@ -565,12 +577,33 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     }
     
     /**
+	 * Displays the Sharing Collection Message. This also locks the 
+     * underlying table and displays a gradient over the table.
+	 */
+    private void showCollectionShare(Category category, Friend friend) {
+        if(category != null) {
+            JPanel panel = new JPanel(new MigLayout("fill"));
+            panel.setOpaque(true);
+            panel.setBackground(new Color(147,170,209,80));
+            panel.add(getLockedLayer(category, friend), "align 50% 40%");
+            
+            JXLayer layer = map.get(category);
+            layer.getGlassPane().removeAll(); 
+            layer.getGlassPane().add(panel);
+            layer.getGlassPane().setVisible(true);
+            layer.getGlassPane().repaint();
+        }
+    }
+    
+    /**
 	 * Hides the Not Sharing Message in this particular category.
 	 */
     private void hideEmptyFriend(Category category) {
         if(category != null) {
             JXLayer layer = map.get(category);
             layer.getGlassPane().setVisible(false);
+            LockableUI locked = lockMap.get(category);
+            locked.setLocked(false);
         }
     }
     
@@ -581,6 +614,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         for(Category category : Category.values()) {
             JXLayer layer = map.get(category);
             layer.getGlassPane().setVisible(false);
+            LockableUI locked = lockMap.get(category);
+            locked.setLocked(false);
         }
     }
     
@@ -666,7 +701,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         
         public LockedUI(LayerEffect... lockedEffects) {
             panel = new JXPanel(new MigLayout("aligny 50%, alignx 50%"));
-            panel.setVisible(false);
+            panel.setBackground(new Color(147,170,209,80));
+            panel.setVisible(false);     
         }
         
         @SuppressWarnings("unchecked")
@@ -694,6 +730,26 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         public Cursor getLockedCursor() {
             return Cursor.getDefaultCursor();
         }
+    }
+    
+    /**
+	 * Creates a Message Component when displaying a share collection. 
+	 */
+    public MessageComponent getLockedLayer(Category category, Friend friend) {
+ 
+        MessageComponent messageComponent = new MessageComponent(6, 22, 18, 6);
+        
+        JLabel label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category.getSingularName(), friend.getRenderName()));
+        messageComponent.decorateHeaderLabel(label);
+
+        // {0}: name of category (Audio, Video...)
+        JLabel minLabel = new JLabel(I18n.tr("New {0} files that are added to your Library will be automatically shared with this person", category.getSingularName()));
+        messageComponent.decorateSubLabel(minLabel);
+
+        messageComponent.addComponent(label, "wrap");
+        messageComponent.addComponent(minLabel, "");
+        
+        return messageComponent;
     }
     
     /**
@@ -725,11 +781,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             public void actionPerformed(ActionEvent e) {
                 for(JXLayer layer : map.values()) {
                     layer.getGlassPane().setVisible(false);
-                }
+                }       
                 SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.setValue(false);
             }
         });
-
+        
         messageComponent.addComponent(cancelButton, "span, alignx right");
         messageComponent.addComponent(headerLabel, "push, wrap");
         messageComponent.addComponent(minLabel, "wrap, gapright 16");
@@ -752,6 +808,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         JLabel minLabel = new JLabel(I18n.tr("Click the share button to share or unshare files with the P2P Network"));
         messageComponent.decorateSubLabel(minLabel);
         
+        JLabel minLabel2 = new JLabel(I18n.tr("Click the What I'm Sharing button to see what files are being shared with the P2P Network"));
+        messageComponent.decorateSubLabel(minLabel2);
+        
         JButton cancelButton = new JButton(closeButton);
         cancelButton.setBorder(BorderFactory.createEmptyBorder());
         cancelButton.setRolloverIcon(closeHoverButton);
@@ -771,6 +830,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         messageComponent.addComponent(cancelButton, "span, alignx right");
         messageComponent.addComponent(headerLabel, "push, wrap");
         messageComponent.addComponent(minLabel, "wrap, gapright 16");
+        messageComponent.addComponent(minLabel2, "wrap, gapright 16");
 
         return messageComponent;
     }
@@ -813,7 +873,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         messageComponent.addComponent(cancelButton, "span, alignx right");
         messageComponent.addComponent(headerLabel, "push, wrap");
         messageComponent.addComponent(minLabel, "wrap, gapright 16");
-
+        
         return messageComponent;
     }
     
@@ -1042,15 +1102,28 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                     action.setEnabled(true);
                 }
             } else { //filtering on a friend
-                if(category == Category.PROGRAM) { // hide program category is not enabled
-                    action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
-                }
-                //disable any category if size is 0
-                action.setEnabled(list.size() > 0);
-                if(list.size() > 0)
-                    hideEmptyFriend(category);
+                FriendFileList fileList;
+                if(currentFriendFilterChanger.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                    fileList = shareListManager.getGnutellaShareList();
                 else
-                    showEmptyFriend(category);
+                    fileList = shareListManager.getFriendShareList(currentFriendFilterChanger.getCurrentFriend());
+                
+                // if category shaaring, lock the ui
+                if( (category == Category.AUDIO || category == Category.IMAGE || category == Category.VIDEO) && 
+                        fileList != null && fileList.isCategoryAutomaticallyAdded(category)) {
+                        showCollectionShare(category, currentFriendFilterChanger.getCurrentFriend());
+                        lockMap.get(category).setLocked(true);
+                } else {
+                    if(category == Category.PROGRAM) { // hide program category is not enabled
+                        action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
+                    }
+                    //disable any category if size is 0
+                    action.setEnabled(list.size() > 0);
+                    if(list.size() > 0)
+                        hideEmptyFriend(category);
+                    else
+                        showEmptyFriend(category);
+                }
             }
         }
         
