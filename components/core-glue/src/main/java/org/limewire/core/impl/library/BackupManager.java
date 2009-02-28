@@ -2,15 +2,20 @@ package org.limewire.core.impl.library;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.limewire.core.api.browser.LoadURLEvent;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -28,6 +33,13 @@ import com.amazon.s3.ListBucketResponse;
 import com.amazon.s3.ListEntry;
 import com.amazon.s3.Response;
 import com.amazon.s3.S3Object;
+import com.amazonaws.ls.AmazonLSException;
+import com.amazonaws.ls.http.AmazonLSQuery;
+import com.amazonaws.ls.model.ActivateDesktopProduct;
+import com.amazonaws.ls.model.ActivateDesktopProductResponse;
+import com.amazonaws.ls.model.ActivateDesktopProductResult;
+import com.amazonaws.ls.model.VerifyProductSubscriptionByTokens;
+import com.amazonaws.ls.model.VerifyProductSubscriptionByTokensResponse;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileManager;
@@ -39,11 +51,12 @@ public class BackupManager implements Service {
     private static final Log LOG = LogFactory.getLog(BackupManager.class);
 
     private final LibraryManager libraryManager;
-    private static final String LIMEWIRE_LIBRARY = "tjulienlibrary";
+    private final EventListener<LoadURLEvent> loadURLListener;
 
     @Inject
-    public BackupManager(LibraryManager libraryManager){
+    public BackupManager(LibraryManager libraryManager, EventListener<LoadURLEvent> loadURLListener){
         this.libraryManager = libraryManager;
+        this.loadURLListener = loadURLListener;
     }
 
     @Inject
@@ -64,29 +77,79 @@ public class BackupManager implements Service {
 //        }
     }
 
-    public void backup() throws IOException {
-        InputStream awsPropStream = getClass().getClassLoader().getResourceAsStream("org/limewire/core/impl/library/aws.properties");
+    private ActivateDesktopProductResult activate(Properties awsProps) throws AmazonLSException, URISyntaxException, InterruptedException, IOException {
+        if(awsProps.getProperty("activationKey") == null) {
+            loadURLListener.handleEvent(new LoadURLEvent(new URI(awsProps.getProperty("purchaseURL"))));
+            // TODO offer a choice to show activation page, for existing customers?
+        }
+        while(awsProps.getProperty("activationKey") == null) {
+            Thread.sleep(30 * 1000);
+            InputStream awsPropStream = new FileInputStream(new File("aws.properties"));
+            awsProps.load(awsPropStream);
+        }
+
+        AmazonLSQuery lsQuery = new AmazonLSQuery("dummy", "dummy");
+        ActivateDesktopProductResponse response = lsQuery.activateDesktopProduct(getActivateDesktopProductAction(awsProps.getProperty("productToken"), awsProps.getProperty("activationKey")));
+        return response.getActivateDesktopProductResult();
+    }
+
+    private ActivateDesktopProduct getActivateDesktopProductAction(String productToken, String activationKey) {
+        ActivateDesktopProduct product = new ActivateDesktopProduct();
+        product.setProductToken(productToken);
+        product.setActivationKey(activationKey);
+        return product;
+    }
+
+    public void backup() throws IOException, AmazonLSException, URISyntaxException, InterruptedException {
+        InputStream awsPropStream = new FileInputStream(new File("aws.properties"));
         if(awsPropStream != null) {
             Properties awsProps = new Properties();
             awsProps.load(awsPropStream);
+            String userToken = awsProps.getProperty("userToken");
+            if(userToken == null ||
+                    !verifySubscription(awsProps).getVerifyProductSubscriptionByTokensResult().isSubscribed()) {
+                ActivateDesktopProductResult activateResult = activate(awsProps);
+                awsPropStream = new FileInputStream(new File("aws.properties"));
+                awsProps.load(awsPropStream);
+                awsProps.setProperty("id", activateResult.getAWSAccessKeyId());
+                awsProps.setProperty("password", activateResult.getSecretAccessKey());
+                awsProps.setProperty("userToken", activateResult.getUserToken());
+                awsProps.store(new FileOutputStream(new File("aws.properties")), null);
+            }
             LibraryFileList managedFiles = libraryManager.getLibraryManagedList();
-            AWSAuthConnection connection = new AWSAuthConnection(awsProps.getProperty("id"), awsProps.getProperty("password"));
-            createLimewireLibraryBucketIfNecessary(connection);
-            deleteRemovedEntries(managedFiles, connection);
-            uploadNewOrUpdatedFiles(managedFiles, connection);
+            List<String> securityTokens = new ArrayList<String>();
+            securityTokens.add(awsProps.getProperty("userToken"));
+            securityTokens.add(awsProps.getProperty("productToken"));
+            AWSAuthConnection connection = new AWSAuthConnection(awsProps.getProperty("id"), awsProps.getProperty("password"), securityTokens);
+            createLimewireLibraryBucketIfNecessary(connection, awsProps);
+            deleteRemovedEntries(managedFiles, connection, awsProps);
+            uploadNewOrUpdatedFiles(managedFiles, connection, awsProps);
         }
     }
 
-    private void uploadNewOrUpdatedFiles(LibraryFileList managedFiles, AWSAuthConnection connection) {
+    private VerifyProductSubscriptionByTokensResponse verifySubscription(Properties awsProps) throws AmazonLSException {
+        AmazonLSQuery lsQuery = new AmazonLSQuery(awsProps.getProperty("id"), awsProps.getProperty("password"));
+        return lsQuery.verifyProductSubscriptionByTokens(getTokens(awsProps.getProperty("productToken"), awsProps.getProperty("userToken")));
+    }
+
+    private VerifyProductSubscriptionByTokens getTokens(String productToken, String userToken) {
+        VerifyProductSubscriptionByTokens tokens = new VerifyProductSubscriptionByTokens();
+        tokens.setProductToken(productToken);
+        tokens.setUserToken(userToken);
+        return tokens;
+    }
+
+
+    private void uploadNewOrUpdatedFiles(LibraryFileList managedFiles, AWSAuthConnection connection, Properties awsProps) {
         for(LocalFileItem file : managedFiles.getModel()) {
             try {
-                HeadResponse response = connection.head(LIMEWIRE_LIBRARY, file.getFile().getCanonicalPath(), null);
+                HeadResponse response = connection.head(awsProps.getProperty("id").toLowerCase(), file.getFile().getCanonicalPath(), null);
                 if(response.connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                    uploadFile(connection, file);
+                    uploadFile(connection, file, awsProps);
                 } else if(response.connection.getResponseCode() == HttpURLConnection.HTTP_OK){
                     Map<String, List<String>> metadata = response.metadata;
                     if(fileHasChanged(file, metadata) || !isFullyStored(response, file)) {
-                        uploadFile(connection, file);
+                        uploadFile(connection, file, awsProps);
                     }
                 }  else {
                     // TODO
@@ -105,21 +168,27 @@ public class BackupManager implements Service {
         return !metadata.get("sha1").get(0).equals(file.getUrn().toString());
     }
 
-    private void createLimewireLibraryBucketIfNecessary(AWSAuthConnection connection) throws IOException {
-        if(!connection.checkBucketExists(LIMEWIRE_LIBRARY)) {
-            LOG.debugf("creating bucket {0} ...", LIMEWIRE_LIBRARY);
-            Response response = connection.createBucket(LIMEWIRE_LIBRARY, AWSAuthConnection.LOCATION_DEFAULT, null);
+    private void createLimewireLibraryBucketIfNecessary(AWSAuthConnection connection, Properties awsProps) throws IOException {
+        if(!checkBucketExists(connection, awsProps.getProperty("id").toLowerCase(), awsProps)) {
+            LOG.debugf("creating bucket {0} ...", awsProps.getProperty("id").toLowerCase());
+            Response response = connection.createBucket(awsProps.getProperty("id").toLowerCase(), AWSAuthConnection.LOCATION_DEFAULT, null);
             if(response.connection.getResponseCode() != 200) {
                 throw new IOException();
             }
         }
     }
 
-    private void deleteRemovedEntries(LibraryFileList managedFiles, AWSAuthConnection connection) throws IOException {
+    private boolean checkBucketExists(AWSAuthConnection connection, String limewireLibrary, Properties awsProps) throws IOException {
+        HttpURLConnection response  = connection.head(limewireLibrary, "", null).connection;
+        int httpCode = response.getResponseCode();
+        return httpCode >= 200 && httpCode < 300;
+    }
+
+    private void deleteRemovedEntries(LibraryFileList managedFiles, AWSAuthConnection connection, Properties awsProps) throws IOException {
         String marker = null;
         List<ListEntry> entries;
         do {
-            ListBucketResponse response = connection.listBucket(LIMEWIRE_LIBRARY,
+            ListBucketResponse response = connection.listBucket(awsProps.getProperty("id").toLowerCase(),
                 null, marker, 256, null);
             entries = response.entries;
             for(ListEntry entry : entries) {
@@ -127,7 +196,7 @@ public class BackupManager implements Service {
                 marker = fileName;
                 if(!managedFiles.contains(new File(fileName))) {
                     LOG.debugf("removing {0} ...", fileName);
-                    Response deleteResponse = connection.delete(LIMEWIRE_LIBRARY, fileName, null);
+                    Response deleteResponse = connection.delete(awsProps.getProperty("id").toLowerCase(), fileName, null);
                     if(deleteResponse.connection.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT) {
                         LOG.debugf("error deleting {0}.  HTTP status = {1}", fileName,
                                 deleteResponse.connection.getResponseCode());
@@ -137,13 +206,13 @@ public class BackupManager implements Service {
         } while (entries.size() > 0);
     }
 
-    private void uploadFile(AWSAuthConnection connection, LocalFileItem file) throws IOException {
+    private void uploadFile(AWSAuthConnection connection, LocalFileItem file, Properties awsProps) throws IOException {
         // TODO populate metadata with limexmldocument ?
         Map<String, List<String>> metadata = new HashMap<String, List<String>>();
         metadata.put("sha1", Arrays.asList(file.getUrn().toString()));
         S3Object backedUpFile = new S3Object(IOUtils.readFully(new FileInputStream(file.getFile())), metadata);
         LOG.debugf("uploading {0}...", file.getFileName());
-        Response response = connection.put(LIMEWIRE_LIBRARY, file.getFile().getCanonicalPath(), backedUpFile, null);
+        Response response = connection.put(awsProps.getProperty("id").toLowerCase(), file.getFile().getCanonicalPath(), backedUpFile, null);
         if(response.connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
             LOG.debugf("failed to backup {0}:  HTTP status {1}", file.getName(), response.connection.getResponseCode());
         }
@@ -166,7 +235,7 @@ public class BackupManager implements Service {
             if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
                 try {
                     backup();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
             }

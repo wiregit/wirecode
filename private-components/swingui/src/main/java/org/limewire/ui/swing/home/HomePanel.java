@@ -13,6 +13,7 @@ import javax.swing.event.HyperlinkListener;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Application;
+import org.limewire.core.api.browser.LoadURLEvent;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.BrowserUtils;
 import org.limewire.ui.swing.browser.TargetedUrlAction;
@@ -21,6 +22,7 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.listener.ListenerSupport;
 import org.mozilla.browser.MozillaAutomation;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
@@ -41,7 +43,7 @@ public class HomePanel extends JXPanel {
     private final HTMLPane fallbackBrowser;
 
     @Inject
-    public HomePanel(Application application, final Navigator navigator) {
+    public HomePanel(Application application, final Navigator navigator, ListenerSupport<LoadURLEvent> listenerSupport) {
         this.application = application;
         
         setPreferredSize(new Dimension(500, 500));
@@ -76,6 +78,7 @@ public class HomePanel extends JXPanel {
                 }
             });
             browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN, VisibilityMode.DEFAULT);
+            browser.register(listenerSupport);
             fallbackBrowser = null;
             add(browser, gbc);
             loadDefaultUrl();

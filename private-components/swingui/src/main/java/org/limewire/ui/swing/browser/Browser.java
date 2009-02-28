@@ -10,11 +10,12 @@ import java.awt.event.ComponentEvent;
 
 import javax.swing.JLabel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.browser.LoadURLEvent;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.components.ColoredBusyLabel;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.I18n;
@@ -32,10 +33,12 @@ import org.mozilla.interfaces.nsIWebProgress;
 import org.mozilla.interfaces.nsIWebProgressListener;
 import org.mozilla.xpcom.Mozilla;
 
+import net.miginfocom.swing.MigLayout;
+
 /**
  * Extension to Mozilla's browser that adds the correct listeners.
  */
-public class Browser extends MozillaPanel {
+public class Browser extends MozillaPanel implements EventListener<LoadURLEvent> {
     
     private final Listener listener = new Listener();
     
@@ -64,6 +67,10 @@ public class Browser extends MozillaPanel {
     public Browser(VisibilityMode toolbarVisMode, VisibilityMode statusbarVisMode, VisibilityMode loadingMode) {
         super(toolbarVisMode, statusbarVisMode);
         this.loadStatus = loadingMode;
+    }
+
+    public void register(ListenerSupport<LoadURLEvent> listenerSupport) {
+        listenerSupport.addListener(this);
     }
     
     @Override
@@ -161,7 +168,12 @@ public class Browser extends MozillaPanel {
             });
         }
     }
-    
+
+    @Override
+    public void handleEvent(LoadURLEvent event) {
+        load(event.getData().toASCIIString());
+    }
+
 
     private class VisibilityListener extends ComponentAdapter {
         @Override

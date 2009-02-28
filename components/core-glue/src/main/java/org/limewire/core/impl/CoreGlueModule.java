@@ -5,6 +5,7 @@ import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.magnet.MagnetFactory;
 import org.limewire.core.impl.browse.CoreGlueBrowseModule;
+import org.limewire.core.impl.browser.CoreGlueBrowserModule;
 import org.limewire.core.impl.connection.CoreGlueConnectionModule;
 import org.limewire.core.impl.daap.CoreGlueDaapModule;
 import org.limewire.core.impl.download.CoreGlueDownloadModule;
@@ -65,6 +66,7 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGlueSupportModule());
         install(new CoreGlueUploadModule());
         install(new CoreGlueUpdatesModule());
+        install(new CoreGlueBrowserModule());
     }
 
 }
