@@ -42,8 +42,10 @@ public class TcpBootstrap {
     
     private static final Log LOG = LogFactory.getLog(TcpBootstrap.class);
     
-    /** The total number of hosts we want to retrieve from web caches at a time. */
-    private final int WANTED_HOSTS = 15;
+    /** The number of hosts we want to retrieve from web caches at a time. */
+    private static final int WANTED_HOSTS = 15;
+    /** The socket timeout for HTTP connections to gwebcaches. */
+    private static final int SOCKET_TIMEOUT = 5000;
     
     private final ExecutorService bootstrapQueue = ExecutorsHelper.newProcessingQueue("TCP Bootstrap");
     
@@ -144,8 +146,8 @@ public class TcpBootstrap {
         }
         
         HttpParams params = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(params, 5000);
-        HttpConnectionParams.setSoTimeout(params, 5000);
+        HttpConnectionParams.setConnectionTimeout(params, SOCKET_TIMEOUT);
+        HttpConnectionParams.setSoTimeout(params, SOCKET_TIMEOUT);
         params = new DefaultedHttpParams(params, defaultParams.get());
         
         if(LOG.isDebugEnabled())
@@ -227,8 +229,13 @@ public class TcpBootstrap {
         
         @Override
         public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
-            if(LOG.isDebugEnabled())
+            if(LOG.isDebugEnabled()) {
                 LOG.debug("Failed request: " + request.getRequestLine());
+                if(response != null)
+                    LOG.debug("Response " + response);
+                if(exc != null)
+                    LOG.debug(exc);
+            }
             synchronized (TcpBootstrap.this) {
                 attemptedHosts.add(hosts.remove(request));                
             }
