@@ -90,13 +90,15 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
     /**
      * Adds an info panel for the specified catalog and its file list. 
      */
-    @SuppressWarnings("unchecked")
     public<T extends FileItem> void addCard(Catalog catalog, EventList<T> fileList, boolean isFriendView) {
-        InfoPanel panel = new InfoPanel(catalog, fileList, isFriendView);
+        InfoPanel panel = new InfoPanel<T>(catalog, fileList, isFriendView);
         categoryInfoPanels.put(catalog.getId(), panel);
         cardPanel.add(panel, catalog.getId());
     }
     
+    /**
+     * Adds an info panel for the specified category and its file list. 
+     */
     public<T extends FileItem> void addCard(Category category, EventList<T> fileList, boolean isFriendView) {
         addCard(new Catalog(category), fileList, isFriendView);
     }

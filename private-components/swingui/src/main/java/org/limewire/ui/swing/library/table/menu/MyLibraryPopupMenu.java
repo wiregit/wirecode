@@ -1,8 +1,10 @@
 package org.limewire.ui.swing.library.table.menu;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.util.List;
 
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -10,9 +12,13 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.playlist.Playlist;
+import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.Catalog;
 import org.limewire.ui.swing.library.SelectAllable;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.menu.actions.DeleteAction;
 import org.limewire.ui.swing.library.table.menu.actions.LaunchFileAction;
 import org.limewire.ui.swing.library.table.menu.actions.LocateFileAction;
@@ -35,6 +41,8 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private final PropertiesFactory<LocalFileItem> propertiesFactory;
     private final XMPPService xmppService;
     private final SharingActionFactory sharingActionFactory;   
+    private final LibraryNavigator libraryNavigator;
+    private final PlaylistManager playlistManager;
 
     private SelectAllable<LocalFileItem> librarySelectable;
 
@@ -43,12 +51,14 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
             SharingActionFactory sharingActionFactory, PropertiesFactory<LocalFileItem> propertiesFactory,
-            XMPPService xmppService) {
+            XMPPService xmppService, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.libraryManager = libraryManager;
         this.sharingActionFactory = sharingActionFactory;
         this.category = category;
         this.propertiesFactory = propertiesFactory;
         this.xmppService = xmppService;
+        this.libraryNavigator = libraryNavigator;
+        this.playlistManager = playlistManager;
         
         GuiUtils.assignResources(this);
     }
@@ -77,10 +87,19 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         boolean shareActionEnabled = false;
         boolean removeActionEnabled = false;
         boolean deleteActionEnabled = false;
+        boolean playlistActionEnabled = true;
 
         for (LocalFileItem localFileItem : fileItems) {
             if (localFileItem.isShareable()) {
                 shareActionEnabled = true;
+                break;
+            }
+        }
+
+        // Disable playlist action if any selected files are incomplete.
+        for (LocalFileItem localFileItem : fileItems) {
+            if (localFileItem.isIncomplete()) {
+                playlistActionEnabled = false;
                 break;
             }
         }
@@ -97,7 +116,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         switch (category) {
         case AUDIO:
         case VIDEO:
-            add(new PlayAction(firstItem)).setEnabled(playActionEnabled);
+            add(new PlayAction(libraryNavigator, new Catalog(category), firstItem)).setEnabled(playActionEnabled);
             break;
         case IMAGE:
         case DOCUMENT:
@@ -107,6 +126,22 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         case OTHER:
             add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
         }
+
+        // Create playlist sub-menu for audio files.
+        if (category == Category.AUDIO) {
+            JMenu playlistMenu = new JMenu(I18n.tr("Add to playlist"));
+            
+            // Add action for each playlist.
+            List<Playlist> playlistList = playlistManager.getPlaylists();
+            for (Playlist playlist : playlistList) {
+                playlistMenu.add(new PlaylistAction(playlist, fileItems));
+            }
+            
+            // Add sub-menu to popup menu.
+            playlistMenu.setEnabled(playlistActionEnabled);
+            add(playlistMenu);
+        }
+
         addSeparator();
 
         boolean isDocumentSharingAllowed = isGnutellaShareAllowed(category) & shareActionEnabled;
@@ -122,7 +157,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
             add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Share with Friend"))));
             add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Unshare with Friend"))));
         }
-
+        
         addSeparator();
         if (category != Category.PROGRAM && category != Category.OTHER) {
             add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
@@ -140,5 +175,26 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         if(category != Category.DOCUMENT)
             return true;
         return LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue();
+    }
+    
+    /**
+     * Menu action to add files to a playlist.
+     */
+    private class PlaylistAction extends AbstractAction {
+        private final Playlist playlist;
+        private final List<LocalFileItem> fileItems;
+        
+        public PlaylistAction(Playlist playlist, List<LocalFileItem> fileItems) {
+            super(playlist.getName());
+            this.playlist = playlist;
+            this.fileItems = fileItems;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            for (LocalFileItem fileItem : fileItems) {
+                playlist.addFile(fileItem.getFile());
+            }
+        }
     }
 }

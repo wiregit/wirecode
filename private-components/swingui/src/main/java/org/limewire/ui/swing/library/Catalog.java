@@ -1,13 +1,14 @@
 package org.limewire.ui.swing.library;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.playlist.Playlist;
 import org.limewire.util.Objects;
 
 /**
  * Catalog defines an organization of items in a library.  There are two 
  * catalog types: a media category, and a playlist.
  */
-class Catalog {
+public class Catalog {
     /** Types of catalogs. */
     public enum Type {
         CATEGORY, PLAYLIST
@@ -18,7 +19,10 @@ class Catalog {
     /** Name of catalog. */
     private final String name;
     
+    /** Category represented by this catalog; may be null. */
     private Category category;
+    /** Playlist represented by this catalog; may be null. */
+    private Playlist playlist;
 
     /**
      * Constructs a Catalog with the specified type and name.
@@ -37,10 +41,25 @@ class Catalog {
     }
     
     /**
+     * Constructs a Catalog for the specified playlist.
+     */
+    public Catalog(Playlist playlist) {
+        this(Type.PLAYLIST, playlist.getName());
+        this.playlist = playlist;
+    }
+    
+    /**
      * Returns the media category associated with this catalog.  May be null.
      */
     public Category getCategory() {
         return category;
+    }
+    
+    /**
+     * Returns the playlist associated with this catalog.  May be null.
+     */
+    public Playlist getPlaylist() {
+        return playlist;
     }
     
     /**
@@ -50,11 +69,17 @@ class Catalog {
     public String getId() {
         return (type + "." + name);
     }
-    
+
+    /**
+     * Returns the catalog name.  
+     */
     public String getName() {
         return name;
     }
     
+    /**
+     * Returns the catalog type.
+     */
     public Type getType() {
         return type;
     }

@@ -6,12 +6,13 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TooManyListenersException;
@@ -46,6 +47,8 @@ import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.playlist.Playlist;
+import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -67,6 +70,8 @@ import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.playlist.PlaylistButtonDropListener;
+import org.limewire.ui.swing.library.playlist.PlaylistFileItemFunction;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
@@ -87,7 +92,6 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
 
-import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -105,15 +109,18 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private Icon closeButton;
     @Resource
     private Icon closeHoverButton;
+    @Resource
+    private Icon playQuicklistIcon;
     
     private final LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
     private final PlayerPanel playerPanel;
     private final LibraryManager libraryManager;
     private final LibraryNavigator libraryNavigator;
-    private final Map<Category, LibraryOperable<LocalFileItem>> selectableMap;
+    private final Map<Catalog, LibraryOperable<? extends LocalFileItem>> selectableMap;
     private final ShareWidgetFactory shareFactory;    
-   
+    private final PlaylistManager playlistManager;
+    
     /** Map of JXLayers and categories they exist in */
     private Map<Category, JXLayer> map = new HashMap<Category, JXLayer>();
     
@@ -152,7 +159,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                           ComboBoxDecorator comboDecorator,
                           ButtonDecorator buttonDecorator,
                           XMPPService xmppService,
-                          FriendsSignInPanel friendSignInPanel) {
+                          FriendsSignInPanel friendSignInPanel,
+                          PlaylistManager playlistManager) {
         
         super(headerBarDecorator, textFieldDecorator);
         
@@ -164,9 +172,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         this.categoryIconManager = categoryIconManager;    
         this.shareFactory = shareFactory;
         this.playerPanel = player;
-        this.selectableMap = new EnumMap<Category, LibraryOperable<LocalFileItem>>(Category.class);
+        this.selectableMap = new HashMap<Catalog, LibraryOperable<? extends LocalFileItem>>();
         this.connectionListeners = connectionListeners;
         this.xmppService = xmppService;
+        this.playlistManager = playlistManager;
         
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
@@ -189,7 +198,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         });
 
         createMyCategories(baseLibraryList);
-        createMyPlaylists();
+        createMyPlaylists(libraryManager.getLibraryManagedList());
         selectFirstVisible();
 
         this.knownFriends.add(Friend.P2P_FRIEND_ID);
@@ -350,13 +359,14 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         final ShareWidget<File> fileShareWidget = shareFactory.createFileShareWidget();
         addDisposable(fileShareWidget);             
         JScrollPane scrollPane;        
+        Catalog catalog = new Catalog(category);
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         if (category != Category.IMAGE) {
             LibraryTable<LocalFileItem> table = tableFactory.createMyTable(category, filterList, currentFriendFilterChanger);
             table.enableMyLibrarySharing(fileShareWidget);
-            table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
-            selectableMap.put(category, table);
+            table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(catalog, getTableModel(table)));
+            selectableMap.put(catalog, table);
             scrollPane = new JScrollPane(table);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());    
             addDisposable(table);
@@ -364,7 +374,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             scrollPane = new JScrollPane();
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             LibraryImagePanel imagePanel = tableFactory.createMyImagePanel(filterList, scrollPane, fileShareWidget, currentFriendFilterChanger);
-            selectableMap.put(category, imagePanel);
+            selectableMap.put(catalog, imagePanel);
             scrollPane.setViewportView(imagePanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());            
             addDisposable(imagePanel);
@@ -430,37 +440,64 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
             return jxlayer;
         }
+
+    /**
+     * Overrides superclass method to create catalog selection button.  This
+     * method installs a DropTargetListener on playlist buttons to accept drop
+     * operations.
+     */
+    @Override
+    protected <T extends FileItem> JComponent createCatalogButton(Action action,
+            Catalog catalog, FilterList<T> filteredAllFileList) {
+        // Create catalog selection button.
+        JComponent button = super.createCatalogButton(action, catalog, filteredAllFileList);
+        
+        // Install listener to accept drops on playlist button.  We should
+        // consider installing a TransferHandler instead of a DropTarget.
+        if (catalog.getType() == Catalog.Type.PLAYLIST) {
+            new DropTarget(button, new PlaylistButtonDropListener(catalog.getPlaylist()));
+        }
+        
+        return button;
+    }
     
     /**
-     * Adds the playlists to the container. 
+     * Adds the playlists to the container using the specified library file 
+     * list. 
      */
-    private void createMyPlaylists() {
+    private void createMyPlaylists(LibraryFileList libraryFileList) {
         // Display heading.
         addHeading(new HeadingPanel(I18n.tr("PLAYLISTS")), Catalog.Type.PLAYLIST);
 
-        Catalog playlist = new Catalog(Catalog.Type.PLAYLIST, I18n.tr("Quicklist"));
+        // Get playlists from manager.
+        playlistManager.renameDefaultPlaylist(I18n.tr("Quicklist"));
+        List<Playlist> playlists = playlistManager.getPlaylists();
+        for (Playlist playlist : playlists) {
+            // Create library catalog.
+            Catalog playCatalog = new Catalog(playlist);
 
-        CatalogSelectionCallback callback = new CatalogSelectionCallback() {
-            @Override
-            public void catalogSelected(Catalog catalog, boolean state) {
-                playerPanel.setVisible(state);
-            }
-        };
-        
-        // Create empty filtered list.
-        //FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(
-        //        libraryFileList.getSwingModel(), new CategoryFilter(category));
-        FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(
-                new BasicEventList<LocalFileItem>());
-        
-        // Add playlist to container. 
-        // TODO create playlist icon manager
-        addCatalog(categoryIconManager.getIcon(Category.OTHER), playlist,
-                createMyPlaylistAction(playlist, filtered),
-                null, filtered, callback);
-        
-        addDisposable(filtered);
-        addLibraryInfoBar(playlist, filtered);
+            CatalogSelectionCallback callback = new CatalogSelectionCallback() {
+                @Override
+                public void catalogSelected(Catalog catalog, boolean state) {
+                    playerPanel.setVisible(state);
+                }
+            };
+
+            // Create list by applying filter to library file list.
+            FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(
+                    libraryFileList.getSwingModel(), playlist.getFilter());
+
+            // Create playlist display component.
+            JComponent component = createMyPlaylistAction(playlist, filtered); 
+
+            // Add playlist to container.  This adds the playlist component and
+            // selection button to the container.
+            addCatalog(playQuicklistIcon, playCatalog, component,
+                    null, filtered, callback);
+
+            addDisposable(filtered);
+            addLibraryInfoBar(playCatalog, filtered);
+        }
     }
     
     @Override
@@ -472,26 +509,40 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     /**
      * Creates the component used to display a single playlist.
      */
-    private JComponent createMyPlaylistAction(Catalog playlist, EventList<LocalFileItem> filtered) {
-        // Create filtered list.
-        EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
-                new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
+    private JComponent createMyPlaylistAction(Playlist playlist, EventList<LocalFileItem> filtered) {
+        // Convert the list to one containing PlaylistFileItem elements, which 
+        // include the playlist position index.
+        EventList<? extends LocalFileItem> functionList = 
+            GlazedListsFactory.functionList(filtered, new PlaylistFileItemFunction(playlist));
         
-        // TODO create factory method createPlaylistTable()
-        LibraryTable<LocalFileItem> table = tableFactory.createMyTable(Category.AUDIO, filterList, currentFriendFilterChanger);
-        // TODO review for possible inclusion/exclusion
-        //table.enableMyLibrarySharing(fileShareWidget);
-        //table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
-        //selectableMap.put(category, table);
+        // Note that the playlist is not filtered using the filter text field.
+        // To revise this, we could apply a TextComponentMatcherEditor to the 
+        // function list using a LibraryTextFilterator.
+        
+        // Create playlist table using factory.
+        LibraryTable<? extends LocalFileItem> table =
+            tableFactory.createPlaylistTable(playlist, functionList);
+        
+        // Apply saved column settings to table.
+        table.applySavedColumnSettings();
+
+        // Install double-click handler.
+        table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(
+                new Catalog(playlist), getTableModel(table)));
+        
+        // Add table to selectable map.  The map is referenced when we select
+        // the next/previous item for the media player.
+        selectableMap.put(new Catalog(playlist), table);
+        
+        // Add table for disposal.
         addDisposable(table);
         
+        // Create scroll pane containing table.
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setViewportView(table);
         return scrollPane;
     }
-    
-    // TODO review createCatalogButton(), maybe override here
     
     @SuppressWarnings("unchecked")
     private LibraryTableModel<LocalFileItem> getTableModel(LibraryTable table){
@@ -540,10 +591,12 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         knownFriendsListeners.removeListener(this);
     }
     
-    private static class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{
+    private class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{
+        private final Catalog catalog;
         private LibraryTableModel<LocalFileItem> model;
 
-        public MyLibraryDoubleClickHandler(LibraryTableModel<LocalFileItem> model){
+        public MyLibraryDoubleClickHandler(Catalog catalog, LibraryTableModel<LocalFileItem> model){
+            this.catalog = catalog;
             this.model = model;
         }
 
@@ -552,6 +605,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             File file = model.getFileItem(row).getFile();
             switch (model.getFileItem(row).getCategory()){
             case AUDIO:
+                libraryNavigator.setActiveCatalog(catalog);
                 PlayerUtils.playOrLaunch(file);
                 break;
             case OTHER:
@@ -570,36 +624,37 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         return libraryManager.getLibraryManagedList();
     }
 
-    public void selectItem(File file, Category category) {
+    public void selectItem(File file, Catalog catalog) {
         showAllFiles();
-        select(category);
-        selectableMap.get(category).selectAndScrollTo(file);
+        select(catalog);
+        if (catalog != null) selectableMap.get(catalog).selectAndScrollTo(file);
     }
 
-    public File getNextItem(File file, Category category) {
-        return selectableMap.get(category).getNextItem(file);
+    public File getNextItem(File file, Catalog catalog) {
+        return (catalog != null) ? selectableMap.get(catalog).getNextItem(file) : null;
     }
 
-    public File getPreviousItem(File file, Category category) {
-        return selectableMap.get(category).getPreviousItem(file);
+    public File getPreviousItem(File file, Catalog catalog) {
+        return (catalog != null) ? selectableMap.get(catalog).getPreviousItem(file) : null;
     }
 
-    public void selectItem(URN urn, Category category) {
+    public void selectItem(URN urn, Catalog catalog) {
         showAllFiles();
-        select(category);
-        selectableMap.get(category).selectAndScrollTo(urn);        
+        select(catalog);
+        if (catalog != null) selectableMap.get(catalog).selectAndScrollTo(urn);        
     }    
     
     /**
 	 * Returns the Table that is currently shown. Returns null if a playlist
 	 * is being shown.
 	 */ 
+    @SuppressWarnings("unchecked")
     public SelectAllable<LocalFileItem> getTable() {
         Category category = getSelectedCategory();
         if(category == null)
             return null;
         else
-            return selectableMap.get(category);
+            return (SelectAllable<LocalFileItem>) selectableMap.get(new Catalog(category));
     }
     
     /**

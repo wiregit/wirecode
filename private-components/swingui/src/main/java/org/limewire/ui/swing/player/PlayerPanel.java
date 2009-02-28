@@ -28,7 +28,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.core.api.Category;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
@@ -296,7 +295,7 @@ public class PlayerPanel extends JXPanel {
     private void previousSong() {
         if (file != null) {
             player.stop();
-            file = libraryNavigator.getPreviousInLibrary(file, Category.AUDIO);
+            file = libraryNavigator.getPreviousInLibrary(file);
             if (file != null) {
                 player.loadSong(file);
                 player.playSong();
@@ -311,7 +310,7 @@ public class PlayerPanel extends JXPanel {
     private void nextSong() {
         if (file != null) {
             player.stop();
-            file = libraryNavigator.getNextInLibrary(file, Category.AUDIO);
+            file = libraryNavigator.getNextInLibrary(file);
             if (file != null) {
                 player.loadSong(file);
                 player.playSong();

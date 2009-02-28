@@ -22,6 +22,8 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.playlist.Playlist;
+import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
@@ -30,6 +32,11 @@ import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.playlist.PlaylistLibraryTable;
+import org.limewire.ui.swing.library.playlist.PlaylistPopupHandler;
+import org.limewire.ui.swing.library.playlist.PlaylistTableFormat;
+import org.limewire.ui.swing.library.playlist.PlaylistTransferHandler;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
@@ -95,6 +102,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final GhostDragGlassPane ghostPane;
     private final SharingActionFactory sharingActionFactory;
     private final XMPPService xmppService;
+    private final LibraryNavigator libraryNavigator;
+    private final PlaylistManager playlistManager;
 
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager,
@@ -114,7 +123,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             CategoryIconManager categoryIconManager,
             SearchResultFromWidgetFactory fromWidgetfactory,
             SharingActionFactory sharingActionFactory,
-            XMPPService xmppService) {
+            XMPPService xmppService,
+            LibraryNavigator libraryNavigator,
+            PlaylistManager playlistManager) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -130,6 +141,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.fromWidgetFactory = fromWidgetfactory;
         this.sharingActionFactory = sharingActionFactory;
         this.xmppService = xmppService;
+        this.libraryNavigator = libraryNavigator;
+        this.playlistManager = playlistManager;
         
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
@@ -177,7 +190,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList(), shareListManager, listChanger));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                 category, libraryManager, shareListManager, magnetLinkFactory,
-                localItemPropFactory, sharingActionFactory, xmppService));
+                localItemPropFactory, sharingActionFactory, xmppService, 
+                libraryNavigator, playlistManager));
         
         try {
             libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane, listChanger));
@@ -337,6 +351,38 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
     }    
 
+    /**
+     * Creates a table to display a playlist.
+     */
+    @Override
+    public <T extends LocalFileItem> LibraryTable<T> createPlaylistTable(
+            Playlist playlist, EventList<T> eventList) {
+        // Create sorted list.
+        SortedList<T> sortedList = GlazedListsFactory.sortedList(eventList);
+
+        // Create table.
+        LibraryTable<T> libTable = new PlaylistLibraryTable<T>(playlist, sortedList, 
+                new PlaylistTableFormat<T>(), player,
+                saveLocationExceptionHandler, shareTableRendererEditorFactory);
+        
+        // Install popup menu handler.
+        libTable.setPopupHandler(new PlaylistPopupHandler(libTable, playlist,
+                libraryNavigator, localItemPropFactory));
+
+        // Install transfer handler to reorder playlist items.
+        libTable.setTransferHandler(new PlaylistTransferHandler(playlist));
+        
+        // Possible drag-and-drop upgrades:
+        // - Start drag to category buttons to remove file from playlist
+        // - Use GhostDropTargetListener to display image on drag operation
+        // - Accept drop from OS file explorer to add file to library/playlist
+        
+        // Install sort support.
+        EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());
+        
+        return libTable;
+    }
+    
     @SuppressWarnings( { "unchecked", "cast" })
     private LibraryTable<RemoteFileItem> castToRemoteLibraryTable(LibraryTable table) {
         return (LibraryTable<RemoteFileItem>) table;
