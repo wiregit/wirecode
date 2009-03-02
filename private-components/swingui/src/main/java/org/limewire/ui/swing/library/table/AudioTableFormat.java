@@ -22,8 +22,8 @@ import org.limewire.ui.swing.util.PropertyUtils;
  */
 public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
 
-    static final int ACTION_INDEX = 0;
-    static final int PLAY_INDEX = 1;
+    static final int PLAY_INDEX = 0;
+    static final int ACTION_INDEX = 1;
     static final int TITLE_INDEX = 2;
     static final int ARTIST_INDEX = 3;
     static final int ALBUM_INDEX = 4;
@@ -43,8 +43,8 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     
     public AudioTableFormat() {
         super(ACTION_INDEX, "LIBRARY_AUDIO_TABLE", ARTIST_INDEX, true, new ColumnStateInfo[] {
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_AUDIO_ACTION", I18n.tr("Sharing"), 61, true, false),
                 new ColumnStateInfo(PLAY_INDEX, "LIBRARY_AUDIO_PLAY", "", 25, true, false), 
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_AUDIO_ACTION", I18n.tr("Sharing"), 61, true, false),
                 new ColumnStateInfo(TITLE_INDEX, "LIBRARY_AUDIO_TITLE", I18n.tr("Name"), 278, true, true),     
                 new ColumnStateInfo(ARTIST_INDEX, "LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 120, true, true), 
                 new ColumnStateInfo(ALBUM_INDEX, "LIBRARY_AUDIO_ALBUM", I18n.tr("Album"), 180, true, true), 
