@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.table.menu;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.JMenu;
@@ -26,6 +27,7 @@ import org.limewire.ui.swing.library.table.menu.actions.PlayAction;
 import org.limewire.ui.swing.library.table.menu.actions.RemoveAction;
 import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.library.table.menu.actions.ViewFileInfoAction;
+import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -178,7 +180,8 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     }
     
     /**
-     * Menu action to add files to a playlist.
+     * Menu action to add audio files to a playlist.  Only file types that are
+     * playable by the LimeWire player are added.
      */
     private class PlaylistAction extends AbstractAction {
         private final Playlist playlist;
@@ -193,7 +196,10 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         @Override
         public void actionPerformed(ActionEvent arg0) {
             for (LocalFileItem fileItem : fileItems) {
-                playlist.addFile(fileItem.getFile());
+                File file = fileItem.getFile();
+                if (playlist.canAdd(file) && PlayerUtils.isPlayableFile(file)) {
+                    playlist.addFile(fileItem.getFile());
+                }
             }
         }
     }

@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.ui.swing.dnd.LocalFileTransferable;
+import org.limewire.ui.swing.player.PlayerUtils;
 
 /**
  * A DropTargetListener installed on playlist buttons to accept drop operations.
@@ -64,9 +65,10 @@ public class PlaylistButtonDropListener extends DropTargetAdapter {
             // Get files to be added.
             File[] files = getDropFiles(dtde.getTransferable());
             
-            // Add files to playlist.
+            // Add files to playlist.  Only compatible file types that are
+            // playable by the LimeWire player are added.
             for (File file : files) {
-                if (playlist.canAdd(file)) {
+                if (playlist.canAdd(file) && PlayerUtils.isPlayableFile(file)) {
                     playlist.addFile(file);
                 }
             }
