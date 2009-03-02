@@ -14,14 +14,16 @@ public class QualityComparator implements Comparator<PropertiableFile> {
         Object quality1 = o1.getProperty(FilePropertyKey.QUALITY);
         Object quality2 = o2.getProperty(FilePropertyKey.QUALITY);
 
-        if (quality1 instanceof Long) {
-            if (quality2 instanceof Long) {
-                return ((Long) quality1).compareTo((Long) quality2);
+        if (quality1 instanceof Number) {
+            if (quality2 instanceof Number) {
+                int q1 = ((Number) quality1).intValue();
+                int q2 = ((Number) quality2).intValue();               
+                return (q1 == q2)? 0 : (q1 < q2)? -1 : 1;
             } else {
                 return 1;
             }
         } else {
-            return (quality2 instanceof Long) ? -1 : 0;
+            return (quality2 instanceof Number) ? -1 : 0;
         }
     }
 }
