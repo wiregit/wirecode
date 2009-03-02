@@ -41,7 +41,7 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
                 new ColumnStateInfo(ARTIST_INDEX, "REMOTE_LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 120, true, true), 
                 new ColumnStateInfo(ALBUM_INDEX, "REMOTE_LIBRARY_AUDIO_ALBUM", I18n.tr("Album"), 161, true, true), 
                 new ColumnStateInfo(LENGTH_INDEX, "REMOTE_LIBRARY_AUDIO_LENGTH", I18n.tr("Length"), 60, true, true), 
-                new ColumnStateInfo(QUALITY_INDEX, "REMOTE_LIBRARY_AUDIO_QUALITY", I18n.tr("Quality"), 80, true, true), 
+                new ColumnStateInfo(QUALITY_INDEX, "REMOTE_LIBRARY_AUDIO_QUALITY", I18n.tr("Quality"), 105, true, true), 
                 new ColumnStateInfo(GENRE_INDEX, "REMOTE_LIBRARY_AUDIO_GENRE", I18n.tr("Genre"), 60, false, true),
                 new ColumnStateInfo(BITRATE_INDEX, "REMOTE_LIBRARY_AUDIO_BITRATE", I18n.tr("Bitrate"), 50, false, true), 
                 new ColumnStateInfo(SIZE_INDEX, "REMOTE_LIBRARY_AUDIO_SIZE", I18n.tr("Size"), 60, false, true),

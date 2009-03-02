@@ -64,7 +64,10 @@ public class QualityRenderer extends DefaultLibraryRenderer {
     
     private String getQualityDetails(PropertiableFile propertiable){
         if (propertiable.getCategory() == Category.AUDIO){
-            return " (" + propertiable.getProperty(FilePropertyKey.BITRATE) + ")";
+            Object bitRate = propertiable.getProperty(FilePropertyKey.BITRATE);
+            if (bitRate != null) {
+                return " (" + bitRate + ")";
+            }
         }
         return "";
     }
