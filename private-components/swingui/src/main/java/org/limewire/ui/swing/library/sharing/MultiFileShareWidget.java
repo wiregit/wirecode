@@ -7,6 +7,7 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.library.sharing.model.MultiFileShareModel;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.impl.ThreadSafeList;
 
@@ -16,16 +17,16 @@ public class MultiFileShareWidget implements ShareWidget<LocalFileItem[]>{
     private ShareListManager shareListManager;
     
     public MultiFileShareWidget(ShareListManager shareListManager, 
-            ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog) {
+            ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog, XMPPService xmppService) {
         this.shareListManager = shareListManager;
-        sharePanel = new LibrarySharePanel(allFriends, shapeDialog);
+        sharePanel = new LibrarySharePanel(allFriends, shapeDialog, xmppService);
     }
     
     public MultiFileShareWidget(ShareListManager shareListManager, 
-            ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog,
+            ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog, XMPPService xmppService, 
             boolean canShowP2P) {
         this.shareListManager = shareListManager;
-        sharePanel = new LibrarySharePanel(allFriends, shapeDialog, canShowP2P);
+        sharePanel = new LibrarySharePanel(allFriends, shapeDialog, xmppService, canShowP2P);
     }
     
     @Override

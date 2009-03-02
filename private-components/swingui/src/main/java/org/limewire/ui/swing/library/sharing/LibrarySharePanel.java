@@ -69,6 +69,7 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -94,6 +95,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     
     private JXPanel titlePanel;
     private JXPanel tablePanel;
+    private JXPanel signInPanel;
     private JXPanel bottomPanel;
     
     private GradientPaint bottomGradient;
@@ -140,6 +142,8 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     private JButton closeButton;
 
     private final List<ShareListener> shareListeners = new CopyOnWriteArrayList<ShareListener>();
+    
+    private XMPPService xmppService;
     
     private final Action up = new AbstractAction() {
         @Override
@@ -196,18 +200,21 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     @Resource private Color borderColor;
     @Resource private Color titleFontColor;
     
-    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog) {
-        this(allFriends, dialog, true);
+    @Resource private Icon friendIcon;   
+    
+    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, XMPPService xmppService) {
+        this(allFriends, dialog, xmppService, true);
     }
     
-    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog,
+    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, XMPPService xmppService,
             boolean canShowP2P) {
-        this(allFriends, dialog, canShowP2P, true);
+        this(allFriends, dialog, xmppService, canShowP2P, true);
     }
     
-    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog,
+    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, XMPPService xmppService,
             boolean canShowP2P, boolean canShare) {        
         this.dialog = dialog;
+        this.xmppService = xmppService;
         this.canShowP2P = canShowP2P;
         this.canShare = canShare;
         initialize(allFriends);
@@ -272,6 +279,9 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         tablePanel = new JXPanel(new MigLayout("fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         tablePanel.setOpaque(false);
         
+        signInPanel = new JXPanel(new MigLayout("fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
+        signInPanel.setOpaque(false);
+        
         bottomPanel = new JXPanel(new MigLayout("fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         bottomPanel.setOpaque(false);
 
@@ -286,6 +296,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         gnutellaCheckBox.setSelectedIcon(checkBoxSelectedIcon);
         gnutellaCheckBox.setFont(checkBoxFont);
     }
+    
     
     private void initializePainters(){
         //TODO: sizes and shapes
@@ -322,6 +333,13 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
                     g2.setColor(dividerColor);
                     Rectangle panelBounds = mainPanelShape.getBounds();
                     g2.drawLine(panelBounds.x, bottomLocation.y, panelBounds.x + panelBounds.width, bottomLocation.y);
+                }
+                
+                if(signInPanel.isVisible()){
+                        g2.setColor(dividerColor);
+                        Rectangle panelBounds = mainPanelShape.getBounds();
+                        Point signInLocation = SwingUtilities.convertPoint(mainPanel, signInPanel.getLocation(), LibrarySharePanel.this);
+                        g2.drawLine(panelBounds.x, signInLocation.y, panelBounds.x + panelBounds.width, signInLocation.y);
                 }
                 g2.setColor(borderColor);
                 g2.setStroke(new BasicStroke(2));
@@ -417,12 +435,15 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         tablePanel.add(shareScroll, "hidemode 3, gaptop 6, gapbottom 2, growx, wrap");
         tablePanel.add(gnutellaCheckBox, "gapbottom 2, hidemode 3");
         
+        signInPanel.add(new JLabel("Sign in to share with friends", friendIcon, JLabel.LEFT), "gapbottom 6, gaptop 6");
+        
         bottomPanel.add(friendLabel, "gaptop 6, hidemode 3, wrap");
         bottomPanel.add(comboPanel, "growx, gaptop 4, gapbottom 6, hidemode 3, wrap");
         bottomPanel.add(bottomLabel, "growy, gapbottom 6, hidemode 3");
         
         mainPanel.add(titlePanel, "growx, gaptop 6, gapbottom 6, wrap");
         mainPanel.add(tablePanel, "growx, wrap, hidemode 3");
+        mainPanel.add(signInPanel, "gapleft 4, growx, wrap, hidemode 3");
         mainPanel.add(bottomPanel, "growx, hidemode 3");
         
      //   add(mainPanel, "growx, gapleft " + BORDER_BUFFER + ", gapright " + BORDER_BUFFER + ", gaptop " + BORDER_BUFFER + ", gapbottom " + BORDER_BUFFER); 
@@ -668,7 +689,9 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     
     private void adjustSize(){
         adjustFriendLabel();
-        bottomPanel.setVisible(canShare);
+        bottomPanel.setVisible(canShare && xmppService.isLoggedIn());
+        
+        signInPanel.setVisible(canShare && !xmppService.isLoggedIn());
 
         int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);
