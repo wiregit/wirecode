@@ -318,7 +318,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     private final Bootstrapper bootstrapper;
     
     @Inject
-    HostCatcher(
+    protected HostCatcher(
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ConnectionServices connectionServices,
             Provider<ConnectionManager> connectionManager,
