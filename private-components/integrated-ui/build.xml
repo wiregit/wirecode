@@ -28,9 +28,7 @@
 	</target>
     
     <target name="compile" depends="initialize, lw-core-glue.compile, lw-swingui.compile, mojito-ui.compile">
-    	<!--<do.compile component="integrated-ui"/>-->
-    	<do.compile-src component="integrated-ui"/>
-    	<mkdir dir="${build.limewire.components.integrated-ui.tests}"/>
+    	<do.compile component="integrated-ui"/>
     </target>
 	
 	<target name="compile-src" depends="initialize, lw-core-glue.compile-src, lw-swingui.compile-src, mojito-ui.compile-src">
@@ -42,8 +40,7 @@
 	</target>
 	
 	<target name="compile-tests" depends="initialize">
-	    <!--<do.compile-tests component="integrated-ui"/>-->
-	    <mkdir dir="${build.limewire.components.integrated-ui.tests}"/>
+	    <do.compile-tests component="integrated-ui"/>
 	</target>
 	
 	<target name="clean-tests" depends="initialize">
