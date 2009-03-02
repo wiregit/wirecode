@@ -9,6 +9,8 @@ import java.awt.Font;
 import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,6 +114,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private Icon closeHoverButton;
     @Resource
     private Icon playQuicklistIcon;
+    @Resource
+    private Font subFont;
     
     private final LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
@@ -764,11 +768,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         JLabel headerLabel = new JLabel(I18n.tr("What Now?"));
         messageComponent.decorateHeaderLabel(headerLabel);
         
-        JLabel minLabel = new JLabel(I18n.tr("Click the share button to share or unshare files with a friend"));
+        JLabel minLabel = new JLabel(I18n.tr("Share with friends and chat with them about LimeWire 5"));
         messageComponent.decorateSubLabel(minLabel);
-        
-        JLabel secondMinLabel = new JLabel(I18n.tr("Chat with them about using LimeWire 5"));
-        messageComponent.decorateSubLabel(secondMinLabel);
         
         JButton cancelButton = new JButton(closeButton);
         cancelButton.setBorder(BorderFactory.createEmptyBorder());
@@ -789,7 +790,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         messageComponent.addComponent(cancelButton, "span, alignx right");
         messageComponent.addComponent(headerLabel, "push, wrap");
         messageComponent.addComponent(minLabel, "wrap, gapright 16");
-        messageComponent.addComponent(secondMinLabel, "gapright 16");
 
         return messageComponent;
     }
@@ -805,7 +805,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         JLabel headerLabel = new JLabel(I18n.tr("No more shared folders"));
         messageComponent.decorateHeaderLabel(headerLabel);
         
-        JLabel minLabel = new JLabel(I18n.tr("Click the share button to share or unshare files with the P2P Network"));
+        JLabel minLabel = new JLabel(I18n.tr("Click the share hyperlink to share or unshare a file"));
         messageComponent.decorateSubLabel(minLabel);
         
         JLabel minLabel2 = new JLabel(I18n.tr("Click the What I'm Sharing button to see what files are being shared with the P2P Network"));
@@ -847,10 +847,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         JLabel headerLabel = new JLabel(I18n.tr("No more shared folders"));
         messageComponent.decorateHeaderLabel(headerLabel);
         
-        JLabel minLabel = new JLabel(I18n.tr("Click the share button to share or unshare files with the P2P Network"));
+        JLabel minLabel = new JLabel(I18n.tr("Click the share hyperlink to share or unshare a file"));
         messageComponent.decorateSubLabel(minLabel);
         
-        JLabel minLabel2 = new JLabel(I18n.tr("Click the share button to share or unshare files with a friend"));
+        JLabel minLabel2 = new JLabel(I18n.tr("Share files with friends and chat with them about LimeWire 5"));
         messageComponent.decorateSubLabel(minLabel2);
         
         JButton cancelButton = new JButton(closeButton);
@@ -901,13 +901,14 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             headerLabel = new JLabel();
             messageComponent.decorateHeaderLabel(headerLabel);
             
-            hyperlinkButton = new HyperlinkButton(I18n.tr("Show all Files"));
+            hyperlinkButton = new HyperlinkButton(I18n.tr("Show All Files"));
             hyperlinkButton.addActionListener(new ActionListener(){
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     showAllFiles();
                 }
             });
+            hyperlinkButton.setFont(subFont);
             
             messageComponent.addComponent(headerLabel, "wrap, gapright 16");
             messageComponent.addComponent(hyperlinkButton, "gapright 16");
@@ -1025,7 +1026,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
         ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredList);
         filteredList.addListEventListener(listener);
+        ShareAllListener<T> shareAllListener = new ShareAllListener<T>(filteredList, action);
+        filteredList.addListEventListener(shareAllListener);
         addDisposable(listener);
+        addDisposable(shareAllListener);
     }
     
     @Override
@@ -1040,6 +1044,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             addDisposable(listener);
             break;
         }
+    }
+    
+    private void enableShareAllComboBox(boolean value) {
+        if(shareAllComboBox != null)
+            shareAllComboBox.setEnabled(value);
     }
     
     private class PlayListListener<T> implements Disposable {
@@ -1072,6 +1081,41 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         
         @Override
         public void dispose() {
+        }
+    }
+
+    private class ShareAllListener<T> implements Disposable, ListEventListener<T>, PropertyChangeListener {
+        private final FilterList<T> list;
+        private final Action action;
+        
+        public ShareAllListener(FilterList<T> list, Action action) {
+            this.list = list;
+            this.action = action;
+            
+            this.action.addPropertyChangeListener(this);
+            this.list.addListEventListener(this);
+        }
+        
+        @Override
+        public void dispose() {
+            list.removeListEventListener(this);
+            action.removePropertyChangeListener(this);
+        }
+        
+        private void updateShareAll() {
+            if(action.getValue(Action.SELECTED_KEY) == Boolean.TRUE) {
+                enableShareAllComboBox(list.size() > 0);
+            }   
+        }
+
+        @Override
+        public void listChanged(ListEvent<T> listChanges) {
+            updateShareAll();
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            updateShareAll();
         }
     }
     

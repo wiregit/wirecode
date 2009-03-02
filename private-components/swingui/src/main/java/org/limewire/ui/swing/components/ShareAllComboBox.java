@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
@@ -42,6 +43,14 @@ public class ShareAllComboBox extends LimeComboBox {
     private Font labelFont;
     @Resource
     private Color disabledColor;
+    @Resource
+    private Icon gnutellaShareIcon;
+    @Resource
+    private Icon friendShareIcon;
+    @Resource
+    private Icon gnutellaUnshareIcon;
+    @Resource
+    private Icon friendUnshareIcon;
     
     private final XMPPService xmppService;
     private final FriendsSignInPanel friendsSignInPanel;
@@ -51,8 +60,8 @@ public class ShareAllComboBox extends LimeComboBox {
     
     private JPopupMenu menu = new JPopupMenu();
     
-    private AbstractAction shareAllAction;
-    private AbstractAction unshareAllAction;
+    private AbstractAction shareAllGnutellaAction;
+    private AbstractAction unshareAllGnutellaAction;
     private AbstractAction shareAllFriendAction;
     private AbstractAction unshareAllFriendAction;
     private AbstractAction signedOutAction;
@@ -76,8 +85,8 @@ public class ShareAllComboBox extends LimeComboBox {
     }
     
     private void createActions() {
-        shareAllAction = new ShareAllAction(true);
-        unshareAllAction = new UnShareAllAction(true);
+        shareAllGnutellaAction = new ShareAllAction(true);
+        unshareAllGnutellaAction = new UnShareAllAction(true);
         shareAllFriendAction = new ShareAllAction(false);
         unshareAllFriendAction = new UnShareAllAction(false);
         signedOutAction = new DisabledFriendLoginAction(I18n.tr("Sign in to share with friends"), friendsSignInPanel);
@@ -127,20 +136,26 @@ public class ShareAllComboBox extends LimeComboBox {
                 }
             } else {
                 // if not logged in don't show options for friends.
-                if(!xmppService.isLoggedIn()) {
-                    menu.add(decorateItem(shareAllAction));
-                    menu.add(decorateItem(unshareAllAction));
+                if(!xmppService.isLoggedIn()) { 
+                    if(myLibraryPanel.getCurrentFriend() != null && myLibraryPanel.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                        menu.add(decorateDisabledItem(shareAllGnutellaAction));
+                    else
+                        menu.add(decorateItem(shareAllGnutellaAction));
+                    menu.add(decorateItem(unshareAllGnutellaAction));
                     
                     menu.addSeparator();
                     
                     menu.add(decorateDisabledItem(signedOutAction));
                 } else {
-                    menu.add(decorateItem(shareAllAction));
+                    if(myLibraryPanel.getCurrentFriend() != null && myLibraryPanel.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                        menu.add(decorateDisabledItem(shareAllGnutellaAction));
+                    else
+                        menu.add(decorateItem(shareAllGnutellaAction));
                     menu.add(decorateItem(shareAllFriendAction));
                     
                     menu.addSeparator();
                     
-                    menu.add(decorateItem(unshareAllAction));
+                    menu.add(decorateItem(unshareAllGnutellaAction));
                     menu.add(decorateItem(unshareAllFriendAction));
                 }
             }
@@ -159,8 +174,10 @@ public class ShareAllComboBox extends LimeComboBox {
             
             if(!isGnutella) {
                 putValue(Action.NAME, I18n.tr("Share all with Friend..."));
+                putValue(Action.SMALL_ICON, friendShareIcon);
             } else {
                 putValue(Action.NAME, I18n.tr("Share all with the P2P Network"));
+                putValue(Action.SMALL_ICON, gnutellaShareIcon);
             }
         }
         
@@ -205,8 +222,10 @@ public class ShareAllComboBox extends LimeComboBox {
             
             if(!isGnutella) {
                 putValue(Action.NAME, I18n.tr("Unshare all with Friend..."));
+                putValue(Action.SMALL_ICON, friendUnshareIcon);
             } else {
                 putValue(Action.NAME, I18n.tr("Unshare all with the P2P Network"));
+                putValue(Action.SMALL_ICON, gnutellaUnshareIcon);
             }
         }
         

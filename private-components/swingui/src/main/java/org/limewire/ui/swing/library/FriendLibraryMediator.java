@@ -279,7 +279,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             setMessage();
             
             messageComponent.addComponent(firstLabel, "span, gapbottom 0, wrap");
-            messageComponent.addComponent(shareLabel,"");
+            messageComponent.addComponent(shareLabel, "");
             
             setMessage();
         }
@@ -312,15 +312,8 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 */
         private void setOfflineMessage() {
             firstLabel.setText(I18n.tr("{0} is offline", friend.getRenderName()));
-            if(!friendList.isEmpty()) {
-                // {0}, {1}: html tags, {2}: number of files shared
-                setShareText(I18n.trn("{0}Sharing{1} {2} file with your friend.", "{0}Sharing{1} {2} files with our friend.", 
-                        friendList.size(), SHARE_ANCHOR, CLOSING_ANCHOR, friendList.size()));
-            }
-            else {
-                // {0}, {1}: html tags
-                setShareText(I18n.tr("{0}Share{1} files with your friend.", SHARE_ANCHOR, CLOSING_ANCHOR));
-            }
+            // {0}, {1}: html tags, {2}: number of files shared
+            setShareText(I18n.tr("You're sharing {0}{1}{2} files with your friend.", SHARE_ANCHOR, friendList.size(), CLOSING_ANCHOR));
         }
         
         /**
@@ -328,15 +321,10 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 */
         private void setOnlineMessage() {
             firstLabel.setText(I18n.tr("{0} isn't on LimeWire", friend.getRenderName()));
-            if(!friendList.isEmpty()) {
-                // {0}, {1}: html tags, {2}: number of files shared
-                setShareText(I18n.trn("{0}Sharing{1} {2} file with your friend.", "{0}Sharing{1} {2} files with your friend.", friendList.size(), SHARE_ANCHOR, CLOSING_ANCHOR, friendFileList.size()) + " "
-                        // {0}, {1}: html tags
-                        + I18n.tr("{0}Chat{1} about using LimeWire 5.", CHAT_ANCHOR, CLOSING_ANCHOR));
-            } else {
-                // {0}, {1}, {2}, {3}: html tags
-                setShareText(I18n.tr("{0}Share{1} files with your friend and {2}chat{3} about using LimeWire 5.", SHARE_ANCHOR, CLOSING_ANCHOR, CHAT_ANCHOR, CLOSING_ANCHOR));
-            }
+            // {0}, {1}: html tags, {2}: number of files shared
+            setShareText(I18n.tr("You're sharing {0}{1}{2} files with your friend.", SHARE_ANCHOR, friendList.size(), CLOSING_ANCHOR) + " "
+                    // {0}, {1}: html tags
+                    + I18n.tr("{0}Chat{1} about signing into LimeWire 5.", CHAT_ANCHOR, CLOSING_ANCHOR));
         }
         
         /**
@@ -357,7 +345,9 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         private void setLWNoFiles() {
             if(!friend.isAnonymous()) {
                 firstLabel.setText(I18n.tr("{0} isn't sharing with you", friend.getRenderName()));
-                setShareText(I18n.tr("{0}Chat{1} about sharing with you.", CHAT_ANCHOR, CLOSING_ANCHOR));
+                setShareText(I18n.tr("You're sharing {0}{1}{2} files with your friend.", SHARE_ANCHOR, friendList.size(), CLOSING_ANCHOR) + " "
+                        // {0}, {1}: html tags
+                        + I18n.tr("{0}Chat{1} about LimeWire 5.", CHAT_ANCHOR, CLOSING_ANCHOR));
             } else {
                 //this should never happen
                 firstLabel.setText(I18n.tr("This person isn't sharing any files with you."));

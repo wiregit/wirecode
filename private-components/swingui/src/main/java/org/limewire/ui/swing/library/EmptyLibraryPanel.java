@@ -55,7 +55,7 @@ public class EmptyLibraryPanel extends LibraryPanel {
 
         addDisposable(messageComponent);
         createEmptyPanel(component);
-        getHeaderPanel().setText(I18n.tr("Browse Files from {0}", getFullPanelName()));
+        getHeaderPanel().setText(I18n.tr("Browse files from {0}", getFullPanelName()));
         setTransferHandler(new LocalFileListTransferHandler(friendFileList));
     }
         

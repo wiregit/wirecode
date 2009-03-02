@@ -37,6 +37,7 @@ import javax.swing.event.PopupMenuListener;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
@@ -171,7 +172,7 @@ public class SharingFilterComboBox extends LimeComboBox {
             menu.add(new MenuAction(SharingTarget.GNUTELLA_SHARE.getFriend(), shareListManager.getGnutellaShareList().size(), gnutellaIcon));
             
             List<Friend> sortedFriends = new ArrayList<Friend>(menuList);
-            Collections.sort(sortedFriends, new FriendComparator());
+            Collections.sort(sortedFriends, new FriendComparator(shareListManager));
             for(Friend friend : sortedFriends) {
                 menu.add(new MenuAction(friend, shareListManager.getOrCreateFriendShareList(friend).size(), friendIcon));
             }
@@ -182,15 +183,31 @@ public class SharingFilterComboBox extends LimeComboBox {
     }
     
     /**
-     * Compares two friends names for sorting.
+     * Compares two friends names for sorting. Friends that are being shared with
+     * appear at the top of the list in alphabetical order. Friends that are
+     * not being shared with appear below that in alphabetical order.
      */
     private static class FriendComparator implements Comparator<Friend> {
+        private final ShareListManager shareListManager;
+        
+        public FriendComparator(ShareListManager shareListManager) {
+            this.shareListManager = shareListManager;
+        }
+        
         @Override
         public int compare(Friend o1, Friend o2) {
             if(o1 == o2) {
                 return 0;
-            } else {           
-                return o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
+            } else {
+                FriendFileList fileList1 = shareListManager.getOrCreateFriendShareList(o1);
+                FriendFileList fileList2 = shareListManager.getOrCreateFriendShareList(o2);
+                if((fileList1.size() > 0 && fileList2.size() > 0) || 
+                        (fileList1.size() == 0 && fileList2.size() == 0))
+                    return o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
+                else if(fileList1.size() > 0 && fileList2.size() == 0)
+                    return -1;
+                else 
+                    return 1;
             }
         }
     }

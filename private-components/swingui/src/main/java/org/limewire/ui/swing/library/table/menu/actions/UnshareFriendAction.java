@@ -4,7 +4,9 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 
 import javax.swing.Action;
+import javax.swing.Icon;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.SelectAllable;
@@ -19,17 +21,22 @@ import org.limewire.ui.swing.util.I18n;
  * for unsharing all the files in the selectable table.
  */
 public class UnshareFriendAction extends AbstractAction {
-
+    @Resource
+    private Icon friendIcon;
+    
     private final ShareWidgetFactory shareWidgetFactory;
     private final SelectAllable<LocalFileItem> librarySelectable;
     private final boolean isShareAll;
     
     public UnshareFriendAction(ShareWidgetFactory shareWidgetFactory, SelectAllable<LocalFileItem> librarySelectable, boolean isShareAll) {
+        GuiUtils.assignResources(this);
+        
         if(isShareAll) {
-            putValue(Action.NAME, I18n.tr("Unshare all with Friend"));
+            putValue(Action.NAME, I18n.tr("Unshare folder with Friend"));
         } else {
             putValue(Action.NAME, I18n.tr("Unshare with Friend"));
         }
+        putValue(Action.SMALL_ICON, friendIcon);
         
         this.shareWidgetFactory = shareWidgetFactory;
         this.librarySelectable = librarySelectable;
