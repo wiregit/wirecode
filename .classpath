@@ -48,6 +48,7 @@
 	<classpathentry excluding="windows/|windows/|linux/|osx/" kind="src" path="lib/resources"/>
 	<classpathentry kind="src" path="lib/resources/windows"/>
 	<classpathentry kind="src" output="private-components/integrated-ui/build/classes" path="private-components/integrated-ui/src/main/java"/>
+	<classpathentry kind="src" output="private-components/integrated-ui/build/tests" path="private-components/integrated-ui/src/test/java"/>
 	<classpathentry kind="src" output="private-components/mock-core/build/classes" path="private-components/mock-core/src/main/java"/>
 	<classpathentry kind="src" output="private-components/swingui/build/classes" path="private-components/swingui/src/main/java"/>
 	<classpathentry kind="src" output="private-components/swingui/build/tests" path="private-components/swingui/src/test/java"/>
