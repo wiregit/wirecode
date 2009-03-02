@@ -243,7 +243,7 @@ public class ShareAllComboBox extends LimeComboBox {
      */
     private class DisabledDocumentAction extends AbstractAction {
         public DisabledDocumentAction() {
-            putValue(Action.NAME, I18n.tr("Go to Tools/Options/Security to enable Document sharing with the P2P Network"));
+            putValue(Action.NAME, I18n.tr("You can't share documents with the P2P Network. Enable this at Tools > Options > Security > Unsafe Categories"));
         }
         
         @Override

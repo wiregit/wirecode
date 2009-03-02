@@ -915,9 +915,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     
         public void setFriend(Friend friend) {
             if(friend.getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
-                headerLabel.setText(I18n.tr("You are not sharing any files with the {0}", friend.getRenderName()));
+                headerLabel.setText(I18n.tr("No files shared with the {0}", friend.getRenderName()));
             else
-                headerLabel.setText(I18n.tr("You are not sharing any files with {0}", friend.getRenderName()));
+                headerLabel.setText(I18n.tr("No files shared with {0}", friend.getRenderName()));
         }
         
         public MessageComponent getMessageComponent() {
