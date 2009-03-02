@@ -8,10 +8,9 @@ import org.limewire.io.IpPort;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionServices;
-import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -20,31 +19,28 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 public class UDPConnectionCheckerImpl implements UDPConnectionChecker {
 
     private final ConnectionServices connectionServices;
-
     private final Provider<UDPService> udpService;
-
-    private final Provider<HostCatcher> hostCatcher;
-
+    private final Provider<UniqueHostPinger> uniqueHostPinger;
     private final PingRequestFactory pingRequestFactory;
 
     @Inject
     public UDPConnectionCheckerImpl(ConnectionServices connectionServices,
-            Provider<UDPService> udpService, Provider<HostCatcher> hostCatcher,
+            Provider<UDPService> udpService,
+            Provider<UniqueHostPinger> uniqueHostPinger,
             PingRequestFactory pingRequestFactory) {
         this.connectionServices = connectionServices;
         this.udpService = udpService;
-        this.hostCatcher = hostCatcher;
+        this.uniqueHostPinger = uniqueHostPinger;
         this.pingRequestFactory = pingRequestFactory;
     }
 
     public boolean udpIsDead() {
         PingRequest ping = pingRequestFactory.createUDPPing();
         Collection<IpPort> hosts = connectionServices.getPreferencedHosts(false, "en", 50);
-        UDPPinger myPinger = hostCatcher.get().getPinger();
         UDPChecker checker = new UDPChecker();
 
         // send some hosts to be ranked
-        myPinger.rank(hosts, checker, checker, ping);
+        uniqueHostPinger.get().rank(hosts, checker, checker, ping);
         long now = System.currentTimeMillis();
         synchronized (checker) {
             try {
@@ -84,5 +80,4 @@ public class UDPConnectionCheckerImpl implements UDPConnectionChecker {
         public void unregistered(byte[] guid) {
         }
     }
-
 }

@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -9,10 +8,12 @@ import org.limewire.io.IpPortSet;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
+@Singleton
 public class UniqueHostPinger extends UDPPingerImpl {
 
     /**
@@ -47,5 +48,4 @@ public class UniqueHostPinger extends UDPPingerImpl {
             }
         });
     }
-
 }

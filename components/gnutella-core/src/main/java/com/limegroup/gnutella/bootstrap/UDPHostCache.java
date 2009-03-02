@@ -19,14 +19,16 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.address.StrictIpPortSet;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPReplyHandler;
+import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
@@ -34,6 +36,7 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 /**
  * A collection of UDP Host Caches.
  */
+@Singleton
 public class UDPHostCache {
     
     private static final Log LOG = LogFactory.getLog(UDPHostCache.class);
@@ -62,8 +65,7 @@ public class UDPHostCache {
      * LOCKING: obtain this' monitor before modifying either */
     private final List<ExtendedEndpoint> udpHosts = new ArrayList<ExtendedEndpoint>(PERMANENT_SIZE);
     private final Set<ExtendedEndpoint> udpHostsSet = new HashSet<ExtendedEndpoint>();
-    
-    private final UDPPinger pinger;
+    private final UniqueHostPinger pinger;
     
     /**
      * A set of hosts who we've recently contacted, so we don't contact them
@@ -93,7 +95,8 @@ public class UDPHostCache {
      * Constructs a new UDPHostCache that remembers attempting hosts for 10
      * minutes.
      */
-    protected UDPHostCache(UDPPinger pinger, Provider<MessageRouter> messageRouter,
+    @Inject
+    protected UDPHostCache(UniqueHostPinger pinger, Provider<MessageRouter> messageRouter,
             PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
             NetworkInstanceUtils networkInstanceUtils) {
         this(10 * 60 * 1000, pinger, messageRouter, pingRequestFactory, connectionServices,
@@ -106,7 +109,7 @@ public class UDPHostCache {
      * 
      * @param connectionServices
      */
-    protected UDPHostCache(long expiryTime, UDPPinger pinger,
+    UDPHostCache(long expiryTime, UniqueHostPinger pinger,
             Provider<MessageRouter> messageRouter, PingRequestFactory pingRequestFactory,
             ConnectionServices connectionServices, NetworkInstanceUtils networkInstanceUtils) {
         this.connectionServices = connectionServices;

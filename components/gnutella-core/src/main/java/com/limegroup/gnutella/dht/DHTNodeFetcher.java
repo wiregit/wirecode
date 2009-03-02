@@ -26,6 +26,7 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -80,11 +81,6 @@ public class DHTNodeFetcher {
     private final AtomicBoolean pingingSingleHost = new AtomicBoolean(false);
     
     /**
-     * The pinger used to send out the UDP pings.
-     */
-    private UDPPinger pinger;
-    
-    /**
      * A settable expiry time for the pings.
      */
     private volatile int pingExpireTime = -1;
@@ -92,21 +88,22 @@ public class DHTNodeFetcher {
     private final ConnectionServices connectionServices;
     private final Provider<HostCatcher> hostCatcher;
     private final ScheduledExecutorService backgroundExecutor;
-    private final Provider<UDPPinger> udpPingerFactory;
-
+    private final Provider<UDPPinger> udpPinger;
+    private final Provider<UniqueHostPinger> uniqueHostPinger;
     private final PingRequestFactory pingRequestFactory;
     
     public DHTNodeFetcher(DHTBootstrapper bootstrapper,
             ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
             ScheduledExecutorService backgroundExecutor,
-            Provider<UDPPinger> udpPingerFactory,
+            Provider<UDPPinger> udpPinger,
+            Provider<UniqueHostPinger> uniqueHostPinger,
             PingRequestFactory pingRequestFactory) {
         this.connectionServices = connectionServices;
         this.hostCatcher = hostCatcher;
         this.backgroundExecutor = backgroundExecutor;
-        this.udpPingerFactory = udpPingerFactory;
-
+        this.udpPinger = udpPinger;
+        this.uniqueHostPinger = uniqueHostPinger;
         this.bootstrapper = bootstrapper;
         this.pingRequestFactory = pingRequestFactory;
     }
@@ -174,8 +171,7 @@ public class DHTNodeFetcher {
             LOG.debug("Sending ping to dht capable hosts");
             
             //we don't have active hosts but have hosts that support dht
-            hostCatcher.get().getPinger().rank(dhtHosts, 
-                                                            listener, canceller, m);
+            uniqueHostPinger.get().rank(dhtHosts, listener, canceller, m);
         } else {
             
             LOG.debug("Sending ping to all hosts");
@@ -213,11 +209,7 @@ public class DHTNodeFetcher {
             
             Message m = pingRequestFactory.createUDPingWithDHTIPPRequest();
             
-            if(pinger == null) {
-                pinger = udpPingerFactory.get();
-            }
-            
-            pinger.rank(Arrays.asList(ipp), 
+            udpPinger.get().rank(Arrays.asList(ipp), 
                     new SinglePingRequestListener(), null, m, pingExpireTime);
         }
     }

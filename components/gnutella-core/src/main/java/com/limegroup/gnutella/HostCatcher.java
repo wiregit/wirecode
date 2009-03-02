@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.limewire.collection.BucketQueue;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeSortedList;
@@ -55,10 +54,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
 import com.limegroup.gnutella.bootstrap.TcpBootstrap;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
-import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.bootstrap.TcpBootstrap.TcpBootstrapListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -241,9 +238,6 @@ public class HostCatcher implements Service {
     private final ListPartitioner<ExtendedEndpoint> uptimePartitions = 
         new ListPartitioner<ExtendedEndpoint>(restoredHosts, 3);
             
-    /** The UDPHostCache bootstrap system. */
-    private UDPHostCache udpHostCache;
-    
     /**
      * <tt>Set</tt> of hosts we were unable to create TCP connections with
      * and should therefore not be tried again.  Fixed size.
@@ -333,6 +327,7 @@ public class HostCatcher implements Service {
 
     private final PingRequestFactory pingRequestFactory;
     private final TcpBootstrap tcpBootstrap;
+    private final UDPHostCache udpHostCache;
     
     @Inject
     public HostCatcher(
@@ -344,10 +339,10 @@ public class HostCatcher implements Service {
             Provider<IPFilter> ipFilter,
             Provider<MulticastService> multicastService,
             UniqueHostPinger uniqueHostPinger,
-            UDPHostCacheFactory udpHostCacheFactory,
             PingRequestFactory pingRequestFactory,
             NetworkInstanceUtils networkInstanceUtils,
-            TcpBootstrap tcpBootstrap) {
+            TcpBootstrap tcpBootstrap,
+            UDPHostCache udpHostCache) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.connectionManager = connectionManager;
@@ -360,10 +355,7 @@ public class HostCatcher implements Service {
         this.pingRequestFactory = pingRequestFactory;
         this.networkInstanceUtils = networkInstanceUtils;
         this.tcpBootstrap = tcpBootstrap;
-        
-        // TODO: this could also be solved with a named injection to get the
-        //       UniqHostPinger and not its super class
-        this.udpHostCache = udpHostCacheFactory.createUDPHostCache(uniqueHostPinger);
+        this.udpHostCache = udpHostCache;
     }
     
     UDPHostCache getUdpHostCache() {
@@ -1477,10 +1469,6 @@ public class HostCatcher implements Service {
         permanentHostsSet.clear();
     }
     
-    public UDPPinger getPinger() {
-        return uniqueHostPinger;
-    }
-
     /** Enable very slow rep checking?  Package access for use by
      *  HostCatcherTest. */
     static boolean DEBUG = false;

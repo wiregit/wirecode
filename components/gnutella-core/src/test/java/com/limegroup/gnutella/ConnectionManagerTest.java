@@ -36,7 +36,7 @@ import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
 import com.limegroup.gnutella.bootstrap.TcpBootstrap;
-import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
+import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionCapabilitiesDelegator;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -732,14 +732,14 @@ public class ConnectionManagerTest extends LimeTestCase {
                 Provider<IPFilter> ipFilter,
                 Provider<MulticastService> multicastService,
                 UniqueHostPinger uniqueHostPinger,
-                UDPHostCacheFactory udpHostCacheFactory,
                 PingRequestFactory pingRequestFactory, 
                 NetworkInstanceUtils networkInstanceUtils,
-                TcpBootstrap tcpBootstrap) {
+                TcpBootstrap tcpBootstrap,
+                UDPHostCache udpHostCache) {
             super(backgroundExecutor, connectionServices, connectionManager,
                     udpService, dhtManager, queryUnicaster, ipFilter,
-                    multicastService, uniqueHostPinger, udpHostCacheFactory,
-                    pingRequestFactory, networkInstanceUtils, tcpBootstrap);
+                    multicastService, uniqueHostPinger, pingRequestFactory,
+                    networkInstanceUtils, tcpBootstrap, udpHostCache);
             resetLatches();
         }
         
@@ -809,14 +809,14 @@ public class ConnectionManagerTest extends LimeTestCase {
                 @Named("hostileFilter") Provider<IPFilter> ipFilter,
                 Provider<MulticastService> multicastService,
                 UniqueHostPinger uniqueHostPinger,
-                UDPHostCacheFactory udpHostCacheFactory,
                 PingRequestFactory pingRequestFactory, 
                 NetworkInstanceUtils networkInstanceUtils,
-                TcpBootstrap tcpBootstrap) {
+                TcpBootstrap tcpBootstrap,
+                UDPHostCache udpHostCache) {
             super(backgroundExecutor, connectionServices, connectionManager,
                     udpService, dhtManager, queryUnicaster, ipFilter,
-                    multicastService, uniqueHostPinger, udpHostCacheFactory,
-                    pingRequestFactory, networkInstanceUtils, tcpBootstrap);
+                    multicastService, uniqueHostPinger, pingRequestFactory,
+                    networkInstanceUtils, tcpBootstrap, udpHostCache);
         }
         
         final BlockingQueue<EndpointObserver> observers = 

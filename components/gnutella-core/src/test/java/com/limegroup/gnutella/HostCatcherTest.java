@@ -34,7 +34,6 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
-import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.Message;
@@ -46,7 +45,6 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-
 
 public class HostCatcherTest extends LimeTestCase {
     
@@ -173,7 +171,7 @@ public class HostCatcherTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(UDPHostCacheFactory.class).to(UDPHostCacheFactoryStub.class);               
+                bind(UDPHostCache.class).to(StubUDPBootstrapper.class);               
             }
         });
         hostCatcher = injector.getInstance(HostCatcher.class);
@@ -181,7 +179,7 @@ public class HostCatcherTest extends LimeTestCase {
         
         assertEquals(0, hostCatcher.getNumHosts());   
         
-        StubUDPBootstrapper udp = (StubUDPBootstrapper)injector.getInstance(HostCatcher.class).getUdpHostCache();        
+        StubUDPBootstrapper udp = (StubUDPBootstrapper)injector.getInstance(UDPHostCache.class);        
         Endpoint firstHost = hostCatcher.getAnEndpoint();
         assertTrue(udp.fetched);
         assertEquals(udp.host, firstHost.getAddress());
@@ -1004,40 +1002,12 @@ public class HostCatcherTest extends LimeTestCase {
     }
     
     @Singleton
-    private static class UDPHostCacheFactoryStub implements UDPHostCacheFactory {
-        private final Provider<MessageRouter> messageRouter;
-        private final PingRequestFactory pingRequestFactory;
-        private final ConnectionServices connectionServices;
-        private final Provider<HostCatcher> hostCatcher;
-        private final NetworkInstanceUtils networkInstanceUtils;
-
-        @Inject
-        public UDPHostCacheFactoryStub(Provider<MessageRouter> messageRouter,
-                PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
-                Provider<HostCatcher> hostCatcher, NetworkInstanceUtils networkInstanceUtils) {
-            this.messageRouter = messageRouter;
-            this.pingRequestFactory = pingRequestFactory;
-            this.connectionServices = connectionServices;
-            this.hostCatcher = hostCatcher;
-            this.networkInstanceUtils = networkInstanceUtils;
-        }
-
-        public UDPHostCache createUDPHostCache(UDPPinger pinger) {
-            return new StubUDPBootstrapper(pinger, messageRouter, pingRequestFactory,
-                    connectionServices, hostCatcher, networkInstanceUtils);
-        }
-
-        public UDPHostCache createUDPHostCache(long expiryTime, UDPPinger pinger) {
-            throw new UnsupportedOperationException();
-        }
-        
-    }
-    
     private static class StubUDPBootstrapper extends UDPHostCache {
         
         private final Provider<HostCatcher> hostCatcher;
         
-        public StubUDPBootstrapper(UDPPinger pinger, Provider<MessageRouter> messageRouter,
+        @Inject
+        StubUDPBootstrapper(UniqueHostPinger pinger, Provider<MessageRouter> messageRouter,
                 PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
                 Provider<HostCatcher> hostCatcher, NetworkInstanceUtils networkInstanceUtils) {
             super(pinger, messageRouter, pingRequestFactory, connectionServices,
@@ -1048,8 +1018,7 @@ public class HostCatcherTest extends LimeTestCase {
         private boolean fetched = false;
         private String host = "143.123.234.132";
         private boolean expired = false;
-        
-        
+                
         public boolean fetchHosts() {
             if(expired)
                 return false;

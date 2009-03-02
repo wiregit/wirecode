@@ -31,7 +31,7 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.UDPPingerImpl;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.PingReply;
@@ -499,7 +499,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         private boolean doRealDecrement = false;
         
         @Inject
-        public StubCache(UDPPinger pinger, Provider<MessageRouter> messageRouter,
+        public StubCache(UniqueHostPinger pinger, Provider<MessageRouter> messageRouter,
                 PingRequestFactory pingRequestFactory, ConnectionServices connectionServices, NetworkInstanceUtils networkInstanceUtils) {
             super(EXPIRY_TIME, pinger, messageRouter, pingRequestFactory,
                     connectionServices, networkInstanceUtils);
