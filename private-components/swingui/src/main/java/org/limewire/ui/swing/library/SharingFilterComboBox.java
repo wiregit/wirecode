@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -24,7 +25,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -35,6 +35,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
@@ -219,13 +220,24 @@ public class SharingFilterComboBox extends LimeComboBox {
     private class ScrollablePopupMenu extends JPopupMenu implements ActionListener, MouseListener {
 
         private JScrollPane scrollPane;
-        private JPanel panel;
+        private JXPanel panel;
         private Border buttonBorder = BorderFactory.createEmptyBorder(3,11,3,3);
         
         public ScrollablePopupMenu() {
             setLayout(new BorderLayout());
 
-            panel = new JPanel();
+            panel = new JXPanel(){
+                @Override
+                public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+                    return 20;
+                }
+                @Override
+                public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+                    return 20;
+                }
+            };
+            panel.setScrollableTracksViewportHeight(false);
+            panel.setScrollableTracksViewportWidth(false);
             panel.setMinimumSize(new Dimension(100,20));
             panel.setLayout(new VerticalLayout());
             

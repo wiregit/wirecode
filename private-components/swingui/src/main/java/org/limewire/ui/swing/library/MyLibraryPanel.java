@@ -116,6 +116,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private Icon playQuicklistIcon;
     @Resource
     private Font subFont;
+    @Resource
+    private Icon gnutellaIcon;
+    @Resource
+    private Icon friendIcon;
     
     private final LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
@@ -147,6 +151,17 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private ShareAllComboBox shareAllComboBox;
     private GhostDropTargetListener ghostDropTargetListener;
     private XMPPService xmppService;
+    
+    /**
+     * Set to true if the current message overlay has a clickable feature to hide it.
+     * This boolean is needed to properlly hide the message when the user doesn't
+     * close a closeable message but the program changes the message (ie changing to
+     * sharing view when not sharing with that friend). 
+     */
+    //TODO: revisit all this message overlay stuff. There needs to be a new class to
+    // handle this logic of showing/hiding closeable/noncloseable messages.
+    // the usage and complexity has changed dramatically since it was first written
+    private boolean isClickMessageView = false;
 
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
@@ -301,8 +316,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         messagePanel.setVisible(false);
         
         // don't hide the overlay if its the first time seeing the library or
-        // im logged in and its the first time logging in
-        if(!(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true ||
+        // im logged in and its the first time logging in. Do hide the overlay if one of the above is true
+        // but the program changed the message to a notcloseable message.
+        if(!isClickMessageView || !(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true ||
                 (xmppService.isLoggedIn() && SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true)))
             hideEmptyFriend();
         //reselect the current category in case we filtered on a friend that wasn't 
@@ -414,8 +430,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                                 libraryNavigator.selectLibrary();
                                 SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
                             }
-                            SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.setValue(false);
-                            SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.setValue(false);
                         } else if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
                             JPanel panel = new JPanel(new MigLayout("fill"));
                             panel.setOpaque(false);
@@ -428,7 +442,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                                 libraryNavigator.selectLibrary();
                                 SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
                             }
-                            SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.setValue(false);
                         }
                     }
                 }
@@ -437,15 +450,11 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             if(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true) {
                 JPanel panel = new JPanel(new MigLayout("fill"));
                 panel.setOpaque(false);
-                if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) 
-                    panel.add(getFirstTimeMyLibraryMessageAndSignedInComponent(), "align 50% 40%");
-                else
-                    panel.add(getFirstTimeMyLibraryMessageComponent(), "align 50% 40%");
+                panel.add(getFirstTimeMyLibraryMessageComponent(), "align 50% 40%");
                 JXLayer layer = map.get(category);
                 layer.getGlassPane().removeAll();
                 layer.getGlassPane().add(panel);
                 layer.getGlassPane().setVisible(true);
-                SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.setValue(false);
             }
         }
 
@@ -749,6 +758,8 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         messageComponent.addComponent(label, "wrap");
         messageComponent.addComponent(minLabel, "");
         
+        isClickMessageView = false;
+        
         return messageComponent;
     }
     
@@ -761,11 +772,13 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         MessageComponent messageComponent;
         messageComponent = new MessageComponent(6, 22, 18, 6);
         
-        JLabel headerLabel = new JLabel(I18n.tr("What Now?"));
+        JLabel headerLabel = new JLabel(I18n.tr("Now What?"));
         messageComponent.decorateHeaderLabel(headerLabel);
         
-        JLabel minLabel = new JLabel(I18n.tr("Share with friends and chat with them about LimeWire 5"));
+        JLabel minLabel = new JLabel(I18n.tr("Click "));
+        JLabel minLabel2 = new JLabel(I18n.tr(" to share or unshare with your friends"), friendIcon, JLabel.LEFT);
         messageComponent.decorateSubLabel(minLabel);
+        messageComponent.decorateSubLabel(minLabel2);
         
         JButton cancelButton = new JButton(closeButton);
         cancelButton.setBorder(BorderFactory.createEmptyBorder());
@@ -783,9 +796,12 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             }
         });
         
+        isClickMessageView = true;
+        
         messageComponent.addComponent(cancelButton, "span, alignx right");
         messageComponent.addComponent(headerLabel, "push, wrap");
-        messageComponent.addComponent(minLabel, "wrap, gapright 16");
+        messageComponent.addComponent(minLabel, "split");
+        messageComponent.addComponent(minLabel2, "wrap, gapright 16");
 
         return messageComponent;
     }
@@ -801,10 +817,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         JLabel headerLabel = new JLabel(I18n.tr("No more shared folders"));
         messageComponent.decorateHeaderLabel(headerLabel);
         
-        JLabel minLabel = new JLabel(I18n.tr("Click the share hyperlink to share or unshare a file"));
+        JLabel minLabel = new JLabel(I18n.tr("Click "));
+        JLabel minLabel2 = new JLabel(I18n.tr(" to share or unshare with the P2P Network"), gnutellaIcon, JLabel.LEFT);
         messageComponent.decorateSubLabel(minLabel);
-        
-        JLabel minLabel2 = new JLabel(I18n.tr("Click the What I'm Sharing button to see what files are being shared with the P2P Network"));
         messageComponent.decorateSubLabel(minLabel2);
         
         JButton cancelButton = new JButton(closeButton);
@@ -825,8 +840,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
         messageComponent.addComponent(cancelButton, "span, alignx right");
         messageComponent.addComponent(headerLabel, "push, wrap");
-        messageComponent.addComponent(minLabel, "wrap, gapright 16");
+        messageComponent.addComponent(minLabel, "split");
         messageComponent.addComponent(minLabel2, "wrap, gapright 16");
+        
+        isClickMessageView = true;
 
         return messageComponent;
     }
@@ -843,11 +860,15 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         JLabel headerLabel = new JLabel(I18n.tr("No more shared folders"));
         messageComponent.decorateHeaderLabel(headerLabel);
         
-        JLabel minLabel = new JLabel(I18n.tr("Click the share hyperlink to share or unshare a file"));
+        JLabel minLabel = new JLabel(I18n.tr("Click "));
+        JLabel minLabel2 = new JLabel(I18n.tr(" to share or unshare with the P2P Network"), gnutellaIcon, JLabel.LEFT);
         messageComponent.decorateSubLabel(minLabel);
-        
-        JLabel minLabel2 = new JLabel(I18n.tr("Share files with friends and chat with them about LimeWire 5"));
         messageComponent.decorateSubLabel(minLabel2);
+        
+        JLabel minLabel3 = new JLabel(I18n.tr("Click "));
+        JLabel minLabel4 = new JLabel(I18n.tr(" to share or unshare with your friends"), friendIcon, JLabel.LEFT);
+        messageComponent.decorateSubLabel(minLabel3);
+        messageComponent.decorateSubLabel(minLabel4);
         
         JButton cancelButton = new JButton(closeButton);
         cancelButton.setBorder(BorderFactory.createEmptyBorder());
@@ -868,7 +889,13 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
         messageComponent.addComponent(cancelButton, "span, alignx right");
         messageComponent.addComponent(headerLabel, "push, wrap");
-        messageComponent.addComponent(minLabel, "wrap, gapright 16");
+        messageComponent.addComponent(minLabel, "split");
+        messageComponent.addComponent(minLabel2, "wrap, gapright 16");
+        
+        messageComponent.addComponent(minLabel3, "split");
+        messageComponent.addComponent(minLabel4, "wrap, gapright 16");
+        
+        isClickMessageView = true;
         
         return messageComponent;
     }
@@ -879,6 +906,9 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     public MessageComponent getEmptyLibraryMessageComponent(Friend friend) {
         NotSharingPanel notSharingPanel = new NotSharingPanel();          
         notSharingPanel.setFriend(friend);
+        
+        isClickMessageView = false;
+        
         return notSharingPanel.getMessageComponent();
     }
 
