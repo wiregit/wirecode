@@ -18,6 +18,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.upload.UploadPanel;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
@@ -56,8 +57,20 @@ public class ToolsMenu extends MnemonicMenu {
                 navItem.select();
             }
         });
+        
+        add(new AbstractAction(I18n.tr("Advanced &Search")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                NavItem navItem = navigator.getNavItem(NavCategory.LIMEWIRE, AdvancedSearchPanel.NAME);
+                if (navItem != null) {
+                    navItem.select();
+                }
+            }
+        });
+        
         add(createWhatsNewSubmenu(searchHandler));
         addSeparator();
+        
         add(new AbstractAction(I18n.tr("&Advanced Tools...")) {
             @Override
             public void actionPerformed(ActionEvent e) {
