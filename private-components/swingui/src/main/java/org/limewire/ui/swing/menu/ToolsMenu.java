@@ -58,6 +58,7 @@ public class ToolsMenu extends MnemonicMenu {
             }
         });
         
+        addSeparator();
         add(new AbstractAction(I18n.tr("Advanced &Search")) {
             @Override
             public void actionPerformed(ActionEvent e) {
