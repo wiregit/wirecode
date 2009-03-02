@@ -81,10 +81,12 @@ public class ButtonDecorator {
     
     public void decorateDarkFullButton(JXButton button, AccentType accent) {
         decorateDarkFullButton(button, DrawMode.FULLY_ROUNDED, accent);
+        button.setBorder(BorderFactory.createEmptyBorder(2,10,3,10));
     }
     
     public void decorateDarkFullButton(JXButton button) {
         decorateDarkFullButton(button, DrawMode.FULLY_ROUNDED, AccentType.SHADOW);
+        button.setBorder(BorderFactory.createEmptyBorder(2,10,3,10));
     }
     
     /**
@@ -118,6 +120,7 @@ public class ButtonDecorator {
     public void decorateDarkFullButton(JXButton button, DrawMode mode, AccentType accent) {
         decorateDarkFullButton(button, painterFactory.createDarkFullButtonForegroundPainter(), 
                 painterFactory.createDarkFullButtonBackgroundPainter(mode, accent));
+        button.setBorder(BorderFactory.createEmptyBorder(2,10,3,10));
     }
     
     private void decorateDarkFullButton(JXButton button,
@@ -137,6 +140,7 @@ public class ButtonDecorator {
         button.setBackgroundPainter(painterFactory.createLightFullButtonBackgroundPainter());
 
         decorateGeneral(button);
+        button.setBorder(BorderFactory.createEmptyBorder(2,10,3,10));
         
         button.setForeground(lightFullTextForeground);
         button.setFont(lightFullTextFont);
