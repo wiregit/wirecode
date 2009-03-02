@@ -52,8 +52,6 @@ import org.jdesktop.swingx.decorator.BorderHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -74,6 +72,9 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+import org.limewire.xmpp.api.client.MessageReader;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -108,7 +109,6 @@ public class ChatFriendListPane extends JPanel {
     private final Map<String, ChatFriend> idToFriendMap;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final LibraryNavigator libraryNavigator;
-    private final JScrollPane scrollPane;
 
     private String myID;
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
@@ -140,8 +140,7 @@ public class ChatFriendListPane extends JPanel {
         addPopupMenus(friendsTable);
         
         setBorder(new DropShadowBorder(rightBorderColor, 1, 1.0f, 0, false, false, false, true));
-        
-        scrollPane = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane scrollPane = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         add(scrollPane);
         setPreferredSize(new Dimension(PREFERRED_WIDTH, 200));
@@ -328,23 +327,42 @@ public class ChatFriendListPane extends JPanel {
     
     private void handlePresenceEvent(FriendPresenceEvent event) {
         LOG.debugf("handling presence event {0}", event);
-        FriendPresence presence = event.getSource();
-        Friend friend = presence.getFriend();
-        ChatFriend chatFriend = idToFriendMap.get(friend.getId());
+        final Presence presence = (Presence)event.getSource();
+        final User user = presence.getUser();
+        ChatFriend chatFriend = idToFriendMap.get(user.getId());
         switch(event.getType()) {
         case ADDED:
-        case UPDATE:
             if(chatFriend == null) {
-                chatFriend = new ChatFriendImpl((Presence)presence, myID);
+                chatFriend = new ChatFriendImpl(presence);
                 chatFriends.add(chatFriend);
-                idToFriendMap.put(friend.getId(), chatFriend);
+                idToFriendMap.put(user.getId(), chatFriend);
             }
+
+            final ChatFriend chatFriendForIncomingChat = chatFriend;
+            IncomingChatListener incomingChatListener = new IncomingChatListener() {
+                public MessageReader incomingChat(MessageWriter writer) {
+                    LOG.debugf("{0} is typing a message", presence.getJID());
+                    MessageWriter writerWrapper = new MessageWriterImpl(myID, chatFriendForIncomingChat, writer);
+                    ConversationSelectedEvent event =
+                            new ConversationSelectedEvent(chatFriendForIncomingChat, writerWrapper, false);
+                    event.publish();
+                    //Hang out until a responder has processed this event
+                    event.await();
+                    return new MessageReaderImpl(chatFriendForIncomingChat);
+                }
+            };
+            user.setChatListenerIfNecessary(incomingChatListener);
             chatFriend.update();
+            break;
+        case UPDATE:
+            if (chatFriend != null) {
+                chatFriend.update();
+            }
             break;
         case REMOVED:
             if (chatFriend != null) {
                 if (shouldRemoveFromFriendsList(chatFriend)) {
-                    chatFriends.remove(idToFriendMap.remove(friend.getId()));
+                    chatFriends.remove(idToFriendMap.remove(user.getId()));
                 }
                 chatFriend.update();
             }
