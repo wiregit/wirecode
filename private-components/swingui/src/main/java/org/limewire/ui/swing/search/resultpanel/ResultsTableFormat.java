@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.AbstractColumnStateFormat;
 import org.limewire.ui.swing.table.ColumnStateInfo;
+import org.limewire.ui.swing.table.QualityComparator;
 import org.limewire.ui.swing.util.EventListTableSortFormat;
 
 /**
@@ -180,27 +180,6 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
         
         private String getName(VisualSearchResult result) {
             return result.getNameProperty(useAudioArtist);
-        }
-    }
-
-    /**
-     * Compares the quality value for a pair of VisualSearchResult objects.
-     */
-    public static class QualityComparator implements Comparator<VisualSearchResult> {
-        @Override
-        public int compare(VisualSearchResult o1, VisualSearchResult o2) {
-            Object quality1 = o1.getProperty(FilePropertyKey.QUALITY);
-            Object quality2 = o2.getProperty(FilePropertyKey.QUALITY);
-            
-            if (quality1 instanceof Long) {
-                if (quality2 instanceof Long) {
-                    return ((Long) quality1).compareTo((Long) quality2);
-                } else {
-                    return 1;
-                }
-            } else {
-                return (quality2 instanceof Long) ? -1 : 0;
-            }
         }
     }
     
