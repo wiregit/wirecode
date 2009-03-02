@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -31,6 +32,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -70,12 +72,15 @@ import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.ThreadSafeList;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor.Event;
 import ca.odell.glazedlists.swing.EventComboBoxModel;
 import ca.odell.glazedlists.swing.EventTableModel;
@@ -87,27 +92,25 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
 
     private static final int SHARED_ROW_COUNT = 10;        
     
-    @Resource
-    private int panelWidth;
-    
     private JXPanel titlePanel;
     private JXPanel tablePanel;
     private JXPanel bottomPanel;
-    @Resource
-    private Color bottomPanelTopGradient;
-    @Resource
-    private Color bottomPanelBottomGradient;
     
     private GradientPaint bottomGradient;
     
     private LibraryShareModel shareModel;
+    private final boolean canShowP2P;
+    private final boolean canShare;
+    
     
     private JTextField inputField;
 
     private String startTypingText = I18n.tr("Start typing a friend's name");
     private String addFriendText = I18n.tr("Add another friend");
 
-    private GnutellaFilteredList noShareListEDTOnly;  
+    private TextMatcherEditor<SharingTarget> textMatcher;
+    
+    private FilterList<SharingTarget> noShareListEDTOnly;  
     //wraps noShareList 
     private SortedList<SharingTarget> comboBoxListEDTOnly;
     
@@ -123,56 +126,22 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     private MouseableTable shareTable;
     private JComboBox friendCombo;
     private LimeEditableComboBox comboPanel;
-    
-    private boolean bottomPanelHidden = false;
-    private boolean tableHidden = false;
 
     private JXLabel friendLabel;
     private JLabel topLabel;
     private JXLabel bottomLabel;
     private JLabel titleLabel;
+
+    private JCheckBox gnutellaCheckBox;
     
     private JXPanel mainPanel;
-    
-    /**
-     * arc for RoundedRect
-     */
-    @Resource
-    private int arc = 10;
-
-    private JButton closeButton;
-    @Resource
-    private Icon closeIcon;
-    @Resource
-    private Icon closeIconRollover;
-    @Resource
-    private Icon closeIconPressed;   
-     
-    
     private ShapeDialog dialog;
-    
     private BasicComboPopup comboPopup;
-    
-   // private TextMatcherEditor<SharingTarget> textMatcher;
-    
-    @Resource
-    private Icon removeIcon;
-    @Resource
-    private Icon removeIconRollover;
-    @Resource
-    private Icon removeIconPressed;   
-    @Resource
-    private int shareTableIndent = 15;   
-    @Resource
-    private Color dividerColor;
-    @Resource
-    private Color borderColor;
-    @Resource
-    private Color titleFontColor;
-    
+    private JButton closeButton;
+
     private final List<ShareListener> shareListeners = new CopyOnWriteArrayList<ShareListener>();
     
-    private Action up = new AbstractAction() {
+    private final Action up = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(!friendCombo.isPopupVisible()){
@@ -187,7 +156,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         }
     };
 
-    private Action down = new AbstractAction() {
+    private final Action down = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(!friendCombo.isPopupVisible()){
@@ -201,10 +170,46 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
             }
         }
     };    
-    
 
-    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog) {        
+    
+    /**
+     * arc for RoundedRect
+     */
+    @Resource private int arc = 10;
+    @Resource private Icon closeIcon;
+    @Resource private Icon closeIconRollover;
+    @Resource private Icon closeIconPressed;   
+    
+    @Resource private int panelWidth;
+    @Resource private Color bottomPanelTopGradient;
+    @Resource private Color bottomPanelBottomGradient;
+    
+    @Resource private Icon checkBoxIcon;
+    @Resource private Icon checkBoxSelectedIcon;
+    @Resource private Font checkBoxFont;
+    
+    @Resource private Icon removeIcon;
+    @Resource private Icon removeIconRollover;
+    @Resource private Icon removeIconPressed;   
+    @Resource private int shareTableIndent = 15;   
+    @Resource private Color dividerColor;
+    @Resource private Color borderColor;
+    @Resource private Color titleFontColor;
+    
+    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog) {
+        this(allFriends, dialog, true);
+    }
+    
+    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog,
+            boolean canShowP2P) {
+        this(allFriends, dialog, canShowP2P, true);
+    }
+    
+    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog,
+            boolean canShowP2P, boolean canShare) {        
         this.dialog = dialog;
+        this.canShowP2P = canShowP2P;
+        this.canShare = canShare;
         initialize(allFriends);
     }
   
@@ -219,6 +224,8 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         configureComboBox();
         
         initializeLabels();
+        
+        initializeGnutellaCheckBox();
         
         initializePanels();
         
@@ -270,6 +277,14 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
 
         mainPanel.setMinimumSize(new Dimension(panelWidth, 0));
         mainPanel.setMaximumSize(new Dimension(panelWidth, Integer.MAX_VALUE));
+    }
+    
+    private void initializeGnutellaCheckBox() {
+        gnutellaCheckBox = new JCheckBox(I18n.tr("Share with the P2P Nework"));
+        gnutellaCheckBox.setOpaque(false);
+        gnutellaCheckBox.setIcon(checkBoxIcon);
+        gnutellaCheckBox.setSelectedIcon(checkBoxSelectedIcon);
+        gnutellaCheckBox.setFont(checkBoxFont);
     }
     
     private void initializePainters(){
@@ -364,11 +379,20 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         });
         
 
-        noShareListEDTOnly = new GnutellaFilteredList();
+        TextFilterator<SharingTarget> textFilter = new TextFilterator<SharingTarget>() {
+            @Override
+            public void getFilterStrings(List<String> baseList, SharingTarget element) {
+                baseList.add(element.getFriend().getName());
+                baseList.add(element.getFriend().getId());
+            }
+        };
+        textMatcher = new TextMatcherEditor<SharingTarget>(textFilter);
+        
+        noShareListEDTOnly = GlazedListsFactory.filterList(new BasicEventList<SharingTarget>(), textMatcher);
         comboBoxListEDTOnly = GlazedListsFactory.sortedList(noShareListEDTOnly, new SharingTargetComparator());
         
         // force list to re-sort when textMatcher is updated
-        noShareListEDTOnly.addMatcherEditorListener(new MatcherEditor.Listener<SharingTarget>() {
+        textMatcher.addMatcherEditorListener(new MatcherEditor.Listener<SharingTarget>() {
             @Override
             public void changedMatcher(Event<SharingTarget> matcherEvent) {
                 Comparator<SharingTarget> comparator = (comboPanel.getTextField().getText() == null || comboPanel.getTextField().getText().equals("")) ? 
@@ -390,13 +414,13 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         titlePanel.add(closeButton, "aligny top, alignx right");
         
         tablePanel.add(topLabel, "hidemode 3, wrap");        
-        tablePanel.add(shareScroll, "gaptop 6, gapbottom 6, growx");
+        tablePanel.add(shareScroll, "hidemode 3, gaptop 6, gapbottom 2, growx, wrap");
+        tablePanel.add(gnutellaCheckBox, "gapbottom 2, hidemode 3");
         
         bottomPanel.add(friendLabel, "gaptop 6, hidemode 3, wrap");
         bottomPanel.add(comboPanel, "growx, gaptop 4, gapbottom 6, hidemode 3, wrap");
         bottomPanel.add(bottomLabel, "growy, gapbottom 6, hidemode 3");
         
-
         mainPanel.add(titlePanel, "growx, gaptop 6, gapbottom 6, wrap");
         mainPanel.add(tablePanel, "growx, wrap, hidemode 3");
         mainPanel.add(bottomPanel, "growx, hidemode 3");
@@ -471,7 +495,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
             }
             
             private void update() {
-                noShareListEDTOnly.setFilterText(inputField.getText().split(" "));
+                textMatcher.setFilterText(inputField.getText().split(" "));
                 if (friendCombo.getModel().getSize() > 0) {
                     friendCombo.setSelectedIndex(0);
                     fixPopupSize();
@@ -555,20 +579,9 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
             resetRowSelection(index);
 
             if (friendCombo.getModel().getSize() > 0) {
-                friendCombo.showPopup();
+               friendCombo.showPopup();
             }
         }
-    }
-    
-    public void setComboBoxVisible(boolean visible){
-        bottomPanel.setVisible(visible);
-        bottomPanelHidden = !visible;
-    }
-    
-
-    public void setTableVisible(boolean visible) {
-        tableHidden = !visible;
-        tablePanel.setVisible(visible);
     }
 
     private void setShareModel(LibraryShareModel shareModel){
@@ -655,16 +668,19 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     
     private void adjustSize(){
         adjustFriendLabel();
-        bottomPanel.setVisible(!bottomPanelHidden && noShareListEDTOnly.getUnfilteredSize() > 0);
-        if (!tableHidden ) {
-            int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
-            shareTable.setVisibleRowCount(visibleRows);
-            tablePanel.setVisible(visibleRows > 0);
+        bottomPanel.setVisible(canShare);
 
-            //prevent flashing scrollbar
-            int scrollPolicy = shareTable.getRowCount() > visibleRows ? JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED : JScrollPane.VERTICAL_SCROLLBAR_NEVER;
-            shareScroll.setVerticalScrollBarPolicy(scrollPolicy);
-        }
+        int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
+        shareTable.setVisibleRowCount(visibleRows);
+            
+        topLabel.setVisible(visibleRows > 0);
+        shareScroll.setVisible(visibleRows > 0);
+
+        //prevent flashing scrollbar
+        int scrollPolicy = shareTable.getRowCount() > visibleRows ? JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED : JScrollPane.VERTICAL_SCROLLBAR_NEVER;
+
+        shareScroll.setVerticalScrollBarPolicy(scrollPolicy);
+        
         setSize(getPreferredSize());  
     }
     
@@ -723,12 +739,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
             if (o1 == o2){
                 return 0;
             }
-            if(o1.isGnutellaNetwork()){
-                return -1;
-            }
-            if(o2.isGnutellaNetwork()){
-                return 1;
-            }
+            
             return o1.getFriend().getRenderName().compareToIgnoreCase(o2.getFriend().getRenderName());
         }
         
@@ -740,12 +751,6 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         public int compare(SharingTarget o1, SharingTarget o2) {
             if (o1 == o2){
                 return 0;
-            }
-            if(o1.isGnutellaNetwork()){
-                return 1;
-            }
-            if (o2.isGnutellaNetwork()) {
-                    return -1;
             }
             return o1.getFriend().getRenderName().compareToIgnoreCase(o2.getFriend().getRenderName());
         }
@@ -795,10 +800,8 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         
         private void reloadSharedFriendsInBackground() {           
 
-            if (setupShareModel.isGnutellaNetworkSharable()) {
-                loadFriendInBackground(SharingTarget.GNUTELLA_SHARE);
-            }
-
+            initGnutella();
+                       
             allFriendsSortedThreadSafe.getReadWriteLock().readLock().lock();
             try {
                 for (SharingTarget target : allFriendsSortedThreadSafe) {
@@ -806,6 +809,36 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
                 }
             } finally {
                 allFriendsSortedThreadSafe.getReadWriteLock().readLock().unlock();
+            }
+        }
+        
+        private void initGnutella() {
+            boolean hasGnutella = setupShareModel.isGnutellaNetworkSharable() 
+                                    && canShowP2P && canShare;
+            
+            gnutellaCheckBox.setVisible(hasGnutella);
+            
+            if (hasGnutella) {
+                gnutellaCheckBox.setSelected(setupShareModel.isShared(SharingTarget.GNUTELLA_SHARE)); 
+                gnutellaCheckBox.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                    
+                        if (gnutellaCheckBox.isSelected()) {
+                            shareModel.shareFriend(SharingTarget.GNUTELLA_SHARE);
+                            handleShareChanged(SharingTarget.GNUTELLA_SHARE.getFriend(), ShareEventType.SHARE);
+                        } 
+                        else {
+                            shareModel.unshareFriend(SharingTarget.GNUTELLA_SHARE);
+                            handleShareChanged(SharingTarget.GNUTELLA_SHARE.getFriend(), ShareEventType.UNSHARE);
+                        }
+    
+                    }
+                });
+            } else if (!canShare && canShowP2P) {
+                if (setupShareModel.isShared(SharingTarget.GNUTELLA_SHARE)) {
+                    loadFriendInBackground(SharingTarget.GNUTELLA_SHARE);
+                }
             }
         }
         

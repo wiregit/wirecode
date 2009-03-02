@@ -114,7 +114,7 @@ public class LimeComboBox extends JXButton {
         item.setBorder(BorderFactory.createEmptyBorder(0,1,0,0));
         return item;
     }
-    
+
     /**
      * A helper method for creating menu items painted in the default style of an 
      *  overridden menu.
@@ -242,6 +242,24 @@ public class LimeComboBox extends JXButton {
         }
     }
 
+    /** Manually triggers a resize of the component. 
+      *
+      *  Should be avoided but can be used after drastic changes to font size/border after
+      *  the component is layed out.
+      */
+    public void forceResize() {
+        ResizeUtils.updateSize(this, actions);
+    }
+    
+    // TODO: Resize model must be redone so this is not necessary
+    @Override
+    public void setFont(Font f) {
+        super.setFont(f);
+        menuDirty = true;
+        ResizeUtils.updateSize(this, actions);
+    }
+    
+
     /** Sets the cursor that will be shown when the button is hovered-over. */
     public void setMouseOverCursor(Cursor cursor) {
         mouseOverCursor = cursor;
@@ -338,15 +356,7 @@ public class LimeComboBox extends JXButton {
     public boolean isOpaque() {
         return false;
     }
-    
-    
-    @Override
-    public void setFont(Font f) {
-        super.setFont(f);
-        menuDirty = true;
-        ResizeUtils.updateSize(this, actions);
-    }
-    
+       
     /**
      * Sets whether or not clicking the combobox forces the menu to display.
      * Normally clicking it would cause a visible menu to disappear.
@@ -408,10 +418,7 @@ public class LimeComboBox extends JXButton {
                 selectedAction = action;
                 selectedComponent = (JComponent)label.getParent();
                 selectedLabel = label;
-                // Fire the parent listeners
-                for (SelectionListener listener : selectionListeners) {
-                    listener.selectionChanged(action);
-                }
+			    fireChangeEvent(action);
                 repaint();
                 menu.setVisible(false);
             }
@@ -505,6 +512,13 @@ public class LimeComboBox extends JXButton {
         
         for(MenuCreationListener listener : menuCreationListeners) {
             listener.menuCreated(this, menu);
+        }
+    }
+    
+    protected void fireChangeEvent(Action action) {
+        // Fire the parent listeners
+        for (SelectionListener listener : selectionListeners) {
+            listener.selectionChanged(action);
         }
     }
     

@@ -13,6 +13,7 @@ import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.GnutellaFileList;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
@@ -24,6 +25,8 @@ import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.event.ListEventPublisher;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -51,11 +54,12 @@ class ShareListManagerImpl implements ShareListManager {
 
     @Inject
     ShareListManagerImpl(FileManager fileManager, CoreLocalFileItemFactory coreLocalFileItemFactory,
-            EventListener<FriendShareListEvent> friendShareListEventListener) {
+            EventListener<FriendShareListEvent> friendShareListEventListener,
+            LibraryManager libraryManager) {
         this.fileManager = fileManager;
         this.coreLocalFileItemFactory = coreLocalFileItemFactory;
         this.friendShareListEventListener = friendShareListEventListener;
-        this.combinedShareList = new CombinedShareList();
+        this.combinedShareList = new CombinedShareList(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
         this.gnutellaFileList = new GnutellaFileListImpl(fileManager.getGnutellaFileList());
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
     }
@@ -221,8 +225,8 @@ class ShareListManagerImpl implements ShareListManager {
         private final EventList<LocalFileItem> threadSafeUniqueList;
         private volatile TransformedList<LocalFileItem, LocalFileItem> swingList;
         
-        public CombinedShareList() {
-            compositeList = new CompositeList<LocalFileItem>();
+        public CombinedShareList(ListEventPublisher listEventPublisher, ReadWriteLock readWriteLock) {
+            compositeList = new CompositeList<LocalFileItem>(listEventPublisher, readWriteLock);
             threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(
                     GlazedListsFactory.readOnlyList(compositeList)),
                     new Comparator<LocalFileItem>() {

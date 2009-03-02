@@ -59,7 +59,15 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
         }
         return multiFileShareWidget;
     }
-
+    
+    @Override
+    public ShareWidget<LocalFileItem[]> createMultiFileFriendOnlyShareWidget() {
+        if(multiFileShareWidget == null){
+            multiFileShareWidget = new MultiFileShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, false);
+        }
+        return multiFileShareWidget;
+    }
+    
     @Override
     public ShareWidget<LocalFileItem[]> createMultiFileUnshareWidget() {
         if(multiFileUnshareWidget == null){

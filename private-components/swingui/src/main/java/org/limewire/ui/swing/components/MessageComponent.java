@@ -7,6 +7,8 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
+import javax.swing.text.html.HTMLDocument;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -39,6 +41,7 @@ public class MessageComponent extends JPanel {
         this(18, 22, 18, 22);
     }
     
+    // TODO: top, left, right, bottom does not seem to map correctly
     public MessageComponent(int topInset, int leftInset, int rightInset, int bottomInset) {
         GuiUtils.assignResources(this);
         
@@ -62,9 +65,22 @@ public class MessageComponent extends JPanel {
         component.setForeground(fontColor);
     }
     
-    public void decorateSubLabel(JComponent component) {
+    public void decorateSubLabel(JLabel component) {
         component.setFont(subFont);
         component.setForeground(fontColor);
+    }
+    
+    public void decorateSubLabel(JTextPane component) {
+        ((HTMLDocument)component.getDocument()).getStyleSheet().addRule(createCSS(subFont, fontColor));
+    }
+    
+    private String createCSS(Font font, Color color) {
+        StringBuilder builder = new StringBuilder("body {");
+        builder.append("font-family: ").append(font.getFamily()).append(";");
+        builder.append("font-size: ").append(font.getSize()).append("pt;");
+        builder.append("color: ").append(GuiUtils.colorToHex(color)).append(";");
+        builder.append("}");
+        return builder.toString();
     }
     
     public void decorateFont(JComponent component) {

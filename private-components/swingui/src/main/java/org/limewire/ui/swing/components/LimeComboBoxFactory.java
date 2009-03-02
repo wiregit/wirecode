@@ -8,6 +8,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -112,5 +113,31 @@ public class LimeComboBoxFactory {
         box.setBorder(BorderFactory.createEmptyBorder(2,6,3,15));
         box.setText(promptText);
         box.setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+    
+    public void decorateDarkFullComboBox(JXButton box, AccentType accentType) {
+        buttonDecorator.decorateDarkFullButton(box, accentType);
+        box.setIcon(darkFullIcon);
+        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
+    }
+    
+    public void decorateDarkFullComboBox(JXButton box) {
+        buttonDecorator.decorateDarkFullButton(box);
+        box.setIcon(darkFullIcon);
+        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
+    }       
+    
+    public void decorateLinkComboBox(JXButton box) {
+        buttonDecorator.decorateLinkButton(box);
+        box.setIcon(miniRegIcon);
+        box.setBorder(BorderFactory.createEmptyBorder(2,6,3,15));
+        
+        tryInstallHandCursor(box);
+    }
+    
+    private void tryInstallHandCursor(JXButton box) {
+        if (box instanceof LimeComboBox) {
+            ((LimeComboBox)box).setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
     }
 }
