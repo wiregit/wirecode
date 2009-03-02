@@ -197,7 +197,7 @@ public class ShareAllComboBox extends LimeComboBox {
                     selectAllable.selectAll();
                     List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();                
                     if (selectedItems.size() > 0) {
-                        ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileFriendOnlyShareWidget();
+                        ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileShareWidget();
                         shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
                         shareWidget.show(GuiUtils.getMainFrame());
                     } 
