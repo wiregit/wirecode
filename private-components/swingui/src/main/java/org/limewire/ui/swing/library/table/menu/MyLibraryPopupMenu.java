@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.List;
 
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -131,17 +130,17 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         // Create playlist sub-menu for audio files.
         if (category == Category.AUDIO) {
-            JMenu playlistMenu = new JMenu(I18n.tr("Add to playlist"));
-            
-            // Add action for each playlist.
+            // Get list of playlists.
             List<Playlist> playlistList = playlistManager.getPlaylists();
-            for (Playlist playlist : playlistList) {
-                playlistMenu.add(new PlaylistAction(playlist, fileItems));
+
+            // Add action for default playlist only; this is assumed to be the
+            // first item in the list.  When multiple playlists are supported,
+            // we need to upgrade this to create a sub-menu of playlists. 
+            if (playlistList.size() > 0) {
+                Playlist playlist = playlistList.get(0);
+                String name = I18n.tr("Add to {0}", playlist.getName());
+                add(new PlaylistAction(name, playlist, fileItems)).setEnabled(playlistActionEnabled);
             }
-            
-            // Add sub-menu to popup menu.
-            playlistMenu.setEnabled(playlistActionEnabled);
-            add(playlistMenu);
         }
 
         addSeparator();
@@ -187,8 +186,8 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         private final Playlist playlist;
         private final List<LocalFileItem> fileItems;
         
-        public PlaylistAction(Playlist playlist, List<LocalFileItem> fileItems) {
-            super(playlist.getName());
+        public PlaylistAction(String name, Playlist playlist, List<LocalFileItem> fileItems) {
+            super(name);
             this.playlist = playlist;
             this.fileItems = fileItems;
         }
