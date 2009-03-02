@@ -15,6 +15,14 @@ import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Class that preps and skins JXButtons with the default
+ *  lw style. 
+ *  
+ *  Mini buttons do not have a background drawn unless mouse
+ *   overed or clicked, full buttons do.
+ *  
+ */
 @Singleton
 public class ButtonDecorator {
 
@@ -53,6 +61,11 @@ public class ButtonDecorator {
         button.setFont(miniTextFont);
     }
     
+    /** 
+     * The link button is similar to the mini button in that it has no background drawn until mouse
+     *  over.  When inactive, text is underlined like a link, the active styles are similar to that
+     *  of the mini buttons.
+     */
     public void decorateLinkButton(JXButton button) {
         button.setForegroundPainter(painterFactory.createLinkButtonForegroundPainter());
         button.setBackgroundPainter(painterFactory.createLinkButtonBackgroundPainter());
@@ -66,12 +79,20 @@ public class ButtonDecorator {
     
     public void decorateDarkFullButton(JXButton button, AccentType accent) {
         decorateDarkFullButton(button, DrawMode.FULLY_ROUNDED, accent);
+        button.setBorder(BorderFactory.createEmptyBorder(2,10,3,10));
     }
     
     public void decorateDarkFullButton(JXButton button) {
         decorateDarkFullButton(button, DrawMode.FULLY_ROUNDED, AccentType.SHADOW);
+        button.setBorder(BorderFactory.createEmptyBorder(2,10,3,10));
     }
     
+    /**
+     * This button is preped for the case where an image will be displayed
+     *  but no text.  The buttons icon will be centered and the remained of the
+     *  button drawn around.  This button will be painted with the dark style and
+     *  needs an accent to be selected. 
+     */
     public void decorateDarkFullImageButton(JXButton button, AccentType accent) {
         decorateDarkFullButton(button, button.getForegroundPainter(), 
                 painterFactory.createDarkFullButtonBackgroundPainter(DrawMode.FULLY_ROUNDED, accent));
@@ -80,6 +101,12 @@ public class ButtonDecorator {
         button.setPaintBorderInsets(true);
     }
     
+    /**
+     * This button is preped for the case where an image will be displayed
+     *  but no text.  The buttons icon will be centered and the remained of the
+     *  button drawn around.  This button will be painted with the dark style and
+     *  accepts a parameter for overriding the edge rounding settings on the button face. 
+     */
     public void decorateDarkFullImageButton(JXButton button, DrawMode mode) {
         decorateDarkFullButton(button, button.getForegroundPainter(), 
                 painterFactory.createDarkFullButtonBackgroundPainter(mode, AccentType.SHADOW));
@@ -91,6 +118,7 @@ public class ButtonDecorator {
     public void decorateDarkFullButton(JXButton button, DrawMode mode, AccentType accent) {
         decorateDarkFullButton(button, painterFactory.createDarkFullButtonForegroundPainter(), 
                 painterFactory.createDarkFullButtonBackgroundPainter(mode, accent));
+        button.setBorder(BorderFactory.createEmptyBorder(2,10,3,10));
     }
     
     private void decorateDarkFullButton(JXButton button,
@@ -110,6 +138,7 @@ public class ButtonDecorator {
         button.setBackgroundPainter(painterFactory.createLightFullButtonBackgroundPainter());
 
         decorateGeneral(button);
+        button.setBorder(BorderFactory.createEmptyBorder(2,10,3,10));
         
         button.setForeground(lightFullTextForeground);
         button.setFont(lightFullTextFont);
