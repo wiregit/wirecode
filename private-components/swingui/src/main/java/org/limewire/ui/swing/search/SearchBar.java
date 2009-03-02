@@ -169,7 +169,7 @@ public class SearchBar extends JXPanel {
             @Override
             public void menuCreated(LimeComboBox comboBox, final JPopupMenu menu) {
                 menu.addSeparator();
-                menu.add(new HyperlinkButton(new AbstractAction(I18n.tr("Advanced Search...")) {
+                menu.add(new HyperlinkButton(new AbstractAction(I18n.tr("Advanced Search")) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         NavItem item = navigator.getNavItem(NavCategory.LIMEWIRE, AdvancedSearchPanel.NAME);
