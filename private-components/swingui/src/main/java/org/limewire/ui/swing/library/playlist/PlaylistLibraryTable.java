@@ -19,6 +19,7 @@ import org.limewire.ui.swing.library.table.PlayRendererEditor;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditorFactory;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.NameRenderer;
+import org.limewire.ui.swing.table.QualityRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -78,6 +79,7 @@ public class PlaylistLibraryTable<T extends LocalFileItem> extends LibraryTable<
         getColumnModel().getColumn(PlaylistTableFormat.SIZE_INDEX).setCellRenderer(new FileSizeRenderer());
         getColumnModel().getColumn(PlaylistTableFormat.TITLE_INDEX).setCellRenderer(new NameRenderer());
         getColumnModel().getColumn(PlaylistTableFormat.NUMBER_INDEX).setCellRenderer(new PositionRenderer());
+        getColumnModel().getColumn(PlaylistTableFormat.QUALITY_INDEX).setCellRenderer(new QualityRenderer());
     }
 
     @Override
