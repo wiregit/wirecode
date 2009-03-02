@@ -513,15 +513,13 @@ public class ConnectionManagerTest extends LimeTestCase {
 
 
     /**
-     * Tests to make sure that a host is still added to the host
-     * catcher as a connection that was made (at least temporarily) even
-     * if the server sent a 503.
+     * Tests that a 503 rejection is counted as a connection failure.
      */
     public void testRejectHost() throws Exception {
         CATCHER.endpoint =  new ExtendedEndpoint("localhost", Backend.REJECT_PORT);
         connectionServices.connect();
-        assertTrue(CATCHER.waitForSuccess(5000));
-        assertEquals(0, CATCHER.getFailureCount());
+        assertTrue(CATCHER.waitForFailure(5000));
+        assertEquals(1, CATCHER.getFailureCount());
     }
     
     public void testRecordConnectionTime() throws Exception{
