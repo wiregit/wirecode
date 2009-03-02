@@ -22,9 +22,11 @@
 			</add-src-classpath>
             <add-tests-classpath>
               <pathelement location="${limewire.tests.jars}/inspTool.jar"/>
+              <pathelement location="${limewire.tests.jars}/bcel.jar"/>
 	    </add-tests-classpath>
 	    <add-build-tests-classpath>
 	      <pathelement location="${limewire.tests.jars}/inspTool.jar"/>
+              <pathelement location="${limewire.tests.jars}/bcel.jar"/>
 	    </add-build-tests-classpath>
         </do.setup-private-properties>
     </target>
