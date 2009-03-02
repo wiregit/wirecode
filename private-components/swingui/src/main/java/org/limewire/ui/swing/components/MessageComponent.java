@@ -41,6 +41,7 @@ public class MessageComponent extends JPanel {
         this(18, 22, 18, 22);
     }
     
+    // TODO: top, left, right, bottom does not seem to map correctly
     public MessageComponent(int topInset, int leftInset, int rightInset, int bottomInset) {
         GuiUtils.assignResources(this);
         

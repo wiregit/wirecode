@@ -63,6 +63,11 @@ public class ButtonDecorator {
         button.setFont(miniTextFont);
     }
     
+    /** 
+     * The link button is similar to the mini button in that it has no background drawn until mouse
+     *  over.  When inactive, text is underlined like a link, the active styles are similar to that
+     *  of the mini buttons.
+     */
     public void decorateLinkButton(JXButton button) {
         button.setForegroundPainter(painterFactory.createLinkButtonForegroundPainter());
         button.setBackgroundPainter(painterFactory.createLinkButtonBackgroundPainter());
@@ -82,6 +87,12 @@ public class ButtonDecorator {
         decorateDarkFullButton(button, DrawMode.FULLY_ROUNDED, AccentType.SHADOW);
     }
     
+    /**
+     * This button is preped for the case where an image will be displayed
+     *  but no text.  The buttons icon will be centered and the remained of the
+     *  button drawn around.  This button will be painted with the dark style and
+     *  needs an accent to be selected. 
+     */
     public void decorateDarkFullImageButton(JXButton button, AccentType accent) {
         decorateDarkFullButton(button, button.getForegroundPainter(), 
                 painterFactory.createDarkFullButtonBackgroundPainter(DrawMode.FULLY_ROUNDED, accent));
@@ -90,6 +101,12 @@ public class ButtonDecorator {
         button.setPaintBorderInsets(true);
     }
     
+    /**
+     * This button is preped for the case where an image will be displayed
+     *  but no text.  The buttons icon will be centered and the remained of the
+     *  button drawn around.  This button will be painted with the dark style and
+     *  accepts a parameter for overriding the edge rounding settings on the button face. 
+     */
     public void decorateDarkFullImageButton(JXButton button, DrawMode mode) {
         decorateDarkFullButton(button, button.getForegroundPainter(), 
                 painterFactory.createDarkFullButtonBackgroundPainter(mode, AccentType.SHADOW));
