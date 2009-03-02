@@ -54,16 +54,13 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.bootstrap.TcpBootstrap;
-import com.limegroup.gnutella.bootstrap.UDPHostCache;
-import com.limegroup.gnutella.bootstrap.TcpBootstrap.TcpBootstrapListener;
+import com.limegroup.gnutella.bootstrap.Bootstrapper;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
 /**
@@ -91,7 +88,7 @@ import com.limegroup.gnutella.util.ClassCNetworks;
  * use those anymore.
  */
 @Singleton
-public class HostCatcher implements Service {
+public class HostCatcher implements Service, Bootstrapper.Listener {
     
     /**
      * Log for logging this class.
@@ -281,11 +278,6 @@ public class HostCatcher implements Service {
     public static final int EXPIRED_HOSTS_SIZE = 500;
     
     /**
-     * The scheduled runnable that fetches hosts from bootstrappers if we need them.
-     */
-    public final Bootstrapper FETCHER = new Bootstrapper();
-    
-    /**
      * All EndpointObservers waiting on getting an Endpoint.
      */
     private List<EndpointObserver> _catchersWaiting = new LinkedList<EndpointObserver>();
@@ -321,28 +313,22 @@ public class HostCatcher implements Service {
     private final Provider<DHTManager> dhtManager;
     private final Provider<QueryUnicaster> queryUnicaster;
     private final Provider<IPFilter> ipFilter;
-    private final Provider<MulticastService> multicastService;
     private final UniqueHostPinger uniqueHostPinger;
     private final NetworkInstanceUtils networkInstanceUtils;
-
-    private final PingRequestFactory pingRequestFactory;
-    private final TcpBootstrap tcpBootstrap;
-    private final UDPHostCache udpHostCache;
+    private final Bootstrapper bootstrapper;
     
     @Inject
-    public HostCatcher(
+    HostCatcher(
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ConnectionServices connectionServices,
             Provider<ConnectionManager> connectionManager,
-            Provider<UDPService> udpService, Provider<DHTManager> dhtManager,
+            Provider<UDPService> udpService,
+            Provider<DHTManager> dhtManager,
             Provider<QueryUnicaster> queryUnicaster,
             Provider<IPFilter> ipFilter,
-            Provider<MulticastService> multicastService,
             UniqueHostPinger uniqueHostPinger,
-            PingRequestFactory pingRequestFactory,
             NetworkInstanceUtils networkInstanceUtils,
-            TcpBootstrap tcpBootstrap,
-            UDPHostCache udpHostCache) {
+            Bootstrapper bootstrapper) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.connectionManager = connectionManager;
@@ -350,18 +336,11 @@ public class HostCatcher implements Service {
         this.dhtManager = dhtManager;
         this.queryUnicaster = queryUnicaster;
         this.ipFilter = ipFilter;
-        this.multicastService = multicastService;
         this.uniqueHostPinger = uniqueHostPinger;
-        this.pingRequestFactory = pingRequestFactory;
         this.networkInstanceUtils = networkInstanceUtils;
-        this.tcpBootstrap = tcpBootstrap;
-        this.udpHostCache = udpHostCache;
+        this.bootstrapper = bootstrapper;
     }
     
-    UDPHostCache getUdpHostCache() {
-        return udpHostCache;
-    }
-
     /**
      * Initializes any components required for HostCatcher.
      * Currently, this schedules occasional services.
@@ -411,7 +390,6 @@ public class HostCatcher implements Service {
                             LOCALE_SET_MAP.size() + " locales, " +
                             permanentHostsSet.size() + " permanent, " +
                             restoredHosts.size() + " restored, " +
-                            udpHostCache.getSize() + " UHCs, " +
                             EXPIRED_HOSTS.size() + " expired, " +
                             PROBATION_HOSTS.size() + " on probation, " +
                             _catchersWaiting.size() + " waiting");
@@ -426,7 +404,7 @@ public class HostCatcher implements Service {
         // Try to fetch hosts whenever we need them.
         // Start it immediately, so that if we have no hosts
         // (because of a fresh installation) we will connect.
-        backgroundExecutor.scheduleWithFixedDelay(FETCHER, 0, 2*1000,
+        backgroundExecutor.scheduleWithFixedDelay(bootstrapper, 0, 2000,
                 TimeUnit.MILLISECONDS);
     }
 
@@ -569,7 +547,7 @@ public class HostCatcher implements Service {
                 try {
                     ExtendedEndpoint e = ExtendedEndpoint.read(line); 
                     if(e.isUDPHostCache()) {
-                        addUDPHostCache(e);
+                        bootstrapper.addUDPHostCache(e);
                     } else if(isValidHost(e)) {
                         synchronized(this) {
                             addPermanent(e);
@@ -612,11 +590,11 @@ public class HostCatcher implements Service {
     synchronized void write(File hostFile) throws IOException {
         checkInvariants();
         LOG.trace("Writing host file");
-        if(dirty || udpHostCache.isWriteDirty()) {
+        if(dirty || bootstrapper.isWriteDirty()) {
             FileWriter out = new FileWriter(hostFile);
                 
             //Write udp hostcache endpoints.
-            udpHostCache.write(out);
+            bootstrapper.write(out);
     
             //Write elements of permanent from worst to best.  Order matters, as it
             //allows read() to put them into queue in the right order without any
@@ -714,7 +692,7 @@ public class HostCatcher implements Service {
                 new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
             ep.setUDPHostCache(true);
             if(isValidHost(ep))
-                addUDPHostCache(ep);
+                bootstrapper.addUDPHostCache(ep);
         }
 
         // If the pong came from a local address but we let it through
@@ -749,7 +727,7 @@ public class HostCatcher implements Service {
         // if it was a UDPHostCache pong, just add it as that.
         if(endpoint.isUDPHostCache()) {
             LOG.trace("Adding host as UHC");
-            return addUDPHostCache(endpoint);
+            return bootstrapper.addUDPHostCache(endpoint);
         }
         
         if(pr.isTLSCapable())
@@ -787,14 +765,6 @@ public class HostCatcher implements Service {
             LOG.trace("Adding host with normal priority");
             return add(endpoint, NORMAL_PRIORITY);
         }
-    }
-    
-    /**
-     * Adds an endpoint to the udp host cache, returning true
-     * if it succesfully added.
-     */
-    private boolean addUDPHostCache(ExtendedEndpoint host) {
-        return udpHostCache.add(host);
     }
     
     /**
@@ -921,7 +891,7 @@ public class HostCatcher implements Service {
         
         if(e.isUDPHostCache()) {
             LOG.trace("Adding host as UHC");
-            return addUDPHostCache(e);
+            return bootstrapper.addUDPHostCache(e);
         }
         
         boolean added = false;
@@ -1519,11 +1489,7 @@ public class HostCatcher implements Service {
         synchronized(this) {
             PROBATION_HOSTS.clear();
             EXPIRED_HOSTS.clear();
-            FETCHER.resetFetchTime();
-            udpHostCache.resetData();
-            udpHostCache.loadDefaults();
-            tcpBootstrap.resetData();
-            tcpBootstrap.loadDefaults();
+            bootstrapper.reset();
             restoredHosts.clear();
             uniqueHostPinger.resetData();
         }
@@ -1563,168 +1529,16 @@ public class HostCatcher implements Service {
         }
     }
     
-    /**
-     * Runnable that looks for UDPHostCache or multicast hosts.
-     * This tries, in order:
-     * 1) Multicasting a ping.
-     * 2) Sending UDP pings to UDPHostCaches.
-     * 3) Sending TCP pings to TcpHostCaches.
-     */
-    private class Bootstrapper implements Runnable {
-        
-        /**
-         * The time at which we started to think about bootstrapping
-         */
-        private long firstBootstrapCheck = 0;
-        
-        /**
-         * The next allowed multicast time.
-         * Incremented after each attempted multicast fetch.
-         */
-        private long nextAllowedMulticastTime = 0; // Immediately
-        
-        /**
-         * The next allowed UDP fetch time.
-         * Incremented after each attempted UDP fetch.
-         */
-        private long nextAllowedUdpTime = Long.MAX_VALUE; // Not just yet
-        
-        /**
-         * The next allowed TCP fetch time.
-         * Incremented after each attempted TCP fetch.
-         */
-        private long nextAllowedTcpTime = Long.MAX_VALUE; // Not just yet
-        
-        /** Milliseconds to wait between multicast fetches. */
-        private static final int MULTICAST_INTERVAL = 50 * 1000;
-        
-        /** Milliseconds to wait after trying multicast before falling back to UDP. */
-        private static final int UDP_FALLBACK_DELAY = 5 * 1000;
-
-        /** Milliseconds to wait between UDP fetches. */
-        private static final int UDP_INTERVAL = 30 * 1000;
-        
-        /** Milliseconds to wait after trying UDP before falling back to TCP. */
-        private static final int TCP_FALLBACK_DELAY = 40 * 1000;
-        
-        /** Milliseconds to wait between TCP fetches. */
-        private static final int TCP_INTERVAL = 5 * 60 * 1000;        
-        
-        /**
-         * Determines whether or not it is time to get more hosts,
-         * and if we need them, gets them.
-         */
-        public synchronized void run() {            
-            if(ConnectionSettings.DO_NOT_BOOTSTRAP.getValue()) {
-                LOG.trace("Not bootstrapping");
-                return;
-            }
-            
-            long now = System.currentTimeMillis();
-            if(firstBootstrapCheck == 0)
-                firstBootstrapCheck = now;
-
-            // If we need endpoints, try any bootstrapping methods that
-            // haven't been tried too recently
-            if(needsHosts(now)) {
-                multicastFetch(now);
-                udpHostCacheFetch(now);
-                tcpHostCacheFetch(now);
-            }
-        }
-        
-        /**
-         * Resets the nextAllowedFetchTime, so that after we regain a
-         * connection to the internet, we can fetch if needed.
-         */
-        void resetFetchTime() {
-            nextAllowedMulticastTime = 0;
-            nextAllowedUdpTime = Long.MAX_VALUE;
-            nextAllowedTcpTime = Long.MAX_VALUE;
-        }
-        
-        /**
-         * Determines whether or not we need more hosts.
-         */
-        private synchronized boolean needsHosts(long now) {
-            synchronized(HostCatcher.this) { 
-                if(getNumHosts() == 0) {
-                    LOG.trace("Need hosts: none known");
-                    return true;
-                }
-                long delay = now - firstBootstrapCheck;
-                if(!connectionServices.isConnected() &&
-                        delay > ConnectionSettings.BOOTSTRAP_DELAY.getValue()) {
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("Need hosts: not connected after " +
-                                delay + " milliseconds");
-                    return true;
-                }
-            }
-            LOG.trace("Do not need hosts");
-            return false;
-        }
-        
-        /**
-         * Attempts to fetch via multicast, returning true
-         * if it was able to.
-         */
-        private boolean multicastFetch(long now) {
-            if(nextAllowedMulticastTime < now && 
-                    !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
-                LOG.trace("Fetching via multicast");
-                PingRequest pr = pingRequestFactory.createMulticastPing();
-                multicastService.get().send(pr);
-                nextAllowedMulticastTime = now + MULTICAST_INTERVAL;
-                // If this is the first multicast fetch, set the UDP fallback time
-                if(nextAllowedUdpTime == Long.MAX_VALUE)
-                    nextAllowedUdpTime = now + UDP_FALLBACK_DELAY;
-                return true;
-            }
-            // If we're never going to multicast, fall back to UDP
-            if(nextAllowedUdpTime == Long.MAX_VALUE &&
-                    ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue())
-                nextAllowedUdpTime = now + UDP_FALLBACK_DELAY;
-            LOG.trace("Not fetching via multicast");
-            return false;
-        }
-        
-        /**
-         * Attempts to fetch via udp host caches, returning true
-         * if it was able to.
-         */
-        private boolean udpHostCacheFetch(long now) {
-            if(nextAllowedUdpTime < now && udpHostCache.fetchHosts()) {
-                LOG.trace("Fetching via UDP");
-                nextAllowedUdpTime = now + UDP_INTERVAL;
-                // If this is the first UDP fetch, set the TCP fallback time
-                if(nextAllowedTcpTime == Long.MAX_VALUE)
-                    nextAllowedTcpTime = now + TCP_FALLBACK_DELAY;
-                return true;
-            }
-            LOG.trace("Not fetching via UDP");
-            return false;
-        }
-        
-        private boolean tcpHostCacheFetch(long now) {
-            if(nextAllowedTcpTime < now &&
-                    tcpBootstrap.fetchHosts(new BootstrapListener())) {
-                LOG.trace("Fetching via TCP");
-                nextAllowedTcpTime = now + TCP_INTERVAL;
-                return true;
-            }
-            LOG.trace("Not fetching via TCP");
-            return false;
-        }
+    /** Returns true if the host catcher needs hosts from the bootstrapper. */
+    @Override
+    public boolean needsHosts() {
+        return getNumHosts() == 0;
     }
     
-    private class BootstrapListener implements TcpBootstrapListener {
-        @Override
-        public int handleHosts(Collection<? extends Endpoint> hosts) {
-            if(LOG.isInfoEnabled())
-                LOG.info("Received " + hosts.size() + " hosts");
-            return add(hosts);
-        }
+    /** Receives hosts from the bootstrapper, returning the number used. */
+    @Override
+    public int handleHosts(Collection<? extends Endpoint> hosts) {
+        return add(hosts);
     }
     
     /** Simple callback for having an endpoint added. */

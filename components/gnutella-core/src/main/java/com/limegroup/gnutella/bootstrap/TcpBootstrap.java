@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -115,7 +114,7 @@ public class TcpBootstrap {
     /**
      * Attempts to contact a host cache to retrieve endpoints.
      */
-    public synchronized boolean fetchHosts(TcpBootstrapListener listener) {
+    public synchronized boolean fetchHosts(Bootstrapper.Listener listener) {
         // If the hosts have been used, shuffle them
         if(dirty) {
             LOG.debug("Shuffling TCP host caches");
@@ -126,7 +125,7 @@ public class TcpBootstrap {
         return doFetch(listener);
     }
     
-    private boolean doFetch(TcpBootstrapListener listener) {
+    private boolean doFetch(Bootstrapper.Listener listener) {
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
         Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
         for(URI host : hosts) {
@@ -175,7 +174,7 @@ public class TcpBootstrap {
         return get;
     }
 
-    private int parseResponse(HttpResponse response, TcpBootstrapListener listener) {
+    private int parseResponse(HttpResponse response, Bootstrapper.Listener listener) {
         if(response.getEntity() == null) {
             LOG.warn("No response entity!");
             return 0;
@@ -207,10 +206,10 @@ public class TcpBootstrap {
     
     private class Listener implements HttpClientListener {
         private final Map<HttpUriRequest, URI> hosts;
-        private final TcpBootstrapListener listener;
+        private final Bootstrapper.Listener listener;
         private int totalAdded = 0;
         
-        Listener(Map<HttpUriRequest, URI> hosts, TcpBootstrapListener listener) {
+        Listener(Map<HttpUriRequest, URI> hosts, Bootstrapper.Listener listener) {
             this.hosts = hosts;
             this.listener = listener;
         }
@@ -269,10 +268,5 @@ public class TcpBootstrap {
     
     public void loadDefaults() {
         // ADD DEFAULT HOST CACHES HERE.
-    }
-    
-    public static interface TcpBootstrapListener {
-        /** Notification that some number of hosts were found.  Returns the number that are used. */
-        int handleHosts(Collection<? extends Endpoint> hosts);
     }
 }

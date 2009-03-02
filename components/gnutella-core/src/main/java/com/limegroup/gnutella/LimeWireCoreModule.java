@@ -78,6 +78,8 @@ import com.limegroup.bittorrent.tracking.TrackerFactory;
 import com.limegroup.bittorrent.tracking.TrackerFactoryImpl;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactoryImpl;
+import com.limegroup.gnutella.bootstrap.Bootstrapper;
+import com.limegroup.gnutella.bootstrap.BootstrapperImpl;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
 import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
@@ -361,6 +363,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(BTMetaInfoFactory.class).to(BTMetaInfoFactoryImpl.class);
         bind(OutgoingQueryReplyFactory.class).to(OutgoingQueryReplyFactoryImpl.class);
         bind(UPnPManagerConfiguration.class).to(UPnPManagerConfigurationImpl.class);
+        bind(Bootstrapper.class).to(BootstrapperImpl.class);
+        bind(Bootstrapper.Listener.class).to(HostCatcher.class);
         
         bindAll(Names.named("fastExecutor"), ScheduledExecutorService.class, FastExecutorProvider.class, ExecutorService.class, Executor.class);
         bindAll(Names.named("unlimitedExecutor"), ListeningExecutorService.class, UnlimitedExecutorProvider.class, Executor.class, ExecutorService.class);
