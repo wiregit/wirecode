@@ -17,6 +17,14 @@ import org.limewire.ui.swing.util.GuiUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Class that preps and skins JXButtons with the default
+ *  lw style. 
+ *  
+ *  Mini buttons do not have a background drawn unless mouse
+ *   overed or clicked, full buttons do.
+ *  
+ */
 @Singleton
 public class ButtonDecorator {
 
