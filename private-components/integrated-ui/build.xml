@@ -14,12 +14,18 @@
     
     <target name="initialize" depends="lw-core-glue.initialize, lw-swingui.initialize, mojito-ui.initialize" unless="initialized.integrated-ui">
         <do.setup-private-properties component="integrated-ui">
-			<add-src-classpath>
+	  <add-src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
 				<path refid="build.limewire.components.mojito-ui.buildpath"/>
 			    <path refid="build.limewire.components.core-glue.buildpath"/>
 			    <path refid="build.limewire.components.swingui.buildpath"/>
 			</add-src-classpath>
+            <add-tests-classpath>
+              <pathelement location="${limewire.tests.jars}/inspTool.jar"/>
+	    </add-tests-classpath>
+	    <add-build-tests-classpath>
+	      <pathelement location="${limewire.tests.jars}/inspTool.jar"/>
+	    </add-build-tests-classpath>
         </do.setup-private-properties>
     </target>
 	
