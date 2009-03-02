@@ -6,11 +6,13 @@ import java.awt.Font;
 import java.awt.LayoutManager;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -42,6 +44,9 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
     
     private Map<String, InfoPanel> categoryInfoPanels = new HashMap<String, InfoPanel>();
     private Set<String> possibleShareValues;
+
+    /** Map of catalog headings. */
+    private final Map<Catalog.Type, JComponent> headingMap = new EnumMap<Catalog.Type, JComponent>(Catalog.Type.class);
 
     /**used to fill empty space and hold the info bar at the bottom of the screen. */
     private final JPanel selectionGrow = new JPanel(new MigLayout("fill"));
@@ -85,6 +90,28 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
     public void updateLayout(LayoutManager layout) {
         super.setLayout(layout);
         add(selectionGrow, "dock south, aligny baseline, growy");
+    }
+
+    /**
+     * Adds the specified heading component and catalog type to the container.
+     */
+    public void addHeading(JComponent heading, Catalog.Type catalogType) {
+        if (catalogType == Catalog.Type.CATEGORY) {
+            add(heading, "growx");
+        } else {
+            add(heading, "growx, gaptop 40");
+        }        
+        headingMap.put(catalogType, heading);
+    }
+    
+    /**
+     * Sets the heading visibility for the specified catalog type.
+     */
+    public void setHeadingVisible(Catalog.Type catalogType, boolean visible) {
+        JComponent heading = headingMap.get(catalogType);
+        if (heading != null) {
+            heading.setVisible(visible);
+        }        
     }
     
     /**
