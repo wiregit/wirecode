@@ -1596,15 +1596,11 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         numTCPConnectBacksLeft = MAX_TCP_CONNECT_BACK_ATTEMPTS;
         numUDPConnectBacksLeft = MAX_UDP_CONNECT_BACK_ATTEMPTS;
 
-
-        // Notify HostCatcher that we've connected.
-        hostCatcher.get().expire();
-        
         // Set the number of connections we want to maintain
         setPreferredConnections();
         
-        // tell the catcher to start pinging people.
-        hostCatcher.get().sendUDPPings();
+        // Tell the host catcher to start pinging
+        hostCatcher.get().connect();
     }
 
     /**
@@ -2489,21 +2485,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         _automaticConnectTime = System.currentTimeMillis();
         _automaticallyConnecting = true;
         
-
-        recoverHosts();
-    }
-
-    /**
-     * Utility method that tells the host catcher to recover hosts from disk
-     * if it doesn't have enough hosts.
-     */
-    private synchronized void recoverHosts() {
-        // Notify the HostCatcher that it should keep any hosts it has already
-        // used instead of discarding them.
-        // The HostCatcher can be null in testing.
-        if(hostCatcher != null && hostCatcher.get().getNumHosts() < 100) {
-            hostCatcher.get().recoverHosts();
-        }
+        hostCatcher.get().noInternetConnection();
     }
 
     /**

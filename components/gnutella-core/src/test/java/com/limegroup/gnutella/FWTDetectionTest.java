@@ -158,8 +158,7 @@ public class FWTDetectionTest extends LimeTestCase {
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
@@ -200,8 +199,7 @@ public class FWTDetectionTest extends LimeTestCase {
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
@@ -245,8 +243,7 @@ public class FWTDetectionTest extends LimeTestCase {
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
@@ -295,8 +292,7 @@ public class FWTDetectionTest extends LimeTestCase {
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
@@ -315,32 +311,31 @@ public class FWTDetectionTest extends LimeTestCase {
         assertFalse(udpService.canDoFWT());
         
     }
+    
     /**
-     * tests if the pings are requesting ip:port check properly
+     * Tests that pings ask for our IP:port if we need it
      */
-    public void testPingsRequesting() throws Exception {        
-        // make sure we have not received incoming connection in the past
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
-        
+    public void testPingsRequestUnknownIP() throws Exception {
+        // Pretend we've never accepted an incoming connection
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);        
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
-        
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
-        
-        //we should receive a udp ping requesting ip
+        hostCatcher.connect();
         assertTrue(ponger1.listen().requestsIP());
-        
-        // if we have received incoming, pings should not be requesting
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
-        
-        assertFalse(ponger1.listen().requestsIP());
-        
     }
-    
-    
+
+    /**
+     * Tests that pings do not ask for our IP:port if we don't need it
+     */
+    public void testPingsDoNotRequestKnownIP() throws Exception {
+        // Pretend we've accepted an incoming connection
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
+        HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
+        hostCatcher.connect();
+        assertFalse(ponger1.listen().requestsIP());
+    }
+        
     /**
      * tests the case where both pinged hosts reply with the same
      * ip:port.
@@ -350,8 +345,7 @@ public class FWTDetectionTest extends LimeTestCase {
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -373,8 +367,7 @@ public class FWTDetectionTest extends LimeTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -401,8 +394,7 @@ public class FWTDetectionTest extends LimeTestCase {
         connectionManager.setConnected(false);
         
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         ponger1.listen();
         IpPort badAddress = new IpPortImpl("1.2.3.4", networkManager.getPort());
         PingReply badGuid = injector.getInstance(PingReplyFactory.class).create(GUID.makeGuid(),(byte)1,badAddress);
@@ -416,8 +408,7 @@ public class FWTDetectionTest extends LimeTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);        
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -432,9 +423,11 @@ public class FWTDetectionTest extends LimeTestCase {
         assertTrue(ConnectionSettings.CANNOT_DO_FWT.getValue());
         connectionManager.setConnected(false);
         
+        // forget what just happened
+        injector.getInstance(UniqueHostPinger.class).resetData();
+        
         // now send good ports
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());

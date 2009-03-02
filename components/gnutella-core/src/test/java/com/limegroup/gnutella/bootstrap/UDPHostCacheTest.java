@@ -278,11 +278,9 @@ public class UDPHostCacheTest extends LimeTestCase {
         cache.resetData();
         
         cache.fetchHosts();
-        assertEquals(5, cache.amountFetched);
+        assertEquals(0, cache.getSize());        
         cache.fetchHosts();
-        assertEquals(3, cache.amountFetched);
-        cache.fetchHosts();
-        assertEquals(0, cache.amountFetched);        
+        assertEquals(0, cache.amountFetched);
     }
     
     public void testWriting() throws Exception {
@@ -374,8 +372,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         assertEquals(0, e5.getUDPHostCacheFailures());
         assertEquals(5, cache.getSize());
         
-        // reset data, try again.
-        cache.resetData();
+        // forget we tried, try again.
         cache.fetchHosts();
         Thread.sleep(100);
         routeFor("1.2.3.4", cache.guid);
@@ -389,8 +386,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         assertEquals(0, e5.getUDPHostCacheFailures());
         assertEquals(5, cache.getSize());
         
-        // reset data, try again.
-        cache.resetData();
+        // forget we tried , try again.
         cache.fetchHosts();
         Thread.sleep(100);        
         routeFor("3.4.5.6", cache.guid);
@@ -402,8 +398,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         assertEquals(1, e5.getUDPHostCacheFailures());
         assertEquals(5, cache.getSize());
         
-        // reset data, try again.
-        cache.resetData();
+        // forget we tried , try again.
         cache.fetchHosts();
         Thread.sleep(100);        
         routeFor("1.2.3.4", cache.guid);
@@ -416,8 +411,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         assertEquals(2, e5.getUDPHostCacheFailures());
         assertEquals(5, cache.getSize()); 
         
-        // reset data, try again.
-        cache.resetData();
+        // forget we tried , try again.
         cache.fetchHosts();
         Thread.sleep(100);        
         routeFor("1.2.3.4", cache.guid);
@@ -430,9 +424,8 @@ public class UDPHostCacheTest extends LimeTestCase {
         assertEquals(3, e5.getUDPHostCacheFailures());
         assertEquals(5, cache.getSize());
         
-        // reset data, try again.
+        // forget we tried , try again.
         // e4 should be ejected because it failed over 5 times.
-        cache.resetData();
         cache.fetchHosts();
         Thread.sleep(100);        
         routeFor("1.2.3.4", cache.guid);
@@ -444,20 +437,8 @@ public class UDPHostCacheTest extends LimeTestCase {
         assertEquals(6, e4.getUDPHostCacheFailures());
         assertEquals(4, e5.getUDPHostCacheFailures());
         assertEquals(4, cache.getSize());
-        
-        // now try a real reset data that decrements failures,
-        // ensure the caches failures went down 
-        // this includes e4, because we did attempt it.
-        cache.doRealDecrement = true;
-        cache.resetData();
-        assertEquals(0, e1.getUDPHostCacheFailures());
-        assertEquals(0, e2.getUDPHostCacheFailures());
-        assertEquals(2, e3.getUDPHostCacheFailures());
-        assertEquals(5, e4.getUDPHostCacheFailures());
-        assertEquals(3, e5.getUDPHostCacheFailures());
-        assertEquals(5, cache.getSize()); // e4 was readded.
     }
-    
+        
     private void assertStartsWithInList(String find, List list) throws Exception {
         boolean found = false;
         for(Iterator i = list.iterator(); i.hasNext();) {
@@ -491,16 +472,18 @@ public class UDPHostCacheTest extends LimeTestCase {
     
     @Singleton
     private static class StubCache extends UDPHostCache {
-        private static final int EXPIRY_TIME = 10 * 1000;        
+        private static final int EXPIRY_TIME = 2 * 1000;        
         private int amountFetched = -1;
         private Collection<? extends ExtendedEndpoint> lastFetched;
         private boolean doRealFetch = false;
         private byte[] guid = null;
-        private boolean doRealDecrement = false;
         
         @Inject
-        public StubCache(UniqueHostPinger pinger, Provider<MessageRouter> messageRouter,
-                PingRequestFactory pingRequestFactory, ConnectionServices connectionServices, NetworkInstanceUtils networkInstanceUtils) {
+        public StubCache(UniqueHostPinger pinger,
+                Provider<MessageRouter> messageRouter,
+                PingRequestFactory pingRequestFactory,
+                ConnectionServices connectionServices,
+                NetworkInstanceUtils networkInstanceUtils) {
             super(EXPIRY_TIME, pinger, messageRouter, pingRequestFactory,
                     connectionServices, networkInstanceUtils);
         }
@@ -524,15 +507,6 @@ public class UDPHostCacheTest extends LimeTestCase {
             PingRequest pr = super.getPing();
             guid = pr.getGUID();
             return pr;
-        }
-        
-        @Override
-        protected void decrementFailures() {
-            if(doRealDecrement) {
-                super.decrementFailures();
-            } else {
-                ;
-            }
         }
     }
 }

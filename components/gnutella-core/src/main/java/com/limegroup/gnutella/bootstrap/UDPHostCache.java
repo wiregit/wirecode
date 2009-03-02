@@ -145,31 +145,14 @@ public class UDPHostCache {
     }
     
     /**
-     * Erases the attempted hosts & decrements the failure counts.
+     * Resets the cache to its initial empty state
      */
-    public synchronized void resetData() {
-        LOG.trace("Clearing attempted UHCs");
-        decrementFailures();
+    synchronized void resetData() {
+        udpHosts.clear();
+        udpHostsSet.clear();
         attemptedHosts.clear();
-    }
-    
-    /**
-     * Decrements the failure count for each known cache.
-     */
-    protected synchronized void decrementFailures() {
-        for(ExtendedEndpoint ep : attemptedHosts) {
-            ep.decrementUDPHostCacheFailure();
-            // if we brought this guy down back to a managable
-            // failure size, add'm back if we have room.
-            if(ep.getUDPHostCacheFailures() == MAXIMUM_FAILURES &&
-                    udpHosts.size() < PERMANENT_SIZE) {
-                if(LOG.isInfoEnabled())
-                    LOG.info("Restoring failed UHC " + ep);
-                add(ep);
-            }
-            dirty = true;
-            writeDirty = true;
-        }
+        dirty = false;
+        writeDirty = false;
     }
     
     /**

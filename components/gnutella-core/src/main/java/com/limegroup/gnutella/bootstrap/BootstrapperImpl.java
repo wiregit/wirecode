@@ -105,6 +105,7 @@ public class BootstrapperImpl implements Bootstrapper {
 
     @Override
     public void reset() {
+        firstBootstrapCheck = 0;
         nextAllowedMulticastTime = 0;
         nextAllowedUdpTime = Long.MAX_VALUE;
         nextAllowedTcpTime = Long.MAX_VALUE;

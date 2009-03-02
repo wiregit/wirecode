@@ -303,7 +303,7 @@ public class HostCatcherTest extends LimeTestCase {
         }
         
         assertEquals("hosts should be 0", 0, hostCatcher.getNumHosts());
-        hostCatcher.recoverHosts();
+        hostCatcher.noInternetConnection();
         assertEquals("hosts should have been recovered", 
             numHosts, hostCatcher.getNumHosts());
     }
@@ -412,11 +412,13 @@ public class HostCatcherTest extends LimeTestCase {
         File tmp=File.createTempFile("hc_test", ".net" );
         hostCatcher.write(tmp);
 
-        //2. read HC from file.
-        setUp(); // make sure we clear from memory the stuff we just added.
-        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hostCatcher, "udpHostCache");
-        assertEquals(0, uhc.getSize());
+        // clear from memory the stuff we just added
+        hostCatcher.reset();
+        UDPHostCache uhc = injector.getInstance(UDPHostCache.class);
         assertEquals(0, hostCatcher.getNumHosts());
+        assertEquals(0, uhc.getSize());
+        
+        //2. read HC from file.
         hostCatcher.read(tmp);
         assertEquals(2, uhc.getSize());        
         assertEquals(5, hostCatcher.getNumHosts());
@@ -594,7 +596,7 @@ public class HostCatcherTest extends LimeTestCase {
     public void testUDPHostCacheAdded() throws Exception {
         PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
         
-        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hostCatcher, "udpHostCache");
+        UDPHostCache uhc = injector.getInstance(UDPHostCache.class);
         assertEquals(0, hostCatcher.getNumHosts());
         assertEquals(0, uhc.getSize());
         
@@ -658,7 +660,7 @@ public class HostCatcherTest extends LimeTestCase {
     public void testPackedIPsWithUHC() throws Exception {
         PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
         
-        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hostCatcher, "udpHostCache");
+        UDPHostCache uhc = injector.getInstance(UDPHostCache.class);
         assertEquals(0, hostCatcher.getNumHosts());
         assertEquals(0, uhc.getSize());
         
@@ -682,7 +684,7 @@ public class HostCatcherTest extends LimeTestCase {
     public void testPackedHostCachesAreStored() throws Exception {
         PingReplyFactory pingReplyFactory = injector.getInstance(PingReplyFactory.class);
         
-        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hostCatcher, "udpHostCache");
+        UDPHostCache uhc = injector.getInstance(UDPHostCache.class);
         assertEquals(0, hostCatcher.getNumHosts());
         assertEquals(0, uhc.getSize());
         
@@ -872,8 +874,7 @@ public class HostCatcherTest extends LimeTestCase {
         acceptor.bindAndStartUpnp();
         acceptor.start();
         messageRouter.start();
-        hostCatcher.expire();
-        hostCatcher.sendUDPPings();
+        hostCatcher.connect();
         
         // empty the hostcatcher
         StubEndpointObserver seo = new StubEndpointObserver();

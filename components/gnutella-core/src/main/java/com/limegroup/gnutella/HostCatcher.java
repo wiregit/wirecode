@@ -407,22 +407,36 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         backgroundExecutor.scheduleWithFixedDelay(bootstrapper, 0, 2000,
                 TimeUnit.MILLISECONDS);
     }
-
-    /**
-     * Sends UDP pings to hosts read from disk.
-     */
-    public void sendUDPPings() {
-        // We need the lock on this so that we can copy the set of endpoints.
-        List<Endpoint> l; 
-        synchronized(this) {
-            l = new ArrayList<Endpoint>(ENDPOINT_SET.size() + restoredHosts.size());
-            l.addAll(ENDPOINT_SET.keySet());
-            l.addAll(restoredHosts);
-        }
-        Collections.shuffle(l);
-        rank(l); 
-    }
     
+    public void connect() {
+        // Allow pings to be sent for the next PONG_RANKING_EXPIRE_TIME msecs
+        lastAllowedPongRankTime =
+            System.currentTimeMillis() + PONG_RANKING_EXPIRE_TIME;
+        // Schedule a runnable after we stop pinging to clear the set of
+        // hosts that were pinged while trying to connect
+        Runnable clearPingedHosts = new Runnable() {
+            public void run() {
+                uniqueHostPinger.resetData();
+            }
+        };
+        backgroundExecutor.schedule(clearPingedHosts,
+                PONG_RANKING_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+        // Load the default bootstrap servers
+        bootstrapper.reset();
+        // Read the gnutella.net file
+        readHostsFile();
+        // Ping some of the hosts we just loaded
+        ArrayList<Endpoint> hosts;
+        synchronized(this) {
+            hosts = new ArrayList<Endpoint>(ENDPOINT_SET.size() +
+                    restoredHosts.size());
+            hosts.addAll(ENDPOINT_SET.keySet());
+            hosts.addAll(restoredHosts);
+        }
+        Collections.shuffle(hosts);
+        rank(hosts);
+    }
+
     /**
      * Rank the collection of hosts.
      */
@@ -1399,33 +1413,29 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * Notifies this that connect() has been called.  This may decide to give
-     * out bootstrap pongs if necessary.
+     * Resets all recorded failures on the assumption that they were
+     * caused by having no internet connection
      */
-    public void expire() {
+    public void noInternetConnection() {
+        LOG.trace("Resetting failures caused by no internet connection");
+
         synchronized(this) {
-            long now = System.currentTimeMillis();
-            lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
+            PROBATION_HOSTS.clear();
+            EXPIRED_HOSTS.clear();
+            bootstrapper.reset();
+            restoredHosts.clear();
+            uniqueHostPinger.resetData();
         }
-        
-        recoverHosts();
-        
-        // schedule new runnable to clear the set of endpoints that
-        // were pinged while trying to connect
-        backgroundExecutor.schedule(
-                new Runnable() {
-                    public void run() {
-                        uniqueHostPinger.resetData();
-                    }
-                },
-                PONG_RANKING_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+
+        // Read the hosts file again.  This will also notify any waiting 
+        // connection fetchers from previous connection attempts.
+        readHostsFile();
     }
 
     /**
-     * @modifies this
-     * @effects removes all entries from this
+     * Resets the state of the host catcher (only for testing)
      */
-    public synchronized void clear() {
+    protected synchronized void reset() {
         LOG.trace("Clearing hosts");
         FREE_LEAF_SLOTS_SET.clear();
         FREE_ULTRAPEER_SLOTS_SET.clear();
@@ -1437,6 +1447,8 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         EXPIRED_HOSTS.clear();
         permanentHosts.clear();
         permanentHostsSet.clear();
+        bootstrapper.reset();
+        uniqueHostPinger.resetData();
     }
     
     /** Enable very slow rep checking?  Package access for use by
@@ -1479,26 +1491,6 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         return new File(CommonUtils.getUserSettingsDir(), "gnutella.net");
     }
     
-    /**
-     * Recovers any hosts that we have put in the set of hosts "pending" 
-     * removal from our hosts list.
-     */
-    public void recoverHosts() {
-        LOG.trace("Recovering host file");
-        
-        synchronized(this) {
-            PROBATION_HOSTS.clear();
-            EXPIRED_HOSTS.clear();
-            bootstrapper.reset();
-            restoredHosts.clear();
-            uniqueHostPinger.resetData();
-        }
-        
-        // Read the hosts file again.  This will also notify any waiting 
-        // connection fetchers from previous connection attempts.
-        readHostsFile();
-    }
-
     /**
      * Adds the specified host to the group of hosts currently on "probation."
      * These are hosts that are on the network but that have rejected a 
