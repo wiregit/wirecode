@@ -81,6 +81,11 @@ public class ImageList extends JXList implements Disposable, SelectAllable<Local
     public List<LocalFileItem> getSelectedItems() {
         return new ArrayList<LocalFileItem>(listSelection);
     }
+    
+    @Override
+    public List<LocalFileItem> getAllItems() {
+        return new ArrayList<LocalFileItem>( ((ImageListModel)getModel()).getFileList().getSwingModel());
+    }
 
     @Override
     public void selectAll() {

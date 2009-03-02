@@ -146,6 +146,11 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
     }
     
     @Override
+    public List<LocalFileItem> getAllItems() {
+        return new ArrayList<LocalFileItem>(imageList.getAllItems());
+    }
+    
+    @Override
     public void selectAll() {
         imageList.selectAll();
     }

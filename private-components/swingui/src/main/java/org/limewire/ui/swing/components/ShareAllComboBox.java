@@ -90,7 +90,7 @@ public class ShareAllComboBox extends LimeComboBox {
         return item;
     }
     
-    private JMenuItem decorateDisabledfItem(AbstractAction action) {
+    private JMenuItem decorateDisabledItem(AbstractAction action) {
         JMenuItem item = new JMenuItem(action);
         item.setForeground(disabledColor);
         item.setFont(labelFont);
@@ -116,14 +116,14 @@ public class ShareAllComboBox extends LimeComboBox {
             if(myLibraryPanel.getCategory() == Category.DOCUMENT && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
                 // if not logged in
                 if(!xmppService.isLoggedIn()) {
-                    menu.add(decorateDisabledfItem(new DisabledDocumentAction()));
+                    menu.add(decorateDisabledItem(new DisabledDocumentAction()));
                 } else {                   
                     menu.add(decorateItem(shareAllFriendAction));
                     menu.add(decorateItem(unshareAllFriendAction));
                     
                     menu.addSeparator();
                     
-                    menu.add(decorateDisabledfItem(new DisabledDocumentAction()));
+                    menu.add(decorateDisabledItem(new DisabledDocumentAction()));
                 }
             } else {
                 // if not logged in don't show options for friends.
@@ -133,7 +133,7 @@ public class ShareAllComboBox extends LimeComboBox {
                     
                     menu.addSeparator();
                     
-                    menu.add(decorateDisabledfItem(signedOutAction));
+                    menu.add(decorateDisabledItem(signedOutAction));
                 } else {
                     menu.add(decorateItem(shareAllAction));
                     menu.add(decorateItem(shareAllFriendAction));
@@ -176,17 +176,17 @@ public class ShareAllComboBox extends LimeComboBox {
                 shareWidget.show(GuiUtils.getMainFrame());
             } else {  
                 SelectAllable<LocalFileItem> selectAllable = myLibraryPanel.getTable();
-                selectAllable.selectAll();
-                List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();
-                
                 if(!isGnutella) {                
+                    selectAllable.selectAll();
+                    List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();                
                     if (selectedItems.size() > 0) {
                         ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileFriendOnlyShareWidget();
                         shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
                         shareWidget.show(GuiUtils.getMainFrame());
                     } 
                 } else {
-                    MultiFileShareModel model = new MultiFileShareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+                    List<LocalFileItem> items = selectAllable.getAllItems();
+                    MultiFileShareModel model = new MultiFileShareModel(shareListManager, items.toArray(new LocalFileItem[items.size()]));
                     model.shareFriend(SharingTarget.GNUTELLA_SHARE);
                 }
             }
@@ -221,17 +221,17 @@ public class ShareAllComboBox extends LimeComboBox {
                 shareWidget.show(GuiUtils.getMainFrame());
             } else {    
                 SelectAllable<LocalFileItem> selectAllable = myLibraryPanel.getTable();
-                selectAllable.selectAll();
-                List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();
-                
                 if(!isGnutella) {                
+                    selectAllable.selectAll();
+                    List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();                
                     if (selectedItems.size() > 0) {
                         ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileUnshareWidget();
                         shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
                         shareWidget.show(GuiUtils.getMainFrame());
                     }
                 } else {
-                    MultiFileUnshareModel model = new MultiFileUnshareModel(shareListManager, selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+                    List<LocalFileItem> items = selectAllable.getAllItems();                
+                    MultiFileUnshareModel model = new MultiFileUnshareModel(shareListManager, items.toArray(new LocalFileItem[items.size()]));
                     model.unshareFriend(SharingTarget.GNUTELLA_SHARE);   
                 }
             }

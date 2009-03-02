@@ -148,10 +148,11 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         public void actionPerformed(ActionEvent e) {
             shareWidget.setShareable(shareEditor.getLocalFileItem().getFile());
           
+            JComponent source = (JComponent)e.getSource();
             Point convertedLocation = 
-                SwingUtilities.convertPoint(shareEditor, shareEditor.getShareButton().getLocation(), parent.getImageList());
+                SwingUtilities.convertPoint(shareEditor, source.getLocation(), parent.getImageList());
             selectImage(convertedLocation);
-            shareWidget.show(shareEditor.getShareButton());
+            shareWidget.show(source);
             shareEditor.cancelCellEditing();
         }
         

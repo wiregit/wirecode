@@ -182,6 +182,11 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     }
     
     @Override
+    public List<T> getAllItems() {
+        return new ArrayList<T>(getLibraryTableModel().getAllItems());
+    }
+    
+    @Override
     public void setModel(TableModel newModel) {
         assert getModel() == null : "cannot change model!";
         super.setModel(newModel);

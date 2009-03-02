@@ -273,6 +273,15 @@ public class LibraryImagePanel extends JPanel
         }
         return selectionList;
     }
+    
+    @Override
+    public List<LocalFileItem> getAllItems() {
+        List<LocalFileItem> allList = new ArrayList<LocalFileItem>();
+        for (LibraryImageSubPanel subPanel : panelMap.values()) {
+            allList.addAll(subPanel.getAllItems());
+        }
+        return allList;
+    }
 
     @Override
     public void selectAll() {
