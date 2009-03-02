@@ -7,6 +7,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 public class ProgramsNotAllowedPanel extends JPanel {
     
@@ -14,13 +15,27 @@ public class ProgramsNotAllowedPanel extends JPanel {
     
         super(new MigLayout("fill"));
         
-        MessageComponent messageComponent = new MessageComponent(14, 22, 14, 6);
+        MessageComponent messageComponent = new MessageComponent(12, 22, 14, 4);
         
-        JLabel message = new JLabel("<html>" + I18n.tr("To protect against viruses, LimeWire has disabled showing search results for programs. " +
-            "To change this option, go to Options, choose Security, and configure your 'Unsafe Categories'.")+"</html>");
+        JLabel title = new JLabel(I18n.tr("Downloading programs can result in viruses"));
         
+        JLabel message;
+            
+        if (OSUtils.isMacOSX()) {
+            message = new JLabel("<html>" + I18n.tr("We recommend you don't download programs" +
+                    " using LimeWire. However, you can enable downloading programs via Preferences > " +
+                    "Security > Unsafe Categories.")+"</html>");
+        }
+        else {
+            message = new JLabel("<html>" + I18n.tr("We recommend you don't download programs" +
+        		" using LimeWire. However, you can enable downloading programs via Tools > Options > " +
+        		"Security > Unsafe Categories.")+"</html>");
+        }
+        
+        messageComponent.decorateHeaderLabel(title);
         messageComponent.decorateSubLabel(message);
-        messageComponent.addComponent(message, "align center, wmax 420");
+        messageComponent.addComponent(title, "align left, wmax 400, wrap");
+        messageComponent.addComponent(message, "align center, wmax 400");
         
         this.add(messageComponent, "align 50% 40%");
     }
