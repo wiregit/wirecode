@@ -249,15 +249,10 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     /**
      * Adds the specified heading component to the category selection panel on
-     * the left-side of the display.  If <code>newSection</code> is true, then
-     * empty space is inserted above the new heading.  
+     * the left-side of the display.  
      */
     protected <T extends FileItem> void addHeading(JComponent heading, Catalog.Type catalog) {
-        if (catalog == Catalog.Type.PLAYLIST) {
-            selectionPanel.add(heading, "growx, gaptop 40");
-        } else {
-            selectionPanel.add(heading, "growx");
-        }
+        selectionPanel.addHeading(heading, catalog);
     }
     
     /** Adds a catalog to the InnerNav Info bar for My Library views*/
