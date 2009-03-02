@@ -7,6 +7,7 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.library.sharing.model.CategoryShareModel;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.impl.ThreadSafeList;
 
@@ -16,9 +17,9 @@ public class CategoryShareWidget implements ShareWidget<Category> {
     private Category category;
     private ShareListManager shareListManager;
     
-    public CategoryShareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog){
+    public CategoryShareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog, XMPPService xmppService){
         this.shareListManager = shareListManager;
-        sharePanel = new LibrarySharePanel(allFriends, shapeDialog);
+        sharePanel = new LibrarySharePanel(allFriends, shapeDialog, xmppService);
     }
     
     @Override
