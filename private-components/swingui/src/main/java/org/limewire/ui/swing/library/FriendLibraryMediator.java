@@ -314,10 +314,8 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             firstLabel.setText(I18n.tr("{0} is offline", friend.getRenderName()));
             if(friendList.size() == 1)
                 setShareText(I18n.tr("Sharing"), I18n.tr("1 file with your friend."));
-            else if(friendList.size() > 1)
-                setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with your friend.", friendFileList.size()));
             else
-                setShareText(I18n.tr("Share"), I18n.tr("files with your friend."));
+                setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with your friend.", friendFileList.size()));
             setChatText(null, null);
         }
         
@@ -327,14 +325,11 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         private void setOnlineMessage() {
             firstLabel.setText(I18n.tr("{0} isn't on LimeWire", friend.getRenderName()));
             if(friendList.size() == 1){
-                setShareText(I18n.tr("Sharing"), I18n.tr("1 file with your friend. "));
-                setChatText(I18n.tr("Chat"), I18n.tr("about using LimeWire 5."));
-            } else if(friendList.size() > 1){
+                setShareText(I18n.tr("Sharing"), I18n.tr("1 file with your friend."));
+                setChatText(I18n.tr("Chat"), I18n.tr("about signing into LimeWire 5."));
+            } else {
                 setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with your friend. ", friendFileList.size()));
-                setChatText(I18n.tr("Chat"), I18n.tr("about using LimeWire 5."));
-            } else{
-                setShareText(I18n.tr("Share"), I18n.tr("files with your friend and"));
-                setChatText(I18n.tr("chat"), I18n.tr("about using LimeWire 5."));
+                setChatText(I18n.tr("Chat"), I18n.tr("about signing into LimeWire 5."));
             }
         }
         
@@ -359,8 +354,11 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         private void setLWNoFiles() {
             if(!friend.isAnonymous()) {
                 firstLabel.setText(I18n.tr("{0} isn't sharing with you", friend.getRenderName()));
-                setShareText(null, null);
-                setChatText(I18n.tr("Chat"), I18n.tr("about sharing with you."));
+                if(friendList.size() == 1)
+                    setShareText(I18n.tr("Sharing"), I18n.tr("1 file with your friend."));
+                else
+                    setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with your friend.", friendFileList.size()));
+                setChatText(I18n.tr("Chat"), I18n.tr("about LimeWire 5."));
             } else {
                 //this should never happen
                 firstLabel.setText(I18n.tr("This person isn't sharing any files with you."));
