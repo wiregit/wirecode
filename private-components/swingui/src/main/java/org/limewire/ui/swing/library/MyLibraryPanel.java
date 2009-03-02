@@ -1028,10 +1028,18 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         addDisposable(listener);
     }
     
+    @Override
     protected <T extends FileItem> void addCatalogSizeListener(Catalog catalog,
             Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
-        PlayListListener<T> listener = new PlayListListener<T>(action);
-        addDisposable(listener);
+        switch (catalog.getType()) {
+        case CATEGORY:
+            addCategorySizeListener(catalog.getCategory(), action, filteredAllFileList, filteredList);
+            break;
+        case PLAYLIST:
+            PlayListListener<T> listener = new PlayListListener<T>(action);
+            addDisposable(listener);
+            break;
+        }
     }
     
     private class PlayListListener<T> implements Disposable {
@@ -1052,10 +1060,13 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             //if not filtering
             if(currentFriendFilterChanger.getCurrentFriend() == null) {
                 action.setEnabled(true);
+                getSelectionPanel().setHeadingVisible(Catalog.Type.PLAYLIST, true);
             } else {
                 action.setEnabled(false); 
-                if(getSelectedCategory() == null)
+                getSelectionPanel().setHeadingVisible(Catalog.Type.PLAYLIST, false);
+                if (getSelectedCategory() == null) {
                     select(Category.AUDIO);
+                }
             }
         }
         
