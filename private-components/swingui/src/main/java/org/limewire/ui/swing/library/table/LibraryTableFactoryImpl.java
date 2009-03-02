@@ -197,6 +197,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         switch (category) {
         case AUDIO:
             libTable = new AudioLibraryTable<T>(sortedList, player, saveLocationExceptionHandler, shareTableRendererEditorFactory);
+            libTable.getColumnModel().getColumn(AudioTableFormat.QUALITY_INDEX).setCellRenderer(qualityRenderer);
             break;
         case VIDEO:
             libTable = new LibraryTable<T>(sortedList,  new VideoTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
