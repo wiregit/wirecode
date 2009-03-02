@@ -83,7 +83,7 @@ public class AdvancedSearchPanel extends JXPanel {
         
         HeaderBar heading = new HeaderBar(I18n.tr("Advanced Search"));
         headerDecorator.decorateBasic(heading);
-        JLabel description = new JLabel(I18n.tr("Search for the following type of file:"));
+        JLabel description = new JLabel(I18n.tr("Search for the following category:"));
         description.setFont(headingFont);
         add(heading, "dock north");
         add(description, "gapleft 15, gaptop 15, wrap");
