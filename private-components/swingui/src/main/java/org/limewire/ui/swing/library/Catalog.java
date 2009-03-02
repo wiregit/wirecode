@@ -36,7 +36,7 @@ public class Catalog {
      * Constructs a Catalog for the specified media category.
      */
     public Catalog(Category category) {
-        this(Type.CATEGORY, category.name());
+        this(Type.CATEGORY, category.toString());
         this.category = category;
     }
     
