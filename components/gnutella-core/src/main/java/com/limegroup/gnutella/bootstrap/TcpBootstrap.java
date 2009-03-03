@@ -45,8 +45,11 @@ public class TcpBootstrap {
     private static final int WANTED_HOSTS = 15;
     /** The socket timeout for HTTP connections to gwebcaches. */
     private static final int SOCKET_TIMEOUT = 5000;
+    /** How many milliseconds to remember that a host has already been tried. */
+    private static final int EXPIRY_TIME = 10 * 60 * 1000;
     
-    private final ExecutorService bootstrapQueue = ExecutorsHelper.newProcessingQueue("TCP Bootstrap");
+    private final ExecutorService bootstrapQueue =
+        ExecutorsHelper.newProcessingQueue("TCP Bootstrap");
     
     /**
      * A list of host caches, to allow easy sorting & randomizing.
@@ -73,40 +76,29 @@ public class TcpBootstrap {
     private final ConnectionServices connectionServices;
     
     /**
-     * Constructs a new TcpBootstrap that remembers attempting hosts for 10
-     * minutes.
+     * Constructs a new TcpBootstrap that remembers attempting hosts for the
+     * default expiry time.
      */
     @Inject
-    protected TcpBootstrap(HttpExecutor httpExecutor, @Named("defaults")
+    TcpBootstrap(HttpExecutor httpExecutor, @Named("defaults")
     Provider<HttpParams> defaultParams, ConnectionServices connectionServices) {
-        this(10 * 60 * 1000, httpExecutor, defaultParams, connectionServices);
-    }
-
-    /**
-     * Constructs a new TcpBootstrap that remembers attempting hosts for the
-     * given amount of time, in msecs.
-     * 
-     * @param connectionServices
-     */
-    protected TcpBootstrap(long expiryTime, HttpExecutor httpExecutor,
-            Provider<HttpParams> defaultParams, ConnectionServices connectionServices) {
         this.httpExecutor = httpExecutor;
         this.defaultParams = defaultParams;
         this.connectionServices = connectionServices;
-        this.attemptedHosts = new FixedSizeExpiringSet<URI>(100, expiryTime);
+        this.attemptedHosts = new FixedSizeExpiringSet<URI>(100, EXPIRY_TIME);
     }
     
     /**
      * Returns the number of Host Caches this knows about.
      */
-    public synchronized int getSize() {
+    synchronized int getSize() {
         return hostsSet.size();
     }
     
     /**
      * Erases the attempted hosts & decrements the failure counts.
      */
-    public synchronized void resetData() {
+    synchronized void resetData() {
         LOG.debug("Clearing attempted TCP host caches");
         attemptedHosts.clear();
     }
@@ -114,18 +106,13 @@ public class TcpBootstrap {
     /**
      * Attempts to contact a host cache to retrieve endpoints.
      */
-    public synchronized boolean fetchHosts(Bootstrapper.Listener listener) {
+    synchronized boolean fetchHosts(Bootstrapper.Listener listener) {
         // If the hosts have been used, shuffle them
         if(dirty) {
             LOG.debug("Shuffling TCP host caches");
             Collections.shuffle(hosts);
             dirty = false;
         }
-        
-        return doFetch(listener);
-    }
-    
-    private boolean doFetch(Bootstrapper.Listener listener) {
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
         Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
         for(URI host : hosts) {
@@ -254,7 +241,8 @@ public class TcpBootstrap {
     /**
      * Adds a new hostcache to this.
      */
-    public synchronized boolean add(URI e) {
+    @SuppressWarnings("unused")
+    private synchronized boolean add(URI e) {
         if(hostsSet.contains(e)) {
             LOG.debugf("Not adding known TCP host cache {0}", e);
             return false;
@@ -266,7 +254,7 @@ public class TcpBootstrap {
         return true;
     }
     
-    public void loadDefaults() {
+    void loadDefaults() {
         // ADD DEFAULT HOST CACHES HERE.
     }
 }
