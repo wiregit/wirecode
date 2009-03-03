@@ -313,7 +313,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         private void setOfflineMessage() {
             firstLabel.setText(I18n.tr("{0} is offline", friend.getRenderName()));
             // {0}, {1}: html tags, {2}: number of files shared
-            setShareText(I18n.tr("You're sharing {0}{1}{2} files with your friend.", SHARE_ANCHOR, friendList.size(), CLOSING_ANCHOR));
+            setShareText(I18n.trn("You're {0}sharing {1} file{2} with your friend.", "You're {0}sharing {1} files{2} with your friend.", friendList.size(), SHARE_ANCHOR, friendList.size(), CLOSING_ANCHOR));
         }
         
         /**
@@ -322,7 +322,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         private void setOnlineMessage() {
             firstLabel.setText(I18n.tr("{0} isn't on LimeWire", friend.getRenderName()));
             // {0}, {1}: html tags, {2}: number of files shared
-            setShareText(I18n.tr("You're sharing {0}{1}{2} files with your friend.", SHARE_ANCHOR, friendList.size(), CLOSING_ANCHOR) + " "
+            setShareText(I18n.trn("You're {0}sharing {1} file{2} with your friend.", "You're {0}sharing {1} files{2} with your friend.", friendList.size(), SHARE_ANCHOR, friendList.size(), CLOSING_ANCHOR) + " "
                     // {0}, {1}: html tags
                     + I18n.tr("{0}Chat{1} about signing into LimeWire 5.", CHAT_ANCHOR, CLOSING_ANCHOR));
         }
@@ -345,7 +345,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         private void setLWNoFiles() {
             if(!friend.isAnonymous()) {
                 firstLabel.setText(I18n.tr("{0} isn't sharing with you", friend.getRenderName()));
-                setShareText(I18n.tr("You're sharing {0}{1}{2} files with your friend.", SHARE_ANCHOR, friendList.size(), CLOSING_ANCHOR) + " "
+                setShareText(I18n.trn("You're {0}sharing {1} file{2} with your friend.", "You're {0}sharing {1} files{2} with your friend.", friendList.size(), SHARE_ANCHOR, friendList.size(), CLOSING_ANCHOR) + " "
                         // {0}, {1}: html tags
                         + I18n.tr("{0}Chat{1} about LimeWire 5.", CHAT_ANCHOR, CLOSING_ANCHOR));
             } else {
