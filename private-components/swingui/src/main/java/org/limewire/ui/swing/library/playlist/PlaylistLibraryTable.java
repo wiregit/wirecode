@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.io.File;
 import java.util.Comparator;
 
+import javax.swing.JLabel;
 import javax.swing.JTable;
 
 import org.jdesktop.swingx.decorator.SortController;
@@ -20,6 +21,7 @@ import org.limewire.ui.swing.library.table.ShareTableRendererEditorFactory;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.NameRenderer;
 import org.limewire.ui.swing.table.QualityRenderer;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -74,7 +76,11 @@ public class PlaylistLibraryTable<T extends LocalFileItem> extends LibraryTable<
     @Override
     protected void setupCellRenderers(LibraryTableFormat<T> format) {
         super.setupCellRenderers(format);
+        
+        // Set column header renderers.
+        getColumnModel().getColumn(PlaylistTableFormat.LENGTH_INDEX).setHeaderRenderer(new TableCellHeaderRenderer(JLabel.TRAILING));
 
+        // Set column cell renderers.
         getColumnModel().getColumn(PlaylistTableFormat.LENGTH_INDEX).setCellRenderer(new TimeRenderer());
         getColumnModel().getColumn(PlaylistTableFormat.SIZE_INDEX).setCellRenderer(new FileSizeRenderer());
         getColumnModel().getColumn(PlaylistTableFormat.TITLE_INDEX).setCellRenderer(new NameRenderer());

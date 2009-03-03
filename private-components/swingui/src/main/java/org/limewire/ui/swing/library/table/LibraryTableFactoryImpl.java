@@ -9,6 +9,7 @@ import java.util.TooManyListenersException;
 
 import javax.swing.DropMode;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.TransferHandler;
 
@@ -50,6 +51,7 @@ import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.NameRenderer;
 import org.limewire.ui.swing.table.QualityRenderer;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.DNDUtils;
@@ -161,10 +163,12 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         switch (category) {
         case AUDIO:
             libTable = new AudioLibraryTable<T>(sortedList, player, saveLocationExceptionHandler, shareTableRendererEditorFactory);
+            libTable.getColumnModel().getColumn(AudioTableFormat.LENGTH_INDEX).setHeaderRenderer(new TableCellHeaderRenderer(JLabel.TRAILING));
             libTable.getColumnModel().getColumn(AudioTableFormat.QUALITY_INDEX).setCellRenderer(qualityRenderer);
             break;
         case VIDEO:
             libTable = new LibraryTable<T>(sortedList,  new VideoTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+            libTable.getColumnModel().getColumn(VideoTableFormat.LENGTH_INDEX).setHeaderRenderer(new TableCellHeaderRenderer(JLabel.TRAILING));
             libTable.getColumnModel().getColumn(VideoTableFormat.LENGTH_INDEX).setCellRenderer(timeRenderer);
             libTable.getColumnModel().getColumn(VideoTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
             libTable.getColumnModel().getColumn(VideoTableFormat.NAME_INDEX).setCellRenderer(nameRenderer);
@@ -244,12 +248,14 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         case AUDIO:
             if(friend != null) {
                 libTable = new LibraryTable<T>(sortedList, new RemoteAudioTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+                libTable.getColumnModel().getColumn(RemoteAudioTableFormat.LENGTH_INDEX).setHeaderRenderer(new TableCellHeaderRenderer(JLabel.TRAILING));
                 libTable.getColumnModel().getColumn(RemoteAudioTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
                 libTable.getColumnModel().getColumn(RemoteAudioTableFormat.LENGTH_INDEX).setCellRenderer(timeRenderer);
                 libTable.getColumnModel().getColumn(RemoteAudioTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
                 libTable.getColumnModel().getColumn(RemoteAudioTableFormat.QUALITY_INDEX).setCellRenderer(qualityRenderer);
             } else {
                 libTable = new LibraryTable<T>(sortedList, new AllFriendAudioTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+                libTable.getColumnModel().getColumn(AllFriendAudioTableFormat.LENGTH_INDEX).setHeaderRenderer(new TableCellHeaderRenderer(JLabel.TRAILING));
                 libTable.getColumnModel().getColumn(AllFriendAudioTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
                 libTable.getColumnModel().getColumn(AllFriendAudioTableFormat.LENGTH_INDEX).setCellRenderer(timeRenderer);
                 libTable.getColumnModel().getColumn(AllFriendAudioTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
@@ -261,12 +267,14 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         case VIDEO:
             if(friend != null) {
                 libTable = new LibraryTable<T>(sortedList, new RemoteVideoTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+                libTable.getColumnModel().getColumn(RemoteVideoTableFormat.LENGTH_INDEX).setHeaderRenderer(new TableCellHeaderRenderer(JLabel.TRAILING));
                 libTable.getColumnModel().getColumn(RemoteVideoTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
                 libTable.getColumnModel().getColumn(RemoteVideoTableFormat.LENGTH_INDEX).setCellRenderer(timeRenderer);
                 libTable.getColumnModel().getColumn(RemoteVideoTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
                 libTable.getColumnModel().getColumn(RemoteVideoTableFormat.QUALITY_INDEX).setCellRenderer(qualityRenderer);
             } else {
                 libTable = new LibraryTable<T>(sortedList, new AllFriendVideoTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+                libTable.getColumnModel().getColumn(AllFriendVideoTableFormat.LENGTH_INDEX).setHeaderRenderer(new TableCellHeaderRenderer(JLabel.TRAILING));
                 libTable.getColumnModel().getColumn(AllFriendVideoTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
                 libTable.getColumnModel().getColumn(AllFriendVideoTableFormat.LENGTH_INDEX).setCellRenderer(timeRenderer);
                 libTable.getColumnModel().getColumn(AllFriendVideoTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
