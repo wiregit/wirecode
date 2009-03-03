@@ -141,6 +141,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(0);
     }
 
+    @Override
     public void tearDown() throws Exception {
         //Kill all connections
         if (connectionServices != null) {
@@ -436,8 +437,6 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertEquals(3, mgr.getNumFreeNonLeafSlots());
         assertEquals(0, mgr.getNumFreeLimeWireNonLeafSlots());
     }
-        
-        
     
     /**
      * Tests to make sure that a connection does not succeed with an
@@ -509,7 +508,6 @@ public class ConnectionManagerTest extends LimeTestCase {
         assertTrue(mc.isTLSCapable());
         assertFalse(mc.isTLSEncoded());
     }
-
 
     /**
      * Tests that a 503 rejection is counted as a connection failure.
@@ -784,11 +782,8 @@ public class ConnectionManagerTest extends LimeTestCase {
             return failures.get();
         }
         
-        //  Overridden because initialize() was previously overridden, but that missed
-        //  setting up some required members.  Now, the code which was intended to be 
-        //  skipped was moved into this function (on the base class)
         @Override
-        public void scheduleServices() {            
+        public void start() {
         }
     }
     
@@ -954,7 +949,6 @@ public class ConnectionManagerTest extends LimeTestCase {
         public GnutellaConnection createRoutedConnection(Socket socket) {
            return null;
         }
-        
     }
 
     private static class TestManagedConnection extends GnutellaConnection {
@@ -1045,22 +1039,17 @@ public class ConnectionManagerTest extends LimeTestCase {
             setIsSupernodeClientConnection(false);
         }
         
-      
-        
         public void setIsSupernodeSupernodeConnection(boolean isSupernodeSupernodeConnection) {
             this.isSupernodeSupernodeConnection = isSupernodeSupernodeConnection;
         }
-       
         
         public void setIsClientSupernodeConnection(boolean isClientSupernodeConnection) {
             this.isClientSupernodeConnection = isClientSupernodeConnection;
-        }
-        
+        }        
         
         public void setIsSupernodeClientConnection(boolean isSupernodeClientConnection) {
             this.isSupernodeClientConnection = isSupernodeClientConnection;
         }
-       
         
         public void setIsLimeWire(boolean isLime) {
             this.isLime = isLime;
@@ -1187,6 +1176,5 @@ public class ConnectionManagerTest extends LimeTestCase {
         Lock getLock() {
             return lock;
         }
-        
     }
 }

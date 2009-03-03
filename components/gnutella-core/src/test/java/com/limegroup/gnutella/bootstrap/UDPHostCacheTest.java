@@ -100,6 +100,15 @@ public class UDPHostCacheTest extends LimeTestCase {
         udpService.shutdown();
     }
 
+    /**
+     * Tests that we haven't accidentally committed
+     * the list of host caches to CVS
+     */
+    public void testNoDefaultsLoaded() {
+        cache.loadDefaults();
+        assertEquals(0, cache.getSize());
+    }
+
     public void testMaximumStored() {
         assertEquals(0, cache.getSize());
         
@@ -229,7 +238,6 @@ public class UDPHostCacheTest extends LimeTestCase {
                 fail("wrong i: " + i);
         }
     }
-            
     
     public void testAttemptedExpiresAfterTime() throws Exception {
         assertEquals(0, cache.getSize());
@@ -276,8 +284,6 @@ public class UDPHostCacheTest extends LimeTestCase {
         assertEquals(0, cache.amountFetched);
         
         cache.resetData();
-        
-        cache.fetchHosts();
         assertEquals(0, cache.getSize());        
         cache.fetchHosts();
         assertEquals(0, cache.amountFetched);
@@ -479,7 +485,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         private byte[] guid = null;
         
         @Inject
-        public StubCache(UniqueHostPinger pinger,
+        StubCache(UniqueHostPinger pinger,
                 Provider<MessageRouter> messageRouter,
                 PingRequestFactory pingRequestFactory,
                 ConnectionServices connectionServices,
@@ -489,21 +495,18 @@ public class UDPHostCacheTest extends LimeTestCase {
         }
         
         @Override
-        protected boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
+        boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
             if(doRealFetch) {
                 return super.fetch(hosts);
             } else {
                 amountFetched = hosts.size();
                 lastFetched = hosts;
-                if(amountFetched == 0)
-                    return false;
-                else
-                    return true;
+                return amountFetched != 0;
             }
         }
         
         @Override
-        protected PingRequest getPing() {
+        PingRequest getPing() {
             PingRequest pr = super.getPing();
             guid = pr.getGUID();
             return pr;

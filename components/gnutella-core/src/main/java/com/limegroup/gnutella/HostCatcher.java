@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -37,7 +38,6 @@ import org.limewire.collection.RandomAccessMap;
 import org.limewire.collection.RandomOrderHashMap;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.FilterSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
@@ -64,92 +64,63 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
 /**
- * The host catcher.  This peeks at pong messages coming on the
- * network and snatches IP addresses of other Gnutella peers.  IP
- * addresses may also be added to it from a file (usually
- * "gnutella.net").  The servent may then connect to these addresses
- * as necessary to maintain full connectivity.<p>
- *
- * The HostCatcher currently prioritizes pongs as follows.  Note that Ultrapeers
- * with a private address is still highest priority; hopefully this may allow
- * you to find local Ultrapeers.
- * <ol>
- * <li> Ultrapeers.  Ultrapeers are identified because the number of files they
- *      are sharing is an exact power of two--a dirty but effective hack.
- * <li> Normal pongs.
- * <li> Private addresses.  This means that the host catcher will still 
- *      work on private networks, although we will normally ignore private
- *      addresses.        
- * </ol> 
- *
- * Finally, HostCatcher maintains a list of "permanent" locations, based on
- * average daily uptime.  These are stored in the gnutella.net file.  They
- * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
- * use those anymore.
+ * The host catcher collects the addresses of Gnutella and DHT hosts from ping
+ * replies and bootstrap servers. Collected addresses are stored in a file
+ * between sessions. The servent may attempt to connect to these addresses as
+ * necessary to maintain full connectivity. Hosts that are known to be
+ * ultrapeers are preferred when caching and returning addresses. 
  */
 @Singleton
 public class HostCatcher implements Service, Bootstrapper.Listener {
     
-    /**
-     * Log for logging this class.
-     */
     private static final Log LOG = LogFactory.getLog(HostCatcher.class);
-    
-    /**
-     * The number of ultrapeer pongs to store.
-     */
-    static final int GOOD_SIZE=1000;
-    
-    /**
-     * The number of normal pongs to store.
-     * This must be large enough to store all permanent addresses, 
-     * as permanent addresses when read from disk are stored as
-     * normal priority.
-     */    
-    static final int NORMAL_SIZE=400;
 
     /**
-     * The number of permanent locations to store in gnutella.net 
-     * This MUST NOT BE GREATER THAN NORMAL_SIZE.  This is because when we read
-     * in endpoints, we add them as NORMAL_PRIORITY.  If we have written
-     * out more than NORMAL_SIZE hosts, then we guarantee that endpoints
-     * will be ejected from the ENDPOINT_QUEUE upon startup.
-     * Because we write out best first (and worst last), and thus read in
-     * best first (and worst last) this means that we will be ejecting
-     * our best endpoints and using our worst ones when starting.
-     * 
+     * The number of good addresses to store (definitely ultrapeers).
      */
-    static final int PERMANENT_SIZE = NORMAL_SIZE;
+    static final int GOOD_SIZE = 1000;
 
     /**
-     * Constant for the index of good priority hosts (Ultrapeers)
+     * The number of normal addresses to store (maybe not ultrapeers). This
+     * is also the number of addresses (good or normal) that will be saved
+     * between sessions. Addresses read from disk are given normal priority.
      */
-    public static final int GOOD_PRIORITY = 1;
+    static final int NORMAL_SIZE = 400;
 
     /**
-     * Constant for the index of non-Ultrapeer hosts.
+     * Constant for identifying good priority hosts (definitely ultrapeers).
      */
-    public static final int NORMAL_PRIORITY = 0;
-    
+    private static final int GOOD_PRIORITY = 1;
+
     /**
-     * netmask for pongs that we accept and send.
+     * Constant for identifying normal priority hosts (maybe not ultrapeers).
      */
-    public static final int PONG_MASK = 0xFFFFFF00;
-    
+    private static final int NORMAL_PRIORITY = 0;
+
     /**
-     * Delete the host file if it's older than this in milliseconds
+     * Netmask for filtering addresses by their class C networks.
+     */
+    private static final int PONG_MASK = 0xFFFFFF00;
+
+    /**
+     * Delete the host file if it's older than this in milliseconds.
      */
     static final long STALE_HOST_FILE = 2 * 7 * 24 * 60 * 60 * 1000; // 2 weeks
-    
+
+    /**
+     * Comparator for returning DHT hosts - return active hosts first, then
+     * passive, then inactive.
+     */
     private static final Comparator<ExtendedEndpoint> DHT_COMPARATOR = 
         new Comparator<ExtendedEndpoint>() {
         public int compare(ExtendedEndpoint e1, ExtendedEndpoint e2) {
             DHTMode mode1 = e1.getDHTMode();
             DHTMode mode2 = e2.getDHTMode();
-            if ((mode1.equals(DHTMode.ACTIVE) && !mode2.equals(DHTMode.ACTIVE)) ||
+            // FIXME: what about PASSIVE_LEAF?
+            if((mode1.equals(DHTMode.ACTIVE) && !mode2.equals(DHTMode.ACTIVE)) ||
                     (mode1.equals(DHTMode.PASSIVE) && mode2.equals(DHTMode.INACTIVE))) {
                 return -1;
-            } else if ((mode2.equals(DHTMode.ACTIVE) && !mode1.equals(DHTMode.ACTIVE)) ||
+            } else if((mode2.equals(DHTMode.ACTIVE) && !mode1.equals(DHTMode.ACTIVE)) ||
                     (mode2.equals(DHTMode.PASSIVE) && mode1.equals(DHTMode.INACTIVE))) {
                 return 1;
             } else {
@@ -158,154 +129,155 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         }
     };
 
-    // NOTE: ENDPOINT_SET, FREE_ULTRAPEER_SLOTS_SET & FREE_LEAF_SLOTS_SET
-    //       are actually Maps that point to themselves so that we can
-    //       retrieve Endpoints from them based on an ip/port.
-        
-
-    /** The list of hosts to try.  These are sorted by priority: ultrapeers,
-     * normal, then private addresses.  Within each priority level, recent hosts
-     * are prioritized over older ones.  Our representation consists of a set
-     * and a queue, both bounded in size.  The set lets us quickly check if
-     * there are duplicates, while the queue provides ordering--a classic
-     * space/time tradeoff.
+    /**
+     * The list of hosts to try. Addresses that are known to be ultrapeers are
+     * given priority. Within each priority level, recent hosts are prioritized
+     * over older ones. Our representation consists of a set and a queue, both
+     * bounded in size. The set lets us quickly check if there are duplicates,
+     * while the queue provides ordering. The set is actually a map that points
+     * to itself so we can retrieve an endpoint using its IP and port.
      *
-     * INVARIANT: queue contains no duplicates and contains exactly the
-     *  same elements as set.
-     * LOCKING: obtain this' monitor before modifying either.  */
+     * INVARIANT: queue and set contain exactly the same elements
+     * LOCKING: this
+     */
     private final BucketQueue<ExtendedEndpoint> ENDPOINT_QUEUE = 
-        new BucketQueue<ExtendedEndpoint>(new int[] {NORMAL_SIZE,GOOD_SIZE});
+        new BucketQueue<ExtendedEndpoint>(new int[] {NORMAL_SIZE, GOOD_SIZE});
     private final Map<ExtendedEndpoint, ExtendedEndpoint> ENDPOINT_SET =
         new HashMap<ExtendedEndpoint, ExtendedEndpoint>();
-    
+
     /**
-     * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
+     * Hosts advertising free ultrapeer connection slots.
      */
-    private final RandomAccessMap<ExtendedEndpoint, ExtendedEndpoint> FREE_ULTRAPEER_SLOTS_SET = 
+    private final RandomAccessMap<ExtendedEndpoint, ExtendedEndpoint>
+    FREE_ULTRAPEER_SLOTS_SET = 
         new RandomOrderHashMap<ExtendedEndpoint, ExtendedEndpoint>(200);
-    
+
     /**
-     * <tt>Set</tt> of hosts advertising free leaf connection slots.
+     * Hosts advertising free leaf connection slots.
      */
-    private final RandomAccessMap<ExtendedEndpoint, ExtendedEndpoint> FREE_LEAF_SLOTS_SET = 
+    private final RandomAccessMap<ExtendedEndpoint, ExtendedEndpoint>
+    FREE_LEAF_SLOTS_SET = 
         new RandomOrderHashMap<ExtendedEndpoint, ExtendedEndpoint>(200);
-    
+
     /**
-     * map of locale (string) to sets (of endpoints).
+     * Map of locales to sets of hosts with those locales.
      */
     private final Map<String, Set<ExtendedEndpoint>> LOCALE_SET_MAP =
         new HashMap<String, Set<ExtendedEndpoint>>();
-    
+
     /**
-     * number of endpoints to keep in the locale set
+     * Number of hosts to keep in each locale set.
      */
     private static final int LOCALE_SET_SIZE = 100;
-    
-    /** The list of pongs with the highest average daily uptimes.  Each host's
-     * weight is set to the uptime.  These are most likely to be reachable
-     * during the next session, though not necessarily likely to have slots
-     * available now.  In this way, they act more like bootstrap hosts than
-     * normal pongs.  This list is written to gnutella.net and used to
-     * initialize queue on startup.  To prevent duplicates, we also maintain a
-     * set of all addresses, like with queue/set.
+
+    /**
+     * Hosts that should be saved in the host file for future sessions. The
+     * hosts are ordered by priority using three criteria:
+     * 1. Whether the most recent connection attempt succeeded or failed,
+     * 2. Whether the host's locale matches our own (if locale preferencing
+     * is enabled),
+     * 3. The host's average daily uptime (high-uptime hosts are more likely
+     * to be reachable in future sessions, and even if they don't have any
+     * free connection slots we can learn other addresses from them).
      *
-     * INVARIANT: permanentHosts contains no duplicates and contains exactly
-     *  the same elements and permanentHostsSet
-     * LOCKING: obtain this' monitor before modifying either */
+     * INVARIANT: queue and set contain exactly the same elements
+     * LOCKING: this
+     */
     private final FixedSizeSortedList<ExtendedEndpoint> permanentHosts =
         new FixedSizeSortedList<ExtendedEndpoint>(
-                ExtendedEndpoint.priorityComparator(),
-                PERMANENT_SIZE);
+                ExtendedEndpoint.priorityComparator(), NORMAL_SIZE);
     private final Set<ExtendedEndpoint> permanentHostsSet =
         new HashSet<ExtendedEndpoint>();
-    
+
     /**
-     * List of the hosts that were restored from disk.
-     * INVARIANT: a subset of permanentHosts.  
+     * Whether the set of permanent hosts has changed since we last saved it.
+     */
+    private boolean dirty = false;
+
+    /**
+     * Hosts that were loaded from the host file, ordered using the same
+     * criteria as permanentHosts.
+     * 
      * LOCKING: this
      */
     private final List<ExtendedEndpoint> restoredHosts =
         new FixedSizeSortedList<ExtendedEndpoint>(
-                ExtendedEndpoint.priorityComparator(),
-                PERMANENT_SIZE);
-    
+                ExtendedEndpoint.priorityComparator(), NORMAL_SIZE);
+
     /** 
      * Partition view of the list of restored hosts.
+     * FIXME: the list is sorted, why not just pop the last element?
      */
     private final ListPartitioner<ExtendedEndpoint> uptimePartitions = 
         new ListPartitioner<ExtendedEndpoint>(restoredHosts, 3);
-            
+
     /**
-     * <tt>Set</tt> of hosts we were unable to create TCP connections with
-     * and should therefore not be tried again.  Fixed size.
+     * Hosts to which we could not create a TCP connection, and which should
+     * therefore not be tried again. Fixed size, which is package accessible
+     * for testing.
      * 
-     * LOCKING: obtain this' monitor before modifying/iterating
+     * LOCKING: this
      */
     private final Set<Endpoint> EXPIRED_HOSTS = new HashSet<Endpoint>();
-    
+    protected static final int EXPIRED_HOSTS_SIZE = 500;
+
     /**
-     * <tt>Set</tt> of hosts we were able to create TCP connections with but 
-     * did not accept our Gnutella connection, and are therefore put on 
-     * "probation".  Fixed size.
+     * Hosts that accepted a TCP connection but not a Gnutella connection, and
+     * which are therefore "on probation". Fixed size, which is package
+     * accessible for testing.
      * 
-     * LOCKING: obtain this' monitor before modifying/iterating
+     * LOCKING: this
      */    
     private final Set<Endpoint> PROBATION_HOSTS = new HashSet<Endpoint>();
-    
-    /**
-     * Constant for the number of milliseconds to wait before periodically
-     * recovering hosts on probation.  Non-final for testing.
-     */
-    private static long PROBATION_RECOVERY_WAIT_TIME = 60*1000;
+    protected static final int PROBATION_HOSTS_SIZE = 500;
 
     /**
-     * Constant for the number of milliseconds to wait between calls to 
-     * recover hosts that have been placed on probation.  
-     * Non-final for testing.
+     * How long (in milliseconds) to wait before first recovering hosts on
+     * probation. Non-final for testing.
      */
-    private static long PROBATION_RECOVERY_TIME = 60*1000;
-    
-    /**
-     * Constant for the size of the set of hosts put on probation.  Public for
-     * testing.
-     */
-    public static final int PROBATION_HOSTS_SIZE = 500;
+    private static long PROBATION_RECOVERY_WAIT_TIME = 60 * 1000;
 
     /**
-     * Constant for the size of the set of expired hosts.  Public for
-     * testing.  
+     * How long (in milliseconds) to wait between periodically recovering
+     * hosts on probation. Non-final for testing.
      */
-    public static final int EXPIRED_HOSTS_SIZE = 500;
-    
+    private static long PROBATION_RECOVERY_TIME = 60 * 1000;
+
     /**
      * All EndpointObservers waiting on getting an Endpoint.
      */
-    private List<EndpointObserver> _catchersWaiting = new LinkedList<EndpointObserver>();
-    
+    private final List<EndpointObserver> _catchersWaiting =
+        new LinkedList<EndpointObserver>();
+
     /**
-     * The last allowed time that we can continue ranking pongs.
+     * How long (in milliseconds) to send pings after the host catcher
+     * is initialized.
      */
-    private long lastAllowedPongRankTime = 0;
-    
+    private static final long PONG_RANKING_EXPIRE_TIME = 20 * 1000;
+
     /**
-     * The amount of time we're allowed to do pong ranking after
-     * we click connect.
+     * The time at which we should stop sending pings.
      */
-    private final long PONG_RANKING_EXPIRE_TIME = 20 * 1000;
-    
+    private volatile long lastAllowedPongRankTime = 0;
+
     /**
-     * Stop ranking if we have this many connections.
+     * Stop sending pings if we have this many connections.
      */
     private static final int MAX_CONNECTIONS = 5;
-    
-    /** A RND to share to find random hosts. */
-    private final Random RND = new Random();
-    
+
     /**
-     * Whether or not hosts have been added since we wrote to disk.
+     * Random number generator for choosing a host at random when no host with
+     * a given locale is available.
      */
-    private boolean dirty = false;
-    
+    private final Random RND = new Random();
+
+    /**
+     * Keep references to background threads so we can shut them down later.
+     */
+    private ScheduledFuture probationFuture;
+    private ScheduledFuture bootstrapperFuture;
+    private ScheduledFuture clearPingedHostsFuture;
+
     private final ScheduledExecutorService backgroundExecutor;
     private final ConnectionServices connectionServices;
     private final Provider<ConnectionManager> connectionManager;
@@ -342,32 +314,10 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
     
     /**
-     * Initializes any components required for HostCatcher.
-     * Currently, this schedules occasional services.
+     * Schedules background threads.
      */
+    @Override
     public void start() {
-        scheduleServices();
-    }
-    
-    public String getServiceName() {
-        return org.limewire.i18n.I18nMarker.marktr("Peer Locator");
-    }
-    
-    public void initialize() {
-    }
-    
-    public void stop() {
-        try {
-            write();
-        } catch(IOException ignored) {}
-    }
-    
-    @Inject
-    void register(org.limewire.lifecycle.ServiceRegistry registry) {
-        registry.register(this);
-    }
-    
-    protected void scheduleServices() {        
         Runnable probationRestorer = new Runnable() {
             public void run() {
                 // Restore probated hosts
@@ -375,7 +325,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
                 synchronized(HostCatcher.this) {
                     if(LOG.isTraceEnabled()) {
                         LOG.trace("Restoring " + PROBATION_HOSTS.size() +
-                                " probated hosts");
+                        " probated hosts");
                     }
                     toAdd = new ArrayList<Endpoint>(PROBATION_HOSTS);
                     PROBATION_HOSTS.clear();
@@ -397,17 +347,51 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             } 
         };
         // Recover hosts on probation every minute.
-        backgroundExecutor.scheduleWithFixedDelay(probationRestorer, 
-                PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME,
-                TimeUnit.MILLISECONDS);
-            
+        probationFuture =
+            backgroundExecutor.scheduleWithFixedDelay(probationRestorer, 
+                    PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME,
+                    TimeUnit.MILLISECONDS);
         // Try to fetch hosts whenever we need them.
         // Start it immediately, so that if we have no hosts
         // (because of a fresh installation) we will connect.
-        backgroundExecutor.scheduleWithFixedDelay(bootstrapper, 0, 2000,
-                TimeUnit.MILLISECONDS);
+        bootstrapperFuture = 
+            backgroundExecutor.scheduleWithFixedDelay(bootstrapper, 0, 2000,
+                    TimeUnit.MILLISECONDS);
     }
     
+    @Override
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Peer Locator");
+    }
+    
+    @Override
+    public void initialize() {
+    }
+    
+    /**
+     * Shuts down background threads and saves the host file.
+     */
+    @Override
+    public void stop() {
+        // Shut down the background threads
+        if(probationFuture != null)
+            probationFuture.cancel(true);
+        if(bootstrapperFuture != null)
+            bootstrapperFuture.cancel(true);
+        if(clearPingedHostsFuture != null)
+            clearPingedHostsFuture.cancel(true);
+        write();
+    }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    /**
+     * Informs the host catcher that we have (re)connected to the network;
+     * reads the host file and starts pinging.
+     */
     public void connect() {
         // Allow pings to be sent for the next PONG_RANKING_EXPIRE_TIME msecs
         lastAllowedPongRankTime =
@@ -419,12 +403,12 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
                 uniqueHostPinger.resetData();
             }
         };
-        backgroundExecutor.schedule(clearPingedHosts,
+        clearPingedHostsFuture = backgroundExecutor.schedule(clearPingedHosts,
                 PONG_RANKING_EXPIRE_TIME, TimeUnit.MILLISECONDS);
         // Load the default bootstrap servers
         bootstrapper.reset();
         // Read the gnutella.net file
-        readHostsFile();
+        read();
         // Ping some of the hosts we just loaded
         ArrayList<Endpoint> hosts;
         synchronized(this) {
@@ -438,7 +422,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * Rank the collection of hosts.
+     * Pings some or all of the specified hosts, if necessary.
      */
     private void rank(Collection<? extends IpPort> hosts) {
         if(needsPongRanking()) {
@@ -456,6 +440,10 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         }
     }
     
+    /**
+     * Sends a ping to every host the catcher knows about (used for
+     * discovering DHT-capable hosts).
+     */
     public void sendMessageToAllHosts(Message m, MessageListener listener, Cancellable c) {
         uniqueHostPinger.rank(getAllHosts(), listener, c, m);
     }
@@ -471,13 +459,11 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
     
     /**
-     * Gets a List of hosts that support the DHT. If <tt>this</tt> knows any active nodes,
-     * return them at the head of the list.
+     * Gets a (possibly empty) list of hosts that support the DHT. Active nodes
+     * are returned first, then passive nodes, then inactive nodes. 
      * Note: this method is slow and is not meant to be used often.
      * 
-     * @param minVersion The minimum DHT Version. Should be 0 to return all versions
-     * 
-     * @return A Collection of ExtendedEndpoints that support the DHT.
+     * @param minVersion the minimum DHT version, 0 to return all versions.
      */
     public synchronized List<ExtendedEndpoint> getDHTSupportEndpoint(int minVersion) {
         List<ExtendedEndpoint> hosts = new ArrayList<ExtendedEndpoint>();
@@ -495,7 +481,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
     
     /**
-     * Determines if UDP Pongs need to be sent out.
+     * Determines whether UDP pings should be sent out.
      */
     private synchronized boolean needsPongRanking() {
         if(connectionServices.isFullyConnected()) {
@@ -533,12 +519,19 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
     
     /**
-     * Reads in endpoints from the given file.  This is called by initialize, so
-     * you don't need to call it manually.  It is package access for
-     * testability.
-     *
-     * @modifies this
-     * @effects read hosts from the given file.  
+     * Reads the host file from the default location.
+     */
+    private void read() {
+        try {
+            read(getHostsFile());
+        } catch (IOException e) {
+            if(LOG.isInfoEnabled())
+                LOG.info("Exception reading host file " + getHostsFile(), e);
+        }
+    }
+
+    /**
+     * Reads hosts from the specified file. Package access for testing.
      */
     void read(File hostFile) throws FileNotFoundException, IOException {
         LOG.trace("Reading host file");
@@ -588,20 +581,21 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * Writes the host file to the default location.
-     *
-     * @throws <tt>IOException</tt> if the file cannot be written
+     * Writes the host file to the default location. Package access for testing.
      */
-    synchronized void write() throws IOException {
-        write(getHostsFile());
+    protected void write() {
+        try {
+            write(getHostsFile());
+        } catch(IOException e) {
+            if(LOG.isInfoEnabled())
+                LOG.info("Exception writing host file " + getHostsFile(), e);   
+        }
     }
 
     /**
-     * @modifies the file named filename
-     * @effects writes this to the given file.  The file
-     *  is prioritized by rough probability of being good.
+     * Writes hosts to the specified file. Package access for testing.
      */
-    synchronized void write(File hostFile) throws IOException {
+    protected synchronized void write(File hostFile) throws IOException {
         checkInvariants();
         LOG.trace("Writing host file");
         if(dirty || bootstrapper.isWriteDirty()) {
@@ -620,26 +614,30 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         }
     }
 
-    ///////////////////////////// Add Methods ////////////////////////////
-
-
     /**
-     * Attempts to add a pong to this, possibly ejecting other elements from the
-     * cache.  This method used to be called "spy".
-     *
-     * @param pr the pong containing the address/port to add
-     * @param receivingConnection the connection on which we received
-     *  the pong.
-     * @return true iff pr was actually added 
+     * Returns the default host file.
+     */
+    private File getHostsFile() {
+        return new File(CommonUtils.getUserSettingsDir(), "gnutella.net");
+    }
+    
+    /**
+     * Adds hosts from a ping reply, possibly ejecting others from the cache.
+     * Also adds any UHCs in the ping reply to the UDPHostCache, active and
+     * passive DHT nodes to the DHT manager, and unicast endpoints to the
+     * unicast manager.
+     * 
+     * @return true if any hosts were added to the catcher
      */
     public boolean add(PingReply pr) {
         if(LOG.isTraceEnabled())
             LOG.trace("Pong from " + pr.getAddress() + ":" + pr.getPort());
+
         // Discard UDP pongs with unknown GUIDs, unless they're from local
         // sources, in which case they might be replies to multicast pings 
         byte[] source = pr.getInetAddress().getAddress();
         boolean isLocalOrPrivate = networkInstanceUtils.isVeryCloseIP(source)
-                || networkInstanceUtils.isPrivateAddress(source);
+        || networkInstanceUtils.isPrivateAddress(source);
         if(pr.isUDP() && !isLocalOrPrivate) {
             GUID g = new GUID(pr.getGUID());
             if(!g.equals(PingRequest.UDP_GUID) &&
@@ -648,78 +646,97 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
                 return false;
             }
         } 
-        
-        //Convert to endpoint
+
+        // Convert to endpoint
         ExtendedEndpoint endpoint;
-        
         if(pr.getDailyUptime() != -1) {
             endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort(), 
-                                            pr.getDailyUptime());
+                    pr.getDailyUptime());
         } else {
             endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort());
         }
-        
-        //if the PingReply had locale information then set it in the endpoint
         if(!pr.getClientLocale().equals(""))
             endpoint.setClientLocale(pr.getClientLocale());
-            
         if(pr.isUDPHostCache()) {
             endpoint.setHostname(pr.getUDPCacheAddress());            
             endpoint.setUDPHostCache(true);
         }
-        
-        // Make a temporary exception for local addresses so we can extract
-        // the packed endpoints and UHCs - we'll check validity again later 
-        if(!isValidHost(endpoint) && !isLocalOrPrivate)
-            return false;
+        if(pr.isTLSCapable())
+            endpoint.setTLSCapable(true);
 
-        // If the pong carries packed IP/Ports, add them
+        // Make a temporary exception for local addresses so we can extract
+        // the packed hosts and UHCs - we'll check validity again later 
+        if(!isValidHost(endpoint) && !isLocalOrPrivate) {
+            if(LOG.isInfoEnabled())
+                LOG.info("Discarding pong from invalid host " + endpoint);
+            return false;
+        }
+
+        // If the pong has packed hosts, add them
         Collection<IpPort> packed = pr.getPackedIPPorts();
         if(ConnectionSettings.FILTER_CLASS_C.getValue())
             packed = NetworkUtils.filterOnePerClassC(packed);
-        if(LOG.isDebugEnabled() && !packed.isEmpty())
-            LOG.debug("Pong contains " + packed.size() + " packed endpoints");
-        rank(packed); // FIXME: why ping them before checking validity?
-        for(IpPort ipp : packed) {            
-            ExtendedEndpoint ep;
+        if(LOG.isTraceEnabled() && !packed.isEmpty())
+            LOG.trace("Pong contains " + packed.size() + " packed endpoints");
+        Collection<ExtendedEndpoint> valid = new HashSet<ExtendedEndpoint>();
+        boolean addedPacked = false;
+        for(IpPort ipp : packed) {
+            ExtendedEndpoint ee;
             if(ipp instanceof ExtendedEndpoint) {
-                ep = (ExtendedEndpoint)ipp;
+                ee = (ExtendedEndpoint)ipp;
             } else {
-                ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
+                ee = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
                 if(ipp instanceof Connectable) {
                     // When more items other than TLS are added to HostInfo,
                     // it would make more sense to make this something like:
                     // ep.addHostInfo(ipp);
-                    ep.setTLSCapable(((Connectable)ipp).isTLSCapable());
+                    ee.setTLSCapable(((Connectable)ipp).isTLSCapable());
                 }
             }
-            if(isValidHost(ep))
-                add(ep, GOOD_PRIORITY);
+            if(isValidHost(ee)) {
+                addedPacked |= add(ee, GOOD_PRIORITY);
+                valid.add(ee);
+            } else if(LOG.isInfoEnabled()) {
+                LOG.info("Not adding invalid host " + ee);
+            }
         }
+        // Ping the valid packed hosts (if any)
+        if(!valid.isEmpty())
+            rank(valid);
 
-        // If the pong carries packed UDP host caches, add them
+        // If the pong has packed UHCs, add them
         packed = pr.getPackedUDPHostCaches();
-        if(LOG.isDebugEnabled() && !packed.isEmpty())
-            LOG.debug("Pong contains " + packed.size() + " packed UHCs");
+        if(LOG.isTraceEnabled() && !packed.isEmpty())
+            LOG.trace("Pong contains " + packed.size() + " packed UHCs");
         for(IpPort ipp : packed) {
-            ExtendedEndpoint ep =
+            ExtendedEndpoint ee =
                 new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
-            ep.setUDPHostCache(true);
-            if(isValidHost(ep))
-                bootstrapper.addUDPHostCache(ep);
+            ee.setUDPHostCache(true);
+            if(isValidHost(ee))
+                bootstrapper.addUDPHostCache(ee);
         }
 
         // If the pong came from a local address but we let it through
-        // to extract the packed endpoints and UHCs, throw it away now
-        if(!isValidHost(endpoint))
-            return true;
+        // to extract the packed hosts and UHCs, throw it away now
+        if(!isValidHost(endpoint)) {
+            if(LOG.isInfoEnabled())
+                LOG.info("Not adding invalid host " + endpoint);
+            return addedPacked;
+        }
 
+        // If the pong came from a UHC, just add it as that
+        if(endpoint.isUDPHostCache()) {
+            LOG.trace("Adding host as UHC");
+            bootstrapper.addUDPHostCache(endpoint);
+            return addedPacked;
+        }
+
+        // If the pong came from a DHT node, pass it to the DHT manager
         int dhtVersion = pr.getDHTVersion();
         if(dhtVersion > -1) {
             DHTMode mode = pr.getDHTMode();
             endpoint.setDHTVersion(dhtVersion);
             endpoint.setDHTMode(mode);
-
             if(dhtManager.get().isRunning()) {
                 // Send active and passive DHT endpoints to the DHT manager
                 if(mode.equals(DHTMode.ACTIVE)) {
@@ -734,36 +751,22 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             }
         }
 
+        // If the pong came from a unicast endpoint, pass it to the unicaster
         if(pr.supportsUnicast()) {
-            queryUnicaster.get().addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
+            queryUnicaster.get().addUnicastEndpoint(
+                    pr.getInetAddress(), pr.getPort());
         }
-        
-        // if it was a UDPHostCache pong, just add it as that.
-        if(endpoint.isUDPHostCache()) {
-            LOG.trace("Adding host as UHC");
-            return bootstrapper.addUDPHostCache(endpoint);
-        }
-        
-        if(pr.isTLSCapable())
-            endpoint.setTLSCapable(true);
 
-        //Add the endpoint, forcing it to be high priority if marked pong from 
-        //an ultrapeer.
-            
+        // Add the endpoint with good priority if it's an ultrapeer
+        boolean addedSource = false;
         if(pr.isUltrapeer()) {
             // Add it to our free leaf slots list if it has free leaf slots
             if(pr.hasFreeLeafSlots()) {
                 LOG.trace("Adding host to free leaf slot set");
                 addToFreeSlotSet(endpoint, FREE_LEAF_SLOTS_SET);
-                // Return now if the pong is not also advertising free 
-                // ultrapeer slots.
-                if(!pr.hasFreeUltrapeerSlots()) {
-                    LOG.trace("Host has no free UP slots");
-                    return true;
-                }
-            } 
-            
-            // Add it to our free UP slots list if it has UP leaf slots, or if
+                addedSource = true;
+            }
+            // Add it to our free UP slots list if it has free UP slots, or if
             // the locales match and it has free locale preferencing slots
             String myLocale = ApplicationSettings.LANGUAGE.getValue();
             if(pr.hasFreeUltrapeerSlots() || 
@@ -771,54 +774,52 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
                             pr.getNumFreeLocaleSlots() > 0)) {
                 LOG.trace("Adding host to free UP slot set");
                 addToFreeSlotSet(endpoint, FREE_ULTRAPEER_SLOTS_SET);
-                return true;
-            } 
-            LOG.trace("Adding host with good priority");
-            return add(endpoint, GOOD_PRIORITY); 
+                addedSource = true;
+            }
+            if(!addedSource) {
+                LOG.trace("Adding host with good priority");
+                addedSource = add(endpoint, GOOD_PRIORITY);
+            }
         } else {
             LOG.trace("Adding host with normal priority");
-            return add(endpoint, NORMAL_PRIORITY);
+            addedSource = add(endpoint, NORMAL_PRIORITY);
         }
+        return addedPacked || addedSource;
     }
     
     /**
-     * Utility method for adding the specified host to the specified 
-     * <tt>Set</tt> of hosts with free slots. 
-     * 
-     * @param host the host to add
-     * @param hosts the <tt>Set</tt> to add it to
+     * Adds a host to the specified set and the permanent set.
      */
-    private void addToFreeSlotSet(ExtendedEndpoint host, Map<? super ExtendedEndpoint, ? super ExtendedEndpoint> hosts) {
+    private void addToFreeSlotSet(ExtendedEndpoint host,
+            Map<? super ExtendedEndpoint, ? super ExtendedEndpoint> hosts) {
         synchronized(this) {
             hosts.put(host, host);
-            
-            // Also add it to the list of permanent hosts stored on disk.
             addPermanent(host);
-        }
-        
+        }        
         endpointAdded();
     }
 
     /**
-     * add the endpoint to the map which matches locales to a set of 
-     * endpoints
+     * Adds an endpoint to the map which matches locales to sets of endpoints.
+     * 
+     * LOCKING: this
      */
-    private synchronized void addToLocaleMap(ExtendedEndpoint endpoint) {
-        String loc = endpoint.getClientLocale();
-        if(LOCALE_SET_MAP.containsKey(loc)) { //if set exists for ths locale
-            Set<ExtendedEndpoint> s = LOCALE_SET_MAP.get(loc);
-            if(s.add(endpoint) && s.size() > LOCALE_SET_SIZE)
-                s.remove(s.iterator().next());
+    private void addToLocaleMap(ExtendedEndpoint ee) {
+        String locale = ee.getClientLocale();
+        Set<ExtendedEndpoint> s = LOCALE_SET_MAP.get(locale);
+        if(s == null) {
+            s = new HashSet<ExtendedEndpoint>();
+            LOCALE_SET_MAP.put(locale, s);
         }
-        else { //otherwise create new set and add it to the map
-            Set<ExtendedEndpoint> s = new HashSet<ExtendedEndpoint>();
-            s.add(endpoint);
-            LOCALE_SET_MAP.put(loc, s);
-        }
+        s.add(ee);
+        if(s.size() > LOCALE_SET_SIZE)
+            s.remove(s.iterator().next());
     }
     
     /**
-     * Adds a collection of addresses to this.
+     * Adds a collection of hosts to the catcher.
+     * 
+     * @return the number of hosts added
      */
     public int add(Collection<? extends Endpoint> endpoints) {
         rank(endpoints);
@@ -832,13 +833,11 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * Adds an address to this, possibly ejecting other elements from the cache.
-     * This method is used when getting an address from headers instead of the
-     * normal ping reply.
+     * Adds a host, possibly ejecting others from the cache.
      *
-     * @param pr the pong containing the address/port to add.
-     * @param forceHighPriority true if this should always be of high priority
-     * @return true iff e was actually added
+     * @param e the host to add
+     * @param forceHighPriority true if the host should have high priority
+     * @return true if the host was added
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
         if(!isValidHost(e)) {
@@ -853,8 +852,10 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * Adds an endpoint.  Use this method if the locale of endpoint is known
-     * (used by ConnectionManager.disconnect())
+     * Adds a host with known locale. This is used when a handshake is
+     * rejected because of the locale.
+     * 
+     * @return true if the host was added
      */
     public boolean add(Endpoint e, boolean forceHighPriority, String locale) {
         if(!isValidHost(e)) {
@@ -872,33 +873,25 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * Adds the specified host to the host catcher with the specified priority.
+     * Adds a host with the specified priority.
      * 
-     * @param host the endpoint to add
-     * @param priority the priority of the endpoint
-     * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
+     * @param e the host to add
+     * @param priority the priority of the host
+     * @return true if the host was added
      */
     private boolean add(Endpoint host, int priority) {
         if(host instanceof ExtendedEndpoint)
             return add((ExtendedEndpoint)host, priority);
-        //need ExtendedEndpoint for the locale
         return add(new ExtendedEndpoint(host.getAddress(), 
                 host.getPort()), priority);
     }
 
     /**
-     * Adds the passed endpoint to the set of hosts maintained, temporary and
-     * permanent. The endpoint may not get added due to various reasons
-     * (including it might be our address itself, we might be connected to it
-     * etc.). Also adding this endpoint may lead to the removal of some other
-     * endpoint from the cache.
-     *
-     * @param e Endpoint to be added
-     * @param priority the priority to use for e, one of GOOD_PRIORITY 
-     *  (ultrapeer) or NORMAL_PRIORITY
-     * @param uptime the host's uptime (or our best guess)
-     *
-     * @return true iff e was actually added 
+     * Adds a host with the specified priority.
+     * 
+     * @param ee the host to add
+     * @param priority the priority of the host
+     * @return true if the host was added
      */
     private boolean add(ExtendedEndpoint e, int priority) {
         checkInvariants();
@@ -910,38 +903,42 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         
         boolean added = false;
         synchronized(this) {
-            //Add to permanent list, regardless of whether it's actually in queue.
-            //Note that this modifies e.
-            addPermanent(e);            
-            if(!(ENDPOINT_SET.containsKey(e))) {
-                added = true;
-                //Add to temporary list. Adding e may eject an older point from
-                //queue, so we have to cleanup the set to maintain
-                //rep. invariant.
+            addPermanent(e);
+            if(ENDPOINT_SET.containsKey(e)) {
+                //TODO: we could adjust the key
+                LOG.trace("Not adding duplicate host");
+                return false;
+            }
+            ExtendedEndpoint removed = ENDPOINT_QUEUE.insert(e, priority);
+            if(removed != e) {
+                // The host was actually added...
+                if(LOG.isInfoEnabled())
+                    LOG.info("Adding host " + e);
                 ENDPOINT_SET.put(e, e);
-                ExtendedEndpoint ejected = ENDPOINT_QUEUE.insert(e, priority);
-                if(ejected != null) {
-                    ENDPOINT_SET.remove(ejected);
+                if(removed != null) {
+                    // ...and something else was removed
                     if(LOG.isTraceEnabled())
-                        LOG.trace("Ejected host " + ejected);
+                        LOG.trace("Ejected host " + removed);
+                    ENDPOINT_SET.remove(removed);
                 }
+                added = true;
             }
         }
-        endpointAdded();
+        if(added)
+            endpointAdded();
         checkInvariants();
         return added;
     }
 
     /**
-     * Adds an address to the permanent list of this without marking it for
-     * immediate fetching.  This method is when connecting to a host and reading
-     * its Uptime header.  If e is already in the permanent list, it is not
-     * re-added, though its key may be adjusted.
+     * Adds a host to the set that will be saved for future sessions.
+     * 
+     * LOCKING: this
      *
-     * @param e the endpoint to add
-     * @return true iff e was actually added 
+     * @param ee the host to add
+     * @return true if the host was added
      */
-    private synchronized boolean addPermanent(ExtendedEndpoint e) {
+    private boolean addPermanent(ExtendedEndpoint e) {
         if(networkInstanceUtils.isPrivateAddress(e.getInetAddress())) {
             LOG.trace("Not permanently adding host with private address");
             return false;
@@ -951,17 +948,15 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             LOG.trace("Not permanently adding duplicate host");
             return false;
         }
-
-        addToLocaleMap(e); //add e to locale mapping 
-        
+        addToLocaleMap(e);
         ExtendedEndpoint removed = permanentHosts.insert(e);
         if(removed != e) {
-            //Was actually added...
+            // The host was actually added...
             if(LOG.isInfoEnabled())
                 LOG.info("Permanently adding host " + e);
             permanentHostsSet.add(e);
             if(removed != null) {
-                //...and something else was removed.
+                // ...and something else was removed
                 if(LOG.isTraceEnabled())
                     LOG.trace("Ejected permanent host " + removed);
                 permanentHostsSet.remove(removed);
@@ -969,16 +964,20 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             dirty = true;
             return true;
         } else {
-            //Uptime not good enough to add.  (Note that this is 
-            //really just an optimization of the above case.)
+            // Uptime was not good enough to add
             LOG.trace("Not permanently adding host with low uptime");
             return false;
         }
     }
     
-    /** Removes e from permanentHostsSet and permanentHosts. 
-     *  @return true iff this was modified */
-    private synchronized boolean removePermanent(ExtendedEndpoint e) {
+    /**
+     * Removes a host from the set that will be saved for future sessions.
+     * 
+     * LOCKING: this
+     * 
+     * @return true if the host was removed
+     */
+    private boolean removePermanent(ExtendedEndpoint e) {
         boolean removed1 = permanentHosts.remove(e);
         boolean removed2 = permanentHostsSet.remove(e);
         assert removed1 == removed2 : "Queue "+removed1+" but set "+removed2;
@@ -991,19 +990,13 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * Utility method for verifying that the given host is a valid host to add
-     * to the group of hosts to try.  This verifies that the host does not have
-     * a private address, is not banned, is not this node, is not in the
-     * expired or probated hosts set, etc.
-     * 
-     * @param host the host to check
-     * @return <tt>true</tt> if the host is valid and can be added, otherwise
-     *  <tt>false</tt>
+     * Determines whether a host is valid for adding to the catcher.
      */
     public boolean isValidHost(Endpoint host) {
         if(LOG.isTraceEnabled())
             LOG.trace("Validating host " + host);
         
+        // Don't add the host if its address is unknown, private or blacklisted
         byte[] addr;
         try {
             addr = host.getHostBytes();
@@ -1011,62 +1004,49 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             LOG.trace("Host is invalid: unknown host");
             return false;
         }
-        
         if(networkInstanceUtils.isPrivateAddress(addr)) {
             LOG.trace("Host is invalid: private address");
             return false;
         }
-
-        //We used to check that we're not connected to e, but now we do that in
-        //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
-        //deal, since the call to "set.contains(e)" below ensures no duplicates.
-        //Skip if this would connect us to our listening port.  TODO: I think
-        //this check is too strict sometimes, which makes testing difficult.
         if(networkInstanceUtils.isMe(addr, host.getPort())) {
             LOG.trace("Host is invalid: own address");
             return false;
         }
-
-        //Skip if this host is banned.
         if(!ipFilter.get().allow(addr)) {
-            if(FilterSettings.USE_NETWORK_FILTER.getValue())
-                LOG.trace("Using network filter");
             LOG.trace("Host is invalid: blacklisted");
             return false;
         }
-        
+
+        // Don't add the host if it has previously failed
         synchronized(this) {
-            // Don't add this host if it has previously failed.
             if(EXPIRED_HOSTS.contains(host)) {
                 LOG.trace("Host is invalid: expired");
                 return false;
             }
-            
-            // Don't add this host if it has previously rejected us.
             if(PROBATION_HOSTS.contains(host)) {
                 LOG.trace("Host is invalid: on probation");
                 return false;
             }
         }
-        
+
         LOG.trace("Host is valid");
         return true;
     }
     
-    /** Returns true if the given IpPort is TLS-capable. */
+    /**
+     * Returns true if the given host is known to be TLS-capable.
+     */
     public boolean isHostTLSCapable(IpPort ipp) {
         if(ipp instanceof Connectable) {
             boolean capable = ((Connectable)ipp).isTLSCapable();
             if(LOG.isTraceEnabled())
                 LOG.trace(ipp + (capable ? " is" : " is not") + " TLS capable");
             return capable;
-        }
-        
-        // No need to check if it's an endpoint already, because all Endpoints
-        // already implement HostInfo.
+        }        
+        // Retrieve an ExtendedEndpoint using its IP and port
         Endpoint p = new Endpoint(ipp.getAddress(), ipp.getPort());
-        
         ExtendedEndpoint ee;
+        // Look everywhere
         synchronized(this) {
             ee = ENDPOINT_SET.get(p);
             if(ee == null)
@@ -1087,17 +1067,10 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         }
     }
     
-    ///////////////////////////////////////////////////////////////////////
-    
     /**
-     * Notification that endpoints now exist.
-     * If something was waiting on getting endpoints, this will notify them
-     * about the new endpoint.
+     * Notifies one waiting observer that an endpoint is now available.
      */
     private void endpointAdded() {
-        // No loop is actually necessary here because this method is called
-        // each time an endpoint is added.  Each new endpoint will trigger its
-        // own check.
         Endpoint p;
         EndpointObserver observer;
         synchronized (this) {
@@ -1114,14 +1087,17 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             
             observer = _catchersWaiting.remove(0);
         }
-        
-        // It is important that this is outside the lock.  Otherwise HostCatcher's lock
-        // is exposed to the outside world.
+        // It's important that this is outside the lock, otherwise
+        // HostCatcher's lock is exposed to the outside world
         LOG.trace("Returning a host to a waiting observer");
         observer.handleEndpoint(p);
     }
 
-    /** Passes the next available endpoint to the EndpointObserver. */
+    /**
+     * Passes the next available host to the given EndpointObserver. If
+     * no host is immediately available, the observer is added to a list
+     * of waiting observers.
+     */
     public void getAnEndpoint(EndpointObserver observer) {
         Endpoint p;
         
@@ -1140,15 +1116,11 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
     
     /**
-     * Passes the next available endpoint to the EndpointObserver.
-     * If an Endpoint is immediately available, it is returned immediately
-     * instead of using the observer's callback.  That is, the callback will
-     * only be used if an endpoint is not immediately available.
-     * This is useful to prevent stack overflows when many endpoints are
-     * attempted in response to endpoints not being usable.
+     * Returns a host immediately if one is available. Otherwise the observer
+     * is added to a list of waiting observers and null is returned.
      * 
-     * If the observer is null and no endpoint is available, this will
-     * simply return null and schedule no future callback.
+     * If the observer is null and no host is available, this method returns
+     * null and schedules no future callback.
      */
     public Endpoint getAnEndpointImmediate(EndpointObserver observer) {
         Endpoint p;
@@ -1164,21 +1136,21 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         return p;
     }
     
-    /** Removes an observer from wanting to get an endpoint. */
+    /**
+     * Removes an observer that is waiting for an endpoint.
+     */
     public synchronized void removeEndpointObserver(EndpointObserver observer) {
         LOG.trace("Removing waiting observer");
         _catchersWaiting.remove(observer);
     }
 
     /**
-     * @modifies this
-     * @effects atomically removes and returns the highest priority host in
-     *          this. If no host is available, blocks until one is. If the
-     *          calling thread is interrupted during this process, throws
-     *          InterruptedException. The caller should call doneWithConnect and
-     *          doneWithMessageLoop when done with the returned value.
+     * Removes and returns a host, blocking if one is not immediately available.
+     * Package access for testing.
+     * 
+     * @throws InterruptedException if the calling thread is interrupted
      */
-    public Endpoint getAnEndpoint() throws InterruptedException {
+    protected Endpoint getAnEndpoint() throws InterruptedException {
         BlockingObserver observer = new BlockingObserver();
 
         getAnEndpoint(observer);
@@ -1201,16 +1173,9 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
   
     /**
-     * Notifies this that the fetcher has finished attempting a connection to
-     * the given host. This exists primarily to update the permanent host list
-     * with connection history.
-     * 
-     * @param e
-     *            the address/port, which should have been returned by
-     *            getAnEndpoint
-     * @param success
-     *            true if we successfully established a messaging connection to
-     *            e, at least temporarily; false otherwise
+     * Notifies the catcher that a connection fetcher has finished attempting
+     * a connection to the given host. This allows the catcher to update the
+     * host's connection history.
      */
     public synchronized void doneWithConnect(Endpoint e, boolean success) {
         //Normal host: update key.  TODO: adjustKey() operation may be more
@@ -1283,8 +1248,10 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
     
     /**
-     * tries to return an endpoint that matches the locale of this client
-     * from the passed in set.
+     * Returns a host from the specified set that matches our locale, or a
+     * randomly chosen host from the set if there are no matches.
+     * 
+     * LOCKING: this
      */
     private ExtendedEndpoint preferenceWithLocale(
             RandomAccessMap<ExtendedEndpoint, ExtendedEndpoint> base) {
@@ -1317,10 +1284,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * Accessor for the total number of hosts stored, including Ultrapeers and
-     * leaves.
-     * 
-     * @return the total number of hosts stored 
+     * Returns the number of hosts the catcher knows about.
      */
     public synchronized int getNumHosts() {
         return ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
@@ -1328,29 +1292,26 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * Returns the number of marked ultrapeer hosts.
+     * Returns the number of hosts that are known to be ultrapeers.
+     * Package access for testing.
      */
-    public synchronized int getNumUltrapeerHosts() {
+    protected synchronized int getNumUltrapeerHosts() {
         return ENDPOINT_QUEUE.size(GOOD_PRIORITY)+FREE_LEAF_SLOTS_SET.size()+
             FREE_ULTRAPEER_SLOTS_SET.size();
     }
 
     /**
-     * Returns an iterator of this' "permanent" hosts, from worst to best.
-     * This method exists primarily for testing.  THIS MUST NOT BE MODIFIED
-     * WHILE ITERATOR IS IN USE.
+     * Returns an iterator of the set of permanent hosts. Package access for
+     * testing. THIS MUST NOT BE MODIFIED WHILE THE ITERATOR IS IN USE.
      */
-    Iterator<ExtendedEndpoint> getPermanentHosts() {
+    protected Iterator<ExtendedEndpoint> getPermanentHosts() {
         return permanentHosts.iterator();
     }
 
     /**
-     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
-     * advertised free Ultrapeer slots.  The returned <tt>Collection</tt> is a 
-     * new <tt>Collection</tt> and can therefore be modified in any way.
-     * 
-     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
-     *  have advertised they have free ultrapeer slots
+     * Returns a collection containing up to the specified number of hosts that
+     * have advertised free ultrapeer slots, matching the specified locale if
+     * possible. The returned collection can be modified.
      */
     public synchronized Collection<IpPort>
     getUltrapeersWithFreeUltrapeerSlots(String locale, int num) {
@@ -1358,12 +1319,9 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
     
     /**
-     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
-     * advertised free leaf slots.  The returned <tt>Collection</tt> is a 
-     * new <tt>Collection</tt> and can therefore be modified in any way.
-     * 
-     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
-     *  have advertised they have free leaf slots
+     * Returns a collection containing up to the specified number of hosts that
+     * have advertised free leaf slots, matching the specified locale if
+     * possible. The returned collection can be modified.
      */
     public synchronized Collection<IpPort>
     getUltrapeersWithFreeLeafSlots(String locale, int num) {
@@ -1371,8 +1329,9 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
 
     /**
-     * preference the set so we try to return those endpoints that match
-     * passed in locale "loc"
+     * Selects up to the specified number of hosts from a collection,
+     * matching the specified locale if possible. The returned collection
+     * can be modified.
      */
     private Collection<IpPort> getPreferencedCollection(
             Map<? extends ExtendedEndpoint, ? extends ExtendedEndpoint> base,
@@ -1429,13 +1388,13 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
 
         // Read the hosts file again.  This will also notify any waiting 
         // connection fetchers from previous connection attempts.
-        readHostsFile();
+        read();
     }
 
     /**
-     * Resets the state of the host catcher (only for testing)
+     * Resets the state of the host catcher (only for testing).
      */
-    protected synchronized void reset() {
+    public synchronized void reset() {
         LOG.trace("Clearing hosts");
         FREE_LEAF_SLOTS_SET.clear();
         FREE_ULTRAPEER_SLOTS_SET.clear();
@@ -1451,13 +1410,13 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         uniqueHostPinger.resetData();
     }
     
-    /** Enable very slow rep checking?  Package access for use by
-     *  HostCatcherTest. */
+    /** Whether to check invariants. Package access for testing. */
     static boolean DEBUG = false;
 
-    /** Checks invariants. Very slow; method body should be enabled for testing
-     *  purposes only. */
-    protected void checkInvariants() {
+    /**
+     * Checks invariants. Not as slow as it used to be.
+     */
+    private void checkInvariants() {
         if(DEBUG) {
             synchronized(this) {
                 // Check ENDPOINT_SET == ENDPOINT_QUEUE
@@ -1475,28 +1434,9 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     }
     
     /**
-     * Reads the gnutella.net file.
-     */
-    private void readHostsFile() {
-        // Just gnutella.net
-        try {
-            read(getHostsFile());
-        } catch (IOException e) {
-            if(LOG.isInfoEnabled())
-                LOG.info("Exception reading host file " + getHostsFile(), e);
-        }
-    }
-
-    private File getHostsFile() {
-        return new File(CommonUtils.getUserSettingsDir(), "gnutella.net");
-    }
-    
-    /**
      * Adds the specified host to the group of hosts currently on "probation."
      * These are hosts that are on the network but that have rejected a 
      * connection attempt.  They will periodically be re-activated as needed.
-     * 
-     * @param host the <tt>Endpoint</tt> to put on probation
      */
     public synchronized void putHostOnProbation(Endpoint host) {
         LOG.trace("Putting a host on probation");
@@ -1510,8 +1450,6 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
      * Adds the specified host to the group of expired hosts.  These are hosts
      * that we have been unable to create a TCP connection to, let alone a 
      * Gnutella connection.
-     * 
-     * @param host the <tt>Endpoint</tt> to expire
      */
     public synchronized void expireHost(Endpoint host) {
         LOG.trace("Expiring a host");
@@ -1552,7 +1490,6 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         }
     }
 
-    //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
     @SuppressWarnings("unused")
     @InspectableContainer
     private class HCInspectables {

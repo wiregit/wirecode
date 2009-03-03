@@ -58,6 +58,12 @@ public class UDPHostCache {
     public static final int FETCH_AMOUNT = 5;
     
     /**
+     * How many milliseconds to wait before retrying a cache.
+     * FIXME: this is too long, we will have given up before retrying
+     */
+    public static final int EXPIRY_TIME = 10 * 60 * 1000;
+    
+    /**
      * A list of UDP Host caches, to allow easy sorting & randomizing.
      * For convenience, a Set is also maintained, to easily look up duplicates.
      * INVARIANT: udpHosts contains no duplicates and contains exactly
@@ -92,15 +98,17 @@ public class UDPHostCache {
     private final NetworkInstanceUtils networkInstanceUtils;
     
     /**
-     * Constructs a new UDPHostCache that remembers attempting hosts for 10
-     * minutes.
+     * Constructs a new UDPHostCache that remembers attempting hosts for the
+     * default expiry time.
      */
     @Inject
-    protected UDPHostCache(UniqueHostPinger pinger, Provider<MessageRouter> messageRouter,
-            PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
+    protected UDPHostCache(UniqueHostPinger pinger,
+            Provider<MessageRouter> messageRouter,
+            PingRequestFactory pingRequestFactory,
+            ConnectionServices connectionServices,
             NetworkInstanceUtils networkInstanceUtils) {
-        this(10 * 60 * 1000, pinger, messageRouter, pingRequestFactory, connectionServices,
-                networkInstanceUtils);
+        this(EXPIRY_TIME, pinger, messageRouter, pingRequestFactory,
+                connectionServices, networkInstanceUtils);
     }
 
     /**
@@ -109,9 +117,11 @@ public class UDPHostCache {
      * 
      * @param connectionServices
      */
-    UDPHostCache(long expiryTime, UniqueHostPinger pinger,
-            Provider<MessageRouter> messageRouter, PingRequestFactory pingRequestFactory,
-            ConnectionServices connectionServices, NetworkInstanceUtils networkInstanceUtils) {
+    UDPHostCache(int expiryTime, UniqueHostPinger pinger,
+            Provider<MessageRouter> messageRouter,
+            PingRequestFactory pingRequestFactory,
+            ConnectionServices connectionServices,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.connectionServices = connectionServices;
         attemptedHosts = new FixedSizeExpiringSet<ExtendedEndpoint>(PERMANENT_SIZE, expiryTime);
         this.pinger = pinger;
@@ -123,7 +133,7 @@ public class UDPHostCache {
     /**
      * Writes this' info out to the stream.
      */
-    public synchronized void write(Writer out) throws IOException {
+    synchronized void write(Writer out) throws IOException {
         for(ExtendedEndpoint e: udpHosts) {
             e.write(out);
         }
@@ -133,12 +143,13 @@ public class UDPHostCache {
     /**
      * Determines if data has been dirtied since the last time we wrote.
      */
-    public synchronized boolean isWriteDirty() {
+    synchronized boolean isWriteDirty() {
         return writeDirty;
     }
     
     /**
      * Returns the number of UDP Host Caches this knows about.
+     * Public for testing.
      */
     public synchronized int getSize() {
         return udpHostsSet.size();
@@ -160,7 +171,7 @@ public class UDPHostCache {
      *
      * Contacts 10 UDP hosts at a time.
      */
-    public synchronized boolean fetchHosts() {
+    synchronized boolean fetchHosts() {
         // If the hosts have been used, shuffle and sort them
         if(dirty) {
             // shuffle then sort, ensuring that we're still going to use
@@ -210,7 +221,7 @@ public class UDPHostCache {
      /**
       * Fetches endpoints from the given collection of hosts.
       */
-     protected synchronized boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
+     synchronized boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
         if(hosts.isEmpty()) {
             LOG.info("No UHCs to try");
             return false;
@@ -238,14 +249,14 @@ public class UDPHostCache {
      *
      * Useful as a seperate method for tests to catch the Ping's GUID.
      */
-    protected PingRequest getPing() {
+    PingRequest getPing() {
         return pingRequestFactory.createUHCPing();
     }
 
     /**
      * Removes a given hostcache from this.
      */
-    public synchronized boolean remove(ExtendedEndpoint e) {
+    synchronized boolean remove(ExtendedEndpoint e) {
         if(LOG.isInfoEnabled())
             LOG.info("Removing UHC " + e);
         boolean removed1=udpHosts.remove(e);
@@ -259,7 +270,7 @@ public class UDPHostCache {
     /**
      * Adds a new udp hostcache to this.
      */
-    public synchronized boolean add(ExtendedEndpoint e) {
+    synchronized boolean add(ExtendedEndpoint e) {
         assert e.isUDPHostCache();
         
         if(udpHostsSet.contains(e)) {
@@ -294,7 +305,7 @@ public class UDPHostCache {
         return true;
     }
     
-    public void loadDefaults() {
+    void loadDefaults() {
         // ADD DEFAULT UDP HOST CACHES HERE.
     }
     
@@ -304,9 +315,7 @@ public class UDPHostCache {
     @SuppressWarnings("unused")
     private void createAndAdd(String host, int port) {
         try {
-            ExtendedEndpoint ep = 
-			  new ExtendedEndpoint(host, port).setUDPHostCache(true);
-            add(ep);
+            add(new ExtendedEndpoint(host, port).setUDPHostCache(true));
         } catch(IllegalArgumentException ignored) {}
     }
     
