@@ -339,6 +339,7 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 
                 // Assertions
                 exactly(1).of(networkManager).acceptedIncomingConnection();
+                will(returnValue(false));
                 
                 exactly(1).of(connectRequestSender).send("403", publicConnectable, guid, 407);
                 will(returnValue(true));
@@ -380,5 +381,151 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         
         context.assertIsSatisfied();
     }
+ 
+    
+    /**
+     * Attempt to connect using an invalid public ip.  Ensure this is 
+     *  handled gracefully and an IOE is passed to the ConnectObserver 
+     */
+    @SuppressWarnings("unchecked")
+    public void testConnectWithBadIpPort() throws IOException {
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }};
+
+        final NetworkManager networkManager = context.mock(NetworkManager.class);
+        final ConnectBackRequestSender connectRequestSender = context.mock(ConnectBackRequestSender.class);
+        final Provider<UDPSelectorProvider> udpSelectorProviderProvider = context.mock(Provider.class);
+        final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
+        final Provider<SocketProcessor> socketProcessorProvider = context.mock(Provider.class);
+        
+        final ConnectObserver observer = context.mock(ConnectObserver.class);    
+        final XMPPFirewalledAddress address = context.mock(XMPPFirewalledAddress.class);
+        
+        final FirewalledAddress fwAddress = context.mock(FirewalledAddress.class);
+        final GUID guid = new GUID(new byte[] {'X','x',1,2,3,4,'.','.','.',5,6,9,'n', 10,'x','X'});
+        
+        final Connectable publicConnectable = context.mock(Connectable.class);
+        final InetAddress inetAddr = context.mock(InetAddress.class);
+        final InetSocketAddress inetSocketAddr = context.mock(InetSocketAddress.class);
+        
+        final XMPPFirewalledAddressConnector connector 
+            = new XMPPFirewalledAddressConnector(connectRequestSender, null, networkManager,
+                backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
+        
+        context.checking(new Expectations() {
+            {   allowing(address).getFirewalledAddress();
+                will(returnValue(fwAddress));
+                
+                allowing(fwAddress).getClientGuid();
+                will(returnValue(guid));
+                allowing(fwAddress).getPublicAddress();
+                will(returnValue(publicConnectable));
+                allowing(networkManager).getPublicAddress();
+                will(returnValue(publicConnectable));
+                
+                allowing(publicConnectable).getAddress();
+                will(returnValue("401.0.0.0"));
+                allowing(publicConnectable).getPort();
+                will(returnValue(-404));
+                allowing(publicConnectable).getInetAddress();
+                will(returnValue(inetAddr));
+                allowing(publicConnectable).getInetSocketAddress();
+                will(returnValue(inetSocketAddr));
+                
+                
+                exactly(1).of(observer).handleIOException(with(any(ConnectException.class)));
+            }});
+        
+        // Connect
+        connector.connect(address, observer);
+         
+        context.assertIsSatisfied();
+    }
+
+    
+    /**
+     * Connect when is there is no incoming connection and an send failure.
+     */
+    @SuppressWarnings("unchecked")
+    public void testConnectWithFails() throws IOException {
+        Mockery context = new Mockery() {
+            {   setImposteriser(ClassImposteriser.INSTANCE);
+            }};
+
+        final NetworkManager networkManager = context.mock(NetworkManager.class);
+        final ConnectBackRequestSender connectRequestSender = context.mock(ConnectBackRequestSender.class);
+        final Provider<UDPSelectorProvider> udpSelectorProviderProvider = context.mock(Provider.class);
+        final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
+        final Provider<SocketProcessor> socketProcessorProvider = context.mock(Provider.class);
+        
+        final PushDownloadManager pushDownloadManager = context.mock(PushDownloadManager.class);
+        
+        final ConnectObserver observer = context.mock(ConnectObserver.class);    
+        final XMPPFirewalledAddress address = context.mock(XMPPFirewalledAddress.class);
+        
+        final FirewalledAddress fwAddress = context.mock(FirewalledAddress.class);
+        final GUID guid = new GUID(new byte[] {'X','x',1,2,3,4,'.','.','.',5,6,9,'n', 10,'x','X'});
+        
+        final XMPPAddress xmppAddress = context.mock(XMPPAddress.class);
+        
+        final Connectable publicConnectable = context.mock(Connectable.class);
+        final InetAddress inetAddr = context.mock(InetAddress.class);
+        final InetSocketAddress inetSocketAddr = context.mock(InetSocketAddress.class);
+    
+        final XMPPFirewalledAddressConnector connector 
+            = new XMPPFirewalledAddressConnector(connectRequestSender, pushDownloadManager, networkManager,
+                    backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
+        
+        context.checking(new Expectations() {
+            {   allowing(address).getFirewalledAddress();
+                will(returnValue(fwAddress));
+                
+                allowing(fwAddress).getClientGuid();
+                will(returnValue(guid));
+                allowing(fwAddress).getPublicAddress();
+                will(returnValue(publicConnectable));
+                
+                allowing(networkManager).getPublicAddress();
+                will(returnValue(publicConnectable));
+                
+                allowing(publicConnectable).getAddress();
+                will(returnValue("40.1.0.0"));
+                allowing(publicConnectable).getPort();
+                will(returnValue(427));
+                allowing(publicConnectable).getInetAddress();
+                will(returnValue(inetAddr));
+                allowing(publicConnectable).getInetSocketAddress();
+                will(returnValue(inetSocketAddr));
+                
+                allowing(address).getXmppAddress();
+                will(returnValue(xmppAddress));
+                allowing(xmppAddress).getFullId();
+                will(returnValue("403"));
+                
+                // Assertions
+                exactly(2).of(networkManager).acceptedIncomingConnection();
+                will(returnValue(true));
+                
+                exactly(1).of(connectRequestSender).send("403", publicConnectable, guid, 0);
+                will(returnValue(false));
+                
+                exactly(1).of(connectRequestSender).send("403", publicConnectable, guid, 0);
+                will(returnValue(true));
+                
+                exactly(1).of(pushDownloadManager).connect(fwAddress, observer);
+                
+                exactly(1).of(backgroundExecutor).schedule(with(any(Runnable.class)), 
+                        with(any(Integer.class)), with((any(TimeUnit.class))));
+            }});
+        
+        // Connect
+        connector.connect(address, observer);
+        connector.connect(address, observer);
+        
+        context.assertIsSatisfied();
+    }
+    
+
     
 }
