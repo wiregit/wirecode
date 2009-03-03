@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import javax.swing.JLabel;
+
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.Search;
@@ -14,6 +16,7 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.QualityRenderer;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.IconManager;
@@ -51,6 +54,7 @@ public class VideoResultsPanel extends BaseResultPanel {
     @Override
     protected void setupCellRenderers(ResultsTableFormat<VisualSearchResult> tableFormat) {
         super.setupCellRenderers(tableFormat);
+        setHeaderRenderer(VideoTableFormat.LENGTH_INDEX, new TableCellHeaderRenderer(JLabel.TRAILING));
         setCellRenderer(VideoTableFormat.SIZE_INDEX, new FileSizeRenderer());
         setCellRenderer(VideoTableFormat.LENGTH_INDEX, new TimeRenderer());
         setCellRenderer(VideoTableFormat.QUALITY_INDEX, new QualityRenderer());
