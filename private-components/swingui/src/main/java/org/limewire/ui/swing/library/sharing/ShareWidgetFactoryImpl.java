@@ -11,7 +11,7 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.ShapeDialog;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.ui.swing.friends.login.FriendActions;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.impl.ThreadSafeList;
@@ -37,21 +37,21 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
 
     private ShapeDialog shapeDialog;
     
-    private XMPPService xmppService;
+    private FriendActions friendActions;
     
     
     @Inject
-    public ShareWidgetFactoryImpl(ShareListManager shareListManager, ShapeDialog shapeDialog, XMPPService xmppService){
+    public ShareWidgetFactoryImpl(ShareListManager shareListManager, ShapeDialog shapeDialog, FriendActions friendActions){
         this.shareListManager = shareListManager;
         allFriendsThreadSafe = GlazedListsFactory.threadSafeList(new BasicEventList<SharingTarget>());
         this.shapeDialog = shapeDialog;
-        this.xmppService = xmppService;
+        this.friendActions = friendActions;
     }
 
     @Override
     public ShareWidget<File> createFileShareWidget() {
         if(fileShareWidget == null){
-            fileShareWidget = new FileShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, xmppService);
+            fileShareWidget = new FileShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, friendActions);
         }
         return fileShareWidget;
     }
@@ -59,7 +59,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     @Override
     public ShareWidget<LocalFileItem[]> createMultiFileShareWidget() {
         if(multiFileShareWidget == null){
-            multiFileShareWidget = new MultiFileShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, xmppService);
+            multiFileShareWidget = new MultiFileShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, friendActions);
         }
         return multiFileShareWidget;
     }
@@ -67,7 +67,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     @Override
     public ShareWidget<LocalFileItem[]> createMultiFileFriendOnlyShareWidget() {
         if(multiFileShareWidget == null){
-            multiFileShareWidget = new MultiFileShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, xmppService, false);
+            multiFileShareWidget = new MultiFileShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, friendActions, false);
         }
         return multiFileShareWidget;
     }
@@ -75,7 +75,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     @Override
     public ShareWidget<LocalFileItem[]> createMultiFileUnshareWidget() {
         if(multiFileUnshareWidget == null){
-            multiFileUnshareWidget = new MultiFileUnshareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, xmppService);
+            multiFileUnshareWidget = new MultiFileUnshareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, friendActions);
         }
         return multiFileUnshareWidget;
     }
@@ -83,7 +83,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     @Override
     public ShareWidget<Category> createCategoryShareWidget() {
         if(categoryShareWidget == null){
-            categoryShareWidget = new CategoryShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, xmppService);
+            categoryShareWidget = new CategoryShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, friendActions);
         }
         return categoryShareWidget;
     }

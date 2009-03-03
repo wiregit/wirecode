@@ -7,9 +7,9 @@ import java.awt.event.ComponentEvent;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.ShapeDialog;
+import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.library.sharing.model.MultiFileUnshareModel;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.impl.ThreadSafeList;
 
@@ -18,8 +18,8 @@ public class MultiFileUnshareWidget implements ShareWidget<LocalFileItem[]>{
     private LocalFileItem[] files;
     private ShareListManager shareListManager;
     
-    public MultiFileUnshareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog, XMPPService xmppService){
-        unsharePanel = new LibrarySharePanel(allFriends, shapeDialog, xmppService, true, false);
+    public MultiFileUnshareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog, FriendActions friendActions){
+        unsharePanel = new LibrarySharePanel(allFriends, shapeDialog, friendActions, true, false);
         this.shareListManager = shareListManager;
 
         unsharePanel.addShareListener(new ShareListener() {

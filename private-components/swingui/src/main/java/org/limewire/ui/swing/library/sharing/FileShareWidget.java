@@ -5,9 +5,9 @@ import java.io.File;
 
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.ShapeDialog;
+import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.library.sharing.model.FileShareModel;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.impl.ThreadSafeList;
 
@@ -17,9 +17,9 @@ public class FileShareWidget implements ShareWidget<File> {
     private File file;
     private ShareListManager shareListManager;
 
-    public FileShareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog, XMPPService xmppService) {
+    public FileShareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog, FriendActions friendActions) {
         this.shareListManager = shareListManager;
-        sharePanel = new LibrarySharePanel(allFriends, shapeDialog, xmppService);
+        sharePanel = new LibrarySharePanel(allFriends, shapeDialog, friendActions);
         sharePanel.setTopLabel(I18n.tr("Currently sharing with"));
         sharePanel.setTitleLabel(I18n.tr("Share one file"));
     }

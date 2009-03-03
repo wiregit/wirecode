@@ -56,11 +56,13 @@ import org.jdesktop.swingx.painter.Painter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeEditableComboBox;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.ShapeComponent;
 import org.limewire.ui.swing.components.ShapeDialog;
+import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.library.sharing.FriendShareEvent.ShareEventType;
 import org.limewire.ui.swing.library.sharing.model.LibraryShareModel;
 import org.limewire.ui.swing.painter.TextShadowPainter;
@@ -69,7 +71,6 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -140,10 +141,11 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     private ShapeDialog dialog;
     private BasicComboPopup comboPopup;
     private JButton closeButton;
+    private JButton signInButton;
 
     private final List<ShareListener> shareListeners = new CopyOnWriteArrayList<ShareListener>();
     
-    private XMPPService xmppService;
+    private FriendActions friendActions;
     
     private final Action up = new AbstractAction() {
         @Override
@@ -174,6 +176,14 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
             }
         }
     };    
+    
+    private final Action signInAction = new org.limewire.ui.swing.action.AbstractAction(){       
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            friendActions.signIn();
+            dialog.setVisible(false);
+        }        
+    };
 
     
     /**
@@ -202,19 +212,19 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     
     @Resource private Icon friendIcon;   
     
-    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, XMPPService xmppService) {
+    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, FriendActions xmppService) {
         this(allFriends, dialog, xmppService, true);
     }
     
-    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, XMPPService xmppService,
+    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, FriendActions xmppService,
             boolean canShowP2P) {
         this(allFriends, dialog, xmppService, canShowP2P, true);
     }
     
-    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, XMPPService xmppService,
+    public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, FriendActions xmppService,
             boolean canShowP2P, boolean canShare) {        
         this.dialog = dialog;
-        this.xmppService = xmppService;
+        this.friendActions = xmppService;
         this.canShowP2P = canShowP2P;
         this.canShare = canShare;
         initialize(allFriends);
@@ -238,7 +248,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         
         initializePainters();
         
-        initializeButton();
+        initializeButtons();
         
         addComponents();
         
@@ -255,13 +265,16 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
        });
     }
   
-    private void initializeButton() {
+    private void initializeButtons() {
         closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
         closeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
                 dialog.setVisible(false);
             }
         });
+        
+        signInButton = new HyperlinkButton("Sign in to share with friends", signInAction);
+        signInButton.setIcon(friendIcon);
     }
 
 
@@ -435,7 +448,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         tablePanel.add(shareScroll, "hidemode 3, gaptop 6, gapbottom 2, growx, wrap");
         tablePanel.add(gnutellaCheckBox, "gapbottom 2, hidemode 3");
         
-        signInPanel.add(new JLabel("Sign in to share with friends", friendIcon, JLabel.LEFT), "gapbottom 6, gaptop 6");
+        signInPanel.add(signInButton, "gapbottom 6, gaptop 6");
         
         bottomPanel.add(friendLabel, "gaptop 6, hidemode 3, wrap");
         bottomPanel.add(comboPanel, "growx, gaptop 4, gapbottom 6, hidemode 3, wrap");
@@ -689,9 +702,9 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     
     private void adjustSize(){
         adjustFriendLabel();
-        bottomPanel.setVisible(canShare && xmppService.isLoggedIn());
+        bottomPanel.setVisible(canShare && friendActions.isSignedIn());
         
-        signInPanel.setVisible(canShare && !xmppService.isLoggedIn());
+        signInPanel.setVisible(canShare && !friendActions.isSignedIn());
 
         int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);
