@@ -1,10 +1,14 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -15,6 +19,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
@@ -23,6 +28,7 @@ import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.nio.observer.Shutdownable;
+import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
@@ -62,6 +68,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     private BTMetaInfo btMetaInfo = null;
 
+    private final File incompleteTorrentFile;
     /**
      * Something to shutdown if the user cancels the fetching
      */
@@ -80,6 +87,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         this.torrentManager = Objects.nonNull(torrentManager, "torrentMaanger");
         this.btMetaInfoFactory = Objects.nonNull(btMetaInfoFactory, "btMetaInfoFactory");
         this.eventListenerList = new EventListenerList<DownloadStateEvent>();
+        this.incompleteTorrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.getValue(), UUID.randomUUID().toString() + ".torrent");
         addListener(this);
     }
 
@@ -97,39 +105,53 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     public boolean requestComplete(HttpUriRequest method, HttpResponse response) {
         aborter = null;
-        if (downloadStatus == DownloadState.ABORTED)
+        if (downloadStatus == DownloadState.ABORTED) {
             return false;
+        }
         BTMetaInfo m = null;
-        byte[] body = null;
+        InputStream torrentDownloadStream = null;
+        FileOutputStream torrentOutputStream = null;
+        FileInputStream torrentInputStream = null;
         try {
-            if (response.getEntity() != null) {
-                body = IOUtils.readFully(response.getEntity().getContent());
-            }
             if (response.getStatusLine().getStatusCode() < 200
-                    || response.getStatusLine().getStatusCode() >= 300)
+                    || response.getStatusLine().getStatusCode() >= 300) {
                 throw new IOException("bad status code, downloading .torrent file "
                         + response.getStatusLine().getStatusCode());
-            if (body == null || body.length == 0)
-                throw new IOException("invalid response");
+            }
+            
+            if (response.getEntity() != null) {
+                torrentDownloadStream = response.getEntity().getContent();
+                torrentOutputStream = new FileOutputStream(incompleteTorrentFile);
+                FileUtils.write(torrentDownloadStream, torrentOutputStream);
+                torrentInputStream = new FileInputStream(incompleteTorrentFile);
+                torrentOutputStream.close();
+                m = btMetaInfoFactory.createBTMetaInfoFromBytes(torrentInputStream.getChannel());
+                
+                if (m == null) {
+                    downloadStatus = DownloadState.INVALID;
+                    return false;
+                }
 
-            m = btMetaInfoFactory.createBTMetaInfoFromBytes(body);           
+                torrentManager.shareTorrentFile(m, incompleteTorrentFile);
+                downloadStatus = DownloadState.COMPLETE;
+                this.btMetaInfo = m;
+            }
+            else {
+                throw new IOException("invalid response");
+            }
         } catch (IOException iox) {
             downloadStatus = DownloadState.INVALID;
             if(LOG.isErrorEnabled()) {
                 LOG.error("Error downloading torrent: " + torrentURI, iox);
             }
         } finally {
+            IOUtils.close(torrentInputStream);
+            IOUtils.close(torrentDownloadStream);
+            IOUtils.close(torrentOutputStream);
+            FileUtils.forceDelete(incompleteTorrentFile);
             httpExecutor.releaseResources(response);
         }
-
-        if (m == null) {
-            downloadStatus = DownloadState.INVALID;
-            return false;
-        }
-
-        torrentManager.shareTorrentFile(m, body);
-        downloadStatus = DownloadState.COMPLETE;
-        this.btMetaInfo = m;
+        
         eventListenerList.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));
         return false;
     }
@@ -137,6 +159,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     public boolean requestFailed(HttpUriRequest method, HttpResponse response, IOException exc) {
         downloadStatus = DownloadState.INVALID;
         downloadManager.remove(this, true);
+        eventListenerList.broadcast(new DownloadStateEvent(this, DownloadState.INVALID));
         return false;
     }
 
@@ -225,7 +248,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     public File getSaveFile() {
-        // TODO revamp
+        // TODO revamp to make better file names
 
         // try to get a meaningful name out of the URI
         String uri = torrentURI.toString();
@@ -429,6 +452,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     @Override
     public void deleteIncompleteFiles() {
-        //incomplete file is only stored in memory, nothing to delete.
+        FileUtils.forceDelete(incompleteTorrentFile);
     }
 }

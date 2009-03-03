@@ -41,11 +41,6 @@ public interface TorrentManager extends FileLocker, ConnectionAcceptor, TorrentE
     boolean killTorrentForFile(File f);
 
     /**
-     * Returns the expected shared .torrent meta data file. Can be null.
-     */
-    File getSharedTorrentMetaDataFile(BTMetaInfo info);
-
-    /**
      * @return the number of connections per torrent we'll try to maintain. This
      *         is somewhat arbitrary
      */
@@ -55,5 +50,5 @@ public interface TorrentManager extends FileLocker, ConnectionAcceptor, TorrentE
      * Checks to see if the given torrent file can be shared with the gnutella network. 
      * If it can, the file is saved to a special location on disk and shared.
      */
-    public void shareTorrentFile(BTMetaInfo m, byte[] body);
+    public void shareTorrentFile(BTMetaInfo m, File torrentFile);
 }

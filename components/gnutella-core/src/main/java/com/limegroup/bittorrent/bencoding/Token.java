@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 import org.limewire.util.BEncoder;
-import org.limewire.util.BufferUtils;
 
 
 /**
@@ -197,67 +196,32 @@ public abstract class Token<T> {
     public static Token<?> getNextToken(ReadableByteChannel chan) throws IOException {
         return getNextToken(chan, ASCII);
     }
-    
+
+
     /**
-     * Parses bencoded data in a byte array into an object that extends Token.
+     * Parses bencoded data in a channel into an object that extends Token.
      * 
-     * @param data a byte array with a complete bencoded object.
+     * @param data a channel with a complete bencoded object.
      * @param charsetName name of the charset used for decoding dictionary keys
      * @return     an object that extends Token like BEList.
      *             null if the byte array didn't contain a complete bencoded object.
      */
-    public static Object parse(byte[] data, String charsetName) throws IOException {
-        Token<?> t = getNextToken(new BufferChannel(data), charsetName); // Reads the first letter like "l" to see what's next
+    public static Object parse(ReadableByteChannel byteChannel, String charsetName) throws IOException {
+        Token<?> t = getNextToken(byteChannel, charsetName); // Reads the first letter like "l" to see what's next
         if (t == null)
-        	return null; // The channel couldn't even give 1 byte
+            return null; // The channel couldn't even give 1 byte
         t.handleRead(); // Tell t to read from its channel and parse the data it reads
         return t.getResult();
     }
     
     /**
-     * Parses bencoded data in a byte array into an object that extends Token. Charset used
-     * for decoding dictionary keys is {@link #ASCII}.
+     * Parses bencoded data in a channel into an object that extends Token.
      * 
-     * @param data a byte array with a complete bencoded object.
+     * @param data a channel with a complete bencoded object.
      * @return     an object that extends Token like BEList.
      *             null if the byte array didn't contain a complete bencoded object.
      */
-    public static Object parse(byte[] data) throws IOException {
-        return parse(data, ASCII);
-    }
-
-    /**
-     * Wraps a byte array, putting a <code>ReadableByteChannel</code> interface on it.
-     */
-    private static class BufferChannel implements ReadableByteChannel {
-
-    	/** A ByteBuffer with the data this BufferChannel holds. */
-    	private final ByteBuffer src;
-
-        /**
-         * Makes a new <code>BufferChannel</code>, wrapping a byte array of 
-         * data in a <code>ReadableByteChannel</code> interface.
-         * 
-         * @param data a byte array with the data
-         */
-        BufferChannel(byte[] data) {
-            src = ByteBuffer.wrap(data);
-        }
-
-        /* Reads a sequence of bytes from this channel into the given buffer. */
-        public int read(ByteBuffer dst) throws IOException {
-            int ret = BufferUtils.transfer(src, dst, false);
-            if (ret == 0 && !src.hasRemaining())
-            	return -1;
-            return ret;
-        }
-
-        /* Closes this channel. */
-        public void close() throws IOException {}
-
-        /* Tells whether or not this channel is open. */
-        public boolean isOpen() {
-            return true;
-        }
+    public static Object parse(ReadableByteChannel byteChannel) throws IOException {
+        return parse(byteChannel, ASCII);
     }
 }

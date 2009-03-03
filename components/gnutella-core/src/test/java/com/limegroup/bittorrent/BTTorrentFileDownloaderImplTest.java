@@ -372,11 +372,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public File getSharedTorrentMetaDataFile(BTMetaInfo info) {
-                return null;
-            }
-
-            @Override
             public ManagedTorrent getTorrentForHash(byte[] infoHash) {
                 return null;
             }
@@ -402,7 +397,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public void shareTorrentFile(BTMetaInfo m, byte[] body) {
+            public void shareTorrentFile(BTMetaInfo m, File torrentFile) {
                 
             }
 

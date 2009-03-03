@@ -14,6 +14,7 @@ import org.jmock.Mockery;
 import org.limewire.inspection.Inspector;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
+import org.limewire.util.ReadBufferChannel;
 import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
@@ -106,7 +107,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.finished();
         byte [] uncompressed = new byte[1024];
         i.inflate(uncompressed);
-        Map<String,Object> o = (Map<String,Object>) Token.parse(uncompressed);
+        Map<String,Object> o = (Map<String,Object>) Token.parse(new ReadBufferChannel(uncompressed));
         assertTrue(o.containsKey("-1"));
         assertTrue(Arrays.equals("inspected".getBytes(),(byte[])o.get("0")));
     }
@@ -126,7 +127,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.finished();
         byte [] uncompressed = new byte[1024];
         i.inflate(uncompressed);
-        Map<String,Object> o = (Map<String,Object>) Token.parse(uncompressed);
+        Map<String,Object> o = (Map<String,Object>) Token.parse(new ReadBufferChannel(uncompressed));
         assertTrue(o.containsKey("-1"));
         assertTrue(Arrays.equals("inspected".getBytes(),(byte[])o.get("0")));
     }
@@ -149,7 +150,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.finished();
         byte [] uncompressed = new byte[1024 * 20];
         i.inflate(uncompressed);
-        Map<String,Object> o = (Map<String,Object>) Token.parse(uncompressed);
+        Map<String,Object> o = (Map<String,Object>) Token.parse(new ReadBufferChannel(uncompressed));
         assertTrue(o.containsKey("-1"));
         assertTrue(Arrays.equals(data,(byte[])o.get("0")));
     }

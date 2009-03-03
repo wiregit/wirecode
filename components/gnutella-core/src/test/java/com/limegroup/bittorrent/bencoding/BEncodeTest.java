@@ -9,13 +9,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
-
-import org.limewire.util.BEncoder;
-import org.limewire.util.StringUtils;
+import java.util.Set;
 
 import junit.framework.Test;
+
+import org.limewire.util.BEncoder;
+import org.limewire.util.ReadBufferChannel;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -297,7 +298,7 @@ public class BEncodeTest extends LimeTestCase {
         String encoded = new String(baos.toByteArray());
         assertEquals("r4600877379321698714e",encoded);
         chan.setString(encoded);
-        Double d = (Double)Token.parse(baos.toByteArray());
+        Double d = (Double)Token.parse(new ReadBufferChannel(baos.toByteArray()));
         assertEquals(0.4, d);
         
     }
@@ -558,7 +559,7 @@ public class BEncodeTest extends LimeTestCase {
         Map<String, String> toEncode = Collections.singletonMap(key, key);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BEncoder.getEncoder(baos, false, true, "UTF-8").encodeDict(toEncode);
-        Map<String, Object> result = (Map<String, Object>) Token.parse(baos.toByteArray(), "UTF-8");
+        Map<String, Object> result = (Map<String, Object>) Token.parse(new ReadBufferChannel(baos.toByteArray()), "UTF-8");
         String decodedKey = result.keySet().iterator().next();
         assertEquals(key, decodedKey);
         byte[] value = (byte[]) result.values().iterator().next();

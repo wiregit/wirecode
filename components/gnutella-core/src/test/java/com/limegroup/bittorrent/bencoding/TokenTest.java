@@ -1,10 +1,10 @@
 package com.limegroup.bittorrent.bencoding;
 
-import java.io.EOFException;
 import java.util.List;
 import java.util.Map;
 
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ReadBufferChannel;
 
 public class TokenTest extends BaseTestCase {
 
@@ -13,34 +13,34 @@ public class TokenTest extends BaseTestCase {
     }
 
     public void testParseString() throws Exception {
-        Object parsedObject = Token.parse("4:test".getBytes());
+        Object parsedObject = Token.parse(new ReadBufferChannel("4:test".getBytes()));
         byte[] result = (byte[]) parsedObject;
         assertEquals("test", new String(result));
 
-        parsedObject = Token.parse("44:the rain in spain stays mostly on the plains".getBytes());
+        parsedObject = Token.parse(new ReadBufferChannel("44:the rain in spain stays mostly on the plains".getBytes()));
         result = (byte[]) parsedObject;
         assertEquals("the rain in spain stays mostly on the plains", new String(result));
     }
 
     public void testParseInt() throws Exception {
-        Object parsedObject = Token.parse("i12345e".getBytes());
+        Object parsedObject = Token.parse(new ReadBufferChannel("i12345e".getBytes()));
         Long result = (Long) parsedObject;
         assertEquals(new Long(12345), result);
 
-        parsedObject = Token.parse("i12345678910e".getBytes());
+        parsedObject = Token.parse(new ReadBufferChannel("i12345678910e".getBytes()));
         result = (Long) parsedObject;
         assertEquals(new Long(12345678910L), result);
     }
 
     @SuppressWarnings("unchecked")
     public void testParseList() throws Exception {
-        Object parsedObject = Token.parse("l5:test1e".getBytes());
+        Object parsedObject = Token.parse(new ReadBufferChannel("l5:test1e".getBytes()));
         List<Object> result = (List<Object>) parsedObject;
         assertEquals(1, result.size());
         byte[] index0 = (byte[]) result.get(0);
         assertEquals("test1", new String(index0));
 
-        parsedObject = Token.parse("l5:test14:blah5:test23:ende".getBytes());
+        parsedObject = Token.parse(new ReadBufferChannel("l5:test14:blah5:test23:ende".getBytes()));
         result = (List<Object>) parsedObject;
         assertEquals(4, result.size());
 
@@ -58,7 +58,7 @@ public class TokenTest extends BaseTestCase {
     @SuppressWarnings("unchecked")
     public void testParseDictionary() throws Exception {
         Object parsedObject = Token
-                .parse("d4:ainti12345e3:key5:value4:type4:test4:listl5:test14:blahee".getBytes());
+                .parse(new ReadBufferChannel("d4:ainti12345e3:key5:value4:type4:test4:listl5:test14:blahee".getBytes()));
         Map<String, Object> result = (Map<String, Object>) parsedObject;
         assertEquals(4, result.size());
 
@@ -86,12 +86,7 @@ public class TokenTest extends BaseTestCase {
     }
 
     public void testParseEmptyByteArray() throws Exception {
-        try {
-            Token.parse(new byte[] {});
-            fail("There should be nothing ot read.");
-            //TODO potentially parsing this should just return null, should revisit
-        } catch (EOFException e) {
-            // expected
-        }
+        Object parsedObject = Token.parse(new ReadBufferChannel(new byte[] {}));
+        assertNull(parsedObject);
     }
 }

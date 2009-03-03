@@ -5,6 +5,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -182,15 +184,13 @@ public class TrackerImpl implements Tracker {
                 if (response.getEntity().getContentLength() > 32768) {
                     return null;
                 }
-
-                byte[] body = IOUtils.readFully(response.getEntity().getContent());
-
-                if (body.length == 0)
-                    return null;
-
-                if (LOG.isDebugEnabled())
-                    LOG.debug(new String(body));
-                return new TrackerResponse(Token.parse(body));
+                ReadableByteChannel byteChannel = null;
+                try {
+                    byteChannel = Channels.newChannel(response.getEntity().getContent());
+                    return new TrackerResponse(Token.parse(byteChannel));
+                } finally {
+                    IOUtils.close(byteChannel);
+                }
             }
             return null;
         } catch (IOException e) {

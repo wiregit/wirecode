@@ -636,7 +636,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      */
     public void chunkVerified(int in) {
         if (firstChunkVerifiedEventDispatched.compareAndSet(false, true) && !_info.isPrivate()
-                && SharingSettings.SHARE_TORRENT_META_FILES.getValue()
+                && SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()
                 && BittorrentSettings.TORRENT_AUTO_PUBLISH.getValue()) {
             // add yourself to the DHT as someone sharing this torrent
             dispatchEvent(TorrentEvent.Type.FIRST_CHUNK_VERIFIED);
@@ -886,15 +886,15 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     }
 
     private void addToLibrary() {
-        boolean force = SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue();
         File _completeFile = context.getFileSystem().getCompleteFile();
         if (_completeFile.isFile()) {
-            if (force)
+            if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
                 fileManager.getGnutellaFileList().add(_completeFile);
-            else
+            } else {
                 fileManager.getManagedFileList().add(_completeFile);
+            }
         } else if (_completeFile.isDirectory()) {
-            if(force) {
+            if(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
                 fileManager.getGnutellaFileList().addFolder(_completeFile);
             } else {
                 fileManager.getManagedFileList().addFolder(_completeFile);

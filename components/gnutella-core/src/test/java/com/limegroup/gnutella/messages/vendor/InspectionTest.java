@@ -27,6 +27,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
+import org.limewire.util.ReadBufferChannel;
 import org.limewire.util.ByteUtils;
 
 import com.google.inject.AbstractModule;
@@ -332,7 +333,7 @@ public class InspectionTest extends ServerSideTestCase {
         byte [] inflated = new byte[60000];
         int numInflated = in.inflate(inflated);
         String s = new String(inflated,0, numInflated);
-        return (Map)Token.parse(s.getBytes());
+        return (Map)Token.parse(new ReadBufferChannel(s.getBytes()));
     }
 }
 @SuppressWarnings("unchecked")

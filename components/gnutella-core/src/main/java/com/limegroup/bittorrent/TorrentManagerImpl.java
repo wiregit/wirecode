@@ -1,10 +1,6 @@
 package com.limegroup.bittorrent;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,7 +19,6 @@ import org.limewire.core.settings.SpeedConstants;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.io.IOUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.util.FileUtils;
@@ -343,7 +338,7 @@ public class TorrentManagerImpl implements TorrentManager {
      * Shares the torrent by adding it to the FileManager
      */
     private synchronized void shareTorrent(ManagedTorrent t) {
-        if(!SharingSettings.SHARE_TORRENT_META_FILES.getValue() || t.getMetaInfo().isPrivate()) 
+        if(!SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() || t.getMetaInfo().isPrivate()) 
             return;
         
         final File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
@@ -383,18 +378,15 @@ public class TorrentManagerImpl implements TorrentManager {
     }
     
     
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.TorrentManager#getSharedTorrentMetaDataFile(com.limegroup.bittorrent.BTMetaInfo)
-     */
-    public File getSharedTorrentMetaDataFile(BTMetaInfo info) {
+    private File getSharedTorrentMetaDataFile(BTMetaInfo info) {
         String fileName = info.getFileSystem().getName().concat(".torrent");
         File f = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE, fileName);
         return f;
     }
 
     @Override
-    public void shareTorrentFile(BTMetaInfo m, byte[] body) {
-        if (SharingSettings.SHARE_TORRENT_META_FILES.getValue() && !m.isPrivate()) {
+    public void shareTorrentFile(BTMetaInfo m, File torrentFile) {
+        if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() && !m.isPrivate()) {
             final File tFile = getSharedTorrentMetaDataFile(m);
             fileManager.getGnutellaFileList().remove(tFile);
 
@@ -403,24 +395,16 @@ public class TorrentManagerImpl implements TorrentManager {
                 backup = new File(tFile.getParent(), tFile.getName().concat(".bak"));
                 FileUtils.forceRename(tFile, backup);
             }
-            OutputStream out = null;
-            try {
-                out = new BufferedOutputStream(new FileOutputStream(tFile));
-                out.write(body);
-                out.flush();
-                if (backup != null) {
-                    backup.delete();
-                }
-            } catch (IOException ioe) {
+            if(FileUtils.forceRename(torrentFile, tFile)) {
+                fileManager.getGnutellaFileList().add(tFile);
+            } else {
                 if (backup != null) {
                     // restore backup
                     if (FileUtils.forceRename(backup, tFile)) {
                         fileManager.getGnutellaFileList().add(tFile);
                     }
                 }
-            } finally {
-                IOUtils.close(out);
-            }
+            } 
         }
     }
 }	

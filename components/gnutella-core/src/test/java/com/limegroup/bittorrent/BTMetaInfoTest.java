@@ -9,6 +9,7 @@ import junit.framework.Assert;
 import junit.framework.Test;
 
 import org.limewire.util.AssertComparisons;
+import org.limewire.util.ReadBufferChannel;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -34,7 +35,7 @@ public class BTMetaInfoTest extends LimeTestCase {
         File file = getFile("test-basics.torrent");
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
-        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(new ReadBufferChannel(bytes));
 
         AssertComparisons.assertEquals(44425, metaInfo.getFileSystem().getTotalSize());
         AssertComparisons.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
@@ -51,7 +52,7 @@ public class BTMetaInfoTest extends LimeTestCase {
         File file = getFile("test-single-webseed-single-file-no-peer.torrent");
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
-        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(new ReadBufferChannel(bytes));
         AssertComparisons.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
         AssertComparisons.assertEquals(1, metaInfo.getNumBlocks());
         AssertComparisons.assertEquals(262144, metaInfo.getPieceLength());
@@ -68,7 +69,7 @@ public class BTMetaInfoTest extends LimeTestCase {
         File file = getFile("test-multiple-webseed-single-file-no-peer.torrent");
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
-        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(new ReadBufferChannel(bytes));
         AssertComparisons.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
         AssertComparisons.assertEquals(2, metaInfo.getNumBlocks());
         AssertComparisons.assertEquals(32768, metaInfo.getPieceLength());
@@ -87,7 +88,7 @@ public class BTMetaInfoTest extends LimeTestCase {
         File file = getFile("test-single-webseed-multiple-file-no-peer.torrent");
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
-        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(new ReadBufferChannel(bytes));
         AssertComparisons.assertEquals("test", metaInfo.getName());
 
         AssertComparisons.assertEquals(2, metaInfo.getNumBlocks());
@@ -104,7 +105,7 @@ public class BTMetaInfoTest extends LimeTestCase {
         File file = getFile("test-multiple-webseed-multiple-file-no-peer.torrent");
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
-        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(new ReadBufferChannel(bytes));
         AssertComparisons.assertEquals("test", metaInfo.getName());
         AssertComparisons.assertEquals(2, metaInfo.getNumBlocks());
         AssertComparisons.assertEquals(262144, metaInfo.getPieceLength());
