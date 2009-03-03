@@ -362,6 +362,16 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         tc.setCellEditor(editor);
     }
 
+    /**
+     * Assigns the specified header renderer to the specified column in the 
+     * Table view column model.   
+     */
+    protected void setHeaderRenderer(int column, TableCellRenderer headerRenderer) {
+        TableColumnModel tcm = resultsTable.getColumnModel();
+        TableColumn tc = tcm.getColumn(column);
+        tc.setHeaderRenderer(headerRenderer);
+    }
+
     @Override
     public void download(final VisualSearchResult vsr) {
         download(vsr, null);
