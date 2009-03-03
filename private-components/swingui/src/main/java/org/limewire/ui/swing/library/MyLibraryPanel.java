@@ -37,6 +37,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
 import org.jdesktop.jxlayer.plaf.ext.LockableUI;
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.collection.glazedlists.PluggableList;
@@ -145,6 +146,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     private final Set<String> knownFriends = new HashSet<String>();
 
     private SharingFilterComboBox sharingComboBox;
+    private HyperlinkButton sharingButton;
     
     private final LibraryListSourceChanger currentFriendFilterChanger;
     
@@ -208,8 +210,10 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         sharingComboBox = new SharingFilterComboBox(currentFriendFilterChanger, this, shareListManager);
         comboDecorator.decorateLinkComboBox(sharingComboBox);
         sharingComboBox.setText(I18n.tr("What I'm Sharing"));
+        sharingComboBox.setVisible(false);
         
         getSelectionPanel().add(sharingComboBox, "gaptop 5, gapbottom 5, alignx 50%, hidemode 3");
+        
         
         sharingComboBox.addSelectionListener(new SelectionListener(){
             @Override
@@ -219,7 +223,22 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 sharingComboBox.setVisible(false);
             }
         });
+        
+        sharingButton = new HyperlinkButton();
+        sharingButton.setText(I18n.tr("What I'm Sharing"));
+        sharingButton.setVisible(false);
+        buttonDecorator.decorateLinkButton(sharingButton);
+        sharingButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sharingComboBox.selectFriend(SharingTarget.GNUTELLA_SHARE.getFriend());
+                sharingButton.setVisible(false);
+            }
+        });
+        getSelectionPanel().add(sharingButton, "gaptop 5, gapbottom 5, alignx 50%, hidemode 3");
 
+        showCorrectButton();
+        
         createMyCategories(baseLibraryList);
         createMyPlaylists(libraryManager.getLibraryManagedList());
         selectFirstVisible();
@@ -266,9 +285,24 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     }
 
     @Inject
-    public void register(@Named("known") ListenerSupport<FriendEvent> knownFriendsListeners) {
+    public void register(@Named("known") ListenerSupport<FriendEvent> knownFriendsListeners, ListenerSupport<XMPPConnectionEvent> connectionListeners) {
         this.knownFriendsListeners = knownFriendsListeners;
         this.knownFriendsListeners.addListener(this);
+        
+        connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPConnectionEvent event) {
+                switch(event.getType()) {
+                case CONNECTED:
+                    showCorrectButton();
+                    break;
+                case DISCONNECTED:
+                    showCorrectButton();
+                    break;
+                }
+            }
+        });
     }
 
 
@@ -317,7 +351,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 	 */
     public void showAllFiles() {
         currentFriendFilterChanger.setFriend(null);
-        sharingComboBox.setVisible(true);
+        showCorrectButton();
         messagePanel.setVisible(false);
         
         // don't hide the overlay if its the first time seeing the library or
@@ -382,6 +416,16 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         }
     }
 
+    private void showCorrectButton(){
+        if(xmppService.isLoggedIn()){
+            sharingButton.setVisible(false);
+            sharingComboBox.setVisible(true);
+        } else {
+            sharingButton.setVisible(true);
+            sharingComboBox.setVisible(false);  
+        }
+    }
+    
     private JComponent createMyCategoryAction(final Category category, EventList<LocalFileItem> filtered) {        
         final ShareWidget<File> fileShareWidget = shareFactory.createFileShareWidget();
         addDisposable(fileShareWidget);             
