@@ -73,9 +73,13 @@ public class PlaylistPopupMenu extends JPopupMenu {
         add(new RemoveAction());
         add(new ClearAction());
 
-        // Add View File Info menu item.
+        // Add View File Info menu item.  Use the underlying file item, usually
+        // a CoreLocalFileItem, so the properties dialog can perform the Copy
+        // Link action.
         addSeparator();
-        add(new ViewFileInfoAction(firstItem, propertiesFactory)).setEnabled(viewFileInfoEnabled);
+        LocalFileItem localItem = (firstItem instanceof PlaylistFileItemImpl) ?
+                ((PlaylistFileItemImpl) firstItem).getLocalFileItem() : firstItem;
+        add(new ViewFileInfoAction(localItem, propertiesFactory)).setEnabled(viewFileInfoEnabled);
     }
 
     /**

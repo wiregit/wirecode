@@ -32,6 +32,13 @@ public class PlaylistFileItemImpl implements PlaylistFileItem, Comparable {
         this.localFileItem = localFileItem;
     }
     
+    /**
+     * Returns the underlying file item that contains the file details.
+     */
+    public LocalFileItem getLocalFileItem() {
+        return localFileItem;
+    }
+    
     @Override
     public int getIndex() {
         return playlist.getIndex(getFile());
