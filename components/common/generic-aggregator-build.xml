@@ -39,9 +39,14 @@
 	<target name="clean-tests">
 	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean-tests"/>
 	</target>
-	
-	<target name="test-all">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="with clover, test-all"/>
+
+    <target name="with.clover">
+        <property name="test-target" value="test-all-with-clover"/>
+    </target>
+    
+    <target name="test-all">
+        <property name="test-target" value="test-all"/>
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="${test-target}"/>
 	</target>
     
     <target name="jar">
@@ -57,15 +62,16 @@
 	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean-dist"/>
 	</target>
     
-    <target name="with.clover" depends="initialize-this">
+    <!--target name="with.clover" depends="initialize-this"-->
 	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="with.clover"/-->
-        <do.tests-init component="${component}"/>
+        <!--do.tests-init component="${component}"/>
         <do.clover-setup component="${component}"  defaultfileset="."/>
-	</target>
+	</target-->
     
-    <target name="clover2html" depends="with.clover">
+    <target name="clover2html" depends="initialize-this">
 	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clover2html"/-->
-        <do.clover2html component="${component}" defaulttestsources="." defaulttestsourceincludes="*/src/test/java/**/*.java"/>
+        <do.clover-merge-dbs component="${component}"/>
+        <!--do.clover2html component="${component}" defaulttestsources="." defaulttestsourceincludes="*/src/test/java/**/*.java"/-->
 	</target>
 	
 </project>

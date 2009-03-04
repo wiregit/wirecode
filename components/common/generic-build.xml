@@ -70,7 +70,7 @@
     </target>
     
     <target name="with.clover" depends="initialize">
-        <do.clover-setup component="${component}" clover.db.location="${clover.limewire.components.@{component}.db}"/>
+        <do.clover-setup component="${component}"/>
 	</target>
     
     <target name="clover2html" depends="initialize, with.clover">

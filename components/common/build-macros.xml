@@ -511,7 +511,7 @@
 	        <antcall target="clover-guard"/>
             <taskdef resource="cloverlib.xml" classpath="${cloverjar}"/>
             <mkdir dir="${clover.limewire.components.@{component}.home}"/>
-            <clover-setup initString="@{clover.db.location}">
+            <clover-setup initString="${clover.limewire.components.@{component}.db}">
                 <statementContext name="log" regexp="^LOG\..*"/>
                 <statementContext name="iflog" regexp="^if *\(LOG\.is.*"/> 
                 <methodContext name="main" regexp="public static void main\(String args\[\]\).*"/>
@@ -519,6 +519,22 @@
                 <locations/>
             </clover-setup>
         </sequential>
+    </macrodef>
+    
+    <macrodef name="do.clover-merge-dbs" description="merges multiple clover db's into one db">
+        <attribute name="component"/>
+        <attribute name="defaultfileset" default="${limewire.components.@{component}.home}"/>
+        <attribute name="clover.db.location" default="${clover.limewire.components.@{component}.db}"/>
+        <sequential>
+	        <antcall target="clover-guard"/>
+            <taskdef resource="cloverlib.xml" classpath="${cloverjar}"/>
+            <mkdir dir="${clover.limewire.components.@{component}.home}"/>
+            <clover-merge initString="@{clover.db.location}">
+                <cloverDbSet dir=".">
+                    <include name="**/clover.db"/>
+                </cloverDbSet>
+            </clover-merge>
+        </sequential>    
     </macrodef>
     
     <!-- Checks to see if clover is installed and sets a property if so -->
@@ -532,6 +548,34 @@
     </target>
     
     <macrodef name="do.clover2html">
+        <attribute name="component"/>
+        <element name="moretestinfo" optional="true"/>
+        <attribute name="defaulttestresults" default="${tests.limewire.components.@{component}.xml}"/>
+        <attribute name="defaulttestsources" default="${limewire.components.@{component}.tests}"/>
+        <attribute name="defaulttestsourceincludes" default="**/*.java"/>
+        <sequential>
+            <antcall target="clover-guard"/>
+            <taskdef resource="cloverlib.xml" classpath="${cloverjar}"/>
+            <tstamp>
+	            <format property="clover.time" pattern="EEE, MMM d, yyyy hh:mm a"/>
+            </tstamp>
+            <clover-report>
+                <current outfile="${clover.limewire.components.@{component}.html}"
+                		 title="LimeWire - ${clover.time}">
+	                <format type="html" filter="log,iflog,assert,main"/>
+                    <testresults dir="@{defaulttestresults}" includes="TEST-*.xml"/>
+                    <testsources dir="@{defaulttestsources}" includes="@{defaulttestsourceincludes}"/>
+                    <moretestinfo/>
+                </current>
+                <current outfile="${clover.limewire.components.@{component}.xml}"
+                         title="LimeWire - ${clover.time}">
+					<format type="xml" filter="log,iflog,assert,main"/>
+                </current>
+            </clover-report>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="do.aggregate-clover2html">
         <attribute name="component"/>
         <element name="moretestinfo" optional="true"/>
         <attribute name="defaulttestresults" default="${tests.limewire.components.@{component}.xml}"/>
