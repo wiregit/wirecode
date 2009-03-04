@@ -94,7 +94,9 @@ public class ResultsContainer extends JXPanel {
      */
     public void setViewType(SearchViewType mode) {
         this.mode = mode;
-        currentPanel.setViewType(mode);
+        if (currentPanel != null) {
+            currentPanel.setViewType(mode);
+        }
     }
     
     void showCategory(SearchCategory category) {
