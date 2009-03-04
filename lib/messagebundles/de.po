@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-03-02 11:30-0500\n"
-"PO-Revision-Date: 2009-03-03 18:58+0000\n"
-"Last-Translator: fberger <bflat1@gmx.net>\n"
+"PO-Revision-Date: 2009-03-04 09:12+0000\n"
+"Last-Translator: Philipp Körner <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-03-03 19:28+0000\n"
+"X-Launchpad-Export-Date: 2009-03-04 16:08+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -2004,7 +2004,7 @@ msgstr "Es gab ein Problem die Dateien dieser Person anzuzeigen."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:61
 #, java-format
 msgid "Browse files from {0}"
-msgstr ""
+msgstr "Durchsuche Dateien von {0}"
 
 #. {0}: category (Audio, Video, etc)
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:167
@@ -2042,17 +2042,17 @@ msgstr "Was ich freigegeben habe"
 #. Display heading.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:343
 msgid "CATEGORIES"
-msgstr ""
+msgstr "Kategorien"
 
 #. Display heading.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:482
 msgid "PLAYLISTS"
-msgstr ""
+msgstr "Playlists"
 
 #. Get playlists from manager.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:485
 msgid "Quicklist"
-msgstr ""
+msgstr "Schnellliste"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:742
 #, java-format
@@ -2110,19 +2110,19 @@ msgstr "Sie haben keine Dateien für {0} freigegeben"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:920
 #, java-format
 msgid "You are not sharing any files with {0}"
-msgstr ""
+msgstr "Sie teilen keine Dateien mit {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:989
 msgid "Show All Files"
-msgstr ""
+msgstr "Zeige alle Dateien"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1015
 msgid "What I'm Sharing With {0}"
-msgstr ""
+msgstr "Was ich mit {0} teile"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingFilterComboBox.java:86
 msgid "with:"
-msgstr ""
+msgstr "mit:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageSubPanel.java:94
 msgid "share folder"
@@ -2176,11 +2176,11 @@ msgstr "Alle Freunde"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistPopupMenu.java:87
 msgid "Remove from playlist"
-msgstr ""
+msgstr "Entferne von Wiedergabeliste"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistPopupMenu.java:104
 msgid "Clear playlist"
-msgstr ""
+msgstr "Leere Wiedergabeliste"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:50
 msgid "#"
@@ -2442,12 +2442,12 @@ msgstr "Download"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:132
 msgid "Add to playlist"
-msgstr ""
+msgstr "Füge zu Wiedergabeliste hinzu"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:157
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareFriendAction.java:31
 msgid "Share with Friend"
-msgstr ""
+msgstr "Teile mit Freund"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:158
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareFriendAction.java:31
