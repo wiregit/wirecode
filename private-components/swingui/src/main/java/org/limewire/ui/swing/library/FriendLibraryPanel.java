@@ -58,7 +58,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         
         createMyCategories(eventList);
         selectFirstVisible();
-        getHeaderPanel().setText(I18n.tr("Browse files from {0}", getFullPanelName()));
+        getHeaderPanel().setText(I18n.tr("Browse Files from {0}", getFullPanelName()));
     }
     
     protected String getFullPanelName() {

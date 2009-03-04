@@ -37,7 +37,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
 import org.jdesktop.jxlayer.plaf.ext.LockableUI;
-import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.collection.glazedlists.PluggableList;
@@ -990,7 +989,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
     
         public void setFriend(Friend friend) {
             if(friend.getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
-                headerLabel.setText(I18n.tr("No files shared with the {0}", friend.getRenderName()));
+                headerLabel.setText(I18n.tr("No files shared with the P2P Network"));
             else
                 headerLabel.setText(I18n.tr("No files shared with {0}", friend.getRenderName()));
         }
