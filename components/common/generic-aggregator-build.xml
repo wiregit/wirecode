@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir="." default="compile-src">
+    <property name="component" value="all"/>
+	<import file="build-macros.xml" />
+    
+    <property name="includes" value="*/build.xml"/>
+    <property name="excludes" value=""/>
+    <property name="root" value=""/>
+    
+    <target name="initialize-this">
+        <do.setup-properties component="${component}"/>    
+    </target>
+    
+    <target name="initialize">
+        <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="initialize"/>
+    </target>
+	
+	<target name="clean">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean"/>
+	</target>
+    
+    <target name="compile">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="compile"/>
+	</target>
+	
+	<target name="compile-src">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="compile-src"/>
+	</target>
+    
+	<target name="clean-src">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean-src"/>
+	</target>
+	
+	<target name="compile-tests">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="compile-test"/>
+	</target>
+    
+	<target name="clean-tests">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean-tests"/>
+	</target>
+	
+	<target name="test-all">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="with clover, test-all"/>
+	</target>
+    
+    <target name="jar">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="jar"/> 
+        <!--do.aggregate-jar component="${component}"/-->
+	</target>
+    
+    <target name="javadoc">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="javadoc"/>
+	</target>
+    
+    <target name="clean-dist">
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean-dist"/>
+	</target>
+    
+    <target name="with.clover" depends="initialize-this">
+	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="with.clover"/-->
+        <do.tests-init component="${component}"/>
+        <do.clover-setup component="${component}"  defaultfileset="."/>
+	</target>
+    
+    <target name="clover2html" depends="with.clover">
+	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clover2html"/-->
+        <do.clover2html component="${component}" defaulttestsources="." defaulttestsourceincludes="*/src/test/java/**/*.java"/>
+	</target>
+	
+</project>

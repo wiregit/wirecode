@@ -1,0 +1,34 @@
+<ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="org.limewire" module="integrated-ui"/>
+    <configurations>
+        <include file="../../components/common/common-configurations.xml"/>
+    </configurations>
+    <publications>
+        <artifact name="integrated-ui" conf="master"/>
+    </publications>
+    <dependencies>
+        <dependency org="org.limewire" name="common" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="http" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="mojito" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="swingui" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core-glue" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="mojito-ui" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="setting" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.apache.httpcomponents" name="httpcore" rev="${httpcore.version}" conf="compile,runtime"/>
+        <dependency org="org.apache.httpcomponents" name="httpclient" rev="${httpclient.version}" conf="compile,runtime"/>
+        <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
+        <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
+        <dependency org="mrjadapter" name="mrjadapter" rev="${mrjadapter.version}" conf="compile,runtime"/>
+        <dependency org="org.jdesktop" name="appframework" rev="${appframework.version}" conf="compile,runtime"/>
+        <dependency org="org.swinglabs" name="swingx" rev="${swingx.version}" conf="compile,runtime"/>
+        <dependency org="org.bushe.swing.event" name="EventBus" rev="${EventBus.version}" conf="compile,runtime"/>
+        <dependency org="mozilla" name="mozswing-interfaces" rev="${mozswing-interfaces.version}" conf="compile,runtime"/>
+        <dependency org="org.mozilla" name="mozswing" rev="${mozswing.version}" conf="compile,runtime"/>
+    </dependencies>
+</ivy-module>

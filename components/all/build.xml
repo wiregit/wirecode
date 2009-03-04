@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="lw-all" basedir="." default="compile-src">
+    <property name="component" value="all"/>
+    <import file="../common/generic-build.xml"/>
+    
+    <target name="jar" depends="initialize">
+        <do.aggregate-jar component="${component}"/>
+    </target>
+    
+    <target name="test-all" depends="initialize">
+        <do.tests-init component="${component}"/>
+        <do.tests2html component="${component}" dir="." include="*/testData/xml/TEST-*.xml" excludes="../core-glue/**"/>
+    </target>
+    
+    <target  name="javadoc" depends="initialize">
+        <path id="javadoc.classpath">
+            <fileset dir=".." includes="*/build/lib/compile/**/*.jar" />
+        </path>
+        <do.javadoc windowtitle="LimeWire - ${component}" component="${component}" sourcepath=".." includes="*/src/main/java/**/*.java" excludes="core-glue/**,all/**" classpathrefid="javadoc.classpath"/>
+    </target>
+</project>

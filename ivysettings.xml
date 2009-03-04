@@ -1,0 +1,10 @@
+<ivysettings>
+    <properties file="./dependencies.props"/>
+	<settings defaultResolver="default"/>
+    <include url="./ivysettings-limewire.xml"/>
+	<include url="./ivysettings-public.xml"/>
+	<include url="${ivy.default.settings.dir}/ivysettings-shared.xml"/>
+	<include url="./ivysettings-local.xml"/>
+    <include url="./ivysettings-main-chain.xml"/>
+	<include url="${ivy.default.settings.dir}/ivysettings-default-chain.xml"/>
+</ivysettings>

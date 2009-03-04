@@ -1,0 +1,15 @@
+<ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="org.limewire" module="common"/>
+    <configurations>
+        <include file="common-configurations.xml"/>
+    </configurations>
+    <publications>
+        <artifact name="common" conf="master"/>
+    </publications>
+    <dependencies>
+        <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
+        <dependency org="com.ibm.icu" name="icu4j" rev="3.4.4" conf="compile,runtime"/>
+        <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
+    </dependencies>
+</ivy-module>

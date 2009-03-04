@@ -1,0 +1,35 @@
+<ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="org.limewire" module="all"/>
+    <configurations>
+        <include file="../common/common-configurations.xml"/>
+    </configurations>
+    <publications>
+        <artifact name="all" conf="master"/>
+    </publications>
+    <dependencies>
+        <!-- TODO generate this file -->
+        <dependency org="org.limewire" name="collection" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="common" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="geocode" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="http" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="lwsserver" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="mojito" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="mojito-ui" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="player" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="player-api" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="promotion" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="resources" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="rudp" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="security" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="setting" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="statistic" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="swarm" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="xmpp" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="xmpp-api" rev="latest.integration" conf="compile,runtime"/>
+    </dependencies>
+</ivy-module>

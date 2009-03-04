@@ -1,0 +1,11 @@
+<ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="org.limewire" module="resources"/>
+    <configurations>
+        <include file="../common/common-configurations.xml"/>
+    </configurations>
+    <publications>
+        <artifact name="resources" conf="master"/>
+    </publications>
+    <dependencies>
+    </dependencies>
+</ivy-module>

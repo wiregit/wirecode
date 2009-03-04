@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="lw-resources" basedir=".">
-
-	<description>
-		LimeWire component 'resources'.
-		This component is a collection of resources required for the GUI.
-	</description>
-	
-    <import file="../common/build-macros.xml" />
+<project name="lw-resources" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+    <property name="component" value="resources"/>
+    <import file="../common/generic-build.xml"/>
     
-    <target name="initialize" unless="initialized.resources">
-        <do.setup-properties component="resources"/>
+    <target name="jar" depends="initialize, compile-src">
+        <ivy:resolve file="${limewire.components.resources.home}/ivy.xml"/>
+        <do.jar component="${component}" basedir="${limewire.components.resources.src.resources}"/>
     </target>
-	
 </project>

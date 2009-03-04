@@ -1,0 +1,42 @@
+<ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="org.limewire" module="swingui"/>
+    <configurations>
+        <include file="../../components/common/common-configurations.xml"/>
+    </configurations>
+    <publications>
+        <artifact name="swingui" conf="master"/>
+    </publications>
+    <dependencies>
+        <dependency org="org.limewire" name="common" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime"/> 
+        <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="collection" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="setting" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="xmpp-api" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="player-api" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="com.google.code.guice" name="assistedinject" rev="${assistedinject.version}" conf="compile,runtime"/>
+        <dependency org="org.swinglabs" name="swingx" rev="${swingx.version}" conf="compile,runtime"/>
+        <dependency org="org.jdesktop" name="appframework" rev="${appframework.version}" conf="compile,runtime"/>
+        <dependency org="org.bushe.swing.event" name="EventBus" rev="${EventBus.version}" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="mock-core" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.mozilla" name="mozswing" rev="${mozswing.version}" conf="compile,runtime"/>
+        <dependency org="mozilla" name="mozdom4java" rev="mozswing1.9-06242008" conf="compile,runtime"/>
+        <dependency org="mozilla" name="mozswing-interfaces" rev="${mozswing-interfaces.version}" conf="compile,runtime"/>
+        <dependency org="mozilla" name="mozilla-glue" rev="${mozilla-glue.version}" conf="compile,runtime"/>
+        <dependency org="mozilla" name="jna" rev="mozswing1.9-06242008" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="jdic" rev="20061102-lw-1" conf="compile,runtime"/>
+        <!--dependency org="org.xnap.commons" name="xnap-commons" rev="0.9.1" conf="compile,runtime"/-->
+        <dependency org="xnap-commons" name="gettext-commons" rev="0.9.6" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="miglayout" rev="1.0" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="jxlayer" rev="3.0" conf="compile,runtime"/>
+        <dependency org="mrjadapter" name="mrjadapter" rev="${mrjadapter.version}" conf="compile,runtime"/>
+        <dependency org="log4j" name="log4j" rev="1.2.14" conf="compile,runtime"/>
+        <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
+        <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
+        <dependency org="net.java.dev.glazedlists" name="glazedlists_java15" rev="${glazedlists_java15.version}" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
+    </dependencies>
+</ivy-module>

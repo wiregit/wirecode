@@ -1,14 +1,37 @@
 <!-- top level ant file -->
-<project name="limewire" default="compile-src" basedir=".">
+<project name="limewire" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="limewire.home" location="${basedir}"/>
 
-    <import file="components/build.xml"/>
-    <import file="core/build.xml"/>
-    <import file="tests/build.xml" />
-    <import file="components/core-glue/build.xml"/>
+    <import file="components/common/build-macros.xml"/>
+    <!--import file="components/build.xml"/-->
+    <!--import file="core/build.xml"/-->
+    <!--import file="tests/build.xml" /-->
+    <!--import file="components/core-glue/build.xml"/-->
     
-    <target name="initialize" depends="lw-core.initialize, lw-tests.initialize, lw-components.initialize, lw-core-glue.initialize" unless="initialized.limewire">
+    <target name="ivy-taskdef" unless="ivy-taskdef.complete">
+        <echo message="defining ivy"/>
+        <property name="ivy-taskdef.complete" value="true"/>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+    	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"/>
+    </target>
+    
+    <target name="compile" depends="initialize">
+        <do.ivy includes="components/*/build.xml,core/build.xml,private-components/*/build.xml"
+                target="jar"/>
+    </target>
+
+    <target name="clean" depends="initialize">
+        <do.ivy includes="components/*/build.xml,core/build.xml,private-components/*/build.xml"
+                target="clean"/>        
+    </target>
+    
+    <target name="clean-cache">
+        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        <ivy:cleancache />                                                              
+    </target>
+    
+    <target name="initialize" depends="ivy-taskdef" unless="initialized.limewire">
         <property name="limewire.components.limewire.home"
                   location="${limewire.home}"/>
         <property name="limewire.components.limewire.tests"
@@ -16,7 +39,7 @@
         <do.setup-properties component="limewire"/>
     </target>
     
-    <target name="compile"
+    <!--target name="compile"
             description="Compiles all code."
             depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-tests.compile-src, lw-tests.compile-tests, lw-core-glue.compile-src, lw-core-glue.compile-tests"/>
     
@@ -43,12 +66,14 @@
             description="Cleans artifacts from compiling tests."
             depends="initialize, lw-components.clean-tests, lw-tests.clean, lw-core-glue.clean-tests">
         <do.clean-testData component="limewire"/>
-    </target>
+    </target-->
         
     <target name="test-all"
             description="Tests all components and LimeWire tests."
-            depends="compile, lw-core-glue.test-all, lw-tests.test-all, lw-components.test-all">
+            depends="compile">
         <mkdir dir="${tests.limewire.components.limewire.xml}"/>
+        <do.ivy includes="components/*/build.xml,core/build.xml,tests/build.xml,private-components/*/build.xml"
+                target="test-all"/>
         <do.tests2html component="limewire">
             <more-xml-locations>
                 <fileset dir="${tests.limewire.components.all.xml}" includes="TEST-*.xml"/>
@@ -67,7 +92,7 @@
         </do.tests2html>
     </target>
     
-    <target name="test-components"
+    <!--target name="test-components"
             description="Tests all components"
             depends="compile, lw-components.test-all">
          <mkdir dir="${tests.limewire.components.limewire.xml}"/>
@@ -84,9 +109,9 @@
     
     <target name="test-pkg-lw"
             description="Tests a single package in limewire/tests.  (Useful for testing outside of the normal directory.)  Requires: -Dpackage="
-            depends="compile, lw-tests.test-package"/>
+            depends="compile, lw-tests.test-package"/-->
     
-    <target name="jar" depends="compile-src, lw-components.jar, lw-core-glue.jar">
+    <target name="jar" depends="compile">
         <!-- get the list of jars in a space separated list without dirnames -->
         <fileset dir="${limewire.lib.jars}" includes="**/*.jar" id="alljars"/>
         <pathconvert property="classpath" refid="alljars" pathsep=" ">

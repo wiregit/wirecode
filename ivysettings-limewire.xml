@@ -1,0 +1,7 @@
+<ivysettings>
+  <resolvers>
+      <chain name="limewire-repository" dual="true">
+         <ibiblio name="limewire-repository" root="http://www.limewire.org/repository" m2compatible="true"/>
+      </chain>
+  </resolvers>
+</ivysettings>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="generic-build" basedir="." default="compile-src">
+	<import file="build-macros.xml" />
+    
+    <target name="ivy-check">
+        <available property="ivy.installed" classname="org.apache.ivy.ant.IvyAntSettings" />
+    </target>
+    
+    <target name="ivy-taskdef" depends="ivy-check" unless="ivy.installed">
+        <echo message="defining ivy"/>
+        <property name="ivy-taskdef.complete" value="true"/>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+    	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"/>
+    </target>
+    
+    <!--target name="tests-check">
+        <available property="tests.exist" file="${limewire.components.component.tests}" type="dir"/>
+    </target-->
+    
+    <target name="initialize">
+        <do.setup-properties component="${component}"/>
+    </target>
+	
+	<target name="clean" depends="initialize">
+	    <do.clean component="${component}"/>
+	</target>
+    
+    <target name="compile" depends="compile-src,compile-tests">
+    </target>
+	
+	<target name="compile-src" depends="initialize" if="limewire.components.${component}.src.exists">
+	    <do.compile-src component="${component}"/>
+	</target>
+    
+	<target name="clean-src" depends="initialize">
+	    <do.clean-src component="${component}"/>
+	</target>
+	
+	<target name="compile-tests" depends="initialize, compile-src" if="limewire.components.${component}.tests.exists">
+	    <do.compile-tests component="${component}"/>
+	</target>
+    
+	<target name="clean-tests" depends="initialize" if="limewire.components.${component}.tests.exists">
+	    <do.clean-tests component="${component}"/>
+	</target>
+	
+	<target name="test" depends="initialize, compile" if="class, limewire.components.${component}.tests.exists">
+	    <do.test component="${component}" class="${class}"/>
+	</target>
+	
+	<target name="test-package" depends="initialize, compile" if="package, limewire.components.${component}.tests.exists">
+	    <do.test-package component="${component}" package="${package}"/>
+	</target>
+	
+	<target name="test-all" depends="initialize, compile" if="limewire.components.${component}.tests.exists">
+	    <do.test-all component="${component}"/>
+	</target>
+    
+    <target name="jar" depends="initialize, compile-src">
+        <do.jar component="${component}"/>
+    </target>
+    
+    <target name="javadoc" depends="initialize, compile-src">
+    	<do.javadoc component="${component}"/>
+	</target>    
+    
+    <target name="clean-dist" depends="initialize">
+        <do.clean-dist component="${component}"/>
+    </target>
+    
+    <target name="with.clover" depends="initialize">
+        <do.clover-setup component="${component}" clover.db.location="${clover.limewire.components.@{component}.db}"/>
+	</target>
+    
+    <target name="clover2html" depends="initialize, with.clover">
+        <do.clover2html component="${component}"/>
+    </target>
+    
+    <target name="test-all-with-clover" depends="initialize,with.clover,test-all"/>
+
+    <target name="runtime" depends="initialize">
+        <do.resolve-dependencies component="${component}" conf="runtime"/>
+    </target>
+	
+</project>
