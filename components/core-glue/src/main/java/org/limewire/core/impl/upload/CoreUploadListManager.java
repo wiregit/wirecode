@@ -135,7 +135,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
     public void uploadRemoved(Uploader uploader) {
         UploadItem item = new CoreUploadItem(uploader);
         // This is called when uploads complete. Remove if auto-clear is enabled.
-        if (item.getState() == UploadState.DONE || item.getState() == UploadState.BROWSE_HOST_DONE) {
+        if (item.getState() == UploadState.DONE || item.getState() == UploadState.BROWSE_HOST_DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD) {
             if (SharingSettings.CLEAR_UPLOAD.getValue()) {
                 threadSafeUploadItems.remove(item);
             } else {
