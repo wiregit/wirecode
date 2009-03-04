@@ -38,7 +38,6 @@ public final class ReplyNumberVendorMessage extends AbstractVendorMessage {
 
     /**
      * Constructs a new ReplyNumberVendorMessages with data from the network.
-     * @param network TODO
      */
     ReplyNumberVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
                           byte[] payload, Network network) 

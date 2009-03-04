@@ -19,7 +19,6 @@ public final class PushProxyRequest extends AbstractVendorMessage {
 
     /**
      * Constructs a new PushProxyRequest from network data.
-     * @param network TODO
      */
     PushProxyRequest(byte[] guid, byte ttl, byte hops, int version, 
                      byte[] payload, Network network) throws BadPacketException {

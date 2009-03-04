@@ -32,7 +32,6 @@ public final class UDPConnectBackRedirect extends AbstractVendorMessage {
 
     /**
      * Constructs a new UDPConnectBackRedirect with data from the network.
-     * @param network TODO
      */
     UDPConnectBackRedirect(byte[] guid, byte ttl, byte hops, int version, 
                            byte[] payload, Network network) 

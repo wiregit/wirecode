@@ -31,7 +31,6 @@ public final class PushProxyAcknowledgement extends AbstractVendorMessage {
     /**
      * Constructs a new PushProxyAcknowledgement message with data from the
      * network.
-     * @param network TODO
      */
     PushProxyAcknowledgement(byte[] guid, byte ttl, byte hops, int version, 
                              byte[] payload, Network network) 

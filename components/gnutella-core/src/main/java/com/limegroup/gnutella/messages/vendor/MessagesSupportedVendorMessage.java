@@ -28,7 +28,6 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
 
     /**
      * Constructs a new MSVM message with data from the network.
-     * @param network TODO
      */
     MessagesSupportedVendorMessage(byte[] guid, byte ttl, byte hops, 
                                    int version, byte[] payload, Network network) 

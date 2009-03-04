@@ -85,7 +85,6 @@ public class HeadPing extends AbstractVendorMessage implements HeadPongRequestor
 	
 	/**
 	 * creates a message object with data from the network.
-	 * @param network TODO
 	 */
 	protected HeadPing(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload, Network network)

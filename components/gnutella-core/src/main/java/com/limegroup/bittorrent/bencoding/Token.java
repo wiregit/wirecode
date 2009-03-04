@@ -59,8 +59,7 @@ public abstract class Token<T> {
             nine = "9".getBytes(ASCII)[0];
 
         } catch (UnsupportedEncodingException impossible) {
-
-        	// TODO: connect to the error service
+            throw new RuntimeException(impossible);
         }
 
         ZERO = zero;

@@ -76,7 +76,6 @@ public interface License {
     /**
      * Verifies the license. The results of the verification can be retrieved by
      * invoking {@link #isValid(URN)}.
-     * @param httpClient TODO
      */
     public void verify(LicenseCache licenseCache, LimeHttpClient httpClient);
     

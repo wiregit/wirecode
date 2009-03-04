@@ -31,7 +31,6 @@ public final class TCPConnectBackRedirect extends AbstractVendorMessage {
 
     /**
      * Constructs a new TCPConnectBackRedirect with data from the network.
-     * @param network TODO
      */
     TCPConnectBackRedirect(byte[] guid, byte ttl, byte hops, int version, 
                            byte[] payload, Network network) 

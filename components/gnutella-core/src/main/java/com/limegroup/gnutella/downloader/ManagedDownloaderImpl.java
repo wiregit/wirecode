@@ -459,7 +459,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * You must set initial source via {@link #addInitialSources},
      * set the save file via {@link #setSaveFile(File, String, boolean)},
      * and call {@link #initialize} prior to starting this download.
-     * @param downloadStateMulticaster TODO
      */
     @Inject
     protected ManagedDownloaderImpl(SaveLocationManager saveLocationManager,

@@ -109,7 +109,6 @@ public class UDPCrawlerPing extends AbstractVendorMessage {
 	 * 
 	 * note this does not have upper limit to the number of requested results 
 	 * (other than the 255 byte limit).  One day we may have many more connections..
-	 * @param network TODO
 	 */
 	protected UDPCrawlerPing(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload, Network network)

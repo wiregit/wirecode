@@ -460,7 +460,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     /**
      * Checks whether the given upload may proceed based on number of slots,
      * position in upload queue, etc. Updates the upload queue as necessary.
-     * @param context TODO
      * 
      * @return ACCEPTED if the download may proceed, QUEUED if this is in the
      *         upload queue, REJECTED if this is flat-out disallowed (and hence

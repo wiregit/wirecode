@@ -84,7 +84,6 @@ public class PatchTableMessage extends RouteTableMessage {
     /**
      * Creates a new PATCH variant with data read from the network.  
      * The first byte is guaranteed to be PATCH_VARIANT.
-     * @param network TODO
      * 
      * @exception BadPacketException the remaining values in payload are not
      *  well-formed, e.g., because it's the wrong length, the sequence size

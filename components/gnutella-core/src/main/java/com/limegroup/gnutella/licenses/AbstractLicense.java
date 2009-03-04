@@ -84,7 +84,6 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
      * Retrieves the body of a URL from a webserver.
      *
      * Returns null if the page could not be found.
-     * @param httpClient TODO
      */
     protected String getBody(String url, LimeHttpClient httpClient) {
         return getBodyFromURL(url, httpClient);
@@ -93,7 +92,6 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
     /**
      * Contacts the given URL and downloads returns the body of the
      * HTTP request.
-     * @param httpClient TODO
      */
     protected String getBodyFromURL(String url, LimeHttpClient httpClient) {
         if (LOG.isTraceEnabled())
@@ -118,8 +116,9 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
         return null;
     }
     
-    /** Parses the document node of the XML. 
-     * @param httpClient TODO*/
+    /**
+	 * Parses the document node of the XML. 
+	 */
     protected abstract void parseDocumentNode(Node node, LicenseCache licenseCache, LimeHttpClient httpClient);
     
     /**
@@ -129,7 +128,6 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
      *
      * If this is a request directly from our Verifier, 'liveData' is true.
      * Subclasses may use this to know where the XML data is coming from.
-     * @param httpClient TODO
      */
     protected void parseXML(String xml, LicenseCache licenseCache, LimeHttpClient httpClient) {
         if(xml == null)

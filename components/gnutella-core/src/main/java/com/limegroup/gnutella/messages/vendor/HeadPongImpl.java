@@ -106,7 +106,6 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
      * 
      * This will correctly set the fields of this HeadPong, as opposed
      * to the other constructor.
-     * @param network TODO
      */
     HeadPongImpl(byte[] guid, byte ttl, byte hops, int version, byte[] payload, Network network, PushEndpointFactory pushEndpointFactory) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, payload, network);

@@ -28,7 +28,6 @@ public class ContentResponse extends AbstractVendorMessage {
 
     /**
      * Constructs a new ContentRequest with data from the network.
-     * @param network TODO
      */
     public ContentResponse(byte[] guid, byte ttl, byte hops, int version, byte[] payload, Network network) 
       throws BadPacketException {

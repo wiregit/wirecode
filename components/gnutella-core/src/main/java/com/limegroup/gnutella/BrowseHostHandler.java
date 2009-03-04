@@ -229,7 +229,6 @@ public class BrowseHostHandler {
                     LOG.debug("no auth token for: " + friendPresence);
             }
         }
-        // TODO
         // hardcoding to "http" should work;
         // socket has already been established
         HttpGet get = new HttpGet("http://" +

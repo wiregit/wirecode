@@ -461,7 +461,6 @@ class CCLicense extends AbstractLicense {
     /**
      * Updates the license details, potentially retrieving information
      * from the licenseURL in each Details.
-     * @param httpClient TODO
      */
     private void updateLicenseDetails(LicenseCache licenseCache, LimeHttpClient httpClient) {
         if(allWorks == null)

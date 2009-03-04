@@ -42,7 +42,6 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
      * constructor has preconditions on several parameters; putting the burden
      * on the caller makes the method easier to implement, since the superclass
      * constructor immediately starts a download thread.
-     * @param pushListProvider TODO
      * @param incompleteFile the incomplete file to resume to, which
      *  MUST be the result of IncompleteFileManager.getFile.
      * @param name the name of the completed file, which MUST be the result of

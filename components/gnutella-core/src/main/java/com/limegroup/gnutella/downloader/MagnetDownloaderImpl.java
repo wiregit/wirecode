@@ -76,8 +76,6 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * non-null.)  If <tt>filename</tt> is specified, it will be used as the
      * name of the complete file; otherwise it will be taken from any search
      * results or guessed from <tt>defaultURLs</tt>.
-     * @param saveLocationManager 
-     * @param pushListProvider TODO
      * @param magnet contains all the information for the download, must be
      * {@link MagnetOptions#isDownloadable() downloadable}.
      * @param overwrite whether file at download location should be overwritten

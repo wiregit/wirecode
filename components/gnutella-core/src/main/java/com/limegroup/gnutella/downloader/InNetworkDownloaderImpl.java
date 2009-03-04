@@ -46,7 +46,6 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
     
     /** 
      * Constructs a new downloader that's gonna work off the network.
-     * @param pushListProvider TODO
      */
     @Inject
     InNetworkDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,

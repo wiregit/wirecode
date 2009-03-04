@@ -64,8 +64,8 @@ public class MockDownloadItem implements DownloadItem {
 	}
 
 	public int getPercentComplete() {
-		//TODO - check for div by zero?
-		return (int) (100 * getCurrentSize() / getTotalSize());
+	    long totalSize = getTotalSize();
+	    return totalSize > 0 ? (int) (100 * getCurrentSize() / totalSize) : 0;
 	}
 
 	public long getCurrentSize() {

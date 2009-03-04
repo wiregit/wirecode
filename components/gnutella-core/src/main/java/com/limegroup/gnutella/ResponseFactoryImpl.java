@@ -224,7 +224,6 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * @param index the index of the file referenced in the response
      * @param size the size of the file (in bytes)
      * @param name the name of the file
-     * @param incomingNameByteArraySize TODO
      * @param urns the <tt>Set</tt> of <tt>URN</tt> instances associated
      *        with the file
      * @param doc the <tt>LimeXMLDocument</tt> instance associated with the

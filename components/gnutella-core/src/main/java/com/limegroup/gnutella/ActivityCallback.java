@@ -42,8 +42,6 @@ public interface ActivityCallback extends DownloadCallback
 
     /**
      * Add a query string to the monitor screen
-     * @param guid TODO
-     * @param address TODO
      */
     public void handleQuery(QueryRequest query, String address, int port);
 

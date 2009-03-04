@@ -21,7 +21,6 @@ public final class UpdateResponse extends AbstractVendorMessage implements Vendo
     
     /**
      * Constructs a new UpdateResponse message from the network.
-     * @param network TODO
      */
     UpdateResponse(byte[] guid, byte ttl, byte hops, int version, byte[] payload, Network network) 
                                                      throws BadPacketException {

@@ -268,7 +268,6 @@ public interface PingReplyFactory {
     /**
      * Returns a new <tt>PingReply</tt> instance with all the same data
      * as <tt>pingReply</tt>, but with the specified GUID.
-     * @param pingReply TODO
      * @param guid the guid to use for the new <tt>PingReply</tt>
      *
      * @return a new <tt>PingReply</tt> instance with the specified GUID

@@ -54,7 +54,6 @@ public class ResetTableMessage extends RouteTableMessage {
      * Creates a new ResetTableMessage with data read from the network.  The
      * payload argument is the complete payload of the message.  The first byte
      * is guaranteed to be RESET_VARIANT.
-     * @param network TODO
      * 
      * @exception BadPacketException the remaining values in payload are not
      *  well-formed, e.g., because it's the wrong length.  

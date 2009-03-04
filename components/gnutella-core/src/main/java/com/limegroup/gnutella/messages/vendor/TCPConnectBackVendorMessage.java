@@ -24,7 +24,6 @@ public final class TCPConnectBackVendorMessage extends AbstractVendorMessage {
 
     /**
      * Constructs a new TCPConnectBackVendorMessage with data from the network.
-     * @param network TODO
      */
     TCPConnectBackVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
                                 byte[] payload, Network network) 

@@ -20,7 +20,6 @@ public final class QueryStatusRequest extends AbstractVendorMessage {
 
     /**
      * Constructs a new QueryStatusRequest with data from the network.
-     * @param network TODO
      */
     QueryStatusRequest(byte[] guid, byte ttl, byte hops, int version, 
                        byte[] payload, Network network) throws BadPacketException {

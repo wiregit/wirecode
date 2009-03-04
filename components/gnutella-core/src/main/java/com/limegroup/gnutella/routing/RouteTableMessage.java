@@ -56,7 +56,6 @@ public abstract class RouteTableMessage extends AbstractMessage {
      * The returned value is a subclass of RouteTableMessage depending on
      * the variant in the payload.  (That's why there is no corresponding
      * constructor in this.)
-     * @param network TODO
      * 
      * @throws BadPacketException the payload is not well-formatted
      */
