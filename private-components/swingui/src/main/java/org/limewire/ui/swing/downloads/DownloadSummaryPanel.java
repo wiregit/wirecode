@@ -602,9 +602,9 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             
             if(tryAgainButton.isVisible()) {
                 if(item.isSearchAgainEnabled()) {
-                    tryAgainButton.setText(I18n.tr("Search again"));
+                    tryAgainButton.setText(I18n.tr("Search Again"));
                 } else {
-                    tryAgainButton.setText(I18n.tr("Try again"));
+                    tryAgainButton.setText(I18n.tr("Try Again"));
                 }
             }
             
