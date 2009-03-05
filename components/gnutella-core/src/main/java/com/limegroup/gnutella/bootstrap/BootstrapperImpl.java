@@ -134,7 +134,7 @@ public class BootstrapperImpl implements Bootstrapper {
      * Determines whether or not we need more hosts.
      */
     private boolean needsHosts(long now) {
-        if(!listener.needsHosts()) {
+        if(listener.needsHosts()) {
             LOG.trace("Need hosts: none known");
             return true;
         }
@@ -166,10 +166,10 @@ public class BootstrapperImpl implements Bootstrapper {
                 nextAllowedUdpTime = now + UDP_FALLBACK_DELAY;
             return true;
         }
-        // If we're never going to multicast, fall back to UDP
+        // If we're never going to multicast, fall back to UDP immediately
         if(nextAllowedUdpTime == Long.MAX_VALUE &&
                 ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue())
-            nextAllowedUdpTime = now + UDP_FALLBACK_DELAY;
+            nextAllowedUdpTime = 0;
         LOG.trace("Not fetching via multicast");
         return false;
     }
