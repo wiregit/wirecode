@@ -32,7 +32,7 @@ class CoreUploadItem implements UploadItem {
 
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
     
-    private Map<FilePropertyKey, Object> propertiesMap;
+    private volatile Map<FilePropertyKey, Object> propertiesMap;
     
     public final static long UNKNOWN_TIME = Long.MAX_VALUE;
     private final UploadItemType uploadItemType;
