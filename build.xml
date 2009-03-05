@@ -4,17 +4,6 @@
     <property name="limewire.home" location="${basedir}"/>
 
     <import file="components/common/build-macros.xml"/>
-    <!--import file="components/build.xml"/-->
-    <!--import file="core/build.xml"/-->
-    <!--import file="tests/build.xml" /-->
-    <!--import file="components/core-glue/build.xml"/-->
-    
-    <target name="ivy-taskdef" unless="ivy-taskdef.complete">
-        <echo message="defining ivy"/>
-        <property name="ivy-taskdef.complete" value="true"/>
-        <taskdef resource="org/apache/ivy/ant/antlib.xml"
-    	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"/>
-    </target>
     
     <target name="compile" depends="initialize">
         <do.ivy includes="components/*/build.xml,core/build.xml,private-components/*/build.xml"
