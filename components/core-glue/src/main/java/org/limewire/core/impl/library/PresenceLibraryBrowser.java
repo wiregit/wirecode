@@ -48,7 +48,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
     private static final Log LOG = LogFactory.getLog(PresenceLibraryBrowser.class);
 
     private final BrowseFactory browseFactory;
-    private final RemoteLibraryManagerImpl remoteLibraryManager;
+    private final RemoteLibraryManager remoteLibraryManager;
 
     private final SocketsManager socketsManager;
     
@@ -74,16 +74,18 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
     private volatile int latestConnectivityEventRevision = 0;
 
     @Inject
-    public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManagerImpl remoteLibraryManager,
+    public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManager remoteLibraryManager,
             SocketsManager socketsManager, XMPPRemoteFileDescDeserializer remoteFileDescDeserializer) {
         this.browseFactory = browseFactory;
         this.remoteLibraryManager = remoteLibraryManager;
         this.socketsManager = socketsManager;
         this.remoteFileDescDeserializer = remoteFileDescDeserializer;
-        socketsManager.addListener(new ConnectivityChangeListener());
     }
 
-    @Inject void register(ListenerSupport<LibraryChangedEvent> listenerSupport) {
+    @Inject 
+    void register(ListenerSupport<LibraryChangedEvent> listenerSupport) {
+        registerSecondaryListeners();
+        
         listenerSupport.addListener(this);
     }
 
@@ -93,8 +95,10 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         remoteLibraryManager.addPresenceLibrary(event.getSource());
     }
 
-    @Inject
-    public void addListener(RemoteLibraryManager remoteLibraryManager) {
+    private void registerSecondaryListeners() {
+        
+        socketsManager.addListener(new ConnectivityChangeListener());
+        
         remoteLibraryManager.getFriendLibraryList().addListEventListener(new ListEventListener<FriendLibrary>() {
             @Override
             public void listChanged(ListEvent<FriendLibrary> listChanges) {
@@ -123,7 +127,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             }
         });
     }
-
+    
     private void browse(final PresenceLibrary presenceLibrary) {
         presenceLibrary.setState(LibraryState.LOADING);
         final FriendPresence friendPresence = presenceLibrary.getPresence();
@@ -235,11 +239,15 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         synchronized (librariesToBrowse) {
             retry = latestConnectivityEventRevision > startRevision;
             if (!retry) {
-                assert(librariesToBrowse.add(presenceLibrary));
+                LOG.debugf("readding and not trying after fail {0}", presenceLibrary);
+                boolean wasAdded = librariesToBrowse.add(presenceLibrary);
+                assert(wasAdded);
             } else {
                 // copy value under lock
                 startRevision = latestConnectivityEventRevision;
+                LOG.debugf("retrying with new revision {0}", startRevision);
             }
+            LOG.debugf("libraries to browser after fail: {0}, size {1}", librariesToBrowse, librariesToBrowse.size());
         }
         if (retry) {
             tryToResolveAndBrowse(presenceLibrary, startRevision);
@@ -266,6 +274,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             synchronized (librariesToBrowse) {
                 currentRevision = ++latestConnectivityEventRevision;
                 copy = new ArrayList<PresenceLibrary>(librariesToBrowse);
+                LOG.debugf("revision: {0}, libraries to browse again: {1}", currentRevision, copy);
                 librariesToBrowse.clear();
             }
             for (PresenceLibrary library : copy) {
