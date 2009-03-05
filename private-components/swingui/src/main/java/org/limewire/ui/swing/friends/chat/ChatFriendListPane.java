@@ -895,7 +895,7 @@ public class ChatFriendListPane extends JPanel {
                 return;
             }
             
-            item.setText(tr("Share"));
+            item.setText(tr("What I'm Sharing"));
         }
     }
     

@@ -471,7 +471,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
     private class ShareAction extends AbstractAction {
         public ShareAction() {
-            super(tr("<html><u>{0}</u></html>", "Share"));
+            super(tr("<html><u>{0}</u></html>", "What I'm Sharing"));
         }
         
         @Override
