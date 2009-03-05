@@ -232,6 +232,10 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         }
     }
     
+    /**
+     * Updates the column header component in the scroll pane.  This depends on
+     * the current results view and whether the sponsored results are visible. 
+     */
     private void syncColumnHeader() {
         Component resultHeader = resultsContainer.getScrollPaneHeader();
         if (resultHeader == null) {
@@ -270,7 +274,11 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         
         scrollPane.validate();
     }
-        
+    
+    /**
+     * Initializes the components and adds them to the container.  Called by
+     * the constructor.  
+     */
     private void layoutComponents() {
         MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!", 
         		                "[grow]", "[][][][grow]");
@@ -311,6 +319,9 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         syncScrollPieces();
     }
 
+    /**
+     * Updates the view components in the scroll pane. 
+     */
     private void syncScrollPieces() {
         scrollablePanel.setScrollable(resultsContainer.getScrollable());
         syncColumnHeader();
@@ -404,6 +415,9 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         updateMessages();        
     }
     
+    /**
+     * Updates the user message based on the current state of the application. 
+     */
     private void updateMessages() {
         if (!lifeCycleComplete) {
             messageLabel.setText(I18n.tr("LimeWire will start your search right after it finishes loading."));
@@ -416,6 +430,9 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         }
     }
     
+    /**
+     * Creates a Painter used to render the selected category tab.
+     */
     private AbstractPainter<FancyTab> createTabSelectionPainter() {
         RectanglePainter<FancyTab> painter = new RectanglePainter<FancyTab>();
         

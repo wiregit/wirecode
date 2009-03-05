@@ -26,7 +26,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * An implementation of SearchHandler to initiate regular text searches.
+ * The implementation of SearchHandler used to initiate regular text searches.
+ * Calling the <code>doSearch(SearchInfo)</code> method will create a new  
+ * search results tab in the UI, and start the search operation.
  */
 @Singleton
 class TextSearchHandlerImpl implements SearchHandler {
@@ -38,6 +40,10 @@ class TextSearchHandlerImpl implements SearchHandler {
     private final LifeCycleManager lifeCycleManager;
     private final GnutellaConnectionManager connectionManager;
     
+    /**
+     * Constructs a TextSearchHandlerImpl with the specified services and
+     * factories.
+     */
     @Inject
     TextSearchHandlerImpl(SearchFactory searchFactory,
             SearchResultsPanelFactory panelFactory,
@@ -53,19 +59,27 @@ class TextSearchHandlerImpl implements SearchHandler {
         this.connectionManager = connectionManager;
     }
 
+    /**
+     * Performs a search operation using the specified SearchInfo object.  
+     * The method always returns true.
+     */
     @Override
     public boolean doSearch(final SearchInfo info) {
+        // Create search request.
         final Search search = searchFactory.createSearch(info);
         
         String panelTitle = info.getTitle();
+        
+        // Create search results data model and display panel.
         final SearchResultsModel model = searchResultsModelFactory.createSearchResultsModel();
-        final SearchResultsPanel searchPanel =
-            panelFactory.createSearchResultsPanel(
+        final SearchResultsPanel searchPanel = panelFactory.createSearchResultsPanel(
                 info, model.getObservableSearchResults(), search);
-        final SearchNavItem item =
-            searchNavigator.addSearch(panelTitle, searchPanel, search);
+        
+        // Add search results display to the UI, and select its navigation item.
+        final SearchNavItem item = searchNavigator.addSearch(panelTitle, searchPanel, search);
         item.select();
         
+        // Add listener to forward search results to data model.
         search.addSearchListener(new SearchListener() {
             @Override
             public void handleSearchResult(Search search, final SearchResult searchResult) {
@@ -105,12 +119,19 @@ class TextSearchHandlerImpl implements SearchHandler {
                 });
             }
         });
+
+        // Add listeners for connection events.
+        addConnectionWarnings(search, searchPanel, item);
         
-        addConnectionWarnings(search, searchPanel, item);        
+        // Start search operation.
         startSearch(search, searchPanel, item);
         return true;
     }
 
+    /**
+     * Initiates a search using the specified Search request, display panel,
+     * and navigation item.
+     */
     private void startSearch(final Search search, final SearchResultsPanel searchPanel, NavItem navItem) {
         //prevent search from starting until lifecycle manager completes loading
         if(lifeCycleManager.isStarted()) {
@@ -138,6 +159,11 @@ class TextSearchHandlerImpl implements SearchHandler {
         }
     }
     
+    /**
+     * Notifies the specified SearchResultsPanel if the specified
+     * ConnectionStrength indicates a full connection.  Return true if fully
+     * connected, false otherwise.
+     */
     private boolean setConnectionStrength(ConnectionStrength type, SearchResultsPanel searchPanel) {
         switch(type) {
         case TURBO:
@@ -149,6 +175,10 @@ class TextSearchHandlerImpl implements SearchHandler {
         return false;
     }
     
+    /**
+     * Removes the specified listeners from the Search request and connection 
+     * manager.
+     */
     private void removeListeners(Search search, AtomicReference<SearchListener> searchListenerRef, AtomicReference<PropertyChangeListener> connectionListenerRef) {
         SearchListener searchListener = searchListenerRef.get();
         if(searchListener != null) {
@@ -163,6 +193,10 @@ class TextSearchHandlerImpl implements SearchHandler {
         }
     }
 
+    /**
+     * Adds listeners to the Search request and connection manager to update 
+     * the UI based on connection events.
+     */
     private void addConnectionWarnings(final Search search, final SearchResultsPanel searchPanel, NavItem navItem) {
         final AtomicReference<SearchListener> searchListenerRef = new AtomicReference<SearchListener>();
         final AtomicReference<PropertyChangeListener> connectionListenerRef = new AtomicReference<PropertyChangeListener>();

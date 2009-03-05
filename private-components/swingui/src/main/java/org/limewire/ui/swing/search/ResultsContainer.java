@@ -32,20 +32,28 @@ import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanelFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 
 /**
- * This class is a panel that displays search results.
- * @see org.limewire.ui.swing.search.SearchResultsPanel.
+ * ResultsContainer is a display panel that contains the search results tables 
+ * for all media categories.
+ * 
+ * @see org.limewire.ui.swing.search.SearchResultsPanel
  */
 public class ResultsContainer extends JXPanel {
 
+    /** Category results panel currently displayed. */
     private BaseResultPanel currentPanel;
-    private Map<String, BaseResultPanel> panelMap =
-        new HashMap<String, BaseResultPanel>();
+    
+    /** Map of results panels indexed by media category. */
+    private Map<String, BaseResultPanel> panelMap = new HashMap<String, BaseResultPanel>();
+    
+    /** Current view type; either LIST or TABLE. */
     private SearchViewType mode = SearchViewType.forId(SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue());
     
     private final CardLayout cardLayout = new CardLayout();
 
     /**
-     * See LimeWireUISearchModule for binding information.
+     * Constructs a ResultsContainer with the specified search parameters and
+     * factories.
+     * @see org.limewire.ui.swing.search.ResultsContainerFactory
      */
     @AssistedInject ResultsContainer(
         @Assisted EventList<VisualSearchResult> eventList, 
@@ -60,6 +68,7 @@ public class ResultsContainer extends JXPanel {
         OtherResultsPanelFactory otherFactory,
         ProgramResultsPanelFactory programFactory) {
         
+        // Create result panels for all media categories.
         panelMap.put(SearchCategory.ALL.name(),
             allFactory.create(eventList, search, searchInfo, preserver));
         panelMap.put(SearchCategory.AUDIO.name(),
@@ -77,11 +86,17 @@ public class ResultsContainer extends JXPanel {
         
         setLayout(cardLayout);
         
+        // Add result panels to the container.
         for (Map.Entry<String, BaseResultPanel> entry : panelMap.entrySet()) {
             add(entry.getValue(), entry.getKey());
         }
     }
 
+    /**
+     * Installs a listener on the list of search results to update the result
+     * count for the specified search category and tab action.  The result
+     * count is displayed in parentheses next to the category name.
+     */
     public void synchronizeResultCount(SearchCategory key, final Action action) {
         // Adds itself as a listener to the list & keeps the action in sync.
         new SourceCountMaintainer(
@@ -99,6 +114,9 @@ public class ResultsContainer extends JXPanel {
         }
     }
     
+    /**
+     * Displays the search results tables for the specified search category.
+     */
     void showCategory(SearchCategory category) {
         String name = category.name();
         currentPanel = panelMap.get(name); 
@@ -106,6 +124,10 @@ public class ResultsContainer extends JXPanel {
         currentPanel.setViewType(mode);
     }
     
+    /**
+     * Returns a filtered list of search results for the specified media
+     * category and list of complete results.
+     */
     private FilterList<VisualSearchResult> filter(
         final Category category, EventList<VisualSearchResult> eventList) {
         return GlazedListsFactory.filterList(
@@ -117,10 +139,17 @@ public class ResultsContainer extends JXPanel {
         });
     }
 
+    /**
+     * Returns the header component for the category results currently 
+     * displayed.  The method returns null if no header is displayed.
+     */
     public Component getScrollPaneHeader() {
         return currentPanel.getScrollPaneHeader();
     }
 
+    /**
+     * Returns the results view component currently being displayed. 
+     */
     public Scrollable getScrollable() {
         return currentPanel.getScrollable();
     }

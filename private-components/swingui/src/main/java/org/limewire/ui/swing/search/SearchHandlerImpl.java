@@ -10,13 +10,22 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+/**
+ * The primary implementation of SearchHandler used to start a new search.
+ * SearchHandlerImpl actually uses secondary search handlers to process search
+ * requests based on the format of the search query.
+ */
 @Singleton
 class SearchHandlerImpl implements SearchHandler {
     
     private final SearchHandler p2pLinkSearch;
     private final SearchHandler textSearch;
     private final MainPanel mainPanel;
-    
+
+    /**
+     * Constructs a SearchHandlerImpl with the specified secondary search 
+     * handlers for p2p and text searches, and main window panel.
+     */
     @Inject
     public SearchHandlerImpl(@Named("p2p://") SearchHandler p2pLinkSearch,
                         @Named("text") SearchHandler textSearch,
@@ -25,7 +34,12 @@ class SearchHandlerImpl implements SearchHandler {
         this.textSearch = textSearch;
         this.mainPanel = mainPanel;
     }
-    
+
+    /**
+     * Performs a search operation using the specified SearchInfo object.  The
+     * task is forwarded to a secondary search handler based on the format of 
+     * the search query.  Returns true if the search request is accepted.
+     */
     @Override
     public boolean doSearch(SearchInfo info) {
         if(info.getSearchCategory() == SearchCategory.PROGRAM && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
