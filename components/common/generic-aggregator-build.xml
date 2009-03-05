@@ -44,18 +44,24 @@
         <property name="test-target" value="test-all-with-clover"/>
     </target>
     
-    <target name="test-all">
+    <target name="test-all" depends="initialize-this">
         <property name="test-target" value="test-all"/>
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="${test-target}"/>
+	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="${test-target}"/-->
+        <do.tests-init component="${component}"/>
+        <do.tests2html component="${component}" dir="." include="*/testData/xml/TEST-*.xml"/>
 	</target>
     
-    <target name="jar">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="jar"/> 
-        <!--do.aggregate-jar component="${component}"/-->
+    <target name="jar" depends="initialize-this">
+	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="jar"/--> 
+        <do.aggregate-jar component="${component}"/>
 	</target>
     
-    <target name="javadoc">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="javadoc"/>
+    <target name="javadoc" depends="initialize-this, compile">
+	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="javadoc"/-->
+        <path id="javadoc.classpath">
+            <fileset dir="." includes="*/build/lib/compile/**/*.jar" />
+        </path>
+        <do.javadoc windowtitle="LimeWire - ${component}" component="${component}" sourcepath="." includes="*/src/main/java/**/*.java" excludes="core-glue/**,all/**" classpathrefid="javadoc.classpath"/>
 	</target>
     
     <target name="clean-dist">

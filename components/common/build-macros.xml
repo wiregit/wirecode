@@ -159,10 +159,11 @@
     <macrodef name="do.resolve-dependencies" description="retreive dependencies with ivy">
         <attribute name="component"/>
         <attribute name="conf"/>
+        <attribute name="ivy.file" default="${limewire.components.@{component}.home}/ivy.xml"/>
         <sequential>
             <mkdir dir="${build.limewire.components.@{component}.lib}/@{conf}"/>
             <ivy:resolve  conf="@{conf}"
-                          file="${limewire.components.@{component}.home}/ivy.xml"/>
+                          file="@{ivy.file}"/>
             <ivy:retrieve
                      conf="@{conf}"
                      pattern="${build.limewire.components.@{component}.lib}/[conf]/[type]/[artifact]-[revision].[ext]"/>
@@ -345,7 +346,7 @@
             <do.dist-init component="@{component}"/>
             <delete file="${dist.limewire.components.@{component}.jar}"/>
             <mkdir dir="${limewire.components.@{component}.src.resources}"/>
-            <do.resolve-dependencies component="@{component}" conf="compile"/>
+            <do.resolve-dependencies component="@{component}" conf="compile" ivy.file="${limewire.components.@{component}.home}/../ivy-group.xml"/>
             <jar destfile="${dist.limewire.components.@{component}.jar}"
             	 compress="@{compress}"
                  excludes="@{excludes}"
@@ -357,7 +358,7 @@
                          overwrite="true"
                          forcedeliver="true"
                          artifactspattern="${dist.limewire.components.@{component}.jar}"
-                         srcivypattern="${dist.limewire.components.@{component}.home}/ivy.xml"/>
+                         srcivypattern="./ivy.xml"/>
         </sequential>
     </macrodef>
     
