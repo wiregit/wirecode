@@ -149,4 +149,19 @@ public class NetworkManagerImplTest extends BaseTestCase {
         networkManagerImpl.setListeningPort(5678);
         context.assertIsSatisfied();
     }
+    
+    public void testPortChanged() throws Exception {
+        Mockery context = new Mockery();
+        final NetworkManager networkManager = context.mock(NetworkManager.class);
+
+        NetworkManagerImpl networkManagerImpl = new NetworkManagerImpl(networkManager);
+
+        context.checking(new Expectations() {
+            {
+                one(networkManager).portChanged();
+            }
+        });
+        networkManagerImpl.portChanged();
+        context.assertIsSatisfied();
+    }
 }
