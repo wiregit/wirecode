@@ -1,10 +1,10 @@
 <ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
-    <info organisation="org.limewire" module="all"/>
+    <info organisation="org.limewire" module="components"/>
     <configurations>
         <include file="common/common-configurations.xml"/>
     </configurations>
     <publications>
-        <artifact name="all" conf="master"/>
+        <artifact name="components" conf="master"/>
     </publications>
     <dependencies>
         <!-- TODO generate this file -->

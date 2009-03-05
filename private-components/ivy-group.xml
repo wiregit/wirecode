@@ -1,0 +1,14 @@
+<ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="org.limewire" module="private-components"/>
+    <configurations>
+        <include file="../components/common/common-configurations.xml"/>
+    </configurations>
+    <publications>
+        <artifact name="private-components" conf="master"/>
+    </publications>
+    <dependencies>
+        <!-- TODO generate this file -->
+        <dependency org="org.limewire" name="integrated-ui" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="swingui" rev="latest.integration" conf="compile,runtime"/>
+    </dependencies>
+</ivy-module>

@@ -52,7 +52,7 @@
 	</target>
     
     <target name="jar" depends="initialize-this">
-	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="jar"/--> 
+	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="jar"/> 
         <do.aggregate-jar component="${component}"/>
 	</target>
     
