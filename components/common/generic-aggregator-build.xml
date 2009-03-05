@@ -70,8 +70,10 @@
     
     <target name="clover2html" depends="initialize-this">
 	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clover2html"/-->
+        <do.tests-init component="${component}"/>
+        <do.clover-setup component="${component}"/>
         <do.clover-merge-dbs component="${component}"/>
-        <!--do.clover2html component="${component}" defaulttestsources="." defaulttestsourceincludes="*/src/test/java/**/*.java"/-->
+        <do.clover2html component="${component}" defaulttestsources="." defaulttestsourceincludes="*/src/test/java/**/*.java"/>
 	</target>
 	
 </project>

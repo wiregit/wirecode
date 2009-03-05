@@ -22,7 +22,6 @@
 			  value="${limewire.lib.native}/windows${path.separator}${limewire.lib.native}/osx${path.separator}${limewire.lib.native}"/>
 	<property name="limewire.components.home"
 		      location="${limewire.home}/components"/>
-    <echo message="${ant.library.dir}"/>
     <property name="cloverjar"
     		  location="${ant.library.dir}/clover.jar"/>
     
