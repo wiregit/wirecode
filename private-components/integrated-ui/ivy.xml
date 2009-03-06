@@ -30,5 +30,7 @@
         <dependency org="org.bushe.swing.event" name="EventBus" rev="${EventBus.version}" conf="compile,runtime"/>
         <dependency org="mozilla" name="mozswing-interfaces" rev="${mozswing-interfaces.version}" conf="compile,runtime"/>
         <dependency org="org.mozilla" name="mozswing" rev="${mozswing.version}" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
+        <dependency org="org.limewire" name="lw-inspection-tool" rev="1.1" conf="test"/>
     </dependencies>
 </ivy-module>

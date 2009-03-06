@@ -1,71 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project basedir="." default="compile-src">
-    <property name="component" value="all"/>
 	<import file="build-macros.xml" />
     
-    <property name="includes" value="*/build.xml"/>
-    <property name="excludes" value=""/>
+    <property name="includes" value="**/build.xml"/>
+    <property name="excludes" value="build.xml"/>
     <property name="root" value=""/>
     
     <target name="initialize-this">
         <do.setup-properties component="${component}"/>    
     </target>
     
-    <target name="initialize">
-        <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="initialize"/>
+    <target name="initialize" unless="skip-sub-builds">
+        <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="initialize"/>
     </target>
 	
-	<target name="clean">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean"/>
+	<target name="clean" unless="skip-sub-builds">
+	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="clean"/>
 	</target>
     
-    <target name="compile">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="compile"/>
+    <target name="compile" unless="skip-sub-builds">
+	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="compile"/>
 	</target>
 	
-	<target name="compile-src">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="compile-src"/>
+	<target name="compile-src" unless="skip-sub-builds">
+	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="compile-src"/>
 	</target>
     
-	<target name="clean-src">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean-src"/>
+	<target name="clean-src" unless="skip-sub-builds">
+	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="clean-src"/>
 	</target>
 	
-	<target name="compile-tests">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="compile-test"/>
+	<target name="compile-tests" unless="skip-sub-builds">
+	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="compile-test"/>
 	</target>
     
-	<target name="clean-tests">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean-tests"/>
+	<target name="clean-tests" unless="skip-sub-builds">
+	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="clean-tests"/>
 	</target>
 
     <target name="with.clover">
         <property name="test-target" value="test-all-with-clover"/>
     </target>
     
-    <target name="test-all" depends="initialize-this">
-        <property name="test-target" value="test-all"/>
-	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="${test-target}"/-->
+    <target name="test-all-sub-builds" unless="skip-sub-builds">
+        <property name="test-target" value="test-all"/>	    
+        <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="${test-target}"/>
+    </target>
+    
+    <target name="test-all" depends="initialize-this, test-all-sub-builds">        
         <do.tests-init component="${component}"/>
         <do.tests2html component="${component}" dir="." include="*/testData/xml/TEST-*.xml"/>
 	</target>
     
-    <target name="jar" depends="initialize-this">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="jar"/> 
+    <target name="jar-sub-builds" unless="skip-sub-builds">    
+        <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="jar"/> 
+    </target>
+    
+    <target name="jar" depends="initialize-this, jar-sub-builds">
         <do.aggregate-jar component="${component}"/>
 	</target>
     
     <target name="javadoc" depends="initialize-this, compile">
-	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="javadoc"/-->
         <path id="javadoc.classpath">
             <fileset dir="." includes="*/build/lib/compile/**/*.jar" />
         </path>
         <do.javadoc windowtitle="LimeWire - ${component}" component="${component}" sourcepath="." includes="*/src/main/java/**/*.java" excludes="core-glue/**,all/**" classpathrefid="javadoc.classpath"/>
 	</target>
     
-    <target name="clean-dist">
-	    <do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clean-dist"/>
+    <target name="clean-dist" unless="skip-sub-builds">
+	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="clean-dist"/>
 	</target>
     
     <!--target name="with.clover" depends="initialize-this"-->
@@ -75,7 +79,6 @@
 	</target-->
     
     <target name="clover2html" depends="initialize-this">
-	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="clover2html"/-->
         <do.tests-init component="${component}"/>
         <do.clover-setup component="${component}"/>
         <do.clover-merge-dbs component="${component}"/>

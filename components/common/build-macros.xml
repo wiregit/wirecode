@@ -34,6 +34,17 @@
     <!--taskdef resource="org/apache/ivy/ant/antlib.xml"
     	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"/-->
     
+    <target name="ivy-check">
+        <available property="ivy.installed" classname="org.apache.ivy.ant.IvyAntSettings" />
+    </target>
+    
+    <target name="ivy-taskdef" depends="ivy-check" unless="ivy.installed">
+        <echo message="defining ivy"/>
+        <property name="ivy-taskdef.complete" value="true"/>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+    	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"/>
+    </target>
+    
     <macrodef name="do.setup-properties" description="Sets up common properties every macro uses.">
     	<attribute name="component"/>
         <attribute name="junit" default="${limewire.lib.jars}/tests/junit.jar"/>
@@ -142,17 +153,20 @@
 		</sequential>
 	</macrodef>
     
-    <macrodef name="do.ivy" description="calculate dependancies and run an ant task">
+    <macrodef name="do.subant" description="calculate dependancies and run an ant task">
         <attribute name="target"/>
         <attribute name="includes"/>
         <attribute name="excludes" default="build.xml"/>
         <attribute name="root" default=""/>
+        <attribute name="ivyfilepath" default="${ivy.buildlist.ivyfilepath}"/>
         <sequential>
-            <ivy:buildlist reference="build-path" onMissingDescriptor="skip" root="@{root}">
+            <ivy:buildlist reference="build-path" onMissingDescriptor="skip" root="@{root}" ivyfilepath="@{ivyfilepath}">
               <fileset dir="." includes="@{includes}" excludes="@{excludes}"/>
             </ivy:buildlist>
             <echo message="${ivy.sorted.modules}"/>
-            <subant target="@{target}" buildpathref="build-path"/>    
+            <subant target="@{target}" buildpathref="build-path">
+                <property name="skip-sub-builds" value="true"/>
+            </subant>    
         </sequential>
     </macrodef>
     
@@ -185,6 +199,7 @@
 	    <sequential>
             <echo message="compiling @{component}..." />
 	        <do.build-init component="@{component}"/>
+            <mkdir dir="${limewire.components.@{component}.src}"/>
 			<mkdir dir="${build.limewire.components.@{component}.classes}"/>
             <do.resolve-dependencies component="@{component}" conf="compile"/>
 			<javac destdir		="${build.limewire.components.@{component}.classes}"
@@ -346,7 +361,7 @@
             <do.dist-init component="@{component}"/>
             <delete file="${dist.limewire.components.@{component}.jar}"/>
             <mkdir dir="${limewire.components.@{component}.src.resources}"/>
-            <do.resolve-dependencies component="@{component}" conf="compile" ivy.file="${limewire.components.@{component}.home}/../ivy-group.xml"/>
+            <do.resolve-dependencies component="@{component}" conf="compile"/>
             <jar destfile="${dist.limewire.components.@{component}.jar}"
             	 compress="@{compress}"
                  excludes="@{excludes}"
@@ -358,7 +373,7 @@
                          overwrite="true"
                          forcedeliver="true"
                          artifactspattern="${dist.limewire.components.@{component}.jar}"
-                         srcivypattern="./ivy.xml"/>
+                         srcivypattern="${dist.limewire.components.@{component}.home}/ivy.xml"/>
         </sequential>
     </macrodef>
     

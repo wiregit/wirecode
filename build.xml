@@ -2,30 +2,17 @@
 <project name="limewire" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="limewire.home" location="${basedir}"/>
-
+    <property name="component" value="limewire"/>
+    <property name="limewire.components.limewire.home"
+                  location="${limewire.home}"/>
+    <property name="limewire.components.limewire.tests"
+                  location="${limewire.components.tests.home}"/>
     <import file="components/common/build-macros.xml"/>
-    
-    <target name="compile" depends="initialize">
-        <do.ivy includes="components/*/build.xml,core/build.xml,private-components/*/build.xml"
-                target="jar"/>
-    </target>
-
-    <target name="clean" depends="initialize">
-        <do.ivy includes="components/*/build.xml,core/build.xml,private-components/*/build.xml"
-                target="clean"/>        
-    </target>
+    <import file="components/common/generic-aggregator-build.xml"/>
     
     <target name="clean-cache">
         <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
         <ivy:cleancache />                                                              
-    </target>
-    
-    <target name="initialize" depends="ivy-taskdef" unless="initialized.limewire">
-        <property name="limewire.components.limewire.home"
-                  location="${limewire.home}"/>
-        <property name="limewire.components.limewire.tests"
-                  location="${limewire.components.tests.home}"/>
-        <do.setup-properties component="limewire"/>
     </target>
     
     <!--target name="compile"
@@ -61,7 +48,7 @@
             description="Tests all components and LimeWire tests."
             depends="compile">
         <mkdir dir="${tests.limewire.components.limewire.xml}"/>
-        <do.ivy includes="components/*/build.xml,core/build.xml,tests/build.xml,private-components/*/build.xml"
+        <do.subant includes="components/*/build.xml,core/build.xml,tests/build.xml,private-components/*/build.xml"
                 target="test-all"/>
         <do.tests2html component="limewire">
             <more-xml-locations>
