@@ -13,6 +13,7 @@ import org.limewire.collection.ByteArrayCache;
 import org.limewire.collection.PowerOf2ByteArrayCache;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.lifecycle.ServiceScheduler;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -50,8 +51,13 @@ public class DiskController {
     private final Object SCHEDULE_LOCK = new Object();
     
     @Inject
-    public DiskController(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
-        backgroundExecutor.scheduleWithFixedDelay(new CacheCleaner(), 10 * 60 * 1000, 10 * 60 * 1000, TimeUnit.MILLISECONDS);
+    public DiskController() {
+        
+    }
+    
+    @Inject
+    public void register(ServiceScheduler serviceScheduler, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+        serviceScheduler.scheduleWithFixedDelay("DiskContrller.CacheCleaner", new CacheCleaner(), 10, 10, TimeUnit.MINUTES, backgroundExecutor);
     }
     
     /** Adds a DelayedWrite to the queue of writers. */

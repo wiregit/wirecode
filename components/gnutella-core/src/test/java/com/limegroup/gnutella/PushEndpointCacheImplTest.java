@@ -16,6 +16,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
@@ -29,7 +30,8 @@ public class PushEndpointCacheImplTest extends BaseTestCase {
     private Runnable weakCleaner;
     private HTTPHeaderUtils httpHeaderUtils;
     private NetworkInstanceUtils networkInstanceUtils;
-
+    private ServiceScheduler serviceScheduler;
+    
     public PushEndpointCacheImplTest(String name) {
         super(name);
     }
@@ -42,15 +44,16 @@ public class PushEndpointCacheImplTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
         executorService = context.mock(ScheduledExecutorService.class);
-
+        serviceScheduler = context.mock(ServiceScheduler.class);
+        
         context.checking(new Expectations() {{
-            allowing(executorService).scheduleWithFixedDelay(with(any(Runnable.class)), 
-                    with(any(Long.class)), with(any(Long.class)), with(any(TimeUnit.class)));
-            will(new CustomAction("savefield") {
+            allowing(serviceScheduler).scheduleWithFixedDelay(with(any(String.class)), with(any(Runnable.class)), with(equal(30L)), with(equal(30L)), with(equal(TimeUnit.SECONDS)), with(equal(executorService)));
+            will(new CustomAction("Schedule") {
+               @Override
                 public Object invoke(Invocation invocation) throws Throwable {
-                    weakCleaner = (Runnable) invocation.getParameter(0);
+                    weakCleaner = (Runnable) invocation.getParameter(1);
                     return null;
-                }
+                } 
             });
         }});
         
@@ -58,7 +61,8 @@ public class PushEndpointCacheImplTest extends BaseTestCase {
         httpHeaderUtils = injector.getInstance(HTTPHeaderUtils.class);
         networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
         
-        pushEndpointCacheImpl = new PushEndpointCacheImpl(executorService, httpHeaderUtils, networkInstanceUtils);
+        pushEndpointCacheImpl = new PushEndpointCacheImpl(httpHeaderUtils, networkInstanceUtils);
+        pushEndpointCacheImpl.register(executorService, serviceScheduler);
     }
 
     public void testCachedEntriesAreExpunged() throws Exception {

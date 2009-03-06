@@ -17,6 +17,7 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.security.AddressSecurityToken;
 
 import com.google.inject.Inject;
@@ -67,8 +68,7 @@ public class OnDemandUnicaster {
 
     @Inject
     public OnDemandUnicaster(QueryRequestFactory queryRequestFactory,
-            UDPService udpService, @Named("backgroundExecutor")
-            ScheduledExecutorService backgroundExecutor,
+            UDPService udpService, 
             Provider<MessageRouter> messageRouter,
             PingRequestFactory pingRequestFactory) {
         this.queryRequestFactory = queryRequestFactory;
@@ -80,13 +80,15 @@ public class OnDemandUnicaster {
         _queryKeys = new Hashtable<GUESSEndpoint, AddressSecurityToken>(); // need sychronization
         _bufferedURNs = new Hashtable<GUESSEndpoint, SendLaterBundle>(); // synchronization handy
         _queriedHosts = new HashMap<GUID.TimedGUID, Set<IpPort>>();
-        
-        // TODO: move scheduling to an initializer
-        // schedule a runner to clear various data structures
-        backgroundExecutor.scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
-        backgroundExecutor.scheduleWithFixedDelay(new QueriedHostsExpirer(), QUERIED_HOSTS_CLEAR_TIME, QUERIED_HOSTS_CLEAR_TIME, TimeUnit.MILLISECONDS);
      }        
 
+    @Inject
+    public void register(ServiceScheduler serviceScheduler, 
+                         @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+        // schedule a runner to clear various data structures
+        serviceScheduler.scheduleWithFixedDelay("OnDemandUnicaster.Expirer", new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS, backgroundExecutor);
+        serviceScheduler.scheduleWithFixedDelay("OnDemandUnicaster.QueriedHostsExpirer", new QueriedHostsExpirer(), QUERIED_HOSTS_CLEAR_TIME, QUERIED_HOSTS_CLEAR_TIME, TimeUnit.MILLISECONDS, backgroundExecutor);
+    }
     /** Feed me AddressSecurityToken pongs so I can query people....
      *  pre: pr.getQueryKey() != null
      */

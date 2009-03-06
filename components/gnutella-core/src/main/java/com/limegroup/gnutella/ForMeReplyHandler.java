@@ -23,6 +23,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
@@ -69,7 +70,6 @@ public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
     private final Provider<SearchResultHandler> searchResultHandler;
     private final Provider<DownloadManager> downloadManager;
     private final Provider<PushManager> pushManager;
-    private final ScheduledExecutorService backgroundExecutor;
     private final ApplicationServices applicationServices;
     private final ConnectionServices connectionServices;
     private final LimeXMLDocumentHelper limeXMLDocumentHelper;
@@ -82,7 +82,6 @@ public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
             Provider<SearchResultHandler> searchResultHandler,
             Provider<DownloadManager> downloadManager,
             Provider<Acceptor> acceptor, Provider<PushManager> pushManager,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ApplicationServices applicationServices,
             ConnectionServices connectionServices,
             LimeXMLDocumentHelper limeXMLDocumentHelper,
@@ -93,19 +92,22 @@ public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
         this.searchResultHandler = searchResultHandler;
         this.downloadManager = downloadManager;
         this.pushManager = pushManager;
-        this.backgroundExecutor = backgroundExecutor;
         this.applicationServices = applicationServices;
         this.connectionServices = connectionServices;
         this.limeXMLDocumentHelper = limeXMLDocumentHelper;
         this.ipFilterProvider = ipFilterProvider;
-    	    
-	    //Clear push requests every 30 seconds.
-        //TODO: move to initializer
-	    this.backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
-	        public void run() {
-	            PUSH_REQUESTS.clear();
-	        }
-	    }, 30 * 1000, 30 * 1000, TimeUnit.MILLISECONDS);
+    }
+    
+    @Inject
+    public void register(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, ServiceScheduler serviceScheduler) {
+        //Clear push requests every 30 seconds.
+        Runnable clearPushRequests = new Runnable() {
+            public void run() {
+                PUSH_REQUESTS.clear();
+            }
+        };
+        
+        serviceScheduler.scheduleWithFixedDelay("ForMeReplyHandler.Clear Push Requests", clearPushRequests, 30, 30, TimeUnit.SECONDS, backgroundExecutor);
     }
 
 	public void handlePingReply(PingReply pingReply, ReplyHandler handler) {

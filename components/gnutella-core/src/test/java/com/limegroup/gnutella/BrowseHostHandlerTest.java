@@ -296,7 +296,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 ApplicationServices applicationServices, ConnectionServices connectionServices,
                 LimeXMLDocumentHelper limeXMLDocumentHelper, Provider<IPFilter> ipFilterProvider) {
             super(networkManager, secureMessageVerifier, connectionManager, searchResultHandler,
-                    downloadManager, acceptor, pushManager, backgroundExecutor, applicationServices,
+                    downloadManager, acceptor, pushManager, applicationServices,
                     connectionServices, limeXMLDocumentHelper, ipFilterProvider);
             
         }

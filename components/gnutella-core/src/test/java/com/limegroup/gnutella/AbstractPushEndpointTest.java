@@ -4,10 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Arrays;
 
 import junit.framework.Test;
 
@@ -23,7 +23,6 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 /**
@@ -82,7 +81,7 @@ public class AbstractPushEndpointTest extends BaseTestCase {
         HTTPHeaderUtils httpHeaderUtils = injector.getInstance(HTTPHeaderUtils.class);
         NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
         
-        pushEndpointCache = new PushEndpointCacheImpl(new ScheduledExecutorServiceStub(), httpHeaderUtils, networkInstanceUtils);
+        pushEndpointCache = new PushEndpointCacheImpl(httpHeaderUtils, networkInstanceUtils);
         factory = new PushEndpointFactoryImpl(Providers.of((PushEndpointCache)pushEndpointCache), null, networkInstanceUtils);
     }
     

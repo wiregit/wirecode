@@ -17,6 +17,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.lifecycle.ServiceScheduler;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -58,11 +59,14 @@ class PushEndpointCacheImpl implements PushEndpointCache {
     private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
-    PushEndpointCacheImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                          HTTPHeaderUtils httpHeaderUtils, NetworkInstanceUtils networkInstanceUtils) {
+    PushEndpointCacheImpl(HTTPHeaderUtils httpHeaderUtils, NetworkInstanceUtils networkInstanceUtils) {
         this.httpHeaderUtils = httpHeaderUtils;
         this.networkInstanceUtils = networkInstanceUtils;
-        backgroundExecutor.scheduleWithFixedDelay(new WeakCleaner(),30*1000,30*1000, TimeUnit.MILLISECONDS);
+    }
+    
+    @Inject
+    public void register(final @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, ServiceScheduler serviceScheduler) {
+        serviceScheduler.scheduleWithFixedDelay("PushEndpointCacheImpl WeakHashMap Cleaner", new WeakCleaner(), 30, 30, TimeUnit.SECONDS, backgroundExecutor);
     }
 
     /**
