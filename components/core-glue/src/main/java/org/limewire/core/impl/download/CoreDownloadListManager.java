@@ -92,7 +92,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 	}
 	
 	@Inject 
-	void register(DownloadListenerList listenerList) {
+	void registerDownloadListener(DownloadListenerList listenerList) {
 	    
 	    listenerList.addDownloadListener(new CoreDownloadListener(threadSafeDownloadItems,
                 new QueueTimeCalculator(observableDownloadItems)));
@@ -100,7 +100,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 	}
 	
 	@Inject 
-    void register(ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+    void registerService(ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
 
 	      Runnable command = new Runnable() {
               @Override
