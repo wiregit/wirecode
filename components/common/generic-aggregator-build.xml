@@ -1,88 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project basedir="." default="compile-src">
-	<import file="build-macros.xml" />
+<project basedir="." default="compile-src" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <import file="common-macros.xml"/>
     
     <property name="includes" value="**/build.xml"/>
-    <property name="excludes" value="build.xml"/>
     <property name="root" value=""/>
     
-    <target name="initialize-this">
-        <do.setup-properties component="${component}"/>    
-    </target>
-    
-    <target name="initialize" unless="skip-sub-builds">
-        <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="initialize"/>
+    <target name="initialize" depends="ivy-load">
     </target>
 	
-	<target name="clean" unless="skip-sub-builds">
-	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="clean"/>
+	<target name="clean" depends="initialize">
+	    <do.subant excludes="${excludes}, build.xml" includes="${includes}" root="${root}" target="clean"/>
 	</target>
     
-    <target name="compile" unless="skip-sub-builds">
-	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="compile"/>
+    <target name="compile" depends="initialize">
+	    <do.subant excludes="${excludes}, build.xml" includes="${includes}" root="${root}" target="compile"/>
 	</target>
 	
-	<target name="compile-src" unless="skip-sub-builds">
-	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="compile-src"/>
+	<target name="compile-src" depends="initialize">
+	    <do.subant excludes="${excludes}, build.xml" includes="${includes}" root="${root}" target="compile-src"/>
 	</target>
     
-	<target name="clean-src" unless="skip-sub-builds">
-	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="clean-src"/>
+	<target name="clean-src" depends="initialize">
+	    <do.subant excludes="${excludes}, build.xml" includes="${includes}" root="${root}" target="clean-src"/>
 	</target>
 	
-	<target name="compile-tests" unless="skip-sub-builds">
-	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="compile-test"/>
+	<target name="compile-tests" depends="initialize">
+	    <do.subant excludes="${excludes}, build.xml" includes="${includes}" root="${root}" target="compile-test"/>
 	</target>
     
-	<target name="clean-tests" unless="skip-sub-builds">
-	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="clean-tests"/>
+	<target name="clean-tests" depends="initialize">
+	    <do.subant excludes="${excludes}, build.xml" includes="${includes}" root="${root}" target="clean-tests"/>
 	</target>
 
-    <target name="with.clover">
+    <target name="with.clover" depends="initialize">
         <property name="test-target" value="test-all-with-clover"/>
     </target>
     
-    <target name="test-all-sub-builds" unless="skip-sub-builds">
+    <target name="test-all-sub-builds" depends="initialize">
         <property name="test-target" value="test-all"/>	    
-        <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="${test-target}"/>
+        <do.subant excludes="${excludes}, build.xml" includes="${includes}" root="${root}" target="${test-target}"/>
     </target>
     
-    <target name="test-all" depends="initialize-this, test-all-sub-builds">        
+    <target name="test-all" depends="initialize, test-all-sub-builds">        
         <do.tests-init component="${component}"/>
         <do.tests2html component="${component}" dir="." include="*/testData/xml/TEST-*.xml"/>
 	</target>
     
-    <target name="jar-sub-builds" unless="skip-sub-builds">    
-        <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="jar"/> 
+    <target name="jar-sub-builds" depends="initialize">    
+        <do.subant excludes="${excludes}, build.xml" includes="${includes}" root="${root}" target="jar"/> 
     </target>
     
-    <target name="jar" depends="initialize-this, jar-sub-builds">
+    <target name="jar" depends="initialize, jar-sub-builds">
         <do.aggregate-jar component="${component}"/>
 	</target>
     
-    <target name="javadoc" depends="initialize-this, compile">
+    <target name="javadoc" depends="initialize, compile">
         <path id="javadoc.classpath">
             <fileset dir="." includes="*/build/lib/compile/**/*.jar" />
         </path>
         <do.javadoc windowtitle="LimeWire - ${component}" component="${component}" sourcepath="." includes="*/src/main/java/**/*.java" excludes="core-glue/**,all/**" classpathrefid="javadoc.classpath"/>
 	</target>
     
-    <target name="clean-dist" unless="skip-sub-builds">
-	    <do.subant excludes="${excludes}" includes="${includes}" root="${root}" target="clean-dist"/>
+    <target name="clean-dist" depends="initialize">
+	    <do.subant excludes="${excludes}, build.xml" includes="${includes}" root="${root}" target="clean-dist"/>
 	</target>
     
-    <!--target name="with.clover" depends="initialize-this"-->
+    <!--target name="with.clover" depends="initialize"-->
 	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="with.clover"/-->
         <!--do.tests-init component="${component}"/>
         <do.clover-setup component="${component}"  defaultfileset="."/>
 	</target-->
     
-    <target name="clover2html" depends="initialize-this">
+    <target name="clover2html" depends="initialize">
         <do.tests-init component="${component}"/>
         <do.clover-setup component="${component}"/>
         <do.clover-merge-dbs component="${component}"/>
         <do.clover2html component="${component}" defaulttestsources="." defaulttestsourceincludes="*/src/test/java/**/*.java"/>
 	</target>
+	
+	
+    <macrodef name="do.subant" description="calculate dependancies and run an ant task">
+        <attribute name="target"/>
+        <attribute name="includes"/>
+        <attribute name="excludes" default="build.xml"/>
+        <attribute name="root" default=""/>
+        <attribute name="ivyfilepath" default="${ivy.buildlist.ivyfilepath}"/>
+        <sequential>
+            <ivy:buildlist reference="build-path" onMissingDescriptor="skip" root="@{root}" ivyfilepath="@{ivyfilepath}">
+              <fileset dir="." includes="@{includes}" excludes="@{excludes}"/>
+            </ivy:buildlist>
+            <subant target="@{target}" buildpathref="build-path">
+            <propertyset>
+                <!-- must pass the ivy.loaded property to subant, otherwise the 
+                     taskdef is loaded multiple times and we run out of PermGen space. -->
+                <propertyref name="ivy.loaded" /> 
+            </propertyset> 
+            </subant>    
+        </sequential>
+    </macrodef>    	
 	
 </project>

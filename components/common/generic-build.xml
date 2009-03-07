@@ -3,7 +3,7 @@
 <project name="generic-build" basedir="." default="compile-src">
 	<import file="build-macros.xml" />
     
-    <target name="initialize" depends="ivy-taskdef" unless="initialized.${component}">
+    <target name="initialize" depends="ivy-load" unless="initialized.${component}">
         <do.setup-properties component="${component}"/>
     </target>
 	

@@ -5,45 +5,8 @@
 	<description>
 	    A collection of macros for other build files to use.
 	</description>
-    
-	<property name="limewire.home"
-			  location="${basedir}/../.."/>
-	<property name="limewire.lib"
-			  location="${limewire.home}/lib"/>
-	<property name="limewire.lib.jars"
-			  location="${limewire.lib}/jars"/>
-	<property name="limewire.tests.jars"
-			  location="${limewire.lib.jars}/tests"/>
-	<property name="limewire.lib.jars.ant"
-			  location="${limewire.lib}/jars/ant"/>
-	<property name="limewire.lib.native"
-			  location="${limewire.lib}/native"/>
-	<property name="limewire.library.path"
-			  value="${limewire.lib.native}/windows${path.separator}${limewire.lib.native}/osx${path.separator}${limewire.lib.native}"/>
-	<property name="limewire.components.home"
-		      location="${limewire.home}/components"/>
-    <property name="cloverjar"
-    		  location="${ant.library.dir}/clover.jar"/>
-    
-	<property name="compile.debug"			value="true"/>
-	<property name="compile.deprecation"	value="true"/>
-	<property name="compile.optimize"		value="false"/>
-	<property name="compile.source"			value="1.6"/>
-	<property name="compile.target"			value="1.6"/>
-    
-    <!--taskdef resource="org/apache/ivy/ant/antlib.xml"
-    	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"/-->
-    
-    <target name="ivy-check">
-        <available property="ivy.installed" classname="org.apache.ivy.ant.IvyAntSettings" />
-    </target>
-    
-    <target name="ivy-taskdef" depends="ivy-check" unless="ivy.installed">
-        <echo message="defining ivy"/>
-        <property name="ivy-taskdef.complete" value="true"/>
-        <taskdef resource="org/apache/ivy/ant/antlib.xml"
-    	          uri="antlib:org.apache.ivy.ant" classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"/>
-    </target>
+	
+	<import file="common-macros.xml"/>
     
     <macrodef name="do.setup-properties" description="Sets up common properties every macro uses.">
     	<attribute name="component"/>
@@ -146,29 +109,13 @@
     <macrodef name="do.clean" description="Cleans all generated directories.">
     	<attribute name="component"/>
 		<sequential>
+            <echo message="cleaning @{component}..." />
         	<do.clean-testData component="@{component}"/>
 		    <do.clean-build    component="@{component}"/>
 			<do.clean-dist     component="@{component}"/>
 		    <do.clean-clover   component="@{component}"/>
 		</sequential>
 	</macrodef>
-    
-    <macrodef name="do.subant" description="calculate dependancies and run an ant task">
-        <attribute name="target"/>
-        <attribute name="includes"/>
-        <attribute name="excludes" default="build.xml"/>
-        <attribute name="root" default=""/>
-        <attribute name="ivyfilepath" default="${ivy.buildlist.ivyfilepath}"/>
-        <sequential>
-            <ivy:buildlist reference="build-path" onMissingDescriptor="skip" root="@{root}" ivyfilepath="@{ivyfilepath}">
-              <fileset dir="." includes="@{includes}" excludes="@{excludes}"/>
-            </ivy:buildlist>
-            <echo message="${ivy.sorted.modules}"/>
-            <subant target="@{target}" buildpathref="build-path">
-                <property name="skip-sub-builds" value="true"/>
-            </subant>    
-        </sequential>
-    </macrodef>
     
     <macrodef name="do.resolve-dependencies" description="retreive dependencies with ivy">
         <attribute name="component"/>
@@ -183,14 +130,6 @@
                      pattern="${build.limewire.components.@{component}.lib}/[conf]/[type]/[artifact]-[revision].[ext]"/>
         </sequential>
     </macrodef>
-    
-    <!--macrodef name="do.compile" description="Compiles source and test code.">
-        <attribute name="component"/>
-        <sequential>
-            <do.compile-src   component="@{component}"/>
-            <do.compile-tests component="@{component}"/>
-        </sequential>
-    </macrodef-->
 	
 	<macrodef name="do.compile-src" description="Compiles only the source code.">
 	    <attribute name="component"/>
@@ -225,6 +164,7 @@
     <macrodef name="do.clean-src" description="Cleans generated classfiles from compiling source.">
         <attribute name="component"/>
         <sequential>
+            <echo message="cleaning @{component}..." />
 			<delete dir="${build.limewire.components.@{component}.classes}" />
         </sequential>
     </macrodef>
@@ -338,36 +278,6 @@
             >
                 <fileset dir="@{resourcedir}" excludes="@{resexclude}"/>
                 <more-jar-elements/>
-            </jar>
-            <ivy:publish resolver="local"
-                         overwrite="true"
-                         forcedeliver="true"
-                         artifactspattern="${dist.limewire.components.@{component}.jar}"
-                         srcivypattern="${dist.limewire.components.@{component}.home}/ivy.xml"/>
-        </sequential>
-    </macrodef>
-    
-    <macrodef name="do.aggregate-jar" description="Generates a jar of the contents of dependency jars">
-    	<attribute name="component"/>
-    	<element name="more-jar-elements" optional="true"/>
-        <attribute name="basedir"     default="${build.limewire.components.@{component}.classes}"/>
-        <attribute name="resourcedir" default="${limewire.components.@{component}.src.resources}"/>
-        <attribute name="resexclude"  default=""/>
-        <attribute name="compress"    default="false"/>
-        <attribute name="excludes"    default=""/>
-        <attribute name="zipfilesetdir" default="${build.limewire.components.@{component}.lib}/compile"/>
-        <attribute name="zipfilesetdincludes" default="**/*.jar"/>
-        <sequential>
-            <do.dist-init component="@{component}"/>
-            <delete file="${dist.limewire.components.@{component}.jar}"/>
-            <mkdir dir="${limewire.components.@{component}.src.resources}"/>
-            <do.resolve-dependencies component="@{component}" conf="compile"/>
-            <jar destfile="${dist.limewire.components.@{component}.jar}"
-            	 compress="@{compress}"
-                 excludes="@{excludes}"
-            >
-                <!--fileset dir="@{resourcedir}" excludes="@{resexclude}"/-->
-                <zipgroupfileset dir="@{zipfilesetdir}" includes="@{zipfilesetdincludes}"/>
             </jar>
             <ivy:publish resolver="local"
                          overwrite="true"
@@ -621,18 +531,18 @@
     <property name="gettexttasks.jar" value="${limewire.lib.jars.ant}/gettext-ant-tasks.jar"/>
 
 	<target name="init.gettext" description="Loads the gettext ant tasks">
-	 <taskdef name="gettext-extract"
-       classname="org.xnap.commons.ant.gettext.GettextExtractKeysTask"
-       classpath="${gettexttasks.jar}"/>
-	 <taskdef name="gettext-merge"
-       classname="org.xnap.commons.ant.gettext.GettextMergeKeysTask"
-       classpath="${gettexttasks.jar}"/>
-	 <taskdef name="gettext-dist"
-       classname="org.xnap.commons.ant.gettext.GettextDistTask"
-       classpath="${gettexttasks.jar}"/>
-      <taskdef name="gettext-generate-default"
-	   classname="org.xnap.commons.ant.gettext.GenerateDefaultBundleTask"
-	   classpath="${gettexttasks.jar}"/>
+    	 <taskdef name="gettext-extract"
+           classname="org.xnap.commons.ant.gettext.GettextExtractKeysTask"
+           classpath="${gettexttasks.jar}"/>
+    	 <taskdef name="gettext-merge"
+           classname="org.xnap.commons.ant.gettext.GettextMergeKeysTask"
+           classpath="${gettexttasks.jar}"/>
+    	 <taskdef name="gettext-dist"
+           classname="org.xnap.commons.ant.gettext.GettextDistTask"
+           classpath="${gettexttasks.jar}"/>
+          <taskdef name="gettext-generate-default"
+    	   classname="org.xnap.commons.ant.gettext.GenerateDefaultBundleTask"
+    	   classpath="${gettexttasks.jar}"/>
 	</target>
     	
 </project>
