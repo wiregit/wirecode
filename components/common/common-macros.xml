@@ -15,7 +15,35 @@
                  uri="antlib:org.apache.ivy.ant"
                  classpath="${limewire.lib.jars.ant}/ivy-2.0.0.jar"
         />
+        <ivy:configure file="${limewire.ivy.home}/ivysettings.xml"/>
     </target>
+    
+    <macrodef name="do.subant" description="calculate dependancies and run an ant task">
+        <attribute name="dir" default="${limewire.home}"/>
+        <attribute name="target"/>
+        <attribute name="includes"/>
+        <attribute name="excludes" default="build.xml"/>
+        <attribute name="root" default="${component}"/>
+        <attribute name="ivyfilepath" default="${ivy.buildlist.ivyfilepath}"/>
+        <sequential>
+            <echo message="building dependencies, dir: @{dir}, target: @{target}, includes: @{includes}, excludes: @{excludes}, root: @{root}, ivyfilepath: ${ivy.buildlist.ivyfilepath}"/>
+            <ivy:buildlist reference="build-path" onMissingDescriptor="skip" root="@{root}" ivyfilepath="@{ivyfilepath}" excluderoot="true">
+                <fileset dir="@{dir}" excludes="@{excludes}" includes="@{includes}" />
+            </ivy:buildlist>
+            <echo message="list: ${build-path} ${ivy.sorted.modules}"/>
+            <subant target="@{target}" buildpathref="build-path">
+            <propertyset>
+                <!-- must pass the ivy.loaded property to subant, otherwise the 
+                     taskdef is loaded multiple times and we run out of PermGen space. -->
+                <propertyref name="ivy.loaded" /> 
+                <!-- must pass the ivy.dependencies.published property so subant
+                     to prevent each dependency from publishing *its* dependencies.
+                     we only want the entry-point build.xml file to publish. -->
+                <propertyref name="ivy.dependencies.published" />
+            </propertyset> 
+            </subant>    
+        </sequential>
+    </macrodef>    	    
     
 </project>
     

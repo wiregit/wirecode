@@ -1,9 +1,0 @@
-<ivysettings>
-	<resolvers>
-		<chain name="main">
-			<resolver ref="shared"/>
-			<resolver ref="public"/>
-            <resolver ref="limewire-repository"/>
-		</chain>
-	</resolvers>
-</ivysettings>

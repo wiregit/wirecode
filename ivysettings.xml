@@ -1,10 +1,48 @@
 <ivysettings>
-    <properties file="./dependencies.props"/>
+    <properties file="${limewire.ivy.home}/dependencies.props"/>
+    
+    <!-- a bunch of patterns for how to store & lookup dependencies. -->
+    <property name="ivy.local.default.root"             value="${ivy.default.ivy.user.dir}/local" override="false"/>
+	<property name="ivy.local.default.ivy.pattern"      value="[organisation]/[module]/[type]s/ivy.xml" override="false"/>
+	<property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[type]s/[artifact].[ext]" override="false"/>
+	
+	<!-- use the resolver named 'default' to lookup our dependencies. -->
 	<settings defaultResolver="default"/>
-    <include url="./ivysettings-limewire.xml"/>
-	<include url="./ivysettings-public.xml"/>
-	<include url="${ivy.default.settings.dir}/ivysettings-shared.xml"/>
-	<include url="./ivysettings-local.xml"/>
-    <include url="./ivysettings-main-chain.xml"/>
-	<include url="${ivy.default.settings.dir}/ivysettings-default-chain.xml"/>
+		
+    <!-- what is this?  where is it? it seems to be required to use the 'shared' resolver. -->
+	<include file="${ivy.default.settings.dir}/ivysettings-shared.xml"/>
+		
+	<resolvers>
+	    <!-- where we'll store locally published files, used for publishing & retrieving. -->
+		<filesystem name="local">
+			<ivy pattern="${ivy.local.default.root}/${ivy.local.default.ivy.pattern}" />
+			<artifact pattern="${ivy.local.default.root}/${ivy.local.default.artifact.pattern}" />
+		</filesystem>
+	
+	    <!-- the limewire repository.  TODO: why dual=true? -->
+        <chain name="limewire-repository" dual="true">
+            <ibiblio name="limewire-repository" root="http://www.limewire.org/repository" m2compatible="true"/>
+        </chain>
+		
+		<!-- the public repository, out there in the world. -->
+        <chain name="public">
+			<ibiblio name="ibiblio" m2compatible="true"/> 
+            <!--ibiblio name="people.apache" root="http://people.apache.org/repo/m2-snapshot-repository" m2compatible="true"/-->
+            <ibiblio name="java-dev" root="http://download.java.net/maven/2" m2compatible="true"/>
+            <ibiblio name="laughingpanda" root="http://www.laughingpanda.org/maven2/" m2compatible="true"/>
+		</chain>
+
+        <!-- the main external repository listing. -->
+		<chain name="main">
+			<resolver ref="shared"/>
+			<resolver ref="public"/>
+            <resolver ref="limewire-repository"/>
+		</chain>        
+	
+	    <!-- declaration of the default chain.  first we lookup in the local cache, then everywhere else. -->
+		<chain name="default" returnFirst="true" checkmodified="true">
+			<resolver ref="local"/>
+			<resolver ref="main"/>
+		</chain>
+	</resolvers>	
 </ivysettings>

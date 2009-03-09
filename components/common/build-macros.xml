@@ -101,8 +101,10 @@
         		<path refid="build.limewire.components.@{component}.tests.classpath"/>
            	    <pathelement location="${cloverjar}"/>
         	    <tests-classpath/>
-        	</path>	
-            <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        	</path>
+        	
+        	
+            <ivy:configure file="${limewire.ivy.home}/ivysettings.xml" override="true"/>
         </sequential>
     </macrodef>
     
@@ -258,6 +260,13 @@
 	        <do.tests2html          component="@{component}"/>
 	    </sequential>
 	</macrodef>
+	
+	<macrodef name="do.publish-dependencies" description="Publishes dependencies of all components that this component requires.">
+    	<attribute name="component"/>
+    	<sequential>
+    	    <do.subant includes="**/build.xml" root="@{component}" target="publish"/>
+    	</sequential>
+    </macrodef>
     
     <macrodef name="do.jar" description="Generates a jar of the classfiles.">
     	<attribute name="component"/>
@@ -279,6 +288,12 @@
                 <fileset dir="@{resourcedir}" excludes="@{resexclude}"/>
                 <more-jar-elements/>
             </jar>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="do.publish" description="Publishes the jar to the local repository.">
+        <attribute name="component"/>
+        <sequential>
             <ivy:publish resolver="local"
                          overwrite="true"
                          forcedeliver="true"

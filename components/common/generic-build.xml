@@ -14,7 +14,7 @@
     <target name="compile" depends="compile-src, compile-tests">
     </target>
 	
-	<target name="compile-src" depends="initialize">
+	<target name="compile-src" depends="publish-dependencies">
 	    <do.compile-src component="${component}"/>
 	</target>
     
@@ -22,7 +22,7 @@
 	    <do.clean-src component="${component}"/>
 	</target>
 	
-	<target name="compile-tests" depends="initialize, compile-src">
+	<target name="compile-tests" depends="compile-src">
 	    <do.compile-tests component="${component}"/>
 	</target>
     
@@ -30,25 +30,34 @@
 	    <do.clean-tests component="${component}"/>
 	</target>
 	
-	<target name="test" depends="initialize, compile">
+	<target name="test" depends="compile">
 	    <do.test component="${component}" class="${class}"/>
 	</target>
 	
-	<target name="test-package" depends="initialize, compile">
+	<target name="test-package" depends="compile">
 	    <do.test-package component="${component}" package="${package}"/>
 	</target>
 	
-	<target name="test-all" depends="initialize, compile">
+	<target name="test-all" depends="compile">
 	    <do.test-all component="${component}"/>
 	</target>
     
-    <target name="jar" depends="initialize, compile-src">
+    <target name="jar" depends="compile-src">
         <do.jar component="${component}"/>
     </target>
     
-    <target name="javadoc" depends="initialize, compile-src">
+    <target name="javadoc" depends="compile-src">
     	<do.javadoc component="${component}"/>
-	</target>    
+	</target>
+	
+	<target name="publish" depends="jar">
+	   <do.publish component="${component}"/>
+    </target>
+	
+	<target name="publish-dependencies" depends="initialize" unless="ivy.dependencies.published">
+	    <property name="ivy.dependencies.published" value="true"/>
+	    <do.publish-dependencies component="${component}"/>
+	</target>
     
     <target name="clean-dist" depends="initialize">
         <do.clean-dist component="${component}"/>
@@ -58,7 +67,7 @@
         <do.clover-setup component="${component}"/>
 	</target>
     
-    <target name="clover2html" depends="initialize, with.clover">
+    <target name="clover2html" depends="with.clover">
         <do.clover2html component="${component}"/>
     </target>
 	
