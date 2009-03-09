@@ -369,11 +369,23 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
                         Point signInLocation = SwingUtilities.convertPoint(mainPanel, signInPanel.getLocation(), LibrarySharePanel.this);
                         g2.drawLine(panelBounds.x, signInLocation.y, panelBounds.x + panelBounds.width, signInLocation.y);
                 }
+
+                //draw border
                 g2.setColor(borderColor);
-                g2.setStroke(new BasicStroke(2));
+                
+                // BasicStroke(2) is necessary for eliminating the white
+                // artifacts in the upper left side of the border. unfortunately it leaves a
+                // strange line on the bottom. The clipping kills the strange
+                // line.
+                g2.setStroke(new BasicStroke(2)); 
+                Shape originalClip = g2.getClip();               
+                g2.setClip(originalClip.getBounds().x, originalClip.getBounds().y, 10, 10);
                 g2.draw(mainPanelShape);
+                g2.setClip(originalClip);  
+                
                 g2.setStroke(new BasicStroke(1));
                 g2.draw(mainPanelShape);
+                                
                 g2.translate(1, 1);
                 g2.draw(mainPanelShape);
                 
