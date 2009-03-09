@@ -13,6 +13,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
+import org.limewire.ui.swing.table.TrackComparator;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -70,6 +71,8 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public Comparator getColumnComparator(int column) {
         switch (column) {
+        case TRACK_INDEX:
+            return getTrackComparator();
         case QUALITY_INDEX:
             return getQualityComparator();
         default:
@@ -123,5 +126,12 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
         default:
             return Collections.emptyList();
         }
+    }
+    
+    /**
+     * Returns a comparator for the track column.
+     */
+    public Comparator getTrackComparator() {
+        return new TrackComparator();
     }
 }
