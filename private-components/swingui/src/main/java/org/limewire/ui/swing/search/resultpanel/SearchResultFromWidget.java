@@ -130,7 +130,7 @@ public class SearchResultFromWidget extends JPanel {
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 
-        add(this.comboBox, BorderLayout.EAST);
+        add(this.comboBox, BorderLayout.WEST);
     }
 
     
