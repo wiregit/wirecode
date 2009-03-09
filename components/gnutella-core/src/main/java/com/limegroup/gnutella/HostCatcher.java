@@ -1683,15 +1683,16 @@ public class HostCatcher implements Service {
          * was attempted.
          */
         private boolean multicastFetch(long now) {
+            if(ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
+                LOG.trace("Never fetching via multicast");
+                if(nextAllowedUdpTime == Long.MAX_VALUE)
+                    nextAllowedUdpTime = 0;
+                return false;
+            }
             if(nextAllowedMulticastTime < now) {
-                if(ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
-                    LOG.trace("Never fetching via multicast");
-                    return false;
-                } else {
-                    LOG.trace("Fetching via multicast");
-                    PingRequest pr = pingRequestFactory.createMulticastPing();
-                    multicastService.get().send(pr);
-                }
+                LOG.trace("Fetching via multicast");
+                PingRequest pr = pingRequestFactory.createMulticastPing();
+                multicastService.get().send(pr);
                 nextAllowedMulticastTime = now + MULTICAST_INTERVAL;
                 // If this is the first multicast fetch, set the UDP fallback time
                 if(nextAllowedUdpTime == Long.MAX_VALUE)
