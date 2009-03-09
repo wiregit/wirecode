@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.table.menu.actions;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.Action;
@@ -50,8 +51,16 @@ public class ShareFriendAction extends AbstractAction {
         }
         List<LocalFileItem> selectedItems = librarySelectable.getSelectedItems();
         
-        ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.createMultiFileShareWidget();
-        shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
-        shareWidget.show(GuiUtils.getMainFrame());
+        if(selectedItems.size() == 1){
+            ShareWidget<File> fileShareWidget = shareWidgetFactory.createFileShareWidget();
+            fileShareWidget.setShareable(selectedItems.get(0).getFile());
+            fileShareWidget.show(GuiUtils.getMainFrame());
+        } else {
+            ShareWidget<LocalFileItem[]> multiShareWidget = shareWidgetFactory.createMultiFileShareWidget();
+            multiShareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+            multiShareWidget.show(GuiUtils.getMainFrame());
+            
+        }
     }
+    
 }

@@ -103,7 +103,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     
     private LibraryShareModel shareModel;
     private final boolean canShowP2P;
-    private final boolean canShare;
+    private final boolean shareVisible;
     
     
     private JTextField inputField;
@@ -222,11 +222,11 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     }
     
     public LibrarySharePanel(ThreadSafeList<SharingTarget> allFriends, ShapeDialog dialog, FriendActions xmppService,
-            boolean canShowP2P, boolean canShare) {        
+            boolean canShowP2P, boolean shareVisible) {        
         this.dialog = dialog;
         this.friendActions = xmppService;
         this.canShowP2P = canShowP2P;
-        this.canShare = canShare;
+        this.shareVisible = shareVisible;
         initialize(allFriends);
     }
   
@@ -308,6 +308,21 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         gnutellaCheckBox.setIcon(checkBoxIcon);
         gnutellaCheckBox.setSelectedIcon(checkBoxSelectedIcon);
         gnutellaCheckBox.setFont(checkBoxFont);
+        gnutellaCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            
+                if (gnutellaCheckBox.isSelected()) {
+                    shareModel.shareFriend(SharingTarget.GNUTELLA_SHARE);
+                    handleShareChanged(SharingTarget.GNUTELLA_SHARE.getFriend(), ShareEventType.SHARE);
+                } 
+                else {
+                    shareModel.unshareFriend(SharingTarget.GNUTELLA_SHARE);
+                    handleShareChanged(SharingTarget.GNUTELLA_SHARE.getFriend(), ShareEventType.UNSHARE);
+                }
+
+            }
+        });
     }
     
     
@@ -353,7 +368,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
                         Rectangle panelBounds = mainPanelShape.getBounds();
                         Point signInLocation = SwingUtilities.convertPoint(mainPanel, signInPanel.getLocation(), LibrarySharePanel.this);
                         g2.drawLine(panelBounds.x, signInLocation.y, panelBounds.x + panelBounds.width, signInLocation.y);
-                }                
+                }
 
                 //draw border
                 g2.setColor(borderColor);
@@ -714,9 +729,9 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     
     private void adjustSize(){
         adjustFriendLabel();
-        bottomPanel.setVisible(canShare && friendActions.isSignedIn());
+        bottomPanel.setVisible(shareVisible && friendActions.isSignedIn());
         
-        signInPanel.setVisible(canShare && !friendActions.isSignedIn());
+        signInPanel.setVisible(shareVisible && !friendActions.isSignedIn());
 
         int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);
@@ -832,7 +847,9 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
                 noShareListEDTOnly.add(target);
             }
             
-            setShareModel(setupShareModel);
+            setShareModel(setupShareModel);            
+
+            initGnutellaInEDT();
                         
             inputField.setText(null);
             adjustSize();
@@ -846,9 +863,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         }
         
         
-        private void reloadSharedFriendsInBackground() {           
-
-            initGnutella();
+        private void reloadSharedFriendsInBackground() {    
                        
             allFriendsSortedThreadSafe.getReadWriteLock().readLock().lock();
             try {
@@ -860,32 +875,18 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
             }
         }
         
-        private void initGnutella() {
-            boolean hasGnutella = setupShareModel.isGnutellaNetworkSharable() 
-                                    && canShowP2P && canShare;
+        private void initGnutellaInEDT() {
+            boolean hasGnutella = shareModel.isGnutellaNetworkSharable() 
+                                    && canShowP2P && shareVisible;
             
             gnutellaCheckBox.setVisible(hasGnutella);
             
             if (hasGnutella) {
-                gnutellaCheckBox.setSelected(setupShareModel.isShared(SharingTarget.GNUTELLA_SHARE)); 
-                gnutellaCheckBox.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                    
-                        if (gnutellaCheckBox.isSelected()) {
-                            shareModel.shareFriend(SharingTarget.GNUTELLA_SHARE);
-                            handleShareChanged(SharingTarget.GNUTELLA_SHARE.getFriend(), ShareEventType.SHARE);
-                        } 
-                        else {
-                            shareModel.unshareFriend(SharingTarget.GNUTELLA_SHARE);
-                            handleShareChanged(SharingTarget.GNUTELLA_SHARE.getFriend(), ShareEventType.UNSHARE);
-                        }
-    
-                    }
-                });
-            } else if (!canShare && canShowP2P) {
-                if (setupShareModel.isShared(SharingTarget.GNUTELLA_SHARE)) {
-                    loadFriendInBackground(SharingTarget.GNUTELLA_SHARE);
+                gnutellaCheckBox.setSelected(shareModel.isShared(SharingTarget.GNUTELLA_SHARE)); 
+                
+            } else if (!shareVisible && canShowP2P) {
+                if (shareModel.isShared(SharingTarget.GNUTELLA_SHARE)) {
+                    shareFriendListEDTOnly.add(SharingTarget.GNUTELLA_SHARE);
                 }
             }
         }
