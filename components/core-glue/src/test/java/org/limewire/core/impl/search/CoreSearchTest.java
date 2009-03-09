@@ -24,6 +24,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.settings.PromotionSettings;
@@ -291,6 +292,7 @@ public class CoreSearchTest extends BaseTestCase {
         final String url = "http://url.com/blahblahblah";
         final String description = "description";
 
+        final AtomicReference<List<SponsoredResult>> sponsoredResults = new AtomicReference<List<SponsoredResult>>();
         context.checking(new Expectations() {
             {
                 allowing(result).getOptions();
@@ -307,9 +309,22 @@ public class CoreSearchTest extends BaseTestCase {
                 will(returnValue(description));
                 one(searchListener).handleSponsoredResults(with(any(Search.class)),
                         with(new SponsoredResultMatcher(title, url, displayUrl)));
+                will(new AssignParameterAction<List<SponsoredResult>>(sponsoredResults, 1));
             }
         });
         promotionResultCallback.get().process(result);
+        
+        assertNotEmpty(sponsoredResults.get());
+        assertEquals(1, sponsoredResults.get().size());
+        
+        SponsoredResult sponsoredResult = sponsoredResults.get().get(0);
+   
+        assertEquals(url, sponsoredResult.getUrl());
+        assertEquals(SponsoredResultTarget.STORE, sponsoredResult.getTarget());
+        assertEquals(description, sponsoredResult.getText());
+        assertEquals(title, sponsoredResult.getTitle());
+        assertEquals(displayUrl, sponsoredResult.getVisibleUrl());
+        
         context.assertIsSatisfied();
     }
 
