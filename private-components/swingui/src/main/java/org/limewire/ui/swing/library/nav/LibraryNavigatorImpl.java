@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.TooManyListenersException;
 
 import javax.swing.AbstractAction;
@@ -14,8 +16,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
@@ -29,6 +29,8 @@ import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.impl.library.BackupManager;
+import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -52,16 +54,21 @@ import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.xmpp.api.client.FriendRequestEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
-import ca.odell.glazedlists.EventList;
-
+import com.amazonaws.ls.AmazonLSException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.FileManager;
+
+import ca.odell.glazedlists.EventList;
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
@@ -86,6 +93,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final GhostDragGlassPane ghostPane;
     
     private Friend selectedFriend = null;
+    private final BackupAction backupAction;
 
     @Inject
     LibraryNavigatorImpl(Navigator navigator,
@@ -100,7 +108,8 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             final FriendsSignInPanel friendsPanel,
             SaveLocationExceptionHandler saveLocationExceptionHandler,
             FriendRequestPanel friendRequestPanel,
-            GhostDragGlassPane ghostPane) {
+            GhostDragGlassPane ghostPane,
+            BackupManager backupManager) {
         
         this.friendRequestPanel = friendRequestPanel;
         this.myLibraryPanel = myLibraryPanel;
@@ -127,9 +136,10 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         try {
             myLibrary.getDropTarget().addDropTargetListener(new GhostDropTargetListener(myLibrary,ghostPane));
         } catch (TooManyListenersException ignoreException) {            
-        }   
-        
-        
+        }
+        backupAction = new BackupAction(backupManager);
+        backupAction.setEnabled(false);
+        myLibrary.addPopupMenu(backupAction);
         myLibraryPanel.getLibrary().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
@@ -185,6 +195,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         addItem(offlineList, friendsListPanel, "", new MoveAction(onlineList, false), null);
 
         new FriendLibraryUpdater().install(remoteLibraryManager.getSwingFriendLibraryList());
+    }
+
+    @Inject
+    public void register(FileManager fileManager) {
+        fileManager.getManagedFileList().addManagedListStatusListener(new FinishedLoadingListener());
     }
     
     private void addItem(JComponent item, JComponent parent, String constraints, Action upAction, Action downAction) {
@@ -506,6 +521,49 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                 navList.selectFirst();
             } else {
                 navList.selectLast();
+            }
+        }
+    }
+
+    private class BackupAction extends javax.swing.AbstractAction {
+        private final BackupManager backupManager;
+
+        public BackupAction(BackupManager backupManager) {
+            super(I18n.tr("Backup..."));
+            this.backupManager = backupManager;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            BackgroundExecutorService.execute(new Runnable() {
+                public void run() {
+                    try {
+                        // TODO remove BackupAction and add CancelBackupAction
+                        backupManager.backup();
+                    } catch (IOException e1) {
+                        LOG.error(e1);
+                    } catch (AmazonLSException e1) {
+                        LOG.error(e1);
+                    } catch (URISyntaxException e1) {
+                        LOG.error(e1);
+                    } catch (InterruptedException e1) {
+                        LOG.error(e1);
+                    }
+                }
+            });
+        }
+    }
+
+    class FinishedLoadingListener implements EventListener<ManagedListStatusEvent> {
+        @SuppressWarnings("unchecked")
+        @BlockingEvent
+        public void handleEvent(ManagedListStatusEvent evt) {
+            if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
+                try {
+                    backupAction.setEnabled(true);
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
     }

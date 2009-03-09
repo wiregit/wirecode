@@ -32,6 +32,7 @@ import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.listener.ActionHandListener;
@@ -170,6 +171,10 @@ public class NavPanel extends JXPanel {
                 }
             }
         });
+    }
+
+    public void addPopupMenu(Action... actions) {
+        PopupUtil.addPopupMenus(categoryLabel, actions);
     }
 
     private String getToolTipText(Friend friend) {
