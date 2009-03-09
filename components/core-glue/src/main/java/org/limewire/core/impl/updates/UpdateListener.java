@@ -16,8 +16,8 @@ public class UpdateListener implements EventListener<UpdateEvent> {
     
     @Inject
     public UpdateListener(UpdateHandler updateHandler, EventBroadcaster<org.limewire.core.api.updates.UpdateEvent> listeners) {
-        updateHandler.addListener(this);
         this.uiListeners = listeners;
+        updateHandler.addListener(this);
     }
     
     @Override
