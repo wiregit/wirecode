@@ -151,36 +151,37 @@ public class BootstrapperImpl implements Bootstrapper {
     }
 
     /**
-     * Attempts to fetch via multicast, returning true
-     * if it was able to.
+     * Considers fetching hosts via multicast and returns true if a fetch
+     * was attempted.
      */
     private boolean multicastFetch(long now) {
-        if(nextAllowedMulticastTime < now && 
-                !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
-            LOG.trace("Fetching via multicast");
-            PingRequest pr = pingRequestFactory.createMulticastPing();
-            multicastService.get().send(pr);
+        if(nextAllowedMulticastTime < now) {
+            if(ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
+                LOG.trace("Never fetching via multicast");
+                return false;
+            } else {
+                LOG.trace("Fetching via multicast");
+                PingRequest pr = pingRequestFactory.createMulticastPing();
+                multicastService.get().send(pr);
+            }
             nextAllowedMulticastTime = now + MULTICAST_INTERVAL;
             // If this is the first multicast fetch, set the UDP fallback time
             if(nextAllowedUdpTime == Long.MAX_VALUE)
                 nextAllowedUdpTime = now + UDP_FALLBACK_DELAY;
             return true;
         }
-        // If we're never going to multicast, fall back to UDP immediately
-        if(nextAllowedUdpTime == Long.MAX_VALUE &&
-                ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue())
-            nextAllowedUdpTime = 0;
         LOG.trace("Not fetching via multicast");
         return false;
     }
 
     /**
-     * Attempts to fetch via udp host caches, returning true
-     * if it was able to.
+     * Considers fetching hosts via UDP and returns true if a fetch was
+     * attempted.
      */
     private boolean udpHostCacheFetch(long now) {
-        if(nextAllowedUdpTime < now && udpHostCache.fetchHosts()) {
+        if(nextAllowedUdpTime < now) {
             LOG.trace("Fetching via UDP");
+            udpHostCache.fetchHosts();
             nextAllowedUdpTime = now + UDP_INTERVAL;
             // If this is the first UDP fetch, set the TCP fallback time
             if(nextAllowedTcpTime == Long.MAX_VALUE)
@@ -191,10 +192,14 @@ public class BootstrapperImpl implements Bootstrapper {
         return false;
     }
 
+    /**
+     * Considers fetching hosts via TCP and returns true if a fetch was
+     * attempted.
+     */
     private boolean tcpHostCacheFetch(long now) {
-        if(nextAllowedTcpTime < now &&
-                tcpBootstrap.fetchHosts(listener)) {
+        if(nextAllowedTcpTime < now) {
             LOG.trace("Fetching via TCP");
+            tcpBootstrap.fetchHosts(listener);
             nextAllowedTcpTime = now + TCP_INTERVAL;
             return true;
         }
