@@ -14,6 +14,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.table.QualityComparator;
+import org.limewire.ui.swing.table.TrackComparator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertyUtils;
 
@@ -106,6 +107,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
             case TITLE_INDEX: return new NameComparator();
             case ACTION_INDEX: return new ActionComparator();
             case QUALITY_INDEX: return new QualityComparator();
+            case TRACK_INDEX: return new TrackComparator();
         }
         return super.getColumnComparator(column);
     }
