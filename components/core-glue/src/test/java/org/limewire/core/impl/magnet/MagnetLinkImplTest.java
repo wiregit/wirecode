@@ -49,6 +49,7 @@ public class MagnetLinkImplTest extends BaseTestCase {
         });
 
         assertFalse(magnetLinkImpl.isDownloadable());
+        context.assertIsSatisfied();
     }
 
     public void testIsKeywordTopicOnly() {
@@ -72,6 +73,7 @@ public class MagnetLinkImplTest extends BaseTestCase {
         });
 
         assertFalse(magnetLinkImpl.isKeywordTopicOnly());
+        context.assertIsSatisfied();
     }
 
     public void testGetKeywordTopic() {
@@ -86,5 +88,13 @@ public class MagnetLinkImplTest extends BaseTestCase {
         });
 
         assertEquals("123", magnetLinkImpl.getQueryString());
+        context.assertIsSatisfied();
+    }
+    
+    public void testGetMagnetOptions() {
+
+        MagnetLinkImpl magnetLinkImpl = new MagnetLinkImpl(magnetOptions);
+        assertEquals(magnetOptions, magnetLinkImpl.getMagnetOptions());
+        context.assertIsSatisfied();
     }
 }
