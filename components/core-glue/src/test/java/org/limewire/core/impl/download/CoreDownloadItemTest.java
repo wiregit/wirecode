@@ -144,16 +144,48 @@ public class CoreDownloadItemTest extends BaseTestCase {
         coreDownloadItem.pause();
         context.assertIsSatisfied();
     }
-    
+
     public void testIsLauncable() {
 
         context.checking(new Expectations() {
             {
                 one(downloader).isLaunchable();
+                will(returnValue(true));
             }
         });
 
-        coreDownloadItem.isLaunchable();
+        assertTrue(coreDownloadItem.isLaunchable());
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).isLaunchable();
+                will(returnValue(false));
+            }
+        });
+
+        assertFalse(coreDownloadItem.isLaunchable());
+        context.assertIsSatisfied();
+    }
+
+    public void testIsSearchAgainEnabled() {
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.WAITING_FOR_USER));
+            }
+        });
+
+        assertTrue(coreDownloadItem.isSearchAgainEnabled());
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DOWNLOADING));
+            }
+        });
+
+        assertFalse(coreDownloadItem.isSearchAgainEnabled());
         context.assertIsSatisfied();
     }
 
