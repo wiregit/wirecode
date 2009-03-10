@@ -133,6 +133,79 @@ public class CoreDownloadItemTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
+    public void testPause() {
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).pause();
+            }
+        });
+
+        coreDownloadItem.pause();
+        context.assertIsSatisfied();
+    }
+    
+    public void testIsLauncable() {
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).isLaunchable();
+            }
+        });
+
+        coreDownloadItem.isLaunchable();
+        context.assertIsSatisfied();
+    }
+
+    public void testResume() {
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).resume();
+            }
+        });
+
+        coreDownloadItem.resume();
+        context.assertIsSatisfied();
+    }
+
+    public void testGetRemoteQueuePosition() {
+        final int remoteQueuePosition = 6;
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.REMOTE_QUEUED));
+                one(downloader).getQueuePosition();
+                will(returnValue(remoteQueuePosition));
+            }
+        });
+        assertEquals(remoteQueuePosition, coreDownloadItem.getRemoteQueuePosition());
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DOWNLOADING));
+            }
+        });
+        assertEquals(-1, coreDownloadItem.getRemoteQueuePosition());
+
+        context.assertIsSatisfied();
+    }
+
+    public void testGetTitle() {
+        final String fileName = "test.txt";
+        context.checking(new Expectations() {
+            {
+                one(downloader).getSaveFile();
+                will(returnValue(new File(fileName)));
+            }
+        });
+        assertEquals(fileName, coreDownloadItem.getTitle());
+
+        context.assertIsSatisfied();
+    }
+
     public void testGetDownloadingFile() {
         final File testFile = new File("test");
 
