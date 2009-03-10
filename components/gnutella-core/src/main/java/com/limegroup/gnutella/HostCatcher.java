@@ -40,6 +40,7 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
@@ -278,6 +279,16 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     private ScheduledFuture bootstrapperFuture;
     private ScheduledFuture clearPingedHostsFuture;
 
+    /**
+     * Inspection points to see which bootstrap techniques are used.
+     */
+    @InspectablePrimitive("deleted host file")
+    @SuppressWarnings("unused")
+    private boolean deletedHostFile = false;
+    @InspectablePrimitive("restored host file")
+    @SuppressWarnings("unused")
+    private boolean loadedHostFile = false;
+    
     private final ScheduledExecutorService backgroundExecutor;
     private final ConnectionServices connectionServices;
     private final Provider<ConnectionManager> connectionManager;
@@ -541,6 +552,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             if(lastModified > 0) {
                 LOG.info("Deleting stale host file");
                 hostFile.delete();
+                deletedHostFile = true;
             }
             return; // Hit the bootstrap hosts instead
         }
@@ -559,6 +571,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
                         synchronized(this) {
                             addPermanent(e);
                             restoredHosts.add(e);
+                            loadedHostFile = true;
                         }
                         endpointAdded();
                     } else {

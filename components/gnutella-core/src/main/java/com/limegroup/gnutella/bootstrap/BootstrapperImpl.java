@@ -6,6 +6,7 @@ import java.io.Writer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.inspection.InspectablePrimitive;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -57,6 +58,19 @@ public class BootstrapperImpl implements Bootstrapper {
      */
     private long nextAllowedTcpTime = Long.MAX_VALUE; // Not just yet
 
+    /**
+     * Inspection points to see which bootstrap techniques are used.
+     */
+    @InspectablePrimitive("multicast bootstrapping")
+    @SuppressWarnings("unused")
+    private boolean triedMulticast = false;
+    @InspectablePrimitive("udp bootstrapping")
+    @SuppressWarnings("unused")
+    private boolean triedUDP = false;
+    @InspectablePrimitive("tcp bootstrapping")
+    @SuppressWarnings("unused")
+    private boolean triedTCP = false;
+    
     private final ConnectionServices connectionServices;
     private final Provider<MulticastService> multicastService;
     private final PingRequestFactory pingRequestFactory;
@@ -165,6 +179,7 @@ public class BootstrapperImpl implements Bootstrapper {
             LOG.trace("Fetching via multicast");
             PingRequest pr = pingRequestFactory.createMulticastPing();
             multicastService.get().send(pr);
+            triedMulticast = true;
             nextAllowedMulticastTime = now + MULTICAST_INTERVAL;
             // If this is the first multicast fetch, set the UDP fallback time
             if(nextAllowedUdpTime == Long.MAX_VALUE)
@@ -183,6 +198,7 @@ public class BootstrapperImpl implements Bootstrapper {
         if(nextAllowedUdpTime < now) {
             LOG.trace("Fetching via UDP");
             udpHostCache.fetchHosts();
+            triedUDP = true;
             nextAllowedUdpTime = now + UDP_INTERVAL;
             // If this is the first UDP fetch, set the TCP fallback time
             if(nextAllowedTcpTime == Long.MAX_VALUE)
@@ -201,6 +217,7 @@ public class BootstrapperImpl implements Bootstrapper {
         if(nextAllowedTcpTime < now) {
             LOG.trace("Fetching via TCP");
             tcpBootstrap.fetchHosts(listener);
+            triedTCP = true;
             nextAllowedTcpTime = now + TCP_INTERVAL;
             return true;
         }
