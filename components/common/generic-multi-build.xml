@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="generic-multi-build" basedir="." default="compile-src" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <import file="ant-macros.xml"/>
+    
+    <property name="excludes" value=""/>
+    <property name="includes" value="**/build.xml"/>
+    
+    <!-- must ensure that ivy is loaded. -->
+    <target name="initialize" depends="ivy-load"/>
+	
+	<!-- publish-dependencies makes sure that all required classes are published, reducing the time spent needlessly publishing. -->
+	<target name="publish-dependencies" depends="initialize" unless="ivy.dependencies.published">
+	    <property name="ivy.dependencies.published" value="true"/>
+        <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="publish"/>
+	</target>
+	
+	<!-- publishes all dependencies. -->
+	<target name="publish" depends="publish-dependencies"/>
+	
+	<target name="clean" depends="initialize">
+	    <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="clean"/>
+	</target>
+    
+    <target name="compile" depends="publish-dependencies">
+	    <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="compile"/>
+	</target>
+	
+	<target name="compile-src" depends="publish-dependencies">
+	    <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="compile-src"/>
+	</target>
+    
+	<target name="clean-src" depends="initialize">
+	    <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="clean-src"/>
+	</target>
+	
+	<target name="compile-tests" depends="publish-dependencies">
+	    <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="compile-tests"/>
+	</target>
+    
+	<target name="clean-tests" depends="initialize">
+	    <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="clean-tests"/>
+	</target>
+    
+    <target name="test-all" depends="publish-dependencies">
+        <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="${root}" target="test-all"/>
+      <!--  <do.tests2html component="${component}" dir="." include="**/testData/xml/TEST-*.xml"/> -->
+	</target>
+    
+    <target name="jar" depends="publish-dependencies">
+        <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="jar"/> 
+        <!-- TODO: build one big jar. -->
+	</target>
+    
+    <target name="javadoc" depends="initialize">
+        <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="javadoc"/> 
+        <!-- TODO: build one big javadoc. -->
+	</target>
+    
+    <target name="clean-dist" depends="initialize">
+	    <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="clean-dist"/>
+	</target>
+    
+    <!--target name="with.clover" depends="initialize"-->
+	    <!--do.ivy excludes="${excludes}" includes="${includes}" root="${root}" target="with.clover"/-->
+        <!--do.tests-init component="${component}"/>
+        <do.clover-setup component="${component}"  defaultfileset="."/>
+	</target-->
+    
+    <target name="clover2html" depends="initialize">
+        <do.tests-init component="${component}"/>
+        <do.clover-setup component="${component}"/>
+        <do.clover-merge-dbs component="${component}"/>
+        <do.clover2html component="${component}" defaulttestsources="." defaulttestsourceincludes="*/src/test/java/**/*.java"/>
+	</target>
+		
+</project>

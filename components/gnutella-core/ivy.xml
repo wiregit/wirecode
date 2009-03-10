@@ -1,7 +1,7 @@
 <ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
     <info organisation="org.limewire" module="core"/>
     <configurations>
-        <include file="../components/common/common-configurations.xml"/>
+        <include file="../components/common/ivy-configs.xml"/>
     </configurations>
     <publications>
         <artifact name="core" conf="master"/>

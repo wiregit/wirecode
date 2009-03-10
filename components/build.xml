@@ -3,8 +3,10 @@
 <project name="lw-components" basedir="." default="compile" xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<property name="limewire.home" location="${basedir}/.."/>
-    <property name="excludes" value="core-glue/*"/>    
+    <property name="component" value=""/>
+	
+    <property name="excludes" value="core-glue/*"/>
     
-    <import file="common/generic-aggregator-build.xml"/>
+    <import file="common/generic-multi-build.xml"/>
     
 </project>

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="common-macros" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="ant-macros" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<description>
-	    Common macros for use on top-level and component-level build scripts.
+	    Common macros for use on both multi and single component build scripts.
 	</description>
 	
 	<property name="limewire.home" location="${basedir}/../.."/> 
 	<property file="${limewire.home}/components/common/build.properties"/>
+	
+	<target name="initialize"/> <!-- Must implement an initialize when using these macros! -->
     
     <target name="ivy-load" unless="ivy.loaded">
         <property name="ivy.loaded" value="true"/>
@@ -22,15 +24,14 @@
         <attribute name="dir" default="${limewire.home}"/>
         <attribute name="target"/>
         <attribute name="includes"/>
-        <attribute name="excludes" default="build.xml"/>
+        <attribute name="excludes" default=""/>
         <attribute name="root" default="${component}"/>
         <attribute name="ivyfilepath" default="${ivy.buildlist.ivyfilepath}"/>
+        <attribute name="excluderoot" default="true"/>
         <sequential>
-            <echo message="building dependencies, dir: @{dir}, target: @{target}, includes: @{includes}, excludes: @{excludes}, root: @{root}, ivyfilepath: ${ivy.buildlist.ivyfilepath}"/>
-            <ivy:buildlist reference="build-path" onMissingDescriptor="skip" root="@{root}" ivyfilepath="@{ivyfilepath}" excluderoot="true">
+            <ivy:buildlist reference="build-path" onMissingDescriptor="skip" root="@{root}" ivyfilepath="@{ivyfilepath}" excluderoot="@{excluderoot}">
                 <fileset dir="@{dir}" excludes="@{excludes}" includes="@{includes}" />
             </ivy:buildlist>
-            <echo message="list: ${build-path} ${ivy.sorted.modules}"/>
             <subant target="@{target}" buildpathref="build-path">
             <propertyset>
                 <!-- must pass the ivy.loaded property to subant, otherwise the 

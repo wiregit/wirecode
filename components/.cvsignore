@@ -4,3 +4,4 @@ all
 bin
 eclipse
 target
+out.txt
