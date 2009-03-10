@@ -41,6 +41,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
@@ -100,6 +101,25 @@ public class HostCatcher implements Service {
      * Log for logging this class.
      */
     private static final Log LOG = LogFactory.getLog(HostCatcher.class);
+    
+    /**
+     * Inspection points to see which bootstrap techniques are used.
+     */
+    @InspectablePrimitive("deleted host file")
+    @SuppressWarnings("unused")
+    private boolean deletedHostFile = false;
+    @InspectablePrimitive("restored host file")
+    @SuppressWarnings("unused")
+    private boolean loadedHostFile = false;
+    @InspectablePrimitive("multicast bootstrapping")
+    @SuppressWarnings("unused")
+    private boolean triedMulticast = false;
+    @InspectablePrimitive("udp bootstrapping")
+    @SuppressWarnings("unused")
+    private boolean triedUDP = false;
+    @InspectablePrimitive("tcp bootstrapping")
+    @SuppressWarnings("unused")
+    private boolean triedTCP = false;
     
     /**
      * The number of ultrapeer pongs to store.
@@ -553,6 +573,7 @@ public class HostCatcher implements Service {
             if(lastModified > 0) {
                 LOG.info("Deleting stale host file");
                 hostFile.delete();
+                deletedHostFile = true;
             }
             return;
         }
@@ -571,6 +592,7 @@ public class HostCatcher implements Service {
                         synchronized(this) {
                             addPermanent(e);
                             restoredHosts.add(e);
+                            loadedHostFile = true;
                         }
                         endpointAdded();
                     } else {
@@ -1693,6 +1715,7 @@ public class HostCatcher implements Service {
                 LOG.trace("Fetching via multicast");
                 PingRequest pr = pingRequestFactory.createMulticastPing();
                 multicastService.get().send(pr);
+                triedMulticast = true;
                 nextAllowedMulticastTime = now + MULTICAST_INTERVAL;
                 // If this is the first multicast fetch, set the UDP fallback time
                 if(nextAllowedUdpTime == Long.MAX_VALUE)
@@ -1711,6 +1734,7 @@ public class HostCatcher implements Service {
             if(nextAllowedUdpTime < now) {
                 LOG.trace("Fetching via UDP");
                 udpHostCache.fetchHosts();
+                triedUDP = true;
                 nextAllowedUdpTime = now + UDP_INTERVAL;
                 // If this is the first UDP fetch, set the TCP fallback time
                 if(nextAllowedTcpTime == Long.MAX_VALUE)
@@ -1729,6 +1753,7 @@ public class HostCatcher implements Service {
             if(nextAllowedTcpTime < now) {
                 LOG.trace("Fetching via TCP");
                 tcpBootstrap.fetchHosts(new BootstrapListener());
+                triedTCP = true;
                 nextAllowedTcpTime = now + TCP_INTERVAL;
                 return true;
             }
