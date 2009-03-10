@@ -2,22 +2,52 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.TestPropertyChangeListener;
 
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.InsufficientDataException;
 
 public class CoreDownloadItemTest extends BaseTestCase {
+    private Mockery context;
+
+    private Downloader downloader;
+
+    private QueueTimeCalculator queueTimeCalculator;
+
+    private CoreDownloadItem coreDownloadItem;
 
     public CoreDownloadItemTest(String name) {
         super(name);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void setUp() throws Exception {
+        context = new Mockery() {
+            {
+                setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+        downloader = context.mock(Downloader.class);
+        queueTimeCalculator = context.mock(QueueTimeCalculator.class);
+        context.checking(new Expectations() {
+            {
+                one(downloader).addListener(with(any(EventListener.class)));
+            }
+        });
+        coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator);
+
     }
 
     /**
@@ -25,23 +55,7 @@ public class CoreDownloadItemTest extends BaseTestCase {
      * downloaders stop method is called. Ensures that a property change event
      * is fired on the state property with a DownloadState of Cancelled.
      */
-    @SuppressWarnings("unchecked")
     public void testCancel() {
-        Mockery context = new Mockery() {
-            {
-                setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
-
-        final Downloader downloader = context.mock(Downloader.class);
-        final QueueTimeCalculator queueTimeCalculator = context.mock(QueueTimeCalculator.class);
-
-        context.checking(new Expectations() {
-            {
-                one(downloader).addListener(with(any(EventListener.class)));
-            }
-        });
-        CoreDownloadItem coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator);
         TestPropertyChangeListener listener = new TestPropertyChangeListener();
         coreDownloadItem.addPropertyChangeListener(listener);
 
@@ -62,31 +76,13 @@ public class CoreDownloadItemTest extends BaseTestCase {
         DownloadState downloadState = (DownloadState) propertyChangeEvent.getNewValue();
         assertEquals(DownloadState.CANCELLED, downloadState);
         context.assertIsSatisfied();
-
     }
 
     /**
      * Test the getCategory method for the CoreDownloadItem. Handles cases where
      * getFile is available or cases where only getSaveFile is available.
      */
-    @SuppressWarnings("unchecked")
     public void testGetCategory() {
-        Mockery context = new Mockery() {
-            {
-                setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
-
-        final Downloader downloader = context.mock(Downloader.class);
-        final QueueTimeCalculator queueTimeCalculator = context.mock(QueueTimeCalculator.class);
-
-        context.checking(new Expectations() {
-            {
-                one(downloader).addListener(with(any(EventListener.class)));
-            }
-        });
-        CoreDownloadItem coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator);
-
         context.checking(new Expectations() {
             {
                 one(downloader).getFile();
@@ -106,6 +102,113 @@ public class CoreDownloadItemTest extends BaseTestCase {
         });
         Category testCategory2 = coreDownloadItem.getCategory();
         assertEquals(Category.DOCUMENT, testCategory2);
+        context.assertIsSatisfied();
+    }
 
+    public void testGetDownloadSourceCount() {
+        final int downloadSoureCount = 5;
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getNumHosts();
+                will(returnValue(downloadSoureCount));
+            }
+        });
+        assertEquals(downloadSoureCount, coreDownloadItem.getDownloadSourceCount());
+
+        context.assertIsSatisfied();
+    }
+
+    public void testGetLocalQueuePriority() {
+        final int localQueuePriority = 3;
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getInactivePriority();
+                will(returnValue(localQueuePriority));
+            }
+        });
+        assertEquals(localQueuePriority, coreDownloadItem.getLocalQueuePriority());
+
+        context.assertIsSatisfied();
+    }
+
+    public void testGetDownloadingFile() {
+        final File testFile = new File("test");
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getFile();
+                will(returnValue(testFile));
+            }
+        });
+
+        assertEquals(testFile, coreDownloadItem.getDownloadingFile());
+        context.assertIsSatisfied();
+    }
+
+    public void testGetRemainingDownloadTime() throws InsufficientDataException {
+        context.checking(new Expectations() {
+            {
+                exactly(2).of(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DOWNLOADING));
+                allowing(downloader).getContentLength();
+                will(returnValue(1000L * 1000L));
+                allowing(downloader).getAmountRead();
+                will(returnValue(0L));
+                allowing(downloader).getMeasuredBandwidth();
+                will(returnValue(100f));
+            }
+        });
+        coreDownloadItem.fireDataChanged();
+        assertEquals(9L, coreDownloadItem.getRemainingDownloadTime());
+        context.assertIsSatisfied();
+    }
+
+    public void testGetPercentageComplete() {
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.COMPLETE));
+            }
+        });
+        assertEquals(100, coreDownloadItem.getPercentComplete());
+
+        context.checking(new Expectations() {
+            {
+                exactly(2).of(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DOWNLOADING));
+                one(downloader).getContentLength();
+                will(returnValue(0L));
+            }
+        });
+        assertEquals(0, coreDownloadItem.getPercentComplete());
+
+        context.checking(new Expectations() {
+            {
+                exactly(2).of(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DOWNLOADING));
+                exactly(2).of(downloader).getContentLength();
+                will(returnValue(10L));
+                one(downloader).getAmountRead();
+                will(returnValue(1L));
+            }
+        });
+        coreDownloadItem.fireDataChanged();
+        assertEquals(10, coreDownloadItem.getPercentComplete());
+        context.assertIsSatisfied();
+    }
+
+    public void testGetSources() {
+        final List<Address> addresses = new ArrayList<Address>();
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getSourcesAsAddresses();
+                will(returnValue(addresses));
+            }
+        });
+        assertEquals(addresses, coreDownloadItem.getSources());
+        context.assertIsSatisfied();
     }
 }
