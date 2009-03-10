@@ -38,6 +38,10 @@ public class MatchAndCopy<X> extends BaseMatcher<X> {
     }
     
     public X getLastMatch() {
+        if (matches.size() < 1) {
+            throw new IllegalStateException("Can not get last match when no matches have been made");
+        }
+        
         return matches.get(matches.size()-1);
     }
 }

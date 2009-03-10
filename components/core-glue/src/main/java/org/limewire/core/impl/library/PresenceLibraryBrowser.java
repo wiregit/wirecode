@@ -56,7 +56,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      * Keeps track of libraries that could not be browsed yet, because the local peer didn't have
      * enough connection capabilities.
      */
-    private final Set<PresenceLibrary> librariesToBrowse = Collections.synchronizedSet(new HashSet<PresenceLibrary>());
+    final Set<PresenceLibrary> librariesToBrowse = Collections.synchronizedSet(new HashSet<PresenceLibrary>());
 
     private final XMPPRemoteFileDescDeserializer remoteFileDescDeserializer;
     
@@ -84,21 +84,16 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
     @Inject 
     void register(ListenerSupport<LibraryChangedEvent> listenerSupport) {
-        registerSecondaryListeners();
-        
         listenerSupport.addListener(this);
     }
 
-    @Override
-    public void handleEvent(LibraryChangedEvent event) {
-        remoteLibraryManager.removePresenceLibrary(event.getSource());
-        remoteLibraryManager.addPresenceLibrary(event.getSource());
-    }
-
-    private void registerSecondaryListeners() {
-        
+    @Inject
+    void registerToSocksManager() {
         socketsManager.addListener(new ConnectivityChangeListener());
-        
+    }
+    
+    @Inject
+    void registerToRemoteLibraryManager() {    
         remoteLibraryManager.getFriendLibraryList().addListEventListener(new ListEventListener<FriendLibrary>() {
             @Override
             public void listChanged(ListEvent<FriendLibrary> listChanges) {
@@ -127,9 +122,18 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             }
         });
     }
+
+    @Override
+    public void handleEvent(LibraryChangedEvent event) {
+        remoteLibraryManager.removePresenceLibrary(event.getSource());
+        remoteLibraryManager.addPresenceLibrary(event.getSource());
+    }
     
     private void browse(final PresenceLibrary presenceLibrary) {
+        
+        // TODO: Is this needed again?  We should already be in loading
         presenceLibrary.setState(LibraryState.LOADING);
+        
         final FriendPresence friendPresence = presenceLibrary.getPresence();
         LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
         final Browse browse = browseFactory.createBrowse(friendPresence);
@@ -182,7 +186,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      * @param startConnectivityRevision the revisions of {@link #latestConnectivityEventRevision}
      * when this method is called
      */
-    private void tryToResolveAndBrowse(final PresenceLibrary presenceLibrary, final int startConnectivityRevision) {
+    void tryToResolveAndBrowse(final PresenceLibrary presenceLibrary, final int startConnectivityRevision) {
         presenceLibrary.setState(LibraryState.LOADING);
         final FriendPresence friendPresence = presenceLibrary.getPresence();
         AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
