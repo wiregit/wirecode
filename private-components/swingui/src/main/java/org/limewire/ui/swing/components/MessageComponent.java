@@ -7,8 +7,6 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextPane;
-import javax.swing.text.html.HTMLDocument;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -70,17 +68,9 @@ public class MessageComponent extends JPanel {
         component.setForeground(fontColor);
     }
     
-    public void decorateSubLabel(JTextPane component) {
-        ((HTMLDocument)component.getDocument()).getStyleSheet().addRule(createCSS(subFont, fontColor));
-    }
-    
-    private String createCSS(Font font, Color color) {
-        StringBuilder builder = new StringBuilder("body {");
-        builder.append("font-family: ").append(font.getFamily()).append(";");
-        builder.append("font-size: ").append(font.getSize()).append("pt;");
-        builder.append("color: ").append(GuiUtils.colorToHex(color)).append(";");
-        builder.append("}");
-        return builder.toString();
+    public void decorateSubLabel(HTMLLabel label) {
+        label.setHtmlFont(subFont);
+        label.setHtmlForeground(fontColor);
     }
     
     public void decorateFont(JComponent component) {

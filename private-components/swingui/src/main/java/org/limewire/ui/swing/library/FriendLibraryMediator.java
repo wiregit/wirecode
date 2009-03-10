@@ -2,7 +2,6 @@ package org.limewire.ui.swing.library;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -20,6 +19,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
@@ -240,7 +240,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         private EventList<LocalFileItem> friendList;
         private MessageTypes messageType;
         private final JLabel firstLabel;
-        private final JTextPane shareLabel;
+        private final HTMLLabel shareLabel;
         
         public Message(EventList<LocalFileItem> friendList, MessageTypes messageType) {
             this.friendList = friendList;
@@ -252,12 +252,9 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             firstLabel = new JLabel();
             messageComponent.decorateHeaderLabel(firstLabel);
 
-            shareLabel = new JTextPane();
-            shareLabel.setContentType("text/html");
+            shareLabel = new HTMLLabel();
             shareLabel.setOpaque(false);
-            shareLabel.setEditable(false);
             shareLabel.setBorder(null);
-            shareLabel.setSelectionColor(null);
             shareLabel.addHyperlinkListener(new HyperlinkListener() {
                 @Override
                 public void hyperlinkUpdate(HyperlinkEvent e) {
