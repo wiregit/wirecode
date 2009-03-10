@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-02 11:30-0500\n"
-"PO-Revision-Date: 2009-02-28 14:54+0000\n"
+"POT-Creation-Date: 2009-03-09 11:30-0400\n"
+"PO-Revision-Date: 2009-03-09 22:36+0000\n"
 "Last-Translator: nanker <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-03-04 16:08+0000\n"
+"X-Launchpad-Export-Date: 2009-03-10 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -150,8 +150,9 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"Limewire var ikke i stand til at skrive en nødvendig fil, da din harddisk er "
-"fuld. For at forsætte brugen af LimeWire må du frigøre plads på din harddisk."
+"Limewire var ikke i stand til at skrive til en nødvendig fil, da din "
+"harddisk er fuld. For at forsætte brugen af LimeWire må du frigøre plads på "
+"din harddisk."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
@@ -310,6 +311,9 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
+"Beklager, LimeWire kunne ikke læse dine gamle downloads. Du kan genstarte "
+"dem ved at klikke \"Prøv igen\" på downloaden. Når LimeWire finder en kilde "
+"til filen, så vil downloaden fortsætte."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:280
 msgid ""
@@ -317,6 +321,9 @@ msgid ""
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
+"Beklager, LimeWire kunne ikke læse nogle af dine gamle downloads. Du kan "
+"genstarte dem ved at klikke \"Prøv igen\" på downloaden. Når LimeWire finder "
+"en kilde til filen, så vil downloaden fortsætte."
 
 #: core/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
@@ -326,7 +333,7 @@ msgstr "HTTP-forespørgsel igang"
 msgid "Upload Management"
 msgstr "Styring af uploads"
 
-#: core/com/limegroup/gnutella/HostCatcher.java:382
+#: core/com/limegroup/gnutella/HostCatcher.java:364
 msgid "Peer Locator"
 msgstr "Peer lokalisering"
 
@@ -460,8 +467,8 @@ msgstr "Titel"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:16
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:46
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:41
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:39
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:53
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:84
@@ -473,8 +480,8 @@ msgstr "Kunstner"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:53
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:17
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:47
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:50
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:44
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:40
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:83
@@ -487,10 +494,10 @@ msgstr "Album"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:55
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:20
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:25
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:45
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:48
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:44
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:52
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:50
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:57
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedAudioPanel.java:17
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:48
@@ -501,8 +508,8 @@ msgstr "Genre"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:59
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:23
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:53
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:56
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:50
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedAudioPanel.java:18
@@ -514,8 +521,8 @@ msgstr "Spor"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendDocumentTableFormat.java:16
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendOtherTableFormat.java:16
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:39
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:31
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:32
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteDocumentTableFormat.java:35
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteOtherTableFormat.java:31
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:316
@@ -531,10 +538,10 @@ msgstr "Type"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:54
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:17
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:48
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:43
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:40
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:37
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:51
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:38
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:300
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:82
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:45
@@ -547,10 +554,10 @@ msgstr "Længde"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:60
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:24
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:21
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:54
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:44
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:39
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:51
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:46
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:40
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:55
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:79
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedAudioPanel.java:19
@@ -569,8 +576,8 @@ msgstr "Sprog"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:56
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:21
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:50
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:46
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:53
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:320
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedAudioPanel.java:20
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:47
@@ -622,8 +629,8 @@ msgstr "Undertekster"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:22
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:45
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:41
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:56
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedVideoPanel.java:17
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:47
@@ -645,15 +652,15 @@ msgstr "Bredde"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendImageTableFormat.java:20
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendProgramTableFormat.java:20
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:24
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:56
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:43
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:36
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:52
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:59
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:44
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:37
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:54
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteDocumentTableFormat.java:40
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteImageTableFormat.java:38
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteProgramTableFormat.java:38
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:47
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:43
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:44
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:54
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:54
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:41
@@ -676,7 +683,7 @@ msgstr "Emne"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendDocumentTableFormat.java:20
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteDocumentTableFormat.java:39
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:40
@@ -688,7 +695,7 @@ msgid "Application"
 msgstr "Program"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:234
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:267
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendDocumentTableFormat.java:15
@@ -696,16 +703,16 @@ msgstr "Program"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendOtherTableFormat.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendProgramTableFormat.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:15
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:45
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:30
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:32
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:31
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:33
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteDocumentTableFormat.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteImageTableFormat.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteOtherTableFormat.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteProgramTableFormat.java:33
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:38
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:36
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:37
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:197
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:88
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedDocumentPanel.java:13
@@ -727,7 +734,7 @@ msgstr "Udgiver"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendProgramTableFormat.java:18
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:34
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:35
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteProgramTableFormat.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:50
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:75
@@ -767,6 +774,8 @@ msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
+"Beklager, LimeWire løb ind i et problem. LimeWire kører stadig fint, men du "
+"bør sende fejlen til os, så vi kan udbedre den."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
@@ -808,9 +817,9 @@ msgid ""
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
-"LimeWire var ikke istand til at skabe forbindelse til fejl-serveren og sende "
-"nedenstående fejl-rapport. For yderligere hjælp og for at hjælpe med "
-"fejlrettelsen besøg www.limewire.com og klik 'Support'. Tak for hjælpen."
+"LimeWire kunne ikke oprette forbindelse til fejlserveren for at sende "
+"nedenstående fejlrapport. Du kan få mere hjælp til fejlfinding ved at klikke "
+"'Support' på www.limewire.com. Tak for hjælpen."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:607
 msgid "Copy Report"
@@ -826,20 +835,20 @@ msgstr "OK"
 #. Load up the HTML engine.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:476
 msgid "Muddling Mint..."
-msgstr ""
+msgstr "Maser mynten..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:493
 msgid "Scouring NYC for Limes..."
-msgstr ""
+msgstr "På udkig i NYC efter limefrugter..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:527
 msgid "Squeezing Limes..."
-msgstr ""
+msgstr "Presser limefrugterne..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:563
 msgid "Prepping Mojitos..."
-msgstr ""
+msgstr "Forbereder Mojitos..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:607
 msgid "This Alpha version has expired.  Press Ok to exit. "
@@ -979,11 +988,11 @@ msgstr "&Forstyr ikke"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:168
 msgid "Connections"
-msgstr "Forbindelser"
+msgstr "Tilslutninger"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 msgid "View connections to other P2P clients"
-msgstr ""
+msgstr "Vis forbindelse til andre P2P klienter"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "Console"
@@ -999,7 +1008,7 @@ msgstr "Mojito"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "View incoming and outgoing DHT messages"
-msgstr ""
+msgstr "Vis ind- og udgående DHT-meddelelser"
 
 #. * Identifier for Advanced Tools window.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:73
@@ -1012,7 +1021,7 @@ msgstr "Anvend"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:192
 msgid "Clear"
-msgstr "Fjern"
+msgstr "Ryd"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:199
 msgid "Save"
@@ -1059,7 +1068,7 @@ msgstr "Fjern"
 
 #. * Action to view files on host.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:44
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:832
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:865
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:104
 msgid "Browse Files"
 msgstr "Browse filer"
@@ -1082,11 +1091,11 @@ msgstr "Du er ikke skjult bag en firewall"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:47
 msgid "You are behind a firewall and support firewall transfers"
-msgstr ""
+msgstr "Du er bag en firewall og understøtter firewalls overføringer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:48
 msgid "You are behind a firewall and do not support firewall transfers"
-msgstr ""
+msgstr "Du er bag en firewall og understøtter ikke firewalls overføringer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:49
 msgid "why"
@@ -1099,7 +1108,7 @@ msgstr "Forbundet til:"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:30
 msgid "Connecting"
-msgstr "Tilslutter"
+msgstr "Opretter forbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:53
 msgid "Leaves"
@@ -1120,7 +1129,7 @@ msgstr "Ultrapeers"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:210
 msgid "Invalid external address"
-msgstr ""
+msgstr "Ugyldig ekstern adresse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:212
 msgid "No solicited incoming messages"
@@ -1128,7 +1137,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:214
 msgid "Reusing status from previous session"
-msgstr ""
+msgstr "Genbruger status fra tidligere"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:216
 msgid "Port unstable"
@@ -1344,32 +1353,31 @@ msgstr "Ja"
 msgid "No"
 msgstr "Nej"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:83
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:92
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageFolderComboBox.java:97
 msgid "Sign in to share with friends"
-msgstr ""
+msgstr "Log på for at dele med venner"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:161
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:176
 msgid "Share all with Friend..."
-msgstr ""
+msgstr "Del alt med vennerne..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:163
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareGnutellaAction.java:29
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:179
 msgid "Share all with the P2P Network"
-msgstr ""
+msgstr "Del alt med P2P netværket"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:207
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:224
 msgid "Unshare all with Friend..."
-msgstr ""
+msgstr "Undlad deling af alt med venner..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:209
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareGnutellaAction.java:29
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:227
 msgid "Unshare all with the P2P Network"
-msgstr ""
+msgstr "Undlad deling af alt med P2P netværk..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:246
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:265
 msgid ""
-"Go to Tools/Options/Security to enable Document sharing with the P2P Network"
+"You can't share documents with the P2P Network. Enable this at Tools > "
+"Options > Security > Unsafe Categories"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:115
@@ -1423,11 +1431,14 @@ msgid "Launch"
 msgstr "Åbn fil"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:605
-msgid "Search again"
-msgstr ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:428
+msgid "Search Again"
+msgstr "Søg igen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:607
-msgid "Try again"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:69
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:430
+msgid "Try Again"
 msgstr "Prøv igen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:623
@@ -1457,7 +1468,7 @@ msgstr "Udført - "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:643
 msgid "Searching..."
-msgstr ""
+msgstr "Søger..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:645
 #, java-format
@@ -1473,8 +1484,8 @@ msgstr "Kan ikke hentes "
 #, java-format
 msgid "Waiting - Next in line"
 msgid_plural "Waiting - {0} in line"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Venter - Den næste i køen"
+msgstr[1] "Venter - {0} i køen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:664
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:550
@@ -1501,11 +1512,11 @@ msgstr "Ryd afsluttede"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:89
 msgid "Clear When Finished"
-msgstr ""
+msgstr "Ryd når afsluttet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:96
 msgid "Categorize Downloads"
-msgstr ""
+msgstr "Kategoriser downloads"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:162
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:159
@@ -1542,8 +1553,8 @@ msgstr "Adresse"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadItemPropertiesFactory.java:89
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:58
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:25
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:52
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:50
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:55
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultPropertiesFactory.java:61
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:51
 msgid "Filename"
@@ -1568,11 +1579,6 @@ msgstr "find på disk"
 msgid "locate in library"
 msgstr "Find i biblioteket"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:69
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:430
-msgid "Try Again"
-msgstr "Prøv igen"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:73
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:61
 msgid "Launch File"
@@ -1588,12 +1594,12 @@ msgstr "Fjern fra liste"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/LocateFileAction.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:73
 msgid "Locate on Disk"
-msgstr ""
+msgstr "Placér på disk"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:89
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:53
 msgid "Locate in Library"
-msgstr ""
+msgstr "Placér i bibliotek"
 
 #. Add View File Info menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:94
@@ -1619,7 +1625,7 @@ msgid "Play"
 msgstr "Afspil"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:110
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:123
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:124
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/ShareLibraryPopupMenu.java:96
 msgid "View"
 msgstr "Vis"
@@ -1627,11 +1633,7 @@ msgstr "Vis"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:399
 #, java-format
 msgid "{0} left"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:428
-msgid "Search Again"
-msgstr ""
+msgstr "{0} tilbage"
 
 #. {0}: current size
 #. {1}: total size
@@ -1641,8 +1643,8 @@ msgstr ""
 #, java-format
 msgid "Downloading {0} of {1} ({2}) from {3} person"
 msgid_plural "Downloading {0} of {1} ({2}) from {3} people"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Downloader {0} af {1} ({2}) fra {3} person"
+msgstr[1] "Downloader {0} af {1} ({2}) fra {3} personer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:513
 #, java-format
@@ -1661,12 +1663,12 @@ msgstr "Standset - {0} af {1} ({2}%)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:542
 msgid "Searching for people with this file..."
-msgstr ""
+msgstr "Søger efter folk med denne fil..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:544
 #, java-format
 msgid "Searching for people with this file... ({0} left)"
-msgstr ""
+msgstr "Søger efter folk med denne fil... ({0} tilbage)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:32
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:96
@@ -1720,76 +1722,82 @@ msgstr "{0} har indtastet en tekst"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:222
 #, java-format
 msgid "Chat from {0}"
-msgstr ""
+msgstr "Chat fra {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:224
 msgid "Reply"
 msgstr "Svar"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:565
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:603
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:871
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:598
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:636
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:904
 msgid "Close conversation"
 msgstr "Luk samtale"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:807
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:840
 msgid "Open Chat"
 msgstr "Åbn chat"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:865
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:213
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:147
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/ShareLibraryPopupMenu.java:132
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/ShareLibraryPopupMenu.java:157
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/FriendShareAction.java:20
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:898
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:211
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:227
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/NavPanel.java:379
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:117
-msgid "Share"
-msgstr "Del"
+msgid "What I'm Sharing"
+msgstr "Hvad jeg deler"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:89
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatHyperlinkListener.java:115
+msgid "Unable to access remote file"
+msgstr "Kan ikke få adgang til fjern fil"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatHyperlinkListener.java:116
+msgid "Hyperlink"
+msgstr "Hyperlink"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:95
 msgid "<html><u>Hide</u></html>"
 msgstr "<html><u>Skjul</u></html>"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:480
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:491
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:463
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:474
 #, java-format
 msgid "<html><u>{0}</u></html>"
 msgstr "<html><u>{0}</u></html>"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:540
-msgid "Unable to access remote file"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:541
-msgid "Hyperlink"
-msgstr "Hyperlink"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:12
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:13
 #, java-format
 msgid "Download it now, or get it from them {0}later{1}."
 msgstr "Download den nu, eller hent den fra dem {0}senere{1}."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:56
 #, java-format
 msgid "Sharing file with {0}"
 msgstr "Deler fil med {0}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:64
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:75
 #, java-format
 msgid "{0} wants to share a file with you"
 msgstr "{0} ønsker at dele en fil med dig"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:65
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:89
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:76
 #, java-format
 msgid "Download {0}"
 msgstr "Download {0}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:81
-msgid "Downloading"
-msgstr "Downloader"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:93
+#, java-format
+msgid "Downloading {0}"
+msgstr "Downloader {0}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:94
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:99
+msgid "Download cancelled.  Click button to retry"
+msgstr "Download afbrudt. Klik på knap for at forsøge igen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:105
+msgid "Error downloading file.  Click button to retry"
+msgstr "Fejl ved download af fil. Klik på knap for at forsøge igen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:109
 #, java-format
 msgid "{0}Downloaded{1}"
 msgstr "{0}Downloaded{1}"
@@ -1804,11 +1812,11 @@ msgstr "Automatisk venne-log ind"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:82
 msgid "Signing in..."
-msgstr ""
+msgstr "Loggar ind..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:107
 msgid "Offline Friends"
-msgstr ""
+msgstr "Venner offline"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:118
 msgid "SHOW"
@@ -1817,7 +1825,7 @@ msgstr "VIS"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:124
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:95
 msgid "Options"
-msgstr "Valgmuligheder"
+msgstr "Indstillinger"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:126
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:134
@@ -1836,7 +1844,7 @@ msgstr "Log ind"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:238
 #, java-format
 msgid "SET {0} STATUS"
-msgstr ""
+msgstr "SÆT {0} STATUS"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:54
 msgid "Sign in"
@@ -1848,7 +1856,7 @@ msgstr "Logger på ..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:56
 msgid "Incorrect username or password."
-msgstr ""
+msgstr "Forkert brugernavn eller adgangskode."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:57
 msgid "Network error."
@@ -1860,7 +1868,7 @@ msgstr "Tjek ind med"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:155
 msgid "Domain"
-msgstr ""
+msgstr "Domæne"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:158
 msgid "Username"
@@ -1876,20 +1884,20 @@ msgstr "Husk mig"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileItemDialog.java:24
 msgid "Copy Link"
-msgstr ""
+msgstr "Kopiér link"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileListPanel.java:78
 msgid "Find..."
-msgstr ""
+msgstr "Find..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AllFriendsLibraryPanel.java:71
-msgid "Download from all friends"
-msgstr "Download fra alle venner"
+msgid "Browse Files from all your Friends"
+msgstr "Gennemse filer fra alle dine venner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyLibraryPanel.java:58
 #, java-format
-msgid "Browse Files from {0}"
-msgstr ""
+msgid "Browse files from {0}"
+msgstr "Gennemse filer fra {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:314
 #, java-format
@@ -1897,95 +1905,83 @@ msgid "{0} is offline"
 msgstr "{0} er offline"
 
 #. {0}, {1}: html tags, {2}: number of files shared
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:317
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:333
-#, java-format
-msgid "{0}Sharing{1} {2} file with your friend."
-msgid_plural "{0}Sharing{1} {2} files with our friend."
-msgstr[0] ""
-msgstr[1] ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:316
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:325
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:348
+msgid "You're {0}sharing {1} file{2} with your friend."
+msgid_plural "You're {0}sharing {1} files{2} with your friend."
+msgstr[0] "Du {0}deler {1} fil{2} med din ven."
+msgstr[1] "Du {0}deler {1} filer{2} med din ven."
 
-#. {0}, {1}: html tags
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:322
-#, java-format
-msgid "{0}Share{1} files with your friend."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:330
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:323
 #, java-format
 msgid "{0} isn't on LimeWire"
 msgstr "{0} er ikke på LimeWire"
 
 #. {0}, {1}: html tags
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:335
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:327
 #, java-format
-msgid "{0}Chat{1} about using LimeWire 5."
+msgid "{0}Chat{1} about signing into LimeWire 5."
 msgstr ""
 
-#. {0}, {1}, {2}, {3}: html tags
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:338
-#, java-format
-msgid ""
-"{0}Share{1} files with your friend and {2}chat{3} about using LimeWire 5."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:348
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:336
 #, java-format
 msgid "Loading {0}'s files..."
-msgstr ""
+msgstr "Indlæser {0}'s filer..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:350
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:338
 msgid "Loading files..."
-msgstr ""
+msgstr "Indlæser filer..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:359
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:347
 #, java-format
 msgid "{0} isn't sharing with you"
-msgstr ""
+msgstr "{0} deler ikke med dig"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:360
+#. {0}, {1}: html tags
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:350
 #, java-format
-msgid "{0}Chat{1} about sharing with you."
-msgstr ""
+msgid "{0}Chat{1} about LimeWire 5."
+msgstr "{0}Chat{1} om LimeWire 5."
 
 #. this should never happen
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:363
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:353
 msgid "This person isn't sharing any files with you."
-msgstr ""
+msgstr "Denne person deler ingen filer med dig."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:374
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:364
 #, java-format
 msgid "There was a problem viewing {0}'s files."
-msgstr ""
+msgstr "Der er et problem med at se {0}'s filer."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:376
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:366
 msgid "There was a problem viewing this person's files."
-msgstr ""
+msgstr "Der er et problem med at se denne persons filer."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:61
 #, java-format
-msgid "Browse files from {0}"
-msgstr ""
+msgid "Browse Files from {0}"
+msgstr "Gennemse filer fra {0}"
 
 #. {0}: category (Audio, Video, etc)
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:167
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:194
 #, java-format
 msgid "{0} Info"
-msgstr ""
+msgstr "{0} Info"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:250
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:277
 #, java-format
 msgid "Total: {0}"
-msgstr ""
+msgstr "Totalt: {0}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:255
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:282
 #, java-format
 msgid "Sharing Collection: {0}"
-msgstr ""
+msgstr "Deler samling: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:128
 msgid "Unable to save metadata changes."
-msgstr ""
+msgstr "Kunne ikke gemme ændringer i metadata."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:132
 msgid "View File Info"
@@ -1993,113 +1989,109 @@ msgstr "Vis oplysninger om filen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:199
 msgid "Sharing with"
-msgstr ""
+msgstr "Deler med"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:191
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/NavPanel.java:379
-msgid "What I'm Sharing"
-msgstr ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:250
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:147
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/ShareLibraryPopupMenu.java:132
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/ShareLibraryPopupMenu.java:157
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/FriendShareAction.java:20
+msgid "Share"
+msgstr "Del"
 
 #. Display heading.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:343
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:396
 msgid "CATEGORIES"
-msgstr ""
+msgstr "KATEGORIER"
 
 #. Display heading.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:482
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:538
 msgid "PLAYLISTS"
-msgstr ""
+msgstr "SPILLELISTE"
 
 #. Get playlists from manager.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:485
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:541
 msgid "Quicklist"
-msgstr ""
+msgstr "Quickliste"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:742
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:798
 #, java-format
 msgid "Sharing entire {0} Collection with {1}"
 msgstr "Deler hele {0} samling med {1}"
 
 #. {0}: name of category (Audio, Video...)
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:746
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:802
 #, java-format
 msgid ""
 "New {0} files that are added to your Library will be automatically shared "
 "with this person"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:764
-msgid "What Now?"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:822
+msgid "Now What?"
+msgstr "Hvad nu?"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:825
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:867
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:910
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:915
+msgid "Click "
+msgstr "Klik "
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:826
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:916
+msgid " to share or unshare with your friends"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:767
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:853
-msgid "Click the share button to share or unshare files with a friend"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:770
-msgid "Chat with them about using LimeWire 5"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:805
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:847
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:864
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:907
 msgid "No more shared folders"
+msgstr "Ikke flere delte mapper"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:868
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:911
+msgid " to share or unshare with the P2P Network"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:808
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:850
-msgid "Click the share button to share or unshare files with the P2P Network"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:811
-msgid ""
-"Click the What I'm Sharing button to see what files are being shared with "
-"the P2P Network"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:904
-msgid "Show all Files"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:918
-#, java-format
-msgid "You are not sharing any files with the {0}"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:920
-#, java-format
-msgid "You are not sharing any files with {0}"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:989
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:977
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1063
 msgid "Show All Files"
-msgstr ""
+msgstr "Vis alle filer"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1015
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:992
+msgid "No files shared with the P2P Network"
+msgstr "Ingen filer deles med P2P netværket"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:994
+#, java-format
+msgid "No files shared with {0}"
+msgstr "Ingen filer deles med {0}"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1089
 msgid "What I'm Sharing With {0}"
-msgstr ""
+msgstr "Hvad jeg deler med {0}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingFilterComboBox.java:86
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingFilterComboBox.java:88
 msgid "with:"
-msgstr ""
+msgstr "med:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageSubPanel.java:94
 msgid "share folder"
-msgstr ""
+msgstr "delemapper"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageSubPanelFactoryImpl.java:121
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:61
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:48
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:37
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:41
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:38
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:30
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:32
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:36
 msgid "Sharing"
-msgstr "Deler"
+msgstr "Deling"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/LibraryTreeTableContainer.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:248
 msgid "*Adding these folders will not automatically share your files"
-msgstr ""
+msgstr "*Tilføjelse af disse mapper vil ikke automatisk dele dine filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/LibraryNavigatorImpl.java:125
 msgid "On LimeWire"
@@ -2126,19 +2118,19 @@ msgstr "P2P netværk"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/LibraryNavigatorImpl.java:155
 msgid "the P2P Network"
-msgstr ""
+msgstr "P2P netværket"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/LibraryNavigatorImpl.java:159
 msgid "All Friends"
 msgstr "Alle venner"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistPopupMenu.java:87
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistPopupMenu.java:91
 msgid "Remove from playlist"
-msgstr ""
+msgstr "Fjern fra spilleliste"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistPopupMenu.java:104
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistPopupMenu.java:108
 msgid "Clear playlist"
-msgstr ""
+msgstr "Ryd spilleliste"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:50
 msgid "#"
@@ -2151,17 +2143,17 @@ msgstr "#"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendOtherTableFormat.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendProgramTableFormat.java:16
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:19
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:51
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:41
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:32
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:33
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:54
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:33
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:34
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteDocumentTableFormat.java:38
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteImageTableFormat.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteOtherTableFormat.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteProgramTableFormat.java:34
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:42
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:44
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:304
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:53
@@ -2176,9 +2168,9 @@ msgstr "Størrelse"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:61
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:18
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:55
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:44
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:41
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:58
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:46
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:78
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:46
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:44
@@ -2186,107 +2178,107 @@ msgid "Quality"
 msgstr "Kvalitet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:63
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:44
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:33
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:37
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:45
-msgid "Hits"
-msgstr "Hits"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:64
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:58
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:60
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:38
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:46
+msgid "Hits"
+msgstr "Hits"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:64
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:61
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:46
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:35
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:39
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:47
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:224
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadPanel.java:92
 msgid "Uploads"
 msgstr "Uploads"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:65
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:59
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:46
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:35
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:39
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:47
-msgid "Upload attempts"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:66
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:60
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:62
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:47
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:40
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:48
+msgid "Upload attempts"
+msgstr "Upload forsøg"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:66
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:63
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:37
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:41
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:271
 msgid "Location"
 msgstr "Adresse"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:41
 #, java-format
 msgid "Share {0} collection"
-msgstr ""
+msgstr "Del {0} samling"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:43
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:44
 #, java-format
 msgid ""
 "Sharing your {0} collection shares new {1} files that automatically get "
 "added to your Library"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:22
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:352
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:395
 msgid "Currently sharing with"
 msgstr "Deler i øjeblikket med"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:24
 msgid "Share one file"
-msgstr ""
+msgstr "Del en fil"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:108
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:111
 msgid "Start typing a friend's name"
 msgstr "Start med at skrive en vens navn"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:109
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:112
 msgid "Add another friend"
-msgstr ""
+msgstr "Tilføj en ven"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:283
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:306
 msgid "Share with the P2P Nework"
-msgstr ""
+msgstr "Del med P2P netværket"
 
 #. {0} number of files, {1}: type of file (Image, Document...)
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:41
 #, java-format
 msgid "Share {0} {1} file"
 msgid_plural "Share {0} {1} files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Del {0} {1} fil"
+msgstr[1] "Del {0} {1} filer"
 
 #. {0}: number of files
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:43
 #, java-format
 msgid "Shared {0} file with:"
 msgid_plural "Shared {0} files with:"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Deler {0} fil med:"
+msgstr[1] "Deler {0} filer med:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:28
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:29
 #, java-format
 msgid "All {0} files were unshared"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:37
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:38
 #, java-format
 msgid "These {0} files are not shared"
-msgstr ""
+msgstr "Disse {0}filer er ikke delte"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:56
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:57
 #, java-format
 msgid "Unshare {0} files"
-msgstr ""
+msgstr "Udelte {0}filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:26
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendDocumentTableFormat.java:17
@@ -2294,12 +2286,12 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendOtherTableFormat.java:17
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendProgramTableFormat.java:17
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:16
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:51
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:53
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteDocumentTableFormat.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteImageTableFormat.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteOtherTableFormat.java:32
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteProgramTableFormat.java:35
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:39
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:40
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:37
@@ -2328,7 +2320,7 @@ msgstr "Fra"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendDocumentTableFormat.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendImageTableFormat.java:17
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteDocumentTableFormat.java:37
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteImageTableFormat.java:35
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:312
@@ -2338,7 +2330,7 @@ msgid "Date Created"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendProgramTableFormat.java:19
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:35
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteProgramTableFormat.java:37
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:74
@@ -2347,78 +2339,76 @@ msgid "Company"
 msgstr "Firma"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:20
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:43
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:38
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:39
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:65
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:46
 msgid "Misc"
 msgstr "Div"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:23
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:46
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:48
 msgid "Resolution"
-msgstr ""
+msgstr "Opløsning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:157
 msgid "download"
 msgstr "download"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:46
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:99
-msgid "share"
-msgstr "Del"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:79
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:88
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:104
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:105
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:127
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:128
 msgid "This file cannot be shared."
+msgstr "Denne fil kan ikke deles."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:113
+msgid "Sharing documents with the p2p network is disabled."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:84
-msgid "Sign in to share Documents with your friends"
-msgstr ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:117
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:134
+msgid "Share this file with the p2p network."
+msgstr "Del denne fil med P2P netværket."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:92
-msgid "Share this file with a friend"
-msgstr ""
-
-#. {0}: number of friends file is shared with already
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:97
-#, java-format
-msgid "share ({0})"
-msgstr ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:121
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:136
+msgid "Share this file with a friend."
+msgstr "Del denne fil med en ven."
 
 #. Add Download menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:101
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/FriendDownloadAction.java:20
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/BaseResultPanel.java:405
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/BaseResultPanel.java:415
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:56
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:138
 msgid "Download"
 msgstr "Download"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:132
-msgid "Add to playlist"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:157
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareFriendAction.java:31
-msgid "Share with Friend"
-msgstr ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:141
+#, java-format
+msgid "Add to {0}"
+msgstr "Tilføj til {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:158
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareFriendAction.java:31
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareFriendAction.java:37
+msgid "Share with Friend"
+msgstr "Del med ven"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:159
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareFriendAction.java:37
 msgid "Unshare with Friend"
-msgstr ""
+msgstr "Stop deling med ven"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/ShareLibraryPopupMenu.java:179
 msgid "Unshare"
-msgstr ""
+msgstr "Stop deling"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:27
 msgid "Delete Files"
-msgstr ""
+msgstr "Slet filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:29
 msgid "Move to Trash"
@@ -2432,21 +2422,29 @@ msgstr "Flyt til papirkurv"
 msgid "Remove from Library"
 msgstr "Fjern fra biblioteket"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareFriendAction.java:29
-msgid "Share all with Friend"
-msgstr ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareFriendAction.java:35
+msgid "Share folder with Friend"
+msgstr "del mappe med en ven."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareGnutellaAction.java:31
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareGnutellaAction.java:37
+msgid "Share folder with the P2P Network"
+msgstr "Del mappe med P2P netværket."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareGnutellaAction.java:39
 msgid "Share with the P2P Network"
-msgstr ""
+msgstr "Del med P2P-netværket"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareFriendAction.java:29
-msgid "Unshare all with Friend"
-msgstr ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareFriendAction.java:35
+msgid "Unshare folder with Friend"
+msgstr "Undlad deling af mappe med ven"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareGnutellaAction.java:31
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareGnutellaAction.java:37
+msgid "Unshare folder with the P2P Network"
+msgstr "Undlad deling af mappe med P2P netværk"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareGnutellaAction.java:39
 msgid "Unshare with the P2P Network"
-msgstr ""
+msgstr "Stop deling med P2P netværket"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:40
 msgid "Automatically Scroll"
@@ -2565,6 +2563,16 @@ msgid ""
 "Lime&nbsp;Wire as the source of the respective Gmail, Jabber and/or "
 "LiveJournal service or technology."
 msgstr ""
+"BitTorrent, BitTorrent logoet, og Torrent er varemærker fra BitTorrent, Inc. "
+"Gmail er et varemærke fra Google Inc. Jabber og LiveJournal er registrerede "
+"varemærker fra XMPP Standards Foundation og LiveJournal, Inc., d/b/a "
+"LiveJournal.com. Hverken Google Inc., XMPP Standards Foundation eller "
+"LiveJournal.com er sponsorer eller partnere for Lime&nbsp;Wire&nbsp;LLC. De "
+"er heller ikke understøttere af Lime&nbsp;Wire&nbsp;LLC eller af LimeWire "
+"software. Brug af disse varemærker er alene et spørgsmål om at referere til "
+"den teknologi eller service som disse ejer, og for ikke at sammenblande "
+"Lime&nbsp;Wire og andre services og teknologier som Gmail, Jabber og/eller "
+"LiveJournal."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:153
 msgid "New Version Available!"
@@ -2581,7 +2589,7 @@ msgstr "LimeWire butik"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:132
 msgid "Close All Searches"
-msgstr ""
+msgstr "Luk alle søgninger"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:133
 msgid "Close Search"
@@ -2589,11 +2597,11 @@ msgstr "Luk søgning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:134
 msgid "Close Other searches"
-msgstr ""
+msgstr "Luk andre søgninger"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:364
 msgid "Find More Results"
-msgstr ""
+msgstr "Find flere resultater"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FileMenu.java:24
 msgid "&File"
@@ -2601,7 +2609,7 @@ msgstr "&Filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FriendMenu.java:27
 msgid "F&riend"
-msgstr ""
+msgstr "&Ven"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:29
 msgid "&Help"
@@ -2621,35 +2629,39 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:59
 msgid "&About LimeWire..."
-msgstr ""
+msgstr "&Om LimeWire..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/PlayerMenu.java:24
 msgid "&Player"
-msgstr ""
+msgstr "&Spiller"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:36
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:37
 msgid "&Tools"
 msgstr "&Værktøjer"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:38
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:39
 msgid "&Downloads"
-msgstr ""
+msgstr "&Downloads"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:48
 msgid "&Uploads"
-msgstr ""
+msgstr "&Uploads"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:61
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:62
+msgid "Advanced &Search"
+msgstr "Avanceret &søgning"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:75
 msgid "&Advanced Tools..."
-msgstr ""
+msgstr "&Avancerede værktøjer..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:84
 msgid "&Options..."
-msgstr ""
+msgstr "&Indstillinger..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:80
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:94
 msgid "&What's New Search"
-msgstr ""
+msgstr "&Nye filer søgning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:31
 msgid "&View"
@@ -2673,15 +2685,15 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:35
 msgid "Hide &Chat Window"
-msgstr ""
+msgstr "Skjul &chat vindue"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:35
 msgid "Show &Chat Window"
-msgstr ""
+msgstr "Vis &chatvindue"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:26
 msgid "Add F&ile to Library..."
-msgstr ""
+msgstr "Tilføj f&il til bibliotek..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:32
 msgid "Add File(s)"
@@ -2697,7 +2709,7 @@ msgstr "Brugbare filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:26
 msgid "Add &Folder to Library..."
-msgstr ""
+msgstr "Tilføj &mappe til bibliotek..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:32
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:33
@@ -2711,7 +2723,7 @@ msgstr "Alle mapper"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ChatAction.java:22
 msgid "&Chat"
-msgstr ""
+msgstr "&Chat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ExitAction.java:18
 msgid "E&xit"
@@ -2723,7 +2735,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:39
 msgid "Invalid Link"
-msgstr ""
+msgstr "Ugyldigt link"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:69
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:45
@@ -2736,11 +2748,11 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:36
 msgid "&Open Torrent..."
-msgstr ""
+msgstr "Åben T&orrent..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:44
 msgid "Open Torrent"
-msgstr ""
+msgstr "Åben torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:55
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:130
@@ -2751,29 +2763,29 @@ msgstr ".torrent filer"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:78
 #, java-format
 msgid "The file {0} does not exist."
-msgstr ""
+msgstr "Filen {0} eksisterer ikke."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:78
 msgid "Unable to open torrent"
-msgstr ""
+msgstr "Kunne ikke åbne torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:42
 msgid "Open &Link..."
-msgstr ""
+msgstr "Åben &link..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:54
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:65
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandlerImpl.java:52
 msgid "Open Link"
-msgstr ""
+msgstr "Åben link"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:65
 msgid "Magnet link is empty."
-msgstr ""
+msgstr "Magnet link er tomt."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/RecentDownloadsMenu.java:40
 msgid "&Recent Downloads"
-msgstr ""
+msgstr "&Seneste downloads"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/RecentDownloadsMenu.java:41
 msgid "(empty)"
@@ -2781,7 +2793,7 @@ msgstr "(tom)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/RecentDownloadsMenu.java:44
 msgid "Clear List"
-msgstr ""
+msgstr "Ryd liste"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/SignInOutAction.java:20
 msgid "&Sign into Friends"
@@ -2793,7 +2805,7 @@ msgstr "&Log ud af Venner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/SwitchUserAction.java:17
 msgid "Switch &User"
-msgstr ""
+msgstr "Skift br&uger"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:43
 msgid "Files"
@@ -2801,7 +2813,7 @@ msgstr "Filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:44
 msgid "Transfers"
-msgstr ""
+msgstr "Overførsler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:45
 msgid "System"
@@ -2837,7 +2849,7 @@ msgstr "Minimum uploads pr. torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:100
 msgid "Connection Speed"
-msgstr "Forbindelses hastighed"
+msgstr "Forbindelseshastighed"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ConnectionsOptionPanel.java:104
 msgid "Broadband"
@@ -2899,7 +2911,7 @@ msgstr "Del filer downloaded fra P2P netværket med P2P netværket"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:107
 msgid "Add audio files I downloaded from LimeWire to iTunes"
-msgstr ""
+msgstr "Tilføj lydfil som jeg downloadede fra LimeWire til iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:112
 msgid "Save downloads to:"
@@ -2922,7 +2934,7 @@ msgstr "Tilføj ny endelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:241
 msgid "File Extension:"
-msgstr ""
+msgstr "Filendelser:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FileTypeOptionPanelManager.java:281
 msgid "The extension name was not valid, could not add."
@@ -2930,15 +2942,15 @@ msgstr "Endelsesnavn er ugyldigt, kunne derfor ikke tilføjes."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:127
 msgid "File Extensions"
-msgstr ""
+msgstr "Filendelser"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:132
 msgid "Manage File Extensions"
-msgstr ""
+msgstr "Administrer filendelser"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:133
 msgid "Manage..."
-msgstr ""
+msgstr "Administrer..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:133
 msgid "Manage file extensions to load"
@@ -2951,13 +2963,13 @@ msgstr "Vælg hvilke filendelser, der hører til hver kategori"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:161
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:167
 msgid "Download Folders"
-msgstr ""
+msgstr "Download mapper"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:167
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:148
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:135
 msgid "Configure..."
-msgstr "Konfigurér..."
+msgstr "Konfigurer..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:167
 msgid "Configure where different categories are downloaded"
@@ -2981,7 +2993,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:214
 msgid "Save Store downloads to:"
-msgstr ""
+msgstr "Gem butiksdownloads i:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:235
 msgid "Could not save Store download directory, reverted to old directory"
@@ -3022,26 +3034,27 @@ msgstr "Daap fejl"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:39
 msgid "Add Extension"
-msgstr ""
+msgstr "Tilføj endelser"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:41
 msgid "Extensions"
-msgstr ""
+msgstr "Endelser"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:60
 msgid ""
 "LimeWire will not show files with the following extensions in your search "
 "results"
 msgstr ""
+"LimeWire vil ikke vise filer med følgende endelser i dine søgeresultater"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:97
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:229
 msgid "Use Default"
-msgstr "Anvend standard"
+msgstr "Brug standard"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:98
 msgid "Revert to default settings"
-msgstr ""
+msgstr "Gå tilbage til standard opsætning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:38
 msgid "Add Keyword"
@@ -3168,7 +3181,7 @@ msgstr "Ingen undermappe"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:128
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:154
 msgid "Sharing Categories"
-msgstr ""
+msgstr "Dele kategorier"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:132
 msgid "Only share files in that category at that point"
@@ -3183,11 +3196,11 @@ msgstr ""
 #. new VerticalLayout(2));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:143
 msgid "When I share a category:"
-msgstr ""
+msgstr "Når jeg deler en kategori:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:147
 msgid "Choose what happens when I share a category"
-msgstr ""
+msgstr "Vælg hvad der sker, når jeg deler en kategori"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:228
 msgid ""
@@ -3201,7 +3214,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:339
 msgid "Add Folder..."
-msgstr ""
+msgstr "Tilføj mappe..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:340
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:242
@@ -3221,7 +3234,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:358
 msgid "Library Manager Error"
-msgstr ""
+msgstr "Fejl i biblioteksadministrator"
 
 #. new VerticalLayout(2));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:389
@@ -3237,15 +3250,15 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:394
 msgid "View Folders..."
-msgstr ""
+msgstr "Vis mapper..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:400
 msgid "Manually Added Folders"
-msgstr ""
+msgstr "Manuelt tilføjede mapper"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:449
 msgid "Use the LimeWire player when I play audio files"
-msgstr ""
+msgstr "Brug LimeWire afspiller når jeg spiller lydfiler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:42
 msgid "Select which file extensions belong in each category"
@@ -3265,7 +3278,7 @@ msgstr "Sprog:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:131
 msgid "Notifications"
-msgstr "Underretninger"
+msgstr "Beskeder"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:133
 msgid "Show popup system notifications"
@@ -3281,11 +3294,11 @@ msgstr "Venner og chat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:176
 msgid "Sign into Friends when LimeWire starts"
-msgstr ""
+msgstr "Log på Venner når LimeWire starter"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:195
 msgid "Jabber Server:"
-msgstr ""
+msgstr "Jabber Server:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:202
 msgid "Using"
@@ -3308,7 +3321,7 @@ msgstr "Lad mig vælge en bestemt netværksgrænseflade"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:118
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:48
 msgid "Search"
-msgstr "Søgning"
+msgstr "Søg"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:64
 msgid "Security"
@@ -3437,7 +3450,7 @@ msgstr "Grupper søgeresultater sammen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:88
 msgid "Search bar"
-msgstr ""
+msgstr "Søgebjælke"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:92
 msgid "By default, search for"
@@ -3445,11 +3458,11 @@ msgstr "Søg som standard efter"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:111
 msgid "Suggest files from friends"
-msgstr ""
+msgstr "Foreslå filer fra venner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:114
 msgid "Remember my recent searches"
-msgstr ""
+msgstr "Husk mine seneste søgninger"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:117
 msgid "Clear Now"
@@ -3462,7 +3475,7 @@ msgstr "Advarselsmeddelelser"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 msgid "Settings..."
-msgstr ""
+msgstr "Indstillinger..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 msgid "Choose which warning messags to display"
@@ -3487,11 +3500,11 @@ msgstr "Af hensyn til din sikkerhed forhindrer LimeWire dig i at:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:139
 msgid "- Searching for and sharing programs with anyone"
-msgstr ""
+msgstr "- Søger efter og deler programmer med alle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:140
 msgid "- Sharing documents with the P2P Network"
-msgstr ""
+msgstr "- Deler dokumenter med P2P netværket"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:181
 msgid ""
@@ -3500,7 +3513,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:184
 msgid "Don't show adult content in search results"
-msgstr ""
+msgstr "Vis ikke pornografisk indhold i søgresultater"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:188
 msgid "Filter Keywords"
@@ -3554,7 +3567,7 @@ msgstr ".magnet filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:138
 msgid "Warn me when other programs want to automatically open these types"
-msgstr ""
+msgstr "Advar mig når andre programmer ønsker automatisk at åbne disse typer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:236
 msgid "Startup and Shutdown"
@@ -3578,28 +3591,30 @@ msgstr "Når jeg trykker X:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:308
 msgid "Bugs"
-msgstr ""
+msgstr "Fejl"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:311
 msgid "Let me know about bugs before sending them"
-msgstr ""
+msgstr "Lad mig vide om fejl før de sendes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
 msgid "Always send bugs to Lime Wire"
-msgstr ""
+msgstr "Send altid fejl til LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
 msgid "Never send bugs to Lime Wire"
-msgstr ""
+msgstr "Send aldrig fejl til LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:30
 msgid ""
 "Allow me to search for and share programs with the P2P Network and my friends"
 msgstr ""
+"Tillad at jeg søger efter og deler programmer med P2P netværket og mine "
+"venner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:31
 msgid "Allow me to share documents with the P2P Network"
-msgstr ""
+msgstr "Tillad at jeg deler dokumenter med P2P netværket"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:34
 msgid ""
@@ -3660,7 +3675,7 @@ msgstr "Hjælp"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/HelpAction.java:19
 msgid "Learn more..."
-msgstr ""
+msgstr "Lær mere..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:17
 msgid "Keep any changes made"
@@ -3668,7 +3683,7 @@ msgstr "Behold alle ændringer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/MiniPlayerPanel.java:86
 msgid "Nothing selected"
-msgstr ""
+msgstr "Intet valgt"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:59
 msgid "Hash"
@@ -3681,7 +3696,7 @@ msgstr "\"{0}\" egenskaber"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:244
 msgid "Overview"
-msgstr ""
+msgstr "Overblik"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:267
 msgid "Details"
@@ -3689,7 +3704,7 @@ msgstr "Detajler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:325
 msgid "Dimensions"
-msgstr ""
+msgstr "Dimensioner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:325
 #, java-format
@@ -3698,7 +3713,7 @@ msgstr "({0}px X {1}px)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:47
 msgid "close"
-msgstr ""
+msgstr "luk"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:57
 msgid "Like the way search results used to look?"
@@ -3706,79 +3721,90 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:62
 msgid "Switch to Classic View"
-msgstr ""
+msgstr "Skift til klassisk visning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:42
 msgid "New audio"
-msgstr ""
+msgstr "Ny lyd"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:43
 msgid "New documents"
-msgstr ""
+msgstr "Nye dokumenter"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:44
 msgid "New images"
-msgstr ""
+msgstr "Nye billeder"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:45
 msgid "New programs"
-msgstr ""
+msgstr "Nye programmer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:46
 msgid "New videos"
-msgstr ""
+msgstr "Nye videoer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:49
 msgid "New files"
-msgstr ""
+msgstr "Nye filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:240
 msgid "Friend Suggestions"
+msgstr "Forslag fra vennerne"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:20
+msgid "Downloading programs can result in viruses"
+msgstr "Download af programmer kan føre til virus"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:25
+msgid ""
+"We recommend you don't download programs using LimeWire. However, you can "
+"enable downloading programs via Preferences > Security > Unsafe Categories."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:13
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:30
 msgid ""
-"To protect against viruses, LimeWire has disabled showing search results for "
-"programs. To change this option, go to Options, choose Security, and "
-"configure your 'Unsafe Categories'."
+"We recommend you don't download programs using LimeWire. However, you can "
+"enable downloading programs via Tools > Options > Security > Unsafe "
+"Categories."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:127
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:202
 msgid "Search P2P Network"
-msgstr ""
+msgstr "Søg P2P netværket"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:173
-msgid "Advanced Search..."
-msgstr ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:84
+msgid "Advanced Search"
+msgstr "Avanceret søgning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:199
 msgid "Search P2P Network and Friends"
-msgstr ""
+msgstr "Søg P2P netværket og venner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:28
 msgid "A&udio"
-msgstr ""
+msgstr "L&yd"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:29
 msgid "&Documents"
-msgstr ""
+msgstr "&Dokumenter"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:30
 msgid "&Images"
-msgstr ""
+msgstr "B&illeder"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:31
 msgid "&Programs"
-msgstr ""
+msgstr "&Programmer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:32
 msgid "&Videos"
-msgstr ""
+msgstr "&Videoer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:35
 msgid "&Other"
-msgstr ""
+msgstr "Øvri&gt"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:42
 msgid "All files"
@@ -3804,11 +3830,11 @@ msgstr "Kun programmer"
 msgid "Only videos"
 msgstr "Kun videoer"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:409
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:423
 msgid "LimeWire will start your search right after it finishes loading."
-msgstr ""
+msgstr "LimeWire starter søgningen i samme øjeblik den er indlæst."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:412
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:426
 msgid "You might not receive many results until LimeWire finishes loading..."
 msgstr ""
 
@@ -3874,24 +3900,20 @@ msgstr "Listevisning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:212
 msgid "Classic view"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:84
-msgid "Advanced Search"
-msgstr ""
+msgstr "Klassisk visning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:86
-msgid "Search for the following type of file:"
+msgid "Search for the following category:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/BaseResultPanel.java:404
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/BaseResultPanel.java:414
 #, java-format
 msgid "Unable to relocate downloading file {0}"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/CopyMagnetLinkToClipboardAction.java:17
 msgid "Copy link"
-msgstr ""
+msgstr "Kopiér link"
 
 #. show dialog.  if "no", don't download, just return.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:39
@@ -3914,7 +3936,7 @@ msgstr "Advar mig ikke igen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchHeadingDocumentBuilderImpl.java:45
 #, java-format
 msgid "{0} is marked as spam."
-msgstr ""
+msgstr "{0} er markeret som spam."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:91
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FriendStatusPanel.java:44
@@ -3925,17 +3947,16 @@ msgstr "Chat"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:93
 #, java-format
 msgid "Chat with {0}"
-msgstr ""
+msgstr "Chat med {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:106
 #, java-format
 msgid "Browse Files of {0}"
-msgstr ""
+msgstr "Gennemse filer fra {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:119
-#, java-format
-msgid "Share With {0}"
-msgstr ""
+msgid "What I'm Sharing with {0}"
+msgstr "Hvad jeg deler med {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:144
 msgid "nobody"
@@ -3945,48 +3966,48 @@ msgstr "ingen"
 #, java-format
 msgid "{0} Person"
 msgid_plural "{0} People"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "{0} Person"
+msgstr[1] "{0} Personer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:164
 msgid "Person"
 msgid_plural "People"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Person"
+msgstr[1] "Personer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:168
 #, java-format
 msgid "{0} Friend"
 msgid_plural "{0} Friends"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "{0} Ven"
+msgstr[1] "{0} Venner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:170
 msgid "Friend"
 msgid_plural "Friends"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Ven"
+msgstr[1] "Venner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:174
 #, java-format
 msgid "{0} P2P User"
 msgid_plural "{0} P2P Users"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "{0} P2P bruger"
+msgstr[1] "{0} P2P brugere"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:176
 msgid "P2P User"
 msgid_plural "P2P Users"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "P2P bruger"
+msgstr[1] "P2P brugere"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:242
 msgid "Friends"
-msgstr ""
+msgstr "Venner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:248
 msgid "P2P Users"
-msgstr ""
+msgstr "P2P brugere"
 
 #. Add Download As menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:67
@@ -3995,7 +4016,7 @@ msgstr "Download som..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:80
 msgid "Download As"
-msgstr ""
+msgstr "Download som"
 
 #. Add Mark/Unmark as Spam menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:93
@@ -4008,11 +4029,11 @@ msgstr "Marker som spam"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:106
 msgid "Hide Similar Files"
-msgstr ""
+msgstr "Skjul lignende filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:106
 msgid "Show Similar Files"
-msgstr ""
+msgstr "Vis lignende filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultPropertiesFactory.java:81
 msgid "Block Address"
@@ -4021,11 +4042,11 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:182
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:220
 msgid "Show similar files"
-msgstr ""
+msgstr "Vis lignende filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:212
 msgid "Hide similar files"
-msgstr ""
+msgstr "Skjul lignende filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:298
 #, java-format
@@ -4105,76 +4126,76 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:112
 msgid "No internet connection"
-msgstr ""
+msgstr "Ingen internetforbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:113
 msgid "You have no internet connection"
-msgstr ""
+msgstr "Du har ingen internetforbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:117
 msgid "Couldn't connect"
-msgstr ""
+msgstr "Kunne ikke tilslutte"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:118
 msgid "You couldn't connect to LimeWire"
-msgstr ""
+msgstr "Du kan ikke tilslutte dig til LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:129
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:134
 msgid "Weak connection"
-msgstr ""
+msgstr "Svag forbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:130
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:135
 msgid "You have a weak connection"
-msgstr ""
+msgstr "Du har en svar forbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:139
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:144
 msgid "Medium connection"
-msgstr ""
+msgstr "Middel forbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:140
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:145
 msgid "You have a medium connection"
-msgstr ""
+msgstr "Du har en middel forbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:150
 msgid "Full connection"
-msgstr ""
+msgstr "Fuld forbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:151
 msgid "You are fully connected"
-msgstr ""
+msgstr "Du har fuld forbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:156
 msgid "Turbo-charged connection"
-msgstr ""
+msgstr "Turboladet forbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:157
 msgid "You have a turbo-charged connection"
-msgstr ""
+msgstr "Du har en super turboladet forbindelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FriendStatusPanel.java:158
 #, java-format
 msgid "Chat ({0})"
-msgstr ""
+msgstr "Chat ({0})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:37
 msgid "Want faster downloads?  Get LimeWire PRO."
-msgstr ""
+msgstr "Ønsker du hurtige downloads? Anskaf LimeWire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:49
 msgid "For the best BitTorrent downloads, get LimeWire PRO."
-msgstr ""
+msgstr "For de bedste BitTorrent downloads, anskaf LimeWire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:53
 msgid "LimeWire PRO comes with FREE tech support. "
-msgstr ""
+msgstr "LimeWire PRO er med GRATIS teknisk support. "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:65
 msgid "FREE updates and support - LimeWire PRO."
-msgstr ""
+msgstr "GRATIS opdateringer og support - LimeWire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:21
 #, java-format
@@ -4185,23 +4206,23 @@ msgstr "Deler {0} filer"
 #, java-format
 msgid "Sharing {0} file"
 msgid_plural "Sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Deler {0} fil"
+msgstr[1] "Deler {0} filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/IconLabelRenderer.java:98
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/NameRenderer.java:64
 #, java-format
 msgid "{0} (downloading)"
-msgstr ""
+msgstr "{0} (downloader)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:28
 msgid "LimeWire 5"
-msgstr ""
+msgstr "LimeWire 5"
 
 #. restore
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:102
 msgid "Show LimeWire"
-msgstr ""
+msgstr "Vis LimeWire"
 
 #. exit after transfers
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:115
@@ -4243,12 +4264,12 @@ msgstr "Opdater senere"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:65
 msgid "Play File"
-msgstr ""
+msgstr "Afspil fil"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:217
 #, java-format
 msgid "{0} browsed your library"
-msgstr ""
+msgstr "{0} gennemså dit bibliotek"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:219
 msgid "Done uploading"
@@ -4279,7 +4300,7 @@ msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:241
 msgid "Waiting for connections..."
-msgstr ""
+msgstr "Venter på forbindelse..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:251
 msgid "Unable to upload: file error"
@@ -4307,7 +4328,7 @@ msgstr "Vælg"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:476
 msgid "File already exists.  Do you want to replace it?"
-msgstr ""
+msgstr "Fil findes allerede. Ønsker du at overskrive den?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:94
 msgid "bytes"
@@ -4351,18 +4372,18 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
 msgid "Unable to open URL"
-msgstr ""
+msgstr "Kunne ikke åbne URL."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
 msgid "Open URL"
-msgstr ""
+msgstr "Åben URL"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:184
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:187
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:190
 #, java-format
 msgid "Unable to open file: {0}"
-msgstr ""
+msgstr "Kunne ikke åbne filen: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:185
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:188
@@ -4375,7 +4396,7 @@ msgstr "Åbn fil"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:254
 #, java-format
 msgid "Unable to locate file: {0}"
-msgstr ""
+msgstr "Kunne ikke finde filen: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:247
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:251
@@ -4395,7 +4416,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:50
 msgid "Invalid Folder"
-msgstr ""
+msgstr "Ugyldig mappe"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:166
 #, java-format
@@ -4409,7 +4430,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:168
 msgid "Folder Warning"
-msgstr ""
+msgstr "Mappe advarsel"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:104
 msgid "Save File As..."
@@ -4421,7 +4442,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:132
 msgid "Sorry, there was a problem downloading your file."
-msgstr ""
+msgstr "Beklager, der opstod et problem med at downloade din fil."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:183
 msgid "File already exists. What do you want to do?"
@@ -4433,7 +4454,7 @@ msgstr "Overskriv"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:267
 msgid "Some Legal Stuff"
-msgstr ""
+msgstr "Noget lovstof"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:269
 msgid ""
@@ -4441,10 +4462,14 @@ msgid ""
 "authorized files only. Copyright laws may forbid obtaining or distributing "
 "certain copyrighted content. Learn more about your rights below:"
 msgstr ""
+"LimeWire Basic og LimeWire PRO er peer-to-peer programmer alene til deling "
+"af autoriserede filer. Ophavsretslovgivningen kan forbyde deling og "
+"distribution af materiale med ophavsret. Lær mere om dine rettigheder "
+"nedenfor:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:270
 msgid "Copyright Information"
-msgstr ""
+msgstr "Ophavsrets information"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:271
 msgid "Privacy Policy"
@@ -4458,7 +4483,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:274
 msgid "Choose your language"
-msgstr ""
+msgstr "Vælg dit sprog"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:284
 msgid "I Agree"
@@ -4478,6 +4503,8 @@ msgstr "Indholdsfiltre"
 msgid ""
 "Don't let me download or upload files copyright owners request not be shared."
 msgstr ""
+"Lad mig ikke downloade eller uploade filer, som ejeren af ophavsretten ikke "
+"ønsker delt."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:35
 msgid "File Associations and Startup"
@@ -4498,20 +4525,24 @@ msgstr "Lær mere"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:45
 msgid "My Library is where you view, share and unshare your files."
 msgstr ""
+"Mit bibliotek er der hvor du ser, deler og standser deling af dine filer."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:46
 msgid ""
 "My Library is where you view, share and unshare your files.  Don't worry, we "
 "will still share files from the older version."
 msgstr ""
+"Mit bibliotek er der hvor du ser, deler og standser deling af dine filer. "
+"Vær ikke bekymret, vi deler stadig filer fra de gamle versioner."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:47
 msgid "Automatically add files to My Library, but don't share any files"
-msgstr ""
+msgstr "Tilføj automatisk filer til mit bibliotek, men del ikke nogle filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:48
 msgid "Automatically add files to My Library, but don't share any new files"
 msgstr ""
+"Tilføj automatisk filer til mit bibliotek, men del ikke nogle nye filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:49
 msgid ""
@@ -4521,28 +4552,30 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:50
 msgid "Manually add files to My Library, but don't share any files"
-msgstr ""
+msgstr "Tilføj manuelt filer til Mit bibliotek, men del ingen filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:51
 msgid "Manually add files to My Library, but don't share any new files"
-msgstr ""
+msgstr "Tilføj manuelt filer til Mit bibliotek, men del ingen nye filer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:52
 msgid ""
 "Select the folders and categories LimeWire automatically adds to My Library."
 msgstr ""
+"Vælg de mapper og kategorier som LimeWire automatisk skal tilføje til Mit "
+"bibliotek."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:53
 msgid "Add the following categories from the folders below to My Library:"
-msgstr ""
+msgstr "Tilføj følgende kategorier fra mapperne nedenfor til Mit bibliotek:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:54
 msgid "You can change this later from Tools > Options"
-msgstr ""
+msgstr "Du kan ændre dette senere i Værltøjer > Indstillinger"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:241
 msgid "Add Folder"
-msgstr ""
+msgstr "Tilføj mappe"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:57
 msgid "Continue"
@@ -4574,23 +4607,23 @@ msgstr "Dette er 'citeret' {0} !"
 #: private-components/swingui/src/test/java/org/limewire/ui/swing/util/I18nTest.java:35
 msgid "singular 'hi!'"
 msgid_plural "plural 'his!'"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "hej!"
+msgstr[1] "hej!"
 
 #: private-components/swingui/src/test/java/org/limewire/ui/swing/util/I18nTest.java:40
 #, java-format
 msgid "you have 1 message"
 msgid_plural "you have {0} messages"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "du har 1 meddelelse"
+msgstr[1] "du har {0} meddelelser"
 
 #: private-components/swingui/src/test/java/org/limewire/ui/swing/util/I18nTest.java:45
 #: private-components/swingui/src/test/java/org/limewire/ui/swing/util/I18nTest.java:50
 #, java-format
 msgid "singular 'hi!' {0}"
 msgid_plural "plural 'his!' {0}"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "hej!{0}"
+msgstr[1] "hej! {0}"
 
 #~ msgid ""
 #~ "A file used to save your preferences was corrupted. LimeWire will use "
@@ -8773,6 +8806,12 @@ msgstr[1] ""
 #~ msgid "Loading Browser..."
 #~ msgstr "Indlæser browser..."
 
+#~ msgid "Try again"
+#~ msgstr "Prøv igen"
+
+#~ msgid "Downloading"
+#~ msgstr "Downloader"
+
 #, java-format
 #~ msgid "Download from {0}"
 #~ msgstr "Download fra {0}"
@@ -8780,6 +8819,9 @@ msgstr[1] ""
 #, java-format
 #~ msgid "Share with {0}"
 #~ msgstr "Del med {0}"
+
+#~ msgid "share"
+#~ msgstr "Del"
 
 #~ msgid "Share collection"
 #~ msgstr "Del samling"
