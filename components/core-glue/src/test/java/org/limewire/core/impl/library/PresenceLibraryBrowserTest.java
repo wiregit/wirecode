@@ -157,7 +157,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final ListEvent<PresenceLibrary> addEvent = context.mock(ListEvent.class);       
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
         
-        final ListEvent<PresenceLibrary> removeEvent = context.mock(ListEvent.class);
+        final ListEvent<PresenceLibrary> updateAndRemoveEvent = context.mock(ListEvent.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
             = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager, null);
@@ -198,11 +198,15 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             will(returnValue(ListEvent.INSERT));
             one(addEvent).next();
             will(returnValue(false));
-            one(removeEvent).next();
+            one(updateAndRemoveEvent).next();
             will(returnValue(true));
-            one(removeEvent).getType();
+            one(updateAndRemoveEvent).getType();
+            will(returnValue(ListEvent.UPDATE));
+            one(updateAndRemoveEvent).next();
+            will(returnValue(true));
+            one(updateAndRemoveEvent).getType();
             will(returnValue(ListEvent.DELETE));
-            one(removeEvent).next();
+            one(updateAndRemoveEvent).next();
             will(returnValue(false));   
             
             allowing(addEvent).getSourceList();
@@ -211,9 +215,9 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             will(returnValue(presenceLibrary));
             allowing(addEvent).getIndex();
             will(returnValue(0));
-            allowing(removeEvent).getSourceList();
+            allowing(updateAndRemoveEvent).getSourceList();
             will(returnValue(presenceLibraryEventList));
-            allowing(removeEvent).getIndex();
+            allowing(updateAndRemoveEvent).getIndex();
             will(returnValue(0));
             
             // TODO: why two?  
@@ -272,7 +276,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         
         // Test removal of simulated killed browse
         presenceLibraryBrowser.librariesToBrowse.add(presenceLibrary);
-        presenceListener.listChanged(removeEvent);
+        presenceListener.listChanged(updateAndRemoveEvent);
         assertEmpty(presenceLibraryBrowser.librariesToBrowse);
         
         context.assertIsSatisfied();
