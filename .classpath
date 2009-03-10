@@ -60,6 +60,7 @@
 	<classpathentry kind="src" path="lib/resources/osx"/>
 	<classpathentry kind="src" output="components/xmpp-api/build/classes" path="components/xmpp-api/src/main/java"/>
 	<classpathentry kind="src" path="components/xmpp-api/src/test/java"/>
+	<classpathentry kind="src" path="components/games/tictactoe"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/cocoaFoundation.jar"/>

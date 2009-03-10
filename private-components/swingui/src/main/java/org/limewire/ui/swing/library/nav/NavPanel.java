@@ -37,6 +37,7 @@ import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.menu.actions.ChatAction;
+import org.limewire.ui.swing.menu.actions.TicTacToeAction;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -85,13 +86,17 @@ public class NavPanel extends JXPanel {
     
     private final Provider<ChatAction> chatActionProvider;
 
+ //   private final Provider<TicTacToeAction> tictactoeActionProvider;
+
     @AssistedInject
     NavPanel(@Assisted Action action,
              @Assisted Friend friend,
              @Assisted FriendLibraryMediator libraryPanel,
             RemoteLibraryManager remoteLibraryManager,
             LibraryNavigator libraryNavigator,
-            Provider<ChatAction> chatActionProvider) {
+            Provider<ChatAction> chatActionProvider
+//            ,Provider<TicTacToeAction> tictactoeActionProvider
+            ) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         GuiUtils.assignResources(this);
@@ -99,6 +104,7 @@ public class NavPanel extends JXPanel {
         setOpaque(false);
         
         this.chatActionProvider = chatActionProvider;
+//        this.tictactoeActionProvider = tictactoeActionProvider;
         this.action = action;
         this.friend = friend;           
         this.libraryPanel = libraryPanel;
@@ -383,11 +389,17 @@ public class NavPanel extends JXPanel {
                 }                
             }));
             
-            
+                        
             ChatAction chatAction = chatActionProvider.get();
             chatAction.setFriend(friend);
             menu.add(new JMenuItem(chatAction));
             menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 3);
+
+//            TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
+//            tictactoeAction.setFriend(friend);
+//            menu.add(new JMenuItem(tictactoeAction));
+//            menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 3);
+            
         }
     }
 }
