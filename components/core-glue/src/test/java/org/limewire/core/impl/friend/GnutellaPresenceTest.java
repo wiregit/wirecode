@@ -66,5 +66,11 @@ public class GnutellaPresenceTest extends BaseTestCase {
 
         assertNull(gnutellaPresence.getFeature(feature3URI));
 
+        assertTrue(gnutellaPresence.hasFeatures(feature2URI));
+        
+        gnutellaPresence.removeFeature(feature2URI);
+        
+        assertFalse(gnutellaPresence.hasFeatures(feature2URI));
+        assertNull(gnutellaPresence.getFeature(feature2URI));
     }
 }
