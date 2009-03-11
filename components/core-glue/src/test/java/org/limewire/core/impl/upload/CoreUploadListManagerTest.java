@@ -99,6 +99,9 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         manager.uploadRemoved(uploader);
         assertEmpty(items);
         
+        // Test remove when item not managed
+        manager.uploadRemoved(uploader);
+        
         context.assertIsSatisfied();
         
     }
