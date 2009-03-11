@@ -17,10 +17,12 @@ import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
 import org.limewire.xmpp.api.client.LibraryChanged;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
+import org.limewire.xmpp.api.client.Presence;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -132,7 +134,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
      * <p>When the browse is complete makes sure the listener handles removing failed browses correctly.
      */
     @SuppressWarnings("unchecked")
-    public void testBrowseGood() {
+    public void testBrowseIntegration() {
         final Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
@@ -282,5 +284,79 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
-    
+    /**
+     * Simulates a browse with a resolvable address.
+     * 
+     * <p>Skips initial integration steps
+     */
+    public void testBrowseWithGoodResolve() {
+        final Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        
+        final RemoteLibraryManager remoteLibraryManager = context.mock(RemoteLibraryManager.class);
+        final SocketsManager socketsManager = context.mock(SocketsManager.class);
+        final BrowseFactory browseFactory = context.mock(BrowseFactory.class);
+        
+        final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        
+        final Address resolvedAddress = context.mock(Address.class);
+        
+        final PresenceLibraryBrowser presenceLibraryBrowser
+            = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager, null);
+        
+        final MatchAndCopy<AddressResolutionObserver> observerCollector 
+            = new MatchAndCopy<AddressResolutionObserver>(AddressResolutionObserver.class);
+        final MatchAndCopy<BrowseListener> browseListenerCollector 
+            = new MatchAndCopy<BrowseListener>(BrowseListener.class);
+        
+        context.checking(new Expectations() {{
+            
+            allowing(presenceLibrary).setState(with(any(LibraryState.class)));
+                        
+            Presence presence = context.mock(Presence.class);
+            allowing(presenceLibrary).getPresence();
+            will(returnValue(presence));
+            AddressFeature addressFeature = context.mock(AddressFeature.class);
+            allowing(presence).getFeature(AddressFeature.ID);
+            will(returnValue(addressFeature));
+            Address address = context.mock(Address.class);
+            allowing(addressFeature).getFeature();
+            will(returnValue(address));
+            allowing(socketsManager).canResolve(address);
+            will(returnValue(true));
+            
+            allowing(socketsManager).canConnect(resolvedAddress);
+            will(returnValue(true));
+            allowing(presence).getPresenceId();
+            will(returnValue("12321321 abajeña 12342323523452"));
+            Browse browse = context.mock(Browse.class);
+            allowing(browseFactory).createBrowse(presence);
+            will(returnValue(browse));
+            Friend friend = context.mock(Friend.class);
+            allowing(presence).getFriend();
+            will(returnValue(friend));
+            allowing(friend).isAnonymous();
+            will(returnValue(true));
+            
+            // Assertions
+            exactly(1).of(socketsManager).resolve(with(same(address)), with(observerCollector));
+            exactly(1).of(browse).start(with(browseListenerCollector));
+            
+        }});
+        
+        // Kick off the browse
+        presenceLibraryBrowser.tryToResolveAndBrowse(presenceLibrary, 0);
+        
+        // Signal resolution and complete the browse 
+        observerCollector.getLastMatch().resolved(resolvedAddress);
+        
+        // Signal browse failure
+        browseListenerCollector.getLastMatch().browseFinished(false);
+        
+        // Signal browse success
+        browseListenerCollector.getLastMatch().browseFinished(true);
+        
+        context.assertIsSatisfied();
+    }
 }
