@@ -11,6 +11,7 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
@@ -443,109 +444,108 @@ public class CoreDownloadItemTest extends BaseTestCase {
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.ABORTED));
             }
         });
-        
+
         assertEquals(DownloadState.CANCELLED, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.BUSY));
             }
         });
-        
+
         assertEquals(DownloadState.REMOTE_QUEUED, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.REMOTE_QUEUED));
             }
         });
-        
+
         assertEquals(DownloadState.REMOTE_QUEUED, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.ABORTED));
             }
         });
-        
+
         assertEquals(DownloadState.CANCELLED, coreDownloadItem.getState());
-        
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.COMPLETE));
             }
         });
-        
+
         assertEquals(DownloadState.DONE, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.CONNECTING));
             }
         });
-        
+
         assertEquals(DownloadState.CONNECTING, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.CORRUPT_FILE));
             }
         });
-        
+
         assertEquals(DownloadState.ERROR, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DISK_PROBLEM));
             }
         });
-        
+
         assertEquals(DownloadState.ERROR, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DOWNLOADING));
             }
         });
-        
+
         assertEquals(DownloadState.DOWNLOADING, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.FETCHING));
             }
         });
-        
+
         assertEquals(DownloadState.DOWNLOADING, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.GAVE_UP));
             }
         });
-        
+
         assertEquals(DownloadState.STALLED, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.WAITING_FOR_USER));
             }
         });
-        
+
         assertEquals(DownloadState.STALLED, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
@@ -554,9 +554,9 @@ public class CoreDownloadItemTest extends BaseTestCase {
                 will(returnValue(2L));
             }
         });
-        
+
         assertEquals(DownloadState.FINISHING, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
@@ -565,108 +565,108 @@ public class CoreDownloadItemTest extends BaseTestCase {
                 will(returnValue(2L));
             }
         });
-        
+
         assertEquals(DownloadState.FINISHING, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.IDENTIFY_CORRUPTION));
             }
         });
-        
+
         assertEquals(DownloadState.ERROR, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.INITIALIZING));
             }
         });
-        
+
         assertEquals(DownloadState.CONNECTING, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.INVALID));
             }
         });
-        
+
         assertEquals(DownloadState.ERROR, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.ITERATIVE_GUESSING));
             }
         });
-        
+
         assertEquals(DownloadState.TRYING_AGAIN, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.PAUSED));
             }
         });
-        
+
         assertEquals(DownloadState.PAUSED, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.QUERYING_DHT));
             }
         });
-        
+
         assertEquals(DownloadState.TRYING_AGAIN, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.QUEUED));
             }
         });
-        
+
         assertEquals(DownloadState.LOCAL_QUEUED, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.RECOVERY_FAILED));
             }
         });
-        
+
         assertEquals(DownloadState.ERROR, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.REMOTE_QUEUED));
             }
         });
-        
+
         assertEquals(DownloadState.REMOTE_QUEUED, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.RESUMING));
             }
         });
-        
+
         assertEquals(DownloadState.CONNECTING, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.WAITING_FOR_GNET_RESULTS));
             }
         });
-        
+
         assertEquals(DownloadState.TRYING_AGAIN, coreDownloadItem.getState());
-        
+
         context.checking(new Expectations() {
             {
                 one(downloader).stop();
@@ -675,7 +675,60 @@ public class CoreDownloadItemTest extends BaseTestCase {
         });
         coreDownloadItem.cancel();
         assertEquals(DownloadState.CANCELLED, coreDownloadItem.getState());
-        
+
         context.assertIsSatisfied();
+    }
+
+    public void testGetErrorState() {
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.CORRUPT_FILE));
+            }
+        });
+
+        assertEquals(ErrorState.CORRUPT_FILE, coreDownloadItem.getErrorState());
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.RECOVERY_FAILED));
+            }
+        });
+
+        assertEquals(ErrorState.CORRUPT_FILE, coreDownloadItem.getErrorState());
+
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DISK_PROBLEM));
+            }
+        });
+
+        assertEquals(ErrorState.DISK_PROBLEM, coreDownloadItem.getErrorState());
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.INVALID));
+            }
+        });
+
+        assertEquals(ErrorState.FILE_NOT_SHARABLE, coreDownloadItem.getErrorState());
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.GAVE_UP));
+            }
+        });
+
+        assertEquals(ErrorState.UNABLE_TO_CONNECT, coreDownloadItem.getErrorState());
+        context.checking(new Expectations() {
+            {
+                one(downloader).getState();
+                will(returnValue(com.limegroup.gnutella.Downloader.DownloadState.DOWNLOADING));
+            }
+        });
+
+        assertEquals(ErrorState.NONE, coreDownloadItem.getErrorState());
     }
 }
