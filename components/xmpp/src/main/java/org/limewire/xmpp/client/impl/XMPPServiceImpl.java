@@ -4,11 +4,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.util.StringUtils;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
@@ -45,9 +48,6 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
-import org.limewire.concurrent.ListeningExecutorService;
-import org.limewire.concurrent.ListeningFuture;
-import org.limewire.concurrent.ThreadPoolListeningExecutor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -142,7 +142,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
         connectionBroadcaster.addListener(new ReconnectionManager(this));
         // We'll install our own subscription listeners
         Roster.setDefaultSubscriptionMode(Roster.SubscriptionMode.manual);
-        executorService = new ThreadPoolListeningExecutor();
+        executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory("XMPPServiceImpl"));
     }
 
     @Inject
