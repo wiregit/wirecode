@@ -1457,6 +1457,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     }
 
     // TODO: re-add
+    @Override
     public Map<String, Object> inspect() {
         // get all kinds of data
         Map<String, Object> data = new HashMap<String, Object>();

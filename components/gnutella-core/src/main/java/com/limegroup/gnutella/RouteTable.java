@@ -600,6 +600,7 @@ public final class RouteTable implements Inspectable {
      * its a good idea to first inspect the stats to see how many
      * entries there are.
      */
+    @Override
     public synchronized Object inspect() {
         Map<String, Object> ret = new HashMap<String, Object>();
         Iterable<Map.Entry<byte[], RouteTableEntry>> bothMaps = 

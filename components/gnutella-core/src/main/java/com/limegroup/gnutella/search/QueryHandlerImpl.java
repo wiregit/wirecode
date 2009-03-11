@@ -662,6 +662,7 @@ final class QueryHandlerImpl implements Inspectable, QueryHandler {
         return new GUID(QUERY.getGUID());
     }
 
+    @Override
     public Object inspect() {
         Map<String, Object> ret = new HashMap<String, Object>();
         ret.put("ver", 1);

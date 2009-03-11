@@ -777,6 +777,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         DBHist(int breaks) {
             this.breaks = breaks;
         }
+        @Override
         public Object inspect() {
             MojitoDHT dht = getMojitoDHT();
             if (dht != null) {
@@ -846,6 +847,7 @@ public class DHTManagerImpl implements DHTManager, Service {
     private class BootstrapTimer implements DHTEventListener, Inspectable {
         private long start, stop;
 
+        @Override
         public synchronized Object inspect() {
             Map<String,Object> ret = new HashMap<String,Object>();
             ret.put("ver",1);

@@ -18,6 +18,7 @@ import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.concurrent.SimpleFuture;
+import org.limewire.inspection.Inspectable;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -31,7 +32,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A List of FileDescs that are grouped together 
  */
-abstract class AbstractFileList implements SharedFileList {
+abstract class AbstractFileList implements SharedFileList, Inspectable {
 
     /**  A list of listeners for this list */
     private final EventMulticaster<FileListChangedEvent> listenerSupport;
@@ -315,6 +316,7 @@ abstract class AbstractFileList implements SharedFileList {
         return list;
     }
 
+    @Override
     public Object inspect() {
         rwLock.readLock().lock();
         try {

@@ -190,7 +190,8 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
     public void handleIOException(IOException x) {
         throw new RuntimeException("Unsupported", x);
     }
-    
+ 
+    @Override
     public Object inspect() {
         return queue.getDroppedStats();
     }

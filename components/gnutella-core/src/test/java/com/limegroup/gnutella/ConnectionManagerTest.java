@@ -1101,6 +1101,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         //  Overridden methods do nothing
         public void send(Message m) {}
         public void shutdown() {}
+        @Override
         public Object inspect() { return "NullRunner"; }
     }
     

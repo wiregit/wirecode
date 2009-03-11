@@ -237,6 +237,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
         SearchSettings.LIME_QRP_ENTRIES.removeSettingListener(this);
     }
 
+    @Override
     public Object inspect() {
         Map<String, Object> ret = new HashMap<String, Object>();
 

@@ -28,6 +28,7 @@ public class DownloadStatsTrackerImpl implements DownloadStatsTracker {
         }
     }
 
+    @Override
     public Object inspect() {
         HashMap<String, Object> data = new HashMap<String, Object>();
         data.put("direct connect success", directConnectSuccess);

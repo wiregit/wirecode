@@ -1,9 +1,13 @@
 package com.limegroup.gnutella.library;
 
+import org.limewire.inspection.InspectionHistogram;
+
 public class FileListChangeFailedException extends Exception {
     
     private final FileListChangedEvent event;
     private final Reason reason;
+    
+    private static final InspectionHistogram<Reason> reasons = new InspectionHistogram<Reason>(); 
     
     public static enum Reason {
         ERROR_LOADING_URNS,
@@ -21,6 +25,10 @@ public class FileListChangeFailedException extends Exception {
         super("Event: " + event + ", Reason: " + reason);
         this.event = event;
         this.reason = reason;
+        long count = reasons.count(reason);
+        if (count % 10 == 0) {
+            System.out.println(reasons);
+        }
     }
     
     public FileListChangeFailedException(FileListChangedEvent event, Reason reason, Throwable cause) {

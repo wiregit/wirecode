@@ -40,7 +40,9 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 class FileManagerImpl implements FileManager, Service {
     
     private final ManagedFileListImpl managedFileList;
+    @InspectionPoint("gnutella shared file list")
     private final GnutellaFileListImpl sharedFileList;
+    @InspectionPoint("incomplete file list")
     private final IncompleteFileListImpl incompleteFileList;
     private final Map<String, FriendFileListImpl> friendFileLists = new TreeMap<String,FriendFileListImpl>(String.CASE_INSENSITIVE_ORDER);
     

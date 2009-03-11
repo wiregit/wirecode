@@ -2980,6 +2980,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             MessageSettings.TRACKING_GUID.addSettingListener(this);
         }
         
+        @Override
         public Object inspect() {
             Map<String,Object> ret = new HashMap<String,Object>();
             ret.put("start",start);
@@ -3051,6 +3052,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         private final Buffer<Integer> bytesRouted = new Buffer<Integer>(50);
         private long totalDropped, droppedTTL0;
         
+        @Override
         public synchronized Object inspect() {
             byte [] tooManyResultsByte = new byte[tooManyResults.getSize() * 2];
             for (int i = 0; i < tooManyResults.getSize(); i++)

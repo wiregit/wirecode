@@ -544,6 +544,7 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
         private volatile int maxSize;
         private volatile long lastMod;
         
+        @Override
         public Object inspect() {
             Map<String,Number> ret = new HashMap<String, Number>();
             ret.put("avg", counter.getAverageSize());
