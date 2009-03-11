@@ -92,7 +92,7 @@ public class ChatTopPanel extends JXPanel {
         friendStatusLabel.setFont(textFont);
         add(friendStatusLabel, "wmin 0, shrinkprio 0");
         
-        JXHyperlink minimizeChat = new JXHyperlink(new AbstractAction(tr("<html><u>Hide</u></html>")) {
+        JXHyperlink minimizeChat = new JXHyperlink(new AbstractAction("<html><u>" + tr("Hide") + "</u></html>") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 minimizeAction.actionPerformed(e);
