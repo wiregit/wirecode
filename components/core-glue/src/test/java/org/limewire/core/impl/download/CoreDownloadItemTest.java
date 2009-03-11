@@ -9,6 +9,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
@@ -17,6 +18,8 @@ import org.limewire.util.TestPropertyChangeListener;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 public class CoreDownloadItemTest extends BaseTestCase {
     private Mockery context;
@@ -26,6 +29,26 @@ public class CoreDownloadItemTest extends BaseTestCase {
     private QueueTimeCalculator queueTimeCalculator;
 
     private CoreDownloadItem coreDownloadItem;
+
+    private LimeXMLDocument document;
+
+    private final String title = "Hello World";
+
+    private final String artist = "Me and you";
+
+    private final String album = "Testing the waters";
+
+    private final String genre = "Rock";
+
+    private final String comments = "woah!";
+
+    private final Long bitrate = new Long(128);
+
+    private final Long seconds = new Long(956);
+
+    private final Long year = new Long(1999);
+
+    private final String track = "5";
 
     public CoreDownloadItemTest(String name) {
         super(name);
@@ -41,11 +64,32 @@ public class CoreDownloadItemTest extends BaseTestCase {
         };
         downloader = context.mock(Downloader.class);
         queueTimeCalculator = context.mock(QueueTimeCalculator.class);
+        document = context.mock(LimeXMLDocument.class);
+
         context.checking(new Expectations() {
             {
                 one(downloader).addListener(with(any(EventListener.class)));
+                allowing(document).getValue(LimeXMLNames.AUDIO_ALBUM);
+                will(returnValue(album.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_ARTIST);
+                will(returnValue(artist.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_BITRATE);
+                will(returnValue(bitrate.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_COMMENTS);
+                will(returnValue(comments.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_GENRE);
+                will(returnValue(genre.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_TRACK);
+                will(returnValue(track.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_YEAR);
+                will(returnValue(year.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_TITLE);
+                will(returnValue(title.toString()));
+                allowing(document).getValue(LimeXMLNames.AUDIO_SECONDS);
+                will(returnValue(seconds.toString()));
             }
         });
+
         coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator);
 
     }
@@ -314,6 +358,81 @@ public class CoreDownloadItemTest extends BaseTestCase {
             }
         });
         assertEquals(addresses, coreDownloadItem.getSources());
+        context.assertIsSatisfied();
+    }
+
+    public void testGetProperties() {
+        context.checking(new Expectations() {
+            {
+                one(downloader).getAttribute("LimeXMLDocument");
+                will(returnValue(document));
+                one(downloader).getSaveFile();
+                will(returnValue(new File("test.mp3")));
+                one(downloader).getFile();
+                will(returnValue(new File("test.mp3")));
+                one(downloader).getContentLength();
+                will(returnValue(1234L));
+            }
+        });
+
+        assertEquals(artist, coreDownloadItem.getProperty(FilePropertyKey.AUTHOR));
+        assertEquals(title, coreDownloadItem.getProperty(FilePropertyKey.TITLE));
+        assertEquals(album, coreDownloadItem.getProperty(FilePropertyKey.ALBUM));
+        assertEquals(genre, coreDownloadItem.getProperty(FilePropertyKey.GENRE));
+        assertEquals(track, coreDownloadItem.getProperty(FilePropertyKey.TRACK_NUMBER));
+        assertEquals(year, coreDownloadItem.getProperty(FilePropertyKey.YEAR));
+        assertEquals(seconds, coreDownloadItem.getProperty(FilePropertyKey.LENGTH));
+        assertEquals(bitrate, coreDownloadItem.getProperty(FilePropertyKey.BITRATE));
+        assertEquals(comments, coreDownloadItem.getProperty(FilePropertyKey.DESCRIPTION));
+
+        assertEquals(artist, coreDownloadItem.getPropertyString(FilePropertyKey.AUTHOR));
+        assertEquals(title, coreDownloadItem.getPropertyString(FilePropertyKey.TITLE));
+        assertEquals(album, coreDownloadItem.getPropertyString(FilePropertyKey.ALBUM));
+        assertEquals(genre, coreDownloadItem.getPropertyString(FilePropertyKey.GENRE));
+        assertEquals(track, coreDownloadItem.getPropertyString(FilePropertyKey.TRACK_NUMBER));
+        assertEquals(year + "", coreDownloadItem.getPropertyString(FilePropertyKey.YEAR));
+        assertEquals(seconds + "", coreDownloadItem.getPropertyString(FilePropertyKey.LENGTH));
+        assertEquals(bitrate + "", coreDownloadItem.getPropertyString(FilePropertyKey.BITRATE));
+        assertEquals(comments, coreDownloadItem.getPropertyString(FilePropertyKey.DESCRIPTION));
+
+        context.assertIsSatisfied();
+    }
+
+    public void testReloadProperties() {
+        context.checking(new Expectations() {
+            {
+                one(downloader).getAttribute("LimeXMLDocument");
+                will(returnValue(document));
+                one(downloader).getSaveFile();
+                will(returnValue(new File("test.mp3")));
+                one(downloader).getFile();
+                will(returnValue(new File("test.mp3")));
+                one(downloader).getContentLength();
+                will(returnValue(1234L));
+            }
+        });
+        coreDownloadItem.reloadProperties();
+
+        assertEquals(artist, coreDownloadItem.getProperty(FilePropertyKey.AUTHOR));
+        assertEquals(title, coreDownloadItem.getProperty(FilePropertyKey.TITLE));
+        assertEquals(album, coreDownloadItem.getProperty(FilePropertyKey.ALBUM));
+        assertEquals(genre, coreDownloadItem.getProperty(FilePropertyKey.GENRE));
+        assertEquals(track, coreDownloadItem.getProperty(FilePropertyKey.TRACK_NUMBER));
+        assertEquals(year, coreDownloadItem.getProperty(FilePropertyKey.YEAR));
+        assertEquals(seconds, coreDownloadItem.getProperty(FilePropertyKey.LENGTH));
+        assertEquals(bitrate, coreDownloadItem.getProperty(FilePropertyKey.BITRATE));
+        assertEquals(comments, coreDownloadItem.getProperty(FilePropertyKey.DESCRIPTION));
+
+        assertEquals(artist, coreDownloadItem.getPropertyString(FilePropertyKey.AUTHOR));
+        assertEquals(title, coreDownloadItem.getPropertyString(FilePropertyKey.TITLE));
+        assertEquals(album, coreDownloadItem.getPropertyString(FilePropertyKey.ALBUM));
+        assertEquals(genre, coreDownloadItem.getPropertyString(FilePropertyKey.GENRE));
+        assertEquals(track, coreDownloadItem.getPropertyString(FilePropertyKey.TRACK_NUMBER));
+        assertEquals(year + "", coreDownloadItem.getPropertyString(FilePropertyKey.YEAR));
+        assertEquals(seconds + "", coreDownloadItem.getPropertyString(FilePropertyKey.LENGTH));
+        assertEquals(bitrate + "", coreDownloadItem.getPropertyString(FilePropertyKey.BITRATE));
+        assertEquals(comments, coreDownloadItem.getPropertyString(FilePropertyKey.DESCRIPTION));
+
         context.assertIsSatisfied();
     }
 }
