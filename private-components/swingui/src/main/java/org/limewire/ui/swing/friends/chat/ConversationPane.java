@@ -460,7 +460,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
     private class DownloadFromFriendLibraryAction extends AbstractAction {
         public DownloadFromFriendLibraryAction() {
-            super(tr("<html><u>{0}</u></html>", "Browse Files"));
+            super("<html><u>" + tr("Browse Files") + "</u></html>");
         }
 
         @Override
@@ -471,7 +471,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
     private class ShareAction extends AbstractAction {
         public ShareAction() {
-            super(tr("<html><u>{0}</u></html>", "What I'm Sharing"));
+            super("<html><u>" + tr("What I'm Sharing") + "</u></html>");
         }
         
         @Override
