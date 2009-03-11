@@ -131,18 +131,22 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
         }
     }
 
+ // This is called when uploads complete - should be renamed?
     @Override
     public void uploadRemoved(Uploader uploader) {
-        UploadItem item = new CoreUploadItem(uploader);
-        // This is called when uploads complete. Remove if auto-clear is enabled.
+        CoreUploadItem item = new CoreUploadItem(uploader);
+        //alert item that it really is finished so that getState() will be correct
+        item.finish();
+         
         if (item.getState() == UploadState.DONE || item.getState() == UploadState.BROWSE_HOST_DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD) {
             if (SharingSettings.CLEAR_UPLOAD.getValue()) {
+                //Remove if auto-clear is enabled.
                 threadSafeUploadItems.remove(item);
             } else {
-                //make sure UI is informed of state change
+                //make sure upload state is correct and UI is informed of state change
                 int i = threadSafeUploadItems.indexOf(item);
                 if (i>-1) {
-                    ((CoreUploadItem)threadSafeUploadItems.get(i)).fireDataChanged();
+                    ((CoreUploadItem)threadSafeUploadItems.get(i)).finish();
                 } 
             }
         }
