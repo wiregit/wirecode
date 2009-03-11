@@ -146,7 +146,6 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
         
         if(friendCount > 0) {
             friendsButton.setIcon(friendsSharedIcon);
-            // {0}: number of friends file is shared with already
             friendsButton.setText(GuiUtils.toLocalizedInteger(friendCount));
         } else {
             friendsButton.setIcon(friendsNotSharedIcon);
@@ -163,7 +162,7 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     }
     
     /**
-     * On clicking the given component the tooltip will immediatley be displayed. 
+     * On clicking the given component the tooltip will immediately be displayed. 
      */
     private final class ToolTipMouseListener extends MouseAdapter {
         private final JComponent component;
