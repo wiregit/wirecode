@@ -141,9 +141,16 @@ public class CacheForwardTest extends MojitoTestCase {
         
         final long waitForNodes = 1000; // ms
         final long BUCKET_REFRESH = 1 * 1000;
-
+        // it takes my machine 8.5 seconds to bootstrap the 3*k nodes and the build machine
+        // is faster than mine. So 8.5 seconds should be enough for the build machine to 
+        // bootstrapp the 3*k nodes. To be safe, we set BOOTSTRAP_TIME to be 10 seconds. 
+        // We use this value as BUCKET_REFRESHER_DELAY since we want all nodes finish 
+        // bootstrapping (joining the network) before pinging nearest neighbors. 
+        final long BOOTSTRAP_TIME = 10 * 1000; 
+        
         //ContextSettings.SEND_SHUTDOWN_MESSAGE.setValue(false);
         BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.setValue(BUCKET_REFRESH);
+        BucketRefresherSettings.BUCKET_REFRESHER_DELAY.setValue(BOOTSTRAP_TIME);        
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(false);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
@@ -171,10 +178,7 @@ public class CacheForwardTest extends MojitoTestCase {
             }
             
             first.bootstrap(new InetSocketAddress("localhost", PORT+1)).get();
-            
-            // give everybody a chance to check if their neigbours are alive
-            // see LWC-2778
-            Thread.sleep(2 * BUCKET_REFRESH);
+            Thread.sleep(waitForNodes);
             
             // Sort all KUIDs by XOR distance and use the Node as 
             // creator that's furthest away from the value ID so
@@ -192,7 +196,25 @@ public class CacheForwardTest extends MojitoTestCase {
             MojitoDHT creator = dhts.get(idsByXorDistance.get(idsByXorDistance.size()-1));
             // Store the value
             DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes());
-            StoreResult evt = creator.put(valueId, value).get();
+            StoreResult evt = creator.put(valueId, value).get();            
+            
+            // see LWC-2778. In case the root is UNKNOWN in others route table, 
+            // we wait BOOTSTRAP_TIME (the delay of ping the nearest bucket)
+            // so that every node has a chance to ping the root, hence realize 
+            // the root is ALIVE
+            boolean waiting = true;
+            KUID rootsID = TrieUtils.select(trie, valueId, 1).get(0);
+            for (Contact c : evt.getLocations()){
+                if (c.getNodeID().equals(rootsID)){
+                    waiting = false;
+                    break;
+                }
+            }
+            if (waiting) {
+                Thread.sleep(BOOTSTRAP_TIME);
+                evt = creator.put(valueId, value).get();
+            }
+            
             assertEquals(k, evt.getLocations().size());
             
             // Give everybody time to process the store request
