@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Callable;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.util.StringUtils;
@@ -44,6 +45,9 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
+import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.ThreadPoolListeningExecutor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -66,11 +70,12 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
     private final XMPPAddressRegistry xmppAddressRegistry;
     private final JabberSettings jabberSettings;
     private final ListenerSupport<AddressEvent> addressListenerSupport;
+    private final ListeningExecutorService executorService;
 
     // Connections that are logged in or logging in
     final List<XMPPConnectionImpl> connections;
-    private boolean multipleConnectionsAllowed;   
-    
+    private boolean multipleConnectionsAllowed;
+
     @SuppressWarnings("unused")
     @InspectableContainer
     private class LazyInspectableContainer {
@@ -137,6 +142,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
         connectionBroadcaster.addListener(new ReconnectionManager(this));
         // We'll install our own subscription listeners
         Roster.setDefaultSubscriptionMode(Roster.SubscriptionMode.manual);
+        executorService = new ThreadPoolListeningExecutor();
     }
 
     @Inject
@@ -157,14 +163,14 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                 switch(event.getSource()) {
                 case Idle:
                     try {
-                        setMode(Mode.xa);
+                        setModeImpl(Mode.xa);
                     } catch (XMPPException e) {
                         LOG.debugf(e, "couldn't set mode based on {0}", event);
                     }
                     break;
                 case Active:
                     try {
-                        setMode(jabberSettings.isDoNotDisturbSet() ? Mode.dnd : Mode.available);
+                        setModeImpl(jabberSettings.isDoNotDisturbSet() ? Mode.dnd : Mode.available);
                     } catch (XMPPException e) {
                         LOG.debugf(e, "couldn't set mode based on {0}", event);
                     }
@@ -187,7 +193,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
     @Asynchronous
     @Override
     public void stop() {
-        logout();
+        logoutImpl();
     }
 
     @Override
@@ -196,11 +202,20 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
     }
 
     @Override
-    public XMPPConnection login(XMPPConnectionConfiguration configuration) throws XMPPException {
-        return login(configuration, false);
+    public ListeningFuture<XMPPConnection> login(final XMPPConnectionConfiguration configuration) {
+        return executorService.submit(new Callable<XMPPConnection>() {
+            @Override
+            public XMPPConnection call() throws Exception {
+                return loginImpl(configuration);
+            }
+        }); 
     }
 
-    XMPPConnection login(XMPPConnectionConfiguration configuration, boolean isReconnect) throws XMPPException {
+    XMPPConnection loginImpl(XMPPConnectionConfiguration configuration) throws XMPPException {
+        return loginImpl(configuration, false);
+    }
+
+    XMPPConnection loginImpl(XMPPConnectionConfiguration configuration, boolean isReconnect) throws XMPPException {
         synchronized (this) {
             if(!multipleConnectionsAllowed) {
                 XMPPConnection activeConnection = getActiveConnection();
@@ -212,7 +227,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                     if(activeConnection != null && activeConnection.getConfiguration().equals(configuration)) {
                         return activeConnection;
                     } else {
-                        logout();
+                        logoutImpl();
                     }    
                 }                
             }
@@ -226,12 +241,13 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                     addressFactory, authenticator, featureSupport,
                     connectRequestEventBroadcaster, 
                     xmppAddressRegistry,
-                    addressListenerSupport);
+                    addressListenerSupport,
+                    executorService);
             try {
                 connections.add(connection);
-                connection.login();
+                connection.loginImpl();
                 //maintain the last set login state available or do not disturb
-                connection.setMode(jabberSettings.isDoNotDisturbSet() ? Presence.Mode.dnd : Presence.Mode.available);
+                connection.setModeImpl(jabberSettings.isDoNotDisturbSet() ? Presence.Mode.dnd : Presence.Mode.available);
                 return connection;
             } catch(XMPPException e) {
                 connections.remove(connection);
@@ -240,10 +256,10 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
             }
         }
     }
-    
+
     @Override
     public boolean isLoggedIn() {
-        for(XMPPConnection connection : connections) {
+        for(XMPPConnectionImpl connection : connections) {
             if(connection.isLoggedIn()) {
                 return true;
             }
@@ -262,9 +278,19 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
     }
 
     @Override
-    public void logout() {
-        for(XMPPConnection connection : connections) {
-            connection.logout();
+    public ListeningFuture<Void> logout() {
+        return executorService.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                logoutImpl();
+                return null;
+            }
+        }); 
+    }
+
+    void logoutImpl() {
+        for(XMPPConnectionImpl connection : connections) {
+            connection.logoutImpl();
         }
         connections.clear();
     }
@@ -324,9 +350,19 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
     }
     
     @Override
-    public void setMode(Mode mode) throws XMPPException {
-        for(XMPPConnection connection : connections) {
-            connection.setMode(mode);
+    public ListeningFuture<Void> setMode(final Mode mode) {
+        return executorService.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                setModeImpl(mode);
+                return null;
+            }
+        }); 
+    }
+
+    private void setModeImpl(Mode mode) throws XMPPException {
+        for(XMPPConnectionImpl connection : connections) {
+            connection.setModeImpl(mode);
         }
     }
     

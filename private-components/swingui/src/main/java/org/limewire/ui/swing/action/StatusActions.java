@@ -8,6 +8,7 @@ import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -20,10 +21,9 @@ import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 
@@ -53,12 +53,14 @@ public class StatusActions {
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    xmppService.setMode(Mode.available);
-                    XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(false);
-                } catch (XMPPException e1) {
-                    LOG.debugf(e1, "setting mode failed");
-                }
+                xmppService.setMode(Mode.available).addFutureListener(new EventListener<FutureEvent<Void>>() {
+                    @Override
+                    public void handleEvent(FutureEvent<Void> event) {
+                        if(event.getType() == FutureEvent.Type.SUCCESS) {
+                            XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(false);    
+                        }
+                    }
+                });                      
             }
         };
 
@@ -70,12 +72,14 @@ public class StatusActions {
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    xmppService.setMode(Mode.dnd);                    
-                    XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(true);
-                } catch (XMPPException e1) {
-                    LOG.debugf(e1, "setting mode failed");
-                }
+                xmppService.setMode(Mode.dnd).addFutureListener(new EventListener<FutureEvent<Void>>() {
+                    @Override
+                    public void handleEvent(FutureEvent<Void> event) {
+                        if(event.getType() == FutureEvent.Type.SUCCESS) {
+                            XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(true);    
+                        }
+                    }
+                });      
             }
         };
         
