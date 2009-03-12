@@ -63,7 +63,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * 
  */
 @Singleton
-public final class CreationTimeCache {
+public class CreationTimeCache {
     
     private static final Log LOG = LogFactory.getLog(CreationTimeCache.class);
     
