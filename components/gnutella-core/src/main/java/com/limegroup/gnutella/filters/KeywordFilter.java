@@ -91,31 +91,6 @@ public class KeywordFilter implements SpamFilter {
         return ban;
     }
     
-    /**
-     * @modifies this
-     * @effects bans .vbs files
-     */
-    public void disallowVbs() {
-        disallow(".vbs");
-    }
-
-    /**
-     * @modifies this
-     * @effects bans .htm and html files
-     */
-    public void disallowHtml() {
-        disallow(".htm");
-    }
-    
-    /**
-     * bans .wmv and .asf files
-     */
-    public void disallowWMVASF() {
-    	disallow(".asf");
-	disallow(".asx");
-    	disallow(".wmv");
-    }
-
     public boolean allow(Message m) {
         boolean ok=true;
         if (m instanceof QueryRequest) 
@@ -158,6 +133,4 @@ public class KeywordFilter implements SpamFilter {
         }
         return false;
     }
-    
-   
 }

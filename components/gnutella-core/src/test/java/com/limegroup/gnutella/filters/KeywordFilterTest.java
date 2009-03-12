@@ -112,7 +112,7 @@ public class KeywordFilterTest extends BaseTestCase {
         keywordContextValue(queryRequestMock, "test.vbs");
         assertTrue(filter.allow(queryRequestMock));
 
-        filter.disallowVbs();
+        filter.disallow(".vbs");
         
         keywordContextValue(queryRequestMock, "test.vbs");
         assertFalse(filter.allow(queryRequestMock));
@@ -120,7 +120,7 @@ public class KeywordFilterTest extends BaseTestCase {
         keywordContextValue(queryRequestMock, "test.htm");
         assertTrue(filter.allow(queryRequestMock));
         
-        filter.disallowHtml();
+        filter.disallow(".htm");
                  
         keywordContextValue(queryRequestMock, "test.htm");
         assertFalse(filter.allow(queryRequestMock));
@@ -131,17 +131,18 @@ public class KeywordFilterTest extends BaseTestCase {
         keywordContextValue(queryRequestMock, "test.asf");
         assertTrue(filter.allow(queryRequestMock));
                 
-        filter.disallowWMVASF();
-        
+        filter.disallow(".asf");
+        filter.disallow(".asx");
+        filter.disallow(".wmv");
+
         keywordContextValue(queryRequestMock, "test.wmv");
         assertFalse(filter.allow(queryRequestMock));
         
         keywordContextValue(queryRequestMock, "test.asf");
         assertFalse(filter.allow(queryRequestMock));
         
-        context.assertIsSatisfied();
-        
-        }
+        context.assertIsSatisfied();    
+    }
     
     public void testDisallowAdult() throws Exception {
         KeywordFilter filter = new KeywordFilter();
