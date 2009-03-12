@@ -1,4 +1,3 @@
-
 package org.limewire.core.settings;
 
 import org.limewire.inspection.InspectablePrimitive;
@@ -29,26 +28,6 @@ public class FilterSettings extends LimeProps {
 	 */
     public static final BooleanSetting FILTER_ADULT =
         FACTORY.createBooleanSetting("FILTER_ADULT", false);
-    
-    /**
-	 * Sets whether or not search results including VBS are
-	 * banned.
-	 */
-    public static final BooleanSetting FILTER_VBS =
-        FACTORY.createBooleanSetting("FILTER_VBS", true);
-    
-    /**
-	 * Sets whether or not search results including HTML are
-	 * banned.
-	 */
-    public static final BooleanSetting FILTER_HTML =
-        FACTORY.createBooleanSetting("FILTER_HTML", false);
-    
-    /**
-     * Sets whether or not search results of the wmv and asf types are banned.
-     */
-    public static final BooleanSetting FILTER_WMV_ASF =
-    	FACTORY.createBooleanSetting("FILTER_WMV_ASF",true);
     
     /**
      * Sets whether or not known spam and malware URNs are banned.
@@ -127,13 +106,6 @@ public class FilterSettings extends LimeProps {
     	FACTORY.createRemoteIntSetting("MIN_MATCHING_WORDS",0,
     			"FilterSettings.minMatchingWords", 0, 30);
     
-    /** 
-     * Whether to drop responses that have an action 
-     */
-    public static final BooleanSetting FILTER_ACTION_RESPONSES =
-    		FACTORY.createRemoteBooleanSetting("FILTER_ACTION_RESPONSES",false,
-    				"FilterSettings.filterActionResponses");
-    
     /**
      * An array of ip addresses that LimeWire will respond to.  
      */
@@ -163,13 +135,6 @@ public class FilterSettings extends LimeProps {
         FACTORY.createRemoteIntSetting("MAX_ALTS_PER_RESPONSE", 50,
                 "FilterSettings.maxAltsPerResponse", 10, 100);
 
-    /**
-     * How many alts to display in the gui.
-     */
-    public static final IntSetting MAX_ALTS_TO_DISPLAY =
-        FACTORY.createRemoteIntSetting("MAX_ALTS_TO_DISPLAY", 15,
-                "FilterSettings.maxAltsToDisplay", 2, 100);
-    
     /**
      * How many responses to allow per QueryReply message.
      */
