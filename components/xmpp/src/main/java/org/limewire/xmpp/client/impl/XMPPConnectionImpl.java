@@ -366,7 +366,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         return executorService.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                addUser(id, name);
+                addUserImpl(id, name);
                 return null;
             }
         }); 
