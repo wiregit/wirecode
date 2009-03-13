@@ -78,6 +78,10 @@
         <do.clover2html component="${component}"/>
     </target>
     
+    <target name="clover-dbmerge" depends="with.clover">
+        <do.clover-dbmerge component="${component}" dst.db.location="${clover.merge.dstDb}"/>
+    </target>
+    
     <macrodef name="do.setup-properties" description="Sets up common properties every macro uses.">
     	<attribute name="component"/>
         <attribute name="junit" default="${limewire.lib.jars}/tests/junit.jar"/>
@@ -112,7 +116,7 @@
         			  location="${build.limewire.components.@{component}.home}/tests"/>
         	
         	<property name="tests.limewire.components.@{component}.home"
-        		      location="${limewire.components.@{component}.home}/testData"/>
+        		      location="${limewire.components.@{component}.home}/testData"/>  		      
             <property name="tests.limewire.components.@{component}.xml"
             		  location="${tests.limewire.components.@{component}.home}/xml"/>
             <property name="tests.limewire.components.@{component}.html"
@@ -121,7 +125,7 @@
             <property name="clover.limewire.components.@{component}.home"
 			          location="${limewire.components.@{component}.home}/clover"/>
             <property name="clover.limewire.components.@{component}.db"
-			          location="${clover.limewire.components.@{component}.home}/clover.db"/>
+                      location="${clover.limewire.components.@{component}.home}/clover.db"/>      			          
             <property name="clover.limewire.components.@{component}.html"
 			          location="${clover.limewire.components.@{component}.home}/html"/>
             <property name="clover.limewire.components.@{component}.xml"
@@ -193,6 +197,9 @@
                      sync="true"
                      symlink="true"
                      log="quiet"/>
+            <!-- because ivy:retrieve has sync==true, if there are no dependencies, the dir will be removed.
+                 we don't want it removed, because then javac fails because the classpath is missing. -->
+            <mkdir dir="${build.limewire.components.@{component}.lib}/@{conf}"/>
         </sequential>
     </macrodef>
 	
@@ -455,10 +462,6 @@
 			</junit>
 		</sequential>
 	</macrodef>
-    
-    <target name="tests-failguard">
-		<fail if="testsfailed" message="One or more tests failed!"/>
-    </target>
 	
     <macrodef name="do.tests2html" description="Converts test XML output to HTML reports.">
         <attribute name="component"/>
@@ -522,16 +525,30 @@
         </sequential>
     </macrodef>
     
+    <macrodef name="do.clover-dbmerge" description="Merges this cloverdb into another one.">
+        <attribute name="component"/>
+        <attribute name="dst.db.location"/>
+        <attribute name="src.db.location" default="${clover.limewire.components.@{component}.db}"/>
+        <sequential>
+	        <antcall target="clover-guard"/>
+            <clover-merge initstring="@{dst.db.location}">
+                <cloverDb initstring="@{src.db.location}"/>
+                <cloverDbSet file="@{dst.db.location}"/> <!-- using cloverDbSet because it may not exist. -->
+            </clover-merge>
+            <delete file="@{dst.db.location}.tmp"/>
+        </sequential>
+    </macrodef> 
+    
     <macrodef name="do.clover-setup" description="Sets up clover.">
     	<attribute name="component"/>
         <element name="locations" optional="true"/>
         <attribute name="defaultfileset" default="${limewire.components.@{component}.home}"/>
-        <attribute name="clover.db.location" default="${clover.limewire.components.@{component}.db}"/>
+        <attribute name="clover.db.location" default="${clover.limewire.components.@{component}.db}"/>        
         <sequential>
 	        <antcall target="clover-guard"/>
-            <taskdef resource="cloverlib.xml" classpath="${cloverjar}"/>
+            <taskdef resource="cloverlib.xml"/>
             <mkdir dir="${clover.limewire.components.@{component}.home}"/>
-            <clover-setup initString="${clover.limewire.components.@{component}.db}">
+            <clover-setup initstring="@{clover.db.location}">
                 <statementContext name="log" regexp="^LOG\..*"/>
                 <statementContext name="iflog" regexp="^if *\(LOG\.is.*"/> 
                 <methodContext name="main" regexp="public static void main\(String args\[\]\).*"/>
@@ -541,73 +558,19 @@
         </sequential>
     </macrodef>
     
-    <macrodef name="do.clover-merge-dbs" description="merges multiple clover db's into one db">
-        <attribute name="component"/>
-        <attribute name="defaultfileset" default="${limewire.components.@{component}.home}"/>
-        <attribute name="clover.db.location" default="${clover.limewire.components.@{component}.db}"/>
-        <sequential>
-	        <antcall target="clover-guard"/>
-            <taskdef resource="cloverlib.xml" classpath="${cloverjar}"/>
-            <mkdir dir="${clover.limewire.components.@{component}.home}"/>
-            <clover-merge initString="@{clover.db.location}">
-                <cloverDbSet dir=".">
-                    <include name="**/clover.db"/>
-                </cloverDbSet>
-            </clover-merge>
-        </sequential>    
-    </macrodef>
-    
-    <!-- Checks to see if clover is installed and sets a property if so -->
-    <target name="clover-check">
-        <available property="clover.installed" classname="com.cenqua.clover.CloverInstr" />
-    </target>
-    
-    <!-- Fails if clover isn't setup. -->
-    <target name="clover-guard" depends="clover-check" unless="clover.installed">
-        <fail message="Clover is not installed, the build cannot continue."/>
-    </target>
-    
     <macrodef name="do.clover2html">
         <attribute name="component"/>
         <element name="moretestinfo" optional="true"/>
         <attribute name="defaulttestresults" default="${tests.limewire.components.@{component}.xml}"/>
         <attribute name="defaulttestsources" default="${limewire.components.@{component}.tests}"/>
-        <attribute name="defaulttestsourceincludes" default="**/*.java"/>
+        <attribute name="defaulttestsourceincludes" default="**/*.java"/>        
+        <attribute name="clover.db.location" default="${clover.limewire.components.@{component}.db}"/>  
         <sequential>
             <antcall target="clover-guard"/>
-            <taskdef resource="cloverlib.xml" classpath="${cloverjar}"/>
             <tstamp>
 	            <format property="clover.time" pattern="EEE, MMM d, yyyy hh:mm a"/>
             </tstamp>
-            <clover-report>
-                <current outfile="${clover.limewire.components.@{component}.html}"
-                		 title="LimeWire - ${clover.time}">
-	                <format type="html" filter="log,iflog,assert,main"/>
-                    <testresults dir="@{defaulttestresults}" includes="TEST-*.xml"/>
-                    <testsources dir="@{defaulttestsources}" includes="@{defaulttestsourceincludes}"/>
-                    <moretestinfo/>
-                </current>
-                <current outfile="${clover.limewire.components.@{component}.xml}"
-                         title="LimeWire - ${clover.time}">
-					<format type="xml" filter="log,iflog,assert,main"/>
-                </current>
-            </clover-report>
-        </sequential>
-    </macrodef>
-    
-    <macrodef name="do.aggregate-clover2html">
-        <attribute name="component"/>
-        <element name="moretestinfo" optional="true"/>
-        <attribute name="defaulttestresults" default="${tests.limewire.components.@{component}.xml}"/>
-        <attribute name="defaulttestsources" default="${limewire.components.@{component}.tests}"/>
-        <attribute name="defaulttestsourceincludes" default="**/*.java"/>
-        <sequential>
-            <antcall target="clover-guard"/>
-            <taskdef resource="cloverlib.xml" classpath="${cloverjar}"/>
-            <tstamp>
-	            <format property="clover.time" pattern="EEE, MMM d, yyyy hh:mm a"/>
-            </tstamp>
-            <clover-report>
+            <clover-report initstring="@{clover.db.location}">
                 <current outfile="${clover.limewire.components.@{component}.html}"
                 		 title="LimeWire - ${clover.time}">
 	                <format type="html" filter="log,iflog,assert,main"/>
