@@ -6,7 +6,6 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -65,7 +64,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  * Base class containing the search results tables for a single category.  
  * BaseResultPanel contains both the List view and Table view components. 
  */
-public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
+public abstract class BaseResultPanel extends JXPanel { //implements DownloadHandler {
     
     private static final int MAX_DISPLAYED_RESULT_SIZE = 500;
     private static final int TABLE_ROW_HEIGHT = 23;
@@ -91,6 +90,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     
     private final LibraryNavigator libraryNavigator;
     private final NameRendererFactory nameRendererFactory;
+    private final DownloadHandler downloadHandler;
     private final boolean showAudioArtist;
     
     private final SearchResultsModel searchResultsModel;
@@ -118,6 +118,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         this.downloadPreprocessors.add(new LicenseWarningDownloadPreprocessor());
         this.libraryNavigator = libraryNavigator;
         this.nameRendererFactory = nameRendererFactory;
+        this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, navigator, libraryNavigator);
         this.showAudioArtist = showAudioArtist;
         
         setLayout(layout);
@@ -174,7 +175,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
                 searchResultsModel.getSearchQuery(), 
-                navigator, this, displayLimit);
+                navigator, downloadHandler, displayLimit);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -185,7 +186,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
                 searchResultsModel.getSearchQuery(), 
-                navigator, this, displayLimit);
+                navigator, downloadHandler, displayLimit);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
@@ -282,8 +283,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             
         setupCellRenderers(tableFormat);
   
-        resultsTable.setPopupHandler(new SearchPopupHandler(resultsTable, this, properties));
-        resultsTable.setDoubleClickHandler(new ClassicDoubleClickHandler(resultsTable, this, navigator, libraryNavigator));
+        resultsTable.setPopupHandler(new SearchPopupHandler(resultsTable, downloadHandler, properties));
+        resultsTable.setDoubleClickHandler(new ClassicDoubleClickHandler(resultsTable.getEventTableModel(), downloadHandler, navigator, libraryNavigator));
 
         resultsTable.setRowHeight(TABLE_ROW_HEIGHT);
         
@@ -350,26 +351,6 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         tc.setHeaderRenderer(headerRenderer);
     }
 
-    @Override
-    public void download(VisualSearchResult vsr) {
-        download(vsr, null);
-    }
-
-    @Override
-    public void download(VisualSearchResult vsr, File saveFile) {
-        // Execute the download preprocessors.
-        for (DownloadPreprocessor preprocessor : downloadPreprocessors) {
-            boolean shouldDownload = preprocessor.execute(vsr);
-            if (!shouldDownload) {
-                // do not download!
-                return;
-            }
-        }
-
-        // Start download.
-        searchResultsModel.download(vsr, saveFile);
-    }
-
     /**
      * Returns the list of visual search results.
      */
@@ -434,7 +415,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                 TableModel tm = resultsList.getModel();
                 VisualSearchResult vsr =
                     (VisualSearchResult) tm.getValueAt(row, 0);
-                download(vsr);
+                downloadHandler.download(vsr);
             }
         }
     }
