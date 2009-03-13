@@ -500,6 +500,7 @@ public class PlayerPanel extends JXPanel {
             } else {
                 playButton.setVisible(true);
                 pauseButton.setVisible(false);
+                titleLabel.stop();
             }            
         }
         
