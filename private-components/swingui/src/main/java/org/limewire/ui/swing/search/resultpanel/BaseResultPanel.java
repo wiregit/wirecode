@@ -4,8 +4,6 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -19,7 +17,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
@@ -64,7 +61,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  * Base class containing the search results tables for a single category.  
  * BaseResultPanel contains both the List view and Table view components. 
  */
-public abstract class BaseResultPanel extends JXPanel { //implements DownloadHandler {
+public abstract class BaseResultPanel extends JXPanel {
     
     private static final int MAX_DISPLAYED_RESULT_SIZE = 500;
     private static final int TABLE_ROW_HEIGHT = 23;
@@ -247,9 +244,7 @@ public abstract class BaseResultPanel extends JXPanel { //implements DownloadHan
                 SwingUtilities.invokeLater(runner);
             }
         });
-        resultsList.setRowHeight(ROW_HEIGHT);
-        
-        resultsList.addMouseListener(new ResultDownloaderAdaptor());
+        resultsList.setRowHeight(ROW_HEIGHT);        
     }
     
     /**
@@ -402,23 +397,7 @@ public abstract class BaseResultPanel extends JXPanel { //implements DownloadHan
         }       
     }
 
-    /**
-     * List view listener to handle mouse click event on search result.  When
-     * a result is double-clicked, then downloading is initiated.   
-     */
-    private class ResultDownloaderAdaptor extends MouseAdapter {
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-                int row = resultsList.rowAtPoint(e.getPoint());
-                if (row == -1 || row == MAX_DISPLAYED_RESULT_SIZE) return;
-                TableModel tm = resultsList.getModel();
-                VisualSearchResult vsr =
-                    (VisualSearchResult) tm.getValueAt(row, 0);
-                downloadHandler.download(vsr);
-            }
-        }
-    }
+    
  
     /**
      * Table component to display search results in a vertical list.
@@ -432,9 +411,6 @@ public abstract class BaseResultPanel extends JXPanel { //implements DownloadHan
             GuiUtils.assignResources(this);
             
             setGridColor(Color.decode("#EBEBEB"));
-            setRowSelectionAllowed(false);
-            setCellSelectionEnabled(false);
-            setColumnSelectionAllowed(false);
             setHighlighters(new ColorHighlighter(new HighlightPredicate() {
                 public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
                     VisualSearchResult vsr = (VisualSearchResult)getValueAt(adapter.row, 0);
