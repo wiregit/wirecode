@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JOptionPane;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -29,24 +28,15 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.search.Search;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
-import org.limewire.ui.swing.search.DownloadItemPropertyListener;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
-import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchViewType;
-import org.limewire.ui.swing.search.model.BasicDownloadState;
+import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.classic.ClassicDoubleClickHandler;
 import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
@@ -58,15 +48,10 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.ConfigurableTable;
-import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.VisibleTableFormat;
-import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.IconManager;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.RangeList;
@@ -93,9 +78,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private final EventList<VisualSearchResult> baseEventList;
     private ListViewTable resultsList;
     private ConfigurableTable<VisualSearchResult> resultsTable;
-    private final Search search;
-    private final DownloadListManager downloadListManager;
-    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    
     //cache for RowDisplayResult which could be expensive to generate with large search result sets
     private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
         new HashMap<VisualSearchResult, RowDisplayResult>();
@@ -103,48 +86,43 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private Scrollable visibleComponent;
     
     private final SearchResultFromWidgetFactory factory;
-    private IconManager iconManager;
-    private CategoryIconManager categoryIconManager;
+
     private List<DownloadPreprocessor> downloadPreprocessors = new ArrayList<DownloadPreprocessor>();
     
     private final LibraryNavigator libraryNavigator;
-    private final LibraryManager libraryManager;
+    private final NameRendererFactory nameRendererFactory;
     private final boolean showAudioArtist;
+    
+    private final SearchResultsModel searchResultsModel;
 
     /**
      * Constructs a BaseResultPanel with the specified components.
      */
-    BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
+    BaseResultPanel(SearchResultsModel searchResultsModel,
+            ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
-            DownloadListManager downloadListManager,
-            Search search,
-            SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
-            Navigator navigator, PropertiesFactory<VisualSearchResult> properties, 
+            Navigator navigator,
+            PropertiesFactory<VisualSearchResult> properties, 
             ListViewRowHeightRule rowHeightRule,
-            SaveLocationExceptionHandler saveLocationExceptionHandler,
-            SearchResultFromWidgetFactory fromWidgetFactory, IconManager iconManager, CategoryIconManager categoryIconManager,
+            SearchResultFromWidgetFactory fromWidgetFactory,
             LibraryNavigator libraryNavigator,
-            LibraryManager libraryManager,
+            NameRendererFactory nameRendererFactory,
             boolean showAudioArtist) {
         
+        this.searchResultsModel = searchResultsModel;
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.baseEventList = eventList;
-        this.downloadListManager = downloadListManager;
-        this.search = search;
         this.factory = fromWidgetFactory;
-        this.iconManager = iconManager;
-        this.categoryIconManager = categoryIconManager;
         this.downloadPreprocessors.add(new LicenseWarningDownloadPreprocessor());
         this.libraryNavigator = libraryNavigator;
-        this.libraryManager = libraryManager;
+        this.nameRendererFactory = nameRendererFactory;
         this.showAudioArtist = showAudioArtist;
         
         setLayout(layout);
                 
-        configureList(eventList, preserver, navigator, searchInfo, properties, rowHeightRule);
+        configureList(eventList, preserver, navigator, properties, rowHeightRule);
         configureTable(eventList, tableFormat, navigator, properties);
  
         add(resultsList, SearchViewType.LIST.name());
@@ -157,7 +135,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
      */
     private void configureList(final EventList<VisualSearchResult> eventList, 
             RowSelectionPreserver preserver, final Navigator navigator, 
-            final SearchInfo searchInfo, final PropertiesFactory<VisualSearchResult> properties, 
+            final PropertiesFactory<VisualSearchResult> properties, 
             final ListViewRowHeightRule rowHeightRule) {
         
         ListViewTableFormat tableFormat = new ListViewTableFormat();        
@@ -195,9 +173,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
-           searchInfo.getSearchQuery(), 
-                    navigator, this, 
-                    displayLimit);
+                searchResultsModel.getSearchQuery(), 
+                navigator, this, displayLimit);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -206,7 +183,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             tc.setCellRenderer(renderer);
         }
 
-        ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(searchInfo.getSearchQuery(), 
+        ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
+                searchResultsModel.getSearchQuery(), 
                 navigator, this, displayLimit);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
@@ -238,7 +216,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                             VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
                             RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
                             if (result == null || result.isStale(vsr)) {
-                                result = rowHeightRule.getDisplayResult(vsr, searchInfo.getSearchQuery());
+                                result = rowHeightRule.getDisplayResult(vsr, searchResultsModel.getSearchQuery());
                                 vsrToRowDisplayResultMap.put(vsr, result);
                             } 
                             int newRowHeight = result.getConfig().getRowHeight();
@@ -321,7 +299,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
      */
     protected void setupCellRenderers(final ResultsTableFormat<VisualSearchResult> tableFormat) {
         CalendarRenderer calendarRenderer = new CalendarRenderer();
-        IconLabelRenderer iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager, showAudioArtist);
+        TableCellRenderer nameRenderer = nameRendererFactory.createNameRenderer(showAudioArtist);
         TableCellRenderer defaultRenderer = new DefaultLibraryRenderer();
         
         int columnCount = tableFormat.getColumnCount();
@@ -334,7 +312,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             } else if (clazz == Calendar.class) {
                 setCellRenderer(i, calendarRenderer);
             } else if (i == tableFormat.getNameColumn()) {
-                setCellRenderer(i, iconLabelRenderer);
+                setCellRenderer(i, nameRenderer);
             } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
                 setCellRenderer(i, new FromTableCellRenderer(factory.create(true)));
                 setCellEditor(i, new FromTableCellRenderer(factory.create(true)));
@@ -373,61 +351,23 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
 
     @Override
-    public void download(final VisualSearchResult vsr) {
+    public void download(VisualSearchResult vsr) {
         download(vsr, null);
     }
 
     @Override
-    public void download(final VisualSearchResult vsr, File saveFile) {
-        try {
-            // execute the download preprocessors
-            for (DownloadPreprocessor preprocessor : downloadPreprocessors) {
-                boolean shouldDownload = preprocessor.execute(vsr);
-                if (!shouldDownload) {
-                    // do not download!
-                    return;
-                }
-            }
-
-            // Add download to manager.  If save file is specified, then set
-            // overwrite to true because the user has already confirmed it.
-            DownloadItem di = (saveFile == null) ?
-                    downloadListManager.addDownload(search, vsr.getCoreSearchResults()) :
-                    downloadListManager.addDownload(search, vsr.getCoreSearchResults(), saveFile, true);
-            
-            // Add listener, and initialize download state.
-            di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-            
-        } catch (final SaveLocationException sle) {
-            if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
-                DownloadItem downloadItem = downloadListManager.getDownloadItem(vsr.getUrn());
-                if (downloadItem != null) {
-                    downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-                    vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-                    if (saveFile != null) {
-                        try {
-                            // Update save file in DownloadItem.
-                            downloadItem.setSaveFile(saveFile, true);
-                        } catch (SaveLocationException ex) {
-                            FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), 
-                                    I18n.tr("Unable to relocate downloading file {0}", ex.getMessage()), 
-                                    I18n.tr("Download"), JOptionPane.INFORMATION_MESSAGE);
-                        }
-                    }
-                }
-            } else {
-                saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
-                    @Override
-                    public void download(File saveFile, boolean overwrite)
-                            throws SaveLocationException {
-                        DownloadItem di = downloadListManager.addDownload(search, vsr.getCoreSearchResults(), saveFile, overwrite);
-                        di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-                        vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-                    }
-                }, sle, true);
+    public void download(VisualSearchResult vsr, File saveFile) {
+        // Execute the download preprocessors.
+        for (DownloadPreprocessor preprocessor : downloadPreprocessors) {
+            boolean shouldDownload = preprocessor.execute(vsr);
+            if (!shouldDownload) {
+                // do not download!
+                return;
             }
         }
+
+        // Start download.
+        searchResultsModel.download(vsr, saveFile);
     }
 
     /**

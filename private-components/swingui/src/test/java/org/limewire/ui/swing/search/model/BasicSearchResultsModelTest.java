@@ -6,20 +6,45 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.library.PropertiableFile;
+import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.util.BaseTestCase;
 
-public class BasicSearchResultsModelTest extends BaseTestCase {
-    private SearchResultsModel model;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
+/**
+ * Test case for BasicSearchResultsModel. 
+ */
+public class BasicSearchResultsModelTest extends BaseTestCase {
+    /** Instance of class being tested. */
+    private BasicSearchResultsModel model;
+
+    /**
+     * Constructs a test case for the specified method name.
+     */
     public BasicSearchResultsModelTest(String name) {
         super(name);
     }
     
     @Override
     protected void setUp() throws Exception {
-        model = new BasicSearchResultsModel(new MockPropertiableHeadings());
+        super.setUp();
+        // Create test instance.
+        model = new BasicSearchResultsModel(new TestSearchInfo(), 
+                new TestSearch(), new TestPropertiableHeadings(), null, null);
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+        model = null;
+        super.tearDown();
     }
 
     public void testGroupingByName2UrnsNameComesEarly() {
@@ -549,4 +574,163 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group0, group1.getSimilarityParent());
     }
 
+    /** Tests method to retrieve sorted and filtered search results. */
+    public void testGetFilteredSearchResults() {
+        // Create test search results.
+        TestSearchResult testResult1 = new TestSearchResult("1", "xray");
+        TestSearchResult testResult2 = new TestSearchResult("2", "zulu");
+        TestSearchResult testResult3 = new TestSearchResult("3", "whiskey");
+        TestSearchResult testResult4 = new TestSearchResult("4", "yankee");
+
+        model.addSearchResult(testResult1);
+        model.addSearchResult(testResult2);
+        model.addSearchResult(testResult3);
+        model.addSearchResult(testResult4);
+        
+        // Get filtered search results.
+        List<VisualSearchResult> filteredList = model.getFilteredSearchResults();
+        
+        // Verify unsorted order.
+        String expectedReturn = "xray";
+        String actualReturn = filteredList.get(0).getHeading();
+        assertEquals("unsorted list", expectedReturn, actualReturn);
+        
+        // Apply sort option.
+        model.setSortOption(SortOption.NAME);
+        
+        // Verify sorted order.
+        expectedReturn = "whiskey";
+        actualReturn = filteredList.get(0).getHeading();
+        assertEquals("sorted list", expectedReturn, actualReturn);
+        
+        // Apply filter editor.
+        TextMatcherEditor<VisualSearchResult> editor = new TextMatcherEditor<VisualSearchResult>(
+                new VisualSearchResultTextFilterator());
+        editor.setFilterText(new String[] {"z"});
+        model.setFilterEditor(editor);
+        
+        // Verify filtered list.
+        int expectedSize = 1;
+        int actualSize = filteredList.size();
+        assertEquals("filtered list size", expectedSize, actualSize);
+    }
+
+    /** Tests method to retrieve filtered search results by category. */
+    public void testGetCategorySearchResults() {
+        // Create test search results.
+        TestSearchResult testResult1 = new TestSearchResult("1", "xray");
+        TestSearchResult testResult2 = new TestSearchResult("2", "zulu");
+        TestSearchResult testResult3 = new TestSearchResult("3", "whiskey");
+        TestSearchResult testResult4 = new TestSearchResult("4", "yankee");
+        testResult3.setCategory(Category.VIDEO);
+        testResult4.setCategory(Category.IMAGE);
+
+        model.addSearchResult(testResult1);
+        model.addSearchResult(testResult2);
+        model.addSearchResult(testResult3);
+        model.addSearchResult(testResult4);
+
+        // Get filtered search results for category.
+        List<VisualSearchResult> categoryList = model.getCategorySearchResults(Category.VIDEO);
+        
+        // Verify category list.
+        int expectedSize = 1;
+        int actualSize = categoryList.size();
+        assertEquals("category list size", expectedSize, actualSize);
+    }
+
+    /**
+     * Test implementation of PropertiableHeadings.
+     */
+    private static class TestPropertiableHeadings implements PropertiableHeadings {
+
+        @Override
+        public String getHeading(PropertiableFile propertiable) {
+            Object name = propertiable.getProperty(FilePropertyKey.NAME);
+            return (name == null) ? "" : name.toString();
+        }
+
+        @Override
+        public String getSubHeading(PropertiableFile propertiable) {
+            Object name = propertiable.getProperty(FilePropertyKey.AUTHOR);
+            return (name == null) ? "" : name.toString();
+        }
+        
+        @Override
+        public String getFileSize(PropertiableFile propertiable) {
+            return "0";
+        }
+
+        @Override
+        public String getLength(PropertiableFile propertiable) {
+            return "0";
+        }
+
+        @Override
+        public String getQualityScore(PropertiableFile propertiableFile) {
+            return "0";
+        }
+    }
+    
+    /**
+     * Test implementation of Search.
+     */
+    private static class TestSearch implements Search {
+
+        @Override
+        public void addSearchListener(SearchListener searchListener) {
+        }
+
+        @Override
+        public void removeSearchListener(SearchListener searchListener) {
+        }
+
+        @Override
+        public SearchCategory getCategory() {
+            return null;
+        }
+
+        @Override
+        public void repeat() {
+        }
+
+        @Override
+        public void start() {
+        }
+
+        @Override
+        public void stop() {
+        }
+    }
+    
+    /**
+     * Test implementation of SearchInfo.
+     */
+    private static class TestSearchInfo implements SearchInfo {
+
+        @Override
+        public String getTitle() {
+            return null;
+        }
+
+        @Override
+        public Map<FilePropertyKey, String> getAdvancedDetails() {
+            return null;
+        }
+
+        @Override
+        public SearchCategory getSearchCategory() {
+            return null;
+        }
+
+        @Override
+        public String getSearchQuery() {
+            return null;
+        }
+
+        @Override
+        public SearchType getSearchType() {
+            return null;
+        }
+    }
 }
