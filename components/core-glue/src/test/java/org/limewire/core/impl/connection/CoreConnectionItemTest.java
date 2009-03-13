@@ -196,7 +196,6 @@ public class CoreConnectionItemTest extends BaseTestCase {
             ConnectionMessageStatistics messageStats = context.mock(ConnectionMessageStatistics.class);
             allowing(connection).getConnectionMessageStatistics();
             will(returnValue(messageStats));
-            
             allowing(messageStats).getNumMessagesReceived();
             will(returnValue(6525));
             allowing(messageStats).getNumMessagesSent();
@@ -212,7 +211,6 @@ public class CoreConnectionItemTest extends BaseTestCase {
             ConnectionRoutingStatistics routingStats = context.mock(ConnectionRoutingStatistics.class);
             allowing(connection).getRoutedConnectionStatistics();
             will(returnValue(routingStats));
-            
             allowing(routingStats).getQueryRouteTableEmptyUnits();
             will(returnValue(6530));
             allowing(routingStats).getQueryRouteTablePercentFull();
@@ -225,7 +223,6 @@ public class CoreConnectionItemTest extends BaseTestCase {
             ConnectionBandwidthStatistics bandwithStats = context.mock(ConnectionBandwidthStatistics.class);
             allowing(connection).getConnectionBandwidthStatistics();
             will(returnValue(bandwithStats));
-            
             allowing(bandwithStats).getReadLostFromSSL();
             will(returnValue(6534f));
             allowing(bandwithStats).getReadSavedFromCompression();
@@ -234,6 +231,33 @@ public class CoreConnectionItemTest extends BaseTestCase {
             will(returnValue(6536f));
             allowing(bandwithStats).getSentSavedFromCompression();
             will(returnValue(6537f));
+            
+            ConnectionCapabilities capabilities = context.mock(ConnectionCapabilities.class);
+            allowing(connection).getConnectionCapabilities();
+            will(returnValue(capabilities));
+            allowing(capabilities).getUserAgent();
+            will(returnValue("6538"));
+            
+            one(connection).isSupernodeClientConnection();
+            will(returnValue(false));
+            one(connection).isSupernodeClientConnection();
+            will(returnValue(true));
+            one(connection).isOutgoing();
+            will(returnValue(false));
+            one(connection).isOutgoing();
+            will(returnValue(true));
+            one(capabilities).isSupernodeSupernodeConnection();
+            will(returnValue(false));
+            one(capabilities).isSupernodeSupernodeConnection();
+            will(returnValue(true));
+            one(capabilities).isSupernodeConnection();
+            will(returnValue(false));
+            one(capabilities).isSupernodeConnection();
+            will(returnValue(true));
+            one(capabilities).isClientSupernodeConnection();
+            will(returnValue(false));
+            one(capabilities).isClientSupernodeConnection();
+            will(returnValue(true));
             
             allowing(connection);
         }});
@@ -255,6 +279,18 @@ public class CoreConnectionItemTest extends BaseTestCase {
         assertEquals(6535f, item.getReadSavedFromCompression());
         assertEquals(6536f, item.getSentLostFromSSL());
         assertEquals(6537f, item.getSentSavedFromCompression());
+        assertEquals("6538", item.getUserAgent());
+        
+        assertFalse(item.isLeaf());
+        assertFalse(item.isOutgoing());
+        assertFalse(item.isPeer());
+        assertFalse(item.isUltrapeerConnection());
+        assertFalse(item.isUltrapeer());
+        assertTrue(item.isLeaf());
+        assertTrue(item.isOutgoing());
+        assertTrue(item.isPeer());
+        assertTrue(item.isUltrapeerConnection());
+        assertTrue(item.isUltrapeer());
     }
   
 }
