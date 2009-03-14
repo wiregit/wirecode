@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="lw-swingui" basedir="." default="compile-src">
-    <property name="component" value="swingui"/>
 
-	<import file="../build-macros.xml"/>
+    <property name="limewire.components.home" value="${basedir}/.."/>
+    <property name="component" value="swingui"/>
     <import file="../../components/common/generic-build.xml"/>
     
-    <target name="initialize"  unless="initialized.swingui">
-        <do.setup-private-properties component="swingui">            
-            <add-tests-classpath>
-				<pathelement location="${limewire.lib.jars}/messages.jar"/>
-		    </add-tests-classpath>
-        </do.setup-private-properties>
-    </target>    
 </project>

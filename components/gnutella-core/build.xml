@@ -1,95 +1,134 @@
 <project name="lw-core" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
-    <property name="limewire.home" location="${basedir}/.."/>
+    <property name="limewire.home" location="${basedir}/.."/>    
+    <property name="component" value="core"/>
+
+    <import file="${limewire.home}/components/common/ant-macros.xml"/>
     
-    <import file="../components/common/generic-build.xml"/>
+    <!-- THIS ENTIRE FILE WOULD GO AWAY IF CORE WERE A PROPER COMPONENT... :(  -->
     
-    <target name="initialize" unless="initialized.core">
-        <property name="initialized.core" 			  value="true"/>
+    <target name="initialize" depends="ivy-load" unless="initialized.core">
+        <property name="initialized.core" value="true"/>
         <property name="limewire.core.home"           location="${limewire.home}/core"/>
         <property name="limewire.core.src"  		  location="${limewire.core.home}"/>
         <property name="build.limewire.core.classes"  location="${limewire.core.home}"/>
-        <property name="build.limewire.core.home.lib" location="${limewire.core.home}/lib"/>
+        <property name="build.limewire.core.lib"      location="${limewire.core.home}/lib"/>
+        <property name="dist.limewire.core.home"      location="${limewire.core.home}/dist"/>
+        <property name="clover.limewire.core.home"    location="${limewire.core.home}/clover"/>
+        <property name="clover.db.location"           location="${limewire.core.home}/clover/clover.db"/>
         <path id="build.limewire.core.classpath">
-            <fileset dir="${build.limewire.core.home.lib}/default/" includes="**/*"/>
+            <fileset dir="${build.limewire.core.lib}/compile/" includes="**/*.jar"/>
         </path>
+        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
     </target>
     
-    <!-- compiles the core & components -->
-    <!-- TODO 
-    <target name="compile-all"
-            description="Compiles the components and the core."
-            depends="initialize, lw-components.compile-core-src, compile-core"/ -->
+	<target name="publish-dependencies" depends="initialize" unless="ivy.dependencies.published">
+	    <property name="ivy.dependencies.published" value="true"/>
+        <do.subant dir="${limewire.home}" includes="**/build.xml" root="${component}" target="publish" excluderoot="true"/>
+	</target>    
     
-	<!-- builds only the core -->
-	<target name="compile-core" 
-	        description="Compiles just the core."
-	        depends="initialize">
-        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
-        <ivy:resolve file="${limewire.core.home}/ivy.xml"/>
-        <ivy:retrieve pattern="${build.limewire.core.home.lib}/[conf]/[type]/[artifact]-[version].[ext]"/>
-	    <javac destdir      ="${build.limewire.core.classes}"
-			   debug	    ="${compile.debug}"
-			   deprecation  ="${compile.deprecation}"
-	           optimize     ="${compile.optimize}"
-			   encoding     ="UTF-8"
-	           source		="${compile.source}"
-	           target       ="${compile.target}"
-	           srcdir	    ="${limewire.core.src}"
-			   excludes		="examples/**"
-	    >
-			<classpath refid="build.limewire.core.classpath"/>
-	   	</javac>
+    <target name="clean" depends="initialize, clean-src, clean-dist">
+        <delete dir="${build.limewire.core.lib}"/>
+        <delete dir="${clover.limewire.core.home}"/>
 	</target>
     
-    <!-- cleans the core & components -->
-    <!-- TODO 
-    <target name="clean-all" 
-            description="Cleans the classfiles generated from compiling the components and core."
-            depends="initialize, lw-components.clean-src, clean-core"/-->
+    <target name="compile" depends="publish-dependencies">
+        <mkdir dir="${build.limewire.core.lib}/compile"/>
+        <ivy:resolve conf="compile"
+                     file="${limewire.core.home}/ivy.xml"
+                     log="quiet"/>
+        <ivy:retrieve conf="compile"
+                      pattern="${build.limewire.core.lib}/[conf]/[type]/[artifact]-[revision].[ext]"
+                      sync="true"
+                      symlink="true"
+                      log="quiet"/>
+        <!-- because ivy:retrieve has sync==true, if there are no dependencies, the dir will be removed.
+             we don't want it removed, because then javac fails because the classpath is missing. -->
+        <mkdir dir="${build.limewire.core.lib}/compile"/>
+        
+        <javac destdir="${build.limewire.core.classes}" 
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               encoding="UTF-8" 
+               source="${compile.source}" 
+               target="${compile.target}" 
+               srcdir="${limewire.core.src}" 
+               excludes="examples/**">
+                <classpath refid="build.limewire.core.classpath"/>
+        </javac>
+    </target>
 	
-	<!-- cleans only the core -->
-	<target name="clean-core"
-	        description="Cleans just the core classes."
-            depends="initialize">
-        <delete dir="${build.limewire.core.classes}" includes="**/*.class"/>
-        <delete dir="${build.limewire.core.home.lib}"/>
-        <delete dir="${limewire.core.home}/dist"/>
+	<target name="compile-src" depends="compile"/>
+    
+	<target name="clean-src" depends="initialize">
+	    <delete>
+            <fileset dir="${build.limewire.core.classes}" includes="com/**/*.class"/>
+        </delete>
 	</target>
     
-    <target name="clean" description="Cleans just the core" depends="clean-core"/>
-    <target name="compile" description="Compiles just the core" depends="compile-core"/>
-    
-    <target name="jar" depends="initialize,compile-core">
+    <target name="jar" depends="compile">
         <mkdir dir="${limewire.core.home}/dist"/>
-        <jar destfile="${limewire.core.home}/dist/core.jar"
-            	 compress="@{compress}"
-                 basedir="${build.limewire.core.classes}"
-                 includes="**/*.class"
-                 excludes="@{excludes}"
-            >
-            </jar>
-        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
-        <ivy:publish resolver="local" overwrite="true" forcedeliver="true" artifactspattern="${limewire.core.home}/dist/core.jar" srcivypattern="${limewire.core.home}/dist/ivy.xml"/>
+        <jar destfile="${dist.limewire.core.home}/core.jar"
+        	 compress="false"
+             basedir="${build.limewire.core.classes}"
+             includes="com/**/*.class"
+             excludes="examples/**"
+        />
     </target>
     
-    <!--
-       everything below is just to erase the targets from 'ant -p'
-       they are listed because we import the component's buildfile.
-      -->
-    <target name="clean-src"/>
-    <target name="clean-dist"/>
-    <target name="clean-tests"/>
-    <target name="clover2html"/>
-    <target name="compile-src"/>
-    <target name="compile-core-src"/>
-    <target name="compile-ui-src"/>
-    <target name="compile-tests"/>
-    <target name="javadoc"/>
-    <target name="test"/>
-    <target name="test-all"/>
-    <target name="test-package"/>
-    <target name="with.clover"/>
+    <target name="javadoc" depends="compile-src">
+        <!-- TODO: write javadoc! -->
+	</target>
+	
+	<target name="publish" depends="jar">
+        <ivy:publish resolver="local"
+                     overwrite="true"
+                     forcedeliver="true"
+                     haltonmissing="false"
+                     artifactspattern="${dist.limewire.core.home}/core.jar"
+                     srcivypattern="${dist.limewire.core.home}/ivy.xml"/>
+    </target>
+    
+    <target name="clean-dist" depends="initialize">
+        <delete dir="${dist.limewire.core.home}"/>
+    </target>
+    
+    <target name="with.clover" depends="initialize">
+        <antcall target="clover-guard"/>
+        <taskdef resource="cloverlib.xml"/>
+        <mkdir dir="${clover.limewire.core.home}"/>
+        <clover-setup initstring="${clover.db.location}">
+            <statementContext name="log" regexp="^LOG\..*"/>
+            <statementContext name="iflog" regexp="^if *\(LOG\.is.*"/> 
+            <methodContext name="main" regexp="public static void main\(String args\[\]\).*"/>
+            <fileset dir="${limewire.core.home}" includes="com/**/*.java"/>
+        </clover-setup>
+	</target>
+    
+    <target name="clover2html" depends="with.clover">
+        <antcall target="clover-guard"/>
+        <tstamp>
+            <format property="clover.time" pattern="EEE, MMM d, yyyy hh:mm a"/>
+        </tstamp>
+        <clover-report initstring="${clover.db.location}">
+            <current outfile="${clover.limewire.core.home}/html"
+            		 title="LimeWire - ${clover.time}">
+                <format type="html" filter="log,iflog,assert,main"/>
+            </current>
+            <current outfile="${clover.limewire.core.home}/coverage.xml"
+                     title="LimeWire - ${clover.time}">
+				<format type="xml" filter="log,iflog,assert,main"/>
+            </current>
+        </clover-report>
+    </target>
+    	
+	<!-- no tests in core -->
+	<target name="compile-tests"/>
+	<target name="clean-tests"/>	
+	<target name="test"/>
+	<target name="test-package"/>
+	<target name="test-all"/>
 
 </project>
 

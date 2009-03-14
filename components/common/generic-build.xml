@@ -78,10 +78,6 @@
         <do.clover2html component="${component}"/>
     </target>
     
-    <target name="clover-dbmerge" depends="with.clover">
-        <do.clover-dbmerge component="${component}" dst.db.location="${clover.merge.dstDb}"/>
-    </target>
-    
     <macrodef name="do.setup-properties" description="Sets up common properties every macro uses.">
     	<attribute name="component"/>
         <attribute name="junit" default="${limewire.lib.jars}/tests/junit.jar"/>
@@ -525,20 +521,6 @@
         </sequential>
     </macrodef>
     
-    <macrodef name="do.clover-dbmerge" description="Merges this cloverdb into another one.">
-        <attribute name="component"/>
-        <attribute name="dst.db.location"/>
-        <attribute name="src.db.location" default="${clover.limewire.components.@{component}.db}"/>
-        <sequential>
-	        <antcall target="clover-guard"/>
-            <clover-merge initstring="@{dst.db.location}">
-                <cloverDb initstring="@{src.db.location}"/>
-                <cloverDbSet file="@{dst.db.location}"/> <!-- using cloverDbSet because it may not exist. -->
-            </clover-merge>
-            <delete file="@{dst.db.location}.tmp"/>
-        </sequential>
-    </macrodef> 
-    
     <macrodef name="do.clover-setup" description="Sets up clover.">
     	<attribute name="component"/>
         <element name="locations" optional="true"/>
@@ -585,22 +567,5 @@
             </clover-report>
         </sequential>
     </macrodef>
-
-    <property name="gettexttasks.jar" value="${limewire.lib.jars.ant}/gettext-ant-tasks.jar"/>
-
-	<target name="init.gettext" description="Loads the gettext ant tasks">
-    	 <taskdef name="gettext-extract"
-           classname="org.xnap.commons.ant.gettext.GettextExtractKeysTask"
-           classpath="${gettexttasks.jar}"/>
-    	 <taskdef name="gettext-merge"
-           classname="org.xnap.commons.ant.gettext.GettextMergeKeysTask"
-           classpath="${gettexttasks.jar}"/>
-    	 <taskdef name="gettext-dist"
-           classname="org.xnap.commons.ant.gettext.GettextDistTask"
-           classpath="${gettexttasks.jar}"/>
-          <taskdef name="gettext-generate-default"
-    	   classname="org.xnap.commons.ant.gettext.GenerateDefaultBundleTask"
-    	   classpath="${gettexttasks.jar}"/>
-	</target>    
 	
 </project>

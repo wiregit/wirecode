@@ -15,7 +15,6 @@
 		<fail if="testsfailed" message="One or more tests failed!"/>
     </target>
     
-    
     <!-- Checks to see if clover is installed and sets a property if so -->
     <target name="clover-check" unless="clover.installed">
         <available property="clover.installed" classname="com.cenqua.clover.CloverInstr" />
@@ -25,6 +24,10 @@
     <target name="clover-guard" depends="clover-check" unless="clover.installed">
         <fail message="Clover is not installed, the build cannot continue."/>
     </target>	
+    
+    <target name="clean-cache" depends="ivy-load">
+        <ivy:cleancache />                                                              
+    </target>
     
     <target name="ivy-load" unless="ivy.loaded">
         <property name="ivy.loaded" value="true"/>

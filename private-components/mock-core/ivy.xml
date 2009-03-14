@@ -17,5 +17,6 @@
         <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
         <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
         <dependency org="net.java.dev.glazedlists" name="glazedlists_java15" rev="${glazedlists_java15.version}" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
     </dependencies>
 </ivy-module>

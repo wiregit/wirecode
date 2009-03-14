@@ -11,6 +11,7 @@
         <dependency org="org.limewire" name="collection" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="rudp" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="rudp" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="security" rev="latest.integration" conf="compile,runtime"/>
@@ -24,6 +25,7 @@
         <dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="swarm" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="xmpp-api" rev="latest.integration" conf="compile,runtime"/>
         <!-- Customized LimeWire Jars --> 
         <dependency org="org.limewire" name="clink" rev="0.6-lw-1" conf="compile,runtime"/>
         <dependency org="org.limewire" name="id3v2" rev="0.3-lw-1" conf="compile,runtime"/>
@@ -37,6 +39,10 @@
         <dependency org="commons-net" name="commons-net" rev="1.4.1" conf="compile,runtime"/>
         <dependency org="log4j" name="log4j" rev="1.2.14" conf="compile,runtime"/>
         <dependency org="org.jaudiotagger" name="jaudiotagger" rev="1.0" conf="compile,runtime"/>
+        <dependency org="org.apache.httpcomponents" name="httpcore" rev="${httpcore.version}" conf="compile,runtime"/>
+        <dependency org="org.apache.httpcomponents" name="httpcore-nio" rev="${httpcore-nio.version}" conf="compile,runtime"/>
+        <dependency org="org.apache.httpcomponents" name="httpclient" rev="${httpclient.version}" conf="compile,runtime"/>    
+        <dependency org="commons-codec" name="commons-codec" rev="${commons-codec.version}" conf="compile,runtime"/>            
         <!-- Scoped Jars -->
         <dependency org="org.limewire" name="cocoaFoundation" rev="1" conf="compile,runtime"/>
         <dependency org="org.limewire" name="daap" rev="1.1" conf="compile,runtime"/>

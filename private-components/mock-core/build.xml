@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="lw-mock-core" basedir="." default="compile-src">
+
+    <property name="limewire.components.home" value="${basedir}/.."/>
     <property name="component" value="mock-core"/>
-	
-    <import file="../build-macros.xml"/>
     <import file="../../components/common/generic-build.xml"/>
-    
-    <target name="initialize" unless="initialized.mock-core">
-        <do.setup-private-properties component="mock-core">
-        </do.setup-private-properties>
-    </target>
     
 </project>

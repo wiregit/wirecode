@@ -4,3 +4,4 @@ private-all
 bin
 eclipse
 target
+testData
