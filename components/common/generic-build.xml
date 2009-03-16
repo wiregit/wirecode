@@ -53,6 +53,10 @@
 	<target name="test-all" depends="compile">
 	    <do.test-all component="${component}"/>
 	</target>
+	
+	<target name="tests2html" depends="initialize">
+        <do.tests2html     component="@{component}"/>
+    </target>
     
     <target name="jar" depends="compile-src">
         <do.jar component="${component}"/>
@@ -80,13 +84,11 @@
     
     <macrodef name="do.setup-properties" description="Sets up common properties every macro uses.">
     	<attribute name="component"/>
-        <attribute name="junit" default="${limewire.lib.jars}/tests/junit.jar"/>
-        <element name="tests-classpath" optional="true" description="Additional paths for running tests"/>
-        <element name="build-tests-classpath" optional="true" description="Additional paths for building tests"/>
-        <element name="src-classpath" optional="true" description="Additional paths for building source"/>
+        
         <sequential>
             <property name="initialized.@{component}" value="true"/>
             
+            <!-- paths for src java files, test java files, and resource files -->
         	<property name="limewire.components.@{component}.home"
         		      location="${limewire.components.home}/@{component}"/>
         	<property name="limewire.components.@{component}.src.home"
@@ -102,6 +104,7 @@
           	<property name="limewire.components.@{component}.tests.resources"
               		  location="${limewire.components.@{component}.tests.home}/resources"/>
             
+            <!-- paths for compiling src & test -->
         	<property name="build.limewire.components.@{component}.home"
         		      location="${limewire.components.@{component}.home}/build"/>
         	<property name="build.limewire.components.@{component}.classes"
@@ -111,6 +114,7 @@
         	<property name="build.limewire.components.@{component}.tests"
         			  location="${build.limewire.components.@{component}.home}/tests"/>
         	
+        	<!-- paths for test runtime. -->
         	<property name="tests.limewire.components.@{component}.home"
         		      location="${limewire.components.@{component}.home}/testData"/>  		      
             <property name="tests.limewire.components.@{component}.xml"
@@ -118,6 +122,7 @@
             <property name="tests.limewire.components.@{component}.html"
             		  location="${tests.limewire.components.@{component}.home}/html"/>
             
+            <!-- paths for clover output -->
             <property name="clover.limewire.components.@{component}.home"
 			          location="${limewire.components.@{component}.home}/clover"/>
             <property name="clover.limewire.components.@{component}.db"
@@ -127,6 +132,7 @@
             <property name="clover.limewire.components.@{component}.xml"
 			          location="${clover.limewire.components.@{component}.home}/coverage.xml"/>
             
+            <!-- paths for distribution files, including javadoc & jar. -->
             <property name="dist.limewire.components.@{component}.home"
                       location="${limewire.components.@{component}.home}/dist"/>
             <property name="dist.limewire.components.@{component}.javadoc"
@@ -134,34 +140,30 @@
             <property name="dist.limewire.components.@{component}.jar"
             		  location="${dist.limewire.components.@{component}.home}/lw-@{component}.jar"/>
             
+            <!-- whether or not to write tests to file instead of stdout. -->
             <property name="tests.writetofileonly" value="false"/>
        	
-        	<path id="build.limewire.components.@{component}.classpath">
+       	    <!-- the src build classpath -->
+        	<path id="build.limewire.components.@{component}.src.classpath">
                 <!-- TODO parameterize 'compile' with ivy-module configuration name -->
-                <fileset dir="${build.limewire.components.@{component}.lib}/compile/" includes="**/*"/>
+                <fileset dir="${build.limewire.components.@{component}.lib}/compile/" includes="**/*"/> <!-- ivy src dependencies -->
         	</path>
             
-            <path id="build.limewire.components.@{component}.buildpath">
-                <path refid="build.limewire.components.@{component}.classpath"/>
-                <pathelement location="${build.limewire.components.@{component}.classes}"/>
-            	<pathelement location="${limewire.components.@{component}.src.resources}"/>
-            </path>
-            
+            <!-- the tests build classpath -->
     	    <path id="build.limewire.components.@{component}.tests.classpath">
 	        	<!-- TODO parameterize 'test' with ivy-module configuration name -->
                 <pathelement location="${build.limewire.components.@{component}.classes}"/>
-                <fileset dir="${build.limewire.components.@{component}.lib}/test/" includes="**/*"/>
+                <fileset dir="${build.limewire.components.@{component}.lib}/test/" includes="**/*"/> <!-- ivy test dependencies -->
     	    </path>
         	
+        	<!-- the tests junit runtime classpath -->
         	<path id="tests.limewire.components.@{component}.classpath">
-        	    <pathelement location="${limewire.components.@{component}.src.resources}"/>
-        	    <pathelement location="${limewire.components.@{component}.tests.resources}"/>
-        		<pathelement location="${build.limewire.components.@{component}.tests}"/>
-        		<path refid="build.limewire.components.@{component}.tests.classpath"/>
-           	    <pathelement location="${cloverjar}"/>
-        	    <tests-classpath/>
-        	</path>
-        	
+        	    <pathelement location="${limewire.components.@{component}.src.resources}"/> <!-- src resources -->
+        	    <pathelement location="${limewire.components.@{component}.tests.resources}"/> <!-- test resources -->
+        		<pathelement location="${build.limewire.components.@{component}.tests}"/> <!-- test compile results -->
+        		<path refid="build.limewire.components.@{component}.tests.classpath"/> <!-- test compile classpath -->
+           	    <pathelement location="${cloverjar}"/> <!-- clover -->
+        	</path>        	
         	
             <ivy:configure file="${limewire.ivy.home}/ivysettings.xml" override="true"/>
         </sequential>
@@ -224,7 +226,7 @@
 					<pathelement location="${limewire.components.@{component}.src}"/>
 				    <more-src-paths/>
 			    </src>
-				<classpath refid="build.limewire.components.@{component}.classpath"/>
+				<classpath refid="build.limewire.components.@{component}.src.classpath"/>
 			</javac>
 	    </sequential>
 	</macrodef>
@@ -251,11 +253,8 @@
 				   encoding     ="ISO-8859-1"
 	    	       source		="${compile.source}"
 	        	   target       ="${compile.target}"
-	        	   sourcepath   =""
+	        	   srcdir       ="${limewire.components.@{component}.tests}"
 	   		>
-				<src>
-					<pathelement location="${limewire.components.@{component}.tests}"/>
-			    </src>
 				<classpath refid="build.limewire.components.@{component}.tests.classpath"/>
 			</javac>
 		</sequential>
@@ -288,7 +287,6 @@
 						       unit="@{path}/@{class}.class"
    			    			   component="@{component}"
 			/>
-			<do.tests2html     component="@{component}"/>
 	    </sequential>
 	</macrodef>
 	
@@ -304,7 +302,6 @@
 									component="@{component}"
 			    					forkmode="@{forkmode}"
 			/>
-	        <do.tests2html          component="@{component}"/>
 	    </sequential>
 	</macrodef>
 	
@@ -324,7 +321,6 @@
 	        	   <testLocations/>
 	            </testPathLocations>
 	        </do.run-tests-batchunit>
-	        <do.tests2html          component="@{component}"/>
 	    </sequential>
 	</macrodef>
     
@@ -372,7 +368,7 @@
         <attribute name="doctitle" default="LimeWire @{component} Component API &lt;br/&gt; for ${timestamp.today}"/>
         <attribute name="header" default="LimeWire @{component} Component API"/>
         <element name="more-javadoc-elements" optional="true"/>
-        <attribute name="classpathrefid" default="build.limewire.components.@{component}.classpath"/>
+        <attribute name="classpathrefid" default="build.limewire.components.@{component}.src.classpath"/>
         <attribute name="sourcepath" default="${limewire.components.@{component}.src}"/>
         <attribute name="includes" default="**/*.java"/>
         <attribute name="excludes" default=""/>

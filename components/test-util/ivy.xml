@@ -14,5 +14,6 @@
         <dependency org="org.jmock" name="jmock-junit3" rev="2.5.0" conf="compile,runtime"/>
         <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
         <dependency org="org.jmock" name="jmock-legacy" rev="2.5.0" conf="compile,runtime"/>
+        <dependency org="log4j" name="log4j" rev="${log4j.version}" conf="runtime"/>
     </dependencies>
 </ivy-module>

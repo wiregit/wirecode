@@ -25,7 +25,7 @@
         <fail message="Clover is not installed, the build cannot continue."/>
     </target>	
     
-    <target name="clean-cache" depends="ivy-load">
+    <target name="ivy-clean-cache" depends="ivy-load">
         <ivy:cleancache />                                                              
     </target>
     

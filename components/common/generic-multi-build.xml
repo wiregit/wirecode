@@ -65,6 +65,10 @@
         <do.multi-ant target="test-all"/>
 	</target>
 	
+    <target name="tests2html" depends="initialize">
+        <do.multi-ant target="tests2html"/>
+	</target>		
+	
 	<target name="aggregate.tests2html" depends="initialize">
 	    <delete dir="${junit.aggregateHome}"/>
 	    <mkdir  dir="${junit.aggregateHome}"/>
