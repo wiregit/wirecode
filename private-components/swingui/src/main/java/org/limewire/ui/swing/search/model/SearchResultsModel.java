@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.model;
 
-import org.limewire.core.api.Category;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
@@ -54,14 +53,9 @@ public interface SearchResultsModel extends DownloadHandler {
     EventList<VisualSearchResult> getObservableSearchResults();
 
     /**
-     * Returns a list of sorted and filtered results in the search.
+     * Returns a list of filtered results for the specified search category.
      */
-    EventList<VisualSearchResult> getFilteredSearchResults();
-
-    /**
-     * Returns a list of filtered results for the specified category.
-     */
-    EventList<VisualSearchResult> getCategorySearchResults(Category category);
+    EventList<VisualSearchResult> getCategorySearchResults(SearchCategory category);
 
     /**
      * Sets the sort option.  This updates the sorted list by changing the

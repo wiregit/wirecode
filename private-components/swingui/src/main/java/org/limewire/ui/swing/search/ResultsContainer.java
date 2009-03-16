@@ -9,7 +9,6 @@ import javax.swing.Action;
 import javax.swing.Scrollable;
 
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanelFactory;
@@ -62,19 +61,19 @@ public class ResultsContainer extends JXPanel {
         
         // Create result panels for all media categories.
         panelMap.put(SearchCategory.ALL.name(),
-            allFactory.create(searchResultsModel, searchResultsModel.getFilteredSearchResults(), preserver));
+            allFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.ALL), preserver));
         panelMap.put(SearchCategory.AUDIO.name(),
-            audioFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(Category.AUDIO), preserver));
+            audioFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.AUDIO), preserver));
         panelMap.put(SearchCategory.VIDEO.name(),
-            videoFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(Category.VIDEO), preserver));
+            videoFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.VIDEO), preserver));
         panelMap.put(SearchCategory.IMAGE.name(),
-            imagesFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(Category.IMAGE), preserver));
+            imagesFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.IMAGE), preserver));
         panelMap.put(SearchCategory.DOCUMENT.name(),
-            documentsFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(Category.DOCUMENT), preserver));
+            documentsFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.DOCUMENT), preserver));
         panelMap.put(SearchCategory.PROGRAM.name(),
-            programFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(Category.PROGRAM), preserver));
+            programFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.PROGRAM), preserver));
         panelMap.put(SearchCategory.OTHER.name(),
-            otherFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(Category.OTHER), preserver));
+            otherFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.OTHER), preserver));
         
         setLayout(cardLayout);
         

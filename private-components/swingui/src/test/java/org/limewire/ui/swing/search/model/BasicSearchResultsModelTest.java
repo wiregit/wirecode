@@ -575,7 +575,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     /** Tests method to retrieve sorted and filtered search results. */
-    public void testGetFilteredSearchResults() {
+    public void testGetCategorySearchResultsAll() {
         // Create test search results.
         TestSearchResult testResult1 = new TestSearchResult("1", "xray");
         TestSearchResult testResult2 = new TestSearchResult("2", "zulu");
@@ -588,7 +588,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult4);
         
         // Get filtered search results.
-        List<VisualSearchResult> filteredList = model.getFilteredSearchResults();
+        List<VisualSearchResult> filteredList = model.getCategorySearchResults(SearchCategory.ALL);
         
         // Verify unsorted order.
         String expectedReturn = "xray";
@@ -616,7 +616,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     /** Tests method to retrieve filtered search results by category. */
-    public void testGetCategorySearchResults() {
+    public void testGetCategorySearchResultsVideo() {
         // Create test search results.
         TestSearchResult testResult1 = new TestSearchResult("1", "xray");
         TestSearchResult testResult2 = new TestSearchResult("2", "zulu");
@@ -631,7 +631,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult4);
 
         // Get filtered search results for category.
-        List<VisualSearchResult> categoryList = model.getCategorySearchResults(Category.VIDEO);
+        List<VisualSearchResult> categoryList = model.getCategorySearchResults(SearchCategory.VIDEO);
         
         // Verify category list.
         int expectedSize = 1;

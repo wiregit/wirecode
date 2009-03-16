@@ -71,7 +71,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
 
     /** Filtered and sorted list of grouped search results. */
     private final FilterList<VisualSearchResult> filteredResultList;
-    
+
     /** Listener to handle search request events. */
     private SearchListener searchListener;
 
@@ -171,15 +171,15 @@ class BasicSearchResultsModel implements SearchResultsModel {
     }
 
     @Override
-    public EventList<VisualSearchResult> getFilteredSearchResults() {
-        return filteredResultList;
+    public EventList<VisualSearchResult> getCategorySearchResults(SearchCategory searchCategory) {
+        if (searchCategory == SearchCategory.ALL) {
+            return filteredResultList;
+        } else {
+            return GlazedListsFactory.filterList(filteredResultList, 
+                    new CategoryMatcher(searchCategory.getCategory()));
+        }
     }
-
-    @Override
-    public EventList<VisualSearchResult> getCategorySearchResults(Category category) {
-        return GlazedListsFactory.filterList(filteredResultList, new CategoryMatcher(category));
-    }
-
+    
     @Override
     public void setSortOption(SortOption sortOption) {
         sortedResultList.setComparator(SortFactory.getSortComparator(sortOption));
@@ -216,7 +216,6 @@ class BasicSearchResultsModel implements SearchResultsModel {
         download(vsr, null);
     }
     
-    // TODO resolve merge conflicts with DownloadHandlerImpl
     /**
      * Initiates a download of the specified visual search result to the
      * specified save file.
