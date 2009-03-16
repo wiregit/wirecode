@@ -55,7 +55,7 @@
 	</target>
 	
 	<target name="tests2html" depends="initialize">
-        <do.tests2html     component="@{component}"/>
+        <do.tests2html component="${component}"/>
     </target>
     
     <target name="jar" depends="compile-src">

@@ -10,10 +10,10 @@
         <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
         <dependency org="junit" name="junit" rev="3.8.1" conf="compile,runtime"/>
         <dependency org="org.hamcrest" name="hamcrest-core" rev="1.1" force="true" conf="compile,runtime"/>
-        <dependency org="org.jmock" name="jmock" rev="2.5.0" conf="compile,runtime"/>
-        <dependency org="org.jmock" name="jmock-junit3" rev="2.5.0" conf="compile,runtime"/>
+        <dependency org="org.jmock" name="jmock" rev="2.2.0" conf="compile,runtime"/>
+        <dependency org="org.jmock" name="jmock-junit3" rev="2.2.0" conf="compile,runtime"/>
         <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
-        <dependency org="org.jmock" name="jmock-legacy" rev="2.5.0" conf="compile,runtime"/>
+        <dependency org="org.jmock" name="jmock-legacy" rev="2.2.0" conf="compile,runtime"/>
         <dependency org="log4j" name="log4j" rev="${log4j.version}" conf="runtime"/>
     </dependencies>
 </ivy-module>
