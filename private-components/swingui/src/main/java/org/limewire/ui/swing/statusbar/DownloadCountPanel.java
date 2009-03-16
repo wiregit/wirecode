@@ -27,7 +27,7 @@ class DownloadCountPanel extends JXLabel {
         setBorder(BorderFactory.createEmptyBorder(0,6,0,0));
         setIconTextGap(2);
         
-        final EventList<DownloadItem> unfinishedDownloads = GlazedListsFactory.filterList(downloadListManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.DONE));
+        final EventList<DownloadItem> unfinishedDownloads = GlazedListsFactory.filterList(downloadListManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.DONE, DownloadState.ERROR));
         
         downloadListManager.getSwingThreadSafeDownloads().addListEventListener(new ListEventListener<DownloadItem>() {
 
