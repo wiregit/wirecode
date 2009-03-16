@@ -12,7 +12,7 @@ public class DownloadUpgradeTaskService {
 
     private final Provider<DownloadUpgradeTask> upgradeTask;
 
-    @Inject
+    @Inject @SuppressWarnings("unused")
     private DownloadUpgradeTaskService(Provider<DownloadUpgradeTask> upgradeTask) {
         this.upgradeTask = upgradeTask;
     }
