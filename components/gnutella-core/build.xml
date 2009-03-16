@@ -19,7 +19,7 @@
         <path id="build.limewire.core.classpath">
             <fileset dir="${build.limewire.core.lib}/compile/" includes="**/*.jar"/>
         </path>
-        <ivy:configure file="${limewire.home}/ivysettings.xml" override="true"/>
+        <ivy:configure file="${limewire.home}/components/common/ivysettings.xml" override="true"/>
     </target>
     
 	<target name="publish-dependencies" depends="initialize" unless="ivy.dependencies.published">
