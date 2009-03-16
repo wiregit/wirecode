@@ -33,8 +33,13 @@ public class MojitoManagerImpl implements MojitoManager {
     @Inject
     public MojitoManagerImpl(DHTManager manager) {
         this.manager = manager;
-        
-        // Add listener to fire property change on DHT event.
+    }
+
+    /**
+     * Add listener to fire property change on DHT event.
+     */
+    @Inject
+    public void registerListener() {
         manager.addEventListener(new DHTEventListener() {
             @Override
             public void handleDHTEvent(DHTEvent evt) {
