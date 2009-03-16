@@ -17,7 +17,7 @@ import org.limewire.ui.swing.util.SwingUtils;
 class SwingSearchListener implements SearchListener {
 
     private final SearchResultsModel searchResultsModel;
-    private final SponsoredResultsView searchView;
+    private final SponsoredResultsView sponsoredView;
     private final SearchNavItem searchNavItem;
     
     /**
@@ -27,7 +27,7 @@ class SwingSearchListener implements SearchListener {
     public SwingSearchListener(SearchResultsModel searchResultsModel, 
             SponsoredResultsView searchView, SearchNavItem searchNavItem) {
         this.searchResultsModel = searchResultsModel;
-        this.searchView = searchView;
+        this.sponsoredView = searchView;
         this.searchNavItem = searchNavItem;
     }
 
@@ -56,7 +56,7 @@ class SwingSearchListener implements SearchListener {
         SwingUtils.invokeLater(new Runnable() {
             @Override
             public void run() {
-                searchView.addSponsoredResults(sponsoredResults);
+                sponsoredView.addSponsoredResults(sponsoredResults);
             }
         });
     }
