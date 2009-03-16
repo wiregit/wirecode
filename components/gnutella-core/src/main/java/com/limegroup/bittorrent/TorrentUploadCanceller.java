@@ -9,7 +9,7 @@ public class TorrentUploadCanceller implements TorrentEventListener {
 
     private final ActivityCallback activityCallback;
 
-    @Inject
+    @Inject @SuppressWarnings("unused")
     private TorrentUploadCanceller(ActivityCallback activityCallback) {
         this.activityCallback = activityCallback;
     }
