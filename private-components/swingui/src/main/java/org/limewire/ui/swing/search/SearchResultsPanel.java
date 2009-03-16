@@ -204,7 +204,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         SwingUiSettings.SEARCH_VIEW_TYPE_ID.removeSettingListener(viewTypeListener);
         sortAndFilterPanel.dispose();
         classicSearchReminderPanel.dispose();
-        searchResultsModel.stop();
+        searchResultsModel.dispose();
     }
 
     /**
