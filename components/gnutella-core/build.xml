@@ -27,7 +27,7 @@
         <do.subant dir="${limewire.home}" includes="**/build.xml" root="${component}" target="publish" excluderoot="true"/>
 	</target>    
     
-    <target name="clean" depends="initialize, clean-src, clean-dist">
+    <target name="clean" depends="clean-src, clean-dist">
         <delete dir="${build.limewire.core.lib}"/>
         <delete dir="${clover.limewire.core.home}"/>
 	</target>
