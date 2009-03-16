@@ -2,7 +2,6 @@ package org.limewire.core.impl.browse;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +23,6 @@ import com.google.inject.TypeLiteral;
 import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
-import com.limegroup.gnutella.util.LimeTestCase;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.browse.BrowseListener;
@@ -36,6 +34,7 @@ import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.CoreGlueModule;
+import org.limewire.core.impl.integration.IntegrationTestCase;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.core.impl.xmpp.XMPPRemoteFileDescDeserializer;
@@ -50,14 +49,12 @@ import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPService;
-import org.limewire.xmpp.client.impl.RosterListenerMock;
-import org.limewire.xmpp.client.impl.XMPPConnectionConfigurationMock;
 
 /**
  *
  * Test browse/downloads over a real life network.
  */
-public class NetworkIntegrationTest extends LimeTestCase {
+public class NetworkIntegrationTest extends IntegrationTestCase {
 
     private static final int SECONDS_TO_WAIT = 10;
     private static final String USERNAME_1 = "limenetworktest1@gmail.com";
@@ -80,13 +77,10 @@ public class NetworkIntegrationTest extends LimeTestCase {
         super.setUp();
         injector = createInjector(getModules());
         registry = injector.getInstance(ServiceRegistry.class);
-        registry.initialize();
+        registry.initialize();                                                                                
         registry.start();
         service = injector.getInstance(XMPPService.class);
-
-        EventListener<RosterEvent> bobRosterListener = new RosterListenerMock();
-        XMPPConnectionConfiguration config = new XMPPConnectionConfigurationMock(USERNAME_1, PASSWORD_1,
-                SERVICE, bobRosterListener);
+        XMPPConnectionConfiguration config = getDefaultXmppConnectionConfig(USERNAME_1, PASSWORD_1, SERVICE);
 
         ListeningFuture<XMPPConnection> loginTask = service.login(config);
         conn = loginTask.get(SECONDS_TO_WAIT, TimeUnit.SECONDS);
@@ -99,6 +93,21 @@ public class NetworkIntegrationTest extends LimeTestCase {
 
     private Injector createInjector(Module... modules) {
         return Guice.createInjector(Stage.PRODUCTION, modules);
+    }
+
+    private XMPPConnectionConfiguration getDefaultXmppConnectionConfig(final String userName, final String passwd,
+                                                                       final String serviceName) {
+        return new XMPPConnectionConfiguration() {
+            @Override public boolean isDebugEnabled() { return true; }
+            @Override public String getUserInputLocalID() { return userName; }
+            @Override public String getPassword() { return passwd; }
+            @Override public String getLabel() { return getServiceName(); }
+            @Override public String getServiceName() { return serviceName; }
+            @Override public String getResource() { return "LimeWire"; }
+            @Override public EventListener<RosterEvent> getRosterListener() { return null; }
+            @Override public String getCanonicalizedLocalID() { return getUserInputLocalID(); }
+            @Override public String getNetworkName() { return getServiceName(); }
+        };
     }
 
     private Module[] getModules() {
@@ -147,10 +156,9 @@ public class NetworkIntegrationTest extends LimeTestCase {
 
         DownloadListManager downloader = injector.getInstance(DownloadListManager.class);
         DownloadItem dlItem = downloader.getDownloadItem(urnOfFile);
-        File fileToSave = new File("downloadedFile");
 
         try {
-            dlItem = downloader.addDownload(null, toDownload, fileToSave, true);
+            dlItem = downloader.addDownload(null, toDownload);
             waitForDownloadCompletion(dlItem);
         } catch (SaveLocationException e) {
             e.printStackTrace();
@@ -274,6 +282,5 @@ public class NetworkIntegrationTest extends LimeTestCase {
                        latch.await(SECONDS_TO_WAIT, TimeUnit.SECONDS));
             return searchResults;
         }
-    }    
-
+    }
 }
