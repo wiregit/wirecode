@@ -134,7 +134,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
      * Stops the search and removes the current search listener. 
      */
     @Override
-    public void stop() {
+    public void dispose() {
         // Stop search.
         search.stop();
         
