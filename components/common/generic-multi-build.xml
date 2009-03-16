@@ -6,13 +6,23 @@
     
     <property name="excludes" value=""/>
     <property name="includes" value="**/build.xml"/>
+    
+    <!-- the locatino that aggregate junit reports are written to. -->
+    <property name="junit.aggregateHome"  value="${basedir}/junit"/>
+    <property name="junit.aggregateHtml"  value="${junit.aggregateHome}/aggregateHtml"/>
+    <property name="junit.aggregateXml"   value="${junit.aggregateHome}/aggregateXml"/>
+    
+    <!-- the location that aggregate clover reports are written to. -->
     <property name="clover.aggregateHome" value="${basedir}/clover"/>
-    <property name="clover.aggregateDb" value="${clover.aggregateHome}/clover-aggregate.db"/> 
+    <property name="clover.aggregateDb"   value="${clover.aggregateHome}/clover-aggregate.db"/> 
     <property name="clover.aggregateHtml" value="${clover.aggregateHome}/clover-aggregateHtml"/> 
-    <property name="clover.aggregateXml" value="${clover.aggregateHome}/clover-aggregate.xml"/> 
+    <property name="clover.aggregateXml"  value="${clover.aggregateHome}/clover-aggregate.xml"/> 
        
+    <!-- the location that clover assumes test sources are located at. 
+         if this needs to be changed, it must be redefined after importing this file. -->
     <fileset id="clover.testsources" dir="${basedir}" includes="**/src/test/**"/>
     
+    <!-- the location where antcontrib is at, for use with the 'if' task. -->
     <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${limewire.lib.jars.ant}/ant-contrib-1.0b3.jar"/>
     
     <!-- must ensure that ivy is loaded. -->
@@ -53,7 +63,17 @@
     
     <target name="test-all" depends="publish-dependencies">
         <do.multi-ant target="test-all"/>
-        <!-- TODO: build one big test2hml -->
+	</target>
+	
+	<target name="aggregate.test2html" depends="initialize">
+	    <delete dir="${junit.aggregateHome}"/>
+	    <mkdir  dir="${junit.aggregateHome}"/>
+	    <mkdir  dir="${junit.aggregateXml}"/>
+	    <mkdir  dir="${junit.aggregateHtml}"/>
+        <junitreport todir="${junit.aggregateXml}">
+        	<fileset dir="${basedir}" excludes="${excludes}" includes="**/testData/xml/TEST-*.xml"/>
+        	<report format="frames" todir="${junit.aggregateHtml}"/>
+       </junitreport>
 	</target>
     
     <target name="jar" depends="publish-dependencies">
