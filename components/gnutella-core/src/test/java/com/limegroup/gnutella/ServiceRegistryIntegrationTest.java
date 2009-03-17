@@ -83,7 +83,12 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "Metadata Loader", "",
         "What's New Manager", "",
         "P2P Network Keyword Library", "",
-        "Uptime Statistics", "UptimeStatTimer"};
+        "Uptime Statistics", "UptimeStatTimer", 
+        "PushEndpointCacheImpl WeakHashMap Cleaner", "ScheduledService",
+        "OnDemandUnicaster.Expirer", "ScheduledService",
+        "OnDemandUnicaster.QueriedHostsExpirer", "ScheduledService",
+        "ForMeReplyHandler.Clear Push Requests", "ScheduledService",
+        "DiskContrller.CacheCleaner", "ScheduledService"};
         
         List<String> missing = new ArrayList<String>();
         
