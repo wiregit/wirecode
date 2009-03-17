@@ -384,8 +384,13 @@ public class IOUtils {
      * if it couldn't be fully read. 
      */
     public static void readFully(InputStream in, byte[] array) throws IOException {
-        if (in.read(array) != array.length) {
-            throw new EOFException();
+        int offset = 0;
+        while (offset < array.length) {
+            int read = in.read(array, offset, array.length - offset);
+            if (read == -1) {
+                throw new EOFException();
+            }
+            offset += read;
         }
     }
 }

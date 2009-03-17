@@ -96,4 +96,41 @@ public final class IOUtilsTest extends BaseTestCase {
 	    String word = IOUtils.readWord(new ByteArrayInputStream(StringUtils.toUTF8Bytes(multiByteWord + " other stuff")), 100);
 	    assertNotEquals(multiByteWord, word);
 	}
+	
+	public void testReadFully() throws Exception {
+	    byte[] read = new byte[7];
+	    IOUtils.readFully(new TwoPartInputStream(new byte[] { 'h', 'e', 'y', }, new byte[] {' ', 'y', 'o', 'u' }), read);
+	    assertEquals(new byte[] { 'h', 'e', 'y', ' ', 'y', 'o', 'u' }, read);
+	}
+	
+	private class TwoPartInputStream extends InputStream {
+
+	    private boolean first = true;
+        private final byte[] firstPart;
+        private final byte[] secondPart;
+	    
+	    public TwoPartInputStream(byte[] firstPart, byte[] secondPart) {
+            this.firstPart = firstPart;
+            this.secondPart = secondPart;
+        }
+	    
+        @Override
+        public int read() throws IOException {
+            throw new IllegalStateException("should not be called");
+        }
+	    
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            if (first) {
+                first = false;
+                int length = Math.min(firstPart.length, len);
+                System.arraycopy(firstPart, 0, b, off, length);
+                return length;
+            } else {
+                int length = Math.min(secondPart.length, len);
+                System.arraycopy(secondPart, 0, b, off, length);
+                return length;
+            }
+        }
+	}
 }
