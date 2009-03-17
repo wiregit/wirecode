@@ -1,9 +1,7 @@
 <!-- top level ant file -->
 <project name="limewire" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
-    <property name="limewire.home" location="${basedir}"/>    
-    
-    <property name="excludes" value="private-components/mock-core/*"/>
+    <property name="limewire.home" location="${basedir}"/>
     
     <import file="components/common/generic-multi-build.xml"/>
     

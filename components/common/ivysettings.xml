@@ -9,13 +9,11 @@
 	<!-- use the resolver named 'default' to lookup our dependencies. -->
 	<settings defaultResolver="default"/>
 		
-    <!-- what is this?  where is it? it seems to be required to use the 'shared' resolver. -->
-	<include file="${ivy.default.settings.dir}/ivysettings-shared.xml"/>
-		
 	<resolvers>
 	    <!-- the cvs lib dir -->
 	    <filesystem name="cvslib">
-	        <artifact pattern="${limewire.lib.jars}/[artifact]"/>
+	        <artifact pattern="${limewire.lib.jars}/[artifact]-[revision].[ext]"/>
+	        <artifact pattern="${limewire.lib.jars}/[artifact].[ext]"/>
 	    </filesystem>
 	
 	    <!-- where we'll store locally published files, used for publishing & retrieving. -->
@@ -24,30 +22,9 @@
 			<artifact pattern="${ivy.local.default.root}/${ivy.local.default.artifact.pattern}" />
 		</filesystem>
 	
-	    <!-- the limewire repository.  TODO: why dual=true? -->
-        <chain name="limewire-repository" dual="true">
-            <ibiblio name="limewire-repository" root="http://www.limewire.org/repository" m2compatible="true"/>
-        </chain>
-		
-		<!-- the public repository, out there in the world. -->
-        <chain name="public">
-			<ibiblio name="ibiblio" m2compatible="true"/> 
-            <!--ibiblio name="people.apache" root="http://people.apache.org/repo/m2-snapshot-repository" m2compatible="true"/-->
-            <ibiblio name="java-dev" root="http://download.java.net/maven/2" m2compatible="true"/>
-            <ibiblio name="laughingpanda" root="http://www.laughingpanda.org/maven2/" m2compatible="true"/>
-		</chain>
-
-        <!-- the main external repository listing. -->
-		<chain name="main">
-			<resolver ref="shared"/>
-			<resolver ref="public"/>
-            <resolver ref="limewire-repository"/>
-		</chain>        
-	
 	    <!-- declaration of the default chain.  first we lookup in the local cache, then everywhere else. -->
 		<chain name="default" returnFirst="true" checkmodified="true">
 			<resolver ref="local"/>
-			<resolver ref="main"/>
 			<resolver ref="cvslib"/>
 		</chain>
 	</resolvers>	

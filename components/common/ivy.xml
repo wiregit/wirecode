@@ -7,10 +7,11 @@
         <artifact name="common" conf="master"/>
     </publications>
     <dependencies>
-        <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
-        <dependency org="com.ibm.icu" name="icu4j" rev="3.4.4" conf="compile,runtime"/>
-        <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
-        <dependency org="aopalliance" name="aopalliance" rev="1.0" conf="runtime"/>
+        <dependency org="none" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
+        <dependency org="none" name="icu4j" rev="${icu4j.version}" conf="compile,runtime"/>
+        <dependency org="none" name="guice" rev="${guice.version}" conf="compile,runtime"/>
+        <dependency org="none" name="aopalliance" rev="${aopalliance.version}" conf="runtime"/>
+        
         <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
     </dependencies>
 </ivy-module>

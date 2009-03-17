@@ -20,17 +20,20 @@
         <dependency org="org.limewire" name="mojito-ui" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="setting" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.apache.httpcomponents" name="httpcore" rev="${httpcore.version}" conf="compile,runtime"/>
-        <dependency org="org.apache.httpcomponents" name="httpclient" rev="${httpclient.version}" conf="compile,runtime"/>
-        <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
-        <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
-        <dependency org="mrjadapter" name="mrjadapter" rev="${mrjadapter.version}" conf="compile,runtime"/>
-        <dependency org="org.jdesktop" name="appframework" rev="${appframework.version}" conf="compile,runtime"/>
-        <dependency org="org.swinglabs" name="swingx" rev="${swingx.version}" conf="compile,runtime"/>
-        <dependency org="org.bushe.swing.event" name="EventBus" rev="${EventBus.version}" conf="compile,runtime"/>
-        <dependency org="mozilla" name="mozswing-interfaces" rev="${mozswing-interfaces.version}" conf="compile,runtime"/>
-        <dependency org="org.mozilla" name="mozswing" rev="${mozswing.version}" conf="compile,runtime"/>
+        
+        <dependency org="none" name="httpcore" rev="${httpcore.version}" conf="compile,runtime"/>
+        <dependency org="none" name="httpclient" rev="${httpclient.version}" conf="compile,runtime"/>
+        <dependency org="none" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
+        <dependency org="none" name="guice" rev="${guice.version}" conf="compile,runtime"/>
+        <dependency org="none" name="osx/MRJAdapter" rev="${MRJAdapter.version}" conf="compile,runtime"/>
+        <dependency org="none" name="AppFramework" rev="${AppFramework.version}" conf="compile,runtime"/>
+        <dependency org="none" name="swingx" rev="${swingx.version}" conf="compile,runtime"/>
+        <dependency org="none" name="EventBus" rev="${EventBus.version}" conf="compile,runtime"/>
+        <dependency org="none" name="MozillaInterfaces" rev="${MozillaInterfaces.version}" conf="compile,runtime"/>
+        <dependency org="none" name="mozswing" rev="${mozswing.version}" conf="compile,runtime"/>
+        
         <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
-        <dependency org="org.limewire" name="lw-inspection-tool" rev="1.1" conf="test"/>
+        
+        <dependency org="none" name="tests/inspTool" rev="" conf="test"/>
     </dependencies>
 </ivy-module>

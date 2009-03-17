@@ -7,6 +7,10 @@
         <artifact name="swingui" conf="master"/>
     </publications>
     <dependencies>
+        <!-- osx specific dependency.  TODO: figure out how to make runtime OSX specific -->
+        <dependency org="none" name="osx/MRJAdapter" rev="${MRJAdapter.version}" conf="compile"/>
+
+        <!-- compile & runtime dependencies. -->
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime"/> 
@@ -17,27 +21,30 @@
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="xmpp-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="player-api" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="com.google.code.guice" name="assistedinject" rev="${assistedinject.version}" conf="compile,runtime"/>
-        <dependency org="org.swinglabs" name="swingx" rev="${swingx.version}" conf="compile,runtime"/>
-        <dependency org="org.jdesktop" name="appframework" rev="${appframework.version}" conf="compile,runtime"/>
-        <dependency org="org.bushe.swing.event" name="EventBus" rev="${EventBus.version}" conf="compile,runtime"/>
         <dependency org="org.limewire" name="mock-core" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.mozilla" name="mozswing" rev="${mozswing.version}" conf="compile,runtime"/>
-        <dependency org="mozilla" name="mozdom4java" rev="mozswing1.9-06242008" conf="compile,runtime"/>
-        <dependency org="mozilla" name="mozswing-interfaces" rev="${mozswing-interfaces.version}" conf="compile,runtime"/>
-        <dependency org="mozilla" name="mozilla-glue" rev="${mozilla-glue.version}" conf="compile,runtime"/>
-        <dependency org="mozilla" name="jna" rev="mozswing1.9-06242008" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="jdic" rev="20061102-lw-1" conf="compile,runtime"/>
-        <!--dependency org="org.xnap.commons" name="xnap-commons" rev="0.9.1" conf="compile,runtime"/-->
-        <dependency org="xnap-commons" name="gettext-commons" rev="0.9.6" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="miglayout" rev="1.0" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="jxlayer" rev="3.0" conf="compile,runtime"/>
-        <dependency org="mrjadapter" name="mrjadapter" rev="${mrjadapter.version}" conf="compile,runtime"/>
-        <dependency org="log4j" name="log4j" rev="${log4j.version}" conf="compile,runtime"/>
-        <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
-        <dependency org="com.google.code.guice" name="guice" rev="${guice.version}" conf="compile,runtime"/>
-        <dependency org="net.java.dev.glazedlists" name="glazedlists_java15" rev="${glazedlists_java15.version}" conf="compile,runtime"/>
+
+        <dependency org="none" name="guice-assistedinject" rev="${guice-assistedinject.version}" conf="compile,runtime"/>
+        <dependency org="none" name="swingx" rev="${swingx.version}" conf="compile,runtime"/>
+        <dependency org="none" name="AppFramework" rev="${appframework.version}" conf="compile,runtime"/>
+        <dependency org="none" name="EventBus" rev="${EventBus.version}" conf="compile,runtime"/>
+        <dependency org="none" name="mozswing" rev="${mozswing.version}" conf="compile,runtime"/>
+        <dependency org="none" name="mozdom4java" rev="${mozdom4java.version}" conf="compile,runtime"/>
+        <dependency org="none" name="MozillaInterfaces" rev="${MozillaInterfaces.version}" conf="compile,runtime"/>
+        <dependency org="none" name="MozillaGlue" rev="${MozillaGlue.version}" conf="compile,runtime"/>
+        <dependency org="none" name="jna" rev="{jna.version}" conf="compile,runtime"/>
+        <dependency org="none" name="jdic" rev="{jdic.version}" conf="compile,runtime"/>
+        <dependency org="none" name="gettext-commons" rev="{gettext-commons.version}" conf="compile,runtime"/>
+        <dependency org="none" name="miglayout" rev="{miglayout.version}" conf="compile,runtime"/>
+        <dependency org="none" name="jxlayer" rev="{jxlayer.version}" conf="compile,runtime"/>
+        <dependency org="none" name="log4j" rev="${log4j.version}" conf="compile,runtime"/>
+        <dependency org="none" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
+        <dependency org="none" name="guice" rev="${guice.version}" conf="compile,runtime"/>
+        <dependency org="none" name="glazedlists" rev="${glazedlists.version}" conf="compile,runtime"/>
+                
+        <!-- runtime dependencies. -->
+        <dependency org="none" name="messages" rev="" conf="runtime"/>
+        
+        <!-- test dependencies. -->
         <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
-        <dependency name="messages.jar" rev="na" conf="runtime"/>
     </dependencies>
 </ivy-module>
