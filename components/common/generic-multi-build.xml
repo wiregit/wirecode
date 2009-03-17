@@ -37,7 +37,7 @@
 	<!-- publishes all dependencies. -->
 	<target name="publish" depends="publish-dependencies"/>
 	
-	<target name="clean" depends="initialize">
+	<target name="clean" depends="initialize, clean-aggregate-reports">
 	    <do.multi-ant target="clean"/>
 	</target>
     
@@ -69,8 +69,7 @@
         <do.multi-ant target="tests2html"/>
 	</target>		
 	
-	<target name="aggregate.tests2html" depends="initialize">
-	    <delete dir="${junit.aggregateHome}"/>
+	<target name="aggregate.tests2html" depends="initialize, clean-aggregate-junit">
 	    <mkdir  dir="${junit.aggregateHome}"/>
 	    <mkdir  dir="${junit.aggregateXml}"/>
 	    <mkdir  dir="${junit.aggregateHtml}"/>
@@ -102,10 +101,9 @@
         <do.multi-ant target="clover2html"/>
 	</target>	
 	
-    <target name="aggregate.clover2html" depends="initialize, clover-guard">
+    <target name="aggregate.clover2html" depends="initialize, clean-aggregate-clover, clover-guard">
 	    <taskdef resource="cloverlib.xml"/>
 	    <!-- delete existing merged db, then merge all the clover dbs together -->
-	    <delete dir="${clover.aggregateHome}"/>
 	    <mkdir dir="${clover.aggregateHome}"/>
 	    <clover-merge initstring="${clover.aggregateDb}">
 	        <cloverDbSet dir="${basedir}" excludes="${excludes}" includes="**/clover/clover.db"/>
@@ -127,6 +125,16 @@
         </clover-report>	            
 	</target>
 	
+	<target name="clean-aggregate-junit">	
+	    <delete dir="${junit.aggregateHome}"/>
+	</target>
+	
+	<target name="clean-aggregate-clover">
+	    <delete dir="${clover.aggregateHome}"/>
+    </target>
+    
+    <target name="clean-aggregate-reports" depends="clean-aggregate-junit, clean-aggregate-clover"/>
+    
 	<!-- executes a subant possibly with clover. -->
 	<macrodef name="do.multi-ant">
 	    <attribute name="target"/>

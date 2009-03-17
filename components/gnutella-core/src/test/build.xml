@@ -28,6 +28,10 @@
         <path id="tests.limewire.core-tests.classpath"> <!-- test run classpath -->
             <pathelement location="${cloverjar}"/>        
     		<pathelement location="${build.limewire.core-tests.tests}"/>
+    		 <!-- NOTE: src is in the classpath because there's no proper 'resources' dir.
+    		      if this were a proper component, we'd have src/tests/resources and all 
+    		      non java files would go there. -->
+    		<pathelement location="${limewire.core-tests.src}"/>
     		<path refid="build.limewire.core-tests.tests.classpath"/>
         </path>
         
