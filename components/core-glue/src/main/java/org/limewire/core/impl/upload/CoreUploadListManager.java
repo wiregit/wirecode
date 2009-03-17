@@ -180,7 +180,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (item.getState() == UploadState.CANCELED) {
-                uploadItems.remove(item);
+                remove(item);
             }
         }
     }
