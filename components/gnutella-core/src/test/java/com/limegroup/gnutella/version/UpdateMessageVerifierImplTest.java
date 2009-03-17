@@ -3,6 +3,7 @@ package com.limegroup.gnutella.version;
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -27,7 +28,7 @@ public class UpdateMessageVerifierImplTest extends BaseTestCase {
     public void testMessageVerifies() {
         Injector injector = LimeTestUtils.createInjector();
         UpdateMessageVerifier updateMessageVerifier = injector.getInstance(UpdateMessageVerifier.class);
-        String data = updateMessageVerifier.getVerifiedData(SIGNED_ASDF.getBytes());
+        String data = updateMessageVerifier.getVerifiedData(StringUtils.toUTF8Bytes(SIGNED_ASDF));
         assertEquals("asdf\n", data);
     }
 

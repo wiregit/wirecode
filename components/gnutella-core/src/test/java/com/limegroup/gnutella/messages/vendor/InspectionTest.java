@@ -27,8 +27,9 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
-import org.limewire.util.ReadBufferChannel;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.ReadBufferChannel;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -178,7 +179,7 @@ public class InspectionTest extends ServerSideTestCase {
                 request.getRequestedFields()[2]);
         Map response = tryMessage(request);
         assertEquals(1, response.size());
-        assertEquals("a",new String((byte[])response.get("0")));
+        assertEquals("a", StringUtils.getASCIIString((byte[])response.get("0")));
         
         request = new InspectionRequestImpl(new GUID(), new Signer(), true, false, -1, 2, null, null, 
                 "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue",
@@ -215,7 +216,7 @@ public class InspectionTest extends ServerSideTestCase {
                     public GGEP getSecureGGEP(GGEP original) {
                         GGEP ret = new GGEP(true);
                         ret.put(GGEPKeys.GGEP_HEADER_SECURE_BLOCK);
-                        ret.put(GGEPKeys.GGEP_HEADER_SIGNATURE," adsf adsf asdf ".getBytes());
+                        ret.put(GGEPKeys.GGEP_HEADER_SIGNATURE, StringUtils.toAsciiBytes(" adsf adsf asdf "));
                         return ret;
                     }
                 }, "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue");
@@ -332,8 +333,7 @@ public class InspectionTest extends ServerSideTestCase {
         in.finished();
         byte [] inflated = new byte[60000];
         int numInflated = in.inflate(inflated);
-        String s = new String(inflated,0, numInflated);
-        return (Map)Token.parse(new ReadBufferChannel(s.getBytes()));
+        return (Map)Token.parse(new ReadBufferChannel(inflated, 0, numInflated));
     }
 }
 @SuppressWarnings("unchecked")

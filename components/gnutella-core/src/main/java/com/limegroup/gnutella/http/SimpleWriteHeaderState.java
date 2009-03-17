@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.http.Header;
 import org.limewire.statistic.Statistic;
+import org.limewire.util.StringUtils;
 
 
 public class SimpleWriteHeaderState extends WriteHeadersIOState {
@@ -28,7 +29,7 @@ public class SimpleWriteHeaderState extends WriteHeadersIOState {
         for(Header header : headers)
             sb.append(HTTPUtils.createHeader(header.getName(), header.getValue()));
         sb.append("\r\n");
-        return ByteBuffer.wrap(sb.toString().getBytes()); // TODO: conversion?
+        return ByteBuffer.wrap(StringUtils.toAsciiBytes(sb.toString()));
     }
 
     @Override

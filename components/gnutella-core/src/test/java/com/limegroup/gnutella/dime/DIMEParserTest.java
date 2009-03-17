@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.limewire.util.StringUtils;
+
 import junit.framework.Test;
 
 
@@ -67,7 +69,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // test we can read a single message.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sab"));
         one.setFirstRecord(true);
         one.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
@@ -75,7 +77,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         Object next = parser.next();
         assertInstanceof(DIMERecord.class, next);
         readOne = (DIMERecord)next;
-        assertEquals("sab".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("sab"), readOne.getData());
         try {
             parser.next();
             fail("expected exception");
@@ -86,11 +88,11 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // test that once we get a message with ME we stop.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sam".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sam"));
         one.setFirstRecord(true);
         one.setLastRecord(true);
         two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "bad".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("bad"));
         one.write(out);
         two.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
@@ -98,7 +100,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         next = parser.next();
         assertInstanceof(DIMERecord.class, next);
         readOne = (DIMERecord)next;
-        assertEquals("sam".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("sam"), readOne.getData());
         try {
             parser.next();
             fail("expected exception");
@@ -109,10 +111,10 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // test multiple 'first' messages fail.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sab"));
         one.setFirstRecord(true);
         two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "bas".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("bas"));
         two.setFirstRecord(true);
         one.write(out);
         two.write(out);
@@ -121,7 +123,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         next = parser.next();
         assertInstanceof(DIMERecord.class, next);
         readOne = (DIMERecord)next;
-        assertEquals("sab".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("sab"), readOne.getData());
         try {
             parser.next();
             fail("expected exception");
@@ -164,13 +166,13 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // test we can read a single message.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sab"));
         one.setFirstRecord(true);
         one.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
         parser = new DIMEParser(in);
         readOne = parser.nextRecord();
-        assertEquals("sab".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("sab"), readOne.getData());
         try {
             parser.nextRecord();
             fail("expected exception");
@@ -181,17 +183,17 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // test that once we get a message with ME we stop.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sam".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sam"));
         one.setFirstRecord(true);
         one.setLastRecord(true);
         two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "bad".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("bad"));
         one.write(out);
         two.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
         parser = new DIMEParser(in);
         readOne = parser.nextRecord();
-        assertEquals("sam".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("sam"), readOne.getData());
         try {
             parser.nextRecord();
             fail("expected exception");
@@ -202,17 +204,17 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // test multiple 'first' messages fail.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sab"));
         one.setFirstRecord(true);
         two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "bas".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("bas"));
         two.setFirstRecord(true);
         one.write(out);
         two.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
         parser = new DIMEParser(in);
         readOne = parser.nextRecord();
-        assertEquals("sab".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("sab"), readOne.getData());
         try {
             parser.nextRecord();
             fail("expected exception");
@@ -256,10 +258,10 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // test multiple 'first' messages fail.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sab"));
         one.setFirstRecord(true);
         two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "bas".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("bas"));
         two.setFirstRecord(true);
         one.write(out);
         two.write(out);
@@ -276,7 +278,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // test we can read a single message.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sab"));
         one.setFirstRecord(true);
         one.setLastRecord(true);
         one.write(out);
@@ -285,7 +287,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         readList = parser.getRecords();
         assertEquals(1, readList.size());
         readOne = (DIMERecord)readList.get(0);
-        assertEquals("sab".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("sab"), readOne.getData());
         // Make sure the next getRecords is empty.
         readList = parser.getRecords();
         assertEquals(0, readList.size());
@@ -294,11 +296,11 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // is read.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "bas".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("bas"));
         one.setFirstRecord(true);
         one.setLastRecord(true);
         two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sab"));
         one.write(out);
         two.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
@@ -306,7 +308,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         readList = parser.getRecords();
         assertEquals(1, readList.size());
         readOne = (DIMERecord)readList.get(0);
-        assertEquals("bas".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("bas"), readOne.getData());
         // Make sure the next getRecords is empty.
         readList = parser.getRecords();
         assertEquals(0, readList.size());
@@ -314,7 +316,7 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // test that a stream without an end fails.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("sab"));
         one.setFirstRecord(true);
         one.write(out);
         in = new ByteArrayInputStream(out.toByteArray());
@@ -337,12 +339,12 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         // write out a few messages.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "one".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("one"));
         one.setFirstRecord(true);
         two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "two".getBytes());
+							 null, null, null, StringUtils.toAsciiBytes("two"));
         three = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "three".getBytes());
+							   null, null, null, StringUtils.toAsciiBytes("three"));
         three.setLastRecord(true);
         one.write(out);
         two.write(out);
@@ -351,13 +353,13 @@ public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCa
         parser = new DIMEParser(in);
         assertTrue(parser.hasNext());
         readOne = parser.nextRecord();
-        assertEquals("one".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("one"), readOne.getData());
         assertTrue(parser.hasNext());
         readTwo = parser.nextRecord();
-        assertEquals("two".getBytes(), readTwo.getData());
+        assertEquals(StringUtils.toAsciiBytes("two"), readTwo.getData());
         assertTrue(parser.hasNext());
         readThree = parser.nextRecord();
-        assertEquals("three".getBytes(), readThree.getData());
+        assertEquals(StringUtils.toAsciiBytes("three"), readThree.getData());
         assertFalse(parser.hasNext());
         try {
             parser.nextRecord();

@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Properties;
 
+import junit.framework.Test;
+
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -14,8 +16,7 @@ import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ReadObserver;
 import org.limewire.nio.observer.WriteObserver;
-
-import junit.framework.Test;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.stubs.WriteBufferChannel;
@@ -37,9 +38,9 @@ public class AsyncOutgoingHandshakerTest extends LimeTestCase {
     
     public void testSimpleSuccess() throws Exception {
         ReadBufferChannel reader = new ReadBufferChannel(
-                ("GNUTELLA/0.6 200 OK DOKIE\r\n" +
+                StringUtils.toAsciiBytes("GNUTELLA/0.6 200 OK DOKIE\r\n" +
                  "ResponseHeader: ResponseValue\r\n" +
-                 "\r\n").getBytes());
+                 "\r\n"));
         WriteBufferChannel writer = new WriteBufferChannel(2048);
         MultiplexingSocket socket = new MultiplexingSocket(reader, writer);
         Properties outRequestProps = new Properties();
@@ -78,14 +79,14 @@ public class AsyncOutgoingHandshakerTest extends LimeTestCase {
         ByteBuffer buffer = writer.getBuffer();
         assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n" +
                      "GNUTELLA/0.6 200 OK!\r\nOutResponse: OutResponseValue\r\n\r\n",
-                     new String(buffer.array(), 0, buffer.limit()));
+                     StringUtils.getASCIIString(buffer.array(), 0, buffer.limit()));
     }
 
     public void testDiscoOnBadResponder() throws Exception {
         ReadBufferChannel reader = new ReadBufferChannel(
-                ("GNUTELLA/0.6 200 OK DOKIE\r\n" +
+                StringUtils.toAsciiBytes("GNUTELLA/0.6 200 OK DOKIE\r\n" +
                  "ResponseHeader: ResponseValue\r\n" +
-                 "\r\n").getBytes());
+                 "\r\n"));
         WriteBufferChannel writer = new WriteBufferChannel(2048);
         MultiplexingSocket socket = new MultiplexingSocket(reader, writer);
         Properties outRequestProps = new Properties();
@@ -125,14 +126,14 @@ public class AsyncOutgoingHandshakerTest extends LimeTestCase {
         ByteBuffer buffer = writer.getBuffer();
         assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n" +
                      "GNUTELLA/0.6 322 AARGH!\r\nOutResponse: OutResponseValue\r\n\r\n",
-                     new String(buffer.array(), 0, buffer.limit()));
+                     StringUtils.getASCIIString(buffer.array(), 0, buffer.limit()));
     }
     
     public void testDiscoOnBadResponseCode() throws Exception {
         ReadBufferChannel reader = new ReadBufferChannel(
-                ("GNUTELLA/0.6 544 SHUCKS\r\n" +
+                StringUtils.toAsciiBytes("GNUTELLA/0.6 544 SHUCKS\r\n" +
                  "ResponseHeader: ResponseValue\r\n" +
-                 "\r\n").getBytes());
+                 "\r\n"));
         WriteBufferChannel writer = new WriteBufferChannel(2048);
         MultiplexingSocket socket = new MultiplexingSocket(reader, writer);
         Properties outRequestProps = new Properties();
@@ -162,14 +163,14 @@ public class AsyncOutgoingHandshakerTest extends LimeTestCase {
         assertEquals("OutRequestValue", written.props().get("OutRequest"));
         ByteBuffer buffer = writer.getBuffer();
         assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n",
-                     new String(buffer.array(), 0, buffer.limit())); 
+                     StringUtils.getASCIIString(buffer.array(), 0, buffer.limit())); 
     }
 
     public void testDiscoOnBadResponseConnectLine() throws Exception {
         ReadBufferChannel reader = new ReadBufferChannel(
-                ("HTTP/1.1 345 GET OFF\r\n" +
+                StringUtils.toAsciiBytes("HTTP/1.1 345 GET OFF\r\n" +
                  "ResponseHeader: ResponseValue\r\n" +
-                 "\r\n").getBytes());
+                 "\r\n"));
         WriteBufferChannel writer = new WriteBufferChannel(2048);
         MultiplexingSocket socket = new MultiplexingSocket(reader, writer);
         Properties outRequestProps = new Properties();
@@ -197,7 +198,7 @@ public class AsyncOutgoingHandshakerTest extends LimeTestCase {
         assertEquals("OutRequestValue", written.props().get("OutRequest"));
         ByteBuffer buffer = writer.getBuffer();
         assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n",
-                     new String(buffer.array(), 0, buffer.limit()));   
+                     StringUtils.getASCIIString(buffer.array(), 0, buffer.limit()));   
     }
 
     private static class MultiplexingSocket extends Socket implements NIOMultiplexor {

@@ -53,6 +53,16 @@ public class ConnectionDispatcherTest extends LimeTestCase {
         assertEquals(3, dispatcher.getMaximumWordSize());
     }
     
+    public void testAddConnectionAcceptorThrowsAssertionErrorOnNonAsciiKeywords() {
+        assertTrue("this test needs assertions to be enabled: java -ea...", ConnectionDispatcherImpl.class.desiredAssertionStatus());
+        ConnectionDispatcher dispatcher = new ConnectionDispatcherImpl(new SimpleNetworkInstanceUtils());
+        try {
+            dispatcher.addConnectionAcceptor(null, false, "\u30d5");
+            fail("expected assertion error");
+        } catch (AssertionError ae) {
+        }
+    }
+    
     // TODO: write tests for dispatching
     
     private static class StubAcceptor implements ConnectionAcceptor {

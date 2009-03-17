@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 
@@ -116,11 +117,11 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         
         DIMERecord record = reader.getRecord();
         assertEquals(DIMERecord.TYPE_MEDIA_TYPE, record.getTypeId());
-        assertEquals("sammy".getBytes(), record.getOptions());
+        assertEquals(StringUtils.toUTF8Bytes("sammy"), record.getOptions());
         assertEquals("berlin", record.getIdentifier());
-        assertEquals("berlin".getBytes(), record.getId());
+        assertEquals(StringUtils.toUTF8Bytes("berlin"), record.getId());
         assertEquals("hackers", record.getTypeString());
-        assertEquals("limewire".getBytes(), record.getData());
+        assertEquals(StringUtils.toUTF8Bytes("limewire"), record.getData());
         assertEquals(44, record.getRecordLength());
     }
     
@@ -175,11 +176,11 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         
         DIMERecord record = reader.getRecord();
         assertEquals(DIMERecord.TYPE_MEDIA_TYPE, record.getTypeId());
-        assertEquals("sammy".getBytes(), record.getOptions());
+        assertEquals(StringUtils.toUTF8Bytes("sammy"), record.getOptions());
         assertEquals("berlin", record.getIdentifier());
-        assertEquals("berlin".getBytes(), record.getId());
+        assertEquals(StringUtils.toUTF8Bytes("berlin"), record.getId());
         assertEquals("hackers", record.getTypeString());
-        assertEquals("limewire".getBytes(), record.getData());
+        assertEquals(StringUtils.toUTF8Bytes("limewire"), record.getData());
         assertEquals(44, record.getRecordLength());
     }
     

@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.Properties;
 
+import org.limewire.util.StringUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -30,9 +32,9 @@ public class BlockingOutgoingHandshakerTest extends LimeTestCase {
     public void testSimpleSuccess() throws Exception {
         Socket socket = new AddressedSocket();
         InputStream in = new ByteArrayInputStream(
-                ("GNUTELLA/0.6 200 OK DOKIE\r\n" +
+                StringUtils.toAsciiBytes("GNUTELLA/0.6 200 OK DOKIE\r\n" +
                 "ResponseHeader: ResponseValue\r\n" +
-                "\r\n").getBytes());
+                "\r\n"));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Properties outRequestProps = new Properties();
         outRequestProps.put("OutRequest", "OutRequestValue");
@@ -60,15 +62,15 @@ public class BlockingOutgoingHandshakerTest extends LimeTestCase {
         assertEquals("OutRequestValue", written.props().get("OutRequest"));
         assertEquals("OutResponseValue", written.props().get("OutResponse"));
         assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n" +
-                     "GNUTELLA/0.6 200 OK!\r\nOutResponse: OutResponseValue\r\n\r\n", new String(out.toByteArray()));
+                     "GNUTELLA/0.6 200 OK!\r\nOutResponse: OutResponseValue\r\n\r\n", StringUtils.getASCIIString(out.toByteArray()));
     }
     
     public void testDiscoOnBadResponder() throws Exception {
         Socket socket = new AddressedSocket();
         InputStream in = new ByteArrayInputStream(
-                ("GNUTELLA/0.6 200 OK DOKIE\r\n" +
+                StringUtils.toAsciiBytes("GNUTELLA/0.6 200 OK DOKIE\r\n" +
                 "ResponseHeader: ResponseValue\r\n" +
-                "\r\n").getBytes());
+                "\r\n"));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Properties outRequestProps = new Properties();
         outRequestProps.put("OutRequest", "OutRequestValue");
@@ -101,15 +103,15 @@ public class BlockingOutgoingHandshakerTest extends LimeTestCase {
         assertEquals("OutRequestValue", written.props().get("OutRequest"));
         assertEquals("OutResponseValue", written.props().get("OutResponse"));
         assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n" +
-                     "GNUTELLA/0.6 322 AARGH!\r\nOutResponse: OutResponseValue\r\n\r\n", new String(out.toByteArray()));
+                     "GNUTELLA/0.6 322 AARGH!\r\nOutResponse: OutResponseValue\r\n\r\n", StringUtils.getASCIIString(out.toByteArray()));
     }
     
     public void testDiscoOnBadResponseCode() throws Exception {
         Socket socket = new AddressedSocket();
         InputStream in = new ByteArrayInputStream(
-                ("GNUTELLA/0.6 544 SHUCKS\r\n" +
+                StringUtils.toAsciiBytes("GNUTELLA/0.6 544 SHUCKS\r\n" +
                 "ResponseHeader: ResponseValue\r\n" +
-                "\r\n").getBytes());
+                "\r\n"));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Properties outRequestProps = new Properties();
         outRequestProps.put("OutRequest", "OutRequestValue");
@@ -132,15 +134,15 @@ public class BlockingOutgoingHandshakerTest extends LimeTestCase {
         HandshakeResponse written = shaker.getWrittenHeaders();
         assertEquals(1, written.props().size());
         assertEquals("OutRequestValue", written.props().get("OutRequest"));
-        assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n", new String(out.toByteArray())); 
+        assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n", StringUtils.getASCIIString(out.toByteArray())); 
     }
     
     public void testDiscoOnBadResponseConnectLine() throws Exception {
         Socket socket = new AddressedSocket();
         InputStream in = new ByteArrayInputStream(
-                ("HTTP/1.1 345 GET OFF\r\n" +
+                StringUtils.toAsciiBytes("HTTP/1.1 345 GET OFF\r\n" +
                 "ResponseHeader: ResponseValue\r\n" +
-                "\r\n").getBytes());
+                "\r\n"));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Properties outRequestProps = new Properties();
         outRequestProps.put("OutRequest", "OutRequestValue");
@@ -162,7 +164,7 @@ public class BlockingOutgoingHandshakerTest extends LimeTestCase {
         HandshakeResponse written = shaker.getWrittenHeaders();
         assertEquals(1, written.props().size());
         assertEquals("OutRequestValue", written.props().get("OutRequest"));
-        assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n", new String(out.toByteArray()));  
+        assertEquals("GNUTELLA CONNECT/0.6\r\nOutRequest: OutRequestValue\r\n\r\n", StringUtils.getASCIIString(out.toByteArray()));  
     }
         
     private static class AddressedSocket extends Socket {

@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.CountingInputStream;
 import org.limewire.io.IOUtils;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 
 /**
@@ -266,7 +267,8 @@ public class ASFParser {
             throw new IOException("ASF file is corrupt.  Type size < 0: "+typeSize);
         byte[] b = new byte[typeSize];
         ds.readFully(b);
-        _drmType = new String(b).trim();
+        // protection type is encoded as ascii
+        _drmType = StringUtils.getASCIIString(b).trim();
         
         skipSize = ByteUtils.uint2long(ByteUtils.leb2int(ds)); // data
         IOUtils.ensureSkip(ds, skipSize);

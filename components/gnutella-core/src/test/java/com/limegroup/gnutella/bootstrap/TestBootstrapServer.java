@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.nio.ssl.SSLUtils;
+import org.limewire.util.StringUtils;
 
 
 /**
@@ -160,8 +161,8 @@ public class TestBootstrapServer {
                     }
                     LOG.debug("finished reading request.");
                     _numRequests++;
-                    out.write((_response + "\r\n\r\n").getBytes());
-                    out.write(_responseData.getBytes());
+                    out.write(StringUtils.toAsciiBytes(_response + "\r\n\r\n"));
+                    out.write(StringUtils.toAsciiBytes(_responseData));
                     out.flush();
                     if(!_allowConnectionReuse)
                         break;

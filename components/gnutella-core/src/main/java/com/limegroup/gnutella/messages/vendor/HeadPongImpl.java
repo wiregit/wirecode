@@ -23,6 +23,7 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Decorator;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
@@ -367,7 +368,7 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
      */
     public String getVendor() {
         if(_vendorId != null)
-            return new String(_vendorId);
+            return StringUtils.getASCIIString(_vendorId);
         else
             return null;
     }

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 
 import junit.framework.Test;
@@ -66,7 +68,7 @@ public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.LimeT
         // test we can read a single message.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+                                null, null, null, StringUtils.toUTF8Bytes("sab"));
         one.setFirstRecord(true);
         one.write(out);
         
@@ -80,18 +82,18 @@ public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.LimeT
         assertEquals(1, list.size());
         assertEquals(one.getRecordLength(), parser.getAmountProcessed());
         readOne = (DIMERecord)list.get(0);
-        assertEquals("sab".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toUTF8Bytes("sab"), readOne.getData());
     }
     
     public void testSingleMessageBeginAndEnd() throws Exception {
         // test that once we get a message with ME we stop.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sam".getBytes());
+                                null, null, null, StringUtils.toUTF8Bytes("sam"));
         one.setFirstRecord(true);
         one.setLastRecord(true);
         two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "bad".getBytes());
+                                null, null, null, StringUtils.toUTF8Bytes("bad"));
         one.write(out);
         two.write(out);
 
@@ -106,17 +108,17 @@ public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.LimeT
         assertEquals(one.getRecordLength(), parser.getAmountProcessed());
         assertEquals(two.getRecordLength(), buffer.remaining());
         readOne = (DIMERecord)list.get(0);
-        assertEquals("sam".getBytes(), readOne.getData());
+        assertEquals(StringUtils.toUTF8Bytes("sam"), readOne.getData());
     }
     
     public void testMultipleFirstMessages() throws Exception {
         // test multiple 'first' messages fail.
         out = new ByteArrayOutputStream();
         one = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "sab".getBytes());
+                                null, null, null, StringUtils.toUTF8Bytes("sab"));
         one.setFirstRecord(true);
         two = new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                                null, null, null, "bas".getBytes());
+                                null, null, null, StringUtils.toUTF8Bytes("bas"));
         two.setFirstRecord(true);
         one.write(out);
         two.write(out);

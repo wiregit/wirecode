@@ -8,6 +8,7 @@ import java.util.Arrays;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.util.Base32;
+import org.limewire.util.StringUtils;
 
 
 /**
@@ -154,7 +155,7 @@ public class TorrentLocation extends ConnectableImpl {
 
 	@Override
     public String toString() {
-		return getAddress() + ":" + getPort() + ":" + new String(PEER_ID) + ":"
+		return getAddress() + ":" + getPort() + ":" + StringUtils.getASCIIString(PEER_ID) + ":"
 				+ Base32.encode(EXTENSION_BYTES);
 	}
 }

@@ -12,6 +12,7 @@ import org.limewire.io.IOUtils.ErrorType;
 import org.limewire.service.MessageCallback;
 import org.limewire.service.MessageService;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.StringUtils;
 
 
 public final class IOUtilsTest extends BaseTestCase {
@@ -75,13 +76,24 @@ public final class IOUtilsTest extends BaseTestCase {
 	public void testIOUtilsReadWord() throws Exception {
 		String firstWord = "GET";
 		String test0 = firstWord+" /get/0/file.txt";
-		InputStream stream0 = new ByteArrayInputStream(test0.getBytes());
+		InputStream stream0 = new ByteArrayInputStream(StringUtils.toAsciiBytes(test0));
 		String result = IOUtils.readWord(stream0, 3);
 		assertEquals("result should equal first word", result, firstWord);
 
 
-		InputStream stream1 = new ByteArrayInputStream(test0.getBytes());
+		InputStream stream1 = new ByteArrayInputStream(StringUtils.toAsciiBytes(test0));
 		result = IOUtils.readWord(stream1, 4);
 		assertEquals("result should equal first word", result, firstWord);
+	}
+	
+	/**
+	 * Ensures that readWord() doesn't handle multibyte words correctly. Test
+	 * is only there, to prove documentation to be correct. 
+	 */
+	public void testReadWordDoesNotHandleMultibyteWord() throws Exception {
+	    String multiByteWord = "\u30d5";
+	    assertGreaterThan(multiByteWord.length(), StringUtils.toUTF8Bytes(multiByteWord).length);
+	    String word = IOUtils.readWord(new ByteArrayInputStream(StringUtils.toUTF8Bytes(multiByteWord + " other stuff")), 100);
+	    assertNotEquals(multiByteWord, word);
 	}
 }

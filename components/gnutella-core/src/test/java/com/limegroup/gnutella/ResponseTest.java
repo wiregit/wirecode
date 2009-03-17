@@ -251,7 +251,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
-	    baos.write("this is a garbage extension".getBytes());
+	    baos.write(StringUtils.toAsciiBytes("this is a garbage extension"));
 	    
 	    // write out closing null.
 	    baos.write((byte)0);
@@ -263,7 +263,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
 	    assertEquals("wrong extension",
-	        "this is a garbage extension", new String(r.getExtBytes()));
+	        "this is a garbage extension", StringUtils.getASCIIString(r.getExtBytes()));
 	    assertEquals("leftover input", -1, in.read());        
 	}
 	
@@ -278,9 +278,9 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
-	    baos.write("this is a garbage extension".getBytes());
+	    baos.write(StringUtils.toAsciiBytes("this is a garbage extension"));
 	    baos.write((byte)0x1c);
-	    baos.write("this is another garbage extension".getBytes());
+	    baos.write(StringUtils.toAsciiBytes("this is another garbage extension"));
 	    
 	    // write out closing null.
 	    baos.write((byte)0);
@@ -293,7 +293,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    assertEquals("wrong name", "sam", r.getName());
 	    assertEquals("wrong extension",
 	        "this is a garbage extension\u001cthis is another garbage extension",
-	        new String(r.getExtBytes()));
+	        StringUtils.getASCIIString(r.getExtBytes()));
 	    assertEquals("leftover input", -1, in.read());        	    
     }
 
@@ -310,7 +310,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    baos.write(name);
 	    
 	    // add the sha1
-	    baos.write(sha1.getBytes());
+	    baos.write(StringUtils.toAsciiBytes(sha1));
 	    // write out closing null.
 	    baos.write((byte)0);
 	    
@@ -320,7 +320,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    assertEquals("wrong index", 257, r.getIndex());
 	    assertEquals("wrong size", 1029, r.getSize());
 	    assertEquals("wrong name", "sam", r.getName());
-	    assertEquals("wrong extension", sha1, new String(r.getExtBytes()));
+	    assertEquals("wrong extension", sha1, StringUtils.getASCIIString(r.getExtBytes()));
 	    assertEquals("leftover input", -1, in.read());
 	    
 	    Set urns = new HashSet();
@@ -342,11 +342,11 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    baos.write(name);
 	    
 	    // add the sha1
-	    baos.write("junkie junk".getBytes());
+	    baos.write(StringUtils.toAsciiBytes("junkie junk"));
 	    baos.write((byte)0x1c);
-	    baos.write(sha1.getBytes());
+	    baos.write(StringUtils.toAsciiBytes(sha1));
 	    baos.write((byte)0x1c);
-	    baos.write("jankie jank".getBytes());
+	    baos.write(StringUtils.toAsciiBytes("jankie jank"));
 	    // write out closing null.
 	    baos.write((byte)0);
 	    
@@ -358,7 +358,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    assertEquals("wrong name", "sam", r.getName());
         assertEquals("wrong extension",
 	        "junkie junk\u001c"+sha1+"\u001cjankie jank",
-	        new String(r.getExtBytes()));
+	        StringUtils.getASCIIString(r.getExtBytes()));
 	    assertEquals("leftover input", -1, in.read());
 	    
 	    Set urns = new HashSet();
@@ -378,7 +378,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
-	    baos.write("192 kbps 160".getBytes());
+	    baos.write(StringUtils.toAsciiBytes("192 kbps 160"));
 	    
 	    // write out closing null.
 	    baos.write((byte)0);
@@ -391,7 +391,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    assertEquals("wrong name", "sam", r.getName());
 	    assertEquals("wrong extension",
 	        "192 kbps 160",
-	        new String(r.getExtBytes()));
+	        StringUtils.getASCIIString(r.getExtBytes()));
 	    assertEquals("leftover input", -1, in.read());
 	    
 	    LimeXMLDocument doc = r.getDocument();
@@ -415,7 +415,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    byte[] name = new byte[] { 's', 'a', 'm', 'm', 'y', 0 };
 	    baos.write(name);
 	    
-	    baos.write("256kbps something 3528".getBytes());
+	    baos.write(StringUtils.toAsciiBytes("256kbps something 3528"));
 	    
 	    // write out closing null.
 	    baos.write((byte)0);
@@ -428,7 +428,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    assertEquals("wrong name", "sammy", r.getName());
 	    assertEquals("wrong extension",
 	        "256kbps something 3528",
-	        new String(r.getExtBytes()));
+	        StringUtils.getASCIIString(r.getExtBytes()));
 	    assertEquals("leftover input", -1, in.read());
 	    
 	    LimeXMLDocument doc = r.getDocument();
@@ -620,7 +620,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
-	    baos.write(sha1.getBytes());
+	    baos.write(StringUtils.toAsciiBytes(sha1));
 	    
 	    baos.write((byte)0x1c);
 	    
@@ -632,7 +632,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    baos.write((byte)0x1c);
 	    
-	    baos.write("192 kbps 160".getBytes());	    
+	    baos.write(StringUtils.toAsciiBytes("192 kbps 160"));	    
 	    
 	    // write out closing null.
 	    baos.write((byte)0);

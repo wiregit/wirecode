@@ -196,7 +196,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
                 
             if (request.hasLocaleInfo()){
                 //I'm assuming the language code is always 2 bytes, no?
-                System.arraycopy(c.getLocalePref().getBytes(),0,result,index,2);
+                System.arraycopy(StringUtils.toAsciiBytes(c.getLocalePref()),0,result,index,2);
                 index+=2;
             }
             
@@ -228,7 +228,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
                 byte [] length = new byte[2];
                 ByteUtils.short2leb((short)agents.length(),length,0);
                 zout.write(length);
-                zout.write(agents.toString().getBytes());
+                zout.write(StringUtils.toAsciiBytes(agents.toString()));
                 zout.flush();
                 zout.close();
             }catch(IOException huh) {

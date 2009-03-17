@@ -36,6 +36,7 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -537,7 +538,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         int amtRead = in.read(read);
         assertGreaterThan(0, amtRead);
 
-        String headers = new String(read, 0, amtRead);
+        String headers = StringUtils.getASCIIString(read, 0, amtRead);
         return parseHeaders(headers, "GET /uri-res/N2R?" + UrnHelper.URNS[0].httpStringValue()
                 + " HTTP/1.1");
     }
@@ -558,7 +559,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     private HTTPDownloader newHTTPDownloaderWithHeader(String s) throws Exception {
         s += "\r\n";
         SimpleReadHeaderState reader = new SimpleReadHeaderState(null, 100, 2048);
-        reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
+        reader.process(new ReadBufferChannel(StringUtils.toAsciiBytes(s)), ByteBuffer.allocate(1024));
         RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("127.0.0.1", 1, false), 1, "file", 1000, new byte[16], 1, 1, false,
                 null, UrnHelper.URN_SETS[0], false, "TEST", -1);
         HTTPDownloader d = httpDownloaderFactory.create(null, new RemoteFileDescContext(rfd), null, false);

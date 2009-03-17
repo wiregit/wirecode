@@ -36,6 +36,7 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.DebugRunnable;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -753,15 +754,15 @@ public class TestUploader {
                          "hot diggity doo\r\n" +
                          "Content-Length: " + tigerWriteHandler.getOutputLength() + "\r\n" + 
                          "\r\n";
-            out.write(str.getBytes());
+            out.write(StringUtils.toAsciiBytes(str));
             tigerWriteHandler.write(out);
         } else {
             String body = "You have failed miserably in your attempts.";
             String str = "HTTP/1.1 9000 Failed Miserably\r\n" +
                          "Content-Length: " + body.length() + "\r\n" +
                          "\r\n";
-            out.write(str.getBytes());
-            out.write(body.getBytes());
+            out.write(StringUtils.toAsciiBytes(str));
+            out.write(StringUtils.toAsciiBytes(body));
         }
     }
 
@@ -785,11 +786,11 @@ public class TestUploader {
             (busy || queue || partial==1 ?
             "503 Service Unavailable\r\n" :
             "200 OK \r\n");
-		out.write(str.getBytes());
+		out.write(StringUtils.toAsciiBytes(str));
 		
 		if(busy && retryAfter != -1) {
 		    str = "Retry-After: " + retryAfter + "\r\n";
-		    out.write(str.getBytes());
+		    out.write(StringUtils.toAsciiBytes(str));
 		}
 
         if(queue) {
@@ -798,9 +799,9 @@ public class TestUploader {
                 ", pollMin=" + MIN_POLL/1000 + 
                 ", pollMax=" + MAX_POLL/1000 +
                 "\r\n";
-            out.write(str.getBytes());
+            out.write(StringUtils.toAsciiBytes(str));
             str = "\r\n";
-            out.write(str.getBytes());
+            out.write(StringUtils.toAsciiBytes(str));
             out.flush();//don't close socket
             long t = System.currentTimeMillis();
             minPollTime = t+MIN_POLL;
@@ -819,19 +820,19 @@ public class TestUploader {
             default:
                 str="X-Available-Ranges: bytes 50000-150000\r\n";
             }
-            out.write(str.getBytes());
+            out.write(StringUtils.toAsciiBytes(str));
             out.flush();
             partial++;
             if(partial==2) {//was 1 until last statement
                 str="\r\n";
-                out.write(str.getBytes());
+                out.write(StringUtils.toAsciiBytes(str));
                 out.flush();
                 return;
             }
         }
         if(sendContentLength) {
 		    str = "Content-Length:"+ (stop - start) + "\r\n";
-		    out.write(str.getBytes());	   
+		    out.write(StringUtils.toAsciiBytes(str));
         }
         
 		if (start != 0 || (stop - start != TestFile.length())) {
@@ -839,7 +840,7 @@ public class TestUploader {
             //are EXCLUSIVE.  Hence the -1.
 			str = "Content-range: bytes " + start  +
 			"-" + (stop-1) + "/" + TestFile.length() + "\r\n"; 
-			out.write(str.getBytes());
+			out.write(StringUtils.toAsciiBytes(str));
 		}
 		if(storedGoodLocs != null && storedGoodLocs.hasAlternateLocations()) {
 
@@ -897,7 +898,7 @@ public class TestUploader {
         }
         
         str = "\r\n";
-		out.write(str.getBytes());
+		out.write(StringUtils.toAsciiBytes(str));
         out.flush();
         if (busy) {
             //turn busy off for the next time if necessary
@@ -1233,7 +1234,7 @@ public class TestUploader {
     									   name);
     	}
     	String header = TestUploader.createHeader(name, value.httpStringValue());
-    	os.write(header.getBytes());
+    	os.write(StringUtils.toAsciiBytes(header));
     }
 
     /**
@@ -1260,7 +1261,7 @@ public class TestUploader {
     									   name);
     	}
     	String header = TestUploader.createHeader(name, value);
-    	os.write(header.getBytes());
+    	os.write(StringUtils.toAsciiBytes(header));
     }
     
     // a factory to create alternate locations w/o sharing any state with the rest of the program.

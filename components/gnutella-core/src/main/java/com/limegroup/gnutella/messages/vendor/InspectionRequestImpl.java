@@ -7,6 +7,7 @@ import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -112,7 +113,7 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
             ret = b.toString();
         
         GGEP g = new GGEP();
-        g.putCompressed(INSPECTION_KEY, ret.getBytes());
+        g.putCompressed(INSPECTION_KEY, StringUtils.toUTF8Bytes(ret));
         if (timestamp)
             g.put(TIMESTAMP_KEY);
 

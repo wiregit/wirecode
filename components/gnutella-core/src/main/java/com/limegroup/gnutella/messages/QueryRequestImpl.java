@@ -828,33 +828,16 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     }
     
      /**
-     * @effects Writes given extension string to given stream, adding
-     * delimiter if necessary, reporting whether next call should add
-     * delimiter. ext may be null or zero-length, in which case this is noop
-     */
-    protected boolean writeGemExtension(OutputStream os, 
-                                        boolean addPrefixDelimiter, 
-                                        String ext) throws IOException {
-        if (ext != null)
-            return writeGemExtension(os, addPrefixDelimiter, ext.getBytes());
-        else
-            return writeGemExtension(os, addPrefixDelimiter, new byte[0]);
-    }
-    
-    /**
      * @effects Writes each extension string in exts to given stream,
      * adding delimiters as necessary. exts may be null or empty, in
      *  which case this is noop
      */
     protected boolean writeGemExtensions(OutputStream os, 
                                          boolean addPrefixDelimiter, 
-                                         Iterator<?> iter) throws IOException {
-        if (iter == null) {
-            return addPrefixDelimiter;
-        }
+                                         Iterator<URN> iter) throws IOException {
         while(iter.hasNext()) {
             addPrefixDelimiter = writeGemExtension(os, addPrefixDelimiter, 
-                                                   iter.next().toString());
+                    StringUtils.toAsciiBytes(iter.next().toString()));
         }
         return addPrefixDelimiter; // will be true is anything at all was written 
     }

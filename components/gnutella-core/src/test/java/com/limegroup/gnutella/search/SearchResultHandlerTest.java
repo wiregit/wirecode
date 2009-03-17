@@ -9,6 +9,7 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.NameValue;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -137,7 +138,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     private QueryReply newQueryReply(Response[] responses) throws Exception {
         QueryReply reply = 
                queryReplyFactory.createQueryReply(new byte[16], (byte)1, 6346,
-                new byte[] { (byte)1, (byte)1, (byte)1, (byte)1 }, 1, responses, new byte[16], LimeXMLDocumentHelper.getAggregateString(responses).getBytes(), false, false,
+                new byte[] { (byte)1, (byte)1, (byte)1, (byte)1 }, 1, responses, new byte[16], StringUtils.toUTF8Bytes(LimeXMLDocumentHelper.getAggregateString(responses)), false, false,
                 true, true, false, false, false, IpPort.EMPTY_SET, null);
         ForMeReplyHandler.addXMLToResponses(reply, limeXMLDocumentHelper);
         return reply;

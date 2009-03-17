@@ -18,6 +18,7 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -407,7 +408,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
      */
     private GGEP addLocale(GGEP ggep, String locale, int slots) {
         byte[] payload = new byte[3];
-        byte[] s = locale.getBytes();
+        byte[] s = StringUtils.toAsciiBytes(locale);
         payload[0] = s[0];
         payload[1] = s[1];
         payload[2] = (byte) slots;

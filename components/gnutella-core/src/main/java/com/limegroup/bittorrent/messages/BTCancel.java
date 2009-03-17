@@ -3,6 +3,8 @@ package com.limegroup.bittorrent.messages;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.limewire.util.StringUtils;
+
 import com.limegroup.bittorrent.BTInterval;
 
 /**
@@ -34,7 +36,7 @@ public class BTCancel extends BTMessage {
 		if (payload.remaining() != 12)
 			throw new BadBTMessageException(
 					"unexpected payload in cancel message: "
-							+ new String(payload.array()));
+							+ StringUtils.getASCIIString(payload.array()));
 
 		payload.order(ByteOrder.BIG_ENDIAN);
 

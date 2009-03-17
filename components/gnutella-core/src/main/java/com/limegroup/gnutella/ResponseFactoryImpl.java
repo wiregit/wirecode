@@ -29,6 +29,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.NameValue;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -360,7 +361,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
                     if (!urn.isSHA1() && MessageSettings.TTROOT_IN_GGEP.getValue()) 
                         continue;
                     
-                    baos.write(urn.toString().getBytes());
+                    baos.write(StringUtils.toAsciiBytes(urn.toString()));
                     // If there's another URN, add the separator.
                     if (iter.hasNext()) {
                         baos.write(EXT_SEPARATOR);

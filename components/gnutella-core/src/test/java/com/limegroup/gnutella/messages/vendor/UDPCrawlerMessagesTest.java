@@ -28,6 +28,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -460,7 +461,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
                 == UDPCrawlerPing.LOCALE_INFO);
  		
  		//see if any of the connections have the locale in them - they should
-        String lang = new String(payload, 9, 2);
+        String lang = StringUtils.getASCIIString(payload, 9, 2);
  		assertEquals(ApplicationSettings.LANGUAGE.getValue(),
                lang);
  	}
@@ -539,7 +540,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         byte []agents = new byte[len];
         dais.readFully(agents);
             
-        String agentsString = new String(agents);
+        String agentsString = StringUtils.getUTF8String(agents);
  		//we should have 3 agents reported.
  		StringTokenizer tok = new StringTokenizer(agentsString,
  				UDPCrawlerPong.AGENT_SEP);

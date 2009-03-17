@@ -13,6 +13,7 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -326,13 +327,13 @@ public class VendorMessageTest extends BaseTestCase {
     }
 
     public void testEquals() throws Exception {
-        VM vm1 = new VM("LIME".getBytes(), 1, 1, new byte[0]);
-        VM vm2 = new VM("LIME".getBytes(), 1, 1, new byte[0]);
-        VM vm3 = new VM("BEAR".getBytes(), 1, 1, new byte[0]);
-        VM vm4 = new VM("LIMB".getBytes(), 1, 1, new byte[0]);
-        VM vm5 = new VM("LIME".getBytes(), 2, 1, new byte[0]);
-        VM vm6 = new VM("LIME".getBytes(), 1, 2, new byte[0]);
-        VM vm7 = new VM("LIME".getBytes(), 1, 1, new byte[1]);
+        VM vm1 = new VM(StringUtils.toAsciiBytes("LIME"), 1, 1, new byte[0]);
+        VM vm2 = new VM(StringUtils.toAsciiBytes("LIME"), 1, 1, new byte[0]);
+        VM vm3 = new VM(StringUtils.toAsciiBytes("BEAR"), 1, 1, new byte[0]);
+        VM vm4 = new VM(StringUtils.toAsciiBytes("LIMB"), 1, 1, new byte[0]);
+        VM vm5 = new VM(StringUtils.toAsciiBytes("LIME"), 2, 1, new byte[0]);
+        VM vm6 = new VM(StringUtils.toAsciiBytes("LIME"), 1, 2, new byte[0]);
+        VM vm7 = new VM(StringUtils.toAsciiBytes("LIME"), 1, 1, new byte[1]);
         assertEquals(vm1,vm2);
         assertNotEquals(vm1,(vm3));
         assertNotEquals(vm1,(vm4));

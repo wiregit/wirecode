@@ -11,6 +11,7 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.ByteReader;
 import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
+import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.BlockingConnectionUtils;
@@ -100,17 +101,17 @@ public class TestConnection extends AssertComparisons {
         //write out the headers this code needs to change if the definition of
         //what's considered a good connection
         //Phase 1 of the handshake
-        os.write("GNUTELLA CONNECT/0.6\r\n".getBytes());
-        os.write("User-Agent: LimeWire/3.4.4\r\n".getBytes());
-        os.write("Listen-IP:127.0.0.1:6346\r\n".getBytes());
-        os.write("X-Query-Routing: 0.1\r\n".getBytes());
-        os.write("X-Max-TTL: 3\r\n".getBytes());
-        os.write("X-Dynamic-Querying: 0.1\r\n".getBytes());
-        os.write(("X-Version: @version@\r\n").getBytes());
-        os.write("X-Ultrapeer: False\r\n".getBytes());
-        os.write("X-Degree: 15\r\n".getBytes());
-        os.write("X-Ultrapeer-Query-Routing: 0.1\r\n".getBytes());
-        os.write("\r\n".getBytes());
+        os.write(StringUtils.toAsciiBytes("GNUTELLA CONNECT/0.6\r\n"));
+        os.write(StringUtils.toAsciiBytes("User-Agent: LimeWire/3.4.4\r\n"));
+        os.write(StringUtils.toAsciiBytes("Listen-IP:127.0.0.1:6346\r\n"));
+        os.write(StringUtils.toAsciiBytes("X-Query-Routing: 0.1\r\n"));
+        os.write(StringUtils.toAsciiBytes("X-Max-TTL: 3\r\n"));
+        os.write(StringUtils.toAsciiBytes("X-Dynamic-Querying: 0.1\r\n"));
+        os.write((StringUtils.toAsciiBytes("X-Version: @version@\r\n")));
+        os.write(StringUtils.toAsciiBytes("X-Ultrapeer: False\r\n"));
+        os.write(StringUtils.toAsciiBytes("X-Degree: 15\r\n"));
+        os.write(StringUtils.toAsciiBytes("X-Ultrapeer-Query-Routing: 0.1\r\n"));
+        os.write(StringUtils.toAsciiBytes("\r\n"));
         //Phase 2 of handshake -- read
         String line = null;
         while((line = reader.readLine()) != null && !line.equals("")) {
@@ -118,8 +119,8 @@ public class TestConnection extends AssertComparisons {
         }
 
         //Phase 3 of handshake -- write 200 OK
-        os.write("GNUTELLA/0.6 200 OK \r\n".getBytes());
-        os.write("\r\n".getBytes());
+        os.write(StringUtils.toAsciiBytes("GNUTELLA/0.6 200 OK \r\n"));
+        os.write(StringUtils.toAsciiBytes("\r\n"));
         //Handshake complete
         //Make sure initial SIMPP behavior is correct
         checkInitialSimppBehavior(is, os);

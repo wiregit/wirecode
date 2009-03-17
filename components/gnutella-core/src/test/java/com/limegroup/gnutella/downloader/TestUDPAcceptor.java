@@ -23,6 +23,7 @@ import org.limewire.io.GUID;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.DebugRunnable;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -135,7 +136,8 @@ class TestUDPAcceptor implements Runnable {
             OutputStream os = s.getOutputStream();
 
             String GIV = "GIV 0:" + _g.toHexString() + "/" + _fileName + "\n\n";
-            os.write(GIV.getBytes());
+            // push download manager can't handle anything but ascii bytes correctly
+            os.write(StringUtils.toAsciiBytes(GIV));
 
             os.flush();
 

@@ -16,6 +16,7 @@ import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.TLSManager;
 import org.limewire.util.NameValue;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -159,7 +160,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
         pr.write(outBuffer);
         byte [] outb = outBuffer.toByteArray();
-        String out = new String(outb,23,outb.length-23);
+        String out = StringUtils.getASCIIString(outb,23,outb.length-23);
         assertEquals("Wrong payload", "ABCDEFGHIJKLMNOP", out);
       
         //Test the new constructor for big pings read from the network

@@ -16,6 +16,7 @@ import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.util.ReadBufferChannel;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.StringUtils;
 
 import junit.framework.Test;
 
@@ -109,7 +110,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.inflate(uncompressed);
         Map<String,Object> o = (Map<String,Object>) Token.parse(new ReadBufferChannel(uncompressed));
         assertTrue(o.containsKey("-1"));
-        assertTrue(Arrays.equals("inspected".getBytes(),(byte[])o.get("0")));
+        assertTrue(Arrays.equals(StringUtils.toUTF8Bytes("inspected"),(byte[])o.get("0")));
     }
     
     @SuppressWarnings("unchecked")
@@ -129,7 +130,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         i.inflate(uncompressed);
         Map<String,Object> o = (Map<String,Object>) Token.parse(new ReadBufferChannel(uncompressed));
         assertTrue(o.containsKey("-1"));
-        assertTrue(Arrays.equals("inspected".getBytes(),(byte[])o.get("0")));
+        assertTrue(Arrays.equals(StringUtils.toUTF8Bytes("inspected"),(byte[])o.get("0")));
     }
     
     @SuppressWarnings("unchecked")

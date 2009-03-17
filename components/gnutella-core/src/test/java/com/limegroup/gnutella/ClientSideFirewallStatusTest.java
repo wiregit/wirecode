@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 
 import junit.framework.Test;
@@ -39,7 +41,7 @@ public class ClientSideFirewallStatusTest extends ClientSideTestCase {
         Socket s = new Socket();
         s.connect(me);
         OutputStream os = s.getOutputStream();
-        os.write("CONNECT \n\n".getBytes());
+        os.write(StringUtils.toAsciiBytes("CONNECT \n\n"));
         os.flush();
         os.close();
         Thread.sleep(50);

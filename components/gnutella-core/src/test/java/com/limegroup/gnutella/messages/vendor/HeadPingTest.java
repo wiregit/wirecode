@@ -2,6 +2,8 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayOutputStream;
 
+import org.limewire.util.StringUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -26,7 +28,7 @@ public class HeadPingTest extends LimeTestCase {
     public void testVersion1PingIsNotPongGGEPCapable() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(0);
-        out.write(UrnHelper.SHA1.httpStringValue().getBytes());
+        out.write(StringUtils.toAsciiBytes(UrnHelper.SHA1.httpStringValue()));
         
         HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, 1, out.toByteArray(), Network.UNKNOWN);
         assertFalse(ping.isPongGGEPCapable());
@@ -35,7 +37,7 @@ public class HeadPingTest extends LimeTestCase {
     public void testVersion2PingIsPongGGEPCapable() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(0);
-        out.write(UrnHelper.SHA1.httpStringValue().getBytes());
+        out.write(StringUtils.toAsciiBytes(UrnHelper.SHA1.httpStringValue()));
         
         HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, 2, out.toByteArray(), Network.UNKNOWN);
         assertTrue(ping.isPongGGEPCapable());
@@ -44,7 +46,7 @@ public class HeadPingTest extends LimeTestCase {
     public void testCurrentVersionPingIsPongGGEPCapable() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(0);
-        out.write(UrnHelper.SHA1.httpStringValue().getBytes());
+        out.write(StringUtils.toAsciiBytes(UrnHelper.SHA1.httpStringValue()));
         
         HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, HeadPing.VERSION, out.toByteArray(), Network.UNKNOWN);
         assertTrue(ping.isPongGGEPCapable());
@@ -53,7 +55,7 @@ public class HeadPingTest extends LimeTestCase {
     public void testVersionXPlus1PingIsStillPongGGEPCapable() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(0);
-        out.write(UrnHelper.SHA1.httpStringValue().getBytes());
+        out.write(StringUtils.toAsciiBytes(UrnHelper.SHA1.httpStringValue()));
         
         HeadPing ping = new HeadPing(new byte[16], (byte)0, (byte)0, HeadPing.VERSION+1, out.toByteArray(), Network.UNKNOWN);
         assertTrue(ping.isPongGGEPCapable());

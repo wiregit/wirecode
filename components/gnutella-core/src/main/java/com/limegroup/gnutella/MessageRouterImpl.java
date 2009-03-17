@@ -55,6 +55,7 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.util.Base32;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.Objects;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -1375,14 +1376,14 @@ public abstract class MessageRouterImpl implements MessageRouter {
                         sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 6000, ConnectType.TLS);
                         sock.setSoTimeout(6000);
                         OutputStream os = sock.getOutputStream();
-                        os.write("CONNECT BACK\r\n\r\n".getBytes());
+                        os.write(StringUtils.toAsciiBytes("CONNECT BACK\r\n\r\n"));
                         os.flush();
                     } catch (IOException noTls) {
                         IOUtils.close(sock);
                         sock = socketsManager.connect(new InetSocketAddress(addrToContact, portToContact), 12000, ConnectType.PLAIN);                        
                         sock.setSoTimeout(12000);
                         OutputStream os = sock.getOutputStream();
-                        os.write("CONNECT BACK\r\n\r\n".getBytes());
+                        os.write(StringUtils.toAsciiBytes("CONNECT BACK\r\n\r\n"));
                         os.flush();
                     }
                     if(LOG.isTraceEnabled())

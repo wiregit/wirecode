@@ -20,6 +20,7 @@ import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPSelectorProvider;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -195,7 +196,7 @@ public final class PushManager implements EventListener<ConnectBackRequestedEven
             socket.setSoTimeout(30 * 1000);
             
             String giv = "GIV 0:" + data.getGuid() + "/file\n\n";
-            this.buffer = ByteBuffer.wrap(giv.getBytes());
+            this.buffer = ByteBuffer.wrap(StringUtils.toAsciiBytes(giv));
         }
 
         public boolean handleWrite() throws IOException {

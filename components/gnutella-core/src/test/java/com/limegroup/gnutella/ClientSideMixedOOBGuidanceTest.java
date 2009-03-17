@@ -12,6 +12,7 @@ import junit.framework.Test;
 import org.limewire.io.GUID;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -115,7 +116,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
                 sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                      SERVER_PORT), 12);
                 os = sock.getOutputStream();
-                os.write("CONNECT BACK\n\n".getBytes());
+                os.write(StringUtils.toAsciiBytes("CONNECT BACK\n\n"));
                 os.flush();
             } catch (Throwable t) {
                 ErrorService.error(t);

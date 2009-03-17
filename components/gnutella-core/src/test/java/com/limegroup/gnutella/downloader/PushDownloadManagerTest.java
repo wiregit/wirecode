@@ -21,6 +21,7 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.BlockingConnectObserver;
 import org.limewire.net.address.FirewalledAddress;
+import org.limewire.util.StringUtils;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
@@ -230,7 +231,7 @@ public class PushDownloadManagerTest extends LimeTestCase {
             socket = new Socket("localhost", port);
             socket.setSoTimeout(30 * 1000);
             OutputStream out = socket.getOutputStream();
-            out.write(("GIV 0:" + guid + "/file\n\n").getBytes());
+            out.write(StringUtils.toAsciiBytes("GIV 0:" + guid + "/file\n\n"));
             out.flush();
         }
 

@@ -25,6 +25,7 @@ import java.util.zip.InflaterInputStream;
 
 import org.limewire.io.IOUtils;
 import org.limewire.util.I18NConvert;
+import org.limewire.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -634,7 +635,7 @@ public class LimeXMLUtils {
         if (compressedData != null) {
             retBytes = new byte[COMPRESS_HEADER_ZLIB.length() +
                                compressedData.length];
-            System.arraycopy(COMPRESS_HEADER_ZLIB.getBytes(),
+            System.arraycopy(StringUtils.toAsciiBytes(COMPRESS_HEADER_ZLIB),
                              0,
                              retBytes,
                              0,
@@ -646,7 +647,7 @@ public class LimeXMLUtils {
         else {  // essentially compress failed, just send prefixed raw data....
             retBytes = new byte[COMPRESS_HEADER_NONE.length() +
                                 data.length];
-            System.arraycopy(COMPRESS_HEADER_NONE.getBytes(),
+            System.arraycopy(StringUtils.toAsciiBytes(COMPRESS_HEADER_NONE),
                              0,
                              retBytes,
                              0,
@@ -720,8 +721,7 @@ public class LimeXMLUtils {
      */
     public static byte[] uncompress(byte[] data) throws IOException {
         byte[] retBytes = new byte[0];
-        String headerFragment = new String(data, 0, 
-                                           C_HEADER_BEGIN.length());
+        String headerFragment = StringUtils.getASCIIString(data, 0, C_HEADER_BEGIN.length());
         if (headerFragment.equals(C_HEADER_BEGIN)) {
             // we have well formed input (so far)
             boolean found = false;
@@ -730,7 +730,7 @@ public class LimeXMLUtils {
                 if(data[i]==(byte)125)
                     found = true;
             //We know know that "{" is at 1 because we are in this if block
-            headerFragment = new String(data,1,i-1-1);
+            headerFragment = StringUtils.getASCIIString(data,1,i-1-1);
             int comp = getCompressionType(headerFragment);
             if (comp == NONE) {
                 retBytes = new byte[data.length-(headerFragment.length()+2)];

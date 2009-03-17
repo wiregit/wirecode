@@ -26,6 +26,7 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -260,7 +261,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                 try {
                     byte[] bytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_CLIENT_LOCALE);
                     if(bytes.length >= 2)
-                        locale = new String(bytes, 0, 2);
+                        locale = StringUtils.getASCIIString(bytes, 0, 2);
                     if(bytes.length >= 3)
                         slots = ByteUtils.ubyte2int(bytes[2]);
                 } catch(BadGGEPPropertyException e) {}

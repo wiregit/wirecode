@@ -7,6 +7,7 @@ import junit.framework.Test;
 
 import org.limewire.io.GUID;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -51,14 +52,14 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         assertGreaterThan(0, vmp.supportsHopsFlow());
         assertGreaterThan(0, vmp.supportsPushProxy());
         assertGreaterThan(0, vmp.supportsLeafGuidance());
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),7));
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),4));
-        assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),7));
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),11));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),21));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),7));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),8));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),30));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("BEAR"),7));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("BEAR"),4));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("GTKG"),7));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("BEAR"),11));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("LIME"),21));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("LIME"),7));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("LIME"),8));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("LIME"),30));
                                              
     
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -75,25 +76,25 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         assertGreaterThan(0, vmpRead.supportsHopsFlow());
         assertGreaterThan(0, vmp.supportsPushProxy());
         assertGreaterThan(0, vmp.supportsLeafGuidance());
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),7));
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),4));
-        assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),7));
-        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),11));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),21));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),7));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),8));
-        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),30));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("BEAR"),7));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("BEAR"),4));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("GTKG"),7));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("BEAR"),11));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("LIME"),21));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("LIME"),7));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("LIME"),8));
+        assertGreaterThan(0, vmp.supportsMessage(StringUtils.toAsciiBytes("LIME"),30));
     }
 
     public void testNetworkConstructor() throws Exception {
         MessagesSupportedVendorMessage.SupportedMessageBlock smp1 = 
-            new MessagesSupportedVendorMessage.SupportedMessageBlock("SUSH".getBytes(),
+            new MessagesSupportedVendorMessage.SupportedMessageBlock(StringUtils.toAsciiBytes("SUSH"),
                                                             10, 10);
         MessagesSupportedVendorMessage.SupportedMessageBlock smp2 = 
-            new MessagesSupportedVendorMessage.SupportedMessageBlock("NEIL".getBytes(), 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock(StringUtils.toAsciiBytes("NEIL"), 
                                                            5, 5);
         MessagesSupportedVendorMessage.SupportedMessageBlock smp3 = 
-            new MessagesSupportedVendorMessage.SupportedMessageBlock("DAWG".getBytes(), 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock(StringUtils.toAsciiBytes("DAWG"), 
                                                            3, 3);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -114,9 +115,9 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         MessagesSupportedVendorMessage vmp = 
            (MessagesSupportedVendorMessage) messageFactory.read(bais, Network.TCP);
         // make sure it supports everything we expect....
-        assertEquals(10, vmp.supportsMessage("SUSH".getBytes(), 10));
-        assertEquals(5, vmp.supportsMessage("NEIL".getBytes(), 5));
-        assertEquals(3, vmp.supportsMessage("DAWG".getBytes(), 3));
+        assertEquals(10, vmp.supportsMessage(StringUtils.toAsciiBytes("SUSH"), 10));
+        assertEquals(5, vmp.supportsMessage(StringUtils.toAsciiBytes("NEIL"), 5));
+        assertEquals(3, vmp.supportsMessage(StringUtils.toAsciiBytes("DAWG"), 3));
         assertEquals(-1, vmp.supportsTCPConnectBack());
         assertEquals(-1, vmp.supportsUDPConnectBack());
         assertEquals(-1, vmp.supportsHopsFlow());
@@ -140,13 +141,13 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
 
     public void testBadCases() throws Exception {
         MessagesSupportedVendorMessage.SupportedMessageBlock smp1 = 
-            new MessagesSupportedVendorMessage.SupportedMessageBlock("SUSH".getBytes(),
+            new MessagesSupportedVendorMessage.SupportedMessageBlock(StringUtils.toAsciiBytes("SUSH"),
                                                             10, 10);
         MessagesSupportedVendorMessage.SupportedMessageBlock smp2 = 
-            new MessagesSupportedVendorMessage.SupportedMessageBlock("NEIL".getBytes(), 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock(StringUtils.toAsciiBytes("NEIL"), 
                                                            5, 5);
         MessagesSupportedVendorMessage.SupportedMessageBlock smp3 = 
-            new MessagesSupportedVendorMessage.SupportedMessageBlock("DAWG".getBytes(), 
+            new MessagesSupportedVendorMessage.SupportedMessageBlock(StringUtils.toAsciiBytes("DAWG"), 
                                                            3, 3);
         ByteArrayOutputStream baos = null;
         byte[] guid = GUID.makeGuid();
@@ -170,7 +171,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             smp2.encode(baos);
             smp3.encode(baos);
             smp1.encode(baos);
-            baos.write("crap".getBytes());
+            baos.write(StringUtils.toAsciiBytes("crap"));
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                    baos.toByteArray(), Network.UNKNOWN);
             fail("bpe should have been thrown.");

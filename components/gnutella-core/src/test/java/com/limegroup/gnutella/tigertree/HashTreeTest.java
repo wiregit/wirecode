@@ -17,6 +17,7 @@ import org.limewire.collection.Range;
 import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -213,7 +214,7 @@ public class HashTreeTest extends BaseTestCase {
         DIMERecord corruptedXML = null;
         
         // must have valid data.
-        String data = new String(xmlRecord.getData());
+        String data = StringUtils.getUTF8String(xmlRecord.getData());
         corruptedXML = createCorruptRecord(xmlRecord, data.substring(1));
         try {
             createTree(corruptedXML, treeRecord);
@@ -249,7 +250,7 @@ public class HashTreeTest extends BaseTestCase {
     
     private void checkXML(String search, String replace, boolean good)
       throws Exception {
-        String data = new String(xmlRecord.getData());
+        String data = StringUtils.getUTF8String(xmlRecord.getData());
         StringBuffer sb = new StringBuffer(data);
         int a = data.indexOf("'", data.indexOf(search));
         int b = data.indexOf("'", a+1);
@@ -267,7 +268,7 @@ public class HashTreeTest extends BaseTestCase {
     
     private void replaceXML(String search, String replace, boolean good)
       throws Exception {
-        String data = new String(xmlRecord.getData());
+        String data = StringUtils.getUTF8String(xmlRecord.getData());
         StringBuffer sb = new StringBuffer(data);
         int a = -1, b = -1;
         while(true) {
@@ -374,7 +375,7 @@ public class HashTreeTest extends BaseTestCase {
                                  base.getOptions(),
                                  base.getId(),
                                  base.getType(),
-                                 data.getBytes());
+                                 StringUtils.toUTF8Bytes(data));
     }
     
     private UUID verifyXML(DIMERecord xml) throws Exception {

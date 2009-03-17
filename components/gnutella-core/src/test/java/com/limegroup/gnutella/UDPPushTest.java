@@ -22,6 +22,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.TLSManager;
 import org.limewire.nio.NIOSocket;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -391,7 +392,7 @@ public class UDPPushTest extends LimeTestCase {
         Thread t = ThreadExecutor.newManagedThread(new Runnable() {
             public void run() {
                 try {
-                    sock.getOutputStream().write(str.getBytes());
+                    sock.getOutputStream().write(StringUtils.toAsciiBytes(str));
                 } catch (IOException e) {
                     fail(e);
                 }

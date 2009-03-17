@@ -21,6 +21,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.nio.NIOServerSocket;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.ErrorService;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
@@ -578,7 +579,7 @@ public class RoutedConnectionTest extends ServerSideTestCase {
                             throw new IOException("Bad word: " + word);
 
                         if (noGOK) {
-                            socket.getOutputStream().write("GNUTELLA/0.6 401 Failed\r\n\r\n".getBytes());
+                            socket.getOutputStream().write(StringUtils.toAsciiBytes("GNUTELLA/0.6 401 Failed\r\n\r\n"));
                             socket.getOutputStream().flush();
                             return;
                         }

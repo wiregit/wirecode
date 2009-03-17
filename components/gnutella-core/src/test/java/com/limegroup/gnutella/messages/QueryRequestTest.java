@@ -23,6 +23,7 @@ import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -113,7 +114,7 @@ public final class QueryRequestTest extends LimeTestCase {
 				baos[i] = new ByteArrayOutputStream();
 				baos[i].write(0);
 				baos[i].write(0);
-				baos[i].write(QueryRequestTest.QUERY_STRINGS[i].getBytes());
+				baos[i].write(StringUtils.toUTF8Bytes(QueryRequestTest.QUERY_STRINGS[i]));
 				baos[i].write(0);
                 // write the GGEP stuff
                 byte[] bytes = new byte[4];
@@ -283,7 +284,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		baos.write(0); // first null
 		
 		// no encoding problems in english
-		baos.write(UrnHelper.URNS[0].toString().getBytes()); 		
+		baos.write(StringUtils.toAsciiBytes(UrnHelper.URNS[0].toString())); 		
 		baos.write(0); // last null
 
 		queryRequestFactory.createNetworkQuery(
@@ -343,11 +344,11 @@ public final class QueryRequestTest extends LimeTestCase {
 			URN_BYTES[i] = new ByteArrayOutputStream();
 			URN_BYTES[i].write(0);
 			URN_BYTES[i].write(0);
-			URN_BYTES[i].write(QueryRequestTest.QUERY_STRINGS[i].getBytes());
+			URN_BYTES[i].write(StringUtils.toUTF8Bytes(QueryRequestTest.QUERY_STRINGS[i]));
 			URN_BYTES[i].write(0);
 			Set curUrnSet = new HashSet();
 			for(int j=i; j<UrnHelper.URNS.length; j++) {
-				URN_BYTES[i].write(UrnHelper.URNS[j].toString().getBytes());
+				URN_BYTES[i].write(StringUtils.toAsciiBytes(UrnHelper.URNS[j].toString()));
 				curUrnSet.add(UrnHelper.URNS[j]);
 				if((j+1) != UrnHelper.URNS.length) {
 					URN_BYTES[i].write(0x1c);
@@ -395,7 +396,7 @@ public final class QueryRequestTest extends LimeTestCase {
 			baos[i] = new ByteArrayOutputStream();
 			baos[i].write(0);
 			baos[i].write(0);
-			baos[i].write(QueryRequestTest.QUERY_STRINGS[i].getBytes());
+			baos[i].write(StringUtils.toUTF8Bytes(QueryRequestTest.QUERY_STRINGS[i]));
 			baos[i].write(0);
 			baos[i].write(0);
 			QueryRequest qr = queryRequestFactory.createNetworkQuery(
@@ -437,7 +438,7 @@ public final class QueryRequestTest extends LimeTestCase {
 			baos[i] = new ByteArrayOutputStream();
 			baos[i].write(0);
 			baos[i].write(0);
-			baos[i].write(ILLEGAL_QUERIES[i].getBytes());
+			baos[i].write(StringUtils.toUTF8Bytes(ILLEGAL_QUERIES[i]));
 			baos[i].write(0);
 			baos[i].write(0);
             try {

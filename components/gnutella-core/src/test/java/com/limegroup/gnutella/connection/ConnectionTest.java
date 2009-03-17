@@ -13,6 +13,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.NIOServerSocket;
 import org.limewire.nio.observer.AcceptObserver;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -147,7 +148,7 @@ public class ConnectionTest extends LimeTestCase {
                             throw new IOException("Bad word: " + word);
 
                         if(noGOK) {
-                            socket.getOutputStream().write("GNUTELLA/0.6 401 Failed\r\n\r\n".getBytes());
+                            socket.getOutputStream().write(StringUtils.toAsciiBytes("GNUTELLA/0.6 401 Failed\r\n\r\n"));
                             socket.getOutputStream().flush();
                             return;
                         }

@@ -27,6 +27,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -537,7 +538,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -548,7 +549,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x1 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));        
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));        
     }
     
     public void testWriteTLS() throws Exception {
@@ -578,7 +579,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -589,7 +590,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 4, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x1 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
         assertEquals(new byte[] { 0x1 }, writtenGGEP.getBytes("F"));
     }
     
@@ -617,7 +618,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -628,7 +629,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x1 | 0x4 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWritingFNF() throws Exception {
@@ -648,7 +649,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -685,7 +686,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -696,7 +697,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWritingIncompleteAndDownloadingCode() throws Exception {
@@ -724,7 +725,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -735,7 +736,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 | 0x8 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWriteBusyQueueStatus() throws Exception {
@@ -760,7 +761,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -771,7 +772,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x1 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { 0x7F }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWriteCorrectQueueStatus() throws Exception {
@@ -796,7 +797,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -807,7 +808,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x1 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { 3 }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWriteCorrectUploadsInProgressQueueStatus() throws Exception {
@@ -832,7 +833,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -843,7 +844,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x1 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { -5 }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWriteRanges() throws Exception {
@@ -873,7 +874,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -884,7 +885,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 4, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
         byte[] ranges = writtenGGEP.getBytes("R");
         assertEquals(0,     ByteUtils.beb2int(ranges, 0));
         assertEquals(500,   ByteUtils.beb2int(ranges, 4));
@@ -922,7 +923,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -933,7 +934,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 5, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
         byte[] ranges = writtenGGEP.getBytes("R");
         assertEquals(8, ranges.length);
         assertEquals(0,     ByteUtils.beb2int(ranges, 0));
@@ -991,7 +992,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1002,7 +1003,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWriteBusyIfRangeRequestedButHasNone() throws Exception {
@@ -1031,7 +1032,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1042,7 +1043,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { 0x7F }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWriteDoesntMakeBusyIfNoRangesButNotRequested() throws Exception {
@@ -1072,7 +1073,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1083,7 +1084,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWritesPushWithTLSWithFWTLocations() throws Exception {
@@ -1133,7 +1134,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1144,7 +1145,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 4, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
         byte[] pushes = writtenGGEP.get("P");
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(pushes));
         PushEndpoint pe1 = pushEndpointFactory.createFromBytes(in);
@@ -1278,7 +1279,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1289,7 +1290,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 4, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
         byte[] pushes = writtenGGEP.get("P");
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(pushes));
         PushEndpoint pe1 = pushEndpointFactory.createFromBytes(in);
@@ -1361,7 +1362,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1372,7 +1373,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testNoPushWrittenIfNotRequestedEvenIfFWTOnlyRequested() throws Exception {
@@ -1413,7 +1414,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1424,7 +1425,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWriteDirectLocs() throws Exception {
@@ -1464,7 +1465,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1475,7 +1476,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 4, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
         byte[] locs = writtenGGEP.getBytes("A");
         assertEquals(60, locs.length);
         Collection<IpPort> ipps = NetworkUtils.unpackIps(locs);
@@ -1537,7 +1538,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1548,7 +1549,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 3, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
     }
     
     public void testWriteTLSWithLocs() throws Exception {
@@ -1588,7 +1589,7 @@ public class HeadPongTest extends LimeTestCase {
         
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
-        assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
+        assertEquals("LIME", StringUtils.getASCIIString(written, 23, 4));   // headpong vendor ID
         assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
         assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
@@ -1599,7 +1600,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("got headers: " + writtenGGEP.getHeaders(), 5, writtenGGEP.getHeaders().size());
         assertEquals(new byte[] { 0x2 }, writtenGGEP.getBytes("C"));
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
-        assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
+        assertEquals(StringUtils.toAsciiBytes("LIME"), writtenGGEP.getBytes("V"));
         byte[] locs = writtenGGEP.getBytes("A");
         assertEquals(60, locs.length);
         Collection<IpPort> ipps = NetworkUtils.unpackIps(locs);

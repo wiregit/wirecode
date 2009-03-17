@@ -16,6 +16,7 @@ import junit.framework.Test;
 
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
@@ -327,7 +328,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
             byte[] read = new byte["CONNECT BACK\r\n\r\n".length() + 1];
             int n = x.getInputStream().read(read);
             assertGreaterThan(read.length - 1, n); // tls
-            assertFalse((new String(read).contains("CONNECT BACK"))); // encrypted
+            assertFalse((StringUtils.getASCIIString(read).contains("CONNECT BACK"))); // encrypted
         } catch (IOException bad) {
             fail("got IOX", bad);
         }

@@ -19,12 +19,13 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.net.TLSManager;
+import org.limewire.net.address.AddressEvent;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.Base32;
-import org.limewire.net.TLSManager;
-import org.limewire.net.address.AddressEvent;
-import org.limewire.listener.ListenerSupport;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -246,7 +247,7 @@ public class LimeTestUtils {
         try {
             s = new Socket();
             s.connect(new InetSocketAddress("127.0.0.1",port));
-            s.getOutputStream().write("CONNECT ".getBytes());
+            s.getOutputStream().write(StringUtils.toAsciiBytes("CONNECT "));
             s.getOutputStream().flush();
             s.close();
         } catch (IOException ignore) {}

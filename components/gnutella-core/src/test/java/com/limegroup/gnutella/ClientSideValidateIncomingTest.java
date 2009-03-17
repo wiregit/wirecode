@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.GUID;
+import org.limewire.util.StringUtils;
 
 import junit.framework.Test;
 
@@ -169,7 +170,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             assertFalse(networkManager.acceptedIncomingConnection());
             
             s = new Socket("localhost", PORT);
-            s.getOutputStream().write("CONNECT BACK\r\r".getBytes());
+            s.getOutputStream().write(StringUtils.toAsciiBytes("CONNECT BACK\r\r"));
             Thread.sleep(500);
             s.close(); 
             // Socket must have said CONNECT BACK

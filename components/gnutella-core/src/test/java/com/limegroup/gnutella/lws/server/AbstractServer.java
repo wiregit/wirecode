@@ -20,6 +20,7 @@ import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.lws.server.StringCallback;
 import org.limewire.service.ErrorService;
+import org.limewire.util.StringUtils;
 
 /**
  * Base class for servers, both local and remote.
@@ -238,7 +239,6 @@ public abstract class AbstractServer implements Runnable  {
             }
         }
         
-        @SuppressWarnings("deprecation")
         private void handleClient() throws IOException {
             InputStream is = new BufferedInputStream(s.getInputStream());
             final PrintStream ps = new PrintStream(s.getOutputStream(), true);
@@ -304,7 +304,7 @@ public abstract class AbstractServer implements Runnable  {
                         break;
                     }
                 }
-                String request = (new String(buf, 0, index, i - index)).replace('/', File.separatorChar);
+                String request = StringUtils.getASCIIString(buf, index, i - index).replace('/', File.separatorChar);
                 if (request.startsWith(File.separator)) {
                     request = request.substring(1);
                 }

@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -420,7 +421,7 @@ public class DIMERecord {
      */
     public String getIdentifier() {
         if (_idString == null)
-            _idString = new String(getId());
+            _idString = StringUtils.toUTF8String(getId());
         return _idString;
     }
 

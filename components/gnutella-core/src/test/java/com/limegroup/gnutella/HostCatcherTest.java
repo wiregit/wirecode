@@ -26,6 +26,7 @@ import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -664,7 +665,7 @@ public class HostCatcherTest extends LimeTestCase {
         	"www.limewire.com:6379\n"+
         	"www.eff.org\n"+
             "www.test.org:1";
-        ggep.putCompressed(GGEPKeys.GGEP_HEADER_PACKED_HOSTCACHES, addrs.getBytes());
+        ggep.putCompressed(GGEPKeys.GGEP_HEADER_PACKED_HOSTCACHES, StringUtils.toUTF8Bytes(addrs));
         PingReply pr = pingReplyFactory.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);

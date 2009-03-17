@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.io.GUID;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,7 +29,7 @@ public class ApplicationServicesImpl implements ApplicationServices {
         mybtguid[0] = 0x2D; // - 
         mybtguid[1] = 0x4C; // L
         mybtguid[2] = 0x57; // W
-        System.arraycopy(LimeWireUtils.BT_REVISION.getBytes(),0, mybtguid,3, 4);
+        System.arraycopy(StringUtils.toAsciiBytes(LimeWireUtils.BT_REVISION),0, mybtguid,3, 4);
         mybtguid[7] = 0x2D; // -
         System.arraycopy(limewireGUID,0,mybtguid,8,12);
         bittorrentGUID = mybtguid;

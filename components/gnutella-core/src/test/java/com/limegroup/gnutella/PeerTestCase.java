@@ -15,6 +15,7 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.io.GUID;
+import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -128,7 +129,7 @@ public abstract class PeerTestCase extends LimeTestCase {
          
          socket.setSoTimeout(3000);
          InputStream in=socket.getInputStream();
-         String word=readWord(in);
+         String word = IOUtils.readWord(in, 9);
          if (! word.equals("GNUTELLA"))
              throw new IOException("Bad word: "+word);
          
@@ -144,29 +145,6 @@ public abstract class PeerTestCase extends LimeTestCase {
          return con;
      }
      
-     /**
-      * Acceptor.readWord
-      *
-      * @modifies sock
-      * @effects Returns the first word (i.e., no whitespace) of less
-      *  than 8 characters read from sock, or throws IOException if none
-      *  found.
-      */
-     private static String readWord(InputStream sock) throws IOException {
-         final int N=9;  //number of characters to look at
-         char[] buf=new char[N];
-         for (int i=0 ; i<N ; i++) {
-             int got=sock.read();
-             if (got==-1)  //EOF
-                 throw new IOException();
-             if ((char)got==' ') { //got word.  Exclude space.
-                 return new String(buf,0,i);
-             }
-             buf[i]=(char)got;
-         }
-         throw new IOException();
-     }
-
      /**
       * Note that this function will _EAT_ messages until it finds a ping to respond to.
       */  

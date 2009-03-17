@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.Properties;
 
 import org.limewire.nio.statemachine.IOState;
+import org.limewire.util.StringUtils;
 
 import junit.framework.Test;
 
@@ -30,7 +31,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
                             "Header1: Value1\r\n" +
                             "Header2: Value2\r\n" +
                             "\r\n";
-        ByteBuffer buffer = ByteBuffer.wrap(testString.getBytes()); 
+        ByteBuffer buffer = ByteBuffer.wrap(StringUtils.toAsciiBytes(testString)); 
         ReadBufferChannel channel = new ReadBufferChannel(buffer);
         
         
@@ -59,7 +60,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
                             "UnknownData\r\n" +
                             "\r\n" +
                             "Extra Data Leftover";
-        ByteBuffer buffer = ByteBuffer.wrap(testString.getBytes());
+        ByteBuffer buffer = ByteBuffer.wrap(StringUtils.toAsciiBytes(testString));
         ReadBufferChannel channel = new ReadBufferChannel(buffer);
 
         ByteBuffer scratch = ByteBuffer.allocate(2048);
@@ -112,14 +113,14 @@ public class ReadHandshakeStateTest extends LimeTestCase {
         
         assertEquals("Extra Data Leftover".length(), scratch.position());
         scratch.flip();
-        assertEquals("Extra Data Leftover", new String(scratch.array(), 0, scratch.limit()));
+        assertEquals("Extra Data Leftover", StringUtils.getASCIIString(scratch.array(), 0, scratch.limit()));
     }
     
     public void testEOF() throws Exception {
         String testString = "FIRST LINE\r\n" +
                             "Header1: Value1\r\n" +
                             "Header2: Value2\r\n";
-        ByteBuffer buffer = ByteBuffer.wrap(testString.getBytes());
+        ByteBuffer buffer = ByteBuffer.wrap(StringUtils.toAsciiBytes(testString));
         ReadBufferChannel channel = new ReadBufferChannel(buffer, true);
 
         ByteBuffer scratch = ByteBuffer.allocate(2048);
@@ -142,7 +143,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }
     
     public void testReadRequestStateProcessConnectLineSucceeds() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA CONNECT/0.6\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("GNUTELLA CONNECT/0.6\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadRequestState(support);
@@ -150,7 +151,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }
     
     public void testReadRequestStateProcessConnectLineFails() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA CONNECT/0.5\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("GNUTELLA CONNECT/0.5\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadRequestState(support);
@@ -163,7 +164,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }
     
     public void testReadRequestStateProcessAbsurdConnectLine() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("HTTP/1.1 GET\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("HTTP/1.1 GET\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadRequestState(support);
@@ -176,7 +177,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }
     
     public void testReadRequestStateProcessNewerConnectLine() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA CONNECT/0.7\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("GNUTELLA CONNECT/0.7\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadRequestState(support);
@@ -184,7 +185,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }
     
     public void testReadResponseStateProcessConnectLineSucceeds() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.6 200 OK\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("GNUTELLA/0.6 200 OK\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadResponseState(support);
@@ -192,7 +193,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }
     
     public void testReadResponseStateProcessConnectLineSucceedsEvenWhenBadCode() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.6 400 Failed\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("GNUTELLA/0.6 400 Failed\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadResponseState(support);
@@ -200,7 +201,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }    
     
     public void testReadResponseStateProcessConnectLineFailsBadVersion() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.5\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("GNUTELLA/0.5\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadResponseState(support);
@@ -213,7 +214,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }
     
     public void testReadResponseStateProcessAbsurdConnectLine() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("HTTP/1.1 200 OK\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("HTTP/1.1 200 OK\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadResponseState(support);
@@ -226,7 +227,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }
     
     public void testReadResponseStateProcessHeadersSucceeds() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.6 200 OK\r\n\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("GNUTELLA/0.6 200 OK\r\n\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadResponseState(support);
@@ -234,7 +235,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }
     
     public void testReadResponseStateProcessHeadersBadCodeFails() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.6 303 Failed\r\n\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("GNUTELLA/0.6 303 Failed\r\n\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         IOState state = new ReadHandshakeState.ReadResponseState(support);
@@ -247,7 +248,7 @@ public class ReadHandshakeStateTest extends LimeTestCase {
     }    
     
     public void testReadResponseStateProcessConnectLineCrawler() throws Exception {
-        ReadBufferChannel channel = new ReadBufferChannel("GNUTELLA/0.6\r\n".getBytes());
+        ReadBufferChannel channel = new ReadBufferChannel(StringUtils.toAsciiBytes("GNUTELLA/0.6\r\n"));
         ByteBuffer scratch = ByteBuffer.allocate(2048);
         HandshakeSupport support = new HandshakeSupport("127.0.0.1");
         support.processReadHeader("Crawler: 0.1");

@@ -9,6 +9,7 @@ import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.service.ErrorService;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -98,7 +99,7 @@ public class HeadPing extends AbstractVendorMessage implements HeadPongRequestor
 		_features = (byte) (payload [0] & FEATURE_MASK);
 		
 		//parse the urn string.
-		String urnStr = new String(payload,1,41);
+		String urnStr = StringUtils.getASCIIString(payload,1,41);
 		if (!URN.isUrn(urnStr))
 			throw new BadPacketException("udp head request did not contain an urn");		
 		try {

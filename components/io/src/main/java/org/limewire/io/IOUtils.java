@@ -140,6 +140,9 @@ public class IOUtils {
      * Note that only one extra character is read from the stream in the case of
      * success (the white space character after the word).
      *
+     * Note: Doesn't handle multibyte words correctly, each byte as it comes in
+     * will be treated as one character.
+     *
      * @param in The input stream from where to read the word
      * @param maxSize The maximum size of the word.
      * @return the first word (i.e., no whitespace) of specified maximum size

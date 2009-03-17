@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.ByteReader;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.Constants;
 
@@ -124,8 +125,7 @@ class BlockingHandshakeSupport extends HandshakeSupport {
             throw new NullPointerException("null or empty string: " + s);
         }
 
-        // TODO: character encodings?
-        byte[] bytes = s.getBytes();
+        byte[] bytes = StringUtils.toAsciiBytes(s);
         out.write(bytes);
         out.flush();
     }

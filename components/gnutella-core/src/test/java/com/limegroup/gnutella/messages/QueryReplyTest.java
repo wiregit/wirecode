@@ -1815,7 +1815,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         
         // add some uknown GGEP fields
         GGEP g = new GGEP(readQR.getPayload(),readQR.getGGEPStart());
-        g.put("badger","mushroom".getBytes());
+        g.put("badger", StringUtils.toUTF8Bytes("mushroom"));
      
         // all ggep-carried information is preserved
         QueryReplyImpl unknownGGEP = 
@@ -1841,7 +1841,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         // also, we'll find the unknown entry there
         GGEP parsedGGEP = new GGEP(returnPath.getPayload(),returnPath.getGGEPStart());
         byte [] mushroom = parsedGGEP.get("badger");
-        assertTrue(Arrays.equals("mushroom".getBytes(),mushroom));
+        assertTrue(Arrays.equals(StringUtils.toUTF8Bytes("mushroom"),mushroom));
         
         // and we'll find some return-path specific entries as well
         byte [] meParsed = parsedGGEP.get("RPI0");

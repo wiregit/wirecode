@@ -23,6 +23,7 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -364,7 +365,7 @@ public class PingReplyTest extends LimeTestCase {
         byte[] big = new byte[2];
         big[0] = op[op.length-2];
         big[1] = op[op.length-1];
-        String out = new String(big);
+        String out = StringUtils.getASCIIString(big);
         assertEquals("Big part of pong lost", "AB", out);
         //come this far means its OK
     }
@@ -959,7 +960,7 @@ public class PingReplyTest extends LimeTestCase {
     public void testPackedHostCachesInPong() throws Exception {
         // test with compression.
         GGEP ggep = new GGEP();
-        List addrs = new LinkedList();
+        List<String> addrs = new LinkedList<String>();
         addrs.add("1.2.3.4:81");
         addrs.add("www.limewire.com:6379");
         addrs.add("www.eff.org");
@@ -1053,14 +1054,14 @@ public class PingReplyTest extends LimeTestCase {
         assertEquals(0, pr.getPackedUDPHostCaches().size());        
     }
     
-    private byte[] toBytes(List l) throws Exception {
+    private byte[] toBytes(List<String> l) throws Exception {
         StringBuffer sb = new StringBuffer();
         for(Iterator i = l.iterator(); i.hasNext(); ) {
             sb.append(i.next().toString());
             if(i.hasNext())
                 sb.append("\n");
         }
-        return sb.toString().getBytes();
+        return StringUtils.toUTF8Bytes(sb.toString());
     }
     
     private void addIP(byte[] payload) {

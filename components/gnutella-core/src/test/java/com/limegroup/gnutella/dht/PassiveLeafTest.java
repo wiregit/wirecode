@@ -27,6 +27,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
@@ -79,7 +80,7 @@ public class PassiveLeafTest extends DHTTestCase {
             // Store a DHTValue
             KUID key = KUID.createRandomID();
             DHTValue value = new DHTValueImpl(
-                    DHTValueType.BINARY, Version.ZERO, "Hello World".getBytes());
+											  DHTValueType.BINARY, Version.ZERO, StringUtils.toAsciiBytes("Hello World"));
             StoreResult result = dhts.get(0).put(key, value).get();
             assertEquals(k, result.getLocations().size());
             

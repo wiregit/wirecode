@@ -7,6 +7,7 @@ import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 import org.limewire.io.GUID;
 import org.limewire.net.TLSManager;
 
@@ -54,8 +55,8 @@ public class CapabilitiesVMTest extends BaseTestCase {
         CapabilitiesVM vmp = factory.getCapabilitiesVM();
         assertGreaterThan(0, vmp.supportsFeatureQueries());
         assertTrue(vmp.supportsWhatIsNew());
-        assertGreaterThan(0, vmp.supportsCapability("WHAT".getBytes()));
-        assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
+        assertGreaterThan(0, vmp.supportsCapability(StringUtils.toAsciiBytes("WHAT")));
+        assertEquals(-1, vmp.supportsCapability(StringUtils.toAsciiBytes("MDHT")));
     
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vmp.write(baos);
@@ -65,13 +66,13 @@ public class CapabilitiesVMTest extends BaseTestCase {
 
         assertGreaterThan(0, vmpRead.supportsFeatureQueries());
         assertTrue(vmpRead.supportsWhatIsNew());
-        assertGreaterThan(0, vmpRead.supportsCapability("WHAT".getBytes()));
-        assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
+        assertGreaterThan(0, vmpRead.supportsCapability(StringUtils.toAsciiBytes("WHAT")));
+        assertEquals(-1, vmp.supportsCapability(StringUtils.toAsciiBytes("MDHT")));
     }
     
     public void testDHTCapability() throws Exception { 
         CapabilitiesVM vmp = factory.getCapabilitiesVM();
-        assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
+        assertEquals(-1, vmp.supportsCapability(StringUtils.toAsciiBytes("MDHT")));
         
         factory.updateCapabilities();
         vmp = factory.getCapabilitiesVM();
@@ -82,13 +83,13 @@ public class CapabilitiesVMTest extends BaseTestCase {
         tlsManager.setIncomingTLSEnabled(false);
         CapabilitiesVM vmp = factory.getCapabilitiesVM();
         assertEquals(-1, vmp.supportsTLS());
-        assertEquals(-1, vmp.supportsCapability("TLS!".getBytes()));
+        assertEquals(-1, vmp.supportsCapability(StringUtils.toAsciiBytes("TLS!")));
         
         tlsManager.setIncomingTLSEnabled(true);
         factory.updateCapabilities();
         vmp = factory.getCapabilitiesVM();
         assertEquals(1, vmp.supportsTLS());
-        assertEquals(1, vmp.supportsCapability("TLS!".getBytes()));
+        assertEquals(1, vmp.supportsCapability(StringUtils.toAsciiBytes("TLS!")));
     }
 
     public void testNetworkConstructor() throws Exception {
@@ -97,10 +98,10 @@ public class CapabilitiesVMTest extends BaseTestCase {
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
         ByteUtils.short2leb((short)4, baos);
-        CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);
-        CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
-        CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
-        CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("SUSH"), 10, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("NEIL"), 5, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("DAWG"), 3, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("DAWG"), 3, false);
         VendorMessage vm = new CapabilitiesVMImpl(guid, ttl, hops, 0, 
                                               baos.toByteArray(), Network.UNKNOWN);
         baos = new ByteArrayOutputStream();
@@ -109,9 +110,9 @@ public class CapabilitiesVMTest extends BaseTestCase {
             new ByteArrayInputStream(baos.toByteArray());
         CapabilitiesVM vmp = (CapabilitiesVM) messageFactory.read(bais, Network.TCP);
         // make sure it supports everything we expect....
-        assertEquals(10, vmp.supportsCapability("SUSH".getBytes()));
-        assertEquals(5,  vmp.supportsCapability("NEIL".getBytes()));
-        assertEquals(3,  vmp.supportsCapability("DAWG".getBytes()));
+        assertEquals(10, vmp.supportsCapability(StringUtils.toAsciiBytes("SUSH")));
+        assertEquals(5,  vmp.supportsCapability(StringUtils.toAsciiBytes("NEIL")));
+        assertEquals(3,  vmp.supportsCapability(StringUtils.toAsciiBytes("DAWG")));
         assertEquals(-1, vmp.supportsFeatureQueries());
         assertFalse(vmp.supportsWhatIsNew());
 
@@ -119,9 +120,9 @@ public class CapabilitiesVMTest extends BaseTestCase {
         // make sure they are equal....
         baos = new ByteArrayOutputStream();
         ByteUtils.short2leb((short)3, baos);
-        CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
-        CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
-        CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("NEIL"), 5, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("DAWG"), 3, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("SUSH"), 10, false);
         
         CapabilitiesVM vmpOther = 
             new CapabilitiesVMImpl(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
@@ -138,9 +139,9 @@ public class CapabilitiesVMTest extends BaseTestCase {
             // test missing info....
             baos = new ByteArrayOutputStream();
             ByteUtils.short2leb((short)4, baos);
-            CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
-            CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
-            CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);
+            CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("NEIL"), 5, false);
+            CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("DAWG"), 3, false);
+            CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("SUSH"), 10, false);
             new CapabilitiesVMImpl(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
             fail("bpe should have been thrown.");
         } catch (BadPacketException expected) {
@@ -149,10 +150,10 @@ public class CapabilitiesVMTest extends BaseTestCase {
             // test corrupt info....
             baos = new ByteArrayOutputStream();
             ByteUtils.short2leb((short)4, baos);
-            CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);
-            CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
-            CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
-            baos.write("crap".getBytes());
+            CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("SUSH"), 10, false);
+            CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("NEIL"), 5, false);
+            CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("DAWG"), 3, false);
+            baos.write(StringUtils.toAsciiBytes("crap"));
             new CapabilitiesVMImpl(guid, ttl, hops, 0, 
                                                    baos.toByteArray(), Network.UNKNOWN);
             fail("bpe should have been thrown.");
@@ -166,19 +167,19 @@ public class CapabilitiesVMTest extends BaseTestCase {
         byte ttl = 1, hops = 0;
         
         ByteUtils.short2leb((short)1, baos);
-        CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("DAWG"), 3, false);
         ByteUtils.short2leb((short)3, baos);        
-        CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, true);
-        CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, true);
-        CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, true);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("DAWG"), 3, true);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("SUSH"), 10, true);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("NEIL"), 5, true);
         CapabilitiesVM vmpOther = 
             new CapabilitiesVMImpl(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
         baos = new ByteArrayOutputStream();
         
         ByteUtils.short2leb((short)3, baos);
-        CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
-        CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
-        CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("NEIL"), 5, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("DAWG"), 3, false);
+        CapabilitiesVMImpl.writeCapability(baos, StringUtils.toAsciiBytes("SUSH"), 10, false);
         CapabilitiesVM vmpOneOther = 
             new CapabilitiesVMImpl(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
         assertEquals(vmpOther,vmpOneOther);

@@ -27,6 +27,7 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -500,7 +501,7 @@ public class FWTDetectionTest extends LimeTestCase {
     
     private void writeToGnet(String hosts) throws Exception {
         FileOutputStream fos = new FileOutputStream(gnutellaDotNetFile);
-        fos.write(hosts.getBytes());fos.flush();fos.close();
+        fos.write(StringUtils.toAsciiBytes(hosts));fos.flush();fos.close();
     }
     
     private class UDPPonger {

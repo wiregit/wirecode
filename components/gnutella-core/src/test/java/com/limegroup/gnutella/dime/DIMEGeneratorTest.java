@@ -3,6 +3,8 @@ package com.limegroup.gnutella.dime;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import org.limewire.util.StringUtils;
+
 import junit.framework.Test;
 
 /**
@@ -33,13 +35,13 @@ public final class DIMEGeneratorTest extends com.limegroup.gnutella.util.LimeTes
 	    
 	    DIMERecord one =
 	        new DIMERecord(DIMERecord.TYPE_UNCHANGED,
-                              null, null, null, "one".getBytes());
+						   null, null, null, StringUtils.toAsciiBytes("one"));
         DIMERecord two =
             new DIMERecord(DIMERecord.TYPE_MEDIA_TYPE,
-                              null, null, null, "two".getBytes());
+						   null, null, null, StringUtils.toAsciiBytes("two"));
         DIMERecord three =
             new DIMERecord(DIMERecord.TYPE_ABSOLUTE_URI,
-                              null, null, null, "three".getBytes());
+						   null, null, null, StringUtils.toAsciiBytes("three"));
 
         assertEquals(0, gen.getLength());
         gen.add(one);
@@ -63,9 +65,9 @@ public final class DIMEGeneratorTest extends com.limegroup.gnutella.util.LimeTes
         assertEquals(DIMERecord.TYPE_MEDIA_TYPE, readTwo.getTypeId());
         assertEquals(DIMERecord.TYPE_ABSOLUTE_URI, readThree.getTypeId());
         
-        assertEquals("one".getBytes(), readOne.getData());
-        assertEquals("two".getBytes(), readTwo.getData());
-        assertEquals("three".getBytes(), readThree.getData());
+        assertEquals(StringUtils.toAsciiBytes("one"), readOne.getData());
+        assertEquals(StringUtils.toAsciiBytes("two"), readTwo.getData());
+        assertEquals(StringUtils.toAsciiBytes("three"), readThree.getData());
         
         assertTrue(readOne.isFirstRecord());
         assertTrue(readThree.isLastRecord());

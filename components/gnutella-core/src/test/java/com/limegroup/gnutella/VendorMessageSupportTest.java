@@ -10,6 +10,7 @@ import java.util.Iterator;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.GUID;
+import org.limewire.util.StringUtils;
 
 import junit.framework.Test;
 
@@ -148,13 +149,13 @@ public class VendorMessageSupportTest extends LimeTestCase {
         }
         if (!receivedDesiredMessage)
             fail("No MessagesSupportedMessage recieved");
-        if (c.getConnectionCapabilities().supportsVendorMessage("BEAR".getBytes(), 4) < 1) {
+        if (c.getConnectionCapabilities().supportsVendorMessage(StringUtils.toAsciiBytes("BEAR"), 4) < 1) {
             _testHopsFlow = false;
         }
-        if (c.getConnectionCapabilities().supportsVendorMessage("GTKG".getBytes(), 7) < 1) {
+        if (c.getConnectionCapabilities().supportsVendorMessage(StringUtils.toAsciiBytes("GTKG"), 7) < 1) {
             _testUDPCB = false;
         }
-        if (c.getConnectionCapabilities().supportsVendorMessage("BEAR".getBytes(), 7) < 1) {
+        if (c.getConnectionCapabilities().supportsVendorMessage(StringUtils.toAsciiBytes("BEAR"), 7) < 1) {
             _testTCPCB = false;
         }
     }

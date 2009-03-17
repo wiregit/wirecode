@@ -33,6 +33,7 @@ import org.limewire.rudp.RUDPUtils;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
@@ -153,7 +154,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         this.badPacket = true;
         
         if (xmlBytes.length > XML_MAX_SIZE)
-            throw new IllegalArgumentException("xml too large: " + new String(xmlBytes));
+            throw new IllegalArgumentException("xml too large: " + StringUtils.getUTF8String(xmlBytes));
 
         final int n = responses.length;
 		if(!NetworkUtils.isValidPort(port)) {

@@ -39,7 +39,7 @@ public class BEncodeTest extends LimeTestCase {
         public boolean closed;
         
         public void setString(String src) {
-            setBytes(src.getBytes());
+            setBytes(StringUtils.toAsciiBytes(src));
         }
         
         public void setBytes(byte [] bytes) {
@@ -295,7 +295,7 @@ public class BEncodeTest extends LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BEncoder b = BEncoder.getEncoder(baos);
         b.encodeRational(0.4);
-        String encoded = new String(baos.toByteArray());
+        String encoded = StringUtils.getASCIIString(baos.toByteArray());
         assertEquals("r4600877379321698714e",encoded);
         chan.setString(encoded);
         Double d = (Double)Token.parse(new ReadBufferChannel(baos.toByteArray()));

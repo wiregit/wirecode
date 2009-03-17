@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Properties;
 
-import org.limewire.nio.statemachine.IOState;
-
 import junit.framework.Test;
+
+import org.limewire.nio.statemachine.IOState;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.stubs.WriteBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -171,7 +172,7 @@ public class WriteHandshakeStateTest extends LimeTestCase {
 
         WriteHandshakeTester(HandshakeSupport support, String data) {
             super(support);
-            this.outgoingData = ByteBuffer.wrap(data.getBytes());
+            this.outgoingData = ByteBuffer.wrap(StringUtils.toAsciiBytes(data));
         }
 
         @Override

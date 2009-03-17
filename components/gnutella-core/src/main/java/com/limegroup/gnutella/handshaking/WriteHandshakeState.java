@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Properties;
 
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.http.WriteHeadersIOState;
 
 /** Superclass for HandshakeStates that are written out. */
@@ -55,7 +57,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
             response = responder.respond(theirResponse, outgoing);
             StringBuilder sb = new StringBuilder();
             support.appendResponse(response, sb);
-            return ByteBuffer.wrap(sb.toString().getBytes()); // TODO: conversion??
+            return ByteBuffer.wrap(StringUtils.toAsciiBytes(sb.toString()));
         }
 
         /**
@@ -108,7 +110,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
             StringBuilder sb = new StringBuilder();
             support.appendConnectLine(sb);
             support.appendHeaders(request, sb);
-            return ByteBuffer.wrap(sb.toString().getBytes()); // TODO: conversion??
+            return ByteBuffer.wrap(StringUtils.toAsciiBytes(sb.toString()));
         }
         
         /** Does nothing. */

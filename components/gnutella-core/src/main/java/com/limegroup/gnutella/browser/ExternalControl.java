@@ -128,7 +128,8 @@ public class ExternalControl {
 			BufferedOutputStream out =
 			  new BufferedOutputStream(socket.getOutputStream());
 			String s = CommonUtils.getUserName() + "\r\n";
-			byte[] bytes=s.getBytes();
+			// system internal, so use system encoding
+			byte[] bytes= s.getBytes();
 			out.write(bytes);
 			out.flush();
 			if (magnet)

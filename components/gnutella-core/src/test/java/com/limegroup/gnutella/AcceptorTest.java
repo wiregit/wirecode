@@ -32,6 +32,7 @@ import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 import org.limewire.util.OSUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -145,7 +146,7 @@ public class AcceptorTest extends LimeTestCase {
         
         // Now send the connectback..
         Socket socket = socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), port), 1000);
-        socket.getOutputStream().write("CONNECT BACK\r\n".getBytes());
+        socket.getOutputStream().write(StringUtils.toAsciiBytes("CONNECT BACK\r\n"));
         socket.getOutputStream().flush();
         IOUtils.close(socket);
         
@@ -264,7 +265,7 @@ public class AcceptorTest extends LimeTestCase {
                  sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                       port), 12);
                  os = sock.getOutputStream();
-                 os.write("\n\n".getBytes());
+                 os.write(StringUtils.toAsciiBytes("\n\n"));
                  os.flush();
              } catch (IOException ignored) {
              } catch (SecurityException ignored) {
@@ -291,7 +292,7 @@ public class AcceptorTest extends LimeTestCase {
                  sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                       port), 12);
                  os = sock.getOutputStream();
-                 os.write("CONNECT ".getBytes());
+                 os.write(StringUtils.toAsciiBytes("CONNECT "));
                  os.flush();
              } catch (IOException ignored) {
              } catch (SecurityException ignored) {
@@ -318,7 +319,7 @@ public class AcceptorTest extends LimeTestCase {
                  sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                       port), 12, ConnectType.TLS);
                  os = sock.getOutputStream();
-                 os.write("\n\n".getBytes());
+                 os.write(StringUtils.toAsciiBytes("\n\n"));
                  os.flush();
              } catch (IOException ignored) {
              } catch (SecurityException ignored) {
@@ -345,7 +346,7 @@ public class AcceptorTest extends LimeTestCase {
                  sock=socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
                                       port), 12, ConnectType.TLS);
                  os = sock.getOutputStream();
-                 os.write("CONNECT ".getBytes());
+                 os.write(StringUtils.toAsciiBytes("CONNECT "));
                  os.flush();
              } catch (IOException ignored) {
              } catch (SecurityException ignored) {
@@ -368,7 +369,7 @@ public class AcceptorTest extends LimeTestCase {
          connectionDispatcher.addConnectionAcceptor(acceptor, true, "BLOCKING");
          
          Socket tls = new TLSNIOSocket("localhost", port);
-         tls.getOutputStream().write("BLOCKING MORE DATA".getBytes());
+         tls.getOutputStream().write(StringUtils.toAsciiBytes("BLOCKING MORE DATA"));
          tls.getOutputStream().flush();
          assertTrue(acceptor.waitForAccept());
          tls.close();
@@ -386,7 +387,7 @@ public class AcceptorTest extends LimeTestCase {
          tls.setUseClientMode(true);
          tls.setEnabledCipherSuites(new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" } );
          tls.connect(new InetSocketAddress("localhost", port));
-         tls.getOutputStream().write("BLOCKING MORE DATA".getBytes());
+         tls.getOutputStream().write(StringUtils.toAsciiBytes("BLOCKING MORE DATA"));
          tls.getOutputStream().flush();
          assertTrue(acceptor.waitForAccept());
          tls.close();
@@ -451,7 +452,7 @@ public class AcceptorTest extends LimeTestCase {
                     LOG.debug("Reading");
                     int read = in.read(b);
                     LOG.debug("read");
-                    assertEquals("MORE DATA", new String(b, 0, read));
+                    assertEquals("MORE DATA", StringUtils.getASCIIString(b, 0, read));
                     latch.countDown();
                     s.close();
                 } catch (IOException iox) {

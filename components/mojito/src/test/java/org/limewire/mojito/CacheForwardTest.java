@@ -52,6 +52,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.security.SecurityToken;
+import org.limewire.util.StringUtils;
 
 @SuppressWarnings("null")
 public class CacheForwardTest extends MojitoTestCase {
@@ -195,7 +196,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // Use the furthest Node as the creator.
             MojitoDHT creator = dhts.get(idsByXorDistance.get(idsByXorDistance.size()-1));
             // Store the value
-            DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes());
+            DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World"));
             StoreResult evt = creator.put(valueId, value).get();            
             
             // see LWC-2778. In case the root is UNKNOWN in others route table, 
@@ -413,8 +414,8 @@ public class CacheForwardTest extends MojitoTestCase {
             KUID primaryKey1 = KUID.createRandomID();
             KUID primaryKey2 = KUID.createRandomID();
             
-            DHTValue value1 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes());
-            DHTValue value2 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Foo Bar".getBytes());
+            DHTValue value1 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World"));
+            DHTValue value2 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Foo Bar"));
             
             DHTValueEntity entity1 = DHTValueEntity.createFromValue(context1, primaryKey1, value1);
             DHTValueEntity entity2 = DHTValueEntity.createFromValue(context1, primaryKey2, value2);
