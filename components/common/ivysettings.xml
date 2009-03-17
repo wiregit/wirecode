@@ -11,7 +11,7 @@
 		
 	<resolvers>
 	    <!-- the cvs lib dir -->
-	    <filesystem name="cvslib">
+	    <filesystem name="cvslib" checkmodified="true">
 	        <artifact pattern="${limewire.lib.jars}/[artifact]-[revision].[ext]"/>
 	        <artifact pattern="${limewire.lib.jars}/[artifact].[ext]"/>
 	    </filesystem>

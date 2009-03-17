@@ -34,6 +34,6 @@
         
         <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
         
-        <dependency org="none" name="tests/inspTool" rev="" conf="test"/>
+        <dependency org="none" name="tests/inspTool" rev="${inspTool.version}" conf="test"/>
     </dependencies>
 </ivy-module>
