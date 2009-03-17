@@ -5,3 +5,5 @@ bin
 eclipse
 target
 testData
+junit
+clover
