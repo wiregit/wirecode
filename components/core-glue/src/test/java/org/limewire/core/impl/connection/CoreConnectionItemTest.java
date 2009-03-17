@@ -160,7 +160,7 @@ public class CoreConnectionItemTest extends BaseTestCase {
         
         // Ensure the initialisation time value is somewhat sane, aka something bigger
         //  than the start time of the test.
-        assertGreaterThan(testStartTime, item.getTime());
+        assertGreaterThanOrEquals(testStartTime, item.getTime());
                 
         item.update();
         assertFalse(item.isConnecting());
