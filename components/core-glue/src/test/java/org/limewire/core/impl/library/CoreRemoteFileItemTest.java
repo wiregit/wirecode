@@ -6,6 +6,7 @@ import java.util.List;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -148,6 +149,26 @@ public class CoreRemoteFileItemTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
     
+    public void testGetCategory() {
+        Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        
+        final RemoteFileDescAdapter rfdAdapter = context.mock(RemoteFileDescAdapter.class);
+        final Category category = Category.PROGRAM;
+        
+        CoreRemoteFileItem item = new CoreRemoteFileItem(rfdAdapter);
+        
+        context.checking(new Expectations() {{
+            allowing(rfdAdapter).getCategory();
+            will(returnValue(category));
+        }});
+        
+        assertEquals(category, item.getCategory());
+        
+        context.assertIsSatisfied();
+    }
+        
     public void testGetProperty() {
         Mockery context = new Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
