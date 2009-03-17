@@ -261,7 +261,10 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     @Override
     public boolean isSpam() {
         if (spamCache == null) {
-            spamCache = getSpamBoolean(coreResults.get(0).isSpam());
+            boolean spam = false;
+            for (SearchResult result : coreResults)
+                spam |= result.isSpam();
+            spamCache = getSpamBoolean(spam);
         }
         return spamCache.booleanValue();
     }
