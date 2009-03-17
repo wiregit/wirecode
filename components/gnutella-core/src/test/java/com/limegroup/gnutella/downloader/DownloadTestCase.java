@@ -43,7 +43,7 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.Downloader.DownloadState;
+import com.limegroup.gnutella.DownloaderInfo.DownloadState;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;

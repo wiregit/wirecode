@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadState;
+import com.limegroup.gnutella.DownloaderInfo.DownloadState;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 /**

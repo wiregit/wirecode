@@ -27,7 +27,7 @@ import org.limewire.util.TestUtils;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.Downloader.DownloadState;
+import com.limegroup.gnutella.DownloaderInfo.DownloadState;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;

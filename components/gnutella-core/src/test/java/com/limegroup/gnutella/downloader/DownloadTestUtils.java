@@ -9,7 +9,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.util.AssertComparisons;
 
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadState;
+import com.limegroup.gnutella.DownloaderInfo.DownloadState;
 
 public class DownloadTestUtils {
     

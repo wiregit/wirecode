@@ -33,7 +33,7 @@ import com.limegroup.gnutella.NoOpSaveLocationManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.Downloader.DownloadState;
+import com.limegroup.gnutella.DownloaderInfo.DownloadState;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.CoreDownloader;

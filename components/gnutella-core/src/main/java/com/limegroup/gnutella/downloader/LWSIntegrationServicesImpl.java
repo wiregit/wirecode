@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,9 +28,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadServices;
+import com.limegroup.gnutella.DownloaderInfo;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.Downloader.DownloadState;
+import com.limegroup.gnutella.DownloaderInfo.DownloadState;
 import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.lws.server.LWSManagerCommandResponseHandlerWithCallback;
 import com.limegroup.gnutella.lws.server.LWSUtil;
@@ -70,104 +72,21 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
      * cannot keep this state.  Clear them whenever the downloader finishes.
      */
     private final Map<String,String> downloaderIDs2progressBarIDs = new HashMap<String,String>();
-    
-    /**
-     * Instances of this interface should appear like a downloader, but not
-     * actually contain one. There are two implementations:
-     * <ol>
-     * <li>{@link #HeavyWeightDownloaderInterface} contains a {@link CoreDownloader}</li>
-     * <li>{@link #LightWeightDownloaderInterface} contains only the state of a completed {@link CoreDownloader}</li>
-     * </ol>
-     */
-    private interface DownloaderInterface {
-
-        /**
-         * @see Downloader#getAmountRead()
-         */
-        long getAmountRead();
-
-        /**
-         * @see Downloader#getContentLength()
-         */        
-        long getContentLength();
-
-        /**
-         * @see Downloader#getState()
-         */        
-        DownloadState getState();
-
-        /**
-         * @see Downloader#isCompleted()
-         */        
-        boolean isCompleted();
-
-        /**
-         * Returns <code>true</code> if this instance actually contains a downloader.
-         * 
-         * @return <code>true</code> if this instance actually contains a downloader.
-         */        
-        boolean isHeavyWeight();
         
-        /**
-         * Releases any resources.  This may not be totally necessary.
-         */
-        void release();
-    }
-    
     /**
-     * Implementation of {@link DownloaderInterface} with an actual downloader.
-     * Package protected for testing.
+     * Implementation of {@link DownloaderInfo} with just the values from
+     * another {@link DownloaderInfo}. Package protected for testing.
      */
-    final static class HeavyWeightDownloaderInterface implements DownloaderInterface {
-        
-        private Downloader d;
-        HeavyWeightDownloaderInterface(Downloader d) {
-            this.d = d;
-        }
-
-        public boolean isHeavyWeight() {
-            return true;
-        }
-
-        public long getAmountRead() {
-            return d.getAmountRead();
-        }
-
-        public long getContentLength() {
-            return d.getContentLength();
-        }
-
-        public DownloadState getState() {
-            return d.getState();
-        }
-
-        public boolean isCompleted() {
-            return d.isCompleted();
-        }
-
-        public void release() {
-            d = null;
-        }  
-    }
-    
-    /**
-     * Implementation of {@link DownloaderInterface} with just the values from
-     * another. Package protected for testing.
-     */
-    final static class LightWeightDownloaderInterface implements DownloaderInterface {
+    final static class LightWeightDownloader implements DownloaderInfo {
         
         private final long amountRead;
         private final long contentLength;
         private final DownloadState state;
         
-        LightWeightDownloaderInterface(DownloaderInterface d) {
+        LightWeightDownloader(DownloaderInfo d) {
             amountRead = d.getAmountRead();
             contentLength = d.getContentLength();
             state = d.getState();
-        }
-
-        public boolean isHeavyWeight() {
-            return false;
         }
 
         public long getAmountRead() {
@@ -185,10 +104,6 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
         public boolean isCompleted() {
             return true;
         }
-
-        public void release() {
-            // Nothing
-        }  
     }    
     
     
@@ -222,9 +137,54 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
      * web site will remain at 99%, because we never passed back
      * notification that the download completed.
      */
-    private final Map<String, DownloaderInterface> everActiveDownloaderIDs2Downloaders = new HashMap<String, DownloaderInterface>();
+    private final Map<String, DownloaderInfo> everActiveDownloaderIDs2Downloaders = new HashMap<String, DownloaderInfo>();
     
     private String downloadPrefix;
+
+    /**
+     * Maps DownloadState values to their names. These names are used on the
+     * wire. The Store's JavaScript displays these in the Store UI and also
+     * depends on specific names. See recProgress in lws_downloads.js
+     */
+    private final EnumMap<DownloadState, String> downloadStateName =
+        new EnumMap<DownloadState, String>(DownloadState.class) { {
+                put(DownloadState.INITIALIZING, "Initializing");
+                put(DownloadState.QUEUED, "Queued"); // JS depends on this string
+                put(DownloadState.CONNECTING, "Connecting");
+                put(DownloadState.DOWNLOADING, "Downloading");
+                put(DownloadState.BUSY, "Busy");
+                put(DownloadState.COMPLETE, "Complete");
+                put(DownloadState.ABORTED, "Aborted"); // JS depends on this string
+                put(DownloadState.GAVE_UP, "Gave up");
+                put(DownloadState.DISK_PROBLEM, "Disk problem");
+                put(DownloadState.WAITING_FOR_GNET_RESULTS, "Waiting for gnet results");
+                put(DownloadState.CORRUPT_FILE, "Corrupt file");
+                put(DownloadState.REMOTE_QUEUED, "Remote queued");
+                put(DownloadState.HASHING, "Hashing");
+                put(DownloadState.SAVING, "Saving");
+                put(DownloadState.WAITING_FOR_USER, "Waiting for user");
+                put(DownloadState.WAITING_FOR_CONNECTIONS, "Waiting for connections");
+                put(DownloadState.ITERATIVE_GUESSING, "Iterative guessing");
+                put(DownloadState.QUERYING_DHT, "Querying DHT");
+                put(DownloadState.IDENTIFY_CORRUPTION, "Identify corruption");
+                put(DownloadState.RECOVERY_FAILED, "Recovery failed");
+                put(DownloadState.PAUSED, "Paused");
+                put(DownloadState.INVALID, "Invalid");
+                put(DownloadState.RESUMING, "Resuming");
+                put(DownloadState.FETCHING, "Fetching");
+                
+                assert isComplete();
+            }
+        
+            private boolean isComplete() {
+                for (DownloadState state: DownloadState.values()) {
+                    if (!this.containsKey(state)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        };
     
     @Inject
     public LWSIntegrationServicesImpl(LWSManager lwsManager, 
@@ -237,11 +197,11 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
     
     /** For testing. */
     LWSIntegrationServicesImpl(LWSManager lwsManager, 
-                                      DownloadServices downloadServices,
-                                      LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
-                                      RemoteFileDescFactory remoteFileDescFactory,
-                                      ScheduledExecutorService scheduler,
-                                      String downloadPrefix) {
+                               DownloadServices downloadServices,
+                               LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
+                               RemoteFileDescFactory remoteFileDescFactory,
+                               ScheduledExecutorService scheduler,
+                               String downloadPrefix) {
         this.lwsManager = lwsManager;
         this.downloadServices = downloadServices;
         this.lwsIntegrationServicesDelegate = lwsIntegrationServicesDelegate;
@@ -283,27 +243,24 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
      * @return a new {@link RemoveFileDesc} for the file name, relative path,
      *         and file length given.
      */
-    public RemoteFileDesc createRemoteFileDescriptor(String fileName, String urlString, long length) throws IOException, URISyntaxException, HttpException, InterruptedException {
-        //
+    public RemoteFileDesc createRemoteFileDescriptor(String fileName, String urlString, long length)
+             throws IOException, URISyntaxException, HttpException, InterruptedException {
+        
         // We don't want to pass in a full URL and download it, so have
         // the remote setting LWSSettings.LWS_DOWNLOAD_PREFIX specifying
         // the entire prefix of where we're getting the file from and
-        // construct
-        // the full URL from that
-        //
-        String baseDir = "http://" + downloadPrefix;
+        // construct the full URL from that
+        
+        // This will need NO url encoding, and will contain ?'s and &'s
+        // which we want to keep. So for testing, we can only pass in
+        // URLs that don't contain spaces
+
+        URL url = new URL("http://" + downloadPrefix + urlString);
+
         if (fileName == null) {
             fileName = fileNameFromURL(urlString);
         }
-        String urlStr = baseDir + urlString;
-        //
-        // This will need NO url encoding, and will contain ?'s and
-        // &'s
-        // which we want to keep. So for testing, we can only pass
-        // in
-        // URLs that don't contain spaces
-        //
-        URL url = new URL(urlStr);
+
         // this make the size looked up
         RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, fileName, null, length);
         rfd.setHTTP11(false);
@@ -606,9 +563,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                     return true; // continue
                 }
             });
-            //
-            // The response don't matter
-            //
+
+            // The response doesn't matter
             return res.get();
         }         
     }
@@ -620,7 +576,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
     private abstract class LWSManagerCommandResponseForDownloadingAll extends LWSManagerCommandResponseHandlerWithCallback {
         
         private final LWSIntegrationServicesDelegate del;
-        
+
         LWSManagerCommandResponseForDownloadingAll(String name, LWSIntegrationServicesDelegate del) {
             super(name);
             this.del = del;
@@ -660,89 +616,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
             return res.toString();
         }
     }     
-    
-    /**
-     * Returns a printable version of a {@link DownloadState}.
-     * 
-     * @param s status in question
-     * @return a printable version of a {@link DownloadState}.
-     */
-    private static String downloadStatusToString(DownloadState s) {
-        if (s == DownloadState.INITIALIZING) {
-            return "Initializing";
-        }
-        if (s == DownloadState.QUEUED) {
-            return "Queued";
-        }
-        if (s == DownloadState.CONNECTING) {
-            return "Connecting";
-        }
-        if (s == DownloadState.DOWNLOADING) {
-            return "Downloading";
-        }
-        if (s == DownloadState.BUSY) {
-            return "Busy";
-        }
-        if (s == DownloadState.COMPLETE) {
-            return "Complete";
-        }
-        if (s == DownloadState.ABORTED) {
-            return "Aborted";
-        }
-        if (s == DownloadState.GAVE_UP) {
-            return "Gave up";
-        }
-        if (s == DownloadState.DISK_PROBLEM) {
-            return "Disk problem";
-        }
-        if (s == DownloadState.WAITING_FOR_GNET_RESULTS) {
-            return "Waiting for gnet results";
-        }
-        if (s == DownloadState.CORRUPT_FILE) {
-            return "Corrupt_FILE";
-        }
-        if (s == DownloadState.REMOTE_QUEUED) {
-            return "Remote_QUEUED";
-        }
-        if (s == DownloadState.HASHING) {
-            return "Hashing";
-        }
-        if (s == DownloadState.SAVING) {
-            return "Saving";
-        }
-        if (s == DownloadState.WAITING_FOR_USER) {
-            return "Waiting for user";
-        }
-        if (s == DownloadState.WAITING_FOR_CONNECTIONS) {
-            return "Waiting for connections";
-        }
-        if (s == DownloadState.ITERATIVE_GUESSING) {
-            return "Iterative guessing";
-        }
-        if (s == DownloadState.QUERYING_DHT) {
-            return "Querying DHT";
-        }
-        if (s == DownloadState.IDENTIFY_CORRUPTION) {
-            return "Identify corruption";
-        }
-        if (s == DownloadState.RECOVERY_FAILED) {
-            return "Recovery failed";
-        }
-        if (s == DownloadState.PAUSED) {
-            return "Paused";
-        }
-        if (s == DownloadState.INVALID) {
-            return "Invalid";
-        }
-        if (s == DownloadState.RESUMING) {
-            return "Resuming";
-        }
-        if (s == DownloadState.FETCHING) {
-            return "Fetching";
-        }
-        return null;
-    }
-    
+        
     private String fileNameFromURL(String urlString) {
         int ilast = urlString.lastIndexOf("/");
         if (ilast == -1) {
@@ -774,7 +648,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 if (!(d instanceof StoreDownloader)) return true;
                 String id = String.valueOf(System.identityHashCode(d));
                 if (!everActiveDownloaderIDs2Downloaders.containsKey(id)) {
-                    everActiveDownloaderIDs2Downloaders.put(id, new HeavyWeightDownloaderInterface(d));
+                    everActiveDownloaderIDs2Downloaders.put(id, d);
                 }
                 activeDownloaderIDS.add(id);
                 recordProgress(d, res, id);
@@ -788,7 +662,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
         //
         final Collection<String> idsToRemove = new ArrayList<String>();
         for (String downloaderID : everActiveDownloaderIDs2Downloaders.keySet()) {
-            DownloaderInterface d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
+            DownloaderInfo d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
             if (!activeDownloaderIDS.contains(downloaderID)) {
                 //
                 // We must have removed one of the previous from the
@@ -808,26 +682,13 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
         return res.toString();         
     }
     
-    private void recordProgress(DownloaderInterface d, StringBuffer res, String id) {
-        recordProgress(res, d.getAmountRead(), d.getContentLength(), d.getState(), id);
-    }
-    
-    private void recordProgress(CoreDownloader d, StringBuffer res, String id) {
-        recordProgress(res, d.getAmountRead(), d.getContentLength(), d.getState(), id);
-    }
-    
-    private void recordProgress(StringBuffer res, long read, long total, DownloadState state, String id) {
-        String ratio = String.valueOf((float)read / (float)total);
-        String status = downloadStatusToString(state);
+    private void recordProgress(DownloaderInfo d, StringBuffer res, String id) {
+        String ratio = String.valueOf((float)d.getAmountRead() / (float)d.getContentLength());
         String progressBarID = downloaderIDs2progressBarIDs.get(id);
-        res.append(id);
-        res.append(" ");
-        res.append(progressBarID);
-        res.append(" ");
-        res.append(ratio);
-        res.append(":");
-        res.append(status);
-        res.append("|");                
+        String stateName = downloadStateName.get(d.getState());
+
+        res.append(id).append(" ").append(progressBarID).append(" ").
+            append(ratio).append(":").append(stateName).append("|");
     }    
     
     /**
@@ -838,15 +699,15 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
     synchronized void checkEverActiveDownloaderIDs2Downloaders() {
         final Collection<String> idsToChange = new ArrayList<String>();
         for (String downloaderID : everActiveDownloaderIDs2Downloaders.keySet()) {
-            DownloaderInterface d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
-            if (d.isCompleted() && d.isHeavyWeight()) {
+            DownloaderInfo d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
+            if (d.isCompleted() && d instanceof Downloader) {
                 idsToChange.add(downloaderID);
             }
         }
         for (String id : idsToChange) {
-            DownloaderInterface d = everActiveDownloaderIDs2Downloaders.get(id);
+            DownloaderInfo d = everActiveDownloaderIDs2Downloaders.get(id);
             everActiveDownloaderIDs2Downloaders.remove(id);
-            everActiveDownloaderIDs2Downloaders.put(id, new LightWeightDownloaderInterface(d));
+            everActiveDownloaderIDs2Downloaders.put(id, new LightWeightDownloader(d));
         }
     }
 

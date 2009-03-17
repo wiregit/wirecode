@@ -15,36 +15,10 @@ import com.limegroup.gnutella.downloader.DownloadStateEvent;
  * resume downloads. Note that there is no start method;
  * it is assumed that the downloader will start as soon as it is instantiated.
  */
-public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadStateEvent> {
+public interface Downloader extends DownloaderInfo,
+                                    BandwidthTracker,
+                                    ListenerSupport<DownloadStateEvent> {
     
-    /** Enumerates the various states of a download. */
-    public static enum DownloadState {
-        INITIALIZING,
-        QUEUED,
-        CONNECTING,
-        DOWNLOADING,
-        BUSY,
-        COMPLETE,
-        ABORTED,
-        GAVE_UP,
-        DISK_PROBLEM,
-        WAITING_FOR_GNET_RESULTS,
-        CORRUPT_FILE,
-        REMOTE_QUEUED,
-        HASHING,
-        SAVING,
-        WAITING_FOR_USER,
-        WAITING_FOR_CONNECTIONS,
-        ITERATIVE_GUESSING,
-        QUERYING_DHT,
-        IDENTIFY_CORRUPTION,
-        RECOVERY_FAILED,
-        PAUSED,
-        INVALID,
-        RESUMING,
-        FETCHING
-    }
-
     /**
      * Marker string for BitTorrent downloads.
      */
@@ -144,11 +118,6 @@ public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadSt
     /** Returns the file under which the download will be saved when complete.  
      * Counterpart to setSaveFile. */
     public File getSaveFile();
-    
-    /**
-     * Returns the state of this.
-     */
-    public DownloadState getState();
 
     /**
      * Returns an upper bound on the amount of time (in seconds) this will stay 
@@ -156,17 +125,6 @@ public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadSt
      */
     public int getRemainingStateTime();
 
-    /**
-     * Returns the size of this file in bytes, i.e., the total amount to
-     * download or -1 if content length is unknown.
-     */
-    public long getContentLength();
-
-    /**
-     * Returns the amount read by this so far, in bytes.
-     */
-    public long getAmountRead();
-    
     /**
      * @return the amount of data pending to be written on disk (i.e. in cache, queue)
      */
@@ -250,11 +208,6 @@ public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadSt
      * @return -1 if downloader does not support it
      */
     public int getTriedHostCount();
-    
-    /**
-     * Determines if the download is completed.
-     */
-    public boolean isCompleted();
 	
 	/**
 	 * @return the amount of data that has been verified
