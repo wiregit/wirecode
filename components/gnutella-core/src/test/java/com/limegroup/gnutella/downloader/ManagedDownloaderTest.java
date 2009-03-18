@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -564,10 +563,20 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	        will(new ExecuteRunnableAction());
 	    }});
 	    
-	    ManagedDownloaderImpl managedDownloaderImpl1 = new ManagedDownloaderImpl(saveLocationManager, null, null, null, null, null, null, requeryManagerFactory, null, null, null, null, null, null, null, null, null, null, background, null, null, null, null, null, null, downloadProcessingQueue);
+	    ManagedDownloaderImpl managedDownloaderImpl1 =
+            new ManagedDownloaderImpl(saveLocationManager, null, null, null,
+                    null, null, null, requeryManagerFactory, null, null, null,
+                    null, null, null, null, null, null, null, background, null,
+                    null, null, null, null, null, downloadProcessingQueue,
+                    null, null);
 	    managedDownloaderImpl1.addListener(downloadListener1);
         
-        ManagedDownloaderImpl managedDownloaderImpl2 = new ManagedDownloaderImpl(saveLocationManager, null, null, null, null, null, null, requeryManagerFactory, null, null, null, null, null, null, null, null, null, null, background, null, null, null, null, null, null, downloadProcessingQueue);
+        ManagedDownloaderImpl managedDownloaderImpl2 =
+            new ManagedDownloaderImpl(saveLocationManager, null, null, null,
+                    null, null, null, requeryManagerFactory, null, null, null,
+                    null, null, null, null, null, null, null, background, null,
+                    null, null, null, null, null, downloadProcessingQueue,
+                    null, null);
         managedDownloaderImpl2.addListener(downloadListener2);
         
 	    context.checking(new Expectations() {{

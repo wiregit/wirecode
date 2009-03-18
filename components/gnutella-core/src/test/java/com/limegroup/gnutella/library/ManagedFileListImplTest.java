@@ -17,6 +17,7 @@ import static com.limegroup.gnutella.library.FileManagerTestUtils.createHiddenTe
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewExtensionTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createPartialCopy;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.getUrn;
 
 import java.io.File;
@@ -30,6 +31,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.core.settings.ContentSettings;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
@@ -271,6 +273,27 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertContainsFiles(CollectionUtils.listOf(fileList), f1, f2);
     }
 
+    public void testIgnoreMisnamedFiles() throws Exception {
+        // Create some ordinary files and add them
+        f1 = createNewTestFile(1, _scratchDir);
+        f2 = createNewTestFile(1, _scratchDir);
+        assertAdds(fileList, f1, f2);
+        assertEquals(2, fileList.size());
+
+        // Try to add a misnamed file - it's an ASF but claims to be a FOO.
+        // The test file is in the public domain:
+        // http://www.archive.org/details/DovKaplanKolNidreKolNidrewma
+        File asf =
+            TestUtils.getResourceFile("com/limegroup/gnutella/resources/Kol_Nidre.wma");
+        f3 = createPartialCopy(asf, "foo", _scratchDir, 1024);
+        assertAddFails("MISLEADING_NAME", fileList, f3);
+        assertEquals(2, fileList.size());
+        
+        assertLoads(fileList);
+        assertEquals(2, fileList.size());
+        assertContainsFiles(CollectionUtils.listOf(fileList), f1, f2);
+    }
+    
     public void testPausableIterator() throws Exception {
         f1 = createNewTestFile(1, _scratchDir);
         f2 = createNewTestFile(3, _scratchDir);

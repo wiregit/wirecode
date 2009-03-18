@@ -81,8 +81,10 @@ import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.UrnCache;
+import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.util.QueryUtils;
@@ -446,6 +448,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final ApplicationServices applicationServices;
     protected final RemoteFileDescFactory remoteFileDescFactory;
     protected final Provider<PushList> pushListProvider;
+    protected final DangerousFileChecker dangerousFileChecker;
+    protected final SpamManager spamManager;
 
     private final SocketsManager socketsManager;
     
@@ -476,7 +480,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
             RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
             SocketsManager socketsManager, 
-            @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue) {
+            @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
+            DangerousFileChecker dangerousFileChecker,
+            SpamManager spamManager) {
         super(saveLocationManager);
         this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
@@ -504,6 +510,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
         this.pushListProvider = pushListProvider;
+        this.dangerousFileChecker = dangerousFileChecker;
+        this.spamManager = spamManager;
     }
     
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
@@ -702,6 +710,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             case CORRUPT_FILE:
                 clearingNeeded = true;
                 setState(status);
+                break;
+            case DANGEROUS:
+                clearingNeeded = true;
+                setState(DownloadState.ABORTED);
                 break;
 			case BUSY:
             case GAVE_UP:
@@ -1885,14 +1897,29 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     /**
-     * Verifies the completed file against the SHA1 hash and saves it.  If
-     * there is corruption, it asks the user whether to discard or keep the file 
-     * @return {@link DownloadState#COMPLETE} if all went fine, 
-     * {@link DownloadState#DISK_PROBLEM} if not.
-     * @throws InterruptedException if we get interrupted while waiting for user
+     * Verifies the completed file against the SHA1 hash, checks that it's not
+     * dangerous, and saves it. 
+     * @return {@link DownloadStatus#COMPLETE} if all went fine,
+     * {@link DownloadStatus#CORRUPT_FILE} if the hash does not match,
+     * {@link DownloadStatus#INFECTED_FILE} if a virus is detected, or 
+     * {@link DownloadStatus#DISK_PROBLEM} if there's a problem saving the file.
+     * @throws InterruptedException if interrupted while waiting for the user's
      * response.
      */
     private DownloadState verifyAndSave() throws InterruptedException {
+        
+        // Check whether this is a dangerous file
+        if(dangerousFileChecker.isDangerous(incompleteFile)) {
+            // Mark the file as spam in future search results
+            RemoteFileDesc[] type = new RemoteFileDesc[0];
+            spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
+            // Delete the file
+            discardCorruptDownload(true);
+            // Inform the user that the file was deleted
+            downloadCallback.dangerousDownloadDeleted(getSaveFile().getName());
+            // Remove the download from the UI
+            return DownloadState.DANGEROUS;
+        }
         
         // Find out the hash of the file and verify that its the same
         // as our hash.
@@ -2530,10 +2557,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     }
                 }
 
-                if (delete)
+                if (delete) {
                     stop();
-                else 
+                    incompleteFile.delete();
+                } else { 
                     commonOutFile.setDiscardUnverified(false);
+                }
                 
                 synchronized(corruptStateLock) {
                     corruptStateLock.notify();

@@ -247,6 +247,8 @@ public class Main {
         public void promptAboutCorruptDownload(Downloader dloader) {
             dloader.discardCorruptDownload(false);
         }
+        
+        public void dangerousDownloadDeleted(String filename) {}
     
         public void restoreApplication() {}
     

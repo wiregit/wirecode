@@ -59,7 +59,8 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void promptAboutCorruptDownload(Downloader dloader) {
         corruptChecked = true;
         dloader.discardCorruptDownload(delCorrupt);
-    }    
+    }
+    public void dangerousDownloadDeleted(String filename) { }
     public void browseHostFailed(GUID guid) {}
 	public void restoreApplication() {}
 	public void showDownloads() {}

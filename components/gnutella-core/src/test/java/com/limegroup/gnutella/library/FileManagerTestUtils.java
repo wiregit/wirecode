@@ -7,6 +7,7 @@ import static org.limewire.util.AssertComparisons.assertInstanceof;
 import static org.limewire.util.AssertComparisons.assertNotNull;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
@@ -303,6 +304,33 @@ public class FileManagerTestUtils {
     public static File createHiddenTestFile(int size, File dir) throws Exception {
         File real = createNewTestFile(size, dir);
         return new HiddenFakeFile(dir, real.getName());
+    }
+    
+
+    /**
+     * Returns a file with the same initial bytes as the source file, in the
+     * given directory, with the given extension. If the specified size is
+     * greater than the size of the file, the whole file will be copied.
+     */
+    public static File createPartialCopy(File source, String ext, File dir,
+            int size) throws Exception {
+        File temp = File.createTempFile(source.getName(), ext, dir);
+        temp.deleteOnExit();
+        FileInputStream in = new FileInputStream(source);
+        byte[] buf = new byte[size];
+        int read = 0;
+        while(read < buf.length) {
+            int i = in.read(buf, read, buf.length - read);
+            if(i == -1)
+                break;
+            read += i;
+        }
+        in.close();
+        FileOutputStream out = new FileOutputStream(temp);
+        out.write(buf);
+        out.flush();
+        out.close();
+        return temp;
     }
 
     private static class HugeFakeFile extends File {

@@ -54,6 +54,7 @@ public interface DownloaderInfo {
         PAUSED,
         INVALID,
         RESUMING,
-        FETCHING
+        FETCHING,
+        DANGEROUS
     }
 }

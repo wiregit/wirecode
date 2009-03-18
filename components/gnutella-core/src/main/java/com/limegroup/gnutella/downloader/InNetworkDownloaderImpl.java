@@ -30,8 +30,10 @@ import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.UrnCache;
+import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.version.DownloadInformation;
 
@@ -48,26 +50,44 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
      * Constructs a new downloader that's gonna work off the network.
      */
     @Inject
-    InNetworkDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
-            FileManager fileManager, IncompleteFileManager incompleteFileManager,
-            DownloadCallback downloadCallback, NetworkManager networkManager,
-            AlternateLocationFactory alternateLocationFactory, RequeryManagerFactory requeryManagerFactory,
-            QueryRequestFactory queryRequestFactory, OnDemandUnicaster onDemandUnicaster,
-            DownloadWorkerFactory downloadWorkerFactory, AltLocManager altLocManager,
-            ContentManager contentManager, SourceRankerFactory sourceRankerFactory,
+    InNetworkDownloaderImpl(SaveLocationManager saveLocationManager,
+            DownloadManager downloadManager,
+            FileManager fileManager,
+            IncompleteFileManager incompleteFileManager,
+            DownloadCallback downloadCallback,
+            NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory,
+            RequeryManagerFactory requeryManagerFactory,
+            QueryRequestFactory queryRequestFactory,
+            OnDemandUnicaster onDemandUnicaster,
+            DownloadWorkerFactory downloadWorkerFactory,
+            AltLocManager altLocManager,
+            ContentManager contentManager,
+            SourceRankerFactory sourceRankerFactory,
             UrnCache urnCache,
-            VerifyingFileFactory verifyingFileFactory, DiskController diskController,
-             IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
+            VerifyingFileFactory verifyingFileFactory,
+            DiskController diskController,
+            IPFilter ipFilter,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter,
+            Provider<HashTreeCache> tigerTreeCache,
+            ApplicationServices applicationServices,
+            RemoteFileDescFactory remoteFileDescFactory,
+            Provider<PushList> pushListProvider,
             SocketsManager socketsManager, 
-            @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue) throws SaveLocationException {
-        super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
-                downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
-                queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
-                contentManager, sourceRankerFactory, urnCache, 
-                verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider, socketsManager, downloadStateProcessingQueue);
+            @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
+            DangerousFileChecker dangerousFileChecker,
+            SpamManager spamManager) throws SaveLocationException {
+        super(saveLocationManager, downloadManager, fileManager,
+                incompleteFileManager, downloadCallback, networkManager,
+                alternateLocationFactory, requeryManagerFactory,
+                queryRequestFactory, onDemandUnicaster, downloadWorkerFactory,
+                altLocManager, contentManager, sourceRankerFactory, urnCache, 
+                verifyingFileFactory, diskController, ipFilter,
+                backgroundExecutor, messageRouter, tigerTreeCache,
+                applicationServices, remoteFileDescFactory, pushListProvider,
+                socketsManager, downloadStateProcessingQueue,
+                dangerousFileChecker, spamManager);
     }
     
     /* (non-Javadoc)

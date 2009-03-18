@@ -14,7 +14,8 @@ public class FileListChangeFailedException extends Exception {
         REVISIONS_CHANGED,
         CANT_CREATE_FD,
         OLD_WASNT_MANAGED,
-        CANT_ADD_TO_LIST
+        CANT_ADD_TO_LIST,
+        DANGEROUS_FILE
     }
 
     public FileListChangeFailedException(FileListChangedEvent event, Reason reason) {

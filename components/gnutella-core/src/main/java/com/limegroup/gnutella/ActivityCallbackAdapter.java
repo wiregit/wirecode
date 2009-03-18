@@ -108,6 +108,10 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     public void promptAboutCorruptDownload(Downloader dloader) {
        
     }
+    
+    public void dangerousDownloadDeleted(String filename) {
+        
+    }
 
     public void downloadCompleted(Downloader d) {
         

@@ -505,6 +505,11 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
 
             @Override
             public void promptAboutCorruptDownload(Downloader dloader) {
+                dloader.discardCorruptDownload(false);
+            }
+            
+            @Override
+            public void dangerousDownloadDeleted(String filename) {
             }
 
             @Override

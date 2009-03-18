@@ -26,4 +26,8 @@ public interface DownloadCallback {
      */
     public void promptAboutCorruptDownload(Downloader dloader);
     
+    /**
+     * Declares that a dangerous download was decisively deleted.
+     */
+    public void dangerousDownloadDeleted(String filename);
 }

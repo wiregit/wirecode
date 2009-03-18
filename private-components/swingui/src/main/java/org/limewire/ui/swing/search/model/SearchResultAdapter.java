@@ -218,6 +218,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
 
     @Override
     public void setDownloadState(BasicDownloadState downloadState) {
+        // If the download was aborted, recalculate the spam score
+        if(downloadState == BasicDownloadState.NOT_STARTED)
+            recalculateSpam();
         BasicDownloadState oldDownloadState = this.downloadState;
         this.downloadState = downloadState;
         firePropertyChange("downloadState", oldDownloadState, downloadState);
@@ -278,6 +281,13 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         boolean oldSpam = isSpam();
         spamCache = getSpamBoolean(spam);
         firePropertyChange("spam", oldSpam, spam);
+    }
+    
+    private void recalculateSpam() {
+        boolean oldSpam = isSpam();
+        spamCache = null;
+        boolean newSpam = isSpam();
+        firePropertyChange("spam", oldSpam, newSpam);
     }
 
     @Override

@@ -4,6 +4,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringArraySetting;
+import org.limewire.setting.StringSetting;
 
 /**
  * Settings for filters
@@ -99,7 +100,8 @@ public class FilterSettings extends LimeProps {
      * search results.
      */
     public static final StringArraySetting BANNED_EXTENSIONS =
-        FACTORY.createStringArraySetting("BANNED_EXTENSIONS", new String[]{".vbs",".asf",".asx",".wmv",".html",".htm"});
+        FACTORY.createStringArraySetting("BANNED_EXTENSIONS",
+                new String[]{".vbs",".asf",".asx",".wm",".wma",".wmv",".htm",".html"});
     
     /**
      * Whether to filter queries containing hashes.
@@ -147,4 +149,13 @@ public class FilterSettings extends LimeProps {
     public static final IntSetting MAX_RESPONSES_PER_REPLY =
         FACTORY.createRemoteIntSetting("MAX_RESPONSES_PER_REPLY", 10, 
                 "FilterSettings.maxResponsesPerReply", 10, 256);
+    
+    /**
+     * Base32-encoded, deflated, bencoded description of dangerous file types.
+     * See DangerousFileTypeEncoder.
+     */
+    public static final StringSetting DANGEROUS_FILE_TYPES =
+        FACTORY.createRemoteStringSetting("DANGEROUS_FILE_TYPES",
+                "PCOEWMNUJLG4SMNWJIWE4M5SFLHTKBXCIQIFDFU2NJUJLG3DNBTGLIFWVG2C73N44CZJWDFLDCJM5ZNEUYBABWCDCMGA",
+                "FilterSettings.DangerousFileTypes");
 }

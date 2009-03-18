@@ -31,10 +31,12 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.UrnCache;
+import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.templates.StoreFileNameTemplateProcessor;
 import com.limegroup.gnutella.templates.StoreSubDirectoryTemplateProcessor;
 import com.limegroup.gnutella.templates.StoreTemplateProcessor;
@@ -54,27 +56,45 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
     private final MetaDataFactory metaDataFactory;
 
     @Inject
-    public StoreDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
-            FileManager fileManager, IncompleteFileManager incompleteFileManager,
-            DownloadCallback downloadCallback, NetworkManager networkManager,
-            AlternateLocationFactory alternateLocationFactory, RequeryManagerFactory requeryManagerFactory,
-            QueryRequestFactory queryRequestFactory, OnDemandUnicaster onDemandUnicaster,
-            DownloadWorkerFactory downloadWorkerFactory, AltLocManager altLocManager,
-            ContentManager contentManager, SourceRankerFactory sourceRankerFactory,
+    public StoreDownloaderImpl(SaveLocationManager saveLocationManager,
+            DownloadManager downloadManager,
+            FileManager fileManager,
+            IncompleteFileManager incompleteFileManager,
+            DownloadCallback downloadCallback,
+            NetworkManager networkManager,
+            AlternateLocationFactory alternateLocationFactory,
+            RequeryManagerFactory requeryManagerFactory,
+            QueryRequestFactory queryRequestFactory,
+            OnDemandUnicaster onDemandUnicaster,
+            DownloadWorkerFactory downloadWorkerFactory,
+            AltLocManager altLocManager,
+            ContentManager contentManager,
+            SourceRankerFactory sourceRankerFactory,
             UrnCache urnCache, 
-            VerifyingFileFactory verifyingFileFactory, DiskController diskController,
-             IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, 
-            Provider<PushList> pushListProvider, SocketsManager socketsManager, MetaDataFactory metaDataFactory, 
-            @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue) {
-        super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
-                downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
-                queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
-                contentManager, sourceRankerFactory, urnCache, 
-                verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider,
-                socketsManager, downloadStateProcessingQueue);
+            VerifyingFileFactory verifyingFileFactory,
+            DiskController diskController,
+            IPFilter ipFilter,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<MessageRouter> messageRouter,
+            Provider<HashTreeCache> tigerTreeCache,
+            ApplicationServices applicationServices,
+            RemoteFileDescFactory remoteFileDescFactory, 
+            Provider<PushList> pushListProvider,
+            SocketsManager socketsManager,
+            MetaDataFactory metaDataFactory, 
+            @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
+            DangerousFileChecker dangerousFileChecker,
+            SpamManager spamManager) {
+        super(saveLocationManager, downloadManager, fileManager,
+                incompleteFileManager, downloadCallback, networkManager,
+                alternateLocationFactory, requeryManagerFactory,
+                queryRequestFactory, onDemandUnicaster, downloadWorkerFactory,
+                altLocManager, contentManager, sourceRankerFactory, urnCache, 
+                verifyingFileFactory, diskController, ipFilter,
+                backgroundExecutor, messageRouter, tigerTreeCache,
+                applicationServices, remoteFileDescFactory, pushListProvider,
+                socketsManager, downloadStateProcessingQueue,
+                dangerousFileChecker, spamManager);
         this.metaDataFactory = metaDataFactory;
     }
 

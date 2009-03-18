@@ -62,6 +62,7 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.auth.ValidationEvent;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @Singleton
@@ -122,6 +123,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     private final FileDescFactory fileDescFactory; 
     private final ListeningExecutorService fileLoader;
     private final PropertyChangeSupport changeSupport;
+    private final DangerousFileChecker dangerousFileChecker;
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -213,7 +215,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                         UrnCache urnCache,
                         FileDescFactory fileDescFactory,
                         EventMulticaster<ManagedListStatusEvent> managedListSupportMulticaster,
-                        UrnValidator urnValidator) {
+                        UrnValidator urnValidator,
+                        DangerousFileChecker dangerousFileChecker) {
         this.urnCache = urnCache;
         this.fileDescFactory = fileDescFactory;
         this.fileDescMulticaster = fileDescMulticaster;
@@ -228,6 +231,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         this.fileToUrnFuture = new HashMap<File, Future<Set<URN>>>();
         this.urnValidator = urnValidator;
         this.changeSupport = new SwingSafePropertyChangeSupport(this);
+        this.dangerousFileChecker = dangerousFileChecker;
     }
     
     @Override
@@ -924,6 +928,10 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         FileDesc fd = null;
         boolean revchange = false;
         boolean failed = false;
+        
+        // Don't add dangerous files to the library (this call may block)
+        boolean dangerous = dangerousFileChecker.isDangerous(file);
+        
         Set<URN> urns = urnEvent.getResult();
         rwLock.writeLock().lock();
         try {
@@ -935,7 +943,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                 
                 // Only load the file if we were able to calculate URNs 
                 // assume the fd is being shared
-                if(urns != null && !urns.isEmpty()) {
+                if(urns != null && !urns.isEmpty() && !dangerous) {
                     fd = createFileDesc(file, urns, files.size());
                     if(fd != null) {
                         if(contains(file)) {
@@ -959,6 +967,10 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         } else if(urnEvent.getType() != FutureEvent.Type.SUCCESS) {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
             task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.ERROR_LOADING_URNS, urnEvent.getException()));
+        } else if(dangerous) {
+            LOG.debugf("Not adding {0} because the file is dangerous", file);
+            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
+            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.DANGEROUS_FILE));
         } else if(fd == null) {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
             task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.CANT_CREATE_FD));
