@@ -2,7 +2,7 @@
     <properties file="${limewire.ivy.home}/dependencies.props"/>
     
     <!-- a bunch of patterns for how to store & lookup dependencies. -->
-    <property name="ivy.local.default.root"             value="${ivy.default.ivy.user.dir}/local" override="false"/>
+    <property name="ivy.local.default.root"             value="${limewire.home}/.ivy2/local" override="false"/>
 	<property name="ivy.local.default.ivy.pattern"      value="[organisation]/[module]/[type]s/ivy.xml" override="false"/>
 	<property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[type]s/[artifact].[ext]" override="false"/>
 	

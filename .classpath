@@ -133,7 +133,6 @@
 	<classpathentry kind="lib" path="lib/jars/tests/org.mortbay.jetty-5.1.12.jar"/>
 	<classpathentry kind="src" output="components/swarm/build/classes" path="components/swarm/src/main/java"/>
 	<classpathentry kind="src" output="components/swarm/build/tests" path="components/swarm/src/test/java"/>
-	<classpathentry kind="src" path="components/swarm/src/test/resources"/>
 	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-beta1.jar" sourcepath="lib/sources/httpclient-4.0-beta1-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-beta2.jar" sourcepath="lib/sources/httpcore-4.0.beta2-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2.jar" sourcepath="lib/sources/httpcore-nio-4.0-beta2-src.zip"/>
