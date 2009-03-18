@@ -15,7 +15,6 @@ import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertyUtils;
-import org.limewire.util.StringUtils;
 
 /**
  * Defines the table format for the playlist table.
@@ -148,7 +147,9 @@ public class PlaylistTableFormat<T extends LocalFileItem> extends AbstractMyLibr
             String title1 = PropertyUtils.getTitle(o1);
             String title2 = PropertyUtils.getTitle(o2);
             
-            return StringUtils.compareFullPrimary(title1, title2);
+            return title1.compareToIgnoreCase(title2);
+            // TODO: This is making things insanely slow -- commenting out for now.
+//            return StringUtils.compareFullPrimary(title1, title2);
         }
     }
 }

@@ -7,7 +7,6 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.Playlist;
-import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.FileMetaData;
 
 /**
@@ -142,8 +141,10 @@ public class PlaylistFileItemImpl implements PlaylistFileItem, Comparable {
     @Override
     public int compareTo(Object obj) {
         if (obj instanceof PlaylistFileItem) {
-            return StringUtils.compareFullPrimary(getFileName(),
-                    ((PlaylistFileItem) obj).getFileName());
+            return getFileName().compareToIgnoreCase(((PlaylistFileItem) obj).getFileName());
+            // TODO: This is making things insanely slow -- commenting out for now.
+//            return StringUtils.compareFullPrimary(getFileName(),
+//                    ((PlaylistFileItem) obj).getFileName());
         } else {
             return 1;
         }
