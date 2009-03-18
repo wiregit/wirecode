@@ -22,8 +22,6 @@ public class UrnToken extends KeywordToken {
     
     @Override
     public boolean equals(Object o) {
-        if(o == null)
-            return false;
         if(!(o instanceof UrnToken))
             return false;
         return keyword.equals(((UrnToken)o).keyword);

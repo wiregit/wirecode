@@ -35,8 +35,6 @@ public class ApproximateSizeToken extends Token {
     
     @Override
     public boolean equals(Object o) {
-        if(o == null)
-            return false;
         if(!(o instanceof ApproximateSizeToken))
             return false;
         return size == ((ApproximateSizeToken)o).size;

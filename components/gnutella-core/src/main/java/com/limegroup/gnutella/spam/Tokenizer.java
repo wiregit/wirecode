@@ -10,14 +10,18 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -121,6 +125,37 @@ public class Tokenizer {
             if(!networkInstanceUtils.isPrivateAddress(connectable.getInetAddress()))
                 set.add(new AddressToken(connectable.getAddress(), ipFilter));
         }
+        set.add(new ClientGUIDToken(Base32.encode(desc.getClientGUID())));
+    }
+    
+    /**
+     * Tokenizes a QueryReply. Filenames and XML metadata are ignored.
+     * 
+     * @param qr the QueryReply that should be tokenized
+     * @return a non-empty set of Tokens
+     */
+    public Set<Token> getNonKeywordTokens(QueryReply qr) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Tokenizing " + qr);
+        Set<Token> set = new HashSet<Token>();
+        // Client GUID
+        set.add(new ClientGUIDToken(Base32.encode(qr.getClientGUID())));
+        // Responder's address, unless private
+        String ip = qr.getIP();
+        if(!networkInstanceUtils.isPrivateAddress(ip))
+            set.add(new AddressToken(ip, ipFilter));
+        try {
+            for(Response r : qr.getResultsArray()) {
+                // URNs
+                for(URN urn : r.getUrns())
+                    set.add(new UrnToken(urn.toString()));
+                // File sizes
+                long size = r.getSize();
+                set.add(new SizeToken(size));
+                set.add(new ApproximateSizeToken(size));
+            }
+        } catch(BadPacketException ignored) {}
+        return set;
     }
 
 	/**

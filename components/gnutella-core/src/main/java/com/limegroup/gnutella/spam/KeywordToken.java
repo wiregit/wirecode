@@ -32,8 +32,6 @@ public class KeywordToken extends Token {
     
     @Override
     public boolean equals(Object o) {
-        if(o == null)
-            return false;
         if(!(o instanceof KeywordToken))
             return false;
         return keyword.equals(((KeywordToken)o).keyword);

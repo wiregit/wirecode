@@ -22,8 +22,6 @@ public class FileExtensionToken extends KeywordToken {
     
     @Override
     public boolean equals(Object o) {
-        if(o == null)
-            return false;
         if(!(o instanceof FileExtensionToken))
             return false;
         return keyword.equals(((FileExtensionToken)o).keyword);

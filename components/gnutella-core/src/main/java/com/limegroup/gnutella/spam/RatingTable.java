@@ -31,8 +31,8 @@ import org.limewire.util.GenericsUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.spam.Token;
 
 @Singleton
 public class RatingTable implements Service {
@@ -152,6 +152,16 @@ public class RatingTable implements Service {
 	protected synchronized void rate(RemoteFileDesc[] descs, float rating) {
 		rateInternal(lookup(tokenizer.getTokens(descs)), rating);
 	}
+    
+    /**
+     * Assigns the given rating to a QueryReply
+     * 
+     * @param qr a QueryReply to be rated
+     * @param rating a rating between 0 (not spam) and 1 (spam)
+     */
+    protected synchronized void rate(QueryReply qr, float rating) {
+        rateInternal(lookup(tokenizer.getNonKeywordTokens(qr)), rating);
+    }
 
 	/**
      * Clears the ratings of the tokens associated with a QueryRequest and

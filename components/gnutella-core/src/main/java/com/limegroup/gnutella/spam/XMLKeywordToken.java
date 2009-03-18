@@ -23,8 +23,6 @@ public class XMLKeywordToken extends KeywordToken {
     
     @Override
     public boolean equals(Object o) {
-        if(o == null)
-            return false;
         if(!(o instanceof XMLKeywordToken))
             return false;
         return keyword.equals(((XMLKeywordToken)o).keyword);

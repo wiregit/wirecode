@@ -8,15 +8,20 @@ import junit.framework.Test;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.filters.URNFilter;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
@@ -56,9 +61,10 @@ public class SpamManagerTest extends LimeTestCase {
         "'http://www.limewire.com/schemas/video.xsd'>" +
         "<video title='mushroom'></video></videos>";
 
-    private static URN urn1, urn2, urn3, urn4;
+    private static URN urn1, urn2, urn3, urn4, spamUrn;
     private static LimeXMLDocument doc1, doc2;
     
+    private Injector injector;
     private SpamManager manager;
     private LimeXMLDocumentFactory limeXMLDocumentFactory;
     private QueryRequestFactory queryRequestFactory;
@@ -85,8 +91,13 @@ public class SpamManagerTest extends LimeTestCase {
         urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
         urn3 = URN.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
         urn4 = URN.createSHA1Urn("urn:sha1:XLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
+        
+        // Blacklist a URN
+        String spam = "WLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB";
+        spamUrn = URN.createSHA1Urn("urn:sha1:" + spam);
+        FilterSettings.FILTERED_URNS_LOCAL.setValue(new String[] { spam });
 
-		Injector injector = LimeTestUtils.createInjector();
+		injector = LimeTestUtils.createInjector();
 		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
 		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 		remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
@@ -283,6 +294,34 @@ public class SpamManagerTest extends LimeTestCase {
     }
     
     /**
+     * Tests that the client GUID of the result affects the spam rating
+     */
+    public void testClientGUIDAffects() throws Exception {
+        byte[] guid1 = GUID.makeGuid();
+        byte[] guid2 = GUID.makeGuid();
+        
+        // A result arrives and the user marks it as spam
+        RemoteFileDesc marked =
+            createRFD(addr1, port1, badger, null, urn1, size1, guid1);
+        manager.handleUserMarkedSpam(new RemoteFileDesc[]{marked});
+        assertTrue(marked.isSpam());
+        assertGreaterThan(0f, marked.getSpamRating());
+        
+        // A result with nothing in common but the client GUID should receive
+        // a non-zero rating (TODO: should it be considered spam?)
+        RemoteFileDesc sameGUID =
+            createRFD(addr2, port2, mushroom, null, urn2, size2, guid1);
+        assertGreaterThan(0f, sameGUID.getSpamRating());
+        assertLessThan(marked.getSpamRating(), sameGUID.getSpamRating());
+        
+        // A result with nothing in common should receive a zero spam rating
+        RemoteFileDesc unrelated =
+            createRFD(addr3, port3, snake, null, urn3, size3, guid2);
+        assertFalse(unrelated.isSpam());
+        assertEquals(0f, unrelated.getSpamRating());
+    }
+    
+    /**
      * Tests that any XML documents in the result affect the spam rating
      */
     public void testXMLAffects() throws Exception {
@@ -357,7 +396,10 @@ public class SpamManagerTest extends LimeTestCase {
         assertEquals(0f, unrelated.getSpamRating());
     }
     
-    public void testBlacklistAffects() throws Exception {
+    /**
+     * Tests that the IP address blacklist affects the spam rating
+     */
+    public void testAddressBlacklistAffects() throws Exception {
         // A result arrives from a whitelisted address - not spam
         RemoteFileDesc white = createRFD(addr1, port1, badger, null, urn1, size1);
         assertFalse(white.isSpam());
@@ -368,17 +410,72 @@ public class SpamManagerTest extends LimeTestCase {
         assertTrue(black.isSpam());
         assertEquals(1f, black.getSpamRating());
     }
+    
+    /** 
+     * Tests that the URN blacklist affects the spam rating
+     */
+    public void testUrnBlacklistAffects() throws Exception {
+        // A query reply with a blacklisted URN arrives
+        ResponseFactory responseFactory =
+            injector.getInstance(ResponseFactory.class);
+        Response response =
+            responseFactory.createResponse(0, size1, badger+snake, spamUrn);
+        QueryReplyFactory queryReplyFactory =
+            injector.getInstance(QueryReplyFactory.class);
+        QueryReply reply = queryReplyFactory.createQueryReply(GUID.makeGuid(),
+                (byte)0, port1, new byte[] {1, 1, 1, 1}, 0,
+                new Response[] {response}, GUID.makeGuid(), false, false,
+                false, false, false, false);
 
-    private RemoteFileDesc createRFD(String addr, int port,
-            String name, LimeXMLDocument doc, URN urn, int size) throws Exception {
+        // The URN filter should block the result and mark it as spam
+        URNFilter urnFilter = injector.getInstance(URNFilter.class);
+        urnFilter.refreshURNs();
+        assertEquals(0, manager.getRatingTable().size());
+        assertFalse(urnFilter.allow(reply));
+        assertGreaterThan(0, manager.getRatingTable().size());
+
+        // A result with the same keywords as the spam result should receive a
+        // zero spam rating
+        RemoteFileDesc sameName =
+            createRFD(addr2, port2, badger+snake, null, urn2, size2);
+        assertFalse(sameName.isSpam());
+        assertEquals(0f, sameName.getSpamRating());
+
+        // A result from the same address as the spam result should received a
+        // non-zero spam rating
+        RemoteFileDesc sameAddr =
+            createRFD(addr1, port3, badger+snake, null, urn3, size3);
+        assertGreaterThan(0f, sameAddr.getSpamRating());
+
+        // A result with the same size as the spam result should receive a
+        // non-zero spam rating
+        RemoteFileDesc sameSize =
+            createRFD(addr4, port4, badger+snake, null, urn4, size1);
+        assertGreaterThan(0f, sameSize.getSpamRating());
+
+        // An unrelated result should receive a zero spam rating
+        RemoteFileDesc unrelated =
+            createRFD(addr4, port4, badger+snake, null, urn4, size4);
+        assertFalse(unrelated.isSpam());
+        assertEquals(0f, unrelated.getSpamRating());
+    }
+    
+    private RemoteFileDesc createRFD(String addr, int port, String name,
+            LimeXMLDocument doc, URN urn, int size) throws Exception {
+        return createRFD(addr, port, name, doc, urn, size, GUID.makeGuid());
+    }
+    
+    private RemoteFileDesc createRFD(String addr, int port, String name,
+            LimeXMLDocument doc, URN urn, int size, byte[] guid)
+    throws Exception {
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
         RemoteFileDesc rfd =
-                remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl(addr, port, false), 1, name, size,
-                DataUtils.EMPTY_GUID, 3, 3, false, doc, urns, false, "ALT", 0l);
+                remoteFileDescFactory.createRemoteFileDesc(
+                        new ConnectableImpl(addr, port, false), 1, name, size,
+                        guid, 3, 3, false, doc, urns, false, "ALT", 0);
         // This would normally be called by the SearchResultHandler
         manager.calculateSpamRating(rfd);
         return rfd;    
     }
-    
 }

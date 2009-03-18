@@ -7,6 +7,7 @@ import org.limewire.core.settings.SearchSettings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 @Singleton
@@ -61,6 +62,14 @@ public class SpamManager {
 		rfd.setSpamRating(rating);
         return rating;
 	}
+    
+    /**
+     * Increases the spam ratings of tokens associated with a spam query reply.
+     */
+    public void handleSpamQueryReply(QueryReply qr) {
+        if(SearchSettings.ENABLE_SPAM_FILTER.getValue())
+            ratingTable.rate(qr, 1);
+    }
 
 	/**
 	 * Increases the spam ratings of RFDs marked by the user as being spam

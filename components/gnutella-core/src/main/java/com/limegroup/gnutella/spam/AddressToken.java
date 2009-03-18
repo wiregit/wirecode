@@ -71,8 +71,6 @@ public class AddressToken extends Token {
     }
     
     @Override public boolean equals(Object o) {
-        if(o == null)
-            return false;
         if(!(o instanceof AddressToken))
             return false;
         return address.equals(((AddressToken)o).address);

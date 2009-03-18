@@ -49,6 +49,12 @@ public class FilterSettings extends LimeProps {
                 new String[0], "FilterSettings.filteredUrnsRemote");
     
     /**
+     * Sets whether or not results with filtered URNs are considered spam. 
+     */
+    public static final BooleanSetting FILTERED_URNS_ARE_SPAM =
+        FACTORY.createRemoteBooleanSetting("FILTERED_URNS_ARE_SPAM", true,
+                "FilterSettings.filteredUrnsAreSpam");
+    /**
 	 * Sets whether or not duplicate search results are
 	 * banned.
 	 */

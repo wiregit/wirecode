@@ -29,8 +29,6 @@ public class SizeToken extends Token {
     
     @Override
     public boolean equals(Object o) {
-        if(o == null)
-            return false;
         if(!(o instanceof SizeToken))
             return false;
         return size == ((SizeToken)o).size;
