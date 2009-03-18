@@ -191,7 +191,7 @@
                           log="quiet"/>
             <ivy:retrieve
                      conf="@{conf}"
-                     pattern="${build.limewire.components.@{component}.lib}/[conf]/[type]/[artifact]-[revision].[ext]"
+                     pattern="${build.limewire.components.@{component}.lib}/[conf]/[type]/[artifact](-[revision]).[ext]"
                      sync="true"
                      symlink="true"
                      log="quiet"/>

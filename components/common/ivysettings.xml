@@ -7,13 +7,12 @@
 	<property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[type]s/[artifact].[ext]" override="false"/>
 	
 	<!-- use the resolver named 'default' to lookup our dependencies. -->
-	<settings defaultResolver="default"/>
+	<settings defaultResolver="default" defaultConflictManager="all"/>
 		
 	<resolvers>
 	    <!-- the cvs lib dir -->
 	    <filesystem name="cvslib" checkmodified="true">
-	        <artifact pattern="${limewire.lib.jars}/[artifact]-[revision].[ext]"/>
-	        <artifact pattern="${limewire.lib.jars}/[artifact].[ext]"/>
+	        <artifact pattern="${limewire.lib.jars}/[artifact](-[revision]).[ext]"/>
 	    </filesystem>
 	
 	    <!-- where we'll store locally published files, used for publishing & retrieving. -->
@@ -23,7 +22,7 @@
 		</filesystem>
 	
 	    <!-- declaration of the default chain.  first we lookup in the local cache, then everywhere else. -->
-		<chain name="default" returnFirst="true" checkmodified="true">
+		<chain name="default" checkmodified="true">
 			<resolver ref="local"/>
 			<resolver ref="cvslib"/>
 		</chain>

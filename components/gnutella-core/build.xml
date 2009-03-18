@@ -38,7 +38,7 @@
                      file="${limewire.core.home}/ivy.xml"
                      log="quiet"/>
         <ivy:retrieve conf="compile"
-                      pattern="${build.limewire.core.lib}/[conf]/[type]/[artifact]-[revision].[ext]"
+                      pattern="${build.limewire.core.lib}/[conf]/[type]/[artifact](-[revision]).[ext]"
                       sync="true"
                       symlink="true"
                       log="quiet"/>

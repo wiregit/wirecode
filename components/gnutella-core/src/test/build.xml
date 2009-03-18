@@ -54,7 +54,7 @@
                      file="${limewire.core-tests.home}/ivy.xml"
                      log="quiet"/>
         <ivy:retrieve conf="test"
-                      pattern="${build.limewire.core-tests.lib}/[conf]/[type]/[artifact]-[revision].[ext]"
+                      pattern="${build.limewire.core-tests.lib}/[conf]/[type]/[artifact](-[revision]).[ext]"
                       sync="true"
                       symlink="true"
                       log="quiet"/>
