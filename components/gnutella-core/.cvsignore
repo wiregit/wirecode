@@ -9,3 +9,5 @@ log.txt
 .project
 target
 .settings
+dist
+clover
