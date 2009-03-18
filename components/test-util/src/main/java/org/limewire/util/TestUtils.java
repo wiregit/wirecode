@@ -76,10 +76,13 @@ public class TestUtils {
                 InputStream stream = resource.openStream();
                 saveStream(stream, tmpFile);
                 return tmpFile;
-            } catch(IOException iox) {
-                throw new RuntimeException(iox);
+            } catch(Throwable iox) {
+                throw new RuntimeException("failed to expand jar resource file: " + location, iox);
             }
-            
+        }
+        
+        if(resourceString.startsWith("jar:file")) {
+            throw new RuntimeException("resource[" + location + "] is inside jar and cannot be expanded");
         }
         
         //NOTE: The resource URL will contain %20 instead of spaces.
@@ -120,12 +123,12 @@ public class TestUtils {
             if(bis != null) {
                 try {
                     bis.close();
-                } catch(IOException ignored) {}
+                } catch(Throwable ignored) {}
             }
             if(bos != null) {
                 try {
                     bos.close();
-                } catch(IOException ignored) {}
+                } catch(Throwable ignored) {}
             }
         } 
     }
