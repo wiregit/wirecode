@@ -30,7 +30,11 @@ public class StringUtils {
      */
     private volatile static Collator COLLATOR;
     
-    private static final CharsetEncoder ASCII_ENCODER = Charset.forName("ISO-8859-1").newEncoder();
+    private static final ThreadLocal<CharsetEncoder> ASCII_ENCODER = new ThreadLocal<CharsetEncoder>() {
+        protected CharsetEncoder initialValue() {
+            return Charset.forName("ISO-8859-1").newEncoder();
+        }
+    };
     
     static {
         COLLATOR = Collator.getInstance(Locale.getDefault());
@@ -623,6 +627,6 @@ public class StringUtils {
      * @return true if <code>sequence</code> can be encoded as ascii only
      */
     public static boolean isAsciiOnly(CharSequence sequence) {
-        return ASCII_ENCODER.canEncode(sequence);
+        return ASCII_ENCODER.get().canEncode(sequence);
     }
 }
