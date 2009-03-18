@@ -1,5 +1,6 @@
 aopalliance.version=
 AppFramework.version=
+bcel.version=
 cglib-nodep.version=
 clink.version=
 commons-codec.version=1.3

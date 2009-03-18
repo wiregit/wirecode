@@ -35,5 +35,6 @@
         <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
         
         <dependency org="none" name="tests/inspTool" rev="${inspTool.version}" conf="test"/>
+        <dependency org="none" name="tests/bcel" rev="${bcel.version}" conf="test"/>
     </dependencies>
 </ivy-module>
