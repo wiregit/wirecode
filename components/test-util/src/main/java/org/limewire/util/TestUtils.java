@@ -1,6 +1,11 @@
 package org.limewire.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 
@@ -8,12 +13,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 
 public class TestUtils {
-
+    
     /**
-     * Gets a resource file using the class loader
+     * Gets a resource using the class loader
      * or the system class loader.
      */
-    public static File getResourceFile(String location) {
+    public static URL getResource(String location) {
         ClassLoader cl = TestUtils.class.getClassLoader();            
         URL resource = null;
     
@@ -23,11 +28,58 @@ public class TestUtils {
             resource = cl.getResource(location);
         }
         
+        return resource;
+    }
+    
+    /**
+     * Gets a resource stream using the class loader
+     * or the system class loader.
+     */
+    public static InputStream getResourceAsStream(String location) {
+        ClassLoader cl = TestUtils.class.getClassLoader();            
+        InputStream resource = null;
+    
+        if(cl == null) {
+            resource = ClassLoader.getSystemResourceAsStream(location);
+        } else {
+            resource = cl.getResourceAsStream(location);
+        }
+        
+        return resource;
+    }
+
+    /**
+     * Gets a resource file using the class loader
+     * or the system class loader.
+     */
+    public static File getResourceFile(String location) {           
+        URL resource = getResource(location);
+        
         if( resource == null ) {
             // note: this will probably not work,
             // but it will ultimately trigger a better exception
             // than returning null.
             return new File(location);
+        }
+        
+        // if the resource exited inside a jar, let's create a temporary file for the world to use.
+        // (we must convert path characters to the same character in order to check) 
+        String resourceString = resource.toString();
+        resourceString = resourceString.replace("\\", "/");
+        location = location.replace("\\", "/");
+        if(resourceString.startsWith("jar:file:") && resourceString.endsWith("!/" + location)) {
+            File tmpFile;
+            try {
+                tmpFile = File.createTempFile("jarTmp", "lwTestTmp");
+                tmpFile.deleteOnExit();
+                
+                InputStream stream = resource.openStream();
+                saveStream(stream, tmpFile);
+                return tmpFile;
+            } catch(IOException iox) {
+                throw new RuntimeException(iox);
+            }
+            
         }
         
         //NOTE: The resource URL will contain %20 instead of spaces.
@@ -38,6 +90,44 @@ public class TestUtils {
         // exist until Java 1.4.  So, we can't use it here.
         // Thus, we manually have to parse out the %20s from the URL
         return new File( decode(resource.getFile()) );
+    }
+    
+    /**
+     * Copy of CommonUtils.saveStream
+     */
+    private static void saveStream(InputStream inStream, File newFile) throws IOException {
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;            
+        try {
+            //buffer the streams to improve I/O performance
+            final int bufferSize = 2048;
+            bis = new BufferedInputStream(inStream, bufferSize);
+            bos = new BufferedOutputStream(new FileOutputStream(newFile), bufferSize);
+            byte[] buffer = new byte[bufferSize];
+            int c = 0;
+            
+            do { //read and write in chunks of buffer size until EOF reached
+                c = bis.read(buffer, 0, bufferSize);
+                if (c > 0)
+                    bos.write(buffer, 0, c);
+            } while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
+            
+            bos.flush();
+        } catch(IOException e) {
+            //if there is any error, delete any portion of file that did write
+            newFile.delete();
+        } finally {
+            if(bis != null) {
+                try {
+                    bis.close();
+                } catch(IOException ignored) {}
+            }
+            if(bos != null) {
+                try {
+                    bos.close();
+                } catch(IOException ignored) {}
+            }
+        } 
     }
     
     private static String decode(String s) {

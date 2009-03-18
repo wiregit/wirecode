@@ -19,8 +19,7 @@ public class BTMetaInfoTest extends LimeTestCase {
     /**
      * A directory containing the test data for this unit test.
      */
-    public static final File TEST_DATA_DIR = TestUtils
-            .getResourceFile("org/limewire/swarm/bittorrent/public_html/torrents");
+    public static final String TEST_DATA_DIR = "org/limewire/swarm/bittorrent/public_html/torrents/";
 
     public BTMetaInfoTest(String name) {
         super(name);
@@ -160,7 +159,7 @@ public class BTMetaInfoTest extends LimeTestCase {
      * @return
      */
     private File getFile(String fileName) {
-        File file = new File(TEST_DATA_DIR.getAbsolutePath() + "/" + fileName);
+        File file = TestUtils.getResourceFile(TEST_DATA_DIR + fileName);
         return file;
     }
 }

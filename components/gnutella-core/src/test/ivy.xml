@@ -15,5 +15,7 @@
         <dependency org="none" name="tests/org.mortbay.jetty" rev="${org.mortbay.jetty.version}" conf="test"/>
         <dependency org="none" name="tests/javax.servlet" rev="${javax.servlet.version}" conf="test"/>
         <dependency org="none" name="tests/manekineko" rev="${manekineko.version}" conf="test"/>
+        
+        <dependency org="org.limewire" name="swarm" rev="latest.integration" conf="test"/>
     </dependencies>
 </ivy-module>
