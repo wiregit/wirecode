@@ -76,6 +76,7 @@ class PropertyDictionaryImpl implements PropertyDictionary {
                 }
             }
         }
+        Collections.sort(values);
         return values;
     }
 }
