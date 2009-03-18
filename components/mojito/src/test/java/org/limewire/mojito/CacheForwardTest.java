@@ -212,6 +212,10 @@ public class CacheForwardTest extends MojitoTestCase {
                 }
             }
             if (waiting) {
+                for (Contact c: evt.getLocations()) {
+                    Context dht = (Context)dhts.get(c.getNodeID());
+                    dht.getDatabase().clear();
+                }
                 Thread.sleep(BOOTSTRAP_TIME);
                 evt = creator.put(valueId, value).get();
             }
