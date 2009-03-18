@@ -1,5 +1,7 @@
 package org.limewire.core.impl.library;
 
+import java.io.IOException;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
@@ -13,6 +15,7 @@ import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -30,9 +33,11 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.util.concurrent.Lock;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
+/**
+ * Tests the methods and classes contained in PresenceLibraryBrowse with various levels of
+ *  internal integration.
+ */
 public class PresenceLibraryBrowserTest extends BaseTestCase {
-
-    // TODO: What happens when friends are removed? 
     
     public PresenceLibraryBrowserTest(String name) {
         super(name);
@@ -129,9 +134,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
     }
     
     /**
-     * Fires events that should spawn a normal friend browse.  Full internal integration test.
+     * Fires events that should spawn a normal friend browse.  When the browse is
+     *  complete makes sure the listener handles removing failed browses correctly.
      *  
-     * <p>When the browse is complete makes sure the listener handles removing failed browses correctly.
+     * <p>Full internal integration test.
      */
     @SuppressWarnings("unchecked")
     public void testBrowseIntegration() {
@@ -276,18 +282,22 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         BrowseListener browseListener = browseListenerCollector.getLastMatch();
         browseListener.browseFinished(true);
         
+        // PresenceLibrary should not be added to the rebrowse list because the browse was 
+        //  successful
+        assertNotContains(presenceLibraryBrowser.librariesToBrowse, presenceLibrary);
+        
         // Test removal of simulated killed browse
         presenceLibraryBrowser.librariesToBrowse.add(presenceLibrary);
         presenceListener.listChanged(updateAndRemoveEvent);
         assertEmpty(presenceLibraryBrowser.librariesToBrowse);
-        
+                
         context.assertIsSatisfied();
     }
 
     /**
      * Simulates a browse with a resolvable address.
      * 
-     * <p>Skips initial integration steps
+     * <p>Skips initial integration steps and tests tryToResolveAndBrowse() and browse().
      */
     public void testBrowseWithGoodResolve() {
         final Mockery context = new Mockery() {{
@@ -356,6 +366,308 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         
         // Signal browse success
         browseListenerCollector.getLastMatch().browseFinished(true);
+        
+        context.assertIsSatisfied();
+    }
+    
+    /**
+     * Attempt a browse on a presence without an address feature.  Ensure
+     *  graceful fail and the presence is added to the retry queue.
+     *  
+     *  <p> Tests tryToResolveAndBrowse() and handleFailedResolution().
+     */
+    public void testBrowseWithoutAddressFeature() {
+        final Mockery context = new Mockery();
+        
+        final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        
+        final PresenceLibraryBrowser presenceLibraryBrowser
+            = new PresenceLibraryBrowser(null, null, null, null);
+        
+        context.checking(new Expectations() {{
+            FriendPresence presence = context.mock(FriendPresence.class);
+            allowing(presenceLibrary).getPresence();
+            will(returnValue(presence));
+            allowing(presence).hasFeatures(AddressFeature.ID);
+            will(returnValue(false));
+            allowing(presence).getFeature(AddressFeature.ID);
+            will(returnValue(null));
+            
+            allowing(presenceLibrary);
+            allowing(presence);
+        }});
+        
+        presenceLibraryBrowser.tryToResolveAndBrowse(presenceLibrary, 0);
+        assertContains(presenceLibraryBrowser.librariesToBrowse, presenceLibrary);
+        
+        context.assertIsSatisfied();
+    }
+    
+    /**
+     * Attempt a browse with a currently non connectable or resolvable address.  Ensure
+     *  graceful fail and the presence is added to the retry queue.
+     *  
+     *  <p> Tests tryToResolveAndBrowse() and handleFailedResolution().
+     */  
+    public void testBrowseWhenCantResolveAndCantConnect() {
+        final Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        
+        final SocketsManager socketsManager = context.mock(SocketsManager.class);
+        
+        final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        
+        final PresenceLibraryBrowser presenceLibraryBrowser
+            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+        
+        context.checking(new Expectations() {{
+            FriendPresence presence = context.mock(FriendPresence.class);
+            allowing(presenceLibrary).getPresence();
+            will(returnValue(presence));
+            allowing(presence).hasFeatures(AddressFeature.ID);
+            will(returnValue(false));
+            
+            AddressFeature addressFeature = context.mock(AddressFeature.class);
+            allowing(presence).getFeature(AddressFeature.ID);
+            will(returnValue(addressFeature));
+            
+            Address address = context.mock(Address.class);
+            allowing(addressFeature).getFeature();
+            will(returnValue(address));
+
+            // Can't resolve, can't connect
+            allowing(socketsManager).canConnect(address);
+            will(returnValue(false));
+            allowing(socketsManager).canResolve(address);
+            will(returnValue(false));
+            
+            // General behaviour
+            allowing(presenceLibrary);
+            allowing(presence);
+
+        }});
+        
+        presenceLibraryBrowser.tryToResolveAndBrowse(presenceLibrary, 0);
+        assertContains(presenceLibraryBrowser.librariesToBrowse, presenceLibrary);
+        
+        context.assertIsSatisfied();
+    }
+    
+    /**
+     * Tests the edge functionality of the can resolve case.  First resolve but with a 
+     *  non connectable address.  Next force fire an IOE event to the then non relevant resolve handler
+     *  and make sure things are handled accordingly.
+     *  
+     *  <p> Tests tryToResolveAndBrowse() and handleFailedResolution().
+     */
+    public void testBrowseWhenCanResolveButCantConnectPlusIOE() {
+        final Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        
+        final SocketsManager socketsManager = context.mock(SocketsManager.class);
+        
+        final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        final Address resolvedAddress = context.mock(Address.class);
+        
+        final PresenceLibraryBrowser presenceLibraryBrowser
+            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+        
+        final MatchAndCopy<AddressResolutionObserver> observerCollector 
+            = new MatchAndCopy<AddressResolutionObserver>(AddressResolutionObserver.class);
+        
+        context.checking(new Expectations() {{
+            FriendPresence presence = context.mock(FriendPresence.class);
+            allowing(presenceLibrary).getPresence();
+            will(returnValue(presence));
+            allowing(presence).hasFeatures(AddressFeature.ID);
+            will(returnValue(false));
+            
+            AddressFeature addressFeature = context.mock(AddressFeature.class);
+            allowing(presence).getFeature(AddressFeature.ID);
+            will(returnValue(addressFeature));
+            
+            Address address = context.mock(Address.class);
+            allowing(addressFeature).getFeature();
+            will(returnValue(address));
+
+            // Can resolve, can't connect
+            allowing(socketsManager).canResolve(address);
+            will(returnValue(true));
+            allowing(socketsManager).canConnect(resolvedAddress);
+            will(returnValue(false));
+            
+            // General behaviour
+            allowing(presenceLibrary);
+            allowing(presence);
+            
+            // Assertions
+            exactly(1).of(socketsManager).resolve(with(same(address)), with(observerCollector));
+            
+        }});
+        
+        // Kick off browse process
+        presenceLibraryBrowser.tryToResolveAndBrowse(presenceLibrary, 0);
+        
+        // Resolve
+        observerCollector.getLastMatch().resolved(resolvedAddress);
+        
+        // Make sure the failed PresenceLibrary is in the rebrowse list
+        assertContains(presenceLibraryBrowser.librariesToBrowse, presenceLibrary);
+        
+        // Force IOE
+        observerCollector.getLastMatch().handleIOException(new IOException("forced"));
+        
+        // Should still have the PresenceLibrary in the rebrowse list
+        assertContains(presenceLibraryBrowser.librariesToBrowse, presenceLibrary);
+        
+        // "Shutdown" the observer
+        observerCollector.getLastMatch().shutdown();
+        
+        context.assertIsSatisfied();
+    }
+    
+    /**
+     * Test a browse sequence where the address feature is lost between resolving and browsing.
+     *  
+     * <p>NOTE: This simulates a browse upon shutdown.
+     * 
+     * <p>Tests tryToResolveAndBrowse() and browse().
+     */
+    public void testBrowseWhenAfterResolveFeatureIsLost() {
+        final Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        
+        final SocketsManager socketsManager = context.mock(SocketsManager.class);
+        
+        final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        final Address resolvedAddress = context.mock(Address.class);
+        
+        final PresenceLibraryBrowser presenceLibraryBrowser
+            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+        
+        final MatchAndCopy<AddressResolutionObserver> observerCollector 
+            = new MatchAndCopy<AddressResolutionObserver>(AddressResolutionObserver.class);
+        
+        context.checking(new Expectations() {{
+            FriendPresence presence = context.mock(FriendPresence.class);
+            allowing(presenceLibrary).getPresence();
+            will(returnValue(presence));
+            
+            AddressFeature addressFeature = context.mock(AddressFeature.class);
+            
+            // Only return the feature the first time since 
+            //  after the resolve this should fail
+            atMost(1).of(presence).hasFeatures(AddressFeature.ID);
+            will(returnValue(true));
+            allowing(presence).hasFeatures(AddressFeature.ID);
+            will(returnValue(false));
+            atMost(1).of(presence).getFeature(AddressFeature.ID);
+            will(returnValue(addressFeature));
+            allowing(presence).getFeature(AddressFeature.ID);
+            will(returnValue(null));
+            
+            Address address = context.mock(Address.class);
+            allowing(addressFeature).getFeature();
+            will(returnValue(address));
+
+            // Can resolve, can connect
+            allowing(socketsManager).canResolve(address);
+            will(returnValue(true));
+            allowing(socketsManager).canConnect(resolvedAddress);
+            will(returnValue(true));
+            
+            // General behaviour
+            allowing(presenceLibrary);
+            allowing(presence);
+            
+            // Assertions
+            exactly(1).of(socketsManager).resolve(with(same(address)), with(observerCollector));
+            
+        }});
+        
+        // Kick off browse process
+        presenceLibraryBrowser.tryToResolveAndBrowse(presenceLibrary, 0);
+        
+        // Resolve
+        observerCollector.getLastMatch().resolved(resolvedAddress);
+        
+        // PresenceLibrary should not be added to the rebrowse list in this case
+        //  because this fault indicates the shutdown sequence is in progress.
+        assertNotContains(presenceLibraryBrowser.librariesToBrowse, presenceLibrary);
+        
+        context.assertIsSatisfied();
+    }
+    
+    /**
+     * Do a full normal browse on an anonymous friend. 
+     * 
+     * Only tests browse().
+     */
+    public void testBrowseWithAnonymousFriend() {
+        final Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+        
+        final SocketsManager socketsManager = context.mock(SocketsManager.class);
+        final BrowseFactory browseFactory = context.mock(BrowseFactory.class);
+        
+        final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        final RemoteFileDescAdapter searchResult = context.mock(RemoteFileDescAdapter.class);
+        
+        final PresenceLibraryBrowser presenceLibraryBrowser
+            = new PresenceLibraryBrowser(browseFactory, null, socketsManager, null);
+        
+        final MatchAndCopy<BrowseListener> listenerCollector 
+            = new MatchAndCopy<BrowseListener>(BrowseListener.class);
+        
+        context.checking(new Expectations() {{
+            FriendPresence presence = context.mock(FriendPresence.class);
+            allowing(presenceLibrary).getPresence();
+            will(returnValue(presence));
+            
+            AddressFeature addressFeature = context.mock(AddressFeature.class);
+            
+            allowing(presence).hasFeatures(AddressFeature.ID);
+            will(returnValue(true));
+            allowing(presence).getFeature(AddressFeature.ID);
+            will(returnValue(addressFeature));
+            
+            Friend friend = context.mock(Friend.class);
+            allowing(presence).getFriend();
+            will(returnValue(friend));
+            allowing(friend).isAnonymous();
+            will(returnValue(true));
+            
+            Address address = context.mock(Address.class);
+            allowing(addressFeature).getFeature();
+            will(returnValue(address));
+            
+            // Browse creation
+            Browse browse = context.mock(Browse.class);
+            allowing(browseFactory).createBrowse(presence);
+            will(returnValue(browse));
+            
+            // General behaviour
+            allowing(presenceLibrary);
+            allowing(presence);
+            allowing(searchResult);
+            
+            // Assertions
+            exactly(1).of(browse).start(with(listenerCollector));
+            
+        }});
+        
+        // Kick off browse process
+        presenceLibraryBrowser.browse(presenceLibrary);
+
+        listenerCollector.getLastMatch().handleBrowseResult(searchResult);
+        
+        // PresenceLibrary should not be added to the rebrowse list because the browse was 
+        //  successful
+        assertNotContains(presenceLibraryBrowser.librariesToBrowse, presenceLibrary);
         
         context.assertIsSatisfied();
     }

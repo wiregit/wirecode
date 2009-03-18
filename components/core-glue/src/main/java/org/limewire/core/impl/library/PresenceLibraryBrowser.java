@@ -129,19 +129,22 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         remoteLibraryManager.addPresenceLibrary(event.getSource());
     }
     
-    private void browse(final PresenceLibrary presenceLibrary) {
+    void browse(final PresenceLibrary presenceLibrary) {
         
         // TODO: Is this needed again?  We should already be in loading
         presenceLibrary.setState(LibraryState.LOADING);
         
         final FriendPresence friendPresence = presenceLibrary.getPresence();
-        LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
-        final Browse browse = browseFactory.createBrowse(friendPresence);
+        
         AddressFeature addressFeature = ((AddressFeature)friendPresence.getFeature(AddressFeature.ID));
         if(addressFeature == null) {
             // happens during sign-off
             return;    
         }
+        
+        LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
+        final Browse browse = browseFactory.createBrowse(friendPresence);
+        
         final XMPPAddress address;
         if(!friendPresence.getFriend().isAnonymous()) {
             address = (XMPPAddress) addressFeature.getFeature();    
