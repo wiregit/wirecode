@@ -28,8 +28,6 @@ import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.security.MerkleTree;
 import com.limegroup.gnutella.security.Tiger;
 
@@ -42,8 +40,6 @@ import com.limegroup.gnutella.security.Tiger;
  *
  * This class is immutable.
  *
- * @see UrnCache
- * @see FileDesc
  * @see java.io.Serializable
  */
 public final class URN implements HTTPHeaderValue, Serializable {
