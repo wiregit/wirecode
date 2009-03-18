@@ -179,7 +179,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             libTable.getColumnModel().getColumn(DocumentTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
             break;
         case OTHER:
-            libTable = new LibraryTable<T>(sortedList, new OtherTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+            libTable = new LibraryTable<T>(sortedList, new OtherTableFormat<T>(iconManager), saveLocationExceptionHandler, shareTableRendererEditorFactory);
             libTable.getColumnModel().getColumn(OtherTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
             libTable.getColumnModel().getColumn(OtherTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
             break;
@@ -285,12 +285,12 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             break;
         case DOCUMENT:
             if(friend != null) {
-                libTable = new LibraryTable<T>(sortedList, new RemoteDocumentTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+                libTable = new LibraryTable<T>(sortedList, new RemoteDocumentTableFormat<T>(iconManager), saveLocationExceptionHandler, shareTableRendererEditorFactory);
                 libTable.getColumnModel().getColumn(RemoteDocumentTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
                 libTable.getColumnModel().getColumn(RemoteDocumentTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
                 libTable.getColumnModel().getColumn(RemoteDocumentTableFormat.CREATED_INDEX).setCellRenderer(calendarRenderer);
             } else {
-                libTable = new LibraryTable<T>(sortedList, new AllFriendDocumentTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+                libTable = new LibraryTable<T>(sortedList, new AllFriendDocumentTableFormat<T>(iconManager), saveLocationExceptionHandler, shareTableRendererEditorFactory);
                 libTable.getColumnModel().getColumn(AllFriendDocumentTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
                 libTable.getColumnModel().getColumn(AllFriendDocumentTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
                 libTable.getColumnModel().getColumn(AllFriendDocumentTableFormat.CREATED_INDEX).setCellRenderer(calendarRenderer);
@@ -315,11 +315,11 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             break;
         case OTHER:
             if(friend != null) {
-                libTable = new LibraryTable<T>(sortedList, new RemoteOtherTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+                libTable = new LibraryTable<T>(sortedList, new RemoteOtherTableFormat<T>(iconManager), saveLocationExceptionHandler, shareTableRendererEditorFactory);
                 libTable.getColumnModel().getColumn(RemoteOtherTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
                 libTable.getColumnModel().getColumn(RemoteOtherTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
             } else {
-                libTable = new LibraryTable<T>(sortedList, new AllFriendOtherTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
+                libTable = new LibraryTable<T>(sortedList, new AllFriendOtherTableFormat<T>(iconManager), saveLocationExceptionHandler, shareTableRendererEditorFactory);
                 libTable.getColumnModel().getColumn(AllFriendOtherTableFormat.NAME_INDEX).setCellRenderer(iconLabelRenderer);
                 libTable.getColumnModel().getColumn(AllFriendOtherTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
                 libTable.getColumnModel().getColumn(AllFriendOtherTableFormat.FROM_INDEX).setCellRenderer(new FromTableCellRenderer(fromWidgetFactory.create(true)));
