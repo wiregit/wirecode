@@ -19,6 +19,7 @@ import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.util.BaseTestCase;
@@ -44,7 +45,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
     }
     
     /**
-     * Goes through the register phase and ensures all listeners are correctly connected
+     * Goes through the register phase and ensures all listeners are correctly connected.
      */
     @SuppressWarnings("unchecked")
     public void testListeners() {
@@ -58,11 +59,6 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final FriendPresence presence = context.mock(FriendPresence.class);
         final EventList<FriendLibrary> friendLibraryList = context.mock(EventList.class);
         
-        final MatchAndCopy<EventListener> listenerCollector = new MatchAndCopy<EventListener>(EventListener.class);
-        
-        final MatchAndCopy<ListEventListener> friendListenerCollector
-            = new MatchAndCopy<ListEventListener>(ListEventListener.class);
-        
         final PresenceLibraryBrowser presenceLibraryBrowser
             = new PresenceLibraryBrowser(null, remoteLibraryManager, socketsManager, null);
         
@@ -73,8 +69,8 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             exactly(1).of(listenerSupport).addListener(presenceLibraryBrowser);
             exactly(1).of(remoteLibraryManager).removePresenceLibrary(presence);
             exactly(1).of(remoteLibraryManager).addPresenceLibrary(presence);
-            exactly(1).of(socketsManager).addListener(with(listenerCollector));
-            exactly(1).of(friendLibraryList).addListEventListener(with(friendListenerCollector));
+            exactly(1).of(socketsManager).addListener(with(any(EventListener.class)));
+            exactly(1).of(friendLibraryList).addListEventListener(with(any(ListEventListener.class)));
         }});
         
         presenceLibraryBrowser.register(listenerSupport);
@@ -85,6 +81,48 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
+    /**
+     * Force fire a connectivity change event and ensure a browse is attempted on a
+     *  a queued PresenceLibrary.  This simulates the retry of an earlier failed browse.
+     */
+    @SuppressWarnings("unchecked")
+    public void testRetryBrowse() {
+        Mockery context = new Mockery();
+        
+        final SocketsManager socketsManager = context.mock(SocketsManager.class);
+        
+        final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        
+        final PresenceLibraryBrowser presenceLibraryBrowser
+            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+        
+        final MatchAndCopy<EventListener> socketsListenerCollector = new MatchAndCopy<EventListener>(EventListener.class);
+        
+        context.checking(new Expectations() {{
+            // Assertions
+            exactly(1).of(socketsManager).addListener(with(socketsListenerCollector));
+            exactly(1).of(presenceLibrary).setState(LibraryState.LOADING);
+            
+            // Allow the browse to unfold minimally as it must
+            allowing(presenceLibrary);
+        }});
+        
+        // Register the required listener and collect it for probing
+        presenceLibraryBrowser.registerToSocksManager();
+        
+        // Fire a connectivity change with no PresenceLibrary instances queued
+        socketsListenerCollector.getLastMatch().handleEvent(new ConnectivityChangeEvent());
+        
+        // Queue a PresenceLibrary for rebrowse
+        presenceLibraryBrowser.librariesToBrowse.add(presenceLibrary);
+        
+        // Fire a connectivity change again
+        socketsListenerCollector.getLastMatch().handleEvent(new ConnectivityChangeEvent());
+        
+        context.assertIsSatisfied();
+    }
+
+    
     /**
      * Fires events for presence library changes but ones that should not spawn new browses.
      */
@@ -100,7 +138,6 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         
         final MatchAndCopy<ListEventListener> friendListenerCollector
             = new MatchAndCopy<ListEventListener>(ListEventListener.class);
-        
         
         final ListEvent<FriendLibrary> listEventBlank = context.mock(ListEvent.class);
         
