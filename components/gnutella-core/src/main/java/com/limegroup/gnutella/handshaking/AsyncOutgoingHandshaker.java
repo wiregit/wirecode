@@ -6,6 +6,8 @@ import java.net.SocketException;
 import java.util.List;
 import java.util.Properties;
 
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.statemachine.IOState;
 import org.limewire.nio.statemachine.IOStateMachine;
@@ -15,6 +17,9 @@ import com.limegroup.gnutella.Constants;
 
 public class AsyncOutgoingHandshaker implements Handshaker, IOStateObserver {
 
+    private static final Log LOG =
+        LogFactory.getLog(AsyncOutgoingHandshaker.class);
+    
     private final HandshakeSupport support;
     private final IOStateMachine shaker;
     private final Socket socket;
@@ -44,10 +49,19 @@ public class AsyncOutgoingHandshaker implements Handshaker, IOStateObserver {
     }
     
     public void handleStatesFinished() {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Finished handshake with " +
+                    socket.getInetAddress().getHostAddress() +
+                    ":" + socket.getPort());
+        }
         observer.handleHandshakeFinished(this);
     }
 
     public void handleIOException(IOException iox) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(iox + ", " + socket.getInetAddress().getHostAddress() +
+                    ":" + socket.getPort());
+        }
         if(iox instanceof NoGnutellaOkException) {
             NoGnutellaOkException ngok = (NoGnutellaOkException)iox;
             observer.handleNoGnutellaOk(ngok.getCode(), ngok.getMessage());
@@ -57,6 +71,11 @@ public class AsyncOutgoingHandshaker implements Handshaker, IOStateObserver {
     }
 
     public void shutdown() {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Shutting down handshake with " +
+                    socket.getInetAddress().getHostAddress() +
+                    ":" + socket.getPort());
+        }
         observer.shutdown();
     }    
 }

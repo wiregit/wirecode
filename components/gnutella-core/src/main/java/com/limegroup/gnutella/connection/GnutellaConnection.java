@@ -39,6 +39,7 @@ import org.limewire.nio.channel.StatisticGatheringWriter;
 import org.limewire.nio.channel.ThrottleWriter;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
+import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
@@ -497,6 +498,11 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         responder.setLocalePreferencing(_useLocalPreference);
 
         if (isOutgoing()) {
+            if(LOG.isInfoEnabled()) {
+                LOG.info("Outgoing connection to " +
+                        getAddress() + ":" + getPort() +
+                        " with timeout " + timeout);
+            }
             ConnectObserver connectObserver = new AsyncHandshakeConnecter(requestHeaders,
                     responder, observer);
             InetSocketAddress host = new InetSocketAddress(getAddress(), getPort());
@@ -504,6 +510,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
                     .connect(host, timeout, connectObserver, getConnectType());
             setSocket(socket);
         } else {
+            if(LOG.isInfoEnabled()) {
+                LOG.info("Incoming connection from " +
+                        getAddress() + ":" + getPort());
+            }
             startHandshake(requestHeaders, responder, observer);
         }
     }
@@ -541,9 +551,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     private void postHandshakeInitialize(Handshaker shaker) {
         handshakeInitialized(shaker);
         
-        if(LOG.isInfoEnabled())
-            LOG.info("Shook hands with " + getAddress() + ":" + getPort());
-
         if (isWriteDeflated()) {
             deflater = new Deflater();
         }
@@ -702,6 +709,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     /** Starts outgoing messages being sent. */
     private void startOutput() {
         
+        if(LOG.isInfoEnabled())
+            LOG.info("Starting output to " + getAddress() + ":" + getPort());
+
         // add some heavier stats code in betas
         if (LimeWireUtils.isBetaRelease() || LimeWireUtils.isTestingVersion()) {
             statsWriters.put(StatsWriters.TOP,new StatisticGatheringWriter());
@@ -1388,20 +1398,33 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             this.observer = observer;
         }
 
-        public void handleConnect(Socket socket) throws IOException {
+        public void handleConnect(Socket s) throws IOException {
             // _socket may not really have been set yet, this ensures it is.
-            setSocket(socket);
+            setSocket(s);
+            if(LOG.isInfoEnabled()) {
+                LOG.info("Connected to " +
+                        getAddress() + ":" + getPort() +
+                        ", TLS " + SSLUtils.isTLSEnabled(socket));
+            }
             startHandshake(requestHeaders, responder, observer);
         }
 
         public void shutdown() {
-            LOG.trace("Shutting down");
+            if(LOG.isInfoEnabled()) {
+                LOG.info("Shutting down connection to " +
+                        getAddress() + ":" + getPort() +
+                        ", TLS " + SSLUtils.isTLSEnabled(socket));
+            }
             observer.shutdown();
         }
 
         // ignored.
         public void handleIOException(IOException iox) {
-            LOG.info("Exception during async handshake ", iox);
+            if(LOG.isInfoEnabled()) {
+                LOG.info(iox + ", " +
+                        getAddress() + ":" + getPort() +
+                        ", TLS " + SSLUtils.isTLSEnabled(socket));
+            }
         }
     }
 
@@ -1424,32 +1447,43 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         }
 
         public void shutdown() {
-            if(LOG.isInfoEnabled())
-                LOG.info("Shutting down handshake with " +
-                        getAddress() + ":" + getPort());
+            if(LOG.isInfoEnabled()) {
+                LOG.info("Shutting down connection to " +
+                        getAddress() + ":" + getPort() +
+                        ", TLS " + SSLUtils.isTLSEnabled(socket));
+            }
             setHeaders(shaker.getReadHeaders(), shaker.getWrittenHeaders());
             close();
             observer.shutdown();
         }
 
         public void handleHandshakeFinished(Handshaker shaker) {
+            if(LOG.isInfoEnabled()) {
+                LOG.info("Finished handshake with " +
+                        getAddress() + ":" + getPort() +
+                        ", TLS " + SSLUtils.isTLSEnabled(socket));
+            }
             postHandshakeInitialize(shaker);
             observer.handleConnect();
         }
 
         public void handleBadHandshake() {
-            if(LOG.isInfoEnabled())
+            if(LOG.isInfoEnabled()) {
                 LOG.info("Bad handshake with " +
-                        getAddress() + ":" + getPort());
+                        getAddress() + ":" + getPort() +
+                        ", TLS " + SSLUtils.isTLSEnabled(socket));
+            }
             setHeaders(shaker.getReadHeaders(), shaker.getWrittenHeaders());
             close();
             observer.handleBadHandshake();
         }
 
         public void handleNoGnutellaOk(int code, String msg) {
-            if(LOG.isInfoEnabled())
-                LOG.info("No GNUTELLA OK in handshake with " +
-                        getAddress() + ":" + getPort());
+            if(LOG.isInfoEnabled()) {
+                LOG.info("No Gnutella OK in handshake with " +
+                        getAddress() + ":" + getPort() +
+                        ", TLS " + SSLUtils.isTLSEnabled(socket));
+            }
             setHeaders(shaker.getReadHeaders(), shaker.getWrittenHeaders());
             close();
             observer.handleNoGnutellaOk(code, msg);

@@ -125,7 +125,7 @@ public class ConnectionCheckerManagerImpl implements ConnectionCheckerManager {
     }
 
     public Future<Boolean> checkForLiveConnection() {
-        LOG.trace("checking for live connection");
+        LOG.debug("Checking for live connection");
     
         boolean startThread = false;
         synchronized (this) {
@@ -161,10 +161,12 @@ public class ConnectionCheckerManagerImpl implements ConnectionCheckerManager {
     private class ConnectionCheckerRunner implements ConnectionCheckerListener, Callable<Boolean> {
 
         public void connected() {
+            LOG.debug("Connected");
             ConnectionCheckerManagerImpl.this.connected = true;
         }
 
         public void noInternetConnection() {
+            LOG.debug("No internet connection");
             ConnectionCheckerManagerImpl.this.connected = false;
             connectionManager.get().noInternetConnection();
         }

@@ -1300,8 +1300,11 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
      * Returns the number of hosts the catcher knows about.
      */
     public synchronized int getNumHosts() {
-        return ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
+        int hosts = ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
             FREE_ULTRAPEER_SLOTS_SET.size()+restoredHosts.size();
+        if(LOG.isTraceEnabled())
+            LOG.trace(hosts + " hosts");
+        return hosts;
     }
 
     /**
