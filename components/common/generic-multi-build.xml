@@ -5,7 +5,7 @@
     <import file="ant-macros.xml"/>
     
     <property name="excludes" value=""/>
-    <property name="includes" value="**/build.xml"/>
+    <property name="includes" value="*/build.xml"/>
     
     <!-- the locatino that aggregate junit reports are written to. -->
     <property name="junit.aggregateHome"  value="${basedir}/junit"/>
@@ -138,12 +138,17 @@
 	<!-- executes a subant possibly with clover. -->
 	<macrodef name="do.multi-ant">
 	    <attribute name="target"/>
+	    <attribute name="with.clover" default="${with.clover}"/>
+	    <attribute name="basedir" default="${basedir}"/>
+	    <attribute name="excludes" default="${excludes}"/>
+	    <attribute name="includes" default="${includes}"/>
+	    <attribute name="root" default=""/>
 	    <element name="more-elements" optional="true"/>
 	    <sequential>
 	        <if>
-	            <equals arg1="${with.clover}" arg2="true"/>
+	            <equals arg1="@{with.clover}" arg2="true"/>
 	            <then>	            
-        	        <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="@{target}">
+        	        <do.subant dir="@{basedir}" excludes="@{excludes}" includes="@{includes}" root="@{root}" target="@{target}">
         	            <more-elements/>
         	            <pre-targets>
         	                <target name="with.clover"/>
@@ -151,7 +156,7 @@
         	        </do.subant>
         	    </then>
         	    <else>
-        	        <do.subant dir="${basedir}" excludes="${excludes}" includes="${includes}" root="" target="@{target}">
+        	        <do.subant dir="@{basedir}" excludes="@{excludes}" includes="@{includes}" root="@{root}" target="@{target}">
         	            <more-elements/>
         	        </do.subant>        	        
         	    </else>
