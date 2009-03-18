@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.metadata.audio.reader;
+package com.limegroup.gnutella.metadata;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -14,7 +14,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.CountingInputStream;
 import org.limewire.io.IOUtils;
 import org.limewire.util.ByteUtils;
-import org.limewire.util.StringUtils;
+
+import com.limegroup.gnutella.metadata.audio.reader.WRMXML;
+import com.limegroup.gnutella.metadata.audio.reader.WeedInfo;
 
 
 /**
@@ -267,8 +269,7 @@ public class ASFParser {
             throw new IOException("ASF file is corrupt.  Type size < 0: "+typeSize);
         byte[] b = new byte[typeSize];
         ds.readFully(b);
-        // protection type is encoded as ascii
-        _drmType = StringUtils.getASCIIString(b).trim();
+        _drmType = new String(b).trim();
         
         skipSize = ByteUtils.uint2long(ByteUtils.leb2int(ds)); // data
         IOUtils.ensureSkip(ds, skipSize);

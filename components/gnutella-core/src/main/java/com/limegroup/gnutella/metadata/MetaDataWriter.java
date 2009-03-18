@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.metadata;
 
+import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection.MetaDataState;
 
@@ -20,21 +21,27 @@ public class MetaDataWriter {
     private final MetaWriter editor;
     
     /**
+     * The audiodata to be written to the file
+     */
+    private final AudioMetaData audioData;
+    
+    /**
      * LimeXMLDocument that populated the MetaData
      */
     protected LimeXMLDocument correctDocument= null;
     
     public MetaDataWriter(String fileName, MetaDataFactory metaDataFactory) {
         this.fileName = fileName;
+        this.audioData = new AudioMetaData();
         editor = metaDataFactory.getEditorForFile(fileName);
     }
     
     public boolean needsToUpdate(MetaData data) {
-        if( editor.getMetaData() == null)
+        if(editor == null)
             return false;
         else if ( data == null )
             return true;
-        return !editor.getMetaData().equals(data);
+        return !audioData.equals(data);
     }
     
     /**
@@ -43,7 +50,7 @@ public class MetaDataWriter {
      * @return status code as defined in LimeWireXMLReplyCollection
      */
     public MetaDataState commitMetaData(){
-        return editor.commitMetaData(fileName);
+        return editor.commitMetaData(fileName, audioData);
     }
     
     /**
@@ -53,7 +60,7 @@ public class MetaDataWriter {
         if( editor == null )
             throw new NullPointerException("Editor not created");
         correctDocument = doc;
-        editor.populate(doc);
+        audioData.populate(doc);
     }
 
     public LimeXMLDocument getCorrectDocument() {

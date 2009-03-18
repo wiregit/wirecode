@@ -188,11 +188,8 @@ public class LimeXMLReplyCollection {
         synchronized(LOCK) {
             if(!mainMap.containsKey(new FileAndUrn(fd))) {
                 File file = fd.getFile();
-                // If we have no documents for this FD, or the file-format only supports
-                // a single kind of metadata, construct a document.
-                // This is necessary so that we don't keep trying to parse formats that could
-                // be multiple kinds of files every time.
-                if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
+                // If we have no documents for this FD attempt to parse the file.
+                if(fd.getLimeXMLDocuments().size() == 0) {
                     doc = constructDocument(file);
                     if(doc != null) {
                         if(LOG.isDebugEnabled())
@@ -285,8 +282,9 @@ public class LimeXMLReplyCollection {
      * @return null if the format is not supported or parsing fails,
      *  <tt>LimeXMLDocument</tt> otherwise.
      */
-    private LimeXMLDocument constructDocument(File file) {
-	    if(LimeXMLUtils.isSupportedFormatForSchema(file, schemaURI)) {
+    private LimeXMLDocument constructDocument(File file) { 
+        if(LimeXMLNames.AUDIO_SCHEMA.equals(schemaURI) && metaDataFactory.containsAudioReader(file)
+                || LimeXMLNames.VIDEO_SCHEMA.equals(schemaURI) && metaDataFactory.containsVideoReader(file)) {
             try {
                 // Documents with multiple file formats may be the wrong type.
                 LimeXMLDocument document = metaDataReader.readDocument(file);
@@ -639,8 +637,8 @@ public class LimeXMLReplyCollection {
     private MetaDataWriter getEditorIfNeeded(File file, LimeXMLDocument doc) {
         // check if an editor exists for this file, if no editor exists
         //  just store data in xml repository only
-        if( !LimeXMLUtils.isSupportedEditableFormat(file.getName())) 
-        	return null;
+        if(!metaDataFactory.containsEditor(file.getName()))
+            return null;
         
         //get the editor for this file and populate it with the XML doc info
         MetaDataWriter newValues = new MetaDataWriter(file.getPath(), metaDataFactory);
@@ -685,7 +683,7 @@ public class LimeXMLReplyCollection {
         // if a FileDesc for this file exists, write out the changes to disk
         // and update the FileDesc in the FileManager
         List<LimeXMLDocument> currentXmlDocs = fd.getLimeXMLDocuments();
-        if (LimeXMLUtils.isEditableFormat(fd.getFile())) {
+        if(metaDataFactory.containsEditor(fd.getFile().getName())) {
             try {
                   //TODO: Disk IO being performed here!!
                   LimeXMLDocument newAudioXmlDoc = metaDataReader.readDocument(fd.getFile());

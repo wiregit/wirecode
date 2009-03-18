@@ -4,15 +4,12 @@ package com.limegroup.gnutella.metadata.audio.writer;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.mp3.MP3File;
-import org.jaudiotagger.tag.FieldDataInvalidException;
 import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.TagFieldKey;
-import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.id3.ID3v11Tag;
 import org.jaudiotagger.tag.id3.ID3v1Tag;
 import org.jaudiotagger.tag.id3.ID3v23Tag;
 
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 
 /**
  * Returns the correct ID3 tag for the mp3. ID3v2 tags are considered better than
@@ -23,15 +20,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 public class MP3DataEditor extends AudioDataEditor {
     
     @Override
-    protected Tag updateTag(Tag tag, AudioFile audioFile) throws FieldDataInvalidException {
-        if( tag instanceof AbstractID3v2Tag) {
-            tag.set(tag.createTagField(TagFieldKey.COPYRIGHT, audioData.getLicense()));
-        }
-        return super.updateTag(tag, audioFile);
-    }
-    
-    @Override
-    protected Tag createTag(AudioFile audioFile) {
+    protected Tag createTag(AudioFile audioFile, AudioMetaData audioData) {
         
         if( audioFile.getTag() == null )
             return new ID3v23Tag();
@@ -58,7 +47,7 @@ public class MP3DataEditor extends AudioDataEditor {
     }
 
     @Override
-    protected boolean isValidFileType(String fileName) {
-        return LimeXMLUtils.isMP3File(fileName);
+    public String[] getSupportedExtensions() {
+        return new String[] { "mp3" };
     }
 }

@@ -1,17 +1,18 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.gnutella.metadata.video.reader;
 
 import java.io.File;
 import java.io.IOException;
 
-import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
-import com.limegroup.gnutella.metadata.audio.reader.WMAMetaData;
-import com.limegroup.gnutella.metadata.video.reader.WMVMetaData;
+import com.limegroup.gnutella.metadata.ASFParser;
+import com.limegroup.gnutella.metadata.MetaData;
+import com.limegroup.gnutella.metadata.MetaReader;
+import com.limegroup.gnutella.metadata.audio.reader.WMAReader;
 
 public class WMMetaReader implements MetaReader {
 
     private final WMVMetaData wmvMetaData = new WMVMetaData();
     
-    private final WMAMetaData wmaMetaData = new WMAMetaData();
+    private final WMAReader wmaReader= new WMAReader();
     
     @Override
     public String[] getSupportedExtensions() {
@@ -24,7 +25,7 @@ public class WMMetaReader implements MetaReader {
         if (p.hasVideo())
             return wmvMetaData.parse(p);
         else if(p.hasAudio())
-            return wmaMetaData.parse(p);
+            return wmaReader.parse(p);
         else 
             throw new IOException("could not parse file");
     }

@@ -3,8 +3,8 @@ package com.limegroup.gnutella.metadata.video.reader;
 import java.io.File;
 import java.io.IOException;
 
+import com.limegroup.gnutella.metadata.ASFParser;
 import com.limegroup.gnutella.metadata.MetaReader;
-import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
 import com.limegroup.gnutella.metadata.video.VideoMetaData;
 
 

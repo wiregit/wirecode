@@ -10,7 +10,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  *  Wrapper for MetaData from a file. When marshalling meta-data from
  *  disk to LimeXMLDocument and from a LimeXMLDocument to disk, the data
  *  gets wrapped inside this Object
-	 */
+ */
 public interface MetaData {
 	
 	/**

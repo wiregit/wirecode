@@ -18,12 +18,10 @@ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
  *  handles this format. However, store files need to get checked and parsed
  *  correctly so we do that here. 
  */
-public class MP3MetaData extends AudioDataReader {
-	
+public class MP3Reader extends AudioDataReader {
 	
     @Override
     protected void readTag(AudioMetaData audioData, AudioFile audioFile, Tag tag) {
-        
         MP3File mp3File = ((MP3File)audioFile);
         mp3File.getID3v1Tag();
         
@@ -69,7 +67,7 @@ public class MP3MetaData extends AudioDataReader {
     /**
      * Reads v2 tags from the mp3. 
      */
-    private void readV2Tag(AudioMetaData audioData, AbstractID3v2Tag tag){
+    private void readV2Tag(AudioMetaData audioData, AbstractID3v2Tag tag) {
         audioData.setTitle(tag.getFirstTitle());
         audioData.setArtist(tag.getFirstArtist());
         audioData.setAlbum(tag.getFirstAlbum());
@@ -143,7 +141,6 @@ public class MP3MetaData extends AudioDataReader {
             cleanGenre = genre.substring(startIndex);
         }
         return cleanGenre;
-        
     }
     
     @Override

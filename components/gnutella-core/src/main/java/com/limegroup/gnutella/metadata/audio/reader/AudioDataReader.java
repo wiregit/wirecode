@@ -77,7 +77,7 @@ public class AudioDataReader implements MetaReader {
 
     @Override
     public String[] getSupportedExtensions() {
-        return new String[] { "fla", "flac", "m4a", "m4p" };
+        return new String[] { "fla", "flac", "m4a", "m4p", "ogg", "wav", "ra", "ram"};
     }
 
 }

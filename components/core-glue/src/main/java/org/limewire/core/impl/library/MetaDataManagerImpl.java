@@ -18,10 +18,10 @@ import org.xml.sax.SAXException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection.MetaDataState;
@@ -31,12 +31,15 @@ public class MetaDataManagerImpl implements MetaDataManager {
     private final SchemaReplyCollectionMapper schemaReplyCollectionMapper;
 
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private final MetaDataFactory metaDataFactory;
 
     @Inject
     public MetaDataManagerImpl(LimeXMLDocumentFactory limeXMLDocumentFactory,
-            SchemaReplyCollectionMapper schemaReplyCollectionMapper) {
+            SchemaReplyCollectionMapper schemaReplyCollectionMapper,
+            MetaDataFactory metaDataFactory) {
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
         this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
+        this.metaDataFactory = metaDataFactory;
     }
 
     @Override
@@ -92,7 +95,7 @@ public class MetaDataManagerImpl implements MetaDataManager {
             collection.addReply(fileDesc, result);
         }
 
-        if (LimeXMLUtils.isSupportedFormat(fileDesc.getFileName())) {
+        if(metaDataFactory.containsReader(fileDesc.getFile())) {
             final MetaDataState committed = collection.mediaFileToDisk(fileDesc, result);
             if (committed != MetaDataState.NORMAL && committed != MetaDataState.UNCHANGED) {
                 coreLocalFileItem.reloadProperties();

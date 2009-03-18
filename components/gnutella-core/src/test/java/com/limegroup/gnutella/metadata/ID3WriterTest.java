@@ -75,9 +75,10 @@ public class ID3WriterTest extends AudioTestBase {
  
         //2. Write data into the file 
         MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
-        editor.populate(doc);
+        AudioMetaData audioMetaData = new AudioMetaData();
+        audioMetaData.populate(doc);
 
-        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath(), audioMetaData);
         
         assertEquals(MetaDataState.NORMAL,retVal);
         
@@ -125,9 +126,10 @@ public class ID3WriterTest extends AudioTestBase {
  
         //2. Write data into the file 
         MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
-        editor.populate(doc);
+        AudioMetaData audioMetaData = new AudioMetaData();
+        audioMetaData.populate(doc);
 
-        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath(), audioMetaData);
         
         assertEquals(MetaDataState.NORMAL,retVal);
         
@@ -175,9 +177,10 @@ public class ID3WriterTest extends AudioTestBase {
  
         //2. Write data into the file 
         MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
-        editor.populate(doc);
+        AudioMetaData audioMetaData = new AudioMetaData();
+        audioMetaData.populate(doc);
 
-        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath(), audioMetaData);
         
         assertEquals(MetaDataState.NORMAL,retVal);
         
@@ -225,9 +228,10 @@ public class ID3WriterTest extends AudioTestBase {
  
         //2. Write data into the file 
         MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
-        editor.populate(doc);
+        AudioMetaData audioMetaData = new AudioMetaData();
+        audioMetaData.populate(doc);
 
-        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath(), audioMetaData);
         
         assertEquals(MetaDataState.NORMAL,retVal);
         
@@ -275,9 +279,10 @@ public class ID3WriterTest extends AudioTestBase {
  
         //2. Write data into the file 
         MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
-        editor.populate(doc);
+        AudioMetaData audioMetaData = new AudioMetaData();
+        audioMetaData.populate(doc);
 
-        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath(), audioMetaData);
         
         assertEquals(MetaDataState.NORMAL,retVal);
         

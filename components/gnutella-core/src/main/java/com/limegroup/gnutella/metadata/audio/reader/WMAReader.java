@@ -3,6 +3,7 @@ package com.limegroup.gnutella.metadata.audio.reader;
 import java.io.File;
 import java.io.IOException;
 
+import com.limegroup.gnutella.metadata.ASFParser;
 import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 
@@ -10,7 +11,7 @@ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 /**
  * Sets WMA metadata using the ASF parser.
  */
-public class WMAMetaData implements MetaReader {
+public class WMAReader implements MetaReader {
     
     @Override
     public AudioMetaData parse(File f) throws IOException {

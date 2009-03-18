@@ -114,7 +114,6 @@
 	<classpathentry kind="lib" path="lib/jars/onion-common.jar"/>
 	<classpathentry kind="lib" path="lib/jars/onion-fec.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jaudiotagger.jar"/>
 	<classpathentry kind="lib" path="lib/jars/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/jars/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/jars/mozdom4java.jar" sourcepath="lib/sources/mozdom4java-src.zip"/>
@@ -139,5 +138,6 @@
 	<classpathentry kind="lib" path="lib/jars/swing-worker-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-0.9.4.jar" sourcepath="lib/sources/swingx-0.9.4-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jaudiotagger.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

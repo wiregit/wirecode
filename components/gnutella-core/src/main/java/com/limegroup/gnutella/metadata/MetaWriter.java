@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.metadata;
 
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection.MetaDataState;
 
 /**
@@ -9,9 +9,13 @@ import com.limegroup.gnutella.xml.LimeXMLReplyCollection.MetaDataState;
  */
 public interface MetaWriter {
 
-    public MetaDataState commitMetaData(String filename);
+	/**
+	 *	Writes the meta data contained in AudioMetaData to the file.
+	 */
+    public MetaDataState commitMetaData(String filename, AudioMetaData audioData);
     
-    public void populate(LimeXMLDocument doc);
-    
-    public MetaData getMetaData();
+    /**
+	 * Returns an array of extensions whose meta data can be written.
+	 */
+    public String[] getSupportedExtensions();
 }

@@ -15,10 +15,34 @@ public interface MetaDataFactory {
     public MetaWriter getEditorForFile(String name);
     
     /**
+     * Returns true if this factory contains an editor for this file type,
+     * false otherwise.
+     */
+    public boolean containsEditor(String name);
+    
+    /**
      * Reads the meta data from the file if the file type is supported
      * or return null if reading the file meta data if not supprted
      */
     public MetaData parse(File f) throws IOException;
+    
+    /**
+     * Returns true if this factory contains a reader for this file type,
+     * false otherwise.
+     */
+    public boolean containsReader(File f);
+    
+    /**
+     * Returns true if this factory contains an audio reader for this file type,
+     * false otherwise.
+     */
+    public boolean containsAudioReader(File f);
+    
+    /**
+     * Returns true if this factory contains a video reader for this file type,
+     * false otherwise.
+     */
+    public boolean containsVideoReader(File f);
     
     /**
      * Registers a reader factory for a number of file extensions
