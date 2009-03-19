@@ -2,14 +2,11 @@ package org.limewire.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -83,7 +80,7 @@ public class TestUtils {
                 tmpFile.deleteOnExit();
                 
                 InputStream stream = resource.openStream();
-                saveStream(stream, tmpFile);
+                CommonUtils.saveStream(stream, tmpFile);
                 return tmpFile;
             } catch(Throwable iox) {
                 throw new RuntimeException("failed to expand jar resource file: " + location, iox);
@@ -101,7 +98,7 @@ public class TestUtils {
         // The recommended workaround is to use the URI class, but that doesn't
         // exist until Java 1.4.  So, we can't use it here.
         // Thus, we manually have to parse out the %20s from the URL
-        return new File( decode(resource.getFile()) );
+        return new File( CommonUtils.decode(resource.getFile()) );
     }
     
     /**
@@ -134,10 +131,10 @@ public class TestUtils {
                         File outFile  = new File(efile, file.getName());
                         outFile.getParentFile().mkdirs();
                         out =  new BufferedOutputStream(new FileOutputStream(outFile));
-                        write(in, out);
+                        FileUtils.write(in, out);
                     } finally {
-                        close(in);
-                        close(out);
+                        FileUtils.close(in);
+                        FileUtils.close(out);
                     }
                 }
             }
@@ -145,145 +142,10 @@ public class TestUtils {
         } else {
             //if it is on the filesystem already we can just copy the directory we need
             File resourceDir = getResourceFile(location);
-            copyDirectory(resourceDir, efile);
+            FileUtils.copyDirectory(resourceDir, efile);
         }
         
         return efile;
-    }
-    
-    private static void close(Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (IOException ignored) {}
-        }
-    }
-    
-    private static void copyDirectory(File sourceDirectory, File destinationDirectory) throws IOException {
-        if (!sourceDirectory.isDirectory())
-            throw new IOException("source directory not found");
-        if (destinationDirectory.exists())
-            throw new IOException("destination directory already exists");
-        destinationDirectory.mkdirs();
-
-        // Loop for each name in the source directory, like "file.ext" and "subfolder name"
-        String[] contents = sourceDirectory.list();
-        File source, destination;
-        for (String name : contents) {
-            
-            // Make File objects with complete paths for this file or subfolder
-            source = new File(sourceDirectory, name);
-            destination = new File(destinationDirectory, name);
-
-            // Copy it across
-            if (source.isDirectory()) {
-                // Call this same method to copy the subfolder and its contents
-                copyDirectory(source, destination);
-            } else {
-                if (!copy(source, destination))
-                    throw new IOException("unable to copy file");
-            }
-        }
-    }
-    
-    /**
-     * Utility method to copy an input stream into the target output stream.
-     */
-    public static void write(InputStream inputStream, OutputStream outputStream) throws IOException {
-        int numRead = 0;
-        byte[] buffer = new byte[1024];
-        while ((numRead = inputStream.read(buffer,0,buffer.length)) != -1) {
-            outputStream.write(buffer,0,numRead);
-        }
-    }
-    
-    private static boolean copy(File source, File destination) {
-        FileInputStream fileInputStream = null;
-        FileOutputStream fileOutputStream = null;
-        
-        try {
-            fileInputStream = new FileInputStream(source);
-            fileOutputStream = new FileOutputStream(destination);
-            write(fileInputStream, fileOutputStream);
-        } catch (IOException e) {
-           return false;
-        } finally {
-            close(fileInputStream);
-            close(fileOutputStream);
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Copy of CommonUtils.saveStream
-     */
-    private static void saveStream(InputStream inStream, File newFile) throws IOException {
-        BufferedInputStream bis = null;
-        BufferedOutputStream bos = null;            
-        try {
-            //buffer the streams to improve I/O performance
-            final int bufferSize = 2048;
-            bis = new BufferedInputStream(inStream, bufferSize);
-            bos = new BufferedOutputStream(new FileOutputStream(newFile), bufferSize);
-            byte[] buffer = new byte[bufferSize];
-            int c = 0;
-            
-            do { //read and write in chunks of buffer size until EOF reached
-                c = bis.read(buffer, 0, bufferSize);
-                if (c > 0)
-                    bos.write(buffer, 0, c);
-            } while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
-            
-            bos.flush();
-        } catch(IOException e) {
-            //if there is any error, delete any portion of file that did write
-            newFile.delete();
-        } finally {
-            if(bis != null) {
-                try {
-                    bis.close();
-                } catch(Throwable ignored) {}
-            }
-            if(bos != null) {
-                try {
-                    bos.close();
-                } catch(Throwable ignored) {}
-            }
-        } 
-    }
-    
-    private static String decode(String s) {
-        StringBuilder sb = new StringBuilder();
-        for(int i=0; i<s.length(); i++) {
-            char c = s.charAt(i);
-            switch (c) {
-                case '+':
-                    sb.append(' ');
-                    break;
-                case '%':
-                    try {
-                        sb.append((char)Integer.parseInt(
-                                        s.substring(i+1,i+3),16));
-                    } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException(s);
-                    }
-                    i += 2;
-                    break;
-                default:
-                    sb.append(c);
-                    break;
-            }
-        }
-        // Undo conversion to external encoding
-        String result = sb.toString();
-        try {
-            byte[] inputBytes = result.getBytes("8859_1");
-            result = new String(inputBytes);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-        return result;
     }
 
     public static File getResourceInPackage(String resourceName, Class nearResource) {

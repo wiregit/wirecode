@@ -45,6 +45,6 @@
         <dependency org="none" name="messages" rev="" conf="runtime"/>
         
         <!-- test dependencies. -->
-        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
+        <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
     </dependencies>
 </ivy-module>

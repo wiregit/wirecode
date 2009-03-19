@@ -19,7 +19,7 @@
         <dependency org="none" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
         <dependency org="none" name="guice" rev="${guice.version}" conf="compile,runtime"/>
         
-        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
+        <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
         
         <dependency org="none" name="tests/org.mortbay.jetty" rev="${org.mortbay.jetty.version}" conf="test"/>
         <dependency org="none" name="tests/javax.servlet" rev="${javax.servlet.version}" conf="test"/>

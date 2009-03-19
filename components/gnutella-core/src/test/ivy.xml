@@ -8,7 +8,7 @@
     </publications>
     <dependencies>
         <dependency org="org.limewire" name="core" rev="latest.integration" conf="test"/>        
-        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
+        <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
         <dependency org="org.limewire" name="resources" rev="latest.integration" conf="test"/>
         
         <dependency org="none" name="commons-math" rev="${commons-math.version}" conf="test"/>

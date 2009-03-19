@@ -44,6 +44,6 @@
 
         <dependency org="org.limewire" name="resources" rev="latest.integration" conf="runtime"/>
         
-        <dependency org="org.limewire" name="test-util" rev="latest.integration" conf="test"/>
+        <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
     </dependencies>
 </ivy-module>

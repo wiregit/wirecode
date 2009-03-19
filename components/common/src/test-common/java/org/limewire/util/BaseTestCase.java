@@ -10,13 +10,16 @@ import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.limewire.service.ErrorCallback;
+import org.limewire.service.ErrorService;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
 /** Utility test-case class that others can extend for easier testing. */ 
-public abstract class BaseTestCase extends AssertComparisons implements UncaughtExceptionHandler {
+public abstract class BaseTestCase extends AssertComparisons implements UncaughtExceptionHandler, ErrorCallback {
     
     protected volatile static Class _testClass;
     private   final static Timer _testKillerTimer = new Timer(true);
@@ -229,7 +232,7 @@ public abstract class BaseTestCase extends AssertComparisons implements Uncaught
      */
     protected void preSetUp() throws Exception {
         _testThread = Thread.currentThread();
-        ErrorUtils.setCallback(this);
+        ErrorService.setErrorCallback(this);
         Thread.setDefaultUncaughtExceptionHandler(this);
         Thread.currentThread().setUncaughtExceptionHandler(this);
         setupTestTimer();

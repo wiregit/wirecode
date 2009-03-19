@@ -8,8 +8,6 @@
 	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/resources"/>
 	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
 	<classpathentry kind="src" output="components/resources/src/main/resources" path="components/resources/src/main/resources"/>
-	<classpathentry kind="src" output="components/test-util/build/classes" path="components/test-util/src/main/java"/>
-	<classpathentry kind="src" output="components/test-util/build/tests" path="components/test-util/src/test/java"/>
 	<classpathentry kind="src" output="components/common/src/main/resources" path="components/common/src/main/resources"/>
 	<classpathentry kind="src" output="components/common/src/test/resources" path="components/common/src/test/resources"/>
 	<classpathentry kind="src" output="components/common/build/classes" path="components/common/src/main/java"/>
@@ -62,6 +60,8 @@
 	<classpathentry kind="src" path="components/xmpp-api/src/test/java"/>
 	<classpathentry kind="src" path="components/swarm/src/test-common/resources"/>
 	<classpathentry kind="src" path="components/nio/src/test-common/java"/>
+	<classpathentry kind="src" path="components/common/src/test-common/java"/>
+	<classpathentry kind="src" path="components/net/src/test-common/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/cocoaFoundation.jar"/>

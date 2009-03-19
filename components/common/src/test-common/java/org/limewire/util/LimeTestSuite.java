@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.service.ErrorCallback;
+import org.limewire.service.ErrorService;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -19,7 +22,7 @@ import junit.framework.TestSuite;
  * to always be shutdown after tests finished,
  * regardless of halt-on-failure or halt-on-error.
  */
-public class LimeTestSuite extends TestSuite {   
+public class LimeTestSuite extends TestSuite implements ErrorCallback {   
     
     private TestResult _testResult = null;
     private boolean _beforeTests = false;
@@ -53,7 +56,7 @@ public class LimeTestSuite extends TestSuite {
     public void run(TestResult result) {
         _beforeTests = true;
         _testResult = result;
-        ErrorUtils.setCallback(this);
+        ErrorService.setErrorCallback(this);
         
         // First try doing the before-tests-setup
         try {
@@ -92,7 +95,7 @@ public class LimeTestSuite extends TestSuite {
             // Regardless of if any fail or not, 
             // always run the last post test & after all tests methods.
             _beforeTests = false;
-            ErrorUtils.setCallback(this);
+            ErrorService.setErrorCallback(this);
             try {
                 runStaticMethod(postTestName);
             } catch(TestFailedException tfe) {

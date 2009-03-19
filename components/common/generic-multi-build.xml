@@ -37,7 +37,7 @@
 	<!-- publishes all dependencies. -->
 	<target name="publish" depends="publish-dependencies"/>
 	
-	<target name="clean" depends="initialize, clean-aggregate-reports">
+	<target name="clean" depends="initialize, clean-local-ivy, clean-aggregate-reports">
 	    <do.multi-ant target="clean"/>
 	</target>
     
@@ -78,7 +78,7 @@
         	<report format="frames" todir="${junit.aggregateHtml}"/>
        </junitreport>
 	</target>
-    
+        
     <target name="jar" depends="publish-dependencies">
         <do.multi-ant target="jar"/> 
         <!-- TODO: build one big jar. -->
@@ -123,6 +123,11 @@
                 <testsources refid="clover.testsources"/>				
             </current>            
         </clover-report>	            
+	</target>
+	
+	<target name="clean-local-ivy">
+    	<delete dir="${ivy.cache.resolution}"/>
+		<delete dir="${ivy.local.default.root}"/>
 	</target>
 	
 	<target name="clean-aggregate-junit">	
