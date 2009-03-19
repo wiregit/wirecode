@@ -312,6 +312,7 @@ public class RatingTable implements Service {
 	@InspectionPoint("spam rating table token hashes")
 	@SuppressWarnings("unused")
 	private final Inspectable TOKEN_HASH = new Inspectable() {
+        @Override
 	    public Object inspect() {
 	        synchronized(RatingTable.this) {
 	            Map<String, Object> ret = new HashMap<String, Object>();

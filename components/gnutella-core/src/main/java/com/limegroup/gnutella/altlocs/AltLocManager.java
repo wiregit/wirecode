@@ -295,6 +295,7 @@ public class AltLocManager implements EventListener<FileListChangedEvent> {
         /** Inspectable for class C networks of alternate locations */
         @InspectionPoint("alternate locations class C stats")
         public final Inspectable classC = new Inspectable() {
+            @Override
             public Object inspect() {
                 ClassCNetworks direct = new ClassCNetworks();
                 ClassCNetworks pushProxies = new ClassCNetworks();

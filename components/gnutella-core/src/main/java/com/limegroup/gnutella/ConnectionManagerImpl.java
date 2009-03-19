@@ -2589,6 +2589,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             this.leaf = leaf;
         }
         
+        @Override
         public Object inspect() {
             List<RoutedConnection> conns = getConnections();
             

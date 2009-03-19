@@ -580,6 +580,7 @@ public class UPnPManager  {
     @InspectionPoint("upnp stats")
     @SuppressWarnings("unused")
 	private final Inspectable UPnPStats = new Inspectable() {
+        @Override
 	    public Object inspect() {
 	        if (!isNATPresent())
 	            return "N/A";

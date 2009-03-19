@@ -416,6 +416,7 @@ public class OOBHandler implements MessageHandler, Runnable {
 
         @InspectionPoint("oob sessions")
         public final Inspectable oobSessions = new Inspectable() {
+            @Override
             public Object inspect() {
                 List<Object> list;
                 synchronized(sessions) {

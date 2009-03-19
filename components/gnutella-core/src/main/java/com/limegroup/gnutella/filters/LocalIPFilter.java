@@ -166,6 +166,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
         
         @InspectionPoint("ip filter counts")
         private final Inspectable counts = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String,Object> ret = new HashMap<String, Object>();
                 ret.put("white",whitelistings);

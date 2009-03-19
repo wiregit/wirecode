@@ -339,6 +339,7 @@ public class InspectionTest extends ServerSideTestCase {
 @SuppressWarnings("unchecked")
 class BEObject implements Inspectable {
     static BEObject self;
+    @Override
     public Object inspect() {
         Map m = new HashMap();
         m.put("empty list",new ArrayList());

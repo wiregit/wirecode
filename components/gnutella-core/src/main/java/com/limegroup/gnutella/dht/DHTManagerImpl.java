@@ -487,6 +487,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         }
         @InspectionPoint("general dht stats")
         public Inspectable general = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
                 addVersion(data);
@@ -515,6 +516,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         
         @InspectionPoint("dht contacts")
         public Inspectable contacts = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
                 addVersion(data);
@@ -557,6 +559,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         
         @InspectionPoint("dht route table dump")
         public Inspectable RTDump = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
                 addVersion(data);
@@ -574,6 +577,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         
         @InspectionPoint("dht route table class C networks")
         public Inspectable routeTableTop10Networks = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
                 addVersion(data);
@@ -603,6 +607,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         
         @InspectionPoint("dht buckets")
         public Inspectable buckets = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
                 addVersion(data);
@@ -644,6 +649,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         
         @InspectionPoint("dht buckets detailed")
         public Inspectable bucketDetail = new Inspectable() {
+            @Override
             public Object inspect() {
                 List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
                 MojitoDHT dht = getMojitoDHT();
@@ -670,6 +676,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         
         @InspectionPoint("dht database")
         public Inspectable database = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
                 addVersion(data);
@@ -713,36 +720,38 @@ public class DHTManagerImpl implements DHTManager, Service {
         
         @InspectionPoint("dht database top 10 keys")
         public Inspectable databaseTop10Keys = new Inspectable() {
-          public Object inspect() {
-              List<byte[]>ret = new ArrayList<byte[]>();
-              MojitoDHT dht = getMojitoDHT();
-              if (dht != null) {
-                  Database database = dht.getDatabase();
-                  Map<Double, KUID> popularKeys = 
-                      new TreeMap<Double,KUID>(Comparators.inverseDoubleComparator());
-                  synchronized(database) {
-                      Set<KUID> keys = database.keySet();
-                      for (KUID primaryKey : keys) {
-                          popularKeys.put((double)database.getRequestLoad(primaryKey, false), 
-                                  primaryKey);
-                      }
-                  }
-                  
-                  // load -> key
-                  for(double load : popularKeys.keySet()) {
-                      if (ret.size() >= 20)
-                          break;
-                      
-                      ret.add(BigInteger.valueOf(Double.doubleToLongBits(load)).toByteArray());
-                      ret.add(popularKeys.get(load).getBytes());
-                  }
-              }
-              return ret;
-          }
+            @Override
+            public Object inspect() {
+                List<byte[]>ret = new ArrayList<byte[]>();
+                MojitoDHT dht = getMojitoDHT();
+                if (dht != null) {
+                    Database database = dht.getDatabase();
+                    Map<Double, KUID> popularKeys = 
+                        new TreeMap<Double,KUID>(Comparators.inverseDoubleComparator());
+                    synchronized(database) {
+                        Set<KUID> keys = database.keySet();
+                        for (KUID primaryKey : keys) {
+                            popularKeys.put((double)database.getRequestLoad(primaryKey, false), 
+                                    primaryKey);
+                        }
+                    }
+
+                    // load -> key
+                    for(double load : popularKeys.keySet()) {
+                        if (ret.size() >= 20)
+                            break;
+
+                        ret.add(BigInteger.valueOf(Double.doubleToLongBits(load)).toByteArray());
+                        ret.add(popularKeys.get(load).getBytes());
+                    }
+                }
+                return ret;
+            }
         };
         
         @InspectionPoint("dht internal format stats")
         public Inspectable mojitoStats = new Inspectable() {
+            @Override
             public Object inspect() {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Writer w = new OutputStreamWriter(baos);
@@ -925,6 +934,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         
         volatile int maxFailed = 0;
         
+        @Override
         public synchronized Object inspect() {
             Map<String, Object> values = new HashMap<String, Object>();
             values.put("success hist", successes.inspect());

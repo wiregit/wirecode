@@ -193,6 +193,7 @@ public class UDPService implements ReadWriteObserver {
     @InspectionPoint("fwt capable")
     @SuppressWarnings("unused")
     private final Inspectable fwtCapable = new Inspectable() {
+        @Override
         public Object inspect() {
             return canDoFWT();
         }

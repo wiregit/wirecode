@@ -3102,6 +3102,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         private final Map<Byte,InspectionHistogram<Integer>> lastHopRouted = 
             new HashMap<Byte,InspectionHistogram<Integer>>();
         
+        @Override
         public synchronized Object inspect() {
             Map<String,Object> ret = new HashMap<String,Object>();
             for (byte b : lastHopRouted.keySet())
@@ -3153,6 +3154,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 counts.remove(ejected);
         }
         
+        @Override
         public synchronized Object inspect() {
             Map<String,Object> ret = new HashMap<String,Object>();
             ret.put("total",totalDropped);

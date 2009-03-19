@@ -1512,6 +1512,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         
         @InspectionPoint("known hosts by class C")
         public final Inspectable top10classC = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 ret.put("ver",1);
@@ -1551,6 +1552,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         /** Inspectable with some tls stats */
         @InspectionPoint("tls stats of known hosts")
         public final Inspectable tlsStats = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 ret.put("ver",1);
@@ -1588,6 +1590,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         /** Inspectable with some dht stats */
         @InspectionPoint("dht stats of known hosts")
         public final Inspectable dhtStats = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String, Object>();
                 ret.put("ver",1);

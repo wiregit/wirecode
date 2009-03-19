@@ -294,6 +294,7 @@ public class OnDemandUnicaster {
     @SuppressWarnings("unused")
     @InspectionPoint("Unicaster class C stats")
     private final Inspectable classCQueried = new Inspectable() {
+        @Override
         public Object inspect() {
             ClassCNetworks cnc = new ClassCNetworks();
             synchronized(_queriedHosts) {

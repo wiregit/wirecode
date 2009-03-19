@@ -189,6 +189,7 @@ class FileManagerImpl implements FileManager, Service {
         /** An inspectable that counts how many shared fds match a custom criteria */
         @InspectionPoint("FileManager custom criteria")
         public final Inspectable CUSTOM = new Inspectable() {
+            @Override
             public Object inspect() {
                 Map<String, Object> ret = new HashMap<String,Object>();
                 ret.put("ver",1);
@@ -245,6 +246,7 @@ class FileManagerImpl implements FileManager, Service {
             this.nonZero = nonZero;
         }
         
+        @Override
         public Object inspect() {
             Map<String, Object> ret = new HashMap<String, Object>();
             ret.put("ver", FMInspectables.VERSION);

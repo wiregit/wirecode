@@ -163,6 +163,7 @@ public interface Message extends Comparable<Message> {
             count.countMessage(msg);
         }
 
+        @Override
         public synchronized Object inspect() {
             List<Map<String,Object>> ret = new ArrayList<Map<String,Object>>(counts.size());
             for (EnumMap<Network, MessageTypeCounter> e : counts.values()) {

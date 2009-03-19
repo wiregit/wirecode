@@ -40,6 +40,7 @@ public class QueryStats {
     @InspectionPoint("user query stats v3")
     @SuppressWarnings("unused")
     private final Inspectable queryStats = new Inspectable() {
+        @Override
         public Object inspect() {
             synchronized(QueryStats.this) {
                 Map<String, Object> ret = new HashMap<String, Object>();

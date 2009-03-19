@@ -40,6 +40,7 @@ public final class QueryDispatcherImpl implements QueryDispatcher {
     /** Details about the queries */
     @InspectionPoint("dispatched queries details")
     public final Inspectable queryDetail = new Inspectable() {
+        @Override
         public Object inspect() {
             List<Object> l = new ArrayList<Object>(QUERIES.size());
             for(QueryHandler qh : QUERIES.values())

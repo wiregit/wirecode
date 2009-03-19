@@ -142,6 +142,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     @SuppressWarnings("unused")
     @InspectionPoint("ungraceful shutdown details")
     private final Inspectable ungracefulShutdownDetails = new Inspectable() {
+        @Override
         public Object inspect() {
             Map<String, Object> data = new HashMap<String, Object>();
             data.put("JVM version", VersionUtils.getJavaVersion());

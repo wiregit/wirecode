@@ -151,6 +151,7 @@ public final class BugManager {
     @SuppressWarnings("unused")
     @InspectionPoint("bug report")
     private static final Inspectable INSPECTABLE = new Inspectable() {
+        @Override
         public Object inspect() {
             
             if (!SwingUiSettings.USAGE_STATS.getValue() && !LimeWireUtils.isAlphaRelease())

@@ -495,6 +495,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
     @InspectionPoint("search result handler stats")
     @SuppressWarnings("unused")
     private final Inspectable searchResultHandler = new Inspectable() {
+        @Override
         public Object inspect() {
             Map<String, Object> ret = new HashMap<String, Object>();
             ret.put("ver",1);
