@@ -286,7 +286,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
         File asf =
             TestUtils.getResourceFile("com/limegroup/gnutella/resources/Kol_Nidre.wma");
         f3 = createPartialCopy(asf, "foo", _scratchDir, 1024);
-        assertAddFails("MISLEADING_NAME", fileList, f3);
+        assertAddFails("DANGEROUS_FILE", fileList, f3);
         assertEquals(2, fileList.size());
         
         assertLoads(fileList);
