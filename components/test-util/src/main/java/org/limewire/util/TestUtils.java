@@ -2,7 +2,9 @@ package org.limewire.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,8 +17,6 @@ import java.util.Enumeration;
 import java.util.UUID;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import org.limewire.io.IOUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
@@ -136,8 +136,8 @@ public class TestUtils {
                         out =  new BufferedOutputStream(new FileOutputStream(outFile));
                         FileUtils.write(in, out);
                     } finally {
-                        IOUtils.close(in);
-                        IOUtils.close(out);
+                        close(in);
+                        close(out);
                     }
                 }
             }
@@ -145,10 +145,74 @@ public class TestUtils {
         } else {
             //if it is on the filesystem already we can just copy the directory we need
             File resourceDir = getResourceFile(location);
-            FileUtils.copyDirectory(resourceDir, efile);
+            copyDirectory(resourceDir, efile);
         }
         
         return efile;
+    }
+    
+    private static void close(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException ignored) {}
+        }
+    }
+    
+    private static void copyDirectory(File sourceDirectory, File destinationDirectory) throws IOException {
+        if (!sourceDirectory.isDirectory())
+            throw new IOException("source directory not found");
+        if (destinationDirectory.exists())
+            throw new IOException("destination directory already exists");
+        destinationDirectory.mkdirs();
+
+        // Loop for each name in the source directory, like "file.ext" and "subfolder name"
+        String[] contents = sourceDirectory.list();
+        File source, destination;
+        for (String name : contents) {
+            
+            // Make File objects with complete paths for this file or subfolder
+            source = new File(sourceDirectory, name);
+            destination = new File(destinationDirectory, name);
+
+            // Copy it across
+            if (source.isDirectory()) {
+                // Call this same method to copy the subfolder and its contents
+                copyDirectory(source, destination);
+            } else {
+                if (!copy(source, destination))
+                    throw new IOException("unable to copy file");
+            }
+        }
+    }
+    
+    /**
+     * Utility method to copy an input stream into the target output stream.
+     */
+    public static void write(InputStream inputStream, OutputStream outputStream) throws IOException {
+        int numRead = 0;
+        byte[] buffer = new byte[1024];
+        while ((numRead = inputStream.read(buffer,0,buffer.length)) != -1) {
+            outputStream.write(buffer,0,numRead);
+        }
+    }
+    
+    private static boolean copy(File source, File destination) {
+        FileInputStream fileInputStream = null;
+        FileOutputStream fileOutputStream = null;
+        
+        try {
+            fileInputStream = new FileInputStream(source);
+            fileOutputStream = new FileOutputStream(destination);
+            write(fileInputStream, fileOutputStream);
+        } catch (IOException e) {
+           return false;
+        } finally {
+            close(fileInputStream);
+            close(fileOutputStream);
+        }
+        
+        return true;
     }
     
     /**
@@ -281,4 +345,5 @@ public class TestUtils {
             };
         }
     }
+
 }
