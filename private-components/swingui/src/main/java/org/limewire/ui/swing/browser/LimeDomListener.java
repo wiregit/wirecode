@@ -1,10 +1,13 @@
 package org.limewire.ui.swing.browser;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.client.utils.URIUtils;
 import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.MozillaRuntimeException;
 import org.mozilla.dom.NodeFactory;
@@ -104,21 +107,43 @@ class LimeDomListener implements nsIDOMEventListener {
                 Node hrefNode = map.getNamedItem("href");
                 if (hrefNode != null) {
                     String target = null;
-                    String url = hrefNode.getNodeValue();
-                    if (url == null) {
+                    URI absoluteURI = null;
+                    try {
+                        absoluteURI = new URI(encode(hrefNode.getNodeValue()));
+                        if(!absoluteURI.isAbsolute()) {
+                            //we need to pass an absolute uri to the targeted urls.
+                            if(node.getBaseURI() != null) {
+                                URI baseUri = new URI(encode(node.getBaseURI()));
+                                URI relativeURI = new URI(encode(hrefNode.getNodeValue()));
+                                absoluteURI = URIUtils.resolve(baseUri, relativeURI);
+                            }
+                        }
+                    } catch (URISyntaxException e) {
+                        absoluteURI = null;
+                    }
+                    
+                    if (absoluteURI == null || !absoluteURI.isAbsolute()) {
                         return null;
                     }
+                    
                     Node targetNode = map.getNamedItem("target");
                     if (targetNode != null) {
                         target = targetNode.getNodeValue();
                     }
-                    return new UriAction.TargetedUri(target, url);
+                    return new UriAction.TargetedUri(target, absoluteURI.toASCIIString());
                 }
             }
         }
         return null;
     }
 
+    public String encode(String uri) {
+        if(uri == null) {
+            return null;
+        }
+        return uri.replaceAll(" ", "%20");
+    }
+    
     public nsISupports queryInterface(String uuid) {
         return Mozilla.queryInterface(this, uuid);
     }
