@@ -12,7 +12,6 @@ import javax.net.ssl.SSLServerSocketFactory;
 
 import junit.framework.Test;
 
-import org.limewire.nio.LimeTestUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -201,7 +200,7 @@ public class TLSNIOSocketTest extends BaseTestCase {
         // IMPORTANT: do not tell accepted to read here, otherwise
         // handshaking could finish before we shutdown output.
         accepted.shutdownOutput();        
-        LimeTestUtils.waitForNIO();
+//        LimeTestUtils.waitForNIO();
         assertTrue(socket.isClosed());
         accepted.close();
         server.close();
