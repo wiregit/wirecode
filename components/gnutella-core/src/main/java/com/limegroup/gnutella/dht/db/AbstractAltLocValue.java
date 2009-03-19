@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.dht.db;
 
+import java.util.Arrays;
+
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.mojito.db.DHTValueType;
@@ -122,6 +124,31 @@ public abstract class AbstractAltLocValue implements AltLocValue {
      * @see com.limegroup.gnutella.dht.db.AltLocValue#supportsTLS()
      */
     public abstract boolean supportsTLS();
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof AltLocValue)) {
+            return false;
+        }
+        AltLocValue other = (AltLocValue)obj;
+        return getFileSize() == other.getFileSize() && Arrays.equals(getGUID(), other.getGUID())
+                && getPort() == other.getPort() && Arrays.equals(getRootHash(), other.getRootHash())
+                && Arrays.equals(getValue(), other.getValue()) && getValueType().equals(other.getValueType())
+                && getVersion().equals(other.getVersion());
+    }
+    
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + (int)getFileSize();
+        hash = 31 * hash + getPort();
+        hash = 31 * hash + getGUID().hashCode();
+        hash = 31 * hash + getRootHash().hashCode();
+        hash = 31 * hash + getValue().hashCode();
+        hash = 31 * hash + getValueType().hashCode();
+        hash = 31 * hash + getVersion().hashCode();
+        return hash;
+    }
     
     /*
      * (non-Javadoc)

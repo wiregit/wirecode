@@ -40,7 +40,7 @@ public class IncompleteFileDescImpl extends FileDescImpl implements IncompleteFi
      * Constructor for the IncompleteFileDesc object.
      */
     public IncompleteFileDescImpl(
-            RareFileDefinition rareFileDefinition,
+            RareFileStrategy rareFileStrategy,
             SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
             File file,
             Set<? extends URN> urns,
@@ -48,7 +48,7 @@ public class IncompleteFileDescImpl extends FileDescImpl implements IncompleteFi
             String completedName,
             long completedSize,
             VerifyingFile vf) {
-        super(rareFileDefinition, fileDescMulticaster, file, urns, index);
+        super(rareFileStrategy, fileDescMulticaster, file, urns, index);
         _name = completedName;
         _size = completedSize;
         _verifyingFile = vf;

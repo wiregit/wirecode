@@ -13,25 +13,25 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 @Singleton
 class FileDescFactoryImpl implements FileDescFactory {
     
-    private final RareFileDefinition rareFileDefinition;
+    private final RareFileStrategy rareFileStrategy;
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster;
     
     @Inject
-    public FileDescFactoryImpl(RareFileDefinition rareFileDefinition,
+    public FileDescFactoryImpl(RareFileStrategy rareFileStrategy,
             SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster) {
-        this.rareFileDefinition = rareFileDefinition;
+        this.rareFileStrategy = rareFileStrategy;
         this.multicaster = multicaster;
     }
 
     @Override
     public FileDesc createFileDesc(File file, Set<? extends URN> urns, int index) {
-        return new FileDescImpl(rareFileDefinition, multicaster, file, urns, index);
+        return new FileDescImpl(rareFileStrategy, multicaster, file, urns, index);
     }
     
     @Override
     public IncompleteFileDesc createIncompleteFileDesc(File file, Set<? extends URN> urns,
             int index, String completedName, long completedSize, VerifyingFile vf) {
-        return new IncompleteFileDescImpl(rareFileDefinition, multicaster, file, urns,
+        return new IncompleteFileDescImpl(rareFileStrategy, multicaster, file, urns,
                 index, completedName, completedSize, vf);
     }
 

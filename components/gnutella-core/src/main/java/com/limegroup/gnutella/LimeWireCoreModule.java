@@ -130,6 +130,8 @@ import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.LimeWireLibraryModule;
+import com.limegroup.gnutella.library.RareFileStrategy;
+import com.limegroup.gnutella.library.RareFileStrategyImpl;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
 import com.limegroup.gnutella.lws.server.LWSManager;
@@ -368,6 +370,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Bootstrapper.class).to(BootstrapperImpl.class);
         bind(Bootstrapper.Listener.class).to(HostCatcher.class);
         bind(DangerousFileChecker.class).to(FileExtensionChecker.class);
+        bind(RareFileStrategy.class).to(RareFileStrategyImpl.class);
         
         bindAll(Names.named("fastExecutor"), ScheduledExecutorService.class, FastExecutorProvider.class, ExecutorService.class, Executor.class);
         bindAll(Names.named("unlimitedExecutor"), ListeningExecutorService.class, UnlimitedExecutorProvider.class, Executor.class, ExecutorService.class);

@@ -113,7 +113,7 @@ public class FileDescImpl implements FileDesc {
     private final AtomicBoolean storeFile = new AtomicBoolean(false);
     
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster;
-    private final RareFileDefinition rareFileDefinition;
+    private final RareFileStrategy rareFileStrategy;
     
     private final ConcurrentHashMap<String, Object> clientProperties =
         new ConcurrentHashMap<String, Object>(4, 0.75f, 4); // non-default initialCapacity,
@@ -134,7 +134,7 @@ public class FileDescImpl implements FileDesc {
      * @param urns the URNs to associate with this FileDesc
      * @param index the index in the FileManager
      */
-    FileDescImpl(RareFileDefinition rareFileDefinition,
+    FileDescImpl(RareFileStrategy rareFileStrategy,
             SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster,
             File file,
             Set<? extends URN> urns,
@@ -143,7 +143,7 @@ public class FileDescImpl implements FileDesc {
 			throw new IndexOutOfBoundsException("negative index (" + index + ") not permitted in FileDesc");
 		}
 
-		this.rareFileDefinition = rareFileDefinition;
+		this.rareFileStrategy = rareFileStrategy;
 		this.multicaster = multicaster;
 		FILE = Objects.nonNull(file, "file");
         _index = index;
@@ -162,7 +162,7 @@ public class FileDescImpl implements FileDesc {
     
     @Override
     public boolean isRareFile() {
-        return rareFileDefinition.isRareFile(this);
+        return rareFileStrategy.isRareFile(this);
     }
 
 	/* (non-Javadoc)

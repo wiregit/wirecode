@@ -9,12 +9,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class RareFileDefinition { 
+public class RareFileStrategyImpl implements RareFileStrategy { 
     
     private volatile RPNParser parser;
     
     @Inject
-    RareFileDefinition() {
+    RareFileStrategyImpl() {
         parser = new RPNParser(DHTSettings.RARE_FILE_DEFINITION.getValue());      
         DHTSettings.RARE_FILE_DEFINITION.addSettingListener(new SettingListener() {
             @Override
@@ -23,7 +23,7 @@ public class RareFileDefinition {
             }
         });
     }
-    
+
     public boolean isRareFile(FileDesc fd) {
         try {
             return parser.evaluate(fd);
