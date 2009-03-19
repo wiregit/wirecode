@@ -553,6 +553,9 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         // Make sure the failed PresenceLibrary is in the rebrowse list
         assertContains(presenceLibraryBrowser.librariesToBrowse, presenceLibrary);
         
+        // Remove the failed presence library so when simulating the IOE we can readd it
+        presenceLibraryBrowser.librariesToBrowse.remove(presenceLibrary);
+        
         // Force IOE
         observerCollector.getLastMatch().handleIOException(new IOException("forced"));
         
