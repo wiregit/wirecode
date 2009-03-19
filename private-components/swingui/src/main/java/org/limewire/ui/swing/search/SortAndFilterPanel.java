@@ -123,7 +123,7 @@ public class SortAndFilterPanel implements Disposable {
         // Initialize components to select view type.
         listViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
         tableViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
-        setSearchCategory(SearchCategory.ALL);
+        setSearchCategory(searchResultsModel.getSearchCategory());
         configureViewButtons();
         
         // Initialize sorting and filtering.
@@ -335,16 +335,22 @@ public class SortAndFilterPanel implements Disposable {
      */
     public void setSearchCategory(SearchCategory category) {
         Action currentItem = sortCombo.getSelectedAction();
+        boolean currentValid = false;
+        
         repopulatingCombo = true;
         sortCombo.removeAllActions();
         
         // Get sort options for category.
         SortOption[] options = SortOption.getSortOptions(category);
 
-        // Create list of sort actions.
+        // Create list of sort actions.  We also determine if the current
+        // sort action is valid for the new category.
         List<Action> actionList = new LinkedList<Action>();
         for (SortOption option : options) {
             actionList.add(actionMap.get(option));
+            if (actionMap.get(option).equals(currentItem)) {
+                currentValid = true;
+            }
         }
         
         sortCombo.addActions(actionList);
@@ -353,7 +359,14 @@ public class SortAndFilterPanel implements Disposable {
 
         repopulatingCombo = false;
 
-        sortCombo.setSelectedAction(currentItem);
+        // Set combobox to current action if valid.  Otherwise, set search 
+        // model to use first sort option.
+        if (currentValid) {
+            sortCombo.setSelectedAction(currentItem);
+        } else {
+            searchResultsModel.setSortOption(options[0]);
+            sortBy = options[0];
+        }
     }
 
     /**
