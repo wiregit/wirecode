@@ -442,7 +442,8 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
     
     /**
      * Attempt a browse with a currently non connectable or resolvable address.  Ensure
-     *  graceful fail and the presence is added to the retry queue.
+     *  graceful fail and the PresenceLibrary is immediately retried.  On the second failing
+     *  check to make sure the PresenceLibrary is added to the retry queue.
      *  
      *  <p> Tests tryToResolveAndBrowse() and handleFailedResolution().
      */  
@@ -473,10 +474,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             allowing(addressFeature).getFeature();
             will(returnValue(address));
 
-            // Can't resolve, can't connect
-            allowing(socketsManager).canConnect(address);
+            // Can't resolve, can't connect, twice because immediate retry
+            atLeast(2).of(socketsManager).canConnect(address);
             will(returnValue(false));
-            allowing(socketsManager).canResolve(address);
+            atLeast(2).of(socketsManager).canResolve(address);
             will(returnValue(false));
             
             // General behaviour
@@ -485,7 +486,8 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
 
         }});
         
-        presenceLibraryBrowser.tryToResolveAndBrowse(presenceLibrary, 0);
+        // Revision = -1 so an immediate retry will be attempted
+        presenceLibraryBrowser.tryToResolveAndBrowse(presenceLibrary, -1);
         assertContains(presenceLibraryBrowser.librariesToBrowse, presenceLibrary);
         
         context.assertIsSatisfied();
@@ -573,7 +575,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
      *  
      * <p>NOTE: This simulates a browse upon shutdown.
      * 
-     * <p>Tests tryToResolveAndBrowse() and browse().
+     * <p>Tests tryToResolveAndBrowse and browse().
      */
     public void testBrowseWhenAfterResolveFeatureIsLost() {
         final Mockery context = new Mockery() {{
