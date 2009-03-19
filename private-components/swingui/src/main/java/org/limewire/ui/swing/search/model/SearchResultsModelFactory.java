@@ -1,16 +1,13 @@
-package org.limewire.ui.swing.search;
+package org.limewire.ui.swing.search.model;
 
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.search.Search;
 import org.limewire.core.api.spam.SpamManager;
-import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
-import org.limewire.ui.swing.search.model.GroupingListEventListener;
-import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.search.model.SimilarResultsDetector;
-import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import ca.odell.glazedlists.EventList;
 
@@ -33,6 +30,8 @@ public class SearchResultsModelFactory {
 
     private final PropertiableHeadings propertiableHeadings;
 
+    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+
     /**
      * Constructs a SearchResultsModelFactory with the specified factories,
      * managers, and property values.
@@ -40,20 +39,24 @@ public class SearchResultsModelFactory {
     @Inject
     public SearchResultsModelFactory(SimilarResultsDetectorFactory similarResultsDetectorFactory,
             SpamManager spamManager, LibraryManager libraryManager,
-            DownloadListManager downloadListManager, PropertiableHeadings propertiableHeadings) {
+            DownloadListManager downloadListManager, PropertiableHeadings propertiableHeadings,
+            SaveLocationExceptionHandler saveLocationExceptionHandler) {
         this.similarResultsDetectorFactory = similarResultsDetectorFactory;
         this.spamManager = spamManager;
         this.libraryManager = libraryManager;
         this.downloadListManager = downloadListManager;
         this.propertiableHeadings = propertiableHeadings;
+        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
     }
 
     /**
      * Creates a new instance of SearchResultsModel.
      */
-    public SearchResultsModel createSearchResultsModel() {
+    public SearchResultsModel createSearchResultsModel(SearchInfo searchInfo, Search search) {
         // Create search result model.
-        SearchResultsModel searchResultsModel = new BasicSearchResultsModel(propertiableHeadings);
+        SearchResultsModel searchResultsModel = new BasicSearchResultsModel(
+                searchInfo, search, propertiableHeadings, downloadListManager, 
+                saveLocationExceptionHandler);
 
         // Get list of visual search results.
         EventList<VisualSearchResult> visualSearchResults = searchResultsModel

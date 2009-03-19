@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search;
 
-import ca.odell.glazedlists.EventList;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.util.HashMap;
@@ -10,26 +9,20 @@ import javax.swing.Action;
 import javax.swing.Scrollable;
 
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.Category;
-import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.AudioResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel;
 import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.OtherResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
-
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.matchers.Matcher;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import org.limewire.ui.swing.search.resultpanel.OtherResultsPanelFactory;
-import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanelFactory;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 
 /**
  * ResultsContainer is a display panel that contains the search results tables 
@@ -56,9 +49,7 @@ public class ResultsContainer extends JXPanel {
      * @see org.limewire.ui.swing.search.ResultsContainerFactory
      */
     @AssistedInject ResultsContainer(
-        @Assisted EventList<VisualSearchResult> eventList, 
-        @Assisted Search search,
-        @Assisted SearchInfo searchInfo,
+        @Assisted SearchResultsModel searchResultsModel,
         @Assisted RowSelectionPreserver preserver,
         AllResultsPanelFactory allFactory,
         AudioResultsPanelFactory audioFactory,
@@ -70,19 +61,19 @@ public class ResultsContainer extends JXPanel {
         
         // Create result panels for all media categories.
         panelMap.put(SearchCategory.ALL.name(),
-            allFactory.create(eventList, search, searchInfo, preserver));
+            allFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.ALL), preserver));
         panelMap.put(SearchCategory.AUDIO.name(),
-            audioFactory.create(filter(Category.AUDIO, eventList), search, searchInfo, preserver));
+            audioFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.AUDIO), preserver));
         panelMap.put(SearchCategory.VIDEO.name(),
-            videoFactory.create(filter(Category.VIDEO, eventList), search, searchInfo, preserver));
+            videoFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.VIDEO), preserver));
         panelMap.put(SearchCategory.IMAGE.name(),
-            imagesFactory.create(filter(Category.IMAGE, eventList), search, searchInfo, preserver));
+            imagesFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.IMAGE), preserver));
         panelMap.put(SearchCategory.DOCUMENT.name(),
-            documentsFactory.create(filter(Category.DOCUMENT, eventList), search, searchInfo, preserver));
+            documentsFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.DOCUMENT), preserver));
         panelMap.put(SearchCategory.PROGRAM.name(),
-            programFactory.create(filter(Category.PROGRAM, eventList), search, searchInfo, preserver));
+            programFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.PROGRAM), preserver));
         panelMap.put(SearchCategory.OTHER.name(),
-            otherFactory.create(filter(Category.OTHER, eventList), search, searchInfo, preserver));
+            otherFactory.create(searchResultsModel, searchResultsModel.getCategorySearchResults(SearchCategory.OTHER), preserver));
         
         setLayout(cardLayout);
         
@@ -122,21 +113,6 @@ public class ResultsContainer extends JXPanel {
         currentPanel = panelMap.get(name); 
         cardLayout.show(this, name);
         currentPanel.setViewType(mode);
-    }
-    
-    /**
-     * Returns a filtered list of search results for the specified media
-     * category and list of complete results.
-     */
-    private FilterList<VisualSearchResult> filter(
-        final Category category, EventList<VisualSearchResult> eventList) {
-        return GlazedListsFactory.filterList(
-            eventList, new Matcher<VisualSearchResult>() {
-            @Override
-            public boolean matches(VisualSearchResult item) {
-                return item.getCategory() == category;
-            }        
-        });
     }
 
     /**

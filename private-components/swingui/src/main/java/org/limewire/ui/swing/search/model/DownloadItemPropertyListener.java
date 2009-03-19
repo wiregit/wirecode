@@ -1,18 +1,16 @@
-package org.limewire.ui.swing.search;
+package org.limewire.ui.swing.search.model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.ref.WeakReference;
 
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.ui.swing.search.model.BasicDownloadState;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
  * A listener to forward DownloadItem property change events to its associated 
  * visual search result.
  */
-public class DownloadItemPropertyListener implements PropertyChangeListener {
+class DownloadItemPropertyListener implements PropertyChangeListener {
     
     /** Reference to visual search result.  We use a WeakReference to allow
      *  the result to be cleared if the search is closed. 

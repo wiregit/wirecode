@@ -20,6 +20,7 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
+import org.limewire.ui.swing.search.model.SearchResultsModelFactory;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
@@ -66,76 +67,35 @@ class TextSearchHandlerImpl implements SearchHandler {
     @Override
     public boolean doSearch(final SearchInfo info) {
         // Create search request.
-        final Search search = searchFactory.createSearch(info);
+        Search search = searchFactory.createSearch(info);
         
         String panelTitle = info.getTitle();
         
         // Create search results data model and display panel.
-        final SearchResultsModel model = searchResultsModelFactory.createSearchResultsModel();
-        final SearchResultsPanel searchPanel = panelFactory.createSearchResultsPanel(
-                info, model.getObservableSearchResults(), search);
+        SearchResultsModel searchModel = searchResultsModelFactory.createSearchResultsModel(info, search);
+        SearchResultsPanel searchPanel = panelFactory.createSearchResultsPanel(searchModel);
         
         // Add search results display to the UI, and select its navigation item.
-        final SearchNavItem item = searchNavigator.addSearch(panelTitle, searchPanel, search);
+        SearchNavItem item = searchNavigator.addSearch(panelTitle, searchPanel, search);
         item.select();
-        
-        // Add listener to forward search results to data model.
-        search.addSearchListener(new SearchListener() {
-            @Override
-            public void handleSearchResult(Search search, final SearchResult searchResult) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Expect that the core properly filtered the result.
-                        // That is, we won't see it if we didn't want to.
-                        model.addSearchResult(searchResult);
-                        
-                        // We can update the source count here because
-                        // we never expect things to be removed.
-                        // Changes only happen on insertion.
-                        // If removes ever happen, we'll need to switch
-                        // to adding a ListEventListener to
-                        // model.getVisualSearchResults.
-                        item.sourceCountUpdated(model.getResultCount());
-                    }
-                });
-            }
-
-            @Override
-            public void searchStarted(Search search) {
-            }
-
-            @Override
-            public void searchStopped(Search search) {
-            }
-
-            @Override
-            public void handleSponsoredResults(Search search, final List<SponsoredResult> sponsoredResults) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        searchPanel.addSponsoredResults(sponsoredResults);
-                    }
-                });
-            }
-        });
 
         // Add listeners for connection events.
         addConnectionWarnings(search, searchPanel, item);
         
         // Start search operation.
-        startSearch(search, searchPanel, item);
+        startSearch(searchModel, searchPanel, item);
         return true;
     }
 
     /**
-     * Initiates a search using the specified Search request, display panel,
+     * Initiates a search using the specified search model, search panel,
      * and navigation item.
      */
-    private void startSearch(final Search search, final SearchResultsPanel searchPanel, NavItem navItem) {
-        //prevent search from starting until lifecycle manager completes loading
-        if(lifeCycleManager.isStarted()) {
-            search.start();
+    private void startSearch(final SearchResultsModel searchModel, 
+            final SearchResultsPanel searchPanel, final SearchNavItem navItem) {
+        // prevent search from starting until lifecycle manager completes loading
+        if (lifeCycleManager.isStarted()) {
+            searchModel.start(new SwingSearchListener(searchModel, searchPanel, navItem));
         } else {
              searchPanel.setLifeCycleComplete(false);
              final EventListener<LifeCycleEvent> listener = new EventListener<LifeCycleEvent>() {
@@ -143,7 +103,7 @@ class TextSearchHandlerImpl implements SearchHandler {
                  public void handleEvent(LifeCycleEvent event) {
                      if(event == LifeCycleEvent.STARTED) {
                          searchPanel.setLifeCycleComplete(true);
-                         search.start();
+                         searchModel.start(new SwingSearchListener(searchModel, searchPanel, navItem));
                          lifeCycleManager.removeListener(this);
                      }
                  }
@@ -161,7 +121,7 @@ class TextSearchHandlerImpl implements SearchHandler {
     
     /**
      * Notifies the specified SearchResultsPanel if the specified
-     * ConnectionStrength indicates a full connection.  Return true if fully
+     * ConnectionStrength indicates a full connection.  Returns true if fully
      * connected, false otherwise.
      */
     private boolean setConnectionStrength(ConnectionStrength type, SearchResultsPanel searchPanel) {
@@ -197,10 +157,15 @@ class TextSearchHandlerImpl implements SearchHandler {
      * Adds listeners to the Search request and connection manager to update 
      * the UI based on connection events.
      */
-    private void addConnectionWarnings(final Search search, final SearchResultsPanel searchPanel, NavItem navItem) {
+    private void addConnectionWarnings(final Search search, 
+            final SearchResultsPanel searchPanel, NavItem navItem) {
+        // Define atomic listener references.
         final AtomicReference<SearchListener> searchListenerRef = new AtomicReference<SearchListener>();
         final AtomicReference<PropertyChangeListener> connectionListenerRef = new AtomicReference<PropertyChangeListener>();
-        
+
+        // Create property change listener for connection strength.  This
+        // updates an indicator in SearchResultsPanel, and removes all 
+        // warning listeners when the strength is full.
         connectionListenerRef.set(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
@@ -212,8 +177,10 @@ class TextSearchHandlerImpl implements SearchHandler {
             }
         });  
 
-        //override warning message if a certain number of search results comes in, for now 10, 
-        //we assume that while not fully connected, we have a good enough search going
+        // Create search listener to monitor number of results.  If a certain
+        // number of search results comes in, for now 10, we assume that while
+        // not fully connected, we have a good enough search going so we remove
+        // all warning listeners.
         searchListenerRef.set(new SearchListener() {
             private final AtomicInteger numberOfResults = new AtomicInteger(0);
             
@@ -237,8 +204,11 @@ class TextSearchHandlerImpl implements SearchHandler {
             @Override public void searchStopped(Search search) {}                
         });
         
+        // Initialize search panel indicator, and install connection listener.
         searchPanel.setFullyConnected(false);
-        connectionManager.addPropertyChangeListener(connectionListenerRef.get());        
+        connectionManager.addPropertyChangeListener(connectionListenerRef.get());
+
+        // If not fully connected, add search listener and navigation listener.
         if(setConnectionStrength(connectionManager.getConnectionStrength(), searchPanel)) {
             removeListeners(search, searchListenerRef, connectionListenerRef);
         } else {
@@ -251,6 +221,5 @@ class TextSearchHandlerImpl implements SearchHandler {
                 @Override public void itemSelected(boolean selected) {}
             });
         }
-        
     }
 }

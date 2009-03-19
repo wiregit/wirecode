@@ -1,22 +1,30 @@
-package org.limewire.ui.swing.search;
+package org.limewire.ui.swing.search.model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.limewire.core.api.spam.SpamManager;
-import org.limewire.ui.swing.search.model.SimilarResultsDetector;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-public class SpamListEventListener implements ListEventListener<VisualSearchResult> {
+/**
+ * A listener to handle updates to the list of visual search results.  This
+ * listener installs a PropertyChangeListener to each VisualSearchResult to 
+ * handle changes to its "spam" indicator.  When changes occur, notification is
+ * sent to the core SpamManager and the SimilarResultsDetector.
+ */
+class SpamListEventListener implements ListEventListener<VisualSearchResult> {
 
     private final SpamManager spamManager;
 
     private final SimilarResultsDetector similarResultsDetector;
 
+    /**
+     * Constructs a SpamListEventListener with the specified spam manager and
+     * similar results detector.
+     */
     public SpamListEventListener(SpamManager spamManager,
             SimilarResultsDetector similarResultsDetector) {
         this.spamManager = spamManager;

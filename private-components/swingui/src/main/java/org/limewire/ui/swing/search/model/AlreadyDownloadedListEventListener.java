@@ -1,21 +1,21 @@
-package org.limewire.ui.swing.search;
+package org.limewire.ui.swing.search.model;
 
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.ui.swing.search.model.BasicDownloadState;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 /**
- * A listener to handle changes to the list of visual search results.
+ * A listener to handle updates to the list of visual search results.  As each
+ * VisualSearchResult is received, this listener sets its download state if 
+ * the result is already in the library, or currently being downloaded.
  */
-public class AlreadyDownloadedListEventListener implements ListEventListener<VisualSearchResult> {
+class AlreadyDownloadedListEventListener implements ListEventListener<VisualSearchResult> {
 
     private final LibraryManager libraryManager;
 
