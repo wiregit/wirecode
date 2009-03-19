@@ -57,7 +57,7 @@ class ShareListManagerImpl implements ShareListManager {
         knownListeners.addListener(new EventListener<FriendEvent>() {
             @Override
             public void handleEvent(FriendEvent event) {
-                Friend friend = event.getSource();
+                Friend friend = event.getData();
                 switch (event.getType()) {
                     case REMOVED:
                         unloadFilesForFriend(friend);

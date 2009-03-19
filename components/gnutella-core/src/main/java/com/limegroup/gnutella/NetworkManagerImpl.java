@@ -131,8 +131,8 @@ public class NetworkManagerImpl implements NetworkManager {
             
             @Override
             public void handleEvent(FirewallTransferStatusEvent event) {
-                if(started && lastStatus != event.getSource()) {
-                    lastStatus = event.getSource();
+                if(started && lastStatus != event.getData()) {
+                    lastStatus = event.getData();
                     updateCapabilities();
                 }
             }

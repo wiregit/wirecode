@@ -171,7 +171,7 @@ public class ChatFriendListPane extends JPanel {
             @Override
             @SwingEDTEvent
             public void handleEvent(FileOfferEvent event) {
-                FileOffer fileOfferReceived = event.getSource();
+                FileOffer fileOfferReceived = event.getData();
                 handleIncomingFileOffer(fileOfferReceived.getFile(), fileOfferReceived.getFromJID());
 
             }
@@ -295,7 +295,7 @@ public class ChatFriendListPane extends JPanel {
                     keysPressed.add(Character.toString(e.getKeyChar()));
                 }
                 
-                editor.setFilterText(keysPressed.toArray(new String[0]));
+                editor.setFilterText(keysPressed.toArray(new String[keysPressed.size()]));
                 
                 if (LOG.isDebugEnabled()) {
                     LOG.debugf("FriendsPane keyPressed(): {0} {1} ", KeyEvent.getKeyText(e.getKeyCode()), getKeyPressed());
@@ -361,7 +361,7 @@ public class ChatFriendListPane extends JPanel {
     
     private void handlePresenceEvent(FriendPresenceEvent event) {
         LOG.debugf("handling presence event {0}", event);
-        final Presence presence = (Presence)event.getSource();
+        final Presence presence = (Presence)event.getData();
         final User user = presence.getUser();
         ChatFriend chatFriend = idToFriendMap.get(user.getId());
         switch(event.getType()) {

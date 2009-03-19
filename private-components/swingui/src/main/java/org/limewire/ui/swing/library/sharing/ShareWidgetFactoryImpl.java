@@ -96,10 +96,10 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
             public void handleEvent(FriendEvent event) {
                 switch (event.getType()) {
                 case ADDED:
-                    allFriendsThreadSafe.add(new SharingTarget(event.getSource()));
+                    allFriendsThreadSafe.add(new SharingTarget(event.getData()));
                     break;
                 case REMOVED:
-                    allFriendsThreadSafe.remove(new SharingTarget(event.getSource()));
+                    allFriendsThreadSafe.remove(new SharingTarget(event.getData()));
                     break;
                 }
             }

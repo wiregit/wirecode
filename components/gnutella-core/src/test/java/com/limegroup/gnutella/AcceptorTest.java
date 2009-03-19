@@ -507,7 +507,7 @@ public class AcceptorTest extends LimeTestCase {
         @Override
         public void handleEvent(FirewallStatusEvent event) {
             changes++;
-            lastStatus = event.getSource() == FirewallStatus.NOT_FIREWALLED;
+            lastStatus = event.getData() == FirewallStatus.NOT_FIREWALLED;
             if(latch != null)
                 latch.countDown();
             if(singleChangeLatch != null) {

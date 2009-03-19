@@ -10,7 +10,6 @@ import javax.swing.event.HyperlinkEvent.EventType;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FriendFileList;
-import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -54,10 +53,10 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 
     @AssistedInject
     public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
-            LibraryManager libraryManager, ShareListManager shareListManager,
-            @Named("available") ListenerSupport<FriendEvent> availListeners, 
-            ChatFriendListPane friendsPane, ChatFramePanel friendsPanel,
-            LibraryNavigator libraryNavigator) {
+                                 ShareListManager shareListManager,
+                                 @Named("available")ListenerSupport<FriendEvent> availListeners,
+                                 ChatFriendListPane friendsPane, ChatFramePanel friendsPanel,
+                                 LibraryNavigator libraryNavigator) {
         this.factory = factory;
         this.friend = friend;        
         this.emptyFactory = emptyFactory;
@@ -171,14 +170,14 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             switch(event.getType()) {
             case ADDED:
                 //if friend signed on, show online view
-                if(event.getSource().getId().equals(friend.getId())) {
+                if(event.getData().getId().equals(friend.getId())) {
                     emptyPanelMessage.setMessageType(MessageTypes.ONLINE);
                         showEmptyCard();
                     }
                 break;
             case REMOVED:
                 //if this friend signed off, show offline view
-                if(event.getSource().getId().equals(friend.getId())) {
+                if(event.getData().getId().equals(friend.getId())) {
                     emptyPanelMessage.setMessageType(MessageTypes.OFFLINE);
                         showEmptyCard();
                     }
@@ -198,8 +197,8 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
      * Various states the EmptyPanel can exist in. 
      */
     enum MessageTypes {
-        OFFLINE, ONLINE, LW_LOADING, LW_NO_FILES, LW_CONNECTION_ERROR;
-    };
+        OFFLINE, ONLINE, LW_LOADING, LW_NO_FILES, LW_CONNECTION_ERROR
+    }
     
     /**
      * Listens to library loads. When first file from friend is displayed, show

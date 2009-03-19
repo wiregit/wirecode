@@ -250,7 +250,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendEvent event) {
-                if (event.getSource().getId().equals(friendId)) {
+                if (event.getData().getId().equals(friendId)) {
                     handleFriendEvent(event);
                 }
             }

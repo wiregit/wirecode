@@ -125,8 +125,8 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
     @Override
     public void handleEvent(LibraryChangedEvent event) {
-        remoteLibraryManager.removePresenceLibrary(event.getSource());
-        remoteLibraryManager.addPresenceLibrary(event.getSource());
+        remoteLibraryManager.removePresenceLibrary(event.getData());
+        remoteLibraryManager.addPresenceLibrary(event.getData());
     }
     
     void browse(final PresenceLibrary presenceLibrary) {

@@ -67,11 +67,11 @@ public class UpdateListenerTest extends BaseTestCase {
         org.limewire.core.api.updates.UpdateEvent ude = updateEvent.get();
         assertNotNull(ude);
         
-        assertEquals(button1Text, ude.getSource().getButton1Text());
-        assertEquals(button2Text, ude.getSource().getButton2Text());
-        assertEquals(commandText, ude.getSource().getUpdateCommand());
-        assertEquals(title, ude.getSource().getUpdateTitle());
-        assertEquals(text, ude.getSource().getUpdateText());
-        assertEquals(url, ude.getSource().getUpdateURL());
+        assertEquals(button1Text, ude.getData().getButton1Text());
+        assertEquals(button2Text, ude.getData().getButton2Text());
+        assertEquals(commandText, ude.getData().getUpdateCommand());
+        assertEquals(title, ude.getData().getUpdateTitle());
+        assertEquals(text, ude.getData().getUpdateText());
+        assertEquals(url, ude.getData().getUpdateURL());
     }
 }

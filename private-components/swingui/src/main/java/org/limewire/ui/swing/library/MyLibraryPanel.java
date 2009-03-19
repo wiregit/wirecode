@@ -307,15 +307,15 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
 
     @Override
     public void handleEvent(FriendEvent event) {
-        Friend friend = event.getSource();
+        Friend friend = event.getData();
 
         switch (event.getType()) {
             case ADDED:
-                sharingComboBox.addFriend(event.getSource());
+                sharingComboBox.addFriend(event.getData());
                 knownFriends.add(friend.getId());
                 break;
             case REMOVED:
-                sharingComboBox.removeFriend(event.getSource());
+                sharingComboBox.removeFriend(event.getData());
                 // fallthrough...
             case DELETE:
                 knownFriends.remove(friend.getId());

@@ -32,7 +32,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.ReadWriteObserver;
-import org.limewire.rudp.AbstractNBSocketChannel;
 import org.limewire.rudp.ConnectionState;
 import org.limewire.rudp.UDPSocketChannelConnectionEvent;
 import org.limewire.security.AddressSecurityToken;
@@ -550,7 +549,6 @@ public class UDPService implements ReadWriteObserver {
 	 * @param msg  the <tt>Message</tt> to send
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
-     * @param err  an <tt>ErrorCallback<tt> if you want to be notified errors
      * @throws IllegalArgumentException if msg, ip, or err is null.
 	 */
     public void send(Message msg, InetAddress ip, int port) {
@@ -561,7 +559,7 @@ public class UDPService implements ReadWriteObserver {
      * Sends the specified <tt>Message</tt> to the specified host.
      * 
      * @param msg the <tt>Message</tt> to send
-     * @param host the host to send the message to
+     * @param addr the network address of the host to send the message to
      */
     public void send(Message msg, InetSocketAddress addr) {
         if (msg == null)
@@ -968,7 +966,7 @@ public class UDPService implements ReadWriteObserver {
                 synchronized (this) {
                     _successfulFWT = true;
                      // TODO not sure this is correct - could also call networkManager.getPort() ?
-                    _lastReportedPort = ((AbstractNBSocketChannel)event.getSource()).socket().getLocalPort();
+                    _lastReportedPort = event.getData().socket().getLocalPort();
                     ConnectionSettings.HAS_STABLE_PORT.setValue(true);
                 }
                 updateFWTState();

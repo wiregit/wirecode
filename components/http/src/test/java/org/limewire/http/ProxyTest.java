@@ -21,7 +21,6 @@ import org.limewire.net.ProxySettings;
 import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.net.SocketBindingSettings;
 import org.limewire.net.SocketsManager;
-import org.limewire.nio.LimeTestUtils;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.StringUtils;
 
@@ -91,7 +90,7 @@ public class ProxyTest extends BaseTestCase {
     public void tearDown() throws Exception {
         fps.killServers();
         
-        LimeTestUtils.waitForNIO();
+//        LimeTestUtils.waitForNIO();
     }
 
     /**

@@ -1,18 +1,17 @@
 package com.limegroup.gnutella;
 
-import org.limewire.listener.DefaultSourceTypeEvent;
-
+import org.limewire.listener.DefaultDataTypeEvent;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
-public class DownloadManagerEvent extends DefaultSourceTypeEvent<CoreDownloader, DownloadManagerEvent.Type> {
+public class DownloadManagerEvent extends DefaultDataTypeEvent<CoreDownloader, DownloadManagerEvent.Type> {
 
     public enum Type {
         ADDED,
         REMOVED
     }
     
-    public DownloadManagerEvent(CoreDownloader source, Type event) {
-        super(source, event);
+    public DownloadManagerEvent(CoreDownloader data, Type event) {
+        super(data, event);
     }
 
 }

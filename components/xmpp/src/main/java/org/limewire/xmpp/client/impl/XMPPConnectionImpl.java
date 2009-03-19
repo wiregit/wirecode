@@ -254,7 +254,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                                 UserImpl user = new UserImpl(id, rosterEntry, configuration, connection, discoInfoListener);
                                 LOG.debugf("user {0} added", user);
                                 users.put(id, user);
-                                rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_ADDED));
+                                rosterListeners.broadcast(new RosterEvent(user, RosterEvent.Type.USER_ADDED));
                             }
                         }
                     }
@@ -284,7 +284,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                                     user.setRosterEntry(rosterEntry);
                                 }
                                 LOG.debugf("user {0} updated", user);
-                                rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_UPDATED));
+                                rosterListeners.broadcast(new RosterEvent(user, RosterEvent.Type.USER_UPDATED));
                             }
                         }
                     }
@@ -302,7 +302,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     User user = users.remove(id);
                     if(user != null) {
                         LOG.debugf("user {0} removed", user);
-                        rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_DELETED));
+                        rosterListeners.broadcast(new RosterEvent(user, RosterEvent.Type.USER_DELETED));
                     }
                 }
             }

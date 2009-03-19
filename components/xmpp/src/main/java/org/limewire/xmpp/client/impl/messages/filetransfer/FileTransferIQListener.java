@@ -51,7 +51,7 @@ public class FileTransferIQListener implements PacketListener {
         }
         // TODO async?
         String fromJid = packet.getFrom();
-        fileOfferBroadcaster.broadcast(new FileOfferEvent(new FileOffer(packet.getFileMetaData(), fromJid), FileOffer.EventType.OFFER));
+        fileOfferBroadcaster.broadcast(new FileOfferEvent(new FileOffer(packet.getFileMetaData(), fromJid), FileOfferEvent.Type.OFFER));
         // TODO send acceptance or rejection;
         // TODO only needed for user feedback
     }

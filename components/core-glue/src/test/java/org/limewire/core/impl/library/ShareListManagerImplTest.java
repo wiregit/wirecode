@@ -393,8 +393,6 @@ public class ShareListManagerImplTest extends BaseTestCase {
         assertEquals(1, combinedShareList.size());
         assertContains(combinedShareList.getModel(), localFileItem1);
 
-        fileListChangeEventListener = internalListListener.get();
-        
         final FileDesc fileDesc2 = context.mock(FileDesc.class);
         final File file2 = new File("file2");
         final CoreLocalFileItem localFileItem2 = context.mock(CoreLocalFileItem.class);

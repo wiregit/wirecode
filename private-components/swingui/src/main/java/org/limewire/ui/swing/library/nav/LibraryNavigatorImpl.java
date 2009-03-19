@@ -318,7 +318,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendRequestEvent event) {
-                friendRequestPanel.addRequest(event.getSource());
+                friendRequestPanel.addRequest(event.getData());
             }
         });
         
@@ -345,18 +345,18 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendEvent event) {
-                NavPanel panel = getPanelForFriend(event.getSource());
+                NavPanel panel = getPanelForFriend(event.getData());
                 switch(event.getType()) {
                 case ADDED:
                     if(panel == null) {
-                        LOG.debugf("creating new friend nav panel {0}", event.getSource().getId()); 
-                        panel = createFriendNavPanel(event.getSource());
+                        LOG.debugf("creating new friend nav panel {0}", event.getData().getId());
+                        panel = createFriendNavPanel(event.getData());
                         offlineList.addNavPanel(panel);
                     }
                     break;
                 case REMOVED:
                     if(panel != null) {
-                        LOG.debugf("removing matching friend library {0}", event.getSource().getId());
+                        LOG.debugf("removing matching friend library {0}", event.getData().getId());
                         // Shift selection to library if this was selected before.
                         if(panel.isSelected()) {
                             selectLibrary();
@@ -373,11 +373,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendEvent event) {
-                NavPanel panel = getPanelForFriend(event.getSource());
+                NavPanel panel = getPanelForFriend(event.getData());
                 switch(event.getType()) {
                 case ADDED:
                     if(panel == null) {
-                        panel = createFriendNavPanel(event.getSource());
+                        panel = createFriendNavPanel(event.getData());
                         onlineList.addNavPanel(panel);
                     } else if(panel.getParentList() == offlineList) {
                         offlineList.removePanel(panel);

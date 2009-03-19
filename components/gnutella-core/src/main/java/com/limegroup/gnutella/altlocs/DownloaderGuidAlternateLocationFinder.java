@@ -69,7 +69,7 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
         }
         switch (event.getType()) {
         case ADDED:
-            CoreDownloader downloader = event.getSource();
+            CoreDownloader downloader = event.getData();
             if (downloader instanceof MagnetDownloader) {
                 MagnetDownloader magnetDownloader = (MagnetDownloader)downloader;
                 // subscribe for status events so we can search when waiting for user
@@ -77,7 +77,7 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
             }
             break;
         case REMOVED:
-            downloader = event.getSource();
+            downloader = event.getData();
             if (downloader instanceof MagnetDownloader) {
                 downloader.removeListener(downloadStatusListener);
             }

@@ -176,12 +176,12 @@ public class ConnectionSummaryPanel extends JPanel {
      */
     private void updateFirewallStatus() {
         // Get firewall status.
-        FirewallStatus firewallStatus = firewallStatusBean.getLastEvent().getSource();
+        FirewallStatus firewallStatus = firewallStatusBean.getLastEvent().getData();
         
         if (firewallStatus == FirewallStatus.FIREWALLED) {
             // Get firewall transfer status and reason.
             FirewallTransferStatusEvent event = firewallTransferBean.getLastEvent();
-            FirewallTransferStatus transferStatus = event.getSource();
+            FirewallTransferStatus transferStatus = event.getData();
             FWTStatusReason transferReason = event.getType();
 
             // Set firewall status and reason.

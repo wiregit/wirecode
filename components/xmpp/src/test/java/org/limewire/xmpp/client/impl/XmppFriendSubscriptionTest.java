@@ -70,7 +70,7 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         return new EventListener<FriendRequestEvent>() {
             @Override
             public void handleEvent(FriendRequestEvent event) {
-                FriendRequest friendRequest = event.getSource();
+                FriendRequest friendRequest = event.getData();
                 if (friendRequest.getFriendUsername().equals(userName)) {
                     friendRequest.getDecisionHandler().handleDecision(userName, accept);
                 }
