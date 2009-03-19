@@ -231,6 +231,10 @@ class BasicSearchResultsModel implements SearchResultsModel {
     public void setSelectedCategory(SearchCategory selectedCategory) {
         if (this.selectedCategory != selectedCategory) {
             this.selectedCategory = selectedCategory;
+            // Dispose of existing sorted list.
+            if (sortedResultList != null) {
+                sortedResultList.dispose();
+            }
             // Update sorted list.
             EventList<VisualSearchResult> filteredList = getCategorySearchResults(selectedCategory);
             sortedResultList = GlazedListsFactory.sortedList(filteredList, null);
