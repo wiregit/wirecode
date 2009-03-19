@@ -188,7 +188,7 @@ public class CoreSearch implements Search {
                     }
                     CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(
                             title, result.getDescription(),
-                            displayUrl, result.getURL(),
+                            displayUrl, createPromotionUrl(result),
                             target);
                     handleSponsoredResults(coreSponsoredResult);
                 }
@@ -203,6 +203,15 @@ public class CoreSearch implements Search {
             });            
         }
     }
+    
+    private String createPromotionUrl(PromotionMessageContainer container) {
+        String url = PromotionSettings.REDIRECT_URL.getValue();
+        url += "?url=" + container.getURL();
+        url += "&now=" + System.currentTimeMillis() / 1000;
+        url += "&id=" + container.getUniqueID();
+        return url;
+    }
+
     
     private String createAdvancedQueryString(Category category, Map<FilePropertyKey, String> advancedSearch) {
         List<NameValue<String>> nvs = new ArrayList<NameValue<String>>();
