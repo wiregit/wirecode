@@ -10,6 +10,7 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IOUtils;
+import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
@@ -35,7 +36,6 @@ import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class PassiveLeafTest extends DHTTestCase {
     
@@ -58,7 +58,7 @@ public class PassiveLeafTest extends DHTTestCase {
     protected void setUp() throws Exception {
         DHTTestUtils.setSettings(PORT);
         
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, LocalSocketAddressProviderStub.STUB_MODULE);
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeWireIOTestModule());
         
         bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
     }

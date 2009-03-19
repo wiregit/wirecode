@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.LocalSocketAddressProviderStub;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.util.I18NConvert;
@@ -20,7 +21,6 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QRPUpdater;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;

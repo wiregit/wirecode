@@ -13,6 +13,7 @@ import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.LocalSocketAddressProviderStub;
 import org.limewire.net.TLSManager;
 import org.limewire.util.NameValue;
 import org.limewire.util.PrivilegedAccessor;
@@ -23,7 +24,6 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 @SuppressWarnings("unchecked")
 // TODO stub / mock out ping requests

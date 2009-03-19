@@ -6,6 +6,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
+import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.util.MojitoUtils;
@@ -20,7 +21,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.dht.DHTTestUtils;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.MockUtils;
 
@@ -54,7 +54,7 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         // to have non-empty push proxies to send
         final ConnectionManager connectionManager = MockUtils.createConnectionManagerWithPushProxies(context);
         
-        injector = LimeTestUtils.createInjector(LocalSocketAddressProviderStub.STUB_MODULE, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(new LimeWireIOTestModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(DHTManager.class).toInstance(dhtManager);

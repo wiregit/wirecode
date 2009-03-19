@@ -11,6 +11,7 @@ import junit.framework.Test;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.IpPort;
+import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -29,7 +30,6 @@ import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 public class PassiveDHTNodeControllerTest extends DHTTestCase {
@@ -58,7 +58,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
         
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, LocalSocketAddressProviderStub.STUB_MODULE);
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeWireIOTestModule());
         dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
         
         bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));

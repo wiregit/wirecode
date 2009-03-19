@@ -15,6 +15,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.LocalSocketAddressProviderStub;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIOTestUtils;
 
@@ -36,7 +37,6 @@ import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.library.GnutellaFileListStub;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class HTTPUploaderTest extends LimeTestCase {

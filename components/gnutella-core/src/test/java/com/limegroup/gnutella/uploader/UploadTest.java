@@ -53,6 +53,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 import org.limewire.nio.NIOTestUtils;
+import org.limewire.io.LimeWireIOTestModule;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -73,7 +74,6 @@ import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.security.Tiger;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.tigertree.HashTreeCacheImpl;
@@ -149,7 +149,7 @@ public class UploadTest extends LimeTestCase {
         doSettings();
 
         // initialize services
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, LocalSocketAddressProviderStub.STUB_MODULE);
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeWireIOTestModule());
         
         startServices();
         File testDir = TestUtils.getResourceFile(testDirName);

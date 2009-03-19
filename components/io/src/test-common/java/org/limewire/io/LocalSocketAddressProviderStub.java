@@ -1,6 +1,9 @@
 package org.limewire.io;
 
+import com.google.inject.Singleton;
 
+
+@Singleton
 public class LocalSocketAddressProviderStub implements LocalSocketAddressProvider {
 
     private byte[] localAddress;

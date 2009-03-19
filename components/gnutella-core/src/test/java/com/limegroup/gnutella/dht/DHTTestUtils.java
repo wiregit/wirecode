@@ -10,6 +10,7 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.PingPongSettings;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.LocalSocketAddressProviderStub;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.util.AssertComparisons;
@@ -17,7 +18,6 @@ import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class DHTTestUtils {
 

@@ -4,6 +4,7 @@ import junit.framework.Test;
 
 import org.jmock.Mockery;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.LocalSocketAddressProviderStub;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -17,7 +18,6 @@ import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 

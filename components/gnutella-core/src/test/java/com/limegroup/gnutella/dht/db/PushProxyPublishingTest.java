@@ -9,6 +9,7 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
+import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.util.MojitoUtils;
@@ -26,10 +27,9 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTTestUtils;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -65,7 +65,7 @@ public class PushProxyPublishingTest extends LimeTestCase {
         DHTTestUtils.setSettings(NetworkSettings.PORT.getValue());
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 500L);
         
-        injector = LimeTestUtils.createInjectorAndStart(LocalSocketAddressProviderStub.STUB_MODULE, new AbstractModule() {
+        injector = LimeTestUtils.createInjectorAndStart(new LimeWireIOTestModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);
