@@ -134,7 +134,7 @@ public class TestUtils {
                         File outFile  = new File(efile, file.getName());
                         outFile.getParentFile().mkdirs();
                         out =  new BufferedOutputStream(new FileOutputStream(outFile));
-                        FileUtils.write(in, out);
+                        write(in, out);
                     } finally {
                         close(in);
                         close(out);
