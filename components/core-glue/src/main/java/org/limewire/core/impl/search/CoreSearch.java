@@ -32,6 +32,7 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.promotion.PromotionSearcher;
 import org.limewire.promotion.PromotionSearcher.PromotionSearchResultsCallback;
 import org.limewire.promotion.containers.PromotionMessageContainer;
+import org.limewire.util.Clock;
 import org.limewire.util.NameValue;
 
 import com.google.inject.assistedinject.Assisted;
@@ -67,6 +68,7 @@ public class CoreSearch implements Search {
     private final FriendSearchListener friendSearchListener = new FriendSearchListenerImpl();
     private final ScheduledExecutorService backgroundExecutor;
     private final EventBroadcaster<SearchEvent> searchEventBroadcaster;
+    private final Clock clock;
     
     /**
      * The guid of the last active search
@@ -82,7 +84,8 @@ public class CoreSearch implements Search {
             CachedGeoLocation geoLocation,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             EventBroadcaster<SearchEvent> searchEventBroadcaster,
-            LimeXMLDocumentFactory xmlDocumentFactory) {
+            LimeXMLDocumentFactory xmlDocumentFactory,
+            Clock clock) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
@@ -92,6 +95,7 @@ public class CoreSearch implements Search {
         this.backgroundExecutor = backgroundExecutor;
         this.searchEventBroadcaster = searchEventBroadcaster;
         this.xmlDocumentFactory = xmlDocumentFactory;
+        this.clock = clock;
     }
     
     @Override
@@ -207,7 +211,7 @@ public class CoreSearch implements Search {
     private String createPromotionUrl(PromotionMessageContainer container) {
         String url = PromotionSettings.REDIRECT_URL.getValue();
         url += "?url=" + container.getURL();
-        url += "&now=" + System.currentTimeMillis() / 1000;
+        url += "&now=" + clock.now() / 1000;
         url += "&id=" + container.getUniqueID();
         return url;
     }

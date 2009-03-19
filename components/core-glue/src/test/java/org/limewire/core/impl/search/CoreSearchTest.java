@@ -39,6 +39,7 @@ import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.promotion.containers.PromotionMessageContainer.PromotionOptions;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.Clock;
 import org.limewire.util.ExecuteRunnableAction;
 import org.limewire.util.MediaType;
 
@@ -81,7 +82,7 @@ public class CoreSearchTest extends BaseTestCase {
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
                 promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
-                searchEventBroadcaster, null);
+                searchEventBroadcaster, null, null);
 
         context.checking(new Expectations() {
             {
@@ -166,6 +167,7 @@ public class CoreSearchTest extends BaseTestCase {
                 .mock(ScheduledExecutorService.class);
         final EventBroadcaster<SearchEvent> searchEventBroadcaster = (EventBroadcaster<SearchEvent>) context
                 .mock(EventBroadcaster.class);
+        final Clock clock = context.mock(Clock.class);
 
         final byte[] searchGuid = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                 16 };
@@ -173,7 +175,7 @@ public class CoreSearchTest extends BaseTestCase {
         final AtomicReference<FriendSearchListener> friendSearchListener = new AtomicReference<FriendSearchListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
                 promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
-                searchEventBroadcaster, null);
+                searchEventBroadcaster, null, clock);
 
         context.checking(new Expectations() {
             {
@@ -240,6 +242,7 @@ public class CoreSearchTest extends BaseTestCase {
                 .mock(ScheduledExecutorService.class);
         final EventBroadcaster<SearchEvent> searchEventBroadcaster = (EventBroadcaster<SearchEvent>) context
                 .mock(EventBroadcaster.class);
+        final Clock clock = context.mock(Clock.class);
 
         final byte[] searchGuid = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                 16 };
@@ -247,7 +250,7 @@ public class CoreSearchTest extends BaseTestCase {
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
                 promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
-                searchEventBroadcaster, null);
+                searchEventBroadcaster, null, clock);
 
         final GeocodeInformation geocodeInformation = null;
 
@@ -291,7 +294,9 @@ public class CoreSearchTest extends BaseTestCase {
         final String displayUrl = "displayurl.com";
         final String url = "http://url.com/blahblahblah";
         final String description = "description";
-
+        
+        final String expectedUrl = PromotionSettings.REDIRECT_URL.getValue() + "?url=" + url + "&now=52&id=42";
+        
         final AtomicReference<List<SponsoredResult>> sponsoredResults = new AtomicReference<List<SponsoredResult>>();
         context.checking(new Expectations() {
             {
@@ -307,8 +312,12 @@ public class CoreSearchTest extends BaseTestCase {
                 will(returnValue(url));
                 allowing(result).getDescription();
                 will(returnValue(description));
+                allowing(result).getUniqueID();
+                will(returnValue(42L));
+                allowing(clock).now();
+                will(returnValue(52000L)); //divs by 1000
                 one(searchListener).handleSponsoredResults(with(any(Search.class)),
-                        with(new SponsoredResultMatcher(title, url, displayUrl)));
+                        with(new SponsoredResultMatcher(title, expectedUrl, displayUrl)));
                 will(new AssignParameterAction<List<SponsoredResult>>(sponsoredResults, 1));
             }
         });
@@ -319,7 +328,7 @@ public class CoreSearchTest extends BaseTestCase {
         
         SponsoredResult sponsoredResult = sponsoredResults.get().get(0);
    
-        assertEquals(url, sponsoredResult.getUrl());
+        assertEquals(expectedUrl, sponsoredResult.getUrl());
         assertEquals(SponsoredResultTarget.STORE, sponsoredResult.getTarget());
         assertEquals(description, sponsoredResult.getText());
         assertEquals(title, sponsoredResult.getTitle());
@@ -426,7 +435,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchServices searchServices = context.mock(SearchServices.class);
         final SearchListener listener = context.mock(SearchListener.class);
         
-        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null);
+        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null, null);
         
         context.checking(new Expectations() {
             {
@@ -460,7 +469,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener listener = context.mock(SearchListener.class);
         final SearchDetails details = context.mock(SearchDetails.class);
         
-        final CoreSearch search = new CoreSearch(details, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null);
+        final CoreSearch search = new CoreSearch(details, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null, null);
         
         context.checking(new Expectations() {
             {
