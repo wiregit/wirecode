@@ -62,6 +62,7 @@
 	<classpathentry kind="src" path="components/nio/src/test-common/java"/>
 	<classpathentry kind="src" path="components/common/src/test-common/java"/>
 	<classpathentry kind="src" path="components/net/src/test-common/java"/>
+	<classpathentry kind="src" path="components/io/src/test-common/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/cocoaFoundation.jar"/>
