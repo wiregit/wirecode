@@ -26,6 +26,7 @@ import org.limewire.net.SocketBindingSettings;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.StringUtils;
+import org.limewire.nio.NIOTestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -91,7 +92,7 @@ public class ProxyTest extends BaseTestCase {
     public void tearDown() throws Exception {
         fps.killServers();
         
-//        LimeTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
     }
 
     /**
