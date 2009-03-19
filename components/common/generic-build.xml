@@ -166,6 +166,7 @@
         	
         	<path id="build.limewire.components.this.test-common.classpath">
                 <!-- TODO parameterize 'test-common' with ivy-module configuration name -->
+                <pathelement location="${build.limewire.components.this.classes}"/>
                 <fileset dir="${build.limewire.components.this.lib}/test-common/" includes="**/*"/> <!-- ivy src dependencies -->
         	</path>        	
             

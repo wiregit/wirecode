@@ -7,8 +7,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
-import junit.framework.Test;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.limewire.common.LimeWireCommonModule;
@@ -23,6 +21,7 @@ import org.limewire.net.ProxySettings;
 import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.net.SocketBindingSettings;
 import org.limewire.net.SocketsManager;
+import org.limewire.nio.LimeTestUtils;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.StringUtils;
 
@@ -30,6 +29,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
+
+import junit.framework.Test;
 
 public class ProxyTest extends BaseTestCase {
 

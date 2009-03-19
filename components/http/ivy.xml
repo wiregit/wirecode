@@ -11,7 +11,7 @@
         <dependency org="org.limewire" name="collection" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime,test"/>
         
         <dependency org="none" name="httpcore" rev="${httpcore.version}" conf="compile,runtime"/>
         <dependency org="none" name="httpcore-nio" rev="${httpcore-nio.version}" conf="compile,runtime"/>

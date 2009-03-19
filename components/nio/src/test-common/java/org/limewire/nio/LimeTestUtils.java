@@ -3,8 +3,6 @@ package org.limewire.nio;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.limewire.nio.NIODispatcher;
-
 public class LimeTestUtils {
     public static void waitForNIO() throws InterruptedException {
         Future<?> future = NIODispatcher.instance().getScheduledExecutorService().submit(
