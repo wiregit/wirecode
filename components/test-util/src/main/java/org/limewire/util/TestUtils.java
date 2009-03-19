@@ -6,8 +6,17 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.Enumeration;
+import java.util.UUID;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
+import org.limewire.io.IOUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
@@ -93,6 +102,53 @@ public class TestUtils {
         // exist until Java 1.4.  So, we can't use it here.
         // Thus, we manually have to parse out the %20s from the URL
         return new File( decode(resource.getFile()) );
+    }
+    
+    /**
+     * This method will find a jar with the given resource path and will extract the
+     * contents from the first jar it finds that matches that path into a unique temporary
+     * directory. Callers should delete the directory when they are done using it.
+     * 
+     * If the resource is found in the classpath as not a jar, then the resources are instead 
+     * copied to the unique temp directory.
+     */
+    public static File extractResourceDirectory(String location) throws IOException {
+        File efile = new File(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString());
+        URL url = ClassLoader.getSystemResource(location);
+        
+        URLConnection urlConnection = url.openConnection();
+        
+        if(JarURLConnection.class.isInstance(urlConnection)) {
+            //if it is a jar file we want to extract files in the directory we need
+            JarURLConnection jarConnection = (JarURLConnection)urlConnection;
+            JarFile jarFile = jarConnection.getJarFile();
+            for(Enumeration<JarEntry> entires =  jarFile.entries(); entires.hasMoreElements();) {
+                JarEntry entry = entires.nextElement();
+                String name = entry.getName();
+                if(!entry.isDirectory() && name.startsWith(location)) {
+                    InputStream in = null;
+                    OutputStream out = null;
+                    try {
+                        in =  new BufferedInputStream(jarFile.getInputStream(entry));
+                        File file = new File(name);
+                        File outFile  = new File(efile, file.getName());
+                        outFile.getParentFile().mkdirs();
+                        out =  new BufferedOutputStream(new FileOutputStream(outFile));
+                        FileUtils.write(in, out);
+                    } finally {
+                        IOUtils.close(in);
+                        IOUtils.close(out);
+                    }
+                }
+            }
+            
+        } else {
+            //if it is on the filesystem already we can just copy the directory we need
+            File resourceDir = getResourceFile(location);
+            FileUtils.copyDirectory(resourceDir, efile);
+        }
+        
+        return efile;
     }
     
     /**
@@ -224,7 +280,5 @@ public class TestUtils {
                 }
             };
         }
-        
     }
-
 }

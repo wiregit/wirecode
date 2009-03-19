@@ -32,14 +32,12 @@ public class BTDownloaderImplTest extends LimeTestCase {
     /**
      * A directory containing the torrent data for this unit test.
      */
-    public static final File TORRENT_DIR = TestUtils
-            .getResourceFile("org/limewire/swarm/bittorrent/public_html/torrents");
+    private File torrentDir = null;
 
     /**
      * A directory containing the download data for this unit test.
      */
-    public static final File FILE_DIR = TestUtils
-            .getResourceFile("org/limewire/swarm/bittorrent/public_html");
+    private File fileDir = null;
 
     private boolean localIsPrivateBackup = false;
 
@@ -52,20 +50,24 @@ public class BTDownloaderImplTest extends LimeTestCase {
     public BTDownloaderImplTest(String name) {
         super(name);
     }
-    
+
     public static Test suite() {
         return buildTestSuite(BTDownloaderImplTest.class);
     }
 
     @Override
     protected void setUp() throws Exception {
+        torrentDir = TestUtils
+                .extractResourceDirectory("org/limewire/swarm/bittorrent/public_html/torrents");
+        fileDir = TestUtils.extractResourceDirectory("org/limewire/swarm/bittorrent/public_html");
+        
         localIsPrivateBackup = ConnectionSettings.LOCAL_IS_PRIVATE.getValue();
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         forceIPAddressBackup = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         forceIPAddressStringBackup = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
-        fileServer = new FileServer(TEST_PORT, FILE_DIR);
+        fileServer = new FileServer(TEST_PORT, fileDir);
         fileServer.start();
         super.setUp();
     }
@@ -77,6 +79,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(forceIPAddressStringBackup);
         fileServer.stop();
         fileServer.destroy();
+        FileUtils.deleteRecursive(torrentDir);
+        FileUtils.deleteRecursive(fileDir);
         super.tearDown();
     }
 
@@ -312,10 +316,10 @@ public class BTDownloaderImplTest extends LimeTestCase {
             }
         }
     }
-    
+
     /**
-     * This test has a peer and a bad webseed address. 
-     * The bad address should be ignored and the download will happen from the peer. 
+     * This test has a peer and a bad webseed address. The bad address should be
+     * ignored and the download will happen from the peer.
      */
     public void testSingleBadWebSeedSingleFilePeers() throws Exception {
         File torrentFile = createFile("test-single-badwebseed-single-file-peer.torrent");
@@ -349,7 +353,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     }
 
     private File createFile(String fileName) {
-        String torrentfilePath = TORRENT_DIR.getAbsolutePath() + "/" + fileName;
+        String torrentfilePath = torrentDir.getAbsolutePath() + "/" + fileName;
         File torrentFile = new File(torrentfilePath);
         return torrentFile;
     }
@@ -358,7 +362,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
         AssertComparisons.assertTrue(torrentFile.exists());
         Injector injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(
                 ActivityCallbackAdapter.class));
-        final BTMetaInfo metaInfo  = injector.getInstance(BTMetaInfoFactory.class).createMetaInfo(torrentFile);
+        final BTMetaInfo metaInfo = injector.getInstance(BTMetaInfoFactory.class).createMetaInfo(
+                torrentFile);
 
         CoreDownloaderFactory coreDownloaderFactory = injector
                 .getInstance(CoreDownloaderFactory.class);
