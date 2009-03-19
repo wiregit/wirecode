@@ -236,7 +236,7 @@ public class SpamManagerTest extends LimeTestCase {
         assertGreaterThan(0f, marked.getSpamRating());
         
         // A result with nothing in common but the address should receive a
-        // non-zero rating (TODO: should it be considered spam?)
+        // non-zero rating
         RemoteFileDesc sameAddress = createRFD(addr1, port2, mushroom, null, urn2, size2);
         assertGreaterThan(0f, sameAddress.getSpamRating());
         assertLessThan(marked.getSpamRating(), sameAddress.getSpamRating());
@@ -258,7 +258,7 @@ public class SpamManagerTest extends LimeTestCase {
         assertGreaterThan(0f, marked.getSpamRating());
         
         // A result with nothing in common but the size should receive a
-        // non-zero rating (TODO: should it be considered spam?)
+        // non-zero rating
         RemoteFileDesc sameAddress = createRFD(addr2, port2, mushroom, null, urn2, size1);
         assertGreaterThan(0f, sameAddress.getSpamRating());
         assertLessThan(marked.getSpamRating(), sameAddress.getSpamRating());
@@ -282,7 +282,7 @@ public class SpamManagerTest extends LimeTestCase {
         assertGreaterThan(0f, marked.getSpamRating());
         
         // A result with nothing in common but similar in size should receive
-        // a non-zero rating (TODO: should it be considered spam?)
+        // a non-zero rating
         RemoteFileDesc sameAddress = createRFD(addr2, port2, mushroom, null, urn2, size6);
         assertGreaterThan(0f, sameAddress.getSpamRating());
         assertLessThan(marked.getSpamRating(), sameAddress.getSpamRating());
@@ -308,7 +308,7 @@ public class SpamManagerTest extends LimeTestCase {
         assertGreaterThan(0f, marked.getSpamRating());
         
         // A result with nothing in common but the client GUID should receive
-        // a non-zero rating (TODO: should it be considered spam?)
+        // a non-zero rating
         RemoteFileDesc sameGUID =
             createRFD(addr2, port2, mushroom, null, urn2, size2, guid1);
         assertGreaterThan(0f, sameGUID.getSpamRating());
@@ -332,7 +332,7 @@ public class SpamManagerTest extends LimeTestCase {
         assertGreaterThan(0f, marked.getSpamRating());
         
         // A result with nothing in common but the XML should receive a
-        // non-zero rating (TODO: should it be considered spam?)
+        // non-zero rating
         RemoteFileDesc sameAddress = createRFD(addr2, port2, mushroom, doc1, urn2, size2);
         assertGreaterThan(0f, sameAddress.getSpamRating());
         assertLessThan(marked.getSpamRating(), sameAddress.getSpamRating());
