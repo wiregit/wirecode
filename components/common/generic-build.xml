@@ -9,6 +9,8 @@
     </description>
 	
 	<import file="ant-macros.xml"/>
+	
+	<property name="default.code.path" value="org/limewire"/>
     
     <target name="initialize" depends="ivy-load" unless="initialized.${component}">
         <do.setup-properties/>
@@ -316,10 +318,11 @@
 	
 	<macrodef name="do.test" description="Runs a single test class.">
 	    <attribute name="class"/>
-	    <attribute name="path" default="org/limewire"/>
+	    <attribute name="path" default="${default.code.path}"/>
 	    <sequential>
 	    	<do.clean-testData/>
 	        <do.tests-init/>
+	        <echo message="path: @{path}"/>
 			<do.run-tests-batchunit 
 			                   haltonerror="true"
 						       haltonfailure="true"
@@ -330,7 +333,7 @@
 	
 	<macrodef name="do.test-package" description="Runs all tests in a single package.">
 	    <attribute name="package"/>
-	    <attribute name="path" default="org/limewire"/>
+	    <attribute name="path" default="${default.code.path}"/>
 	    <attribute name="forkmode" default="once"/>
 	    <sequential>
 	        <do.clean-testData     />
