@@ -16,6 +16,7 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.nio.NIOTestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -118,7 +119,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         acceptor.setListeningPort(0);
         acceptor.shutdown();
 
-        LimeTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
     }
 
     public void testBrowseEnabled() throws Exception {
@@ -204,7 +205,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
-        LimeTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
         assertEquals(UploadStatus.COMPLETE, uploader.getState());
     }
 

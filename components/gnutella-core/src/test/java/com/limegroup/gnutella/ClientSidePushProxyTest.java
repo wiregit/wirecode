@@ -29,6 +29,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.nio.NIOTestUtils;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.util.Base32;
 
@@ -38,13 +39,13 @@ import com.google.inject.Stage;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
@@ -368,7 +369,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                                        OutputStreamWriter(push.getOutputStream()));
                 writer.write("GIV ");
                 writer.flush();
-                LimeTestUtils.waitForNIO();
+                NIOTestUtils.waitForNIO();
                 
                 // the PUSH request is not matched in PushList.getBestHost() if 
                 // this is set to false: the RemoteFileDesc contains the IP 

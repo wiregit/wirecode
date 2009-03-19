@@ -11,8 +11,6 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -22,7 +20,6 @@ import org.limewire.io.IpPort;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
@@ -41,31 +38,6 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 @SuppressWarnings("deprecation")
 public class LimeTestUtils {
-
-    public static void waitForNIO() throws InterruptedException {
-        Future<?> future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
-            public void run() {
-            }
-        });
-        try {
-            future.get();
-        } catch(ExecutionException ee) {
-            throw new IllegalStateException(ee);
-        }
-        
-        // the runnable is run at the beginning of the processing cycle so 
-        // we need a second runnable to make sure the cycle has been completed
-        future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
-            public void run() {
-            }
-        });
-        try {
-            future.get();
-        } catch(ExecutionException ee) {
-            throw new IllegalStateException(ee);
-        }
-        
-    }
 
     public static void setActivityCallBack(ActivityCallback cb)
             throws Exception {

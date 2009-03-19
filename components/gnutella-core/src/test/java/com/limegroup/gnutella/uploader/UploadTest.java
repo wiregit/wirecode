@@ -52,6 +52,7 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
+import org.limewire.nio.NIOTestUtils;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -196,7 +197,7 @@ public class UploadTest extends LimeTestCase {
     @Override
     public void tearDown() throws Exception {
         stopServices();
-        LimeTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
         injector = null;
         fileManager = null;
         uploadManager = null;
@@ -242,7 +243,7 @@ public class UploadTest extends LimeTestCase {
         acceptor.setListeningPort(PORT);
         acceptor.start();
         
-        LimeTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
     }       
 
     private void stopServices() throws Exception {

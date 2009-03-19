@@ -16,6 +16,7 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.ByteReader;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.NIOTestUtils;
 import org.limewire.nio.timeout.StalledUploadWatchdog;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -179,7 +180,7 @@ public class UploadQueueingTest extends LimeTestCase {
 
         if (lifeCycleManager != null) {
             lifeCycleManager.shutdown();
-            LimeTestUtils.waitForNIO();
+            NIOTestUtils.waitForNIO();
         }
     }
 
@@ -200,7 +201,7 @@ public class UploadQueueingTest extends LimeTestCase {
 
         HTTPDownloader d1 = addUploader(uploadManager, rfd1, "1.1.1.1", true);
         connectDloader(d1, true, rfd1, true);
-        LimeTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
         assertEquals(1, auth.getSent().size());
         assertEquals(urn1, ((ContentRequest) auth.getSent().get(0)).getURN());
 
@@ -1224,7 +1225,7 @@ public class UploadQueueingTest extends LimeTestCase {
             for (Uploader uploader : uploaders) {
                 uploader.stop();
             }
-            LimeTestUtils.waitForNIO();
+            NIOTestUtils.waitForNIO();
         }
     }
 

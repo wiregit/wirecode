@@ -38,6 +38,7 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.ByteBufferCache;
+import org.limewire.nio.NIOTestUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
@@ -186,7 +187,7 @@ public class PushUploadTest extends LimeTestCase {
             lifeCycleManager.shutdown();
         }
         
-        LimeTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
     }
 
     public void testDownloadHTTP10() throws Exception {

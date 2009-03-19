@@ -21,6 +21,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.nio.NIOTestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -102,7 +103,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     @Override
     protected void tearDown() throws Exception {
         bootstrapDHT.close();
-        LimeTestUtils.waitForNIO();
+        NIOTestUtils.waitForNIO();
     }
     
     public void testRequestDHTHostsFromSingleHost() throws Exception {

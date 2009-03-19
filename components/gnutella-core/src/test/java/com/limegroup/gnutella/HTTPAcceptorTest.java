@@ -27,6 +27,7 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
 import org.limewire.util.BaseTestCase;
+import org.limewire.nio.NIOTestUtils;
 
 //ITEST
 public class HTTPAcceptorTest extends BaseTestCase {
@@ -99,12 +100,12 @@ public class HTTPAcceptorTest extends BaseTestCase {
         try {
             response = client.execute(method);
             assertEquals(HTTPStatus.BAD_REQUEST, response.getStatusLine().getStatusCode());
-            LimeTestUtils.waitForNIO();
+            NIOTestUtils.waitForNIO();
             assertTrue(listener.opened);
             // bad request, so connection should have been closed
             assertTrue(listener.closed);
-            LimeTestUtils.waitForNIO();
-            LimeTestUtils.waitForNIO();
+            NIOTestUtils.waitForNIO();
+            NIOTestUtils.waitForNIO();
             assertNotNull(listener.response);
         } finally {
             HttpClientUtils.releaseConnection(response);
