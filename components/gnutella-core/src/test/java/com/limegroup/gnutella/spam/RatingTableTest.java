@@ -7,13 +7,13 @@ import junit.framework.Test;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class RatingTableTest extends LimeTestCase {
@@ -53,19 +53,20 @@ public class RatingTableTest extends LimeTestCase {
         RemoteFileDesc rfd1 = createRFD(addr1, port1, name1, size1);
         assertFalse(rfd1.isSpam());
         assertEquals(0f, rfd1.getSpamRating());
-        // There should be five tokens: address, name, ext, size, approx size
-        assertEquals(5, table.size());
+        // There should be six tokens: address, name, ext, size, approx size,
+        // client GUID
+        assertEquals(6, table.size());
         RemoteFileDesc rfd2 = createRFD(addr2, port2, name2, size2);
         manager.handleUserMarkedSpam(new RemoteFileDesc[]{rfd2});
         assertTrue(rfd2.isSpam());
         assertGreaterThan(rfd1.getSpamRating(), rfd2.getSpamRating());
-        // There should now be ten tokens, five for each RFD
-        assertEquals(10, table.size());
+        // There should now be twelve tokens, six for each RFD
+        assertEquals(12, table.size());
         // Save and load the ratings
         table.stop();
         table.start();
         // Tokens with default ratings should have been discarded
-        assertEquals(5, table.size());
+        assertEquals(6, table.size());
     }
     
     /**
@@ -92,8 +93,9 @@ public class RatingTableTest extends LimeTestCase {
 
     private RemoteFileDesc createRFD(String addr, int port, String name,
             int size) throws UnknownHostException {
-        RemoteFileDesc rfd = rfdFactory.createRemoteFileDesc(new ConnectableImpl(addr, port, false), 1, name, size,
-                DataUtils.EMPTY_GUID, 3, 3, false, null, URN.NO_URN_SET, false,
+        RemoteFileDesc rfd = rfdFactory.createRemoteFileDesc(
+                new ConnectableImpl(addr, port, false), 1, name, size,
+                GUID.makeGuid(), 3, 3, false, null, URN.NO_URN_SET, false,
                 "ALT", 0L);
         // This would normally be called by the SearchResultHandler
         manager.calculateSpamRating(rfd);
