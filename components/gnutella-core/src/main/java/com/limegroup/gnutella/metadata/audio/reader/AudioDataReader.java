@@ -11,6 +11,7 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.tag.vorbiscomment.VorbisCommentTag;
 
 import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
@@ -49,6 +50,11 @@ public class AudioDataReader implements MetaReader {
         audioData.setComment(tag.getFirstComment());
         audioData.setTrack(tag.getFirstTrack());
         audioData.setGenre(tag.getFirstGenre());
+        
+        //if an ogg or flac file, try reading the license
+        if(tag instanceof VorbisCommentTag) {
+            audioData.setLicense(tag.getFirst("LICENSE"));
+        }
     }
     
     /**
