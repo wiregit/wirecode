@@ -7,7 +7,14 @@
 	<property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[type]s/[artifact].[ext]" override="false"/>
 	
 	<!-- use the resolver named 'default' to lookup our dependencies. -->
-	<settings defaultResolver="default" defaultConflictManager="all"/>
+	<settings defaultResolver="default"
+	          defaultConflictManager="all"/>
+	
+	<caches defaultCacheDir="${ivy.default.ivy.user.dir}/defaultCache"
+	        repositoryCacheDir="${ivy.default.ivy.user.dir}/repositoryCache"
+	        resolutionCacheDir="${limewire.home}/.ivy2/resolutionCache"
+	        lockStrategy="artifact-lock"
+	        useOrigin="true"/>
 		
 	<resolvers>
 	    <!-- the cvs lib dir -->
