@@ -2,6 +2,9 @@ package org.limewire.core.impl.connection;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +29,7 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Various tests for GnutellaConnectionManagerImpl.  Tests event listeners,
@@ -33,8 +37,6 @@ import com.limegroup.gnutella.connection.RoutedConnection;
  */
 public class GnutellaConnectionManagerImplTest extends BaseTestCase {
 
-    // TODO: Test connection strength calculation
-    
     private Mockery context;
     private ConnectionManager connectionManager;
 
@@ -366,5 +368,107 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         assertEmpty(list);
         
         context.assertIsSatisfied();
+    }
+    
+    /**
+     * Tests the calculate function.  Make sure it identifies disconnected and connecting.
+     *  Call with various input and insure all states are returned and no errors are encountered
+     */
+    public void testConnectionStrength() throws Exception {
+        
+        // Make sure it correctly identifies disconnected and connecting
+        assertEquals(ConnectionStrength.DISCONNECTED, 
+                testCalculate(0, false, false, 0, 0, 0, false, false));
+        assertEquals(ConnectionStrength.CONNECTING, 
+                testCalculate(0, true, false, 0, 0, 0, false, false));
+        
+        // Prepare a set of states that should be hit in the proceeding calculate calls
+        Set<ConnectionStrength> states = new HashSet<ConnectionStrength>();
+        for ( ConnectionStrength state : ConnectionStrength.values() ) {
+            states.add(state);
+        }
+        states.remove(ConnectionStrength.DISCONNECTED);
+        states.remove(ConnectionStrength.NO_INTERNET);
+        
+        // Call calculates and if the result is new remove it from the list 
+        //  of outstanding states
+        states.remove(testCalculate(0, false, false, 11, 0, 0, false, false));
+        states.remove(testCalculate(0, false, false, 22, 11, 0, false, false));
+        states.remove(testCalculate(80, false, true, 0, 0, 0, false, false));
+        states.remove(testCalculate(1, false, false, 0, 0, Integer.MAX_VALUE, false, false));
+        
+        states.remove(testCalculate(23452346, false, false, 0, 0, 0, false, false));
+        states.remove(testCalculate(100, false, false, 0, 0, 1, false, false));        
+        states.remove(testCalculate(-10, false, false, 0, 0, 100, false, false));
+        states.remove(testCalculate(30, false, false, 0, 0, 99, false, false));
+        states.remove(testCalculate(31, false, false, 0, 0, 101, false, false));
+        states.remove(testCalculate(31, false, false, 0, 0, 101, false, false));
+        
+        states.remove(testCalculate(31, false, false, 0, 0, 101, false, true));
+        states.remove(testCalculate(5, false, false, 0, 0, 101, true, false));
+        states.remove(testCalculate(5, false, false, 0, 0, 101, true, true));
+        
+        for ( int i = 1 ; i < 125 ; i+=4 ) {
+            states.remove(testCalculate(i, false, false, 0, 0, 100, false, false));
+        }
+        
+        // This should be enough to hit all the connection states, make sure otherwise something 
+        //  strange is happening
+        assertEmpty(states);        
+    }
+    
+    /**
+     * Returns the input of the calculate function when called in environment 
+     *  that corresponds to the parameters passed in.
+     */
+    private ConnectionStrength testCalculate(
+            final int countConnectionsWithNMessages, 
+            final boolean isConnecting, 
+            final boolean isConnectionIdle,
+            final int getNumFetchingConnections,
+            final int getNumInitializedConnections,
+            final int getPreferredConnectionCount,
+            final boolean isPro, 
+            final boolean isSupernode) throws Exception {
+        
+        GnutellaConnectionManagerImpl gnutellaConnectionManager
+            = new GnutellaConnectionManagerImpl(connectionManager, null, null);
+        
+        context.checking(new Expectations() {{
+            allowing(connectionManager).countConnectionsWithNMessages(with(any(int.class)));
+            will(returnValue(countConnectionsWithNMessages));
+            allowing(connectionManager).isConnecting();
+            will(returnValue(isConnecting));
+            allowing(connectionManager).isConnectionIdle();
+            will(returnValue(isConnectionIdle));
+            allowing(connectionManager).getNumFetchingConnections();
+            will(returnValue(getNumFetchingConnections));
+            allowing(connectionManager).getNumInitializedConnections();
+            will(returnValue(getNumInitializedConnections));
+            allowing(connectionManager).getPreferredConnectionCount();
+            will(returnValue(getPreferredConnectionCount));
+            allowing(connectionManager).isSupernode();
+            will(returnValue(isSupernode));
+        }});
+        
+        // LimeWireUtils.isPro() is hardcoded, use reflection to get it
+        boolean oldIsPro = LimeWireUtils.isPro();
+        Field isProField = LimeWireUtils.class.getDeclaredField("_isPro");
+        isProField.setAccessible(true);
+        isProField.set(null, isPro);
+        
+        // Calculate connection strength
+        ConnectionStrength strength = gnutellaConnectionManager.calculateStrength();
+
+        // Reset pro field
+        isProField.set(null, oldIsPro);
+        isProField.setAccessible(false);
+        
+        context.assertIsSatisfied();
+
+        // Reset context
+        setUp();
+        
+        return strength;
     }
 }

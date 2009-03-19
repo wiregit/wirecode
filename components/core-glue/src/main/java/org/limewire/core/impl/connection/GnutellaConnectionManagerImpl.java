@@ -150,7 +150,7 @@ public class GnutellaConnectionManagerImpl
         changeSupport.firePropertyChange(GnutellaConnectionManager.CONNECTION_STRENGTH, oldStrength, newStrength);
     }
     
-    private ConnectionStrength calculateStrength() {
+    ConnectionStrength calculateStrength() {
         int stable = connectionManager.countConnectionsWithNMessages(STABLE_THRESHOLD);
             
         ConnectionStrength strength;
