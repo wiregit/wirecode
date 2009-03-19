@@ -26,6 +26,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.nav.Navigator;
@@ -73,7 +74,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * Base class containing the search results tables for a single category.  
  * BaseResultPanel contains both the List view and Table view components. 
  */
-public class BaseResultPanel extends JXPanel {
+public class BaseResultPanel extends JXPanel implements Disposable {
     
     private static final int MAX_DISPLAYED_RESULT_SIZE = 500;
     private static final int TABLE_ROW_HEIGHT = 23;
@@ -438,6 +439,15 @@ public class BaseResultPanel extends JXPanel {
         tc.setHeaderRenderer(headerRenderer);
     }
 
+    /**
+     * Disposes of resources used by the container.
+     */
+    @Override
+    public void dispose() {
+        resultsList.dispose();
+        resultsTable.dispose();
+    }
+    
     /**
      * Displays search results for the specified search category.
      */

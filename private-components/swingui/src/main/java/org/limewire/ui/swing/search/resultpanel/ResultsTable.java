@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.JPopupMenu;
 import javax.swing.table.JTableHeader;
 
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.RowPresevationListener;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -16,6 +17,7 @@ import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
@@ -33,7 +35,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  * </ul> 
  */
 public class ResultsTable<E extends VisualSearchResult> extends MouseableTable 
-    implements RowPresevationListener {
+    implements Disposable, RowPresevationListener {
 
     private final List<E> selectedRows = new ArrayList<E>();
 
@@ -67,20 +69,29 @@ public class ResultsTable<E extends VisualSearchResult> extends MouseableTable
      */
     public void setEventListFormat(EventList<E> eventList, 
             ResultsTableFormat<E> tableFormat, boolean showHeader) {
-        this.eventList = eventList;
-        this.tableFormat = tableFormat;
-        this.tableModel = GlazedListsSwingFactory.eventTableModel(eventList, tableFormat);
-        
         // Remove old listeners.
         uninstallListeners();
         
-        // Set table model.
+        // Dispose old table model and event list.
+        if (tableModel != null) {
+            tableModel.dispose();
+        }
+        if (this.eventList instanceof TransformedList) {
+            ((TransformedList) this.eventList).dispose();
+        }
+        
+        // Save event list and table format.
+        this.eventList = eventList;
+        this.tableFormat = tableFormat;
+        
+        // Create new table model.
+        tableModel = GlazedListsSwingFactory.eventTableModel(eventList, tableFormat);
         setModel(tableModel);
         
         // Install new listeners.
         installListeners(showHeader);
     }
-    
+
     /**
      * Initializes the table header based on the specified indicator, and 
      * installs listeners on the table header and column model.
@@ -151,6 +162,19 @@ public class ResultsTable<E extends VisualSearchResult> extends MouseableTable
             columnStateHandler.setupColumnWidths();
             columnStateHandler.setupColumnVisibility();
             columnStateHandler.setupColumnOrder();
+        }
+    }
+
+    /**
+     * Disposes of resources used by the table.
+     */
+    @Override
+    public void dispose() {
+        if (tableModel != null) {
+            tableModel.dispose();
+        }
+        if (eventList instanceof TransformedList) {
+            ((TransformedList) eventList).dispose();
         }
     }
     
