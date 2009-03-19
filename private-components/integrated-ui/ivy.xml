@@ -13,7 +13,7 @@
         <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="http" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="core" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="gnutella-core" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="mojito" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="swingui" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-glue" rev="latest.integration" conf="compile,runtime"/>

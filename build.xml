@@ -2,17 +2,13 @@
 <project name="limewire" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="limewire.home" location="${basedir}"/>
-    <property name="includes" value="components/*/build.xml, private-components/*/build.xml, */build.xml"/>
+    <property name="includes" value="components/*/build.xml, private-components/*/build.xml"/>
     
     <import file="components/common/generic-multi-build.xml"/>
     
-    <!-- because tests is not a proper component and doesn't follow the same src & test path, 
-         we must redefine where clover looks for test sources -->
-    <fileset id="clover.testsources" dir="${basedir}" includes="**/src/test/**, **/tests/**"/>
-    
-    <!-- runs all tests except those in /limewire/tests. -->
+    <!-- runs all tests except those in gnutella-core. -->
     <target name="test-fast-tests" depends="publish-dependencies">
-        <do.multi-ant target="test-all" excludes="tests/*"/>
+        <do.multi-ant target="test-all" excludes="components/gnutella-core/*"/>
 	</target>
     
     <!-- BEGIN GETTEXT TASKS -->
