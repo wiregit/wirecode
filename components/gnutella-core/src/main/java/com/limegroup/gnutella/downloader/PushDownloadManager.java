@@ -388,7 +388,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     /**
      * Sends a push through UDP.
      *
-     * This always returns true, because a UDP push is always sent.
+     * @return true if a push request was sent to at least one push proxy
      */    
     private boolean sendPushUDP(RemoteFileDesc file, byte[] guid) {
         PushRequest pr = 
@@ -408,11 +408,13 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         IpPort publicAddress = getPublicAddress(file.getAddress());
         //don't bother sending direct push if the node reported invalid
         //address and port.
+        boolean sent = false;
         if (NetworkUtils.isValidIpPort(publicAddress)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("sending push to host itself via udp: " + publicAddress);
             }
             udpService.send(pr, publicAddress);
+            sent = true;
         }
         
         //make sure we send it to the proxies, if any
@@ -422,6 +424,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                     LOG.debug("sending udp push to: " + ppi);
                 }
                 udpService.send(pr, ppi.getInetSocketAddress());
+                sent = true;
             } else {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("removing disallowed pushproxy: " + ppi);
@@ -430,7 +433,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             }
         }
         
-        return true;
+        return sent;
     }
     
     /**
