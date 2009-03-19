@@ -50,14 +50,13 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     /**
      * A directory containing the torrent data for this unit test.
      */
-    public static final File TORRENT_DIR = TestUtils
-            .getResourceFile("org/limewire/swarm/bittorrent/public_html/torrents");
+    private File torrentDir = null;
 
     /**
-     * A directory containing the torrent data for this unit test.
+     * A directory containing the download data for this unit test.
      */
-    public static final File FILE_DIR = TestUtils
-            .getResourceFile("org/limewire/swarm/bittorrent/public_html");
+    private File fileDir = null;
+    
 
     private FileServer fileServer = null;
 
@@ -75,9 +74,13 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        torrentDir = TestUtils
+        .extractResourceDirectory("org/limewire/swarm/bittorrent/public_html/torrents");
+        fileDir = TestUtils.extractResourceDirectory("org/limewire/swarm/bittorrent/public_html");
+        
         injector = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackStub.class));
         metaInfoFactory = injector.getInstance(BTMetaInfoFactory.class);
-        fileServer = new FileServer(TEST_PORT, FILE_DIR);
+        fileServer = new FileServer(TEST_PORT, fileDir);
         fileServer.start();
     }
 
@@ -85,6 +88,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     protected void tearDown() throws Exception {
         fileServer.stop();
         fileServer.destroy();
+        FileUtils.deleteRecursive(torrentDir);
+        FileUtils.deleteRecursive(fileDir);
     }
 
     public void testSingleFileTorrent() throws Exception {
@@ -264,7 +269,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     }
 
     private File getFile(String fileName) {
-        File torrentFile = new File(TORRENT_DIR.getAbsoluteFile() + "/" + fileName);
+        File torrentFile = new File(torrentDir.getAbsoluteFile() + "/" + fileName);
         return torrentFile;
     }
 

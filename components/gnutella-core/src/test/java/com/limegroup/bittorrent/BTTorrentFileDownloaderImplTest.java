@@ -22,6 +22,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventListener;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Provider;
@@ -53,14 +54,13 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
     /**
      * A directory containing the torrent data for this unit test.
      */
-    public static final File TORRENT_DIR = TestUtils
-            .getResourceFile("org/limewire/swarm/bittorrent/public_html/torrents");
+    private File torrentDir = null;
 
     /**
      * A directory containing the download data for this unit test.
      */
-    public static final File FILE_DIR = TestUtils
-            .getResourceFile("org/limewire/swarm/bittorrent/public_html");
+    private File fileDir = null;
+    
 
     private boolean localIsPrivateBackup = false;
 
@@ -80,13 +80,17 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        torrentDir = TestUtils
+        .extractResourceDirectory("org/limewire/swarm/bittorrent/public_html/torrents");
+        fileDir = TestUtils.extractResourceDirectory("org/limewire/swarm/bittorrent/public_html");
+        
         localIsPrivateBackup = ConnectionSettings.LOCAL_IS_PRIVATE.getValue();
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         forceIPAddressBackup = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         forceIPAddressStringBackup = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
-        fileServer = new FileServer(TEST_PORT, FILE_DIR);
+        fileServer = new FileServer(TEST_PORT, fileDir);
         fileServer.start();
         super.setUp();
     }
@@ -98,6 +102,8 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(forceIPAddressStringBackup);
         fileServer.stop();
         fileServer.destroy();
+        FileUtils.deleteRecursive(torrentDir);
+        FileUtils.deleteRecursive(fileDir);
         super.tearDown();
     }
     
