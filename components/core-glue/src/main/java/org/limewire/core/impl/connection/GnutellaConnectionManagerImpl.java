@@ -55,10 +55,11 @@ public class GnutellaConnectionManagerImpl
     /** List of ConnectionItem instances. */
     private final EventList<ConnectionItem> connectionItemList;
     
-    private volatile long lastIdleTime;
     private volatile ConnectionStrength currentStrength = ConnectionStrength.DISCONNECTED;
+    
     volatile ConnectionLifecycleEventType lastStrengthRelatedEvent;
-
+    volatile long lastIdleTime;
+    
     /**
      * Constructs the live implementation of GnutellaConnectionManager using 
      * the specified connection and library services.

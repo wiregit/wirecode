@@ -378,9 +378,18 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         
         // Make sure it correctly identifies disconnected and connecting
         assertEquals(ConnectionStrength.DISCONNECTED, 
-                testCalculate(0, false, false, 0, 0, 0, false, false));
+                testCalculate(0, false, false, 0, 0, 0, false, false, 0, null));
         assertEquals(ConnectionStrength.CONNECTING, 
-                testCalculate(0, true, false, 0, 0, 0, false, false));
+                testCalculate(0, true, false, 0, 0, 0, false, false, 0, null));
+        
+        // Assert NO_INTERNET state is preserved 
+        assertEquals(ConnectionStrength.NO_INTERNET, 
+                testCalculate(0, true, false, 0, 0, 0, false, false, 0,
+                        ConnectionLifecycleEventType.NO_INTERNET));
+        
+        // Test waking up state
+        assertEquals(ConnectionStrength.MEDIUM, 
+                testCalculate(0, true, false, 0, 0, 0, false, false, Long.MAX_VALUE-60*1000, null));        
         
         // Prepare a set of states that should be hit in the proceeding calculate calls
         Set<ConnectionStrength> states = new HashSet<ConnectionStrength>();
@@ -392,24 +401,26 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         
         // Call calculates and if the result is new remove it from the list 
         //  of outstanding states
-        states.remove(testCalculate(0, false, false, 11, 0, 0, false, false));
-        states.remove(testCalculate(0, false, false, 22, 11, 0, false, false));
-        states.remove(testCalculate(80, false, true, 0, 0, 0, false, false));
-        states.remove(testCalculate(1, false, false, 0, 0, Integer.MAX_VALUE, false, false));
+        states.remove(testCalculate(0, false, false, 11, 0, 0, false, false, 0, null));
+        states.remove(testCalculate(0, false, false, 22, 11, 0, false, false, 0, null));
+        states.remove(testCalculate(80, false, true, 0, 0, 0, false, false, 0, null));
+        states.remove(testCalculate(1, false, false, 0, 0, Integer.MAX_VALUE, false, false, 0, null));
         
-        states.remove(testCalculate(23452346, false, false, 0, 0, 0, false, false));
-        states.remove(testCalculate(100, false, false, 0, 0, 1, false, false));        
-        states.remove(testCalculate(-10, false, false, 0, 0, 100, false, false));
-        states.remove(testCalculate(30, false, false, 0, 0, 99, false, false));
-        states.remove(testCalculate(31, false, false, 0, 0, 101, false, false));
-        states.remove(testCalculate(31, false, false, 0, 0, 101, false, false));
+        states.remove(testCalculate(1, false, false, 0, 0, Integer.MAX_VALUE, false, false, 0, null));
         
-        states.remove(testCalculate(31, false, false, 0, 0, 101, false, true));
-        states.remove(testCalculate(5, false, false, 0, 0, 101, true, false));
-        states.remove(testCalculate(5, false, false, 0, 0, 101, true, true));
+        states.remove(testCalculate(23452346, false, false, 0, 0, 0, false, false, 0, null));
+        states.remove(testCalculate(100, false, false, 0, 0, 1, false, false, 0, null));        
+        states.remove(testCalculate(-10, false, false, 0, 0, 100, false, false, 0, null));
+        states.remove(testCalculate(30, false, false, 0, 0, 99, false, false, 0, null));
+        states.remove(testCalculate(31, false, false, 0, 0, 101, false, false, 0, null));
+        states.remove(testCalculate(31, false, false, 0, 0, 101, false, false, 0, null));
+        
+        states.remove(testCalculate(31, false, false, 0, 0, 101, false, true, 0, null));
+        states.remove(testCalculate(5, false, false, 0, 0, 101, true, false, Long.MAX_VALUE-60*1000, null));
+        states.remove(testCalculate(5, false, false, 0, 0, 101, true, true, 0, null));
         
         for ( int i = 1 ; i < 125 ; i+=4 ) {
-            states.remove(testCalculate(i, false, false, 0, 0, 100, false, false));
+            states.remove(testCalculate(i, false, false, 0, 0, 100, false, false, 0, null));
         }
         
         // This should be enough to hit all the connection states, make sure otherwise something 
@@ -420,6 +431,8 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
     /**
      * Returns the input of the calculate function when called in environment 
      *  that corresponds to the parameters passed in.
+     * @param lastIdleTime TODO
+     * @param lastStrengthRelatedEvent TODO
      */
     private ConnectionStrength testCalculate(
             final int countConnectionsWithNMessages, 
@@ -429,10 +442,15 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
             final int getNumInitializedConnections,
             final int getPreferredConnectionCount,
             final boolean isPro, 
-            final boolean isSupernode) throws Exception {
+            final boolean isSupernode,
+            final long lastIdleTime, 
+            final ConnectionLifecycleEventType lastStrengthRelatedEvent) throws Exception {
         
         GnutellaConnectionManagerImpl gnutellaConnectionManager
             = new GnutellaConnectionManagerImpl(connectionManager, null, null);
+        
+        gnutellaConnectionManager.lastIdleTime = lastIdleTime;
+        gnutellaConnectionManager.lastStrengthRelatedEvent = lastStrengthRelatedEvent;
         
         context.checking(new Expectations() {{
             allowing(connectionManager).countConnectionsWithNMessages(with(any(int.class)));
