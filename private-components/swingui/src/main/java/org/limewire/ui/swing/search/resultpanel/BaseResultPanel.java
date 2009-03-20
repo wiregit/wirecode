@@ -60,6 +60,7 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.RangeList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -72,7 +73,10 @@ import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * Base class containing the search results tables for a single category.  
- * BaseResultPanel contains both the List view and Table view components. 
+ * BaseResultPanel contains both the List view and Table view components.  The
+ * current view is selected by calling the <code>setViewType()</code> method.
+ * the display category is selected by calling the <code>showCategory()</code>
+ * method.
  */
 public class BaseResultPanel extends JXPanel implements Disposable {
     
@@ -91,7 +95,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     /** Table component for the Table view. */
     private final ResultsTable<VisualSearchResult> resultsTable;
     
-    //cache for RowDisplayResult which could be expensive to generate with large search result sets
+    /** cache for RowDisplayResult which could be expensive to generate with large search result sets */
     private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
         new HashMap<VisualSearchResult, RowDisplayResult>();
     
@@ -106,6 +110,10 @@ public class BaseResultPanel extends JXPanel implements Disposable {
     private final SearchResultFromWidgetFactory fromWidgetfactory;
     private final NameRendererFactory nameRendererFactory;
     private final DownloadHandler downloadHandler;
+    
+    private FilterList<VisualSearchResult> visibleList;
+    private RangeList<VisualSearchResult> maxSizedList;
+    private ListEventListener<VisualSearchResult> maxSizedListener;
     
     private EventListJXTableSorting resultsTableSorting; 
     private ColorHighlighter resultsColorHighlighter;
@@ -180,14 +188,23 @@ public class BaseResultPanel extends JXPanel implements Disposable {
      * Configures the List view to display results for the selected category.
      */
     private void configureList() {
+        // Remove listeners and dispose of intermediate list.  The existing
+        // maxSizedList is disposed when we pass the new list into 
+        // setEventListFormat().
+        if (maxSizedList != null) {
+            maxSizedList.removeListEventListener(maxSizedListener);
+            visibleList.dispose();
+        }
+        
         // Get sorted list for selected category.
         final EventList<VisualSearchResult> sortedList = searchResultsModel.getSortedSearchResults();
         
-        ListViewTableFormat tableFormat = new ListViewTableFormat();        
-        final RangeList<VisualSearchResult> maxSizedList = new RangeList<VisualSearchResult>(newVisibleFilterList(sortedList));
+        visibleList = newVisibleFilterList(sortedList);
+        maxSizedList = GlazedListsFactory.rangeList(visibleList);
         maxSizedList.setHeadRange(0, MAX_DISPLAYED_RESULT_SIZE + 1);
         
-        // Set table model.
+        // Create table format and set table model.
+        ListViewTableFormat tableFormat = new ListViewTableFormat();
         resultsList.setEventListFormat(maxSizedList, tableFormat, false);
         
         // Represents display limits for displaying search results in list view.
@@ -239,7 +256,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
         }
         
         //add listener to table model to set row heights based on contents of the search results
-        maxSizedList.addListEventListener(new ListEventListener<VisualSearchResult>() {
+        maxSizedListener = new ListEventListener<VisualSearchResult>() {
             @Override
             public void listChanged(ListEvent<VisualSearchResult> listChanges) {
                 
@@ -288,7 +305,8 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 
                 SwingUtilities.invokeLater(runner);
             }
-        });
+        };
+        maxSizedList.addListEventListener(maxSizedListener);
         resultsList.setRowHeight(ROW_HEIGHT);        
     }
     
@@ -296,7 +314,7 @@ public class BaseResultPanel extends JXPanel implements Disposable {
      * Creates a filtered list of visible results using the specified list of 
      * search results.
      */
-    private EventList<VisualSearchResult> newVisibleFilterList(
+    private FilterList<VisualSearchResult> newVisibleFilterList(
             EventList<VisualSearchResult> eventList) {
         return GlazedListsFactory.filterList(eventList, new Matcher<VisualSearchResult>() {
             @Override
