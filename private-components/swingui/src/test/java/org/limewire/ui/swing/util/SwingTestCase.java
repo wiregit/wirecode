@@ -8,6 +8,7 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
+// TODO: Rood dir stuff is broken!!
 public abstract class SwingTestCase extends BaseTestCase {
 
     protected static File baseDir;
