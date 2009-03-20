@@ -315,8 +315,8 @@ public class RatingTable implements Service {
         @Override
 	    public Object inspect() {
 	        synchronized(RatingTable.this) {
-	            Map<String, Object> ret = new HashMap<String, Object>();
-	            ret.put("ver",1);
+	            Map<String, Object> m = new HashMap<String, Object>();
+	            m.put("ver",1);
                 final float spamThreshold = SearchSettings.FILTER_SPAM_RESULTS.getValue();
 	            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	            DataOutputStream daos = new DataOutputStream(baos);
@@ -331,11 +331,11 @@ public class RatingTable implements Service {
 	                }
 	                daos.flush();
 	                daos.close();
-	                ret.put("dump", baos.toByteArray());
+	                m.put("dump", baos.toByteArray());
 	            } catch (IOException impossible) {
-	                ret.put("error", impossible.toString());
+	                m.put("error", impossible.toString());
 	            }
-	            return ret;
+	            return m;
 	        }
 	    }
 	};
