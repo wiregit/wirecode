@@ -56,7 +56,8 @@ public class ResultsTable<E extends VisualSearchResult> extends MouseableTable
     }
 
     /**
-     * Returns the EventTableModel used by the table.
+     * Returns the EventTableModel used by the table.  The returned value may
+     * be null if the table has been disposed.
      */
     public EventTableModel<E> getEventTableModel() {
         return tableModel;
@@ -172,6 +173,9 @@ public class ResultsTable<E extends VisualSearchResult> extends MouseableTable
     public void dispose() {
         if (tableModel != null) {
             tableModel.dispose();
+            // Set reference to null to discourage further use until a new 
+            // event list and table model is set.
+            tableModel = null;
         }
         if (eventList instanceof TransformedList) {
             ((TransformedList) eventList).dispose();

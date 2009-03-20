@@ -260,8 +260,8 @@ public class BaseResultPanel extends JXPanel implements Disposable {
             @Override
             public void listChanged(ListEvent<VisualSearchResult> listChanges) {
                 
-                final EventTableModel model = (EventTableModel) resultsList.getModel();
-                if (model.getRowCount() == 0) {
+                EventTableModel model = resultsList.getEventTableModel();
+                if ((model == null) || (model.getRowCount() == 0)) {
                     return;
                 }
                 
@@ -269,6 +269,10 @@ public class BaseResultPanel extends JXPanel implements Disposable {
                 Runnable runner = new Runnable() {
                     @Override
                     public void run() {
+                        // Verify table model not disposed before this event is
+                        // processed.
+                        EventTableModel model = resultsList.getEventTableModel();
+                        if (model == null) return;
                         
                         resultsList.setIgnoreRepaints(true);
                         boolean setRowSize = false;
