@@ -43,10 +43,11 @@
           <fileset dir="components">
 	    <patternset id="non.test.sources">
 	      <include name="**/*.java"/>
-	      <exclude name="**/*Test*"/>
+	      <exclude name="**/src/test/**"/>
+	      <exclude name="**/src/test-common/**"/>
 	    </patternset>
 	  </fileset>
-          <fileset dir="private-components" includes="**/*.java">
+          <fileset dir="private-components">
 	    <patternset refid="non.test.sources"/>
 	  </fileset>
         </gettext-extract>
