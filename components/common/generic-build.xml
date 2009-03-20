@@ -322,7 +322,6 @@
 	    <sequential>
 	    	<do.clean-testData/>
 	        <do.tests-init/>
-	        <echo message="path: @{path}"/>
 			<do.run-tests-batchunit 
 			                   haltonerror="true"
 						       haltonfailure="true"

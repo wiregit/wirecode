@@ -52,6 +52,9 @@
         <dependency org="none" name="tests/org.mortbay.jetty" rev="${org.mortbay.jetty.version}" conf="test"/>
         <dependency org="none" name="tests/javax.servlet" rev="${javax.servlet.version}" conf="test"/>
         <dependency org="none" name="tests/manekineko" rev="${manekineko.version}" conf="test"/>
+        <dependency org="none" name="tests/saxpath" rev="${saxpath.version}" conf="test"/>
+        <dependency org="none" name="tests/xerces" rev="${xerces.version}" conf="test"/>
+        <dependency org="none" name="tests/jing" rev="${jing.version}" conf="test"/>
         
     </dependencies>
 </ivy-module>

@@ -103,7 +103,7 @@ public class PublishedCCLicenseTest extends LimeTestCase {
         // bug in MinekiNeko prevents use of compact schema.  use regular schema instead
         //		parser.setFeature("http://cyberneko.org/xml/features/relaxng/compact-syntax", true);
 
-        File f = TestUtils.getResourceFile("lib/xml/schemas/ccverificationrdf-schema.rng");
+        File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverificationrdf-schema.rng");
         assertTrue(f.exists()); // must have rng to validate.
 		parser.setProperty(
 				"http://cyberneko.org/xml/properties/relaxng/schema-location",

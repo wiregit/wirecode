@@ -23,7 +23,6 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
-import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -79,7 +78,7 @@ public class BrowseTest extends LimeTestCase {
         client = injector.getInstance(LimeHttpClient.class);
         
         FileManagerTestUtils.waitForLoad(fileManager,2000);
-        File shareDir = TestUtils.getResourceFile("com/limegroup/gnutella");
+        File shareDir = LimeTestUtils.getDirWithComLimegroupGnutellaClasses();
         File[] testFiles = shareDir.listFiles(new FileFilter() {
             public boolean accept(File file) {
                 return !file.isDirectory() && file.getName().endsWith(".class");

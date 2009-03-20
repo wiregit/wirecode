@@ -23,6 +23,7 @@ import org.limewire.net.address.AddressEvent;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -38,6 +39,11 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 @SuppressWarnings("deprecation")
 public class LimeTestUtils {
+    
+    public static File getDirWithComLimegroupGnutellaClasses() {
+        File file = TestUtils.getResourceFile("com/limegroup/gnutella/LimeTestUtils.class");   
+        return file.getParentFile(); 
+    }
 
     public static void setActivityCallBack(ActivityCallback cb)
             throws Exception {
