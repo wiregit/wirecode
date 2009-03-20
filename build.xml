@@ -41,7 +41,6 @@
              poDirectory="lib/messagebundles" keywords="-ktrc:1c,2
           -ktrnc:1c,2,3 -ktr -kmarktr -ktrn:1,2 -ktrl -k">
           <fileset dir="components" includes="**/*.java"/>
-          <fileset dir="core" includes="**/*.java"/>
           <fileset dir="private-components" includes="**/*.java"/>
         </gettext-extract>
     </target>
