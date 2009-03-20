@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="lw-integrated-ui" basedir="." default="compile-src">
-
+<project name="integrated-ui" basedir="." default="compile-src">
     <property name="limewire.components.home" value="${basedir}/.."/>
-    <property name="component" value="integrated-ui"/>	
-    <import file="../../components/common/generic-build.xml"/>
-    
+    <import file="../../components/common/generic-build.xml"/>    
 </project>
