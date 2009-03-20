@@ -127,8 +127,9 @@ public class TestUtils {
                     OutputStream out = null;
                     try {
                         in =  new BufferedInputStream(jarFile.getInputStream(entry));
-                        File file = new File(name);
-                        File outFile  = new File(efile, file.getName());
+                        
+                        String outFileName = name.substring(location.length());
+                        File outFile  = new File(efile, outFileName);
                         outFile.getParentFile().mkdirs();
                         out =  new BufferedOutputStream(new FileOutputStream(outFile));
                         FileUtils.write(in, out);
@@ -206,6 +207,10 @@ public class TestUtils {
                 }
             };
         }
+    }
+    
+    public static void main(String[] args) throws IOException {
+        System.out.println(TestUtils.extractResourceDirectory("com/google/inject"));
     }
 
 }
