@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.Assert;
+
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -37,17 +39,15 @@ import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
-@SuppressWarnings("deprecation")
 public class LimeTestUtils {
     
-    public static File getDirWithComLimegroupGnutellaClasses() {
-        File file = TestUtils.getResourceFile("com/limegroup/gnutella/LimeTestUtils.class");   
-        return file.getParentFile(); 
-    }
-
-    public static void setActivityCallBack(ActivityCallback cb)
-            throws Exception {
-        throw new RuntimeException("fix me");
+    /** Returns a directory that has a bunch of files. */
+    public static File getDirectoryWithLotsOfFiles() {
+        File file = TestUtils.getResourceFile("com/limegroup/gnutella/LimeTestUtils.class");
+        Assert.assertTrue(file.exists());
+        File parent = file.getParentFile();
+        Assert.assertTrue(parent.exists());
+        return parent;
     }
 
     public static void readBytes(InputStream in, long count) throws IOException {

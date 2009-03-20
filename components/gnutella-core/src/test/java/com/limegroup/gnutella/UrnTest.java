@@ -7,7 +7,6 @@ import java.util.Locale;
 import junit.framework.Test;
 
 import org.limewire.io.GUID;
-import org.limewire.util.TestUtils;
 
 
 /**
@@ -172,9 +171,8 @@ public final class UrnTest extends com.limegroup.gnutella.util.LimeTestCase {
 			}
 		}
 
-		_testDir = TestUtils.getResourceFile("com/limegroup/gnutella");
-		assertTrue("should have been able to initialize gnutella dir", 
-				   _testDir.isDirectory());
+		_testDir = LimeTestUtils.getDirectoryWithLotsOfFiles();
+		assertTrue("should have been able to initialize gnutella dir", _testDir.isDirectory());
 		File[] files = _testDir.listFiles();
 		assertNotNull("test directory should contain files", files);
 		assertGreaterThan("should have more than 10 files: "+_testDir, 10, files.length);

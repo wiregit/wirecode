@@ -82,7 +82,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
      * Tests the FileDesc construcotor for valid arguments
      */
     public void testValidConstructorArguments() throws Exception {
-        File parent = new File(getCoreDir(), "com/limegroup/gnutella");
+        File parent = LimeTestUtils.getDirectoryWithLotsOfFiles();
         File[] allFiles = parent.listFiles(); 
         List fileList = new ArrayList(); 
         for(int i=0; i<allFiles.length; i++) { 

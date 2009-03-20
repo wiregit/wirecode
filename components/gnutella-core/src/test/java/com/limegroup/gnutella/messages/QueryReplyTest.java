@@ -1485,7 +1485,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
     private void addFilesToLibrary() throws Exception {
         FileManager fileManager = injector.getInstance(FileManager.class);
-        File testDir = LimeTestUtils.getDirWithComLimegroupGnutellaClasses();
+        File testDir = LimeTestUtils.getDirectoryWithLotsOfFiles();
         testDir = testDir.getCanonicalFile();
         assertTrue("could not find the gnutella directory", testDir.isDirectory());
 

@@ -88,7 +88,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         FileManagerTestUtils.waitForLoad(fileManager, 5000);
         
-        File dir = LimeTestUtils.getDirWithComLimegroupGnutellaClasses();
+        File dir = LimeTestUtils.getDirectoryWithLotsOfFiles();
         File[] testFiles = dir.listFiles(new FileFilter() {
             public boolean accept(File file) {
                 return !file.isDirectory() && (file.getName().endsWith(".class"));

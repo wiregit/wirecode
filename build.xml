@@ -2,8 +2,10 @@
 <project name="limewire" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="limewire.home" location="${basedir}"/>
-    <property name="includes" value="components/*/build.xml, private-components/*/build.xml"/>
-    
+    <property name="includes" value="components/*/build.xml, private-components/*/build.xml"/>	
+	<property name="cloverdb-excludes" value="private-components/mock-core/clover/*"/>
+	<property name="cloverdb-includes" value="components/*/clover/clover.db, private-components/*/clover/clover.db"/>
+	
     <import file="components/common/generic-multi-build.xml"/>
     
     <!-- runs all tests except those in gnutella-core. -->

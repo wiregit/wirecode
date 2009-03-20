@@ -736,9 +736,9 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
 
-        File winInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
-        File linInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/UrnSetTest.java");
-        File osxInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
+        File winInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/Backend.class");
+        File linInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/UrnSetTest.class");
+        File osxInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/UrnTest.class");
 
         //  Gotta make use of the force-share folder for this test
         if( LibraryUtils.PROGRAM_SHARE.exists() ) {

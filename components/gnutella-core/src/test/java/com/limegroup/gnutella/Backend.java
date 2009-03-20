@@ -426,8 +426,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
      * Creates a temporary shared directory for testing purposes.
      */
     private void populateSharedDirectory(FileManager fileManager) {
-        File coreDir;
-        coreDir = TestUtils.getResourceFile("com/limegroup/gnutella");
+        File coreDir = LimeTestUtils.getDirectoryWithLotsOfFiles();
         File[] files = coreDir.listFiles();
 
         if (files != null) {

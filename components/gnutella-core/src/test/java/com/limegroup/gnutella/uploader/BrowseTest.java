@@ -78,7 +78,7 @@ public class BrowseTest extends LimeTestCase {
         client = injector.getInstance(LimeHttpClient.class);
         
         FileManagerTestUtils.waitForLoad(fileManager,2000);
-        File shareDir = LimeTestUtils.getDirWithComLimegroupGnutellaClasses();
+        File shareDir = LimeTestUtils.getDirectoryWithLotsOfFiles();
         File[] testFiles = shareDir.listFiles(new FileFilter() {
             public boolean accept(File file) {
                 return !file.isDirectory() && file.getName().endsWith(".class");

@@ -16,11 +16,14 @@
     <property name="clover.aggregateHome" value="${basedir}/clover"/>
     <property name="clover.aggregateDb"   value="${clover.aggregateHome}/clover-aggregate.db"/> 
     <property name="clover.aggregateHtml" value="${clover.aggregateHome}/clover-aggregateHtml"/> 
-    <property name="clover.aggregateXml"  value="${clover.aggregateHome}/clover-aggregate.xml"/> 
+    <property name="clover.aggregateXml"  value="${clover.aggregateHome}/clover-aggregate.xml"/>
+	
+	<property name="cloverdb-excludes" value="${excludes}"/>
+	<property name="cloverdb-includes" value="**/clover/clover.db"/>
        
     <!-- the location that clover assumes test sources are located at. 
          if this needs to be changed, it must be redefined after importing this file. -->
-    <fileset id="clover.testsources" dir="${basedir}" includes="**/src/test/**"/>
+    <fileset id="clover.testsources" dir="${basedir}" includes="**/src/test/**, **/src/test-common/**"/>
     
     <!-- the location where antcontrib is at, for use with the 'if' task. -->
     <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${limewire.lib.jars.ant}/ant-contrib-1.0b3.jar"/>
@@ -99,14 +102,13 @@
     
     <target name="clover2html" depends="initialize, clover-guard">
         <do.multi-ant target="clover2html"/>
-	</target>	
+	</target>
 	
     <target name="aggregate.clover2html" depends="initialize, clean-aggregate-clover, clover-guard">
 	    <taskdef resource="cloverlib.xml"/>
-	    <!-- delete existing merged db, then merge all the clover dbs together -->
 	    <mkdir dir="${clover.aggregateHome}"/>
 	    <clover-merge initstring="${clover.aggregateDb}">
-	        <cloverDbSet dir="${basedir}" excludes="${excludes}" includes="**/clover/clover.db"/>
+	        <cloverDbSet dir="${basedir}" excludes="${cloverdb-excludes}" includes="${cloverdb-includes}"/>
 	    </clover-merge>
         <tstamp>
             <format property="clover.time" pattern="EEE, MMM d, yyyy hh:mm a"/>
