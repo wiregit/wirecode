@@ -94,6 +94,7 @@ public class TorrentFile extends File {
 
     /**
      * Returns the path to the torrent in the torrent file system.
+     * This path is always returned as a unix based path. path/to/file
      */
     public String getTorrentPath() {
         return torrentPath;
