@@ -248,6 +248,9 @@ public final class SwingUiSettings extends LimeProps {
     public static final BooleanSetting HAS_LOGGED_IN_AND_SHOWN_LIBRARY =
         FACTORY.createBooleanSetting("HAS_LOGGED_IN_AND_SHOWN_LIBRARY", false);
 
+    /** Setting for whether or not to resolve hostnames in Advanced Tools */
+    public static final BooleanSetting RESOLVE_CONNECTION_HOSTNAMES =
+        FACTORY.createBooleanSetting("RESOLVE_CONNECTION_HOSTNAMES", true);
 
     /**
      * Returns the default directory for the file chooser.
