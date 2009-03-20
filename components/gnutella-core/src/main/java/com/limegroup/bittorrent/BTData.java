@@ -27,6 +27,13 @@ public interface BTData {
             return length;
         }
     
+        /**
+         * Returns the path to the file relative to the root 
+         * directory of the torrent in unix form. This form work for
+         * appending the path to urls.
+         * 
+         *  path/to/file instead of path\to\file
+         */
         public String getPath() {
             return path;
         }

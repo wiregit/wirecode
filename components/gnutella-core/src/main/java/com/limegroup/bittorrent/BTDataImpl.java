@@ -1,7 +1,6 @@
 package com.limegroup.bittorrent;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-
 import org.limewire.logging.LogFactory;
 import org.limewire.security.SHA1;
 import org.limewire.service.ErrorService;
@@ -242,7 +240,8 @@ public class BTDataImpl implements BTData {
             if (current.length() == 0)
             	throw new ValueException("empty path element");
             
-            sb.append(File.separator);
+            //using unix path style so path can be appended to urls
+            sb.append("/");
             sb.append(CommonUtils.convertFileName(current));
             // if another path, this is a subfolder, so add it to folders
             if(i.hasNext())
