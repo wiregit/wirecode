@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.playlist;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.JPopupMenu;
@@ -13,6 +14,7 @@ import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.menu.actions.LocateFileAction;
 import org.limewire.ui.swing.library.table.menu.actions.PlayAction;
 import org.limewire.ui.swing.library.table.menu.actions.ViewFileInfoAction;
+import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.I18n;
 
@@ -93,8 +95,12 @@ public class PlaylistPopupMenu extends JPopupMenu {
 
         @Override
         public void actionPerformed(ActionEvent arg0) {
+            File songFile = PlayerUtils.getCurrentSongFile();
             for (LocalFileItem fileItem : fileItemList) {
                 playlist.removeFile(fileItem.getFile());
+                if (fileItem.getFile().equals(songFile)){
+                    PlayerUtils.stop();
+                }
             }
         }
     }

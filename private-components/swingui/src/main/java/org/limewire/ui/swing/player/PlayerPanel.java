@@ -497,6 +497,9 @@ public class PlayerPanel extends JXPanel {
             if (player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY){
                 playButton.setVisible(false);
                 pauseButton.setVisible(true);
+            } else if(player.getStatus() == PlayerState.STOPPED){
+                innerPanel.setVisible(false);
+                titleLabel.stop();
             } else {
                 playButton.setVisible(true);
                 pauseButton.setVisible(false);
