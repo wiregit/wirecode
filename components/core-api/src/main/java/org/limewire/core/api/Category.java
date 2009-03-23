@@ -7,7 +7,7 @@ import org.limewire.i18n.I18nMarker;
 
 
 /**
- * Represents a category for the various file types. 
+ * Represents a category for the various file types represented in the application. 
  */
 public enum Category {
 
