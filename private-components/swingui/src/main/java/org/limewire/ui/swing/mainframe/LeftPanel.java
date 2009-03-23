@@ -32,7 +32,7 @@ public class LeftPanel extends JXPanel implements VisibleComponent {
         setLayout(new MigLayout("insets 0, fill, gap 0"));
         JXPanel libraryNav = libraryNavigator.getComponent();
         libraryNav.setName("LeftPanel.contents");
-        add(libraryNav, "grow");
+        add(libraryNav, "top, grow");
 
         Line line = Line.createVerticalLine();
         line.setName("LeftPanel.rightBorder");
