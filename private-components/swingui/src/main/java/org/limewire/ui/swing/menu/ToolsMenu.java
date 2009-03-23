@@ -30,6 +30,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class ToolsMenu extends MnemonicMenu {
 
+    private AdvancedToolsPanel advancedTools;
+    
     @Inject
     public ToolsMenu(final Provider<AdvancedToolsPanel> advancedProvider,
             final Navigator navigator,
@@ -75,7 +77,8 @@ public class ToolsMenu extends MnemonicMenu {
         add(new AbstractAction(I18n.tr("&Advanced Tools...")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AdvancedToolsPanel advancedTools = advancedProvider.get();
+                if(advancedTools == null)
+                    advancedTools = advancedProvider.get();
                 advancedTools.display();
             }
         });

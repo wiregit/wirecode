@@ -38,13 +38,11 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 
 /**
  * Main content panel for the Advanced Tools window.  The window is displayed
  * by calling the <code>display(TabId)</code> method. 
  */
-@Singleton
 public class AdvancedToolsPanel extends JPanel {
     /** Defines the tab identifiers for the window. */
     public enum TabId {
