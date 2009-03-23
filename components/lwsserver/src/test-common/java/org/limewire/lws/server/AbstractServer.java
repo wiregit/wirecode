@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.lws.server;
+package org.limewire.lws.server;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -15,10 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
-import org.limewire.lws.server.LWSDispatcher;
-import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.lws.server.LWSServerUtil;
-import org.limewire.lws.server.StringCallback;
 import org.limewire.service.ErrorService;
 import org.limewire.util.StringUtils;
 
@@ -109,6 +105,7 @@ public abstract class AbstractServer implements Runnable  {
                 handle(e, getClass() + " on port " + port);
             }
         }   
+        getDispatcher().deauthenticate();
         runner = null;
     }    
     
