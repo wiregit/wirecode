@@ -79,8 +79,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
     /** Listener to handle search request events. */
     private SearchListener searchListener;
 
-    /** Current sorted list of filtered results. */
+    /** Current list of sorted and filtered results. */
     private SortedList<VisualSearchResult> sortedResultList;
+
+    /** Current list of visible, sorted and filtered results. */
+    private FilterList<VisualSearchResult> visibleResultList;
 
     /** Current selected search category. */
     private SearchCategory selectedCategory;
@@ -208,11 +211,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
 
     /**
      * Returns a list of sorted and filtered results for the selected search
-     * category and sort option.
+     * category and sort option.  Only visible results are included in the list.
      */
     @Override
     public EventList<VisualSearchResult> getSortedSearchResults() {
-        return sortedResultList;
+        return visibleResultList;
     }
 
     /**
@@ -231,13 +234,15 @@ class BasicSearchResultsModel implements SearchResultsModel {
     public void setSelectedCategory(SearchCategory selectedCategory) {
         if (this.selectedCategory != selectedCategory) {
             this.selectedCategory = selectedCategory;
-            // Dispose of existing sorted list.
-            if (sortedResultList != null) {
+            // Dispose of existing visible and sorted lists.
+            if (visibleResultList != null) {
+                visibleResultList.dispose();
                 sortedResultList.dispose();
             }
-            // Update sorted list.
+            // Update visible and sorted lists.
             EventList<VisualSearchResult> filteredList = getCategorySearchResults(selectedCategory);
             sortedResultList = GlazedListsFactory.sortedList(filteredList, null);
+            visibleResultList = GlazedListsFactory.filterList(sortedResultList, new VisibleMatcher());
             sortedResultList.setComparator((sortOption != null) ? SortFactory.getSortComparator(sortOption) : null);
         }
     }
@@ -351,6 +356,16 @@ class BasicSearchResultsModel implements SearchResultsModel {
         @Override
         public boolean matches(VisualSearchResult vsr) {
             return (vsr.getCategory() == category);
+        }
+    }
+
+    /**
+     * A matcher used to filter visible search results. 
+     */
+    private static class VisibleMatcher implements Matcher<VisualSearchResult> {
+        @Override
+        public boolean matches(VisualSearchResult item) {
+            return item.isVisible();
         }
     }
     

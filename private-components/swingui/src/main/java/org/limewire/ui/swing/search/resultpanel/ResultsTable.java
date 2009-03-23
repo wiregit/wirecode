@@ -7,7 +7,6 @@ import java.util.List;
 import javax.swing.JPopupMenu;
 import javax.swing.table.JTableHeader;
 
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.RowPresevationListener;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -35,7 +34,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  * </ul> 
  */
 public class ResultsTable<E extends VisualSearchResult> extends MouseableTable 
-    implements Disposable, RowPresevationListener {
+    implements RowPresevationListener {
 
     private final List<E> selectedRows = new ArrayList<E>();
 
@@ -166,22 +165,6 @@ public class ResultsTable<E extends VisualSearchResult> extends MouseableTable
         }
     }
 
-    /**
-     * Disposes of resources used by the table.
-     */
-    @Override
-    public void dispose() {
-        if (tableModel != null) {
-            tableModel.dispose();
-            // Set reference to null to discourage further use until a new 
-            // event list and table model is set.
-            tableModel = null;
-        }
-        if (eventList instanceof TransformedList) {
-            ((TransformedList) eventList).dispose();
-        }
-    }
-    
     /**
      * Handles event to save the currently selected list elements.
      */
