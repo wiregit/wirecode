@@ -11,7 +11,8 @@ public enum DownloadState {
 	CANCELLED( false, false), 
 	STALLED( false, false),
 	TRYING_AGAIN( true, false),
-	ERROR( false, false);
+	ERROR( false, false),
+	RESUMING(false, false);
 
 	private final boolean pausable;
 	private final boolean resumable;

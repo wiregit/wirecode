@@ -196,6 +196,8 @@ class CoreDownloadItem implements DownloadItem {
     
     private DownloadState convertState(com.limegroup.gnutella.Downloader.DownloadState state) {
         switch (state) {
+        case RESUMING:
+                return DownloadState.RESUMING;
         case SAVING:
         case HASHING:
             if (getTotalSize() > finishingThreshold) {
@@ -210,7 +212,6 @@ class CoreDownloadItem implements DownloadItem {
 
         
         case CONNECTING:
-        case RESUMING:
         case INITIALIZING:
         case WAITING_FOR_CONNECTIONS:
             return DownloadState.CONNECTING;

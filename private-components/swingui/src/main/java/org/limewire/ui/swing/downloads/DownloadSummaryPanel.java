@@ -582,23 +582,20 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                 return;
             }
             
+            DownloadState state = item.getState();
+            
             nameLabel.setText(item.getTitle());
-            progressBar.setVisible(item.getState() == DownloadState.DOWNLOADING || item.getState() == DownloadState.PAUSED);
+            progressBar.setVisible(state == DownloadState.DOWNLOADING || state == DownloadState.PAUSED);
             if (progressBar.isVisible()) { 
-                if (item.getTotalSize() != 0) {
-                    progressBar.setValue((int)(100 * item.getCurrentSize() / item.getTotalSize()));
-                } 
-                else {
-                    progressBar.setValue(0);
-                }
-                progressBar.setEnabled(item.getState() == DownloadState.DOWNLOADING);
+                progressBar.setValue(item.getPercentComplete());
+                progressBar.setEnabled(state == DownloadState.DOWNLOADING);
             }
             
-            pauseButton.setVisible(item.getState() == DownloadState.DOWNLOADING);
-            resumeButton.setVisible(item.getState() == DownloadState.PAUSED);
-            tryAgainButton.setVisible(item.getState() == DownloadState.STALLED);
-            launchButton.setVisible(item.isLaunchable() && item.getState() == DownloadState.DONE);
-            cancelButton.setVisible(item.getState() == DownloadState.ERROR);
+            pauseButton.setVisible(state == DownloadState.DOWNLOADING);
+            resumeButton.setVisible(state == DownloadState.PAUSED);
+            tryAgainButton.setVisible(state == DownloadState.STALLED);
+            launchButton.setVisible(item.isLaunchable() && state == DownloadState.DONE);
+            cancelButton.setVisible(state == DownloadState.ERROR);
             
             if(tryAgainButton.isVisible()) {
                 if(item.isSearchAgainEnabled()) {
@@ -608,29 +605,32 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                 }
             }
             
-            statusLabel.setVisible(item.getState() != DownloadState.DOWNLOADING && item.getState() != DownloadState.PAUSED);
+            statusLabel.setVisible(state != DownloadState.DOWNLOADING && state != DownloadState.PAUSED && state != DownloadState.RESUMING);
             if (statusLabel.isVisible()){
-                statusLabel.setText(getMessage(item));
-                if(item.getState() == DownloadState.ERROR || item.getState() == DownloadState.STALLED){
+                statusLabel.setText(getMessage(state, item));
+                if(state == DownloadState.ERROR || state == DownloadState.STALLED){
                     statusLabel.setForeground(orangeForeground);
                 } else {
                     statusLabel.setForeground(grayForeground);
                 }
             }            
             
-            if(item.getState() == DownloadState.PAUSED){
+            if(state == DownloadState.PAUSED){
                 timeLabel.setVisible(true);
                 timeLabel.setText(I18n.tr("Paused at {0}%", item.getPercentComplete()));
-            } else if(item.getState() == DownloadState.DOWNLOADING && item.getRemainingDownloadTime() < Long.MAX_VALUE-1000) {
+            } else if(state == DownloadState.DOWNLOADING && item.getRemainingDownloadTime() < Long.MAX_VALUE-1000) {
                 timeLabel.setVisible(true);
                 timeLabel.setText(I18n.tr("{0}% - {1} left", item.getPercentComplete(), CommonUtils.seconds2time(item.getRemainingDownloadTime())));
+            } else if(state == DownloadState.RESUMING) {
+                timeLabel.setVisible(true);
+                timeLabel.setText(I18n.tr("Resuming at {0}%", item.getPercentComplete()));
             } else {
                 timeLabel.setVisible(false);
             }
         }
         
-        private String getMessage(DownloadItem item) {
-            switch (item.getState()) {
+        private String getMessage(DownloadState downloadState, DownloadItem item) {
+            switch (downloadState) {
             case CANCELLED:
                 return I18n.tr("Cancelled");
             case FINISHING:
