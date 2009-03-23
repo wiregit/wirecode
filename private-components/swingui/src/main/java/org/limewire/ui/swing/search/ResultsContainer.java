@@ -8,7 +8,6 @@ import javax.swing.Scrollable;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanelFactory;
@@ -23,7 +22,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * 
  * @see org.limewire.ui.swing.search.SearchResultsPanel
  */
-public class ResultsContainer extends JXPanel implements Disposable {
+public class ResultsContainer extends JXPanel {
 
     /** Category results panel currently displayed. */
     private BaseResultPanel currentPanel;
@@ -56,14 +55,6 @@ public class ResultsContainer extends JXPanel implements Disposable {
         add(currentPanel, BorderLayout.CENTER);
     }
 
-    /**
-     * Disposes of resources used by the container.
-     */
-    @Override
-    public void dispose() {
-        currentPanel.dispose();
-    }
-    
     /**
      * Installs a listener on the list of search results to update the result
      * count for the specified search category and tab action.  The result
