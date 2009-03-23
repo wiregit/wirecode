@@ -10,6 +10,10 @@ import org.limewire.collection.BitField;
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMetaInfo;
 
+/**
+ * Finds a random gap in the available blocks and picks up to
+ * 10 of the available pieces to download.
+ */
 public class RandomGapStrategy extends RandomPieceStrategy {
     private int max = 10;
 
