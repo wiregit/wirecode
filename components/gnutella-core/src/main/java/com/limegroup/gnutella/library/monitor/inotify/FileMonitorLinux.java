@@ -75,7 +75,7 @@ public class FileMonitorLinux {
                 }
 
                 int consumed = 0;
-                while (consumed < (int) count) {
+                while (consumed < count) {
                     INotifyEvent iNotifyEvent = new INotifyEvent();
                     int len = iNotifyEvent.readStruct(p, consumed, watchDescriptorFiles);
                     consumed += len;
