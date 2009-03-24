@@ -109,6 +109,9 @@ public enum INotifyEventMask {
      */
     IN_MASK_ADD(0x20000000),
 
+    /**
+     * Mask that is the super set of all known events.
+     */
     ALL_EVENTS(IN_ACCESS.value | IN_MOVED_FROM.value | IN_OPEN.value | IN_MOVED_TO.value
             | IN_DELETE.value | IN_CREATE.value | IN_DELETE_SELF.value | IN_CLOSE_WRITE.value
             | IN_CLOSE_NOWRITE.value | IN_MODIFY.value | IN_ATTRIB.value | IN_MOVE_SELF.value);

@@ -120,24 +120,24 @@ class NaiveKQueueFileMonitor {
                                 .printStackTrace();
                         throw new RuntimeException("kevent call returned negative value !");
                     } else if (nev > 0) {
-                        if ((resultEvent.fflags & CLibrary.NOTE_DELETE) != 0) {
+                        if (KQueueEventMask.NOTE_DELETE.isSet(resultEvent.fflags)) {
                             // TODO broadcast this asynchronously
                             listeners.broadcast(new KQueueEvent(KQueueEventType.DELETE, file
                                     .getPath()));
                             break;
                         }
-                        if ((resultEvent.fflags & CLibrary.NOTE_RENAME) != 0) {
+                        if (KQueueEventMask.NOTE_RENAME.isSet(resultEvent.fflags)) {
                             // TODO broadcast this asynchronously
                             listeners.broadcast(new KQueueEvent(KQueueEventType.RENAME, file
                                     .getPath()));
                         }
-                        if ((resultEvent.fflags & CLibrary.NOTE_EXTEND) != 0
-                                || (resultEvent.fflags & CLibrary.NOTE_WRITE) != 0) {
+                        if (KQueueEventMask.NOTE_EXTEND.isSet(resultEvent.fflags)
+                                || KQueueEventMask.NOTE_WRITE.isSet(resultEvent.fflags)) {
                             // TODO broadcast this asynchronously
                             listeners.broadcast(new KQueueEvent(KQueueEventType.FILE_SIZE_CHANGED,
                                     file.getPath()));
                         }
-                        if ((resultEvent.fflags & CLibrary.NOTE_ATTRIB) != 0) {
+                        if (KQueueEventMask.NOTE_ATTRIB.isSet(resultEvent.fflags)) {
                             // TODO broadcast this asynchronously
                             listeners.broadcast(new KQueueEvent(
                                     KQueueEventType.FILE_ATTRIBUTES_CHANGED, file.getPath()));
