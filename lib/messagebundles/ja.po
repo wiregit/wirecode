@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-16 11:30-0400\n"
-"PO-Revision-Date: 2009-03-02 16:00+0000\n"
+"POT-Creation-Date: 2009-03-18 11:30-0400\n"
+"PO-Revision-Date: 2009-03-22 19:40+0000\n"
 "Last-Translator: narumi03 <Unknown>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2009-03-17 03:32+0000\n"
+"X-Launchpad-Export-Date: 2009-03-24 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Language: Japanese\n"
 "X-Poedit-SourceCharset: utf-8\n"
@@ -319,7 +319,7 @@ msgstr "ピアの場所"
 msgid "Core Glue"
 msgstr "コア・グルー"
 
-#: core/com/limegroup/gnutella/MessageRouterImpl.java:553
+#: core/com/limegroup/gnutella/MessageRouterImpl.java:554
 msgid "Message Routing"
 msgstr "メッセージルーティング"
 
@@ -378,7 +378,7 @@ msgstr "クリエイティブ・コモンズ"
 msgid "Mojito DHT"
 msgstr ""
 
-#: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:562
+#: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:519
 msgid "LimeWire Store Integration"
 msgstr "統合を保存します"
 
@@ -725,15 +725,15 @@ msgstr "プラットホーム"
 msgid "Metadata Loader"
 msgstr "メタデータローダー"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:377
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:379
 msgid "Oops!"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:377
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:379
 msgid "A problem occurred..."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:400
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, but please click 'Send Bug' to "
@@ -741,20 +741,20 @@ msgid ""
 "the information that will be sent. Thanks!"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:404
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:410
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To continue using LimeWire, close "
@@ -762,33 +762,33 @@ msgid ""
 "about the error."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:446
 msgid "Tell us what you were doing before LimeWire ran into this problem."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:473
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:481
 msgid "Show Bug"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:483
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:485
 msgid "Hide Bug"
 msgstr ""
 
 #. the "always use this answer" checkbox
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:492
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:494
 msgid "Send bugs without asking me in the future"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:495
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:497
 msgid "Send Bug"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:569
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:571
 msgid "Internal Error"
 msgstr "内部エラー"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:578
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:580
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -798,11 +798,11 @@ msgstr ""
 "のバグサーバーに接続できませんでした。LimeWireのバグ修正のためにエラーをコピーしてbugs@limewire.comまで電子メールで送信してくださ"
 "い。ありがとうがざいます。"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:607
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:609
 msgid "Copy Report"
 msgstr "リポートをコピーする"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:615
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:617
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:214
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
@@ -946,11 +946,11 @@ msgstr "貼り付け"
 msgid "Select All"
 msgstr "すべてを選択する"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:45
 msgid "&Available"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:68
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:64
 msgid "&Do Not Disturb"
 msgstr ""
 
@@ -961,7 +961,7 @@ msgstr "接続"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 msgid "View connections to other P2P clients"
-msgstr ""
+msgstr "他のP2Pクライアントへの接続を表示"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "Console"
@@ -969,7 +969,7 @@ msgstr "コンソール"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "View console messages"
-msgstr ""
+msgstr "コンソールメッセージを表示"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "Mojito"
@@ -977,7 +977,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "View incoming and outgoing DHT messages"
-msgstr ""
+msgstr "出入DHTメッセージを表示"
 
 #. * Identifier for Advanced Tools window.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:73
@@ -1061,11 +1061,11 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:47
 msgid "You are behind a firewall and support firewall transfers"
-msgstr ""
+msgstr "あなたはファイアウォールの後にいて、ファイアウォール移動を支持します"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:48
 msgid "You are behind a firewall and do not support firewall transfers"
-msgstr ""
+msgstr "あなたはファイアウォールの後にいて、ファイアウォール移動を支持しません"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:49
 msgid "why"
@@ -1376,7 +1376,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:260
 msgid "Show all"
-msgstr ""
+msgstr "すべてを示してください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:267
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadPanel.java:43
@@ -1403,7 +1403,7 @@ msgstr "起動する"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:605
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:428
 msgid "Search Again"
-msgstr ""
+msgstr "もう一度捜してください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:607
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:69
@@ -2194,7 +2194,7 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:410
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:343
 msgid "Currently sharing with"
 msgstr "次の人と現在共有中です"
 
@@ -2202,15 +2202,15 @@ msgstr "次の人と現在共有中です"
 msgid "Share one file"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:111
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:110
 msgid "Start typing a friend's name"
 msgstr "友人の名前を入力してください"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:112
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:111
 msgid "Add another friend"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:306
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:305
 msgid "Share with the P2P Nework"
 msgstr ""
 
@@ -2852,7 +2852,7 @@ msgstr "P2PネットワークからダウンロードしたファイルをP2Pネ
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:107
 msgid "Add audio files I downloaded from LimeWire to iTunes"
-msgstr ""
+msgstr "私がLimeWireからiTunesまでダウンロードしたオーディオファイルを加えてください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:112
 msgid "Save downloads to:"
@@ -2883,7 +2883,7 @@ msgstr "拡張名が不正です。追加できませんでした。"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:127
 msgid "File Extensions"
-msgstr ""
+msgstr "ファイル拡張子"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:132
 msgid "Manage File Extensions"
@@ -3381,7 +3381,7 @@ msgstr "友人からのファイルを提案"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:114
 msgid "Remember my recent searches"
-msgstr ""
+msgstr "私の最近の検索を忘れないでください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:117
 msgid "Clear Now"
@@ -3394,7 +3394,7 @@ msgstr "警告メッセージ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 msgid "Settings..."
-msgstr ""
+msgstr "設定..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 msgid "Choose which warning messags to display"
@@ -3486,7 +3486,7 @@ msgstr ".magnet拡張子のファイル"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:138
 msgid "Warn me when other programs want to automatically open these types"
-msgstr ""
+msgstr "他のプログラムが自動的にこれらのタイプを開けたいとき、私に警告してください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:236
 msgid "Startup and Shutdown"
@@ -3510,19 +3510,19 @@ msgstr "Xを押した場合："
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:308
 msgid "Bugs"
-msgstr ""
+msgstr "バグ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:311
 msgid "Let me know about bugs before sending them"
-msgstr ""
+msgstr "彼らを送る前にバグを知らせてください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
 msgid "Always send bugs to Lime Wire"
-msgstr ""
+msgstr "常に、ライムワイヤーにバグを送ってください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
 msgid "Never send bugs to Lime Wire"
-msgstr ""
+msgstr "ライムワイヤーにバグを決して送らないでください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:30
 msgid ""
@@ -3550,7 +3550,7 @@ msgstr "ライセンスのないファイルがダウンロードされた場合
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/WarningMessagesOptionPanel.java:34
 msgid ""
 "Warn me when I cancel uploading a torrent that has not completely seeded"
-msgstr ""
+msgstr "私が完全に実を結ばなかったtorrentをアップロードすることをキャンセルするとき、私に警告してください"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/WarningMessagesOptionPanel.java:41
 msgid "Choose which warning messages you'd like to see:"
@@ -3750,7 +3750,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:426
 msgid "You might not receive many results until LimeWire finishes loading..."
-msgstr ""
+msgstr "LimeWireが荷重を終えるまで、あなたは多くの結果を受けないかもしれません..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:63
 msgid "All"
@@ -3806,7 +3806,7 @@ msgstr "分類方法："
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:101
 msgid "Refine results..."
-msgstr ""
+msgstr "結果を純化してください..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:196
 msgid "List view"

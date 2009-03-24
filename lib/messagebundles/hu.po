@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-16 11:30-0400\n"
+"POT-Creation-Date: 2009-03-18 11:30-0400\n"
 "PO-Revision-Date: 2009-03-11 20:24+0000\n"
 "Last-Translator: hernyo05 <hernyo05@hotmail.com>\n"
 "Language-Team: none\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-03-17 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-03-24 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -338,7 +338,7 @@ msgstr "Peer-érzékelő"
 msgid "Core Glue"
 msgstr "Mag kötés"
 
-#: core/com/limegroup/gnutella/MessageRouterImpl.java:553
+#: core/com/limegroup/gnutella/MessageRouterImpl.java:554
 msgid "Message Routing"
 msgstr "Tömeges Üzenet"
 
@@ -400,7 +400,7 @@ msgstr "Kreatív Közösség"
 msgid "Mojito DHT"
 msgstr "Mojito DHT"
 
-#: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:562
+#: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:519
 msgid "LimeWire Store Integration"
 msgstr "LimeWare áruház beillesztése"
 
@@ -747,15 +747,15 @@ msgstr "Felület"
 msgid "Metadata Loader"
 msgstr "Információk betöltése"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:377
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:379
 msgid "Oops!"
 msgstr "Hiba"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:377
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:379
 msgid "A problem occurred..."
 msgstr "Probléma merült fel..."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:400
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, but please click 'Send Bug' to "
@@ -765,7 +765,7 @@ msgstr ""
 "Valami olyasmi történt, amit mi még nem fejlesztettünk ki. Kattints a 'Send "
 "Bug - Ötlet' gombra, hogy ötleteiddel segítsd a program továbbfejlesztését!"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:404
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
@@ -774,14 +774,14 @@ msgstr ""
 "Valami hiba történt. Kattints a 'Show Bug - Hibaüzenet megtekintése' gombra, "
 "hogy megtudd, mi történt."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
 "Bocs, fellépett egy probléma. Küldj egy hibaüzenetet, hogy kijavíthassuk!"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:410
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To continue using LimeWire, close "
@@ -789,33 +789,33 @@ msgid ""
 "about the error."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:446
 msgid "Tell us what you were doing before LimeWire ran into this problem."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:473
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:481
 msgid "Show Bug"
 msgstr "Hibaüzenet megtekintése"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:483
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:485
 msgid "Hide Bug"
 msgstr ""
 
 #. the "always use this answer" checkbox
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:492
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:494
 msgid "Send bugs without asking me in the future"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:495
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:497
 msgid "Send Bug"
 msgstr "Ötlet küldése"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:569
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:571
 msgid "Internal Error"
 msgstr "Belső hiba"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:578
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:580
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -825,11 +825,11 @@ msgstr ""
 "végett. További segítséghez látogasd meg a www.limewire.com-ot, és kattints "
 "a 'Support' (Támogatás) linkre. Köszönjük."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:607
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:609
 msgid "Copy Report"
 msgstr "Jelentés másolása"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:615
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:617
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:214
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
@@ -981,11 +981,11 @@ msgstr "Beillesztés"
 msgid "Select All"
 msgstr "Összes kiválasztása"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:45
 msgid "&Available"
 msgstr "Elérhető"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:68
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:64
 msgid "&Do Not Disturb"
 msgstr ""
 
@@ -2231,7 +2231,7 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:410
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:343
 msgid "Currently sharing with"
 msgstr ""
 
@@ -2239,15 +2239,15 @@ msgstr ""
 msgid "Share one file"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:111
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:110
 msgid "Start typing a friend's name"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:112
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:111
 msgid "Add another friend"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:306
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:305
 msgid "Share with the P2P Nework"
 msgstr ""
 

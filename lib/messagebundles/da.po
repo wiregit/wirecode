@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-16 11:30-0400\n"
-"PO-Revision-Date: 2009-03-14 12:32+0000\n"
+"POT-Creation-Date: 2009-03-18 11:30-0400\n"
+"PO-Revision-Date: 2009-03-22 16:50+0000\n"
 "Last-Translator: nanker <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-03-17 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-03-24 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -341,7 +341,7 @@ msgstr "Peer lokalisering"
 msgid "Core Glue"
 msgstr "Core Glue"
 
-#: core/com/limegroup/gnutella/MessageRouterImpl.java:553
+#: core/com/limegroup/gnutella/MessageRouterImpl.java:554
 msgid "Message Routing"
 msgstr "Meddelelseshåndtering"
 
@@ -400,7 +400,7 @@ msgstr "Creative Commons"
 msgid "Mojito DHT"
 msgstr "Mojito DHT"
 
-#: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:562
+#: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:519
 msgid "LimeWire Store Integration"
 msgstr "LimeWire butiks integration"
 
@@ -747,15 +747,15 @@ msgstr "Platform"
 msgid "Metadata Loader"
 msgstr "Metadata indlæser"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:377
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:379
 msgid "Oops!"
 msgstr "Hovsa!"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:377
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:379
 msgid "A problem occurred..."
 msgstr "Et problem opstod..."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:400
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, but please click 'Send Bug' to "
@@ -767,7 +767,7 @@ msgstr ""
 "kan forbedre programmet. Klik 'Vis fejl' for at se hvad der sendes. Tak for "
 "hjælpen!"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:404
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
@@ -777,7 +777,7 @@ msgstr ""
 "beklager. LimeWire kører stadig fint så der er ingen grund til bekymring.  "
 "Klik på 'Vis fejl' for at se information om fejlen."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
@@ -785,7 +785,7 @@ msgstr ""
 "Beklager, LimeWire løb ind i et problem. LimeWire kører stadig fint, men du "
 "bør sende fejlen til os, så vi kan udbedre den."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:410
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To continue using LimeWire, close "
@@ -796,33 +796,33 @@ msgstr ""
 "og køre som normalt. For at fortsætte brugen skal du lukke dette vidue. Klik "
 "på 'Vis fejl' hvis du vil se information om fejlen."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:446
 msgid "Tell us what you were doing before LimeWire ran into this problem."
 msgstr "Fortæl os hvad du gjorde før LimeWire fik dette problem."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:473
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:481
 msgid "Show Bug"
 msgstr "Vis fejl."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:483
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:485
 msgid "Hide Bug"
 msgstr "Skjul fejl."
 
 #. the "always use this answer" checkbox
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:492
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:494
 msgid "Send bugs without asking me in the future"
 msgstr "Raporter fejl uden at informere mig i fremtiden."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:495
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:497
 msgid "Send Bug"
 msgstr "Send bug"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:569
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:571
 msgid "Internal Error"
 msgstr "Intern fejl"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:578
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:580
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -832,11 +832,11 @@ msgstr ""
 "nedenstående fejlrapport. Du kan få mere hjælp til fejlfinding ved at klikke "
 "'Support' på www.limewire.com. Tak for hjælpen."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:607
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:609
 msgid "Copy Report"
 msgstr "Kopier rapport"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:615
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:617
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:214
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
@@ -988,11 +988,11 @@ msgstr "Indsæt"
 msgid "Select All"
 msgstr "Vælg alle"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:45
 msgid "&Available"
 msgstr "&Tilgængelig"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:68
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:64
 msgid "&Do Not Disturb"
 msgstr "&Forstyr ikke"
 
@@ -1661,7 +1661,7 @@ msgstr[1] "Downloader {0} af {1} ({2}) fra {3} personer"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:513
 #, java-format
 msgid "Stalled - {0} of {1} ({2}%). - "
-msgstr ""
+msgstr "Standset - {0} af {1} ({2}%). - "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:519
 msgid "Unable to download: "
@@ -1769,7 +1769,7 @@ msgstr "Hyperlink"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:95
 msgid "Hide"
-msgstr ""
+msgstr "Skjul"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:13
 #, java-format
@@ -2033,6 +2033,8 @@ msgid ""
 "New {0} files that are added to your Library will be automatically shared "
 "with this person"
 msgstr ""
+"Nye {0} filer som tilføjes til Mit bibliotek vil automatisk blive delt med "
+"denne person"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:822
 msgid "Now What?"
@@ -2236,7 +2238,7 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:410
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:343
 msgid "Currently sharing with"
 msgstr "Deler i øjeblikket med"
 
@@ -2244,15 +2246,15 @@ msgstr "Deler i øjeblikket med"
 msgid "Share one file"
 msgstr "Del en fil"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:111
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:110
 msgid "Start typing a friend's name"
 msgstr "Start med at skrive en vens navn"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:112
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:111
 msgid "Add another friend"
 msgstr "Tilføj en ven"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:306
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:305
 msgid "Share with the P2P Nework"
 msgstr "Del med P2P netværket"
 
@@ -2980,11 +2982,11 @@ msgstr "Konfigurer..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:167
 msgid "Configure where different categories are downloaded"
-msgstr ""
+msgstr "Opsæt hvortil forskellige kategorier downloades"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:169
 msgid "Choose where specific categories are downloaded"
-msgstr ""
+msgstr "Vælg hvortil specifikke kategorier downloades"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:211
 msgid "Store File Organization"
@@ -3192,7 +3194,7 @@ msgstr "Dele kategorier"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:132
 msgid "Only share files in that category at that point"
-msgstr ""
+msgstr "Del kun filer i denne kategori for nuværende"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:134
 msgid ""
@@ -3240,6 +3242,12 @@ msgid ""
 "\n"
 "Please select another folder to manage."
 msgstr ""
+"Du valgte: {0}\n"
+"\n"
+"LimeWire kan ikke håndtere denne mappe fordi den enten ikke er en mappe "
+"eller ikke kan læses.\n"
+"\n"
+"Vælg venligst en anden mappe."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:358
 msgid "Library Manager Error"
@@ -3532,7 +3540,7 @@ msgstr "Filtrer nøgleord"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:189
 msgid "Filter Keywords..."
-msgstr ""
+msgstr "Filtrér nøgleord..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:189
 msgid ""
@@ -3773,6 +3781,9 @@ msgid ""
 "We recommend you don't download programs using LimeWire. However, you can "
 "enable downloading programs via Preferences > Security > Unsafe Categories."
 msgstr ""
+"Vi anbefaler, at du ikke bruger LimeWire til at downloade programmer. Du har "
+"dog mulighed for selv at tillade downloading af programmer via Præferencer > "
+"Sikkerhed > Usikre kategorier."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:30
 msgid ""
@@ -3780,6 +3791,9 @@ msgid ""
 "enable downloading programs via Tools > Options > Security > Unsafe "
 "Categories."
 msgstr ""
+"Vi anbefaler, at du ikke bruger LimeWire til at downloade programmer. Du har "
+"dog mulighed for selv at tillade downloading af programmer via Værktøjer > "
+"Muligheder > Sikkerhed > Usikre kategorier."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:127
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:202

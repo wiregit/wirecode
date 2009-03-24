@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-16 11:30-0400\n"
-"PO-Revision-Date: 2009-02-28 01:36+0000\n"
-"Last-Translator: Wolfus <Unknown>\n"
+"POT-Creation-Date: 2009-03-18 11:30-0400\n"
+"PO-Revision-Date: 2009-03-23 20:25+0000\n"
+"Last-Translator: Chris.qcs BRA <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2009-03-17 03:32+0000\n"
+"X-Launchpad-Export-Date: 2009-03-24 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -37,7 +37,7 @@ msgstr "Documentos"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:16
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:68
 msgid "Programs"
-msgstr "Progresso"
+msgstr "Programas"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:43
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:11
@@ -91,7 +91,7 @@ msgstr "Documento"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
 msgid "Program"
-msgstr "Nenhum programa"
+msgstr "Programa"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:20
 msgid "No problems."
@@ -107,7 +107,7 @@ msgstr "O arquivo está corrompido"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:23
 msgid "This file is not shareable"
-msgstr "Este arquivo não é compatível"
+msgstr "Este arquivo não é compartilhável"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:24
 msgid "Trouble connecting to people"
@@ -120,6 +120,9 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
+"<html><b>Seu LimeWire pode ter um virus ou trojans! </b><br><br>Visite o "
+"site <a href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> e "
+"instale a mais recente versão oficial do LimeWire.</html>"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:277
 msgid ""
@@ -134,8 +137,8 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
-"Este upload é um torrent e não semeou o suficiente. Ele deveria ficar mais "
-"tempo em upload. Tem certeza que quer pará-lo?"
+"Este upload é um torrent e não foi suficientemente distribuido. Ele deveria "
+"ficar mais tempo em upload. Tem certeza que quer pará-lo?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:41
 msgid "XMPP Service"
@@ -146,9 +149,9 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"O LimeWire não consegue escrever um arquivo necessário porque o seu disco "
-"rígido está cheio. Para continuar usando o LimeWire você deve liberar espaço "
-"no seu disco rígido."
+"O LimeWire não pôde criar um arquivo necessário porque seu disco rígido está "
+"cheio. Para continuar usando o LimeWire, você deve liberar espaço no seu "
+"disco rígido."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
@@ -184,6 +187,9 @@ msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
+"O LimeWire não consegue fazer o download do arquivo selecionado porque o seu "
+"disco rígido está cheio. Para efetuar o download de mais arquivos você tem "
+"que liberar espaço no seu disco rígido."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:63
 msgid ""
@@ -201,6 +207,10 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
+"O LimeWire não conseguiu criar ou continuar a escrever um arquivo incompleto "
+"do download selecionado por não possuir permissão para escrever arquivos na "
+"pasta de arquivos incompletos. Para continuar a usar o LimeWire selecione "
+"uma pasta de destino diferente."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:67
 msgid ""
@@ -208,10 +218,13 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
+"O LimeWire não conseguiu abrir o arquivo incompleto para o download "
+"selecionado, pois o nome do arquivo contém caracteres não suportados pelo "
+"seu sistema operacional."
 
 #: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:31
 msgid "Firewall Manager"
-msgstr "Gerenciador de Firewall"
+msgstr "Gerenciador do Firewall"
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
 msgid "Statistic Management"
@@ -331,7 +344,7 @@ msgstr "Localizdor de Peer"
 msgid "Core Glue"
 msgstr "Colagem do núcleo"
 
-#: core/com/limegroup/gnutella/MessageRouterImpl.java:553
+#: core/com/limegroup/gnutella/MessageRouterImpl.java:554
 msgid "Message Routing"
 msgstr "Roteamento de Mensagens"
 
@@ -384,13 +397,13 @@ msgstr "O que há de novo"
 
 #: core/com/limegroup/gnutella/daap/DaapManager.java:175
 msgid "Creative Commons"
-msgstr ""
+msgstr "Creative Commons"
 
 #: core/com/limegroup/gnutella/dht/DHTManagerImpl.java:139
 msgid "Mojito DHT"
 msgstr "Mojito DHT"
 
-#: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:562
+#: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:519
 msgid "LimeWire Store Integration"
 msgstr "Integração com a LimeWire Store"
 
@@ -424,7 +437,7 @@ msgstr "Gerenciador de Spams"
 
 #: core/com/limegroup/gnutella/statistics/UptimeStatTimer.java:56
 msgid "Uptime Statistics"
-msgstr ""
+msgstr "Estatísticas de Tempo de Funcionamento"
 
 #: core/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
 msgid "Browse"
@@ -737,15 +750,15 @@ msgstr "Plataforma"
 msgid "Metadata Loader"
 msgstr "Carregador Metadata"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:377
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:379
 msgid "Oops!"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:377
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:379
 msgid "A problem occurred..."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:400
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, but please click 'Send Bug' to "
@@ -753,20 +766,20 @@ msgid ""
 "the information that will be sent. Thanks!"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:404
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:410
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To continue using LimeWire, close "
@@ -778,33 +791,33 @@ msgstr ""
 "janela. Se necessário, clique 'Mostrar Erro' para ver a informação sobre o "
 "erro."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:446
 msgid "Tell us what you were doing before LimeWire ran into this problem."
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:473
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:481
 msgid "Show Bug"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:483
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:485
 msgid "Hide Bug"
 msgstr ""
 
 #. the "always use this answer" checkbox
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:492
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:494
 msgid "Send bugs without asking me in the future"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:495
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:497
 msgid "Send Bug"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:569
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:571
 msgid "Internal Error"
 msgstr "Erro Interno"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:578
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:580
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -814,11 +827,11 @@ msgstr ""
 "relatório de erro abaixo. Para mais ajuda e para ajudar com a depuração, por "
 "favor visite www.limewire.com e clique em 'Suporte'. Obrigado."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:607
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:609
 msgid "Copy Report"
 msgstr "Copiar Relatório"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:615
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:617
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:214
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
@@ -970,11 +983,11 @@ msgstr "Colar"
 msgid "Select All"
 msgstr "Selecionar Tudo"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:45
 msgid "&Available"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:68
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:64
 msgid "&Do Not Disturb"
 msgstr ""
 
@@ -2219,7 +2232,7 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:410
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:343
 msgid "Currently sharing with"
 msgstr "Atualmente compartilhando com"
 
@@ -2227,15 +2240,15 @@ msgstr "Atualmente compartilhando com"
 msgid "Share one file"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:111
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:110
 msgid "Start typing a friend's name"
 msgstr "Comece digitando o nome de um amigo"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:112
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:111
 msgid "Add another friend"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:306
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:305
 msgid "Share with the P2P Nework"
 msgstr ""
 
