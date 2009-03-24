@@ -86,18 +86,7 @@ import com.limegroup.gnutella.auth.LimeWireContentAuthModule;
 import com.limegroup.gnutella.bootstrap.Bootstrapper;
 import com.limegroup.gnutella.bootstrap.BootstrapperImpl;
 import com.limegroup.gnutella.browser.LocalAcceptor;
-import com.limegroup.gnutella.connection.ConnectionBandwidthStatistics;
-import com.limegroup.gnutella.connection.ConnectionBandwidthStatisticsImpl;
-import com.limegroup.gnutella.connection.ConnectionCapabilities;
-import com.limegroup.gnutella.connection.ConnectionCapabilitiesImpl;
-import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.ConnectionCheckerManagerImpl;
-import com.limegroup.gnutella.connection.MessageReaderFactory;
-import com.limegroup.gnutella.connection.MessageReaderFactoryImpl;
-import com.limegroup.gnutella.connection.RoutedConnectionFactory;
-import com.limegroup.gnutella.connection.RoutedConnectionFactoryImpl;
-import com.limegroup.gnutella.connection.UDPConnectionChecker;
-import com.limegroup.gnutella.connection.UDPConnectionCheckerImpl;
+import com.limegroup.gnutella.connection.LimeWireCoreConnectionModule;
 import com.limegroup.gnutella.daap.DaapManager;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactoryImpl;
@@ -245,12 +234,14 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireSecurityCertificateModule());
         binder().install(new LimeWireGeocodeGlueModule());        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
+        
         binder().install(new LimeWireSimppModule());
         binder().install(new LimeWireBittorrentModule());
         binder().install(new LimeWireLibraryModule());
         binder().install(new LimeWireUploaderModule());
         binder().install(new LimeWireContentAuthModule());
         binder().install(new LimeWireFiltersModule());
+        binder().install(new LimeWireCoreConnectionModule());
         
         if(activityCallbackClass != null) {
             bind(ActivityCallback.class).to(activityCallbackClass);
@@ -275,7 +266,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HTTPUploadSessionManager.class).to(HTTPUploadManager.class);
         bind(QueryHandlerFactory.class).to(QueryHandlerFactoryImpl.class);
         bind(QueryRequestFactory.class).to(QueryRequestFactoryImpl.class);
-        bind(RoutedConnectionFactory.class).to(RoutedConnectionFactoryImpl.class);
         bind(AltLocValueFactory.class).to(AltLocValueFactoryImpl.class);
         bind(AlternateLocationFactory.class).to(AlternateLocationFactoryImpl.class);
         bind(HttpExecutor.class).to(DefaultHttpExecutor.class);
@@ -296,7 +286,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(DHTControllerFacade.class).to(DHTControllerFacadeImpl.class);
         bind(ChokerFactory.class).to(ChokerFactoryImpl.class);
         bind(BTConnectionFetcherFactory.class).to(BTConnectionFetcherFactoryImpl.class);
-        bind(ConnectionCheckerManager.class).to(ConnectionCheckerManagerImpl.class);
         bind(DHTBootstrapperFactory.class).to(DHTBootstrapperFactoryImpl.class);
         bind(DHTNodeFetcherFactory.class).to(DHTNodeFetcherFactoryImpl.class);
         bind(UDPReplyHandlerFactory.class).to(UDPReplyHandlerFactoryImpl.class);
@@ -312,7 +301,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(PushEndpointService.class).annotatedWith(Names.named("pushEndpointCache")).to(PushEndpointCacheImpl.class);
         bind(FileResponseEntityFactory.class).to(FileResponseEntityFactoryImpl.class);
         bind(MessageFactory.class).to(MessageFactoryImpl.class);
-        bind(MessageReaderFactory.class).to(MessageReaderFactoryImpl.class);
         bind(MessageParserBinder.class).to(MessageParserBinderImpl.class);
         bind(VendorMessageFactory.class).to(VendorMessageFactoryImpl.class);
         bind(VendorMessageParserBinder.class).to(VendorMessageParserBinderImpl.class);
@@ -329,10 +317,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionDispatcher.class).annotatedWith(Names.named("global")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
         bind(ConnectionDispatcher.class).annotatedWith(Names.named("local")).to(ConnectionDispatcherImpl.class).in(Scopes.SINGLETON);
         bind(UDPPinger.class).to(UDPPingerImpl.class);
-        bind(UDPConnectionChecker.class).to(UDPConnectionCheckerImpl.class);
         bind(Inspector.class).to(InspectorImpl.class);
-        bind(ConnectionCapabilities.class).to(ConnectionCapabilitiesImpl.class);
-        bind(ConnectionBandwidthStatistics.class).to(ConnectionBandwidthStatisticsImpl.class);
         bind(LWSManager.class).to(LWSManagerImpl.class);
         bind(LWSIntegrationServicesDelegate.class).to(DownloadManager.class);
         bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderImpl.class);
