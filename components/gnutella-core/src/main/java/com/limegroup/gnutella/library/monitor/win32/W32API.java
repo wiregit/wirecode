@@ -1,5 +1,3 @@
-package com.limegroup.gnutella.library.monitor.win32;
-
 /* Copyright (c) 2007 Timothy Wall, All Rights Reserved
  * 
  * This library is free software; you can redistribute it and/or
@@ -12,6 +10,7 @@ package com.limegroup.gnutella.library.monitor.win32;
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.  
  */
+package com.limegroup.gnutella.library.monitor.win32;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +32,7 @@ import com.sun.jna.win32.W32APITypeMapper;
 public interface W32API extends StdCallLibrary, W32Errors {
 
     /** Standard options to use the unicode version of a w32 API. */
-    public Map<String, Object> UNICODE_OPTIONS = new HashMap<String, Object>() {
+    Map UNICODE_OPTIONS = new HashMap() {
         {
             put(OPTION_TYPE_MAPPER, W32APITypeMapper.UNICODE);
             put(OPTION_FUNCTION_MAPPER, W32APIFunctionMapper.UNICODE);
@@ -41,16 +40,16 @@ public interface W32API extends StdCallLibrary, W32Errors {
     };
 
     /** Standard options to use the ASCII/MBCS version of a w32 API. */
-    public Map<String, Object> ASCII_OPTIONS = new HashMap<String, Object>() {
+    Map ASCII_OPTIONS = new HashMap() {
         {
             put(OPTION_TYPE_MAPPER, W32APITypeMapper.ASCII);
             put(OPTION_FUNCTION_MAPPER, W32APIFunctionMapper.ASCII);
         }
     };
 
-    public Map DEFAULT_OPTIONS = Boolean.getBoolean("w32.ascii") ? ASCII_OPTIONS : UNICODE_OPTIONS;
+    Map DEFAULT_OPTIONS = Boolean.getBoolean("w32.ascii") ? ASCII_OPTIONS : UNICODE_OPTIONS;
 
-    public class HANDLE extends PointerType {
+    class HANDLE extends PointerType {
         /** Override to the appropriate object for INVALID_HANDLE_VALUE. */
         public Object fromNative(Object nativeValue, FromNativeContext context) {
             Object o = super.fromNative(nativeValue, context);
@@ -60,7 +59,7 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class WORD extends IntegerType {
+    class WORD extends IntegerType {
         public WORD() {
             this(0);
         }
@@ -70,7 +69,7 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class DWORD extends IntegerType {
+    class DWORD extends IntegerType {
         public DWORD() {
             this(0);
         }
@@ -80,29 +79,29 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class HDC extends HANDLE {
+    class HDC extends HANDLE {
     }
 
-    public class HICON extends HANDLE {
+    class HICON extends HANDLE {
     }
 
-    public class HBITMAP extends HANDLE {
+    class HBITMAP extends HANDLE {
     }
 
-    public class HRGN extends HANDLE {
+    class HRGN extends HANDLE {
     }
 
-    public class HWND extends HANDLE {
+    class HWND extends HANDLE {
     }
 
-    public class HINSTANCE extends HANDLE {
+    class HINSTANCE extends HANDLE {
     }
 
-    public class HMODULE extends HINSTANCE {
+    class HMODULE extends HINSTANCE {
     }
 
     /** Constant value representing an invalid HANDLE. */
-    public HANDLE INVALID_HANDLE_VALUE = new HANDLE() {
+    HANDLE INVALID_HANDLE_VALUE = new HANDLE() {
         {
             super.setPointer(Pointer.createConstant(-1));
         }
@@ -113,7 +112,7 @@ public interface W32API extends StdCallLibrary, W32Errors {
     };
 
     /** Special HWND value. */
-    public HWND HWND_BROADCAST = new HWND() {
+    HWND HWND_BROADCAST = new HWND() {
         {
             super.setPointer(Pointer.createConstant(0xFFFF));
         }
@@ -124,7 +123,7 @@ public interface W32API extends StdCallLibrary, W32Errors {
     };
 
     /** LPHANDLE */
-    public class HANDLEByReference extends ByReference {
+    class HANDLEByReference extends ByReference {
         public HANDLEByReference() {
             this(null);
         }
@@ -150,7 +149,12 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class LONG_PTR extends IntegerType {
+    class LONG_PTR extends IntegerType {
+        /**
+		 * 
+		 */
+        private static final long serialVersionUID = 1663821750397952382L;
+
         public LONG_PTR() {
             this(0);
         }
@@ -160,7 +164,12 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class SSIZE_T extends LONG_PTR {
+    class SSIZE_T extends LONG_PTR {
+        /**
+		 * 
+		 */
+        private static final long serialVersionUID = -5301869936105270076L;
+
         public SSIZE_T() {
             this(0);
         }
@@ -170,7 +179,12 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class ULONG_PTR extends IntegerType {
+    class ULONG_PTR extends IntegerType {
+        /**
+		 * 
+		 */
+        private static final long serialVersionUID = 5318931073092596577L;
+
         public ULONG_PTR() {
             this(0);
         }
@@ -180,7 +194,12 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class SIZE_T extends ULONG_PTR {
+    class SIZE_T extends ULONG_PTR {
+        /**
+		 * 
+		 */
+        private static final long serialVersionUID = -5867120879599012196L;
+
         public SIZE_T() {
             this(0);
         }
@@ -190,7 +209,12 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class LPARAM extends LONG_PTR {
+    class LPARAM extends LONG_PTR {
+        /**
+		 * 
+		 */
+        private static final long serialVersionUID = -9217076851272676913L;
+
         public LPARAM() {
             this(0);
         }
@@ -200,7 +224,12 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class LRESULT extends LONG_PTR {
+    class LRESULT extends LONG_PTR {
+        /**
+		 * 
+		 */
+        private static final long serialVersionUID = 4538316070138899521L;
+
         public LRESULT() {
             this(0);
         }
@@ -210,7 +239,12 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class UINT_PTR extends IntegerType {
+    class UINT_PTR extends IntegerType {
+        /**
+		 * 
+		 */
+        private static final long serialVersionUID = 5519980804346946264L;
+
         public UINT_PTR() {
             super(Pointer.SIZE);
         }
@@ -224,7 +258,12 @@ public interface W32API extends StdCallLibrary, W32Errors {
         }
     }
 
-    public class WPARAM extends UINT_PTR {
+    class WPARAM extends UINT_PTR {
+        /**
+		 * 
+		 */
+        private static final long serialVersionUID = 8134855338974028151L;
+
         public WPARAM() {
             this(0);
         }
