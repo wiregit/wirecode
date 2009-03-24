@@ -17,7 +17,7 @@ public interface BrowseListener {
     /**
      * Called when the {@link Browse} is finished.
      * 
-     * @param true when the browse completed successfully, false otherwise
+     * @param success true when the browse completed successfully, false otherwise
      */
     void browseFinished(boolean success);
 }
