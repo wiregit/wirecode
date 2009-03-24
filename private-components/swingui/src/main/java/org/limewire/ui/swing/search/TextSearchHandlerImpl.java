@@ -66,7 +66,6 @@ class TextSearchHandlerImpl implements SearchHandler {
      */
     @Override
     public boolean doSearch(final SearchInfo info) {
-        long startTime = System.currentTimeMillis();
         // Create search request.
         Search search = searchFactory.createSearch(info);
         
@@ -85,8 +84,6 @@ class TextSearchHandlerImpl implements SearchHandler {
         
         // Start search operation.
         startSearch(searchModel, searchPanel, item);
-        long endTime = System.currentTimeMillis();
-        System.out.println("doSearch: ms=" + (endTime - startTime));
         return true;
     }
 
