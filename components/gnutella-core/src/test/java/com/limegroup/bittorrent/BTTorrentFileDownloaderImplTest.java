@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
 import junit.framework.Test;
 
+import org.apache.http.params.BasicHttpParams;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.settings.ConnectionSettings;
@@ -30,11 +31,11 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.DownloaderInfo.DownloadState;
 import com.limegroup.gnutella.NoOpSaveLocationManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.DownloaderInfo.DownloadState;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.CoreDownloader;
@@ -360,7 +361,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             public LimeHttpClient get() {
                 return new SimpleLimeHttpClient();
             } 
-        }), new TorrentManager() {
+        }, new BasicHttpParams()), new TorrentManager() {
 
             @Override
             public boolean allowNewTorrent() {
