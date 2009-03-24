@@ -21,7 +21,7 @@ digraph G {
   <!-- sort in order to make .dot file readable in order of "i depend on 'these things'" -->
   <xsl:sort select="@name"/>
    	<xsl:text>    "</xsl:text><xsl:value-of select="@name"/><xsl:text>" -&gt; "</xsl:text><xsl:value-of select="../../@name"/><xsl:text>" </xsl:text>
-   	<!-- THIS IS AWFUL -- BUT I HAVE NO CLUE HOW TO DO IT IN XSL... 
+   	<!-- THIS IS AWFUL - BUT I HAVE NO CLUE HOW TO DO IT IN XSL... 
    	     color names at: http://www.graphviz.org/doc/info/colors.html -->
    	<xsl:choose>
    	    <xsl:when test="@name='swingui'">
