@@ -7,12 +7,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.LWSSettings;
+import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.lws.server.LocalServerImpl;
-import org.limewire.lws.server.LocalServerDelegate;
 import org.limewire.lws.server.RemoteServerImpl;
-import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
 import org.limewire.net.SocketsManager;
 
 import com.google.inject.Injector;
