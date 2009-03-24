@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 
 /**
@@ -9,9 +8,8 @@ import org.limewire.ui.swing.search.model.SearchResultsModel;
 public interface BaseResultPanelFactory {
 
     /**
-     * Creates a BaseResultPanel with the specified search model and row
-     * selection preserver.
+     * Creates a BaseResultPanel with the specified search model.
      */
-    BaseResultPanel create(SearchResultsModel searchResultsModel,
-            RowSelectionPreserver preserver);
+    BaseResultPanel create(SearchResultsModel searchResultsModel);
+    
 }

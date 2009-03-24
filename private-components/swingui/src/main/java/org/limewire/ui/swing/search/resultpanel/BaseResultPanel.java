@@ -30,7 +30,6 @@ import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
-import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -99,7 +98,6 @@ public class BaseResultPanel extends JXPanel {
     /** Data model containing search results. */
     private final SearchResultsModel searchResultsModel;
     
-    private final RowSelectionPreserver preserver;
     private final ResultsTableFormatFactory tableFormatFactory;
     private final Navigator navigator;
     private final PropertiesFactory<VisualSearchResult> properties;
@@ -121,7 +119,6 @@ public class BaseResultPanel extends JXPanel {
     @AssistedInject
     public BaseResultPanel(
             @Assisted SearchResultsModel searchResultsModel,
-            @Assisted RowSelectionPreserver preserver,
             ResultsTableFormatFactory tableFormatFactory,
             ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             Navigator navigator,
@@ -132,7 +129,6 @@ public class BaseResultPanel extends JXPanel {
             NameRendererFactory nameRendererFactory) {
         
         this.searchResultsModel = searchResultsModel;
-        this.preserver = preserver;
         this.tableFormatFactory = tableFormatFactory;
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         this.navigator = navigator;
@@ -160,7 +156,6 @@ public class BaseResultPanel extends JXPanel {
         
         // Set list table fields that do not change with search category.
         listTable.setShowGrid(true, false);
-        preserver.addRowPreservationListener(listTable);
         listTable.setRowHeightEnabled(true);
         
         return listTable;
@@ -253,8 +248,8 @@ public class BaseResultPanel extends JXPanel {
             @Override
             public void listChanged(ListEvent<VisualSearchResult> listChanges) {
                 
-                final EventTableModel model = resultsList.getEventTableModel();
-                if (model.getRowCount() == 0) {
+                EventTableModel tableModel = resultsList.getEventTableModel();
+                if (tableModel.getRowCount() == 0) {
                     return;
                 }
                 
@@ -262,6 +257,7 @@ public class BaseResultPanel extends JXPanel {
                 Runnable runner = new Runnable() {
                     @Override
                     public void run() {
+                        EventTableModel model = resultsList.getEventTableModel();
                         
                         resultsList.setIgnoreRepaints(true);
                         boolean setRowSize = false;

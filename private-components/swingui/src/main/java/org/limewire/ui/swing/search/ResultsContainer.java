@@ -24,35 +24,34 @@ import com.google.inject.assistedinject.AssistedInject;
  */
 public class ResultsContainer extends JXPanel {
 
-    /** Category results panel currently displayed. */
-    private BaseResultPanel currentPanel;
+    /** Results panel containing display tables. */
+    private final BaseResultPanel baseResultPanel;
+
+    /** Data model containing search results. */
+    private final SearchResultsModel searchResultsModel;
     
     /** Current view type; either LIST or TABLE. */
     private SearchViewType mode = SearchViewType.forId(SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue());
 
-    /** Data model containing search results. */
-    private final SearchResultsModel searchResultsModel;
-
     /**
-     * Constructs a ResultsContainer with the specified search parameters and
-     * factories.
+     * Constructs a ResultsContainer with the specified search results data
+     * model and factories.
      * @see org.limewire.ui.swing.search.ResultsContainerFactory
      */
     @AssistedInject
     ResultsContainer(
         @Assisted SearchResultsModel searchResultsModel,
-        @Assisted RowSelectionPreserver preserver,
         BaseResultPanelFactory baseFactory) {
         
         this.searchResultsModel = searchResultsModel;
         
         // Create result panel.
-        currentPanel = baseFactory.create(searchResultsModel, preserver);
+        baseResultPanel = baseFactory.create(searchResultsModel);
         
         setLayout(new BorderLayout());
         
         // Add result panel to the container.
-        add(currentPanel, BorderLayout.CENTER);
+        add(baseResultPanel, BorderLayout.CENTER);
     }
 
     /**
@@ -71,8 +70,8 @@ public class ResultsContainer extends JXPanel {
      */
     public void setViewType(SearchViewType mode) {
         this.mode = mode;
-        if (currentPanel != null) {
-            currentPanel.setViewType(mode);
+        if (baseResultPanel != null) {
+            baseResultPanel.setViewType(mode);
         }
     }
     
@@ -80,8 +79,8 @@ public class ResultsContainer extends JXPanel {
      * Displays the search results tables for the specified search category.
      */
     public void showCategory(SearchCategory category) {
-        currentPanel.showCategory(category);
-        currentPanel.setViewType(mode);
+        baseResultPanel.showCategory(category);
+        baseResultPanel.setViewType(mode);
     }
 
     /**
@@ -89,13 +88,13 @@ public class ResultsContainer extends JXPanel {
      * displayed.  The method returns null if no header is displayed.
      */
     public Component getScrollPaneHeader() {
-        return currentPanel.getScrollPaneHeader();
+        return baseResultPanel.getScrollPaneHeader();
     }
 
     /**
      * Returns the results view component currently being displayed. 
      */
     public Scrollable getScrollable() {
-        return currentPanel.getScrollable();
+        return baseResultPanel.getScrollable();
     }
 }

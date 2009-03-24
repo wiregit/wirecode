@@ -67,9 +67,6 @@ public class SortAndFilterPanel implements Disposable {
     /** Search results data model. */
     private final SearchResultsModel searchResultsModel;
     
-    /** Support class used to preserve row selection. */
-    private final RowSelectionPreserver preserver;
-    
     /** Map of sort options and actions. */ 
     private final Map<SortOption, Action> actionMap = new EnumMap<SortOption, Action>(SortOption.class); 
 
@@ -92,12 +89,11 @@ public class SortAndFilterPanel implements Disposable {
 
     /**
      * Constructs a SortAndFilterPanel with the specified search results data
-     * model, row selection preserver, and UI decorators.
+     * model and UI decorators.
      */
     @AssistedInject
     SortAndFilterPanel(
             @Assisted SearchResultsModel searchResultsModel,
-            @Assisted RowSelectionPreserver preserver,
             ComboBoxDecorator comboBoxDecorator, TextFieldDecorator textFieldDecorator, 
             ButtonDecorator buttonDecorator, HeaderBarDecorator headerBarFactory) {
         
@@ -105,7 +101,6 @@ public class SortAndFilterPanel implements Disposable {
         
         this.buttonDecorator = buttonDecorator;
         this.searchResultsModel = searchResultsModel;
-        this.preserver = preserver;
         
         textFieldDecorator.decorateClearablePromptField(filterBox, AccentType.SHADOW);
         
@@ -263,8 +258,7 @@ public class SortAndFilterPanel implements Disposable {
     }
 
     /**
-     * Configures the sort and filter components to work with the data model 
-     * and selection preserver.
+     * Configures the sort and filter components to work with the data model.
      */
     private void configureSortFilter() {
         // Create text filter with "live" filtering.
@@ -281,10 +275,9 @@ public class SortAndFilterPanel implements Disposable {
             @Override
             public void selectionChanged(Action action) {
                 SortOption option = ((SortAction) action).getSortOption();
-                if (!repopulatingCombo && !option.equals(sortBy)) { // changing sort order
-                    preserver.beforeUpdateEvent();
+                if (!repopulatingCombo && !option.equals(sortBy)) {
+                    // changing sort order
                     searchResultsModel.setSortOption(option);
-                    preserver.afterUpdateEvent();
                     sortBy = option;
                 }
             }
