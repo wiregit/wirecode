@@ -9,9 +9,7 @@ import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.nio.protocol.NHttpRequestHandler;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -23,14 +21,13 @@ import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherFactory;
 import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.lws.server.LWSDispatcherSupport;
+import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
-import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -188,30 +185,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         HttpParams params = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(params, 1000);
         HttpConnectionParams.setSoTimeout(params, 1000);
-        exe.execute(get, params, new HttpClientListener() {
-            
-            public boolean requestComplete(HttpUriRequest request, HttpResponse response) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("requestComplete");
-                }
-                exe.releaseResources(response);
-                return false;
-            }
-            
-            public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("requestFailed");
-                }            
-                exe.releaseResources(response);
-                return false;
-            }
-
-            @Override
-            public boolean allowRequest(HttpUriRequest request) {
-                return true;
-            }
-                    
-        });
+        exe.execute(get, params);
         
     }
      

@@ -15,7 +15,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 /**
- * Measures how long it takes to get full connection strength, and reports back to
+ * Measures how long it takes to get a single ultrapeer connection, and reports back to
  * monitoring machines.
  */
 public class ConnectionReporter implements ConnectionLifecycleListener {
