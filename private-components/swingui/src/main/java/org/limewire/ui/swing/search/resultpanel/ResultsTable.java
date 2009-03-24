@@ -1,14 +1,11 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JPopupMenu;
 import javax.swing.table.JTableHeader;
 
 import org.limewire.ui.swing.listener.MousePopupListener;
-import org.limewire.ui.swing.search.RowPresevationListener;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -29,14 +26,9 @@ import ca.odell.glazedlists.swing.EventTableModel;
  *     <code>ColumnStateHandler</code>.</li>
  *   <li>Table header popup menu to display/hide columns using 
  *     <code>TableColumnSelector</code>.</li>
- *   <li>Support for preserving row selection when table is sorted using
- *     <code>RowPreservationListener</code>.</li>
  * </ul> 
  */
-public class ResultsTable<E extends VisualSearchResult> extends MouseableTable 
-    implements RowPresevationListener {
-
-    private final List<E> selectedRows = new ArrayList<E>();
+public class ResultsTable<E extends VisualSearchResult> extends MouseableTable { 
 
     private EventList<E> eventList;
     private ResultsTableFormat<E> tableFormat;
@@ -162,40 +154,6 @@ public class ResultsTable<E extends VisualSearchResult> extends MouseableTable
             columnStateHandler.setupColumnWidths();
             columnStateHandler.setupColumnVisibility();
             columnStateHandler.setupColumnOrder();
-        }
-    }
-
-    /**
-     * Handles event to save the currently selected list elements.
-     */
-    @Override
-    public void preserveRowSelection() {
-        if (isVisible()) {
-            int[] preservedSelectedRows = getSelectedRows();
-            selectedRows.clear();
-            for (int rowIndex = 0; rowIndex <  preservedSelectedRows.length; rowIndex++) {
-                int row = preservedSelectedRows[rowIndex];
-                if (row > -1) {
-                    E element = getEventTableModel().getElementAt(row);
-                    selectedRows.add(element);
-                } 
-            }
-        }
-    }
-
-    /**
-     * Handles event to restore the selected list elements.
-     */
-    @Override
-    public void restoreRowSelection() {
-        if (isVisible() && (selectedRows.size() > 0)) {
-            clearSelection();
-            for (E selectedRow : selectedRows) {
-                int rowSelection = eventList.indexOf(selectedRow);
-                if (rowSelection > -1) {
-                    addRowSelectionInterval(rowSelection, rowSelection);
-                }    
-            }
         }
     }
 }
