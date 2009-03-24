@@ -226,6 +226,7 @@ class LibrarySharePanel extends JXButton implements Disposable, ShapeComponent {
         this.canShowP2P = canShowP2P;
         this.shareVisible = shareVisible;
         setFocusPainted(false);
+        setBorderPainted(false);
         initialize(allFriends);
     }
   
