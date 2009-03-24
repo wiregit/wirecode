@@ -37,29 +37,6 @@ import com.sun.jna.Pointer;
 class NaiveKQueueFileMonitor {
     private final Map<File, FileWatcher> fileWatchers;
 
-    public enum KQueueEventType {
-        DELETE, RENAME, FILE_SIZE_CHANGED, FILE_ATTRIBUTES_CHANGED
-    }
-
-    public class KQueueEvent {
-        private final KQueueEventType type;
-
-        private final String path;
-
-        public KQueueEvent(KQueueEventType type, String path) {
-            this.type = type;
-            this.path = path;
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        public KQueueEventType getType() {
-            return type;
-        }
-    }
-
     private final EventListenerList<KQueueEvent> listeners;
 
     public NaiveKQueueFileMonitor() {
@@ -149,11 +126,6 @@ class NaiveKQueueFileMonitor {
                 CLibrary.INSTANCE.close(fileEvent.ident);
             }
         }
-    }
-
-    protected synchronized void dispose() {
-        for (FileWatcher fw : fileWatchers.values())
-            fw.interrupt();
     }
 
     protected synchronized void unwatch(File file) {

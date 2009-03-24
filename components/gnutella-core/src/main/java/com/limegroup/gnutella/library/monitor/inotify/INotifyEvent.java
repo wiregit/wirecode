@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.library.monitor.inotify;
 
+import java.io.File;
 import java.util.Map;
 
 import com.sun.jna.Memory;
@@ -34,6 +35,10 @@ public class INotifyEvent extends Structure {
 
     public String getWatchPath() {
         return watchPath;
+    }
+
+    public String getFullPath() {
+        return getWatchPath() + File.separator + getPath();
     }
 
     boolean isAccessEvent() {

@@ -5,12 +5,12 @@ import java.io.IOException;
 
 import org.limewire.listener.EventListener;
 
-import com.limegroup.gnutella.library.monitor.inotify.FileMonitorLinux;
+import com.limegroup.gnutella.library.monitor.inotify.InotifyFileMonitor;
 import com.limegroup.gnutella.library.monitor.inotify.INotifyEvent;
 
-public class Main {
+public class MainLinux {
 	public static void main(String[] args) throws IOException {
-		FileMonitorLinux fileMonitorLinux = new FileMonitorLinux();
+		InotifyFileMonitor fileMonitorLinux = new InotifyFileMonitor();
 		fileMonitorLinux.init();
 
 		fileMonitorLinux.addListener(new EventListener<INotifyEvent>() {
