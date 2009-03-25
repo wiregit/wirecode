@@ -83,6 +83,8 @@ public class FileMonitorWindows implements FileMonitor {
                 fileMonitorEvent = new FileMonitorEvent(FileMonitorEventType.CREATE, path);
             } else if (event.isDelete() || event.isRenamedOldName()) {
                 fileMonitorEvent = new FileMonitorEvent(FileMonitorEventType.DELETE, path);
+            } else {
+                //TODO handle other events?
             }
             return fileMonitorEvent;
         }
