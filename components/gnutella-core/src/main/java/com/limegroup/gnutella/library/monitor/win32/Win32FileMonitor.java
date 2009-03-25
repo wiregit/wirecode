@@ -22,9 +22,9 @@ public class Win32FileMonitor {
     private final Map<File, Integer> watched = new HashMap<File, Integer>();
 
     public void init() {
-        
+
     }
-    
+
     public void addWatch(File dir) throws IOException {
         addWatch(dir, W32NotifyEventMask.ALL_EVENTS.getMask());
     }
@@ -160,7 +160,8 @@ public class Win32FileMonitor {
                     + handle + ": '" + getSystemError(err) + "' (" + err + ")");
         }
         if (watcher == null) {
-            //TODO really can't use a single thread per watch, that is just crazy
+            // TODO really can't use a single thread per watch, that is just
+            // crazy
             watcher = new Thread("W32 File Monitor-" + (watcherThreadID++)) {
                 public void run() {
                     FileInfo finfo;
@@ -191,7 +192,7 @@ public class Win32FileMonitor {
     }
 
     protected synchronized void unwatch(File file) {
-        FileInfo finfo = (FileInfo) fileMap.remove(file);
+        FileInfo finfo = fileMap.remove(file);
         if (finfo != null) {
             handleMap.remove(finfo.handle);
             Kernel32 klib = Kernel32.INSTANCE;
