@@ -14,6 +14,8 @@ import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.settings.LimeWireCoreSettingsModule;
+import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inspection.Inspector;
@@ -31,6 +33,7 @@ import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
+import org.limewire.net.ExternalIP;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressEvent;
@@ -47,6 +50,7 @@ import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -109,7 +113,6 @@ import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.LimeWireDownloadModule;
 import com.limegroup.gnutella.downloader.serial.conversion.DownloadUpgradeTaskService;
 import com.limegroup.gnutella.filters.LimeWireFiltersModule;
-import com.limegroup.gnutella.geocode.LimeWireGeocodeGlueModule;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
 import com.limegroup.gnutella.handshaking.HandshakeServices;
@@ -220,6 +223,7 @@ public class LimeWireCoreModule extends AbstractModule {
     @Override
     protected void configure() {
         binder().install(new LimeWireCommonModule());
+        binder().install(new LimeWireCoreSettingsModule());
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
         binder().install(new LimeWireDownloadModule());
         binder().install(new LimeWireHashTreeModule());        
@@ -232,7 +236,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireIOModule());
         binder().install(new LimeWireMojitoModule());
         binder().install(new LimeWireSecurityCertificateModule());
-        binder().install(new LimeWireGeocodeGlueModule());        
+        binder().install(new LimewireGeocodeModule());        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         
         binder().install(new LimeWireSimppModule());
@@ -459,7 +463,14 @@ public class LimeWireCoreModule extends AbstractModule {
         protected ListeningExecutorService createObject() {
             return ExecutorsHelper.newProcessingQueue("DHT-Executor");
         }
-    }    
+    } 
+    
+    @Provides
+    @Singleton
+    @ExternalIP
+    public byte[] get(NetworkManager networkManager) {
+        return networkManager.getExternalAddress();
+    }
     
     ///////////////////////////////////////////////////////////////////////////
     /// BELOW ARE ALL HACK PROVIDERS THAT NEED TO BE UPDATED TO CONSTRUCT OBJECTS!

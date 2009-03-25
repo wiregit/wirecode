@@ -70,5 +70,6 @@ public class ConnectionReporterTest extends TestCase {
         for(ConnectionLifecycleEventType eventType : ConnectionLifecycleEventType.values()) {
             connectionReporter.handleConnectionLifecycleEvent(new ConnectionLifecycleEvent(new Object(), eventType));            
         }
+        mockery.assertIsSatisfied();
     }
 }

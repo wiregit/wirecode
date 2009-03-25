@@ -7,12 +7,24 @@ import java.util.Map;
 
 import junit.framework.Test;
 
-import org.limewire.geocode.AbstractGeocoder;
-import org.limewire.geocode.GeocodeInformation;
-import org.limewire.geocode.Geocoder;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.Provider;
+
 public class GeocoderTest extends BaseTestCase {
+    private Mockery mockery;
+    private LimeHttpClient httpClient;
+    private Provider<String> geoCodeURL;
+    private String testS;
 
     public GeocoderTest(String name) {
         super(name);
@@ -48,22 +60,42 @@ public class GeocoderTest extends BaseTestCase {
         String testString = SEPARATOR + NEWLINE;
         for (Map.Entry<String,String> en : props.entrySet()) {
             testString += en.getKey() + SEPARATOR + en.getValue() + NEWLINE;
-        }        
-        final String testS = testString;
-        
-        geo = new AbstractGeocoder() {
-            public void initialize() {
-                try {
-                    setGeocodeInformation(new StringInputStream(testS));
-                } catch(IOException iox) {
-                    setInvalid(iox);
-                }
-            }
-        };
+        }
+        testS = testString;
+
+        mockery = new Mockery();
+        httpClient = mockery.mock(LimeHttpClient.class);
+        geoCodeURL = mockery.mock(Provider.class);
+        geo = new GeocoderImpl(geoCodeURL, Providers.of(httpClient));
     }
     
     public void testSimple() throws InterruptedException {
-        
+        final HttpResponse response = mockery.mock(HttpResponse.class);
+        final StatusLine statusLine = mockery.mock(StatusLine.class);
+        final HttpEntity httpEntity = mockery.mock(HttpEntity.class);
+        mockery.checking(new Expectations() {{
+            allowing(geoCodeURL).get();
+            will(returnValue("http://foo.com"));
+            try {
+                allowing(httpClient).execute(with(any(HttpUriRequest.class)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            will(returnValue(response));
+            allowing(response).getStatusLine();
+            will(returnValue(statusLine));
+            allowing(statusLine).getStatusCode();
+            will(returnValue(HttpStatus.SC_OK));
+            allowing(response).getEntity();
+            will(returnValue(httpEntity));
+            try {
+                allowing(httpEntity).getContent();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            will(returnValue(new StringInputStream(testS)));
+            allowing(httpClient).releaseConnection(with(same(response)));
+        }});
         // Test some state information
         assertFalse(geo.isReady());
         geo.initialize();
