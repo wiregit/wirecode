@@ -231,7 +231,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
     
     @Override
-    public void downloadCompleted(Downloader d) {
+    public void removeDownload(Downloader d) {
         for (DownloadListener listener : downloadListeners) {
             listener.downloadRemoved(d);
         }

@@ -1,5 +1,8 @@
 package org.limewire.core.api.download;
 
+/**
+ * An enum to describe the various general download states and their capabilities. 
+ */
 public enum DownloadState {
 	DONE( false, false), 
 	CONNECTING( true, false), 

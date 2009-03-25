@@ -44,7 +44,7 @@ public class ActivityCallbackStub implements ActivityCallback {
 	                              Set alts) {}
     public void handleQuery(QueryRequest query, String address, int port) { }    
     public void addDownload(Downloader d) { }    
-    public void downloadCompleted(Downloader d) { }    
+    public void removeDownload(Downloader d) { }    
     public void addUpload(Uploader u) { }
     public void removeUpload(Uploader u) { }    	
     public void addSharedDirectory(final File directory, final File parent) { }

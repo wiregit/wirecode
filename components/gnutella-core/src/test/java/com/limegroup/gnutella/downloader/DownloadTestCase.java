@@ -509,7 +509,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
         @SuppressWarnings("unchecked")
         @Override
-        public void downloadCompleted(Downloader d) {
+        public void removeDownload(Downloader d) {
             synchronized (COMPLETE_LOCK) {
                 REMOVED = true;
                 COMPLETE_LOCK.notify();

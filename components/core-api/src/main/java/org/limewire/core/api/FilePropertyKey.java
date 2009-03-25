@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.core.api;
 
 import java.util.Collection;
