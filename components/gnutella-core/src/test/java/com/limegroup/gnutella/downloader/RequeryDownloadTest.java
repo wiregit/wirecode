@@ -38,7 +38,7 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerImpl;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.DownloaderInfo.DownloadState;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.HostCatcher;

@@ -52,7 +52,7 @@ import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerImpl;
-import com.limegroup.gnutella.DownloaderInfo.DownloadState;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;

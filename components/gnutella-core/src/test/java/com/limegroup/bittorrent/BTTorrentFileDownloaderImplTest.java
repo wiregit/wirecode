@@ -31,7 +31,7 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.DownloaderInfo.DownloadState;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.NoOpSaveLocationManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
