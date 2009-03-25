@@ -107,6 +107,8 @@ public class FileMonitorLinux implements FileMonitor {
             } else if (event.isDeleteEvent() || event.isDeleteSelfEvent()
                     || event.isMovedFromEvent()) {
                 fileMonitorEvent = new FileMonitorEvent(FileMonitorEventType.DELETE, path);
+            } else {
+                //TODO handles other events?
             }
             return fileMonitorEvent;
         }
