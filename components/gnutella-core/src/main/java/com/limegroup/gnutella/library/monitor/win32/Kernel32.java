@@ -146,25 +146,7 @@ public interface Kernel32 extends W32API {
                             int dwOptions);
     boolean CloseHandle(HANDLE hObject);
     
-    int FILE_ACTION_ADDED = 1;
-    int FILE_ACTION_REMOVED = 2;
-    int FILE_ACTION_MODIFIED = 3;
-    int FILE_ACTION_RENAMED_OLD_NAME = 4;
-    int FILE_ACTION_RENAMED_NEW_NAME = 5;
-    
-    int FILE_NOTIFY_CHANGE_FILE_NAME = 1;
-    int FILE_NOTIFY_CHANGE_DIR_NAME = 2;
-    int FILE_NOTIFY_CHANGE_NAME = 3;
-    int FILE_NOTIFY_CHANGE_ATTRIBUTES = 4;
-    int FILE_NOTIFY_CHANGE_SIZE = 8;
-    int FILE_NOTIFY_CHANGE_LAST_WRITE = 16;
-    int FILE_NOTIFY_CHANGE_LAST_ACCESS = 32;
-    int FILE_NOTIFY_CHANGE_CREATION = 64;
-    int FILE_NOTIFY_CHANGE_EA = 128;
-    int FILE_NOTIFY_CHANGE_SECURITY = 256;
-    int FILE_NOTIFY_CHANGE_STREAM_NAME = 512;
-    int FILE_NOTIFY_CHANGE_STREAM_SIZE = 1024;
-    int FILE_NOTIFY_CHANGE_STREAM_WRITE = 2048;
+
     /** This structure is non-trivial since it is a pattern stamped
      * into a large block of result memory rather than something that stands
      * alone or is used for input.

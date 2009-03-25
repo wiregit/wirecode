@@ -1,0 +1,32 @@
+package com.limegroup.gnutella.library.monitor.win32;
+
+public enum W32NotifyEventMask {
+    FILE_NOTIFY_CHANGE_FILE_NAME(1),
+    FILE_NOTIFY_CHANGE_DIR_NAME(2),
+    FILE_NOTIFY_CHANGE_NAME(3),
+    FILE_NOTIFY_CHANGE_ATTRIBUTES(4),
+    FILE_NOTIFY_CHANGE_SIZE(8),
+    FILE_NOTIFY_CHANGE_LAST_WRITE(16),
+    FILE_NOTIFY_CHANGE_LAST_ACCESS(32),
+    FILE_NOTIFY_CHANGE_CREATION(64),
+    FILE_NOTIFY_CHANGE_EA(128),
+    FILE_NOTIFY_CHANGE_SECURITY(256),
+    FILE_NOTIFY_CHANGE_STREAM_NAME(512),
+    FILE_NOTIFY_CHANGE_STREAM_SIZE(1024),
+    FILE_NOTIFY_CHANGE_STREAM_WRITE(2048),
+    ALL_EVENTS(FILE_NOTIFY_CHANGE_ATTRIBUTES.value | FILE_NOTIFY_CHANGE_CREATION.value | FILE_NOTIFY_CHANGE_DIR_NAME.value | FILE_NOTIFY_CHANGE_EA.value | FILE_NOTIFY_CHANGE_FILE_NAME.value | FILE_NOTIFY_CHANGE_LAST_ACCESS.value | FILE_NOTIFY_CHANGE_LAST_WRITE.value | FILE_NOTIFY_CHANGE_NAME.value | FILE_NOTIFY_CHANGE_SECURITY.value | FILE_NOTIFY_CHANGE_SIZE.value | FILE_NOTIFY_CHANGE_STREAM_NAME.value | FILE_NOTIFY_CHANGE_STREAM_SIZE.value | FILE_NOTIFY_CHANGE_STREAM_WRITE.value);
+    
+    private int value;
+
+    private W32NotifyEventMask(int mask) {
+        this.value = mask;
+    }
+
+    public int getMask() {
+        return value;
+    }
+
+    public boolean isSet(int mask) {
+        return value == (value & mask);
+    }
+}
