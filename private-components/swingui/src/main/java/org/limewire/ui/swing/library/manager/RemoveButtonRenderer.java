@@ -12,8 +12,14 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.I18n;
 
-public class RemoveButtonRenderer extends HyperlinkButton implements TableCellRenderer {
-    
+/**
+ * Table cell renderer that displays the "remove" hyperlink button.
+ */
+class RemoveButtonRenderer extends HyperlinkButton implements TableCellRenderer {
+
+    /**
+     * Constructs a RemoveButtonRenderer.
+     */
     public RemoveButtonRenderer() {
         super(new AbstractAction(I18n.tr("remove")) {
             @Override
