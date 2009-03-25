@@ -160,6 +160,7 @@ public class Win32FileMonitor {
                     + handle + ": '" + getSystemError(err) + "' (" + err + ")");
         }
         if (watcher == null) {
+            //TODO really can't use a single thread per watch, that is just crazy
             watcher = new Thread("W32 File Monitor-" + (watcherThreadID++)) {
                 public void run() {
                     FileInfo finfo;
