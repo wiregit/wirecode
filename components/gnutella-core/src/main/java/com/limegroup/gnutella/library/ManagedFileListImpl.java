@@ -243,6 +243,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     @Inject
     public void registerFileMonitor() {
+        //TODO probably better to add do this through listener support on the ManagedFileListImpl
         fileMonitor.addListener(new EventListener<FileMonitorEvent>() {
            public void handleEvent(FileMonitorEvent event) {
                File file = new File(event.getPath());
@@ -1335,10 +1336,11 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         Queue<File> fifo = new LinkedList<File>();
         fifo.add(startDirectory);
         try {
+            //TODO probably better to add do this through listener support on the ManagedFileListImpl
             fileMonitor.addWatch(startDirectory);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            //TODO handle exception
+            throw new RuntimeException(e);
         }
         while(!fifo.isEmpty()) {
             File directory = fifo.remove();
