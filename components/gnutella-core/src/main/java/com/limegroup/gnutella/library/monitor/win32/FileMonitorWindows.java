@@ -6,18 +6,30 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.listener.EventListener;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.monitor.FileMonitor;
 import com.limegroup.gnutella.library.monitor.FileMonitorEvent;
 import com.limegroup.gnutella.library.monitor.FileMonitorEventType;
 
+@Singleton
 public class FileMonitorWindows implements FileMonitor {
     private final Win32FileMonitor fileMonitor;
 
     private final ConcurrentHashMap<EventListener<FileMonitorEvent>, EventListener<W32NotifyActionEvent>> listeners;
 
+    @Inject
     public FileMonitorWindows() {
         this.fileMonitor = new Win32FileMonitor();
         listeners = new ConcurrentHashMap<EventListener<FileMonitorEvent>, EventListener<W32NotifyActionEvent>>();
+    }
+
+    @Inject
+    @Override
+    public void init() throws IOException {
+        // TODO initialize as service instead
+        fileMonitor.init();
+
     }
 
     @Override
@@ -41,12 +53,6 @@ public class FileMonitorWindows implements FileMonitor {
     @Override
     public void dispose() {
         fileMonitor.dispose();
-    }
-
-    @Override
-    public void init() throws IOException {
-        fileMonitor.init();
-
     }
 
     @Override
@@ -84,7 +90,7 @@ public class FileMonitorWindows implements FileMonitor {
             } else if (event.isDelete() || event.isRenamedOldName()) {
                 fileMonitorEvent = new FileMonitorEvent(FileMonitorEventType.DELETE, path);
             } else {
-                //TODO handle other events?
+                // TODO handle other events?
             }
             return fileMonitorEvent;
         }

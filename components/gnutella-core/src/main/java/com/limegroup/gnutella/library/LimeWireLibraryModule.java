@@ -10,12 +10,14 @@ import org.limewire.listener.SourcedListenerSupport;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.limegroup.gnutella.library.monitor.LimeWireLibraryMonitorModule;
 
 
 public class LimeWireLibraryModule extends AbstractModule {
     
     @Override
     protected void configure() {
+        install(new LimeWireLibraryMonitorModule());
         bind(LocalFileDetailsFactory.class).to(LocalFileDetailsFactoryImpl.class);
         bind(SharedFilesKeywordIndex.class).to(SharedFilesKeywordIndexImpl.class);
         bind(CreationTimeCache.class);        

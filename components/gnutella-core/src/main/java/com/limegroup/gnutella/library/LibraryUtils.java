@@ -68,10 +68,11 @@ public class LibraryUtils {
             return false;
         }
 
-        long fileLength = file.length();
-        if (fileLength <= 0 || fileLength > MAX_FILE_SIZE)  {
-            return false;
-        }
+        //TODO put back, or think through
+//        long fileLength = file.length();
+//        if (fileLength <= 0 || fileLength > MAX_FILE_SIZE)  {
+//            return false;
+//        }
 
         return true;
     }

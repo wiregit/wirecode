@@ -62,6 +62,9 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.auth.ValidationEvent;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.library.monitor.FileMonitor;
+import com.limegroup.gnutella.library.monitor.FileMonitorEvent;
+import com.limegroup.gnutella.library.monitor.FileMonitorEventType;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -196,6 +199,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     /** The revision of the managedFolder update. */
     private final AtomicInteger managedFolderRevision = new AtomicInteger(0);
     
+    private final FileMonitor fileMonitor;
+    
     @SuppressWarnings("unused")
     @InspectableContainer
     private class LazyInspectableContainer {
@@ -216,7 +221,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                         FileDescFactory fileDescFactory,
                         EventMulticaster<ManagedListStatusEvent> managedListSupportMulticaster,
                         UrnValidator urnValidator,
-                        DangerousFileChecker dangerousFileChecker) {
+                        DangerousFileChecker dangerousFileChecker,
+                        FileMonitor fileMonitor) {
         this.urnCache = urnCache;
         this.fileDescFactory = fileDescFactory;
         this.fileDescMulticaster = fileDescMulticaster;
@@ -232,8 +238,27 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         this.urnValidator = urnValidator;
         this.changeSupport = new SwingSafePropertyChangeSupport(this);
         this.dangerousFileChecker = dangerousFileChecker;
+        this.fileMonitor = fileMonitor;
     }
     
+    @Inject
+    public void registerFileMonitor() {
+        fileMonitor.addListener(new EventListener<FileMonitorEvent>() {
+           public void handleEvent(FileMonitorEvent event) {
+               File file = new File(event.getPath());
+               if(event.getType() == FileMonitorEventType.CREATE) {
+                   if(file.isDirectory()) {
+                       addFolder(file);
+                   } else {
+                       add(file);
+                   }
+                   System.out.println("Handled event: " + event);
+               } else {
+                   System.out.println("Unhandled event: " + event);
+               }
+           }; 
+        });
+    }
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.addPropertyChangeListener(listener);
@@ -1309,7 +1334,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
          
         Queue<File> fifo = new LinkedList<File>();
         fifo.add(startDirectory);
-
+        try {
+            fileMonitor.addWatch(startDirectory);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         while(!fifo.isEmpty()) {
             File directory = fifo.remove();
             

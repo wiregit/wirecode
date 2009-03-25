@@ -6,10 +6,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.listener.EventListener;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.monitor.FileMonitor;
 import com.limegroup.gnutella.library.monitor.FileMonitorEvent;
 import com.limegroup.gnutella.library.monitor.FileMonitorEventType;
 
+@Singleton
 public class FileMonitorLinux implements FileMonitor {
     private final InotifyFileMonitor inotifyFileMonitor;
 
@@ -17,6 +20,7 @@ public class FileMonitorLinux implements FileMonitor {
 
     private final ConcurrentHashMap<String, Boolean> watches;
 
+    @Inject
     public FileMonitorLinux() {
         this.inotifyFileMonitor = new InotifyFileMonitor();
         this.listeners = new ConcurrentHashMap<EventListener<FileMonitorEvent>, EventListener<INotifyEvent>>();
@@ -32,6 +36,12 @@ public class FileMonitorLinux implements FileMonitor {
         addWatch(file, false);
     }
 
+    @Inject
+    public void init() throws IOException {
+        //TODO initialize as service instead
+        inotifyFileMonitor.init();
+    }
+    
     @Override
     public void addWatch(File file, boolean recursive) throws IOException {
         // TODO see about making this non recursive
@@ -46,9 +56,6 @@ public class FileMonitorLinux implements FileMonitor {
         }
     }
 
-    public void init() throws IOException {
-        inotifyFileMonitor.init();
-    }
 
     public boolean removeListener(EventListener<FileMonitorEvent> listener) {
         return inotifyFileMonitor.removeListener(listeners.get(listener));
