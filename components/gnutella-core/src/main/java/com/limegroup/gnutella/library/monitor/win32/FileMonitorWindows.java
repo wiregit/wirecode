@@ -34,6 +34,11 @@ public class FileMonitorWindows implements FileMonitor {
     }
 
     @Override
+    public void addWatch(File file, boolean recursive) throws IOException {
+        fileMonitor.addWatch(file, recursive);
+    }
+
+    @Override
     public void dispose() {
         fileMonitor.dispose();
     }

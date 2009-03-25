@@ -29,6 +29,11 @@ public class FileMonitorLinux implements FileMonitor {
         inotifyFileMonitor.addWatch(file);
     }
 
+    @Override
+    public void addWatch(File file, boolean recursive) throws IOException {
+        // TODO recursivley add watches for the directories
+    }
+
     public void init() throws IOException {
         inotifyFileMonitor.init();
     }

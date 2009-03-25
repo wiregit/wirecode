@@ -22,15 +22,19 @@ public class Win32FileMonitor {
     private final Map<File, Integer> watched = new HashMap<File, Integer>();
 
     public void init() {
-
+        // nothing to do for now
     }
 
     public void addWatch(File dir) throws IOException {
-        addWatch(dir, W32NotifyEventMask.ALL_EVENTS.getMask());
+        addWatch(dir, W32NotifyEventMask.ALL_EVENTS.getMask(), false);
+    }
+
+    public void addWatch(File dir, boolean recursive) throws IOException {
+        addWatch(dir, W32NotifyEventMask.ALL_EVENTS.getMask(), recursive);
     }
 
     public void addWatch(File dir, int mask) throws IOException {
-        addWatch(dir, mask, dir.isDirectory());
+        addWatch(dir, mask, false);
     }
 
     public void addWatch(File dir, int mask, boolean recursive) throws IOException {

@@ -18,4 +18,6 @@ public interface FileMonitor {
     public boolean removeListener(EventListener<FileMonitorEvent> listener);
 
     public void dispose();
+
+    void addWatch(File file, boolean recursive) throws IOException;
 }
