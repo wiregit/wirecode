@@ -84,7 +84,8 @@ public class FileMonitorLinux implements FileMonitor {
                         try {
                             // TODO doesn't really work, because there is always
                             // the potential to have some events come in, before
-                            // a watch is created on the root directory.
+                            // a watch is created on the root directory. especially 
+                            //in the event of a mv or what have you.
                             addWatch(file, true);
                         } catch (IOException e) {
                             // TODO handle better
