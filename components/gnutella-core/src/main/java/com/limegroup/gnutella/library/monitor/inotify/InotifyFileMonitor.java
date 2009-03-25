@@ -79,7 +79,16 @@ public class InotifyFileMonitor {
                     INotifyEvent iNotifyEvent = new INotifyEvent();
                     int len = iNotifyEvent.readStruct(p, consumed, watchDescriptorFiles);
                     consumed += len;
-                    // TODO broadcast this asynchronously, missing events otherwise?
+                    // TODO this is definitley missing events when they come in
+                    // too fast.
+                    // need to increase the queue size somehow?
+                    // how big will be need in a production system?
+                    // should it be broken out into several qeueues?
+                    // 1 queue seems ideal, because then 1 thread, and ordering
+                    // should be good
+
+                    // TODO broadcast this asynchronously, missing events
+                    // otherwise?
                     listeners.broadcast(iNotifyEvent);
                 }
             }
