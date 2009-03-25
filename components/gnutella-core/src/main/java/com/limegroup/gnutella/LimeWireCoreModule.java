@@ -356,6 +356,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Bootstrapper.Listener.class).to(HostCatcher.class);
         bind(DangerousFileChecker.class).to(FileExtensionChecker.class);
         bind(RareFileStrategy.class).to(RareFileStrategyImpl.class);
+        bind(MulticastService.class).to(MulticastServiceImpl.class);
         
         bindAll(Names.named("fastExecutor"), ScheduledExecutorService.class, FastExecutorProvider.class, ExecutorService.class, Executor.class);
         bindAll(Names.named("unlimitedExecutor"), ListeningExecutorService.class, UnlimitedExecutorProvider.class, Executor.class, ExecutorService.class);
