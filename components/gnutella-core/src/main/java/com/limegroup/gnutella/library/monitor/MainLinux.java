@@ -19,7 +19,7 @@ public class MainLinux {
 			}
 		});
 
-		fileMonitorLinux.addWatch(new File("/home/pvertenten/test"));
-		fileMonitorLinux.addWatch(new File("/home/pvertenten/test2"));
+		fileMonitorLinux.addWatch(new File("/home/pvertenten/test"), true);
+		fileMonitorLinux.addWatch(new File("/home/pvertenten/test2"), true);
 	}
 }

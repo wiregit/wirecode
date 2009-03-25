@@ -79,7 +79,7 @@ public class InotifyFileMonitor {
                     INotifyEvent iNotifyEvent = new INotifyEvent();
                     int len = iNotifyEvent.readStruct(p, consumed, watchDescriptorFiles);
                     consumed += len;
-                    // TODO broadcast this asynchronously
+                    // TODO broadcast this asynchronously, missing events otherwise?
                     listeners.broadcast(iNotifyEvent);
                 }
             }

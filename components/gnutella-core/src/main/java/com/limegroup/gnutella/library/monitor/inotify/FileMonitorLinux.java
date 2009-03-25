@@ -15,9 +15,12 @@ public class FileMonitorLinux implements FileMonitor {
 
     private final ConcurrentHashMap<EventListener<FileMonitorEvent>, EventListener<INotifyEvent>> listeners;
 
+    private final ConcurrentHashMap<String, Boolean> watches;
+
     public FileMonitorLinux() {
         this.inotifyFileMonitor = new InotifyFileMonitor();
         this.listeners = new ConcurrentHashMap<EventListener<FileMonitorEvent>, EventListener<INotifyEvent>>();
+        this.watches = new ConcurrentHashMap<String, Boolean>();
     }
 
     public void addListener(final EventListener<FileMonitorEvent> listener) {
@@ -26,12 +29,21 @@ public class FileMonitorLinux implements FileMonitor {
     }
 
     public void addWatch(File file) throws IOException {
-        inotifyFileMonitor.addWatch(file);
+        addWatch(file, false);
     }
 
     @Override
     public void addWatch(File file, boolean recursive) throws IOException {
-        // TODO recursivley add watches for the directories
+        // TODO see about making this non recursive
+        watches.put(file.getAbsolutePath(), recursive);
+        inotifyFileMonitor.addWatch(file);
+        if (recursive && file.isDirectory()) {
+            for (File filei : file.listFiles()) {
+                if (filei.isDirectory()) {
+                    addWatch(filei, true);
+                }
+            }
+        }
     }
 
     public void init() throws IOException {
@@ -62,6 +74,21 @@ public class FileMonitorLinux implements FileMonitor {
         public void handleEvent(INotifyEvent event) {
             FileMonitorEvent fileMonitorEvent = translate(event);
             if (fileMonitorEvent != null) {
+                String path = event.getFullPath();
+                File file = new File(path);
+                // TODO manage queue better
+                if (file.isDirectory() && event.isCreateEvent()) {
+                    String watchPath = event.getWatchPath();
+                    Boolean recursive = watches.get(watchPath);
+                    if (recursive != null && recursive.booleanValue()) {
+                        try {
+                            addWatch(file, true);
+                        } catch (IOException e) {
+                            // TODO handle better
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
                 listener.handleEvent(fileMonitorEvent);
             }
         }
