@@ -82,6 +82,9 @@ public class FileMonitorLinux implements FileMonitor {
                     Boolean recursive = watches.get(watchPath);
                     if (recursive != null && recursive.booleanValue()) {
                         try {
+                            // TODO doesn't really work, because there is always
+                            // the potential to have some events come in, before
+                            // a watch is created on the root directory.
                             addWatch(file, true);
                         } catch (IOException e) {
                             // TODO handle better

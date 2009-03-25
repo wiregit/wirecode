@@ -26,7 +26,7 @@ public class INotifyEvent extends Structure {
         int byteOffset = offset + baseSize;
         this.path = m.getString(byteOffset);
         this.watchPath = watchDescriptorFiles.get(wd);
-        return offset + baseSize + len;
+        return baseSize + len;
     }
 
     public String getPath() {

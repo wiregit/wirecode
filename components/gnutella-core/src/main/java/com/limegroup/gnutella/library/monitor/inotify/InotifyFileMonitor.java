@@ -65,7 +65,7 @@ public class InotifyFileMonitor {
     private class EventPoller implements Runnable {
         @Override
         public void run() {
-            Memory p = new Memory(64 * 1024);
+            Memory p = new Memory(32 * 1024 * 1024);
 
             while (watchHandle != -1) {
                 int count = iNotify.read(watchHandle, p, (int) p.getSize());
@@ -77,16 +77,7 @@ public class InotifyFileMonitor {
                 int consumed = 0;
                 while (consumed < count) {
                     INotifyEvent iNotifyEvent = new INotifyEvent();
-                    int len = iNotifyEvent.readStruct(p, consumed, watchDescriptorFiles);
-                    consumed += len;
-                    // TODO this is definitley missing events when they come in
-                    // too fast.
-                    // need to increase the queue size somehow?
-                    // how big will be need in a production system?
-                    // should it be broken out into several qeueues?
-                    // 1 queue seems ideal, because then 1 thread, and ordering
-                    // should be good
-
+                    consumed += iNotifyEvent.readStruct(p, consumed, watchDescriptorFiles);
                     // TODO broadcast this asynchronously, missing events
                     // otherwise?
                     listeners.broadcast(iNotifyEvent);

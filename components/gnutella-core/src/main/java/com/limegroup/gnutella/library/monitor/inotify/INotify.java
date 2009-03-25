@@ -18,6 +18,4 @@ interface INotify extends Library {
     int read(int fd, Pointer buf, int size);
 
     int close(int fd);
-
-    void perror(String message);
 }
