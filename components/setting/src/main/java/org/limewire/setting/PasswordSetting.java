@@ -18,7 +18,7 @@ import org.limewire.service.ErrorService;
  * Create a <code>PasswordSetting</code> object with a 
  * {@link SettingsFactory#createPasswordSettingMD5(String, String)}.
  */
-public final class PasswordSetting extends AbstractSetting {
+public final class PasswordSetting extends AbstractObjectSetting<String> {
 
     /* 
      * Q: Why MD5 and not SHA1 as default?

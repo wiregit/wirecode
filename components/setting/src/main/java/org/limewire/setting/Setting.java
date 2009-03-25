@@ -1,12 +1,13 @@
 package org.limewire.setting;
 
+import org.limewire.inject.MutableProvider;
 import org.limewire.setting.evt.SettingListener;
 
 /**
  * Defines the interface for a setting that can be used
  * within this package.
  */
-public interface Setting {
+public interface Setting<T> extends MutableProvider<T> {
 
     /**
      * Registers a {@link SettingListener}

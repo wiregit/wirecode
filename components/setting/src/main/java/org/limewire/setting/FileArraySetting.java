@@ -18,7 +18,7 @@ import org.limewire.util.FileUtils;
  * {@link SettingsFactory#createFileArraySetting(String, File[])}.
  */
  
-public class FileArraySetting extends AbstractSetting {
+public class FileArraySetting extends AbstractObjectSetting<File[]> {
     
     private File[] value;
 

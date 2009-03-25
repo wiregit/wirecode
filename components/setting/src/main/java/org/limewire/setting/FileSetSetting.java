@@ -21,7 +21,7 @@ import java.util.StringTokenizer;
  * {@link SettingsFactory#createFileSetSetting(String, File[])}.
  */
  
-public class FileSetSetting extends AbstractSetting {
+public class FileSetSetting extends AbstractObjectSetting<Set<? extends File>> {
     
     private Set<File> value;
 

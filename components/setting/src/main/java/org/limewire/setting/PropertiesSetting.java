@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class PropertiesSetting extends AbstractSetting {
+public class PropertiesSetting extends AbstractObjectSetting<Properties> {
 
     private Properties value;
     

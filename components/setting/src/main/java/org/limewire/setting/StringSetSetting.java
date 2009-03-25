@@ -18,7 +18,7 @@ import java.util.StringTokenizer;
  * Create a <code>StringSetSetting</code> object with a 
  * {@link SettingsFactory#createStringSetSetting(String, String)}.
  */
-public class StringSetSetting extends AbstractSetting {
+public class StringSetSetting extends AbstractObjectSetting<Set<String>> {
 
     private Set<String> value;
 

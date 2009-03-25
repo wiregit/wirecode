@@ -11,7 +11,7 @@ import java.util.Properties;
  * Create a <code>FileSetting</code> object with a 
  * {@link SettingsFactory#createFileSetSetting(String, File[])}.
  */
-public class FileSetting extends AbstractSetting {
+public class FileSetting extends AbstractObjectSetting<File> {
 
     private String absolutePath;
 

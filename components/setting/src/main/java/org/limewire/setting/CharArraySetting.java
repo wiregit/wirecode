@@ -10,7 +10,7 @@ import java.util.Properties;
  * Create a <code>CharArraySetting</code> object with a 
  * {@link SettingsFactory#createCharArraySetting(String, char[])}. 
  */
-public final class CharArraySetting extends AbstractSetting {
+public final class CharArraySetting extends AbstractObjectSetting<char[]> {
     
     /**
      * Cached value.

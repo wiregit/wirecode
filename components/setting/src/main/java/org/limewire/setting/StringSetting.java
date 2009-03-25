@@ -10,7 +10,7 @@ import java.util.Properties;
  * Create a <code>StringSetting</code> object with a 
  * {@link SettingsFactory#createStringSetting(String, String)}.
  */
-public final class StringSetting extends AbstractSetting {
+public final class StringSetting extends AbstractObjectSetting<String> {
     
     private String value;
 

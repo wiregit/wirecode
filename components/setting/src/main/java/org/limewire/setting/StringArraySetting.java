@@ -17,7 +17,7 @@ import org.limewire.util.StringUtils;
  * {@link SettingsFactory#createStringArraySetting(String, String[])}.
  */
  
-public class StringArraySetting extends AbstractSetting {
+public class StringArraySetting extends AbstractObjectSetting<String[]> {
     
     public static final char SEPARATOR = ';';
     

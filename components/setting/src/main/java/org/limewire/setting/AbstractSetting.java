@@ -51,7 +51,7 @@ import org.limewire.setting.evt.SettingEvent.EventType;
  * subclass of <code>AbstractSetting</code> . Additionally the
  * example shows how to load and save the setting to disk.
  */
-public abstract class AbstractSetting implements Setting {
+public abstract class AbstractSetting<T> implements Setting<T> {
     
 	/**
 	 * Protected default <tt>Properties</tt> instance for subclasses.
