@@ -45,17 +45,6 @@ public interface Kernel32 extends StdCallLibrary, W32Errors {
 
     Map DEFAULT_OPTIONS = Boolean.getBoolean("w32.ascii") ? ASCII_OPTIONS : UNICODE_OPTIONS;
 
-    /** Special HWND value. */
-    public HWND HWND_BROADCAST = new HWND() {
-        {
-            super.setPointer(Pointer.createConstant(0xFFFF));
-        }
-
-        public void setPointer(Pointer p) {
-            throw new UnsupportedOperationException("Immutable reference");
-        }
-    };
-
     Kernel32 INSTANCE = (Kernel32) Native.loadLibrary("kernel32", Kernel32.class, DEFAULT_OPTIONS);
 
     Pointer LocalFree(Pointer hLocal);
