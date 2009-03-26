@@ -24,7 +24,7 @@ public class InotifyFileMonitor {
     private final EventListenerList<INotifyEvent> listeners;
 
     private int watchHandle = -1;
-    
+
     private Thread watcher = null;
 
     public InotifyFileMonitor() {
@@ -41,7 +41,7 @@ public class InotifyFileMonitor {
             if (watchHandle == -1) {
                 throw new IOException("inotify subsystem failed initialization.");
             } else {
-                watcher = new Thread(new EventPoller());
+                watcher = new EventPoller("Inotify File Monitor");
                 watcher.start();
             }
         }
@@ -64,7 +64,11 @@ public class InotifyFileMonitor {
         watchDescriptorFiles.remove(watchDescriptor);
     }
 
-    private class EventPoller implements Runnable {
+    private class EventPoller extends Thread {
+        public EventPoller(String name) {
+            super(name);
+        }
+
         @Override
         public void run() {
             Memory p = new Memory(32 * 1024 * 1024);
