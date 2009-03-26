@@ -24,9 +24,26 @@ public class Win32FileMonitor {
 
     private final Map<File, Integer> watched = new HashMap<File, Integer>();
 
-    public void init() {
-       Kernel32 klib = Kernel32.INSTANCE;
-       port = klib.CreateIoCompletionPort(W32API.INVALID_HANDLE_VALUE, port, W32API.INVALID_HANDLE_VALUE.getPointer(), 0);
+    private final Map<File, FileInfo> fileMap = new HashMap<File, FileInfo>();
+
+    private final Map<HANDLE, FileInfo> handleMap = new HashMap<HANDLE, FileInfo>();
+
+    private final EventListenerList<W32NotifyActionEvent> listeners = new EventListenerList<W32NotifyActionEvent>();
+
+    public synchronized void init() throws IOException {
+        if (port == null) {
+            Kernel32 klib = Kernel32.INSTANCE;
+            port = klib.CreateIoCompletionPort(W32API.INVALID_HANDLE_VALUE, port,
+                    W32API.INVALID_HANDLE_VALUE.getPointer(), 0);
+            if (port == null) {
+                int err = klib.GetLastError();
+                throw new IOException("Error initializing IOCompletionPort: '"
+                        + getSystemError(err) + "' (" + err + ")");
+            } else {
+                watcher = new Thread(new EventPoller(), "W32 File Monitor");
+                watcher.start();
+            }
+        }
     }
 
     public void addWatch(File dir) throws IOException {
@@ -77,12 +94,6 @@ public class Win32FileMonitor {
         }
     }
 
-    private final Map<File, FileInfo> fileMap = new HashMap<File, FileInfo>();
-
-    private final Map<HANDLE, FileInfo> handleMap = new HashMap<HANDLE, FileInfo>();
-
-    private final EventListenerList<W32NotifyActionEvent> listeners = new EventListenerList<W32NotifyActionEvent>();
-
     private void handleChanges(FileInfo finfo) throws IOException {
         Kernel32 klib = Kernel32.INSTANCE;
         FILE_NOTIFY_INFORMATION fni = finfo.info;
@@ -120,8 +131,6 @@ public class Win32FileMonitor {
             return handleMap.get(rkey.getValue());
         }
     }
-
-    private static int watcherThreadID;
 
     protected synchronized void watch(File file, int eventMask, boolean recursive)
             throws IOException {
@@ -161,11 +170,6 @@ public class Win32FileMonitor {
             int err = klib.GetLastError();
             throw new IOException("ReadDirectoryChangesW failed on " + finfo.file + ", handle "
                     + handle + ": '" + getSystemError(err) + "' (" + err + ")");
-        }
-        if (watcher == null) {
-            watcher = new EventPoller("W32 File Monitor-" + (watcherThreadID++));
-            watcher.setDaemon(true);
-            watcher.start();
         }
     }
 
@@ -219,11 +223,7 @@ public class Win32FileMonitor {
         return listeners.removeListener(eventListener);
     }
 
-    private final class EventPoller extends Thread {
-        private EventPoller(String name) {
-            super(name);
-        }
-
+    private final class EventPoller implements Runnable {
         public void run() {
             FileInfo finfo;
             while (true) {
