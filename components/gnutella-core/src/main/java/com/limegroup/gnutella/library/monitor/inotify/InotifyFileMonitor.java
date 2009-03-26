@@ -24,6 +24,8 @@ public class InotifyFileMonitor {
     private final EventListenerList<INotifyEvent> listeners;
 
     private int watchHandle = -1;
+    
+    private Thread watcher = null;
 
     public InotifyFileMonitor() {
         listeners = new EventListenerList<INotifyEvent>();
@@ -39,8 +41,8 @@ public class InotifyFileMonitor {
             if (watchHandle == -1) {
                 throw new IOException("inotify subsystem failed initialization.");
             } else {
-                Thread thread = new Thread(new EventPoller());
-                thread.start();
+                watcher = new Thread(new EventPoller());
+                watcher.start();
             }
         }
     }
