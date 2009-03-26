@@ -47,28 +47,104 @@ public interface Kernel32Interface extends StdCallLibrary, W32Errors {
 
     Pointer LocalFree(Pointer hLocal);
 
+    /**
+     * Frees the specified global memory object and invalidates its handle.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/aa366579.aspx
+     */
     Pointer GlobalFree(Pointer hGlobal);
 
+    /**
+     * Retrieves a module handle for the specified module. The module must have
+     * been loaded by the calling process.
+     * 
+     * To avoid the race conditions described in the Remarks section, use the
+     * GetModuleHandleEx function.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms683199(VS.85).aspx
+     */
     HMODULE GetModuleHandle(String name);
 
+    /**
+     * Retrieves the current system date and time. The system time is expressed
+     * in Coordinated Universal Time (UTC).
+     * 
+     * To retrieve the current system date and time in local time, use the
+     * GetLocalTime function.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms724390(VS.85).aspx
+     */
     void GetSystemTime(SYSTEMTIME result);
 
+    /**
+     * Retrieves the thread identifier of the calling thread.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms683183(VS.85).aspx
+     */
     int GetCurrentThreadId();
 
+    /**
+     * Retrieves a pseudo handle for the calling thread.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms683182(VS.85).aspx
+     */
     HANDLE GetCurrentThread();
 
+    /**
+     * Retrieves the process identifier of the calling process.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms683180(VS.85).aspx
+     */
     int GetCurrentProcessId();
 
+    /**
+     * Retrieves a pseudo handle for the current process.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms683179(VS.85).aspx
+     */
     HANDLE GetCurrentProcess();
 
+    /**
+     * Retrieves the process identifier of the specified process.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms683215(VS.85).aspx
+     */
     int GetProcessId(HANDLE process);
 
+    /**
+     * This function retrieves the major and minor version numbers of the system
+     * on which the specified process expects to run.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms885636.aspx
+     */
     int GetProcessVersion(int processId);
 
+    /**
+     * Retrieves the calling thread's last-error code value. The last-error code
+     * is maintained on a per-thread basis. Multiple threads do not overwrite
+     * each other's last-error code.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms679360(VS.85).aspx
+     */
     int GetLastError();
 
+    /**
+     * This function sets the last-error code for the calling thread.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/aa909251.aspx
+     */
     void SetLastError(int dwErrCode);
 
+    /**
+     * Determines whether a disk drive is a removable, fixed, CD-ROM, RAM disk,
+     * or network drive.
+     * 
+     * To determine whether a drive is a USB-type drive, call
+     * SetupDiGetDeviceRegistryProperty and specify the SPDRP_REMOVAL_POLICY
+     * property.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/aa364939.aspx
+     */
     int GetDriveType(String rootPathName);
 
     int FORMAT_MESSAGE_ALLOCATE_BUFFER = 0x0100;
@@ -77,9 +153,26 @@ public interface Kernel32Interface extends StdCallLibrary, W32Errors {
 
     int FORMAT_MESSAGE_IGNORE_INSERTS = 0x200;
 
+    /**
+     * Formats a message string. The function requires a message definition as
+     * input. The message definition can come from a buffer passed into the
+     * function. It can come from a message table resource in an already-loaded
+     * module. Or the caller can ask the function to search the system's message
+     * table resource(s) for the message definition. The function finds the
+     * message definition in a message table resource based on a message
+     * identifier and a language identifier. The function copies the formatted
+     * message text to an output buffer, processing any embedded insert
+     * sequences if requested.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms679351.aspx
+     */
     int FormatMessage(int dwFlags, Pointer lpSource, int dwMessageId, int dwLanguageId,
             PointerByReference lpBuffer, int nSize, Pointer va_list);
 
+    /**
+     * @see #FormatMessage(int, Pointer, int, int, PointerByReference, int,
+     *      Pointer)
+     */
     int FormatMessage(int dwFlags, Pointer lpSource, int dwMessageId, int dwLanguageId,
             Buffer lpBuffer, int nSize, Pointer va_list);
 
@@ -165,34 +258,90 @@ public interface Kernel32Interface extends StdCallLibrary, W32Errors {
 
     int GENERIC_WRITE = 0x40000000;
 
+    /**
+     * Creates or opens a file or I/O device. The most commonly used I/O devices
+     * are as follows: file, file stream, directory, physical disk, volume,
+     * console buffer, tape drive, communications resource, mailslot, and pipe.
+     * The function returns a handle that can be used to access the file or
+     * device for various types of I/O depending on the file or device and the
+     * flags and attributes specified.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/aa363858.aspx
+     */
     HANDLE CreateFile(String lpFileName, int dwDesiredAccess, int dwShareMode,
             SECURITY_ATTRIBUTES lpSecurityAttributes, int dwCreationDisposition,
             int dwFlagsAndAttributes, HANDLE hTemplateFile);
 
+    /**
+     * Creates a new directory. If the underlying file system supports security
+     * on files and directories, the function applies a specified security
+     * descriptor to the new directory.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/aa363855.aspx
+     */
     boolean CreateDirectory();
 
+    /**
+     * Creates an input/output (I/O) completion port and associates it with a
+     * specified file handle, or creates an I/O completion port that is not yet
+     * associated with a file handle, allowing association at a later time.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/aa363862(VS.85).aspx
+     */
     HANDLE CreateIoCompletionPort(HANDLE FileHandle, HANDLE ExistingCompletionPort,
             Pointer CompletionKey, int NumberOfConcurrentThreads);
 
     int INFINITE = 0xFFFFFFFF;
 
+    /**
+     * Attempts to dequeue an I/O completion packet from the specified I/O
+     * completion port. If there is no completion packet queued, the function
+     * waits for a pending I/O operation associated with the completion port to
+     * complete.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/aa364986(VS.85).aspx
+     */
     boolean GetQueuedCompletionStatus(HANDLE CompletionPort, IntByReference lpNumberOfBytes,
             ByReference lpCompletionKey, PointerByReference lpOverlapped, int dwMilliseconds);
 
+    /**
+     * Posts an I/O completion packet to an I/O completion port.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/aa365458(VS.85).aspx
+     */
     boolean PostQueuedCompletionStatus(HANDLE CompletionPort, int dwNumberOfBytesTransferred,
             Pointer dwCompletionKey, OVERLAPPED lpOverlapped);
 
+    /**
+     * Waits until the specified object is in the signaled state or the time-out
+     * interval elapses.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms687032.aspx
+     */
     int WaitForSingleObject(HANDLE hHandle, int dwMilliseconds);
 
+    /**
+     * Duplicates an object handle.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms724251.aspx
+     */
     boolean DuplicateHandle(HANDLE hSourceProcessHandle, HANDLE hSourceHandle,
             HANDLE hTargetProcessHandle, HANDLEByReference lpTargetHandle, int dwDesiredAccess,
             boolean bInheritHandle, int dwOptions);
 
+    /**
+     * Closes an open file handle.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/ms724211(VS.85).aspx
+     */
     boolean CloseHandle(HANDLE hObject);
 
     /**
-     * NOTE: only exists in unicode form (W suffix). Define this method
-     * explicitly with the W suffix to avoid inadvertent calls in ASCII mode.
+     * Retrieves information that describes the changes within the specified
+     * directory. The function does not report changes to the specified
+     * directory itself.
+     * 
+     * @see http://msdn.microsoft.com/en-us/library/aa363858.aspx
      */
     boolean ReadDirectoryChangesW(HANDLE directory, FILE_NOTIFY_INFORMATION info, int length,
             boolean watchSubtree, int notifyFilter, IntByReference bytesReturned,
