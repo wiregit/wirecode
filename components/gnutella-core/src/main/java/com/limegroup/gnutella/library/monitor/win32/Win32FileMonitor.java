@@ -20,13 +20,13 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
 public class Win32FileMonitor {
-    private final Map<File, Integer> watched = new HashMap<File, Integer>();
+    private final Map<File, Integer> watched;
 
-    private final Map<File, FileInfo> fileMap = new HashMap<File, FileInfo>();
+    private final Map<File, FileInfo> fileMap;
 
-    private final Map<HANDLE, FileInfo> handleMap = new HashMap<HANDLE, FileInfo>();
+    private final Map<HANDLE, FileInfo> handleMap;
 
-    private final EventListenerList<W32NotifyActionEvent> listeners = new EventListenerList<W32NotifyActionEvent>();
+    private final EventListenerList<W32NotifyActionEvent> listeners;
 
     private final Kernel32 kernel32;
 
@@ -36,6 +36,10 @@ public class Win32FileMonitor {
 
     public Win32FileMonitor() {
         kernel32 = new Kernel32();
+        watched = new HashMap<File, Integer>();
+        fileMap = new HashMap<File, FileInfo>();
+        handleMap = new HashMap<HANDLE, FileInfo>();
+        listeners = new EventListenerList<W32NotifyActionEvent>();
     }
 
     public synchronized void init() throws IOException {
