@@ -40,7 +40,7 @@ public class Win32FileMonitor {
                 throw new IOException("Error initializing IOCompletionPort: '"
                         + getSystemError(err) + "' (" + err + ")");
             } else {
-                watcher = new Thread(new EventPoller(), "W32 File Monitor");
+                watcher = new EventPoller("W32 File Monitor");
                 watcher.start();
             }
         }
@@ -153,7 +153,7 @@ public class Win32FileMonitor {
         handleMap.put(handle, finfo);
         // Existing port is returned
         port = klib.CreateIoCompletionPort(handle, port, handle.getPointer(), 0);
-        if (new INVALID_HANDLE_VALUE().equals(port)) {
+        if (INVALID_HANDLE_VALUE.INVALID_HANDLE.equals(port)) {
             throw new IOException("Unable to create/use I/O Completion port " + "for " + file
                     + " (" + klib.GetLastError() + ")");
         }
@@ -173,11 +173,13 @@ public class Win32FileMonitor {
             removeWatch((File) keys[i++]);
         }
 
+        watcher.interrupt();
+        watcher = null;
+        
         Kernel32 klib = Kernel32.INSTANCE;
         klib.PostQueuedCompletionStatus(port, 0, null, null);
         klib.CloseHandle(port);
         port = null;
-        watcher = null;
     }
 
     protected void finalize() {
@@ -207,20 +209,15 @@ public class Win32FileMonitor {
         return listeners.removeListener(eventListener);
     }
 
-    private final class EventPoller implements Runnable {
+    private final class EventPoller extends Thread {
+        public EventPoller(String name) {
+            super(name);
+        }
+
         public void run() {
             FileInfo finfo;
-            while (true) {
+            while (!isInterrupted()) {
                 finfo = waitForChange();
-                if (finfo == null) {
-                    synchronized (this) {
-                        if (fileMap.isEmpty()) {
-                            watcher = null;
-                            break;
-                        }
-                    }
-                    continue;
-                }
 
                 try {
                     handleChanges(finfo);

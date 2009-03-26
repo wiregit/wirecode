@@ -22,6 +22,5 @@ public class MainW32API {
         
         fileMonitor.addWatch(new File("c://test1"), true);
         fileMonitor.addWatch(new File("c://test2"), true);
-        Thread.sleep(10000000);
     }
 }
