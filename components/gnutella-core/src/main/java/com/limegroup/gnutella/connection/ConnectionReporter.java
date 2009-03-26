@@ -27,7 +27,7 @@ public class ConnectionReporter implements ConnectionLifecycleListener {
     private final AtomicLong startedConnecting = new AtomicLong(0);
     private final AtomicBoolean connected = new AtomicBoolean(false);
     
-    public static final String REPORTING_URL = "http://client-data.limewire.com/";
+    public static final String REPORTING_URL = "http://client-data.limewire.com/conn";
     private ConnectionManager connectionManager;
 
     @Inject
