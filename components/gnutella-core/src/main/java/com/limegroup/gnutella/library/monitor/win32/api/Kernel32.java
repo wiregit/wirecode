@@ -16,7 +16,6 @@ import java.nio.Buffer;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
 import com.sun.jna.ptr.ByReference;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
@@ -26,17 +25,6 @@ public interface Kernel32 extends W32API {
     
     Kernel32 INSTANCE = (Kernel32)
         Native.loadLibrary("kernel32", Kernel32.class, DEFAULT_OPTIONS);
-
-    class SYSTEMTIME extends Structure {
-        public short wYear;
-        public short wMonth;
-        public short wDayOfWeek;
-        public short wDay;
-        public short wHour;
-        public short wMinute;
-        public short wSecond;
-        public short wMilliseconds;
-    }
 
     Pointer LocalFree(Pointer hLocal);
     Pointer GlobalFree(Pointer hGlobal);
@@ -110,11 +98,6 @@ public interface Kernel32 extends W32API {
     int DRIVE_RAMDISK = 6;
     
     int GENERIC_WRITE = 0x40000000;
-    class SECURITY_ATTRIBUTES extends Structure {
-        public int nLength = size();
-        public Pointer lpSecurityDescriptor;
-        public boolean bInheritHandle;
-    }
     HANDLE CreateFile(String lpFileName, int dwDesiredAccess, int dwShareMode,
                       SECURITY_ATTRIBUTES lpSecurityAttributes,
                       int dwCreationDisposition, int dwFlagsAndAttributes,
@@ -147,57 +130,6 @@ public interface Kernel32 extends W32API {
     boolean CloseHandle(HANDLE hObject);
     
 
-    /** This structure is non-trivial since it is a pattern stamped
-     * into a large block of result memory rather than something that stands
-     * alone or is used for input.
-     */
-    class FILE_NOTIFY_INFORMATION extends Structure {
-        public int NextEntryOffset;
-        public int Action;
-        public int FileNameLength;
-        // filename is not nul-terminated, so we can't use a String/WString
-        public char[] FileName = new char[1];
-        
-        private FILE_NOTIFY_INFORMATION() { } 
-        public FILE_NOTIFY_INFORMATION(int size) {
-            if (size < size())
-                throw new IllegalArgumentException("Size must greater than "
-                                                   + size() + ", requested " 
-                                                   + size);
-            allocateMemory(size);
-        }
-        /** WARNING: this filename may be either the short or long form
-         * of the filename.
-         */
-        public String getFilename() {
-            return new String(FileName, 0, FileNameLength/2);
-        }
-        public void read() {
-            // avoid reading filename until we know how long it is
-            FileName = new char[0];
-            super.read();
-            FileName = getPointer().getCharArray(12, FileNameLength/2);
-        }
-        public FILE_NOTIFY_INFORMATION next() {
-            if (NextEntryOffset == 0)
-                return null;
-            FILE_NOTIFY_INFORMATION next = new FILE_NOTIFY_INFORMATION();
-            next.useMemory(getPointer(), NextEntryOffset);
-            next.read();
-            return next;
-        }
-    }
-    class OVERLAPPED extends Structure {
-        public int Internal;
-        public int InternalHigh;
-        public int Offset;
-        public int OffsetHigh;
-        public Pointer hEvent;
-    }
-    // TODO: figure out how OVERLAPPED is used and apply an appropriate mapping
-    interface OVERLAPPED_COMPLETION_ROUTINE extends StdCallCallback {
-        void callback(int errorCode, int nBytesTransferred, OVERLAPPED overlapped);
-    }
     /** NOTE: only exists in unicode form (W suffix).  Define this method 
      * explicitly with the W suffix to avoid inadvertent calls in ASCII mode. 
      */

@@ -10,12 +10,12 @@ import java.util.Map;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
+import com.limegroup.gnutella.library.monitor.win32.api.FILE_NOTIFY_INFORMATION;
 import com.limegroup.gnutella.library.monitor.win32.api.HANDLE;
 import com.limegroup.gnutella.library.monitor.win32.api.HANDLEByReference;
 import com.limegroup.gnutella.library.monitor.win32.api.INVALID_HANDLE_VALUE;
 import com.limegroup.gnutella.library.monitor.win32.api.Kernel32;
-import com.limegroup.gnutella.library.monitor.win32.api.Kernel32.FILE_NOTIFY_INFORMATION;
-import com.limegroup.gnutella.library.monitor.win32.api.Kernel32.OVERLAPPED;
+import com.limegroup.gnutella.library.monitor.win32.api.OVERLAPPED;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
