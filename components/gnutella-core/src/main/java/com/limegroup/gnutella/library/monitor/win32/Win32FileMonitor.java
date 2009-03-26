@@ -35,7 +35,7 @@ public class Win32FileMonitor {
     public synchronized void init() throws IOException {
         if (port == null) {
             Kernel32 klib = Kernel32.INSTANCE;
-            port = klib.CreateIoCompletionPort(new INVALID_HANDLE_VALUE(), port, null, 0);
+            port = klib.CreateIoCompletionPort(INVALID_HANDLE_VALUE.INVALID_HANDLE, port, null, 0);
             if (port == null) {
                 int err = klib.GetLastError();
                 throw new IOException("Error initializing IOCompletionPort: '"
@@ -74,9 +74,9 @@ public class Win32FileMonitor {
         }
     }
 
-    private static final int BUFFER_SIZE = 4096;
-
     private class FileInfo {
+        private static final int BUFFER_SIZE = 4096;
+
         public final File file;
 
         public final HANDLE handle;
@@ -108,6 +108,7 @@ public class Win32FileMonitor {
             File file = new File(finfo.file, fni.getFilename());
             W32NotifyActionEvent event = new W32NotifyActionEvent(fni.Action, file
                     .getAbsolutePath());
+            // TODO broadcast asynchronously
             listeners.broadcast(event);
             fni = fni.next();
         } while (fni != null);
@@ -157,7 +158,7 @@ public class Win32FileMonitor {
         int flags = Kernel32.FILE_FLAG_BACKUP_SEMANTICS | Kernel32.FILE_FLAG_OVERLAPPED;
         HANDLE handle = klib.CreateFile(file.getAbsolutePath(), Kernel32.FILE_LIST_DIRECTORY, mask,
                 null, Kernel32.OPEN_EXISTING, flags, null);
-        if (new INVALID_HANDLE_VALUE().equals(handle)) {
+        if (INVALID_HANDLE_VALUE.INVALID_HANDLE.equals(handle)) {
             throw new IOException("Unable to open " + file + " (" + klib.GetLastError() + ")");
         }
         FileInfo finfo = new FileInfo(file, handle, eventMask, recursive);

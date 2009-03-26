@@ -23,8 +23,8 @@ public class HANDLEByReference extends ByReference {
         if (p == null) {
             return null;
         }
-        if (INVALID_HANDLE_VALUE.pointer.equals(p)) {
-            return new INVALID_HANDLE_VALUE();
+        if (INVALID_HANDLE_VALUE.INVALID_HANDLE.getPointer().equals(p)) {
+            return INVALID_HANDLE_VALUE.INVALID_HANDLE;
         }
         HANDLE h = new HANDLE();
         h.setPointer(p);

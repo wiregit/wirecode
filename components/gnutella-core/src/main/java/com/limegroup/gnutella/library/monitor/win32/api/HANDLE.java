@@ -14,9 +14,8 @@ public class HANDLE extends PointerType {
     /** Override to the appropriate object for INVALID_HANDLE_VALUE. */
     public Object fromNative(Object nativeValue, FromNativeContext context) {
         Object o = super.fromNative(nativeValue, context);
-        INVALID_HANDLE_VALUE invalidHandle = new INVALID_HANDLE_VALUE();
-        if (invalidHandle.equals(o)) {
-            return invalidHandle;
+        if (INVALID_HANDLE_VALUE.INVALID_HANDLE.equals(o)) {
+            return INVALID_HANDLE_VALUE.INVALID_HANDLE;
         }
         return o;
     }
