@@ -3,8 +3,6 @@ package org.limewire.geocode;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
-import junit.framework.TestCase;
-
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.geocode.GeocodeInformation.Property;
@@ -14,6 +12,8 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.util.AssignParameterAction;
 
 import com.google.inject.Provider;
+
+import junit.framework.TestCase;
 
 public class CachedGeoLocationImplTest extends TestCase {
 
@@ -27,6 +27,7 @@ public class CachedGeoLocationImplTest extends TestCase {
         super(name);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();

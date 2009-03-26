@@ -466,7 +466,6 @@ public class LimeWireCoreModule extends AbstractModule {
     } 
     
     @Provides
-    @Singleton
     @ExternalIP
     public byte[] get(NetworkManager networkManager) {
         return networkManager.getExternalAddress();

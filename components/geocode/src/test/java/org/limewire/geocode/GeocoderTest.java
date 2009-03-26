@@ -5,13 +5,13 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.Test;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.http.httpclient.LimeHttpClient;
@@ -19,6 +19,8 @@ import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Provider;
+
+import junit.framework.Test;
 
 public class GeocoderTest extends BaseTestCase {
     private Mockery mockery;
@@ -36,7 +38,8 @@ public class GeocoderTest extends BaseTestCase {
     
     private Geocoder geo;
     private Map<String,String> props;
-        
+
+    @SuppressWarnings("unchecked")
     @Override
     protected void setUp() throws Exception {
         
@@ -94,6 +97,8 @@ public class GeocoderTest extends BaseTestCase {
                 throw new RuntimeException(e);
             }
             will(returnValue(new StringInputStream(testS)));
+            allowing(httpEntity).getContentType();
+            will(returnValue(new BasicHeader("Content-Type", HTTP.DEFAULT_CONTENT_TYPE)));
             allowing(httpClient).releaseConnection(with(same(response)));
         }});
         // Test some state information
