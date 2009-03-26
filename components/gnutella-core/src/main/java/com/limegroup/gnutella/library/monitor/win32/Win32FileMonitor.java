@@ -111,7 +111,7 @@ public class Win32FileMonitor {
         // Existing port is returned
         port = kernel32.CreateIoCompletionPort(handle, port, handle.getPointer(), 0);
         if (INVALID_HANDLE_VALUE.INVALID_HANDLE.equals(port)) {
-            // TODO remove from apps if exception?
+            // TODO remove from maps if exception?
             throw new IOException("Unable to create/use I/O Completion port " + "for " + file
                     + " (" + kernel32.GetLastError() + ")");
         }
@@ -119,7 +119,7 @@ public class Win32FileMonitor {
         if (!kernel32.ReadDirectoryChangesW(handle, finfo.info, finfo.info.size(), recursive,
                 eventMask, finfo.infoLength, finfo.overlapped, null)) {
             int err = kernel32.GetLastError();
-            // TODO remove from apps if exception?
+            // TODO remove from maps if exception?
             throw new IOException("ReadDirectoryChangesW failed on " + finfo.file + ", handle "
                     + handle + ": '" + kernel32.getSystemError(err) + "' (" + err + ")");
         }
