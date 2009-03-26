@@ -21,6 +21,8 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.concurrent.ExecutorsHelper;
@@ -171,7 +173,8 @@ public class TcpBootstrap {
         List<Endpoint> endpoints = new ArrayList<Endpoint>();
         try {
             InputStream in = response.getEntity().getContent();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String charset = EntityUtils.getContentCharSet(response.getEntity());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, charset != null ? charset : HTTP.DEFAULT_CONTENT_CHARSET));
             while((line = reader.readLine()) != null) {
                 Endpoint host=new Endpoint(line, true); // only accept numeric addresses.
                 endpoints.add(host);

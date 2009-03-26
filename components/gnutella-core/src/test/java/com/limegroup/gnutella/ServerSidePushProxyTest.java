@@ -13,6 +13,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.apache.http.protocol.HTTP;
 import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Base32;
@@ -353,9 +354,9 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
      throws Exception {
         Socket s = new Socket("localhost", PORT);
         BufferedReader in = 
-            new BufferedReader(new InputStreamReader(s.getInputStream()));
+            new BufferedReader(new InputStreamReader(s.getInputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
         BufferedWriter out = 
-            new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+            new BufferedWriter(new OutputStreamWriter(s.getOutputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
             
         String result = null;
         Message m = null;

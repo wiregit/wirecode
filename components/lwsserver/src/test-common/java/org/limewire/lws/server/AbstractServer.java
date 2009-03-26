@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.protocol.HTTP;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.service.ErrorService;
 import org.limewire.util.StringUtils;
@@ -238,7 +239,8 @@ public abstract class AbstractServer implements Runnable  {
         
         private void handleClient() throws IOException {
             InputStream is = new BufferedInputStream(s.getInputStream());
-            final PrintStream ps = new PrintStream(s.getOutputStream(), true);
+            // using content charset, since protocol charset is subset and we only send ascii for headers
+            final PrintStream ps = new PrintStream(s.getOutputStream(), true, HTTP.DEFAULT_CONTENT_CHARSET);
             /*
              * we will only block in read for this many milliseconds before we
              * fail with java.io.InterruptedIOException, at which point we will

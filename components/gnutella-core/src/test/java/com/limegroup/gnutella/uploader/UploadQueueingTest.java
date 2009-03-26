@@ -11,6 +11,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.apache.http.protocol.HTTP;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.ByteReader;
@@ -498,7 +499,7 @@ public class UploadQueueingTest extends LimeTestCase {
         try {
             Socket sb = psf.getSocketB();
             OutputStream os = sb.getOutputStream();
-            out = new BufferedWriter(new OutputStreamWriter(os));
+            out = new BufferedWriter(new OutputStreamWriter(os, HTTP.DEFAULT_PROTOCOL_CHARSET));
             out.write("GET " + url1 + " HTTP/1.1\r\n");
             out.write("User-Agent: " + LimeWireUtils.getHttpServer() + "\r\n");
             out.write("X-Queue: 0.1\r\n");// we support remote queueing

@@ -24,6 +24,7 @@ import org.apache.http.ProtocolException;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicLineParser;
+import org.apache.http.protocol.HTTP;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
@@ -442,9 +443,9 @@ public class PushUploadTest extends LimeTestCase {
         
         socket = getSocketFromPush();
 
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
         out = new BufferedWriter(new OutputStreamWriter(socket
-                .getOutputStream()));
+                .getOutputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
 
         assertEquals("GIV 0:"
                 + new GUID(guid).toString() + "/file", in.readLine());
@@ -464,9 +465,9 @@ public class PushUploadTest extends LimeTestCase {
         
         socket = new Socket("localhost", PORT);
 
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
         out = new BufferedWriter(new OutputStreamWriter(socket
-                .getOutputStream()));
+                .getOutputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
     }
 
     private HttpResponse sendRequest(HttpRequest request) throws Exception {

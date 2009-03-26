@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.apache.http.protocol.HTTP;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
@@ -210,7 +211,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             try {
                 BufferedWriter sockWriter  = 
                     new BufferedWriter(new
-                            OutputStreamWriter(httpSock.getOutputStream()));
+                            OutputStreamWriter(httpSock.getOutputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
                 sockWriter.write("HTTP/1.1 202 OK\r\n");
                 sockWriter.flush();
 
@@ -218,7 +219,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
                 String currLine = null;
                 BufferedReader reader = 
                     new BufferedReader(new
-                            InputStreamReader(httpSock.getInputStream()));
+                            InputStreamReader(httpSock.getInputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
 
                 // confirm a GET/HEAD pushproxy request
                 currLine = reader.readLine();
@@ -246,7 +247,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
                 try {
                     BufferedWriter writer = 
                         new BufferedWriter(new
-                                OutputStreamWriter(push.getOutputStream()));
+                                OutputStreamWriter(push.getOutputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
                     writer.write("GIV 0:" + new GUID(clientGUID).toHexString() + "/\r\n");
                     writer.write("\r\n");
                     writer.flush();
@@ -322,7 +323,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         // start reading and confirming the HTTP request
         String currLine = null;
         BufferedReader reader = new BufferedReader(new InputStreamReader(
-                httpSock.getInputStream()));
+                httpSock.getInputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
 
         // confirm a GET/HEAD push proxy request
         currLine = reader.readLine();
@@ -343,7 +344,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         // send back a 200 and make sure no PushRequest is sent via the normal
         // way
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                httpSock.getOutputStream()));
+                httpSock.getOutputStream(), HTTP.DEFAULT_PROTOCOL_CHARSET));
 
         writer.write("HTTP/1.1 200 OK\r\n");
         writer.flush();
