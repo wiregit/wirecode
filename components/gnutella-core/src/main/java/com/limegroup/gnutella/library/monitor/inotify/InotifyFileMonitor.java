@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library.monitor.inotify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -100,8 +101,30 @@ public class InotifyFileMonitor {
         return listeners.removeListener(listener);
     }
 
-    public void dispose() {
-        // TODO dispose of resources
+    public synchronized void dispose() {
+        for (Iterator<String> i = fileWatchDescriptors.keySet().iterator(); i.hasNext();) {
+            String path = i.next();
+            try {
+                removeWatch(new File(path));
+            } catch (IOException e) {
+                //TODO handle somehow
+            }
+        }
+        // TODO double check that all handles are closed
+        if (watcher != null) {
+            watcher.interrupt();
+            watcher = null;
+        }
+
+        if (watchHandle != -1) {
+            iNotify.close(watchHandle);
+            watchHandle = -1;
+        }
+    }
+    
+    @Override
+    protected void finalize() throws Throwable {
+        dispose();
     }
 
 }
