@@ -16,7 +16,6 @@ import com.limegroup.gnutella.library.monitor.win32.api.INVALID_HANDLE_VALUE;
 import com.limegroup.gnutella.library.monitor.win32.api.Kernel32;
 import com.limegroup.gnutella.library.monitor.win32.api.Kernel32.FILE_NOTIFY_INFORMATION;
 import com.limegroup.gnutella.library.monitor.win32.api.Kernel32.OVERLAPPED;
-import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
