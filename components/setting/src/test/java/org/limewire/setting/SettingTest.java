@@ -144,21 +144,21 @@ public class SettingTest extends BaseTestCase {
         assertEquals("Bool default", true, settings.BOOL_SETTING.getValue());
         assertEquals("Byte default", (byte)23, settings.BYTE_SETTING.getValue());
         assertEquals("Color default", new Color(255,127,63), 
-                     settings.COLOR_SETTING.getValue());        
+                     settings.COLOR_SETTING.get());        
 
         assertEquals("Int default", 143, settings.INT_SETTING.getValue());
         assertEquals("Long default", 666666, settings.LONG_SETTING.getValue());
-        assertEquals("String default", "terrific", settings.STRING_SETTING.getValue());
+        assertEquals("String default", "terrific", settings.STRING_SETTING.get());
         assertTrue("char arrays should be equal", 
                    Arrays.equals(new char[]{'a','b','c'}, 
-                                 settings.CHAR_ARRAY_SETTING.getValue()));
+                                 settings.CHAR_ARRAY_SETTING.get()));
         assertTrue("string arrays should be equal", 
                    Arrays.equals(new String[]{"string1", "string2", "string3"}, 
-                                 settings.STRING_ARRAY_SETTING.getValue()));
+                                 settings.STRING_ARRAY_SETTING.get()));
         
         assertTrue("file arrays should be equal", 
                    Arrays.equals(files, 
-                                 settings.FILE_ARRAY_SETTING.getValue()));
+                                 settings.FILE_ARRAY_SETTING.get()));
         
         assertEquals("Expiring Int default", 12061980, settings.EXPIRABLE_INT_SETTING.getValue());
         assertEquals("Expiring Boolean default", false, settings.EXPIRABLE_BOOLEAN_SETTING.getValue());
@@ -166,37 +166,37 @@ public class SettingTest extends BaseTestCase {
         // Confirm that we can set everything 
         settings.BOOL_SETTING.setValue(false);
         settings.BYTE_SETTING.setValue((byte)6);
-        settings.COLOR_SETTING.setValue(new Color(66, 44, 67));
-        settings.FILE_SETTING.setValue(new File(testFilePath));
+        settings.COLOR_SETTING.set(new Color(66, 44, 67));
+        settings.FILE_SETTING.set(new File(testFilePath));
         settings.INT_SETTING.setValue(234);
         settings.LONG_SETTING.setValue(555555);
-        settings.STRING_SETTING.setValue("OK so far");
-        settings.CHAR_ARRAY_SETTING.setValue(new char[] {'d', 'e', 'f'});
-        settings.STRING_ARRAY_SETTING.setValue(new String[]{"OK", "so", "far"});
+        settings.STRING_SETTING.set("OK so far");
+        settings.CHAR_ARRAY_SETTING.set(new char[] {'d', 'e', 'f'});
+        settings.STRING_ARRAY_SETTING.set(new String[]{"OK", "so", "far"});
         if(OSUtils.isUnix() || OSUtils.isMacOSX())
-            settings.FILE_ARRAY_SETTING.setValue(new File[]{new File("/temp/A"), new File("/temp/B")});
+            settings.FILE_ARRAY_SETTING.set(new File[]{new File("/temp/A"), new File("/temp/B")});
         else
-            settings.FILE_ARRAY_SETTING.setValue(new File[]{new File("c:/temp/A"), new File("c:/temp/B")});
+            settings.FILE_ARRAY_SETTING.set(new File[]{new File("c:/temp/A"), new File("c:/temp/B")});
         settings.EXPIRABLE_INT_SETTING.setValue(0xFFFF);
         settings.EXPIRABLE_BOOLEAN_SETTING.setValue(true);
         
         assertEquals("Bool set", false, settings.BOOL_SETTING.getValue());
         assertEquals("Byte set", (byte)6, settings.BYTE_SETTING.getValue());
-        assertEquals("Color set", new Color(66,44,67), settings.COLOR_SETTING.getValue());
+        assertEquals("Color set", new Color(66,44,67), settings.COLOR_SETTING.get());
         assertEquals("File set", new File(testFilePath), 
-                                 settings.FILE_SETTING.getValue());
+                                 settings.FILE_SETTING.get());
         assertEquals("Int set", 234, settings.INT_SETTING.getValue());
         assertEquals("Long set", 555555, settings.LONG_SETTING.getValue());
-        assertEquals("String set", "OK so far", settings.STRING_SETTING.getValue());
+        assertEquals("String set", "OK so far", settings.STRING_SETTING.get());
         assertTrue("char arrays should be equal", 
                    Arrays.equals(new char[]{'d','e','f'}, 
-                                 settings.CHAR_ARRAY_SETTING.getValue()));
+                                 settings.CHAR_ARRAY_SETTING.get()));
         assertTrue("string arrays should be equal", 
                    Arrays.equals(new String[]{"OK", "so", "far"}, 
-                                 settings.STRING_ARRAY_SETTING.getValue()));
+                                 settings.STRING_ARRAY_SETTING.get()));
         assertTrue("file arrays should be equal", 
                    Arrays.equals(testFileArray, 
-                                 settings.FILE_ARRAY_SETTING.getValue()));
+                                 settings.FILE_ARRAY_SETTING.get()));
                                  
         assertEquals("Expiring Int set", 0xFFFF, settings.EXPIRABLE_INT_SETTING.getValue());
         assertEquals("Expiring Boolean set", true, settings.EXPIRABLE_BOOLEAN_SETTING.getValue());
@@ -207,21 +207,21 @@ public class SettingTest extends BaseTestCase {
         settings = new TestSettings(settingsFile);
         assertEquals("Bool set", false, settings.BOOL_SETTING.getValue());
         assertEquals("Byte set", (byte)6, settings.BYTE_SETTING.getValue());
-        assertEquals("Color set", new Color(66,44,67), settings.COLOR_SETTING.getValue());
+        assertEquals("Color set", new Color(66,44,67), settings.COLOR_SETTING.get());
         assertEquals("File set", new File(testFilePath), 
-                                 settings.FILE_SETTING.getValue());
+                                 settings.FILE_SETTING.get());
         assertEquals("Int set", 234, settings.INT_SETTING.getValue());
         assertEquals("Long set", 555555, settings.LONG_SETTING.getValue());
-        assertEquals("String set", "OK so far", settings.STRING_SETTING.getValue());
+        assertEquals("String set", "OK so far", settings.STRING_SETTING.get());
         assertTrue("char arrays should be equal", 
                    Arrays.equals(new char[]{'d','e','f'}, 
-                                 settings.CHAR_ARRAY_SETTING.getValue()));
+                                 settings.CHAR_ARRAY_SETTING.get()));
         assertTrue("string arrays should be equal", 
                    Arrays.equals(new String[]{"OK", "so", "far"}, 
-                                 settings.STRING_ARRAY_SETTING.getValue()));
+                                 settings.STRING_ARRAY_SETTING.get()));
         assertTrue("file arrays should be equal", 
                    Arrays.equals(testFileArray, 
-                                 settings.FILE_ARRAY_SETTING.getValue()));
+                                 settings.FILE_ARRAY_SETTING.get()));
         
         assertEquals("Expiring Int set", 0xFFFF, settings.EXPIRABLE_INT_SETTING.getValue());
         assertEquals("Expiring Boolean set", true, settings.EXPIRABLE_BOOLEAN_SETTING.getValue());
@@ -229,21 +229,21 @@ public class SettingTest extends BaseTestCase {
         // Confirm that the backup object still has its default settings 
         assertEquals("Bool default", true, settings2.BOOL_SETTING.getValue());
         assertEquals("Byte default", (byte)23, settings2.BYTE_SETTING.getValue());
-        assertEquals("Color default", new Color(255,127,63), settings2.COLOR_SETTING.getValue());
+        assertEquals("Color default", new Color(255,127,63), settings2.COLOR_SETTING.get());
         assertEquals("File default", new File(testFilePath2), 
-                                     settings2.FILE_SETTING.getValue());
+                                     settings2.FILE_SETTING.get());
         assertEquals("Int default", 143, settings2.INT_SETTING.getValue());
         assertEquals("Long default", 666666, settings2.LONG_SETTING.getValue());
-        assertEquals("String default", "terrific", settings2.STRING_SETTING.getValue());
+        assertEquals("String default", "terrific", settings2.STRING_SETTING.get());
         assertTrue("char arrays should be equal", 
                    Arrays.equals(new char[]{'a','b','c'}, 
-                                 settings2.CHAR_ARRAY_SETTING.getValue()));
+                                 settings2.CHAR_ARRAY_SETTING.get()));
         assertTrue("string arrays should be equal", 
                    Arrays.equals(new String[]{ "string1", "string2", "string3" }, 
-                                 settings2.STRING_ARRAY_SETTING.getValue()));
+                                 settings2.STRING_ARRAY_SETTING.get()));
         assertTrue("file arrays should be equal", 
                    Arrays.equals(files, 
-                                 settings2.FILE_ARRAY_SETTING.getValue()));
+                                 settings2.FILE_ARRAY_SETTING.get()));
         
         assertEquals("Expiring Int default", 12061980, settings2.EXPIRABLE_INT_SETTING.getValue());
         assertEquals("Expiring Boolean default", false, settings2.EXPIRABLE_BOOLEAN_SETTING.getValue());
@@ -252,38 +252,38 @@ public class SettingTest extends BaseTestCase {
         settings2.FACTORY.reload();
         assertEquals("Bool set", false, settings2.BOOL_SETTING.getValue());
         assertEquals("Byte set", (byte)6, settings2.BYTE_SETTING.getValue());
-        assertEquals("Color set", new Color(66,44,67), settings2.COLOR_SETTING.getValue());
+        assertEquals("Color set", new Color(66,44,67), settings2.COLOR_SETTING.get());
         assertEquals("File set", new File(testFilePath), 
-                                 settings2.FILE_SETTING.getValue());
+                                 settings2.FILE_SETTING.get());
         assertEquals("Int set", 234, settings2.INT_SETTING.getValue());
         assertEquals("Long set", 555555, settings2.LONG_SETTING.getValue());
-        assertEquals("String set", "OK so far", settings2.STRING_SETTING.getValue());
+        assertEquals("String set", "OK so far", settings2.STRING_SETTING.get());
         assertTrue("char arrays should be equal", 
                    Arrays.equals(new char[]{'d','e','f'}, 
-                                 settings2.CHAR_ARRAY_SETTING.getValue()));
+                                 settings2.CHAR_ARRAY_SETTING.get()));
         assertTrue("string arrays should be equal", 
                    Arrays.equals(new String[]{"OK", "so", "far"}, 
-                                 settings2.STRING_ARRAY_SETTING.getValue()));
+                                 settings2.STRING_ARRAY_SETTING.get()));
         assertTrue("file arrays should be equal", 
                    Arrays.equals(testFileArray, 
-                                 settings2.FILE_ARRAY_SETTING.getValue()));
+                                 settings2.FILE_ARRAY_SETTING.get()));
                                  
 		// proxy file settings
 		// proxy is still unset so it should return the default setting's file
 		assertEquals("Proxy default comparison", 
-				settings2.PROXY_FILE_SETTING.getValue(),
-				settings2.FILE_SETTING.getValue());
+				settings2.PROXY_FILE_SETTING.get(),
+				settings2.FILE_SETTING.get());
 		// set new value
 		File proxyFile = new File("proxy-file-test");
-		settings2.PROXY_FILE_SETTING.setValue(proxyFile);
+		settings2.PROXY_FILE_SETTING.set(proxyFile);
 		assertNotEquals("Proxy set value comparison",
-				settings2.PROXY_FILE_SETTING.getValue(),
-				settings2.FILE_SETTING.getValue());
+				settings2.PROXY_FILE_SETTING.get(),
+				settings2.FILE_SETTING.get());
 		// revert to default
 		settings2.PROXY_FILE_SETTING.revertToDefault();
 		assertEquals("Proxy default comparison after revert", 
-				settings2.PROXY_FILE_SETTING.getValue(),
-				settings2.FILE_SETTING.getValue());
+				settings2.PROXY_FILE_SETTING.get(),
+				settings2.FILE_SETTING.get());
 		
         assertEquals("Expiring Int set", 0xFFFF, settings2.EXPIRABLE_INT_SETTING.getValue());
         assertEquals("Expiring Boolean set", true, settings2.EXPIRABLE_BOOLEAN_SETTING.getValue());
@@ -316,7 +316,7 @@ public class SettingTest extends BaseTestCase {
         FileArraySetting setting = factory.createFileArraySetting("FILE_ARRAY_SETTING", files);
         
         //  test add, remove, contains, indexOf, length
-        setting.setValue(new File[0]);
+        setting.set(new File[0]);
         
         assertEquals("Empty FileArraySetting", setting.length(), 0);
         

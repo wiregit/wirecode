@@ -151,7 +151,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
             LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
             RemoteFileDescFactory remoteFileDescFactory,
             @Named("backgroundExecutor") ScheduledExecutorService scheduler) {
-        this(lwsManager,downloadServices,lwsIntegrationServicesDelegate,remoteFileDescFactory,scheduler,LWSSettings.LWS_DOWNLOAD_PREFIX.getValue());
+        this(lwsManager,downloadServices,lwsIntegrationServicesDelegate,remoteFileDescFactory,scheduler,LWSSettings.LWS_DOWNLOAD_PREFIX.get());
     }    
     
     /** For testing. */

@@ -80,7 +80,7 @@ public class RestrictedResponderTest extends BaseTestCase {
     
     public void testRestrictions() throws Exception {
         // ban everyone
-        ipSetting.setValue(new String[0]);
+        ipSetting.set(new String[0]);
         TestResponder responder = new TestResponder(null);
         Message m = pingRequestFactory.createMulticastPing();
         responder.handleMessage(m, addr, h);
@@ -89,7 +89,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         assertNull(responder.handler);
         
         // allow this specific hosts
-        ipSetting.setValue(new String[]{"1.2.3.4"});
+        ipSetting.set(new String[]{"1.2.3.4"});
         triggerSimppUpdate();
         responder.handleMessage(m, addr, h);
         assertSame(m, responder.msg);

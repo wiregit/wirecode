@@ -31,7 +31,7 @@ public class SharingSettingsTest extends LimeTestCase {
 		for (int i = 0; i < types.length; i++) {
 			assertEquals("Should be the save directory", 
 					SharingSettings.getSaveDirectory(null),
-					SharingSettings.getFileSettingForMediaType(types[i]).getValue());
+					SharingSettings.getFileSettingForMediaType(types[i]).get());
 							
 		}
 	}
@@ -47,14 +47,14 @@ public class SharingSettingsTest extends LimeTestCase {
 		// set all mediatype directories
 		MediaType[] types = MediaType.getDefaultMediaTypes();
 		for (int i = 0; i < types.length; i++) {
-			SharingSettings.getFileSettingForMediaType(types[i]).setValue(dir);
+			SharingSettings.getFileSettingForMediaType(types[i]).set(dir);
 		}
 		
 		// test if they are all set
 		for (int i = 0; i < types.length; i++) {
 			assertEquals("Should be the set directory", 
 					dir,
-					SharingSettings.getFileSettingForMediaType(types[i]).getValue());
+					SharingSettings.getFileSettingForMediaType(types[i]).get());
 		}
 		
 		// revert them
@@ -69,7 +69,7 @@ public class SharingSettingsTest extends LimeTestCase {
 							types[i]).isDefault());
 			assertEquals("Should be the save directory", 
 					SharingSettings.getSaveDirectory(null),
-					SharingSettings.getFileSettingForMediaType(types[i]).getValue());
+					SharingSettings.getFileSettingForMediaType(types[i]).get());
 		}
 	}
 	

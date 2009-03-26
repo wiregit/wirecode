@@ -62,9 +62,9 @@ public abstract class PeerTestCase extends LimeTestCase {
     @SuppressWarnings({ "unused", "deprecation" })
     private static void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
             new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
             new String[] {"127.*.*.*", "192.168.*.*", "10.254.*.*", localIP});        
         NetworkSettings.PORT.setValue(SERVER_PORT);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);

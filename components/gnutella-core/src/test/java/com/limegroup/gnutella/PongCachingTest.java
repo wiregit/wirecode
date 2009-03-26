@@ -122,9 +122,9 @@ public final class PongCachingTest extends LimeTestCase {
         //all addresses but localhost and 18.239.0.*.  The latter is used in
         //pongs for testing.  TODO: it would be nice to have a way to prevent
         //BootstrapServerManager from adding defaults and connecting.
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
             new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
             new String[] {"127.*.*.*", "18.239.0.*"});
         // TODO hack: increment static field server port so each test case has its own port
         SERVER_PORT++;
@@ -271,7 +271,7 @@ public final class PongCachingTest extends LimeTestCase {
         }
         
         List pongs = pongCacher
-            .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
+            .getBestPongs(ApplicationSettings.LANGUAGE.get());
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
         Message m = pingRequestFactory.createPingRequest((byte)7);
@@ -330,7 +330,7 @@ public final class PongCachingTest extends LimeTestCase {
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
         //create a ja locale PingRequest
-        ApplicationSettings.LANGUAGE.setValue("ja");
+        ApplicationSettings.LANGUAGE.set("ja");
         Message m = pingRequestFactory.createPingRequest((byte)7);
         assertEquals("locale of ping should be ja",
                      "ja", ((PingRequest)m).getLocale());
@@ -341,7 +341,7 @@ public final class PongCachingTest extends LimeTestCase {
 
         Thread.sleep(100);
 
-        ApplicationSettings.LANGUAGE.setValue("en");        
+        ApplicationSettings.LANGUAGE.set("en");        
 
         //check for ja pongs
         Message received;   
@@ -374,7 +374,7 @@ public final class PongCachingTest extends LimeTestCase {
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );        
 
         //create a sv locale PingRequest
-        ApplicationSettings.LANGUAGE.setValue("sv"); 
+        ApplicationSettings.LANGUAGE.set("sv"); 
         Message m2 = pingRequestFactory.createPingRequest((byte)7);
         assertEquals("locale of ping should be sv",
                      "sv", ((PingRequest)m2).getLocale());

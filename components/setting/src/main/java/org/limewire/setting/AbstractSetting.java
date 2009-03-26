@@ -203,7 +203,7 @@ public abstract class AbstractSetting<T> implements Setting<T> {
     /* (non-Javadoc)
      * @see org.limewire.setting.Setting#setAlwaysSave(boolean)
      */
-    public AbstractSetting setAlwaysSave(boolean alwaysSave) {
+    public AbstractSetting<T> setAlwaysSave(boolean alwaysSave) {
         if (this.alwaysSave != alwaysSave) {
             this.alwaysSave = alwaysSave;
             fireSettingEvent(EventType.ALWAYS_SAVE_CHANGED);
@@ -214,7 +214,7 @@ public abstract class AbstractSetting<T> implements Setting<T> {
     /* (non-Javadoc)
      * @see org.limewire.setting.Setting#setPrivate(boolean)
      */
-    public Setting setPrivate(boolean isPrivate) {
+    public Setting<T> setPrivate(boolean isPrivate) {
         if (this.isPrivate != isPrivate) {
             this.isPrivate = isPrivate;
             fireSettingEvent(EventType.PRIVACY_CHANGED);

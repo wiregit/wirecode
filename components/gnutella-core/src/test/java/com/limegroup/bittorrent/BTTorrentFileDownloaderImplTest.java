@@ -89,8 +89,8 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         forceIPAddressBackup = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        forceIPAddressStringBackup = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
-        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
+        forceIPAddressStringBackup = ConnectionSettings.FORCED_IP_ADDRESS_STRING.get();
+        ConnectionSettings.FORCED_IP_ADDRESS_STRING.set("127.0.0.1");
         fileServer = new FileServer(TEST_PORT, fileDir);
         fileServer.start();
         super.setUp();
@@ -100,7 +100,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
     protected void tearDown() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(localIsPrivateBackup);
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(forceIPAddressBackup);
-        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(forceIPAddressStringBackup);
+        ConnectionSettings.FORCED_IP_ADDRESS_STRING.set(forceIPAddressStringBackup);
         fileServer.stop();
         fileServer.destroy();
         FileUtils.deleteRecursive(torrentDir);

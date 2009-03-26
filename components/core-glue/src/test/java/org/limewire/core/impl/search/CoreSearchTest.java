@@ -295,7 +295,7 @@ public class CoreSearchTest extends BaseTestCase {
         final String url = "http://url.com/blahblahblah";
         final String description = "description";
         
-        final String expectedUrl = PromotionSettings.REDIRECT_URL.getValue() + "?url=" + url + "&now=52&id=42";
+        final String expectedUrl = PromotionSettings.REDIRECT_URL.get() + "?url=" + url + "&now=52&id=42";
         
         final AtomicReference<List<SponsoredResult>> sponsoredResults = new AtomicReference<List<SponsoredResult>>();
         context.checking(new Expectations() {

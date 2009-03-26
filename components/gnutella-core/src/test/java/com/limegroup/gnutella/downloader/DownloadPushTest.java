@@ -47,7 +47,7 @@ public class DownloadPushTest extends DownloadTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[]{"127.*.*.*",
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(new String[]{"127.*.*.*",
                 "1.1.1.1","1.2.3.4","6.7.8.9"});
         super.setUp();
         testUDPAcceptorFactoryImpl = injector.getInstance(TestUDPAcceptorFactoryImpl.class);

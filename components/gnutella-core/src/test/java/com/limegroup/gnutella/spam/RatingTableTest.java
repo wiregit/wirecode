@@ -39,7 +39,7 @@ public class RatingTableTest extends LimeTestCase {
         SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
         // Whitelist the first address so it gets a default rating
         String[] whitelist = new String[] {addr1, addr2};
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(whitelist);
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(whitelist);
         Injector inject = LimeTestUtils.createInjector();
         manager = inject.getInstance(SpamManager.class);
         rfdFactory = inject.getInstance(RemoteFileDescFactory.class);

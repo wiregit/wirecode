@@ -122,7 +122,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         //  Currently, there are no default EVIL_HOSTS useragents.  to test this, we need
         //      to pick on someone, so it will be Morpheus =)
         String [] agents = {"morpheus"};
-        ConnectionSettings.EVIL_HOSTS.setValue( agents );
+        ConnectionSettings.EVIL_HOSTS.set( agents );
         
         CATCHER.resetLatches();
         CATCHER.endpoint = null;

@@ -35,7 +35,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     }
     
     public void testInitialize() {
-        ContentSettings.AUTHORITIES.setValue(new String[] { "yahoo.com", "google.com:82", "askjeeves.com:6346" });
+        ContentSettings.AUTHORITIES.set(new String[] { "yahoo.com", "google.com:82", "askjeeves.com:6346" });
         SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ipPortContentAuthorityFactory);
         auth.initialize();
         ContentAuthority[] all = auth.getAuthorities();
@@ -55,7 +55,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     }
     
     public void testInitializeDNSFails() {
-        ContentSettings.AUTHORITIES.setValue(new String[] { "notarealdnsnamesodonteventryit.com", "google.com" });
+        ContentSettings.AUTHORITIES.set(new String[] { "notarealdnsnamesodonteventryit.com", "google.com" });
         SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ipPortContentAuthorityFactory);
         auth.initialize();
         ContentAuthority[] all = auth.getAuthorities();

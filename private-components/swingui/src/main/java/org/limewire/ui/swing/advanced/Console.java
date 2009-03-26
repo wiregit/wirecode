@@ -425,7 +425,7 @@ public class Console extends JPanel {
      */
     private void attachLogs() {
         WriterAppender append = new WriterAppender(new PatternLayout(
-                ConsoleSettings.CONSOLE_PATTERN_LAYOUT.getValue()), new ConsoleWriter());
+                ConsoleSettings.CONSOLE_PATTERN_LAYOUT.get()), new ConsoleWriter());
         LogManager.getRootLogger().addAppender(append);
     }
     

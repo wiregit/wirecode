@@ -65,8 +65,8 @@ public class HostCatcherTest extends LimeTestCase {
     @Override
     public void setUp() {
         // explicitly allow all ips to test.
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] {});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { "*.*" });
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(new String[] {});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(new String[] { "*.*" });
 
         HostCatcher.DEBUG = true;
         

@@ -36,9 +36,9 @@ public class LWSManagerImplTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector();
         // precondition: host should NOT be empty when we're not setting remotely
         //               but set to empty now for tseting if it were empty
-        LWSSettings.LWS_AUTHENTICATION_HOSTNAME.setValue("");
-        LWSSettings.LWS_DOWNLOAD_PREFIX.setValue("");
-        assertEquals("", LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue());
+        LWSSettings.LWS_AUTHENTICATION_HOSTNAME.set("");
+        LWSSettings.LWS_DOWNLOAD_PREFIX.set("");
+        assertEquals("", LWSSettings.LWS_AUTHENTICATION_HOSTNAME.get());
         
         LWSManagerImpl lwsManagerImpl = new LWSManagerImpl(injector.getInstance(HttpExecutor.class), new LWSDispatcherFactoryImpl());
 
@@ -57,9 +57,9 @@ public class LWSManagerImplTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector();
         // precondition: download prefix should NOT be empty when we're not setting remotely
         //               but set to empty now for tseting if it were empty
-        LWSSettings.LWS_DOWNLOAD_PREFIX.setValue("");
-        LWSSettings.LWS_AUTHENTICATION_HOSTNAME.setValue("");
-        assertEquals("", LWSSettings.LWS_DOWNLOAD_PREFIX.getValue());
+        LWSSettings.LWS_DOWNLOAD_PREFIX.set("");
+        LWSSettings.LWS_AUTHENTICATION_HOSTNAME.set("");
+        assertEquals("", LWSSettings.LWS_DOWNLOAD_PREFIX.get());
         
         LWSManagerImpl lwsManagerImpl = new LWSManagerImpl(injector.getInstance(HttpExecutor.class), new LWSDispatcherFactoryImpl());
 

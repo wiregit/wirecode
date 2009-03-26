@@ -1199,7 +1199,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 			Response testResponse = responseFactory.createResponse(fd);
 
             String name = fd.getFileName();
-            char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();
+            char[] illegalChars = SearchSettings.ILLEGAL_CHARS.get();
             Arrays.sort(illegalChars);
 
             if (name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue()
@@ -1264,7 +1264,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 			assertEquals(fd.toString(), expectTime, testResponse.getCreateTime());
             
             String name = fd.getFileName();
-            char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();
+            char[] illegalChars = SearchSettings.ILLEGAL_CHARS.get();
             Arrays.sort(illegalChars);
 
             if (name.length() > SearchSettings.MAX_QUERY_LENGTH.getValue()

@@ -59,7 +59,7 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
     }
 
     public void testForwardsToLeaves() throws Exception {
-        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"1.2.3.4"});
+        FilterSettings.INSPECTOR_IP_ADDRESSES.set(new String[]{"1.2.3.4"});
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         final ReplyHandler handler = mockery.mock(ReplyHandler.class);
         final InspectionResponse resp = new InspectionResponse(1, new byte[16], new byte[0]);
@@ -76,7 +76,7 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
     }
     
     public void testSendsDelayed() throws Exception {
-        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"1.2.3.4"});
+        FilterSettings.INSPECTOR_IP_ADDRESSES.set(new String[]{"1.2.3.4"});
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         final TestReplyHandler replyHandler = new TestReplyHandler();
         final InspectionResponse [] responses = new InspectionResponse[5];
@@ -114,7 +114,7 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
     
     public void testClearsPrevious() throws Exception {
         // prepare a bunch of responses
-        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"1.2.3.4"});
+        FilterSettings.INSPECTOR_IP_ADDRESSES.set(new String[]{"1.2.3.4"});
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         final TestReplyHandler replyHandler = new TestReplyHandler();
         final InspectionResponse [] responses = new InspectionResponse[5];

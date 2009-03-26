@@ -83,9 +83,9 @@ public class SpamManagerTest extends LimeTestCase {
         SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
         SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f);
         String[] whitelist = new String[] {addr1, addr2, addr3, addr4}; 
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(whitelist);
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(whitelist);
         String[] blacklist = new String[] {blacklistRange};
-        FilterSettings.HOSTILE_IPS.setValue(blacklist);
+        FilterSettings.HOSTILE_IPS.set(blacklist);
         
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
         urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
@@ -95,7 +95,7 @@ public class SpamManagerTest extends LimeTestCase {
         // Blacklist a URN
         String spam = "WLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB";
         spamUrn = URN.createSHA1Urn("urn:sha1:" + spam);
-        FilterSettings.FILTERED_URNS_LOCAL.setValue(new String[] { spam });
+        FilterSettings.FILTERED_URNS_LOCAL.set(new String[] { spam });
 
 		injector = LimeTestUtils.createInjector();
 		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);

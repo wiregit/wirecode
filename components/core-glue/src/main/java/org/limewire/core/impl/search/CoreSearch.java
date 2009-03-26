@@ -210,7 +210,7 @@ public class CoreSearch implements Search {
     }
     
     private String createPromotionUrl(PromotionMessageContainer container) {
-        String url = PromotionSettings.REDIRECT_URL.getValue();
+        String url = PromotionSettings.REDIRECT_URL.get();
         url += "?url=" + container.getURL();
         url += "&now=" + clock.now() / 1000;
         url += "&id=" + container.getUniqueID();

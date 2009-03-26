@@ -98,11 +98,11 @@ public class InspectionTest extends ServerSideTestCase {
     public void setSettings() throws Exception {
         UDP_ACCESS = new DatagramSocket();
         UDP_ACCESS.setSoTimeout(1000);
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
                 new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
                 new String[] {InetAddress.getLocalHost().getHostAddress(),"127.*.*.*"});
-        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"127.*.*.*"});
+        FilterSettings.INSPECTOR_IP_ADDRESSES.set(new String[]{"127.*.*.*"});
         MessageSettings.INSPECTION_VERSION.setValue(0);
     }
     

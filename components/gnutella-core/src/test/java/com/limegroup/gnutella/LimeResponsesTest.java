@@ -44,8 +44,8 @@ public class LimeResponsesTest extends ClientSideTestCase {
     public void setSettings() throws Exception {
         // TODO change this, by either introducing a setter or overriding FileManagerController
         PrivilegedAccessor.setValue(QRPUpdater.class, "QRP_DELAY", 1000);
-        SearchSettings.LIME_QRP_ENTRIES.setValue(new String[]{"badger"});
-        SearchSettings.LIME_SEARCH_TERMS.setValue(new String[]{"badger"});
+        SearchSettings.LIME_QRP_ENTRIES.set(new String[]{"badger"});
+        SearchSettings.LIME_SEARCH_TERMS.set(new String[]{"badger"});
         SearchSettings.SEND_LIME_RESPONSES.setValue(1f);
     }
     
@@ -71,7 +71,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
         assertTrue(r.getResultsAsList().containsAll(expected.getResultsAsList()));
         
         // change the words to something else
-        SearchSettings.LIME_SEARCH_TERMS.setValue(new String[]{"mushroom"});
+        SearchSettings.LIME_SEARCH_TERMS.set(new String[]{"mushroom"});
         qr = queryRequestFactory.createNonFirewalledQuery("badger", (byte)1);
         testUP[0].send(qr);
         testUP[0].flush();
@@ -110,7 +110,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
         assertTrue(qrt.contains(queryRequestFactory.createQuery("badger")));
         
         // change some words, an updated qrp should be sent shortly
-        SearchSettings.LIME_QRP_ENTRIES.setValue(new String[]{"mushroom"});
+        SearchSettings.LIME_QRP_ENTRIES.set(new String[]{"mushroom"});
         c.getRoutedConnectionStatistics().incrementNextQRPForwardTime(0);
         triggerSimppUpdate();
         ptm = BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0], PatchTableMessage.class, 12000);

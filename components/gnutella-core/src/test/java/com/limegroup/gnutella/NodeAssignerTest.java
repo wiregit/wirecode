@@ -102,11 +102,11 @@ public class NodeAssignerTest extends LimeTestCase {
     
     
     private void setSettings() throws Exception {
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
             new String[] {"*.*.*.*"});
         //Set the local host to not be banned so pushes can go through
         String ip = InetAddress.getLocalHost().getHostAddress();
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
                 new String[] {ip, "127.*.*.*"});
         NetworkSettings.PORT.setValue(TEST_PORT);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);

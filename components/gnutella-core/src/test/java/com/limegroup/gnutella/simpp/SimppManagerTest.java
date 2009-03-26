@@ -155,9 +155,9 @@ public class SimppManagerTest extends LimeTestCase {
                 SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         }
 
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
                                                    new String[] {"*.*.*.*"} );
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
                                                    new String[] {"127.*.*.*"});
         
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
@@ -174,7 +174,7 @@ public class SimppManagerTest extends LimeTestCase {
         NetworkSettings.PORT.setValue(PORT);
         
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
+        ConnectionSettings.FORCED_IP_ADDRESS_STRING.set("127.0.0.1");
         ConnectionSettings.FORCED_PORT.setValue(PORT);
         
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);

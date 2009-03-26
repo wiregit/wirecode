@@ -103,9 +103,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
     }
 
     public void setSettings() {
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
             new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
             new String[] {"127.*.*.*"});
         NetworkSettings.PORT.setValue(PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);

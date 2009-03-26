@@ -62,7 +62,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     
     //todo @Inject
     public LWSManagerImpl(HttpExecutor exe, LWSDispatcherFactory lwsDispatcherFactory) {
-        this(exe, LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue(), 
+        this(exe, LWSSettings.LWS_AUTHENTICATION_HOSTNAME.get(), 
              LWSSettings.LWS_AUTHENTICATION_PORT.getValue(), lwsDispatcherFactory);
     }
     

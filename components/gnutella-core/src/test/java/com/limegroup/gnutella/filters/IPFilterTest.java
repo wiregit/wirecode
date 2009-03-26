@@ -55,10 +55,10 @@ public class IPFilterTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] {
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(new String[] {
                 "18.239.0.*", "13.0.0.0" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES
-                .setValue(new String[] { "18.239.0.144" });
+                .set(new String[] { "18.239.0.144" });
         
         
         whiteListedAddress = new byte[] { (byte) 18, (byte) 239, (byte) 0, (byte) 144 };

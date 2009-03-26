@@ -135,7 +135,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         assertFalse(fd.isRareFile());
         
         // Change the definition to something bogus like completedUploads == attemptedUploads
-        DHTSettings.RARE_FILE_DEFINITION.setValue(new String[] {
+        DHTSettings.RARE_FILE_DEFINITION.set(new String[] {
         "cups","ups","=="
         });
         Thread.sleep(100); //allow setting event to propagate
@@ -147,7 +147,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         assertTrue(fd.isRareFile());
         
         // test that a broken rule will not make the file rare
-        DHTSettings.RARE_FILE_DEFINITION.setValue(new String[] {
+        DHTSettings.RARE_FILE_DEFINITION.set(new String[] {
                 "badger","badger"
                 });
         Thread.sleep(100); //allow setting event to propagate

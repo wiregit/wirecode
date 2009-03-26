@@ -145,9 +145,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
             localIP = InetAddress.getLocalHost().getHostAddress();
         }
         catch (Exception ignored) {}
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
                 new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
                 new String[] {localIP,"127.*.*.*"});
         NetworkSettings.PORT.setValue(PORT);
         
@@ -462,7 +462,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		
  		//see if any of the connections have the locale in them - they should
         String lang = StringUtils.getASCIIString(payload, 9, 2);
- 		assertEquals(ApplicationSettings.LANGUAGE.getValue(),
+ 		assertEquals(ApplicationSettings.LANGUAGE.get(),
                lang);
  	}
  	

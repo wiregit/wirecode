@@ -91,9 +91,9 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 
     protected final void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
             new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
             new String[] {"127.*.*.*", localIP});
         NetworkSettings.PORT.setValue(PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);

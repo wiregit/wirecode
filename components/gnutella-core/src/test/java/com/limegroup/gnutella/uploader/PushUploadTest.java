@@ -131,11 +131,11 @@ public class PushUploadTest extends LimeTestCase {
     }
 
     private void doSettings() throws Exception {
-        LibrarySettings.VERSION.setValue(LibrarySettings.LibraryVersion.FIVE_0_0.name());
+        LibrarySettings.VERSION.set(LibrarySettings.LibraryVersion.FIVE_0_0.name());
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
-                .setValue(new String[] { "*.*.*.*" });
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
+                .set(new String[] { "*.*.*.*" });
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
         NetworkSettings.PORT.setValue(PORT);
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);

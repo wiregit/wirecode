@@ -127,9 +127,9 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
                 new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
                 new String[] {"127.*.*.*"});
         
         org.limewire.core.settings.NetworkSettings.PORT.setValue(PORT);

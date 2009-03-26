@@ -85,9 +85,9 @@ public abstract class ClientSideTestCase extends LimeTestCase {
     
     public final void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
             new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
             new String[] {"127.*.*.*", "192.168.*.*", "10.254.*.*", localIP});        
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port

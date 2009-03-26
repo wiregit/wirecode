@@ -397,7 +397,7 @@ public class AcceptorTest extends LimeTestCase {
          int localPort = acceptor.getPort(false);
          ConnectionSettings.FORCED_PORT.setValue(1000);
          ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(InetAddress.getLocalHost().getHostAddress());
+         ConnectionSettings.FORCED_IP_ADDRESS_STRING.set(InetAddress.getLocalHost().getHostAddress());
          assertEquals(1000, acceptor.getPort(true));
          assertNotEquals(1000,localPort); 
      }

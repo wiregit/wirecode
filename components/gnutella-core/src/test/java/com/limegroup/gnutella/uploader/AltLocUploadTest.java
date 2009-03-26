@@ -192,8 +192,8 @@ public class AltLocUploadTest extends LimeTestCase {
     private void doSettings() throws UnknownHostException {
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
-                .setValue(new String[] { "*.*.*.*" });
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
+                .set(new String[] { "*.*.*.*" });
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
         NetworkSettings.PORT.setValue(PORT);
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
@@ -921,7 +921,7 @@ public class AltLocUploadTest extends LimeTestCase {
      * tests that when an altloc has expired from all the meshes it is removed.
      */
     public void testExpiredAltsRemoved() throws Exception {
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { "*.*.*.*" });
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(new String[] { "*.*.*.*" });
         injector.getInstance(IPFilter.class).refreshHosts();
         // set the expiration values to the bare minimum
         UploadSettings.EXPIRE_LEGACY.setValue(true);

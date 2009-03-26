@@ -456,9 +456,9 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
         ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);
 
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] { "*.*.*.*" });
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(new String[] { "*.*.*.*" });
         try {
-            FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { "127.*.*.*",
+            FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(new String[] { "127.*.*.*",
                     InetAddress.getLocalHost().getHostAddress() });
         } catch (UnknownHostException bad) {
             fail(bad);

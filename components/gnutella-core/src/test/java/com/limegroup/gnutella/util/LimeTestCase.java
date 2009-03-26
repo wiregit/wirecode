@@ -191,7 +191,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         LimeProps.instance().getFactory().getRevertSetting().setValue(false);
         MojitoProps.instance().getFactory().getRevertSetting().setValue(false);
         SharingSettings.FRIENDLY_HASHING.setValue(false);
-        LibrarySettings.VERSION.setValue(LibrarySettings.LibraryVersion.FIVE_0_0.name());        
+        LibrarySettings.VERSION.set(LibrarySettings.LibraryVersion.FIVE_0_0.name());        
         LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(true);
         ApplicationSettings.INITIALIZE_SIMPP.setValue(false);
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
@@ -208,7 +208,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(false);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(false);
         DaapSettings.DAAP_ENABLED.setValue(false);
-        _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+        _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.get();
     }
     
     /**

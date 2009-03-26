@@ -49,8 +49,8 @@ public class TLSConnectionTest extends LimeTestCase {
     
     private static void setSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {"127.*.*.*", "192.168.*.*", "10.254.*.*", localIP});
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(new String[] {"127.*.*.*", "192.168.*.*", "10.254.*.*", localIP});
         NetworkSettings.PORT.setValue(PORT);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);

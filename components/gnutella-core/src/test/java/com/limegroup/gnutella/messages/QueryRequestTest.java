@@ -417,11 +417,11 @@ public final class QueryRequestTest extends LimeTestCase {
 
 
     private static final String[] ILLEGAL_QUERIES = 
-        new String[SearchSettings.ILLEGAL_CHARS.getValue().length];
+        new String[SearchSettings.ILLEGAL_CHARS.get().length];
     
     static {
         for(int i=0; i<ILLEGAL_QUERIES.length; i++) {
-            ILLEGAL_QUERIES[i] = "test"+SearchSettings.ILLEGAL_CHARS.getValue()[i];
+            ILLEGAL_QUERIES[i] = "test"+SearchSettings.ILLEGAL_CHARS.get()[i];
         }
     }
 

@@ -139,9 +139,9 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         //all addresses but localhost and 18.239.0.*.  The latter is used in
         //pongs for testing.  TODO: it would be nice to have a way to prevent
         //BootstrapServerManager from adding defaults and connecting.
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
             new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(
             new String[] {"127.*.*.*", "18.239.0.*"});
         // TODO hack: incrementing port value so each test has its own port
         // PORT++;

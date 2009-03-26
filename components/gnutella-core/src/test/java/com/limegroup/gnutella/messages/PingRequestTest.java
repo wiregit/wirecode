@@ -205,10 +205,10 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue(fromNet.requestsIP());
         
         // now try a ping with locale
-        String original = ApplicationSettings.LANGUAGE.getValue();
-        ApplicationSettings.LANGUAGE.setValue("zz");
+        String original = ApplicationSettings.LANGUAGE.get();
+        ApplicationSettings.LANGUAGE.set("zz");
         PingRequest withLocale = pingRequestFactory.createPingRequest((byte)1);
-        ApplicationSettings.LANGUAGE.setValue(original);
+        ApplicationSettings.LANGUAGE.set(original);
         
         withLocale.addIPRequest();
         
