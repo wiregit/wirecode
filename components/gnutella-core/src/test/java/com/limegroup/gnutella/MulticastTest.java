@@ -14,6 +14,8 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.net.TLSManager;
 import org.limewire.util.PrivilegedAccessor;
@@ -30,7 +32,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 public class MulticastTest extends LimeTestCase {
 

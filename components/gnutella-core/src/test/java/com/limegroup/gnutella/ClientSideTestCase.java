@@ -15,6 +15,8 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -39,7 +41,6 @@ import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.spam.SpamManager;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Sets up a Test Scenario of a Leaf connected to some Ultrapeers (default of

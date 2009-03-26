@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.gnutella.tests;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,10 +34,13 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.util.Modules;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.LimeWireCoreModule;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 public class LimeTestUtils {
     

@@ -11,6 +11,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;

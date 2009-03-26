@@ -4,6 +4,8 @@ import java.net.Socket;
 
 import org.limewire.net.SocketsManager.ConnectType;
 
+
+
 public interface BlockingConnectionFactory {
 
     public BlockingConnection createConnection(Socket socket);

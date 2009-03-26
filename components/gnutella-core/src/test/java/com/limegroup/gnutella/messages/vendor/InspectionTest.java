@@ -19,6 +19,7 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.GGEP;
@@ -39,7 +40,6 @@ import com.google.inject.name.Names;
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ServerSideTestCase;

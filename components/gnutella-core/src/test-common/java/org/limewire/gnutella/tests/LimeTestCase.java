@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.gnutella.tests;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +21,6 @@ import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.TestUtils;
 
-import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.LimeCoreGlue;
 
 /**
@@ -259,16 +258,12 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         return new File(getRootDir(), "testData");
     }
     
-    protected static File getCoreDir() throws Exception {
-        throw new RuntimeException("THIS NEEDS TO BE FIXED -- it no longer exists.");
-    }
-    
     protected static File getRootDir() throws Exception {
         // Get a marker file.
-        File f = TestUtils.getResourceFile("com/limegroup/gnutella/Backend.class");
+        File f = TestUtils.getResourceFile("org/limewire/gnutella/tests/LimeTestCase.class");
         f = f.getCanonicalFile();
-                 //gnutella       // limegroup    // com         // tests       // build           // gnutella-core
-        return f.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();        
+                 //tests       // gnutella       // limewire        //org       // test-common     // build     // gnutella-core
+        return f.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();        
     }
 }       
 

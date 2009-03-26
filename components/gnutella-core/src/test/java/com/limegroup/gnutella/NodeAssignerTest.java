@@ -18,6 +18,8 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -26,7 +28,6 @@ import com.google.inject.name.Names;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 public class NodeAssignerTest extends LimeTestCase {
     

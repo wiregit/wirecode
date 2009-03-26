@@ -12,6 +12,8 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.PingPongSettings;
 import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 
 import com.google.inject.Injector;
@@ -28,7 +30,6 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * This test makes sure that pong caching is working correctly between

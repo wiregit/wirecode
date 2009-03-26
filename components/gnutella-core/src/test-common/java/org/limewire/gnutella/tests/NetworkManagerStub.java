@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.stubs;
+package org.limewire.gnutella.tests;
 
 import java.io.IOException;
 import java.net.UnknownHostException;

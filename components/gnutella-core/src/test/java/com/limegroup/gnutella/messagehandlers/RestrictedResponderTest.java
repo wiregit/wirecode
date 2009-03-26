@@ -9,6 +9,7 @@ import java.util.concurrent.Executor;
 
 import junit.framework.Test;
 
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -24,7 +25,6 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPReplyHandlerCache;

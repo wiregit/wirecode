@@ -32,6 +32,8 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
@@ -57,7 +59,6 @@ import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.NodeAssigner;
@@ -86,7 +87,6 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 //ITEST
 public class PushUploadTest extends LimeTestCase {

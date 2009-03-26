@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.http.protocol.HTTP;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ByteReader;
 import org.limewire.io.GUID;
 import org.limewire.util.FileUtils;

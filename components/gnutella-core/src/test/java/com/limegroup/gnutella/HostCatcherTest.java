@@ -19,6 +19,8 @@ import junit.framework.Test;
 import org.limewire.collection.FixedsizePriorityQueue;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortImpl;
@@ -40,7 +42,6 @@ import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 public class HostCatcherTest extends LimeTestCase {
     

@@ -15,6 +15,8 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.security.AddressSecurityToken;
@@ -26,12 +28,10 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.QueryRequestImpl.QueryRequestPayloadParser;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * This class tests the QueryRequest class with HUGE v0.94 extensions.

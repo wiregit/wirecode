@@ -16,6 +16,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.io.Address;
@@ -45,7 +46,6 @@ import com.limegroup.gnutella.downloader.Visitor;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.mozilla.MozillaDownload;
 

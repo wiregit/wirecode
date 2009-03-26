@@ -6,13 +6,13 @@ import java.util.Random;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ContentSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.IpPort;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
-import com.limegroup.gnutella.util.LimeTestCase;
  
 public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     

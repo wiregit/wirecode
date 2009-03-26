@@ -5,10 +5,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.setting.StringArraySetting;
 
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 
 public class UptimeStatTimerTest extends LimeTestCase {

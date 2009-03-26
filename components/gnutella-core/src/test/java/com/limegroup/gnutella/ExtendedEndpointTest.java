@@ -15,7 +15,7 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
  * Unit tests for ExtendedEndpoint.
  */
 @SuppressWarnings( { "unchecked", "cast" } )
-public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCase {
+public class ExtendedEndpointTest extends org.limewire.gnutella.tests.LimeTestCase {
     private ExtendedEndpoint e;
     private Comparator comparator;
 

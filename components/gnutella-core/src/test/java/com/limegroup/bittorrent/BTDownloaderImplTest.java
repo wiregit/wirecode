@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -17,7 +18,6 @@ import com.google.inject.Stage;
 import com.limegroup.gnutella.ActivityCallbackAdapter;
 import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Test cases for the BTDownloader.

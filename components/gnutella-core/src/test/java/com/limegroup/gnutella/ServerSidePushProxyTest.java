@@ -14,6 +14,7 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.apache.http.protocol.HTTP;
+import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Base32;
@@ -27,7 +28,6 @@ import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 
 /**

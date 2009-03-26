@@ -8,6 +8,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.util.MediaType;
 
 import com.google.inject.AbstractModule;

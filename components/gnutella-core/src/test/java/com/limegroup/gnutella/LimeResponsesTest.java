@@ -5,6 +5,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;

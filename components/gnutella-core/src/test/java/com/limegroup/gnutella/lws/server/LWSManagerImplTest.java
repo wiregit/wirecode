@@ -7,13 +7,13 @@ import junit.framework.Test;
 import junit.textui.TestRunner;
 
 import org.limewire.core.settings.LWSSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.lws.server.StringCallback;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * This checks that we handle an empty hostname setting OK.

@@ -16,13 +16,13 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 
 /**

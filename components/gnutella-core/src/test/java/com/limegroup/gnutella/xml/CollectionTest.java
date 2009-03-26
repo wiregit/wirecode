@@ -14,18 +14,18 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescFactory;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 
 public class CollectionTest extends LimeTestCase {

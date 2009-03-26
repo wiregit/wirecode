@@ -22,6 +22,9 @@ import org.apache.http.protocol.HTTP;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.gnutella.tests.ActivityCallbackStub;
+import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -36,8 +39,6 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

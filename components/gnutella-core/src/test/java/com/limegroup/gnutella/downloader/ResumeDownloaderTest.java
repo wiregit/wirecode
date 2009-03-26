@@ -9,13 +9,14 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerImpl;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadState;
@@ -24,7 +25,6 @@ import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializerImpl;
 import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 /** Unit tests small parts of ResumeDownloader. */
 public class ResumeDownloaderTest extends LimeTestCase {

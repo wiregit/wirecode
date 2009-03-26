@@ -9,6 +9,8 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -19,7 +21,6 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  *  Common code to test an Ultrapeer.  Allows you to control how many 

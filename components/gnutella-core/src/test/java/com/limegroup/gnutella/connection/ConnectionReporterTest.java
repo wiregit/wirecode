@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.connection.ConnectionLifecycleEventType;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.inject.AbstractModule;
 import org.limewire.io.GUID;
 import org.limewire.util.AssignParameterAction;
@@ -15,7 +16,6 @@ import org.limewire.util.Clock;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ApplicationServices;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.util.LimeWireUtils;
 

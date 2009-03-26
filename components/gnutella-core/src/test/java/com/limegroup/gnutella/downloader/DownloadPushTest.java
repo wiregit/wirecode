@@ -12,6 +12,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -24,7 +25,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 public class DownloadPushTest extends DownloadTestCase {
 

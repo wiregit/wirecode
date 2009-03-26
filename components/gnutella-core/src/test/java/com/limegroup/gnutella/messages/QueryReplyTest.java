@@ -33,6 +33,7 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -55,7 +56,6 @@ import org.limewire.util.StringUtils;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
@@ -75,7 +75,7 @@ import com.limegroup.gnutella.messages.Message.Network;
  * This class tests the QueryReply class.
  */
 @SuppressWarnings({"unchecked", "null"})
-public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
+public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCase {
 
     private static final byte[] IP = new byte[] {1, 1, 1, 1};
     private static final int MAX_LOCATIONS = 10;

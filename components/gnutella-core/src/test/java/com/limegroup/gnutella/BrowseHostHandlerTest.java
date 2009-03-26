@@ -22,6 +22,8 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -44,7 +46,6 @@ import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
 public class BrowseHostHandlerTest extends LimeTestCase {

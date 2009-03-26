@@ -17,6 +17,9 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.gnutella.tests.ActivityCallbackStub;
+import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.security.AddressSecurityToken;
@@ -48,8 +51,6 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

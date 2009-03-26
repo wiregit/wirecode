@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.gnutella.tests;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,15 +18,16 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.service.ErrorCallback;
 import org.limewire.service.ErrorService;
-import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Stage;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.LimeWireCoreModule;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Utility class that constructs a LimeWire backend for testing
@@ -45,7 +46,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  * having to save and restore important files.
  */
 @SuppressWarnings("all")
-public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
+public class Backend extends org.limewire.gnutella.tests.LimeTestCase {
 
     /** Extensions of files that the backend automatically shares */
     public static final String SHARED_EXTENSION = "tmp";
