@@ -477,7 +477,7 @@ public class UDPHostCacheTest extends LimeTestCase {
     }
     
     @Singleton
-    private static class StubCache extends UDPHostCache {
+    private static class StubCache extends UDPHostCacheImpl {
         private static final int EXPIRY_TIME = 2 * 1000;        
         private int amountFetched = -1;
         private Collection<? extends ExtendedEndpoint> lastFetched;
@@ -495,7 +495,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         }
         
         @Override
-        boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
+        protected boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
             if(doRealFetch) {
                 return super.fetch(hosts);
             } else {
@@ -506,7 +506,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         }
         
         @Override
-        PingRequest getPing() {
+        protected PingRequest getPing() {
             PingRequest pr = super.getPing();
             guid = pr.getGUID();
             return pr;

@@ -89,6 +89,10 @@ import com.limegroup.gnutella.auth.IpPortContentAuthorityFactoryImpl;
 import com.limegroup.gnutella.auth.LimeWireContentAuthModule;
 import com.limegroup.gnutella.bootstrap.Bootstrapper;
 import com.limegroup.gnutella.bootstrap.BootstrapperImpl;
+import com.limegroup.gnutella.bootstrap.TcpBootstrap;
+import com.limegroup.gnutella.bootstrap.TcpBootstrapImpl;
+import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.bootstrap.UDPHostCacheImpl;
 import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.connection.LimeWireCoreConnectionModule;
 import com.limegroup.gnutella.daap.DaapManager;
@@ -361,6 +365,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(DangerousFileChecker.class).to(FileExtensionChecker.class);
         bind(RareFileStrategy.class).to(RareFileStrategyImpl.class);
         bind(MulticastService.class).to(MulticastServiceImpl.class);
+        bind(TcpBootstrap.class).to(TcpBootstrapImpl.class);
+        bind(UDPHostCache.class).to(UDPHostCacheImpl.class);
         
         bindAll(Names.named("fastExecutor"), ScheduledExecutorService.class, FastExecutorProvider.class, ExecutorService.class, Executor.class);
         bindAll(Names.named("unlimitedExecutor"), ListeningExecutorService.class, UnlimitedExecutorProvider.class, Executor.class, ExecutorService.class);
