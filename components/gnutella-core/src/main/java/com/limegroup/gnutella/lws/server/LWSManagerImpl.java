@@ -3,9 +3,8 @@ package com.limegroup.gnutella.lws.server;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +46,6 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         
     private final LWSDispatcher dispatcher;
     private final Map<String, LWSManagerCommandResponseHandler> commands2handlers = new HashMap<String, LWSManagerCommandResponseHandler>();
-    private final Map<String, List<Listener>> commands2listenerLists = new HashMap<String, List<Listener>>();
     
     /** This is provided by {@link LWSSettings}. */
     private final String hostNameAndPort;
@@ -140,24 +138,8 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         return commands2handlers.remove(hash) != null;
     }
  
-    public final boolean registerListener(String cmd, Listener lis) {
-        String hash = hash(cmd);
-        List<Listener> lst = commands2listenerLists.get(hash);
-        if (lst == null) commands2listenerLists.put(hash, lst = new Vector<Listener>());
-        boolean result = lst.contains(lis) ? false : lst.add(lis);
-        return result;
-    } 
-    
-    public final boolean unregisterListener(String cmd) {
-        String hash = hash(cmd);
-        boolean result = commands2listenerLists.remove(hash) != null;
-        
-        return result;
-    }
-    
-    public final void clearHandlersAndListeners() {
+    public final void clearHandlers() {
         commands2handlers.clear();
-        commands2listenerLists.clear();
     }
     
     public final void sendMessageToServer(final String msg, 
@@ -210,31 +192,23 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     }    
   
     private String hash(String cmd) {
-        return cmd.toLowerCase();
+        return cmd.toLowerCase(Locale.US);
     }    
 
-    private String dispatch(String cmd, Map<String, String> args) {
-        String hash = hash(cmd);
-        LWSManagerCommandResponseHandler h = commands2handlers.get(hash);
-        String res = null;
-        boolean handled = false;
-        if (h != null) {
-            handled = true;
-            res = h.handle(args);
+    private String dispatch(String command, Map<String, String> arguments) {
+        String hash = hash(command);
+        String result = null;
+
+        LWSManagerCommandResponseHandler handler = commands2handlers.get(hash);
+        if (handler != null) {
+            result = handler.handle(arguments);
+
+            if (result == null) {
+				// does this ever happen? could just assert.
+                result = "OK";
+            }            
         }
-        List<Listener> ls = commands2listenerLists.get(hash);
-        if (ls != null && !ls.isEmpty()) {
-            handled = true;
-            for (Listener l : ls) l.handle(args);
-        }
-        if (!handled) {
-            return null;
-        } else {
-            if (res == null) {
-                return "OK";
-            } else {
-                return res;
-            }
-        }
+        
+        return result;
     } 
 }

@@ -177,7 +177,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     
     protected final void doDetatch() {
         getCommandSender().detach(getPrivateKey(), getSharedKey());
-        lwsManager.clearHandlersAndListeners();
+        lwsManager.clearHandlers();
     }
 
     protected final String doAuthenticate() {
