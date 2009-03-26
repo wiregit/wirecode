@@ -18,11 +18,15 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
 public class Win32FileMonitor {
+    private HANDLE port;
+
+    private Thread watcher;
 
     private final Map<File, Integer> watched = new HashMap<File, Integer>();
 
     public void init() {
-        // nothing to do for now
+       Kernel32 klib = Kernel32.INSTANCE;
+       port = klib.CreateIoCompletionPort(W32API.INVALID_HANDLE_VALUE, port, W32API.INVALID_HANDLE_VALUE.getPointer(), 0);
     }
 
     public void addWatch(File dir) throws IOException {
@@ -72,10 +76,6 @@ public class Win32FileMonitor {
             this.recursive = recurse;
         }
     }
-
-    private Thread watcher;
-
-    private HANDLE port;
 
     private final Map<File, FileInfo> fileMap = new HashMap<File, FileInfo>();
 
@@ -155,8 +155,7 @@ public class Win32FileMonitor {
             throw new IOException("Unable to create/use I/O Completion port " + "for " + file
                     + " (" + klib.GetLastError() + ")");
         }
-        // TODO: use FileIOCompletionRoutine callback method instead of a
-        // dedicated thread
+
         if (!klib.ReadDirectoryChangesW(handle, finfo.info, finfo.info.size(), recursive,
                 eventMask, finfo.infoLength, finfo.overlapped, null)) {
             int err = klib.GetLastError();
@@ -164,32 +163,7 @@ public class Win32FileMonitor {
                     + handle + ": '" + getSystemError(err) + "' (" + err + ")");
         }
         if (watcher == null) {
-            // TODO really can't use a single thread per watch, that is just
-            // crazy
-            watcher = new Thread("W32 File Monitor-" + (watcherThreadID++)) {
-                public void run() {
-                    FileInfo finfo;
-                    while (true) {
-                        finfo = waitForChange();
-                        if (finfo == null) {
-                            synchronized (this) {
-                                if (fileMap.isEmpty()) {
-                                    watcher = null;
-                                    break;
-                                }
-                            }
-                            continue;
-                        }
-
-                        try {
-                            handleChanges(finfo);
-                        } catch (IOException e) {
-                            // TODO: how is this best handled?
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            };
+            watcher = new EventPoller("W32 File Monitor-" + (watcherThreadID++));
             watcher.setDaemon(true);
             watcher.start();
         }
@@ -243,5 +217,34 @@ public class Win32FileMonitor {
 
     public boolean removeListener(EventListener<W32NotifyActionEvent> eventListener) {
         return listeners.removeListener(eventListener);
+    }
+
+    private final class EventPoller extends Thread {
+        private EventPoller(String name) {
+            super(name);
+        }
+
+        public void run() {
+            FileInfo finfo;
+            while (true) {
+                finfo = waitForChange();
+                if (finfo == null) {
+                    synchronized (this) {
+                        if (fileMap.isEmpty()) {
+                            watcher = null;
+                            break;
+                        }
+                    }
+                    continue;
+                }
+
+                try {
+                    handleChanges(finfo);
+                } catch (IOException e) {
+                    // TODO: how is this best handled?
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

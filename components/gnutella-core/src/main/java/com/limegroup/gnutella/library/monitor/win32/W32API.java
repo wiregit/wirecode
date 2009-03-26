@@ -101,7 +101,7 @@ public interface W32API extends StdCallLibrary, W32Errors {
     }
 
     /** Constant value representing an invalid HANDLE. */
-    HANDLE INVALID_HANDLE_VALUE = new HANDLE() {
+   public HANDLE INVALID_HANDLE_VALUE = new HANDLE() {
         {
             super.setPointer(Pointer.createConstant(-1));
         }
