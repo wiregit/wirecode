@@ -73,12 +73,10 @@ public class Win32FileMonitor {
         }
     }
 
-    protected synchronized void watch(File file, int eventMask, boolean recursive)
-            throws IOException {
+    private synchronized void watch(File file, int eventMask, boolean recursive) throws IOException {
         if (port == null) {
             throw new IOException("Cannot add watches to the FileMonitor before it is initialized.");
         }
-        watched.put(file, new Integer(eventMask));
         Kernel32 klib = Kernel32.INSTANCE;
         int mask = Kernel32.FILE_SHARE_READ | Kernel32.FILE_SHARE_WRITE
                 | Kernel32.FILE_SHARE_DELETE;
@@ -89,11 +87,13 @@ public class Win32FileMonitor {
             throw new IOException("Unable to open " + file + " (" + klib.GetLastError() + ")");
         }
         FileInfo finfo = new FileInfo(file, handle, eventMask, recursive);
+        watched.put(file, new Integer(eventMask));
         fileMap.put(file, finfo);
         handleMap.put(handle, finfo);
         // Existing port is returned
         port = klib.CreateIoCompletionPort(handle, port, handle.getPointer(), 0);
         if (INVALID_HANDLE_VALUE.INVALID_HANDLE.equals(port)) {
+            // TODO remove from apps if exception?
             throw new IOException("Unable to create/use I/O Completion port " + "for " + file
                     + " (" + klib.GetLastError() + ")");
         }
@@ -101,6 +101,7 @@ public class Win32FileMonitor {
         if (!klib.ReadDirectoryChangesW(handle, finfo.info, finfo.info.size(), recursive,
                 eventMask, finfo.infoLength, finfo.overlapped, null)) {
             int err = klib.GetLastError();
+            // TODO remove from apps if exception?
             throw new IOException("ReadDirectoryChangesW failed on " + finfo.file + ", handle "
                     + handle + ": '" + Kernel32Utils.getSystemError(err) + "' (" + err + ")");
         }
