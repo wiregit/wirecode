@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.  
  */
-package com.limegroup.gnutella.library.monitor.win32;
+package com.limegroup.gnutella.library.monitor.win32.api;
 
 import java.nio.Buffer;
 

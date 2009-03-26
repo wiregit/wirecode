@@ -21,7 +21,5 @@ public class MainWindows {
 
         fileMonitor.addWatch(new File("c:\\test1"), true);
         fileMonitor.addWatch(new File("c:\\test2"), true);
-        Thread.sleep(1000000000);
-        System.out.println("Done sleeping!");
     }
 }

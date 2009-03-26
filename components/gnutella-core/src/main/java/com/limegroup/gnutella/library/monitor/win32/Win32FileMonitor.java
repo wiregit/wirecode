@@ -10,10 +10,13 @@ import java.util.Map;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
-import com.limegroup.gnutella.library.monitor.win32.Kernel32.FILE_NOTIFY_INFORMATION;
-import com.limegroup.gnutella.library.monitor.win32.Kernel32.OVERLAPPED;
-import com.limegroup.gnutella.library.monitor.win32.W32API.HANDLE;
-import com.limegroup.gnutella.library.monitor.win32.W32API.HANDLEByReference;
+import com.limegroup.gnutella.library.monitor.win32.api.HANDLE;
+import com.limegroup.gnutella.library.monitor.win32.api.HANDLEByReference;
+import com.limegroup.gnutella.library.monitor.win32.api.INVALID_HANDLE_VALUE;
+import com.limegroup.gnutella.library.monitor.win32.api.Kernel32;
+import com.limegroup.gnutella.library.monitor.win32.api.Kernel32.FILE_NOTIFY_INFORMATION;
+import com.limegroup.gnutella.library.monitor.win32.api.Kernel32.OVERLAPPED;
+import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
@@ -33,8 +36,7 @@ public class Win32FileMonitor {
     public synchronized void init() throws IOException {
         if (port == null) {
             Kernel32 klib = Kernel32.INSTANCE;
-            port = klib.CreateIoCompletionPort(W32API.INVALID_HANDLE_VALUE, port,
-                    W32API.INVALID_HANDLE_VALUE.getPointer(), 0);
+            port = klib.CreateIoCompletionPort(new INVALID_HANDLE_VALUE(), port, null, 0);
             if (port == null) {
                 int err = klib.GetLastError();
                 throw new IOException("Error initializing IOCompletionPort: '"
@@ -46,26 +48,30 @@ public class Win32FileMonitor {
         }
     }
 
-    public void addWatch(File dir) throws IOException {
+    public synchronized void addWatch(File dir) throws IOException {
         addWatch(dir, W32NotifyEventMask.ALL_EVENTS.getMask(), false);
     }
 
-    public void addWatch(File dir, boolean recursive) throws IOException {
+    public synchronized void addWatch(File dir, boolean recursive) throws IOException {
         addWatch(dir, W32NotifyEventMask.ALL_EVENTS.getMask(), recursive);
     }
 
-    public void addWatch(File dir, int mask) throws IOException {
+    public synchronized void addWatch(File dir, int mask) throws IOException {
         addWatch(dir, mask, false);
     }
 
-    public void addWatch(File dir, int mask, boolean recursive) throws IOException {
+    public synchronized void addWatch(File dir, int mask, boolean recursive) throws IOException {
         watched.put(dir, new Integer(mask));
         watch(dir, mask, recursive);
     }
 
-    public void removeWatch(File file) {
-        if (watched.remove(file) != null) {
-            unwatch(file);
+    public synchronized void removeWatch(File file) {
+        watched.remove(file);
+        FileInfo finfo = fileMap.remove(file);
+        if (finfo != null) {
+            handleMap.remove(finfo.handle);
+            Kernel32 klib = Kernel32.INSTANCE;
+            klib.CloseHandle(finfo.handle);
         }
     }
 
@@ -108,7 +114,7 @@ public class Win32FileMonitor {
         } while (fni != null);
         // Trigger the next read
         if (!finfo.file.exists()) {
-            unwatch(finfo.file);
+            removeWatch(finfo.file);
             return;
         }
 
@@ -152,7 +158,7 @@ public class Win32FileMonitor {
         int flags = Kernel32.FILE_FLAG_BACKUP_SEMANTICS | Kernel32.FILE_FLAG_OVERLAPPED;
         HANDLE handle = klib.CreateFile(file.getAbsolutePath(), Kernel32.FILE_LIST_DIRECTORY, mask,
                 null, Kernel32.OPEN_EXISTING, flags, null);
-        if (Kernel32.INVALID_HANDLE_VALUE.equals(handle)) {
+        if (new INVALID_HANDLE_VALUE().equals(handle)) {
             throw new IOException("Unable to open " + file + " (" + klib.GetLastError() + ")");
         }
         FileInfo finfo = new FileInfo(file, handle, eventMask, recursive);
@@ -160,7 +166,7 @@ public class Win32FileMonitor {
         handleMap.put(handle, finfo);
         // Existing port is returned
         port = klib.CreateIoCompletionPort(handle, port, handle.getPointer(), 0);
-        if (Kernel32.INVALID_HANDLE_VALUE.equals(port)) {
+        if (new INVALID_HANDLE_VALUE().equals(port)) {
             throw new IOException("Unable to create/use I/O Completion port " + "for " + file
                     + " (" + klib.GetLastError() + ")");
         }
@@ -173,20 +179,11 @@ public class Win32FileMonitor {
         }
     }
 
-    protected synchronized void unwatch(File file) {
-        FileInfo finfo = fileMap.remove(file);
-        if (finfo != null) {
-            handleMap.remove(finfo.handle);
-            Kernel32 klib = Kernel32.INSTANCE;
-            klib.CloseHandle(finfo.handle);
-        }
-    }
-
     protected synchronized void dispose() {
         // unwatch any remaining files in map, allows watcher thread to exit
         int i = 0;
         for (Object[] keys = fileMap.keySet().toArray(); !fileMap.isEmpty();) {
-            unwatch((File) keys[i++]);
+            removeWatch((File) keys[i++]);
         }
 
         Kernel32 klib = Kernel32.INSTANCE;

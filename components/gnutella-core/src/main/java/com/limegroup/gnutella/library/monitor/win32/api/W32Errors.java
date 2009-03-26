@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.library.monitor.win32;
+package com.limegroup.gnutella.library.monitor.win32.api;
 
 /* Copyright (c) 2007 Timothy Wall, All Rights Reserved
  *
