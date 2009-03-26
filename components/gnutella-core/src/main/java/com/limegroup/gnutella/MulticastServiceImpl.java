@@ -37,7 +37,8 @@ import com.limegroup.gnutella.messages.Message.Network;
 @Singleton
 public final class MulticastServiceImpl implements MulticastService, Runnable {
 
-    private static final Log LOG = LogFactory.getLog(MulticastService.class);
+    private static final Log LOG =
+        LogFactory.getLog(MulticastServiceImpl.class);
     
     /** 
      * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock

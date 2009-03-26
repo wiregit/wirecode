@@ -44,7 +44,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  */
 class TcpBootstrapImpl implements TcpBootstrap {
     
-    private static final Log LOG = LogFactory.getLog(TcpBootstrap.class);
+    private static final Log LOG = LogFactory.getLog(TcpBootstrapImpl.class);
     
     /** The number of hosts we want to retrieve from gwebcaches at a time. */
     private static final int WANTED_HOSTS = 15;
@@ -173,7 +173,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
             InputStream in = response.getEntity().getContent();
             String charset = EntityUtils.getContentCharSet(response.getEntity());
             BufferedReader reader = new BufferedReader(new InputStreamReader(in, charset != null ? charset : HTTP.DEFAULT_CONTENT_CHARSET));
-            while((line = reader.readLine()) != null) {
+            while((line = reader.readLine()) != null && line.length() > 0) {
                 Endpoint host=new Endpoint(line, true); // only accept numeric addresses.
                 endpoints.add(host);
             }
@@ -189,7 +189,6 @@ class TcpBootstrapImpl implements TcpBootstrap {
             LOG.debug("no endpoints sent");
             return 0;
         }
-
     }
     
     private class Listener implements HttpClientListener {
@@ -240,10 +239,10 @@ class TcpBootstrapImpl implements TcpBootstrap {
     }
     
     /**
-     * Adds a new gwebcache to the set.
+     * Adds a new gwebcache to the set. Protected for testing.
      */
     @SuppressWarnings("unused")
-    private synchronized boolean add(URI e) {
+    protected synchronized boolean add(URI e) {
         if(hostsSet.contains(e)) {
             LOG.debugf("Not adding known TCP host cache {0}", e);
             return false;

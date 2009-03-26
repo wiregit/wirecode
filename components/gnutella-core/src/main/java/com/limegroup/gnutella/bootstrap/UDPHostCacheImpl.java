@@ -39,7 +39,7 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 @Singleton
 class UDPHostCacheImpl implements UDPHostCache {
 
-    private static final Log LOG = LogFactory.getLog(UDPHostCache.class);
+    private static final Log LOG = LogFactory.getLog(UDPHostCacheImpl.class);
 
     /**
      * The maximum number of failures to allow for a given UHC.

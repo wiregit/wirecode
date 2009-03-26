@@ -24,7 +24,6 @@ import org.limewire.util.StringUtils;
  * Simulates an HTTP server.  Listens on a port, accepts a single
  * connection, records request and writes result.
  */
-@SuppressWarnings("unchecked")
 public class TestBootstrapServer {
     
     
@@ -32,7 +31,7 @@ public class TestBootstrapServer {
         LogFactory.getLog(TestBootstrapServer.class);
     
     private ServerSocket _ss;
-    private List _sockets = new LinkedList();
+    private List<Socket> _sockets = new LinkedList<Socket>();
 
     private volatile String _request;
     private volatile String _response;
@@ -98,7 +97,7 @@ public class TestBootstrapServer {
     }
 
     /** Sets the data this should send for any HTTP response.  Default value:
-     *  "".  Example value: "18.239.0.144:6346\r\n1.2.3.4\r\n\r\n.*/
+     *  "".  Example value: "18.239.0.144:6346\r\n1.2.3.4\r\n\r\n".*/
     public void setResponseData(String data) {
         this._responseData=data;
     }
