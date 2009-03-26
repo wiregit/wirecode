@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.library.monitor.win32;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -140,18 +139,6 @@ public class Win32FileMonitor {
 
     protected synchronized void watch(File file, int eventMask, boolean recursive)
             throws IOException {
-        File dir = file;
-        if (!dir.isDirectory()) {
-            recursive = false;
-            dir = file.getParentFile();
-        }
-        while (dir != null && !dir.exists()) {
-            recursive = true;
-            dir = dir.getParentFile();
-        }
-        if (dir == null) {
-            throw new FileNotFoundException("No ancestor found for " + file);
-        }
         Kernel32 klib = Kernel32.INSTANCE;
         int mask = Kernel32.FILE_SHARE_READ | Kernel32.FILE_SHARE_WRITE
                 | Kernel32.FILE_SHARE_DELETE;
