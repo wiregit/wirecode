@@ -57,6 +57,14 @@ public class Win32FileMonitor {
         }
     }
 
+    public void addListener(EventListener<W32NotifyActionEvent> eventListener) {
+        listeners.addListener(eventListener);
+    }
+
+    public boolean removeListener(EventListener<W32NotifyActionEvent> eventListener) {
+        return listeners.removeListener(eventListener);
+    }
+
     public synchronized void addWatch(File dir) throws IOException {
         addWatch(dir, W32NotifyEventMask.ALL_EVENTS.getMask(), false);
     }
@@ -137,14 +145,6 @@ public class Win32FileMonitor {
 
     protected void finalize() {
         dispose();
-    }
-
-    public void addListener(EventListener<W32NotifyActionEvent> eventListener) {
-        listeners.addListener(eventListener);
-    }
-
-    public boolean removeListener(EventListener<W32NotifyActionEvent> eventListener) {
-        return listeners.removeListener(eventListener);
     }
 
     private final class EventPoller extends Thread {
