@@ -138,48 +138,6 @@ public class HostCatcherTest extends LimeTestCase {
     }
     
     /**
-     * Tests to make sure that the UDP Host Cache is used  
-     * if we know of any host caches.
-     */
-    // FIXME: this test is not testing what it's supposed to test
-    /*
-    public void testUDPCachesUsed() throws Exception {
-        // Use a different setup...
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(UDPHostCache.class).to(StubUDPBootstrapper.class);               
-            }
-        });
-        hostCatcher = injector.getInstance(HostCatcher.class);
-        hostCatcher.start();
-        
-        assertEquals(0, hostCatcher.getNumHosts());   
-        
-        StubUDPBootstrapper udp = (StubUDPBootstrapper)injector.getInstance(UDPHostCache.class);        
-        Endpoint firstHost = hostCatcher.getAnEndpoint();
-        assertTrue(udp.fetched);
-        assertEquals(udp.host, firstHost.getAddress());
-        udp.fetched = false;
-        
-        // Since udp was done quickly and only gave us one host (and we
-        // just used it), the next request will spark a GW request.
-        Endpoint second = hostCatcher.getAnEndpointImmediate(null);
-        assertNull(second);
-        Thread.sleep(5000); // just to make sure it doesn't trigger a fetch later
-        assertFalse(udp.fetched);
-        
-        udp.expired = false;
-        
-        // Now another fetch will wait until time passes enough to retry
-        // udp (too long before retrying a GW)
-        Endpoint thirdHost = hostCatcher.getAnEndpoint();
-        assertTrue(udp.fetched);
-        assertEquals(udp.host, thirdHost.getAddress());
-    }
-    */
-
-    /**
      * Tests to make sure that we ignore hosts that have expired.
      * 
      * @throws Exception if any error occurs

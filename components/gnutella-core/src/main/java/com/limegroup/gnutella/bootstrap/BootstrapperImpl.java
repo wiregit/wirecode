@@ -18,7 +18,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
 @Singleton
-public class BootstrapperImpl implements Bootstrapper {
+class BootstrapperImpl implements Bootstrapper {
 
     private static final Log LOG = LogFactory.getLog(BootstrapperImpl.class);
 

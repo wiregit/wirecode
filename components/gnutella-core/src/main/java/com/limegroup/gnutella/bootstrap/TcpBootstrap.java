@@ -4,7 +4,7 @@ package com.limegroup.gnutella.bootstrap;
  * Defines an interface for managing a set of gwebcaches and retrieving hosts
  * from them.
  */
-public interface TcpBootstrap {
+interface TcpBootstrap {
 
     /**
      * Clears the set of attempted gwebcaches.

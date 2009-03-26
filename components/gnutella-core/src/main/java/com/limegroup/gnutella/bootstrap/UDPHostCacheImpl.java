@@ -37,7 +37,7 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
  * Manages a set of UDP host caches and retrieves hosts from them.
  */
 @Singleton
-public class UDPHostCacheImpl implements UDPHostCache {
+class UDPHostCacheImpl implements UDPHostCache {
 
     private static final Log LOG = LogFactory.getLog(UDPHostCache.class);
 

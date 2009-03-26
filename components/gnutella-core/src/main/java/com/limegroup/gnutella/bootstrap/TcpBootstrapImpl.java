@@ -42,7 +42,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 /**
  * Manages a set of gwebcaches and retrieves hosts from them. 
  */
-public class TcpBootstrapImpl implements TcpBootstrap {
+class TcpBootstrapImpl implements TcpBootstrap {
     
     private static final Log LOG = LogFactory.getLog(TcpBootstrap.class);
     
