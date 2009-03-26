@@ -177,6 +177,10 @@ public class NavPanel extends JXPanel {
         PopupUtil.addPopupMenus(categoryLabel, actions);
     }
 
+    public void removePopupMenu() {
+        PopupUtil.removePopupMenus(categoryLabel);
+    }
+
     private String getToolTipText(Friend friend) {
         StringBuffer toolTipText = new StringBuffer();
         String name = friend.getName();

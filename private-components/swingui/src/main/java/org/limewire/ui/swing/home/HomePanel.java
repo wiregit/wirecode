@@ -103,7 +103,9 @@ public class HomePanel extends JXPanel {
     }
     
     public void loadDefaultUrl() {
-        load("http://client-data.limewire.com/client_startup/home/");
+        if(!browser.pageRequested()) {
+            load("http://client-data.limewire.com/client_startup/home/");
+        }
     }
 
     public void load(String url) {

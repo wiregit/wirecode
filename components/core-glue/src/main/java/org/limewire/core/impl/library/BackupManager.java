@@ -49,10 +49,14 @@ import com.limegroup.gnutella.library.ManagedListStatusEvent;
 @Singleton
 public class BackupManager implements Service {
 
+    public enum State {NOT_READY, READY, BACKING_UP, RESTORING}
+
     private static final Log LOG = LogFactory.getLog(BackupManager.class);
 
     private final LibraryManager libraryManager;
     private final EventListener<LoadURLEvent> loadURLListener;
+    private State state = State.NOT_READY;
+    private boolean canceled;
 
     @Inject
     public BackupManager(LibraryManager libraryManager, EventListener<LoadURLEvent> loadURLListener){
@@ -102,6 +106,8 @@ public class BackupManager implements Service {
     }
 
     public void backup() throws IOException, AmazonLSException, URISyntaxException, InterruptedException {
+        checkState();
+        state = State.BACKING_UP;
         InputStream awsPropStream = new FileInputStream(new File("aws.properties"));
         if(awsPropStream != null) {
             Properties awsProps = initBackupService(awsPropStream);
@@ -114,6 +120,7 @@ public class BackupManager implements Service {
             deleteRemovedEntries(managedFiles, connection, awsProps);
             uploadNewOrUpdatedFiles(managedFiles, connection, awsProps);
         }
+        state = State.READY; // TODO notify UI
     }
 
     private Properties initBackupService(InputStream awsPropStream) throws IOException, AmazonLSException, URISyntaxException, InterruptedException {
@@ -134,6 +141,8 @@ public class BackupManager implements Service {
     }
 
     public void restore() throws IOException, URISyntaxException, AmazonLSException, InterruptedException {
+        checkState();
+        state = State.RESTORING;
         InputStream awsPropStream = new FileInputStream(new File("aws.properties"));
         if(awsPropStream != null) {
             Properties awsProps = initBackupService(awsPropStream);
@@ -144,6 +153,23 @@ public class BackupManager implements Service {
             AWSAuthConnection connection = new AWSAuthConnection(awsProps.getProperty("id"), awsProps.getProperty("password"), securityTokens);
             downloadMissingFiles(connection, awsProps, managedFiles);
         }
+        state = State.READY; // TODO notify UI
+    }
+
+    private void checkState() {
+        if(state != State.READY) {
+            throw new IllegalStateException(state.toString());
+        }
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void cancel() {
+        checkState();
+        canceled = true; // TODO interrupt upload/download threads
+        state = State.READY;
     }
 
     private void downloadMissingFiles(AWSAuthConnection connection, Properties awsProps, LibraryFileList managedFiles) throws IOException {
@@ -166,7 +192,7 @@ public class BackupManager implements Service {
                         }
                     }
                 }
-            } while (entries.size() > 0);
+            } while (entries.size() > 0 && !canceled);
         }
     }
 
@@ -185,20 +211,22 @@ public class BackupManager implements Service {
 
     private void uploadNewOrUpdatedFiles(LibraryFileList managedFiles, AWSAuthConnection connection, Properties awsProps) {
         for(LocalFileItem file : managedFiles.getModel()) {
-            try {
-                HeadResponse response = connection.head(awsProps.getProperty("id").toLowerCase(), file.getFile().getCanonicalPath(), null);
-                if(response.connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                    uploadFile(connection, file, awsProps);
-                } else if(response.connection.getResponseCode() == HttpURLConnection.HTTP_OK){
-                    Map<String, List<String>> metadata = response.metadata;
-                    if(fileHasChanged(file, metadata) || !isFullyStored(response, file)) {
+            if(!canceled) {
+                try {
+                    HeadResponse response = connection.head(awsProps.getProperty("id").toLowerCase(), file.getFile().getCanonicalPath(), null);
+                    if(response.connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                         uploadFile(connection, file, awsProps);
+                    } else if(response.connection.getResponseCode() == HttpURLConnection.HTTP_OK){
+                        Map<String, List<String>> metadata = response.metadata;
+                        if(fileHasChanged(file, metadata) || !isFullyStored(response, file)) {
+                            uploadFile(connection, file, awsProps);
+                        }
+                    }  else {
+                        // TODO
                     }
-                }  else {
-                    // TODO
+                } catch (IOException ioe) {
+                    LOG.debugf(ioe, "failed to backup {0}:", file.getFileName());
                 }
-            } catch (IOException ioe) {
-                LOG.debugf(ioe, "failed to backup {0}:", file.getFileName());
             }
         }
     }
@@ -276,8 +304,18 @@ public class BackupManager implements Service {
         @BlockingEvent
         public void handleEvent(ManagedListStatusEvent evt) {
             if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
+                state = State.READY;
                 try {
-                    //backup();
+                    InputStream awsPropStream = new FileInputStream(new File("aws.properties"));
+                    if(awsPropStream != null) {
+                        Properties awsProps = new Properties();
+                        awsProps.load(awsPropStream);
+                        String userToken = awsProps.getProperty("userToken");
+                        if(userToken != null) {
+                            backup();
+                            // TODO or restore()!
+                        }
+                    }
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }

@@ -3,6 +3,7 @@ package org.limewire.ui.swing.action;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -26,6 +27,16 @@ public class PopupUtil {
         component.addMouseListener(popupListener);
         menu.addPopupMenuListener(popupListener);
         return menu;
+    }
+
+    public static void removePopupMenus(JComponent component) {
+        for(MouseListener mouseListener : component.getMouseListeners()) {
+            if(mouseListener instanceof PopupListener) {
+                PopupListener toRemove = ((PopupListener)mouseListener);
+                component.removeMouseListener(toRemove);
+                toRemove.popup.removePopupMenuListener(toRemove);
+            }
+        }
     }
     
     private static class AlwaysShowPopup implements PopupDecider {

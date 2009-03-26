@@ -47,6 +47,7 @@ public class Browser extends MozillaPanel implements EventListener<LoadURLEvent>
     private final VisibilityMode loadStatus;
     
     private JXCollapsiblePane loadingPane;
+    private boolean pageRequested;
 
     public Browser() {
         super();
@@ -171,9 +172,13 @@ public class Browser extends MozillaPanel implements EventListener<LoadURLEvent>
 
     @Override
     public void handleEvent(LoadURLEvent event) {
+        pageRequested = true;
         load(event.getData().toASCIIString());
     }
 
+    public boolean pageRequested() {
+        return pageRequested;
+    }
 
     private class VisibilityListener extends ComponentAdapter {
         @Override

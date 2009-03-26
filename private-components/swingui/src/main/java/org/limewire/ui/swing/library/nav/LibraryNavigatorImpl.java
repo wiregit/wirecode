@@ -64,8 +64,8 @@ import com.amazonaws.ls.AmazonLSException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.ManagedListStatusEvent;
 
 import ca.odell.glazedlists.EventList;
 import net.miginfocom.swing.MigLayout;
@@ -86,6 +86,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final MyLibraryPanel myLibraryPanel;
     private final Navigator navigator;
     private final ShareListManager shareListManager;
+    private final BackupManager backupManager;
     private final FriendLibraryMediatorFactory friendLibraryMediatorFactory;
     private final NavPanelFactory navPanelFactory;
     private final JScrollPane friendsScrollArea;
@@ -94,6 +95,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     
     private Friend selectedFriend = null;
     private final BackupAction backupAction;
+    private RestoreAction restoreAction;
 
     @Inject
     LibraryNavigatorImpl(Navigator navigator,
@@ -114,6 +116,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         this.friendRequestPanel = friendRequestPanel;
         this.myLibraryPanel = myLibraryPanel;
         this.shareListManager = shareListManager;
+        this.backupManager = backupManager;
         this.limewireList = new NavList("LibraryNavigator.limewireList", null);
         this.onlineList = new NavList("LibraryNavigator.onlineList", SwingUiSettings.ONLINE_COLLAPSED);
         this.offlineList = new OfflineNavList("LibraryNavigator.offlineList", SwingUiSettings.OFFLINE_COLLAPSED);
@@ -137,9 +140,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             myLibrary.getDropTarget().addDropTargetListener(new GhostDropTargetListener(myLibrary,ghostPane));
         } catch (TooManyListenersException ignoreException) {            
         }
-        backupAction = new BackupAction(backupManager);
+        backupAction = new BackupAction();
         backupAction.setEnabled(false);
-        myLibrary.addPopupMenu(backupAction);
+        restoreAction = new RestoreAction();
+        restoreAction.setEnabled(false);
+        myLibrary.addPopupMenu(backupAction, restoreAction);
         myLibraryPanel.getLibrary().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
@@ -526,20 +531,35 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     }
 
     private class BackupAction extends javax.swing.AbstractAction {
-        private final BackupManager backupManager;
 
-        public BackupAction(BackupManager backupManager) {
+        public BackupAction() {
             super(I18n.tr("Backup..."));
-            this.backupManager = backupManager;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            boolean backup = false;
+            backupAction.setEnabled(false);
+            restoreAction.setEnabled(false);
+            if(backupManager.getState() == BackupManager.State.READY) {
+                backupAction.putValue(Action.NAME, I18n.tr("Cancel Backup"));
+                backup = true;
+            } else if(backupManager.getState() == BackupManager.State.BACKING_UP) {
+                backupAction.putValue(Action.NAME, I18n.tr("Backup..."));
+                backup = false;
+                restoreAction.setEnabled(true);
+            } else {
+                throw new IllegalStateException(backupManager.getState().toString());
+            }
+            final boolean finalBackup = backup;
             BackgroundExecutorService.execute(new Runnable() {
                 public void run() {
                     try {
-                        // TODO remove BackupAction and add CancelBackupAction
-                        backupManager.backup();
+                        if(finalBackup) {
+                            backupManager.backup();
+                        } else {
+                            backupManager.cancel();
+                        }
                     } catch (IOException e1) {
                         LOG.error(e1);
                     } catch (AmazonLSException e1) {
@@ -551,6 +571,52 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                     }
                 }
             });
+            backupAction.setEnabled(true);
+        }
+    }
+
+    private class RestoreAction extends AbstractAction {
+
+        public RestoreAction() {
+            super(I18n.tr("Restore..."));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            boolean restore = false;
+            backupAction.setEnabled(false);
+            restoreAction.setEnabled(false);
+            if(backupManager.getState() == BackupManager.State.READY) {
+                restoreAction.putValue(Action.NAME, I18n.tr("Cancel Restore"));
+                restore = true;
+            } else if(backupManager.getState() == BackupManager.State.RESTORING) {
+                restoreAction.putValue(Action.NAME, I18n.tr("Restore..."));
+                restore = false;
+                backupAction.setEnabled(true);
+            } else {
+                throw new IllegalStateException(backupManager.getState().toString());
+            }
+            final boolean finalRestore = restore;
+            BackgroundExecutorService.execute(new Runnable() {
+                public void run() {
+                    try {
+                        if(finalRestore) {    
+                            backupManager.restore();
+                        } else {
+                            backupManager.cancel();
+                        }
+                    } catch (IOException e1) {
+                        LOG.error(e1);
+                    } catch (AmazonLSException e1) {
+                        LOG.error(e1);
+                    } catch (URISyntaxException e1) {
+                        LOG.error(e1);
+                    } catch (InterruptedException e1) {
+                        LOG.error(e1);
+                    }
+                }
+            });
+            restoreAction.setEnabled(true);
         }
     }
 
@@ -561,6 +627,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
                 try {
                     backupAction.setEnabled(true);
+                    restoreAction.setEnabled(true);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
