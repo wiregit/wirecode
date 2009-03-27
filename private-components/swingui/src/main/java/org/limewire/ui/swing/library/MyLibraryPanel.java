@@ -1090,7 +1090,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 sharingLabel.setIcon(gnutellaIcon);
             else
                 sharingLabel.setIcon(friendIcon);
-            sharingLabel.setText( "<html>" + I18n.tr("What I'm Sharing With {0}", boldName(friend.getRenderName())) + "</html>");
+            sharingLabel.setText( "<html>" + I18n.tr("What I'm Sharing with {0}", boldName(friend.getRenderName())) + "</html>");
         }
         
         private String boldName(String name) {

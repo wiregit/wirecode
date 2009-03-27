@@ -154,7 +154,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     }
     
     public void enableDownloading(DownloadListManager downloadListManager, LibraryNavigator libraryNavigator, LibraryFileList libraryList){
-        LibraryDownloadAction downloadAction = new LibraryDownloadAction(I18n.tr("download"), downloadListManager, this, libraryNavigator, libraryList);
+        LibraryDownloadAction downloadAction = new LibraryDownloadAction(I18n.tr("Download"), downloadListManager, this, libraryNavigator, libraryList);
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
         

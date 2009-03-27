@@ -211,7 +211,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         similarButton.setIcon(similarHiddenIcon);
         similarButton.setPressedIcon(similarHiddenPressedIcon);
         similarButton.setRolloverIcon(similarHiddenHoverIcon);
-        similarButton.setToolTipText(I18n.tr("Show similar files"));
+        similarButton.setToolTipText(I18n.tr("Show Similar Files"));
         
         propertiesButton.setFocusable(false);
         propertiesButton.setIcon(propertiesIcon);
@@ -235,7 +235,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                     similarButton.setIcon(similarShownIcon);
                     similarButton.setPressedIcon(similarShownPressedIcon);
                     similarButton.setRolloverIcon(similarShownHoverIcon);
-                    similarButton.setToolTipText(I18n.tr("Hide similar files"));
+                    similarButton.setToolTipText(I18n.tr("Hide Similar Files"));
                     propertiesButton.setIcon(propertiesSimilarShownIcon);
                     propertiesButton.setPressedIcon(propertiesSimilarShownPressedIcon);
                     propertiesButton.setRolloverIcon(propertiesSimilarShownHoverIcon);
@@ -243,7 +243,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                     similarButton.setIcon(similarHiddenIcon);
                     similarButton.setPressedIcon(similarHiddenPressedIcon);
                     similarButton.setRolloverIcon(similarHiddenHoverIcon);
-                    similarButton.setToolTipText(I18n.tr("Show similar files"));
+                    similarButton.setToolTipText(I18n.tr("Show Similar Files"));
                     propertiesButton.setIcon(propertiesIcon);
                     propertiesButton.setPressedIcon(propertiesPressedIcon);
                     propertiesButton.setRolloverIcon(propertiesHoverIcon);

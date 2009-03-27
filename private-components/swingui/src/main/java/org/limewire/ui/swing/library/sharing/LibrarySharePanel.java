@@ -303,7 +303,7 @@ class LibrarySharePanel extends JXButton implements Disposable, ShapeComponent {
     }
     
     private void initializeGnutellaCheckBox() {
-        gnutellaCheckBox = new JCheckBox(I18n.tr("Share with the P2P Nework"));
+        gnutellaCheckBox = new JCheckBox(I18n.tr("Share with the P2P Network"));
         gnutellaCheckBox.setOpaque(false);
         gnutellaCheckBox.setIcon(checkBoxIcon);
         gnutellaCheckBox.setSelectedIcon(checkBoxSelectedIcon);

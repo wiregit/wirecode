@@ -370,10 +370,10 @@ public class SortAndFilterPanel implements Disposable {
         case COMPANY: return tr("Company");
         case PLATFORM: return tr("Platform");
         case TYPE: return tr("Type");
-        case DATE_CREATED: return tr("Date created");
+        case DATE_CREATED: return tr("Date Created");
         case QUALITY: return tr("Quality");
         case YEAR: return tr("Year");
-        case FILE_EXTENSION: return tr("File extension");
+        case FILE_EXTENSION: return tr("File Extension");
         case TITLE: return tr("Title");
         case LENGTH: return tr("Length");
         case ALBUM: return tr("Album");

@@ -248,6 +248,7 @@ public class FilteringOptionPanel extends OptionPanel {
         private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
         
         public RemoveButtonRenderer(final FilteringTable table) {
+            // lower case since hyperlink
             super(I18n.tr("remove"));
             
             setBorder(BorderFactory.createEmptyBorder());

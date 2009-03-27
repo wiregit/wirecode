@@ -267,7 +267,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         showAllButton.addMouseListener(navMouseListener);
         
         clearFinishedButton = new HyperlinkButton();
-        clearFinishedButton.setText(I18n.tr("Clear finished"));
+        clearFinishedButton.setText(I18n.tr("Clear Finished"));
         clearFinishedButton.setFont(showAllFont);
         clearFinishedButton.setMinimumSize(clearFinishedButton.getPreferredSize());
         clearFinishedButton.addActionListener(new ActionListener(){

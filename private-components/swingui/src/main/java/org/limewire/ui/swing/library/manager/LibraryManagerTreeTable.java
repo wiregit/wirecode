@@ -65,7 +65,7 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
     @Override
     public void setTreeTableModel(TreeTableModel model) {
         super.setTreeTableModel(model);
-        
+        // lower case sinc hyperlink
         HyperlinkCellEditorRenderer renderer = new HyperlinkCellEditorRenderer(I18n.tr("remove"));
         HyperlinkCellEditorRenderer editor = new HyperlinkCellEditorRenderer(new RemoveAction());
         TableColumn removeColumn = getColumn(LibraryManagerModel.REMOVE_INDEX);        
@@ -190,6 +190,7 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
     private class RemoveAction extends AbstractAction {
         
         public RemoveAction() {
+            // lower case since hyperlink
             super(I18n.tr("remove"));
         }
 
