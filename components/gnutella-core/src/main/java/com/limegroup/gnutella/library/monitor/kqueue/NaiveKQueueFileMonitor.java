@@ -69,7 +69,7 @@ public class NaiveKQueueFileMonitor {
     }
 
     public synchronized void addWatch(File file, int mask) throws IOException {
-        FileWatcher fw = new FileWatcher(this, file, mask);
+        FileWatcher fw = new FileWatcher(listeners, file, mask);
         fileWatchers.put(file, fw);
         fw.start();
     }
