@@ -27,6 +27,11 @@ import com.limegroup.gnutella.library.monitor.kqueue.CLibrary.timespec;
 import com.sun.jna.Pointer;
 
 /**
+ * Looks like the java example was initially copied from:
+ * 
+ * http://julipedia.blogspot.com/2004/10/example-of-kqueue.html
+ * 
+ * 
  * Naive KQueue implementation of FileMonitor, for BSD-derived systems
  * (including Mac OS X).<br/> This implementation is naive in that it creates
  * one thread and one kqueue per watched file, which is heavy, slow and not
