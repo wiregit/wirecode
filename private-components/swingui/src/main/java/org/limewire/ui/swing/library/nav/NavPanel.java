@@ -21,8 +21,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -48,6 +46,8 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+
+import net.miginfocom.swing.MigLayout;
 
 public class NavPanel extends JXPanel {
     
@@ -84,7 +84,6 @@ public class NavPanel extends JXPanel {
     private LibraryState lastLibraryState;
     
     private final Provider<ChatAction> chatActionProvider;
-    private final Provider<BrowseFloodAction> browseFloodActionProvider;
 
     @AssistedInject
     NavPanel(@Assisted Action action,
@@ -92,8 +91,7 @@ public class NavPanel extends JXPanel {
              @Assisted FriendLibraryMediator libraryPanel,
             RemoteLibraryManager remoteLibraryManager,
             LibraryNavigator libraryNavigator,
-            Provider<ChatAction> chatActionProvider,
-            Provider<BrowseFloodAction> browseFloodActionProvider) {
+            Provider<ChatAction> chatActionProvider) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         GuiUtils.assignResources(this);
@@ -101,7 +99,6 @@ public class NavPanel extends JXPanel {
         setOpaque(false);
         
         this.chatActionProvider = chatActionProvider;
-        this.browseFloodActionProvider = browseFloodActionProvider;
         this.action = action;
         this.friend = friend;           
         this.libraryPanel = libraryPanel;
@@ -386,9 +383,6 @@ public class NavPanel extends JXPanel {
                 }                
             }));
             
-            final BrowseFloodAction floodAction = browseFloodActionProvider.get();
-            floodAction.setFriend(friend);
-            menu.add(new JMenuItem(floodAction));
             
             ChatAction chatAction = chatActionProvider.get();
             chatAction.setFriend(friend);
