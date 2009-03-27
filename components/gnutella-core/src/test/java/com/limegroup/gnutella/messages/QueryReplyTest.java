@@ -1491,10 +1491,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
 
         File[] testFiles = testDir.listFiles(new FileFilter() {
             public boolean accept(File file) {
-                // use files with a $ because they'll generally
-                // trigger a single-response return, which is
-                // easier to check
-                return LibraryUtils.isFileManagable(file) && file.getName().indexOf("$") != -1;
+                return LibraryUtils.isFileManagable(file);
             }
         });
 

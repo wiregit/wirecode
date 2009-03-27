@@ -92,7 +92,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         File dir = LimeTestUtils.getDirectoryWithLotsOfFiles();
         File[] testFiles = dir.listFiles(new FileFilter() {
             public boolean accept(File file) {
-                return !file.isDirectory() && (file.getName().endsWith(".class"));
+                return !file.isDirectory();
             }
         });
         for(File file : testFiles) {
@@ -158,7 +158,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             for (Response result : results) {
                 files.add(result.getName());
                 assertTrue("Expected .class, .mp3 or LimeWire file, got: " + result.getName(),
-                        result.getName().endsWith(".class") || result.getName().endsWith(".mp3") || result.getName().toLowerCase().startsWith("limewire"));
+                        result.getName().endsWith(".tmp") || result.getName().endsWith(".mp3") || result.getName().toLowerCase().startsWith("limewire"));
             }
         }
 

@@ -46,7 +46,7 @@ public class LimeTestUtils {
     
     /** Returns a directory that has a bunch of files. */
     public static File getDirectoryWithLotsOfFiles() {
-        File file = TestUtils.getResourceFile("com/limegroup/gnutella/LimeTestUtils.class");
+        File file = TestUtils.getResourceFile("org/limewire/gnutella/tests/TestFileNumber54806.tmp");
         Assert.assertTrue(file.exists());
         File parent = file.getParentFile();
         Assert.assertTrue(parent.exists());

@@ -81,7 +81,7 @@ public class BrowseTest extends LimeTestCase {
         File shareDir = LimeTestUtils.getDirectoryWithLotsOfFiles();
         File[] testFiles = shareDir.listFiles(new FileFilter() {
             public boolean accept(File file) {
-                return !file.isDirectory() && file.getName().endsWith(".class");
+                return !file.isDirectory();
             }
         });
         assertGreaterThan("Not enough files to test against", 50, testFiles.length);
