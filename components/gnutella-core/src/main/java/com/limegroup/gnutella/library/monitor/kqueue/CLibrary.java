@@ -16,7 +16,6 @@ package com.limegroup.gnutella.library.monitor.kqueue;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
 
 /**
  * CLibrary for BSD systems, including Mac OS X and FreeBSD
@@ -31,7 +30,7 @@ public interface CLibrary extends Library {
     public static final int O_RDONLY = 0x0000, // open for reading only
             O_WRONLY = 0x0001, // open for writing only
             O_RDWR = 0x0002, // open for reading and writing
-            O_EVTONLY = 0x8000, // descriptor requested for event notifications
+            O_EVTONLY = 0x8000, // descriptor requested for event notifications 
                                 // only
 
             // actions
@@ -101,48 +100,5 @@ public interface CLibrary extends Library {
     // / http://linux.about.com/library/cmd/blcmdl2_getdents.htm
     // / http://www.ipnom.com/FreeBSD-Man-Pages/getdents.2.html
     public int getdents(int fd, Pointer dirp, int count);
-
-    public static class kevent extends Structure {
-        public int ident = -1; // identifier for this event
-
-        public short filter; // filter for event
-
-        public short flags; // general flags
-
-        public int fflags; // filter-specific flags
-
-        public int data; // filter-specific data
-
-        public Pointer udata; // opaque user data identifier
-
-        public final void set(kevent src) {
-            data = src.data;
-            fflags = src.fflags;
-            filter = src.filter;
-            flags = src.flags;
-            ident = src.ident;
-            udata = src.udata;
-        }
-    }
-
-    public static class timespec extends Structure {
-        // / seconds
-        public int tv_sec;
-
-        // / nanoseconds
-        public int tv_nsec;
-
-        public timespec() {
-            super();
-        }
-
-        // / Convenient constructor
-        public timespec(int tv_sec, int tv_nsec) {
-            super();
-            this.tv_sec = tv_sec;
-            this.tv_nsec = tv_nsec;
-            write();
-        }
-    }
 
 }
