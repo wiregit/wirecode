@@ -61,7 +61,8 @@ public class FileWatcher extends Thread {
                 resultEvent = new kevent();
             }
 
-            int nev = CLibrary.INSTANCE.kevent(kq, fileEvent.getPointer(), 1, Pointer.NULL, 0,
+            Pointer fEventPointer = fileEvent.getPointer();
+            int nev = CLibrary.INSTANCE.kevent(kq, fEventPointer, 1, null, 0,
                     Pointer.NULL);
             if (nev != 0) {
                 new IOException("Failed to watch " + file).printStackTrace();

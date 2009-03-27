@@ -6,7 +6,7 @@ package com.limegroup.gnutella.library.monitor.kqueue;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
-public class kevent extends Structure {
+public class kevent extends Structure implements Structure.ByReference {
     public int ident = -1; // identifier for this event
 
     public short filter; // filter for event

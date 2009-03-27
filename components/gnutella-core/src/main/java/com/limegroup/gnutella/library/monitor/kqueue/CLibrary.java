@@ -13,6 +13,8 @@ package com.limegroup.gnutella.library.monitor.kqueue;
  * Lesser General Public License for more details.  
  */
 
+import org.xbill.DNS.PTRRecord;
+
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -23,6 +25,11 @@ import com.sun.jna.Pointer;
  * @author Olivier Chafik
  */
 public interface CLibrary extends Library {
+    
+    
+
+    String strerror(int errnum);
+    
     // public CLibrary INSTANCE =
     // (CLibrary)Native.loadLibrary("/usr/lib/libc.dylib", CLibrary.class);
     public CLibrary INSTANCE = (CLibrary) Native.loadLibrary("c", CLibrary.class);
@@ -80,15 +87,15 @@ public interface CLibrary extends Library {
      * 
      * @see https://jna.dev.java.net/javadoc/overview-summary.html
      * @param kq
-     * @param changelist pointer to kevent[] array of things to monitor for
+     * @param events1 pointer to kevent[] array of things to monitor for
      *        changes
      * @param nchanges size of changelist
-     * @param eventlist pointer to kevent[] array of monitoring results
+     * @param pointer2 pointer to kevent[] array of monitoring results
      * @param nevents size of relevant values returned in eventlist
      * @param timeout
      * @return
      */
-    public int kevent(int kq, Pointer changelist, int nchanges, Pointer eventlist, int nevents,
+    public int kevent(int kq, Pointer ptr, int nchanges, Pointer ptr1, int nevents,
             Pointer timeout);
 
     public int kqueue();
@@ -100,5 +107,7 @@ public interface CLibrary extends Library {
     // / http://linux.about.com/library/cmd/blcmdl2_getdents.htm
     // / http://www.ipnom.com/FreeBSD-Man-Pages/getdents.2.html
     public int getdents(int fd, Pointer dirp, int count);
+
+    public int open(String path, int evtonly);
 
 }
