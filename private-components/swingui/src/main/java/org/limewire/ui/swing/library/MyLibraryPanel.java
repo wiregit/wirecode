@@ -74,6 +74,7 @@ import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.playlist.PlaylistButtonDropListener;
+import org.limewire.ui.swing.library.playlist.PlaylistButtonPopupMenu;
 import org.limewire.ui.swing.library.playlist.PlaylistFileItemFunction;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
@@ -515,15 +516,18 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
      * operations.
      */
     @Override
-    protected <T extends FileItem> JComponent createCatalogButton(Action action,
+    protected <T extends FileItem> SelectionPanel createCatalogButton(Action action,
             Catalog catalog, FilterList<T> filteredAllFileList) {
         // Create catalog selection button.
-        JComponent button = super.createCatalogButton(action, catalog, filteredAllFileList);
+        SelectionPanel button = super.createCatalogButton(action, catalog, filteredAllFileList);
         
         // Install listener to accept drops on playlist button.  We should
         // consider installing a TransferHandler instead of a DropTarget.
         if (catalog.getType() == Catalog.Type.PLAYLIST) {
             new DropTarget(button, new PlaylistButtonDropListener(catalog.getPlaylist()));
+            
+            // Add context menu to playlist button.
+            button.setPopupMenu(new PlaylistButtonPopupMenu(catalog.getPlaylist()));
         }
         
         return button;
