@@ -65,17 +65,17 @@ import org.limewire.ui.swing.table.TableColumnDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
-import org.limewire.ui.swing.util.EnabledListener;
-import org.limewire.ui.swing.util.EnabledListenerList;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.ForceInvisibleComponent;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.ui.swing.util.VisibilityListener;
-import org.limewire.ui.swing.util.VisibilityListenerList;
+import org.limewire.ui.swing.util.VisibilityType;
+import org.limewire.ui.swing.util.EnabledType;
 import org.limewire.util.CommonUtils;
+import org.limewire.listener.EventListenerList;
+import org.limewire.listener.EventListener;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.RangeList;
@@ -99,9 +99,12 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 	private final ProgressBarDecorator progressBarDecorator;
     private final Navigator navigator;
     private final TrayNotifier notifier;
-	
-	private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
-    private final EnabledListenerList enabledListenerList = new EnabledListenerList();
+    private final EventListenerList<VisibilityType> visibilityListenerList =
+            new EventListenerList<VisibilityType>();
+
+    private final EventListenerList<EnabledType> enabledListenerList =
+            new EventListenerList<EnabledType>();
+
     private AbstractDownloadTable table;
     private final HorizontalDownloadTableModel horizontalTableModel;
 
@@ -715,7 +718,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 	@Override
 	public void setVisibility(boolean visible){
 	    setVisible(!forceInvisible && visible);
-        visibilityListenerList.visibilityChanged(isVisible());
+        visibilityListenerList.broadcast(VisibilityType.valueOf(isVisible()));
 	}
 	
 	@Override
@@ -725,23 +728,23 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 	}
 
     @Override
-    public void addVisibilityListener(VisibilityListener listener) {
-        visibilityListenerList.addVisibilityListener(listener);        
+    public void addVisibilityListener(EventListener<VisibilityType> listener) {
+        visibilityListenerList.addListener(listener);
     }
 
     @Override
-    public void removeVisibilityListener(VisibilityListener listener) {
-        visibilityListenerList.removeVisibilityListener(listener);
+    public void removeVisibilityListener(EventListener<VisibilityType> listener) {
+        visibilityListenerList.removeListener(listener);
     }
 
     @Override
-    public void addEnabledListener(EnabledListener listener) {
-        enabledListenerList.addEnabledListener(listener);
+    public void addEnabledListener(EventListener<EnabledType> listener) {
+        enabledListenerList.addListener(listener);
     }
 
     @Override
-    public void removeEnabledListener(EnabledListener listener) {
-        enabledListenerList.removeEnabledListener(listener);
+    public void removeEnabledListener(EventListener<EnabledType> listener) {
+        enabledListenerList.removeListener(listener);
     }
 
     /**

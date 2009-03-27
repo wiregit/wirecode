@@ -32,9 +32,10 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.options.TabItemListener;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
-import org.limewire.ui.swing.util.EnabledListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.EnabledType;
+import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -458,10 +459,10 @@ public class AdvancedToolsPanel extends JPanel {
             
             // Install listener to handle tab panel enabled.
             TabPanel tabPanel = tabItem.getTabPanel();
-            tabPanel.addEnabledListener(new EnabledListener() {
+            tabPanel.addEnabledListener(new EventListener<EnabledType>() {
                 @Override
-                public void enabledChanged(boolean enabled) {
-                    setEnabled(enabled);
+                public void handleEvent(EnabledType enabledType) {
+                    setEnabled(enabledType.isEnabled());
                 }
             });
             
