@@ -21,4 +21,9 @@ public class KQueueEvent {
     public KQueueEventType getType() {
         return type;
     }
+    
+    @Override
+    public String toString() {
+        return type + " - " + path;
+    }
 }

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
 import com.limegroup.gnutella.library.monitor.kqueue.CLibrary.kevent;
@@ -34,7 +35,7 @@ import com.sun.jna.Pointer;
  * 
  * @author Olivier Chafik
  */
-class NaiveKQueueFileMonitor {
+public class NaiveKQueueFileMonitor {
     private final Map<File, FileWatcher> fileWatchers;
 
     private final EventListenerList<KQueueEvent> listeners;
@@ -44,6 +45,14 @@ class NaiveKQueueFileMonitor {
         listeners = new EventListenerList<KQueueEvent>();
     }
 
+    public void addListener(EventListener<KQueueEvent> listener) {
+        listeners.addListener(listener);
+    }
+    
+    public boolean removeListener(EventListener<KQueueEvent> listener) {
+        return listeners.removeListener(listener);
+    }
+    
     class FileWatcher extends Thread {
         File file;
 
@@ -128,7 +137,7 @@ class NaiveKQueueFileMonitor {
         }
     }
 
-    protected synchronized void unwatch(File file) {
+    public synchronized void removeWatch(File file) {
         FileWatcher fw = fileWatchers.get(file);
         if (fw != null) {
             fileWatchers.remove(file);
@@ -136,7 +145,12 @@ class NaiveKQueueFileMonitor {
         }
     }
 
-    protected synchronized void watch(File file, int mask, boolean recursive) throws IOException {
+
+    public synchronized void addWatch(File file) throws IOException {
+        addWatch(file, KQueueEventMask.ALL_EVENTS.getMask());
+    }
+    
+    public synchronized void addWatch(File file, int mask) throws IOException {
         FileWatcher fw = new FileWatcher(file, mask);
         fileWatchers.put(file, fw);
         fw.start();
