@@ -41,6 +41,10 @@ import com.sun.jna.Pointer;
  * @author Olivier Chafik
  */
 public class NaiveKQueueFileMonitor {
+    /**
+     * kqueue man pages
+     * http://people.freebsd.org/~jmg/kqueue.historic.man.html
+     */
     private final Map<File, FileWatcher> fileWatchers;
 
     private final EventListenerList<KQueueEvent> listeners;
