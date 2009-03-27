@@ -41,9 +41,7 @@
         <dependency org="none" name="httpclient" rev="${httpclient.version}" conf="compile,runtime"/>
         <dependency org="none" name="commons-codec" rev="${commons-codec.version}" conf="compile,runtime"/>
         <dependency org="none" name="jcip-annotations" rev="${jcip-annotations.version}" conf="compile,runtime"/>
-
-        <dependency org="org.limewire" name="resources" rev="latest.integration" conf="runtime"/>
-        
+       
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
     </dependencies>
 </ivy-module>

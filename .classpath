@@ -15,10 +15,11 @@
 	<classpathentry kind="src" output="components/geocode/build/classes" path="components/geocode/src/main/java"/>
 	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
 	<classpathentry kind="src" output="components/gnutella-core/build/classes" path="components/gnutella-core/src/main/java"/>
+	<classpathentry kind="src" output="components/gnutella-core/src/main/resources" path="components/gnutella-core/src/main/resources"/>
 	<classpathentry kind="src" output="components/gnutella-core/build/test" path="components/gnutella-core/src/test/java"/>
 	<classpathentry kind="src" output="components/gnutella-core/src/test/resources" path="components/gnutella-core/src/test/resources"/>
 	<classpathentry kind="src" output="components/gnutella-core/build/test-common" path="components/gnutella-core/src/test-common/java"/>
-	<classpathentry kind="src" output="components/gnutella-core/src/test-common/resources" path="components/gnutella-core/src/test-common/resources"/>	
+	<classpathentry kind="src" output="components/gnutella-core/src/test-common/resources" path="components/gnutella-core/src/test-common/resources"/>
 	<classpathentry kind="src" output="components/http/build/classes" path="components/http/src/main/java"/>
 	<classpathentry kind="src" output="components/http/build/tests" path="components/http/src/test/java"/>
 	<classpathentry kind="src" output="private-components/integrated-ui/build/classes" path="private-components/integrated-ui/src/main/java"/>
@@ -46,7 +47,6 @@
 	<classpathentry kind="src" output="components/player-api/build/classes" path="components/player-api/src/main/java"/>
 	<classpathentry kind="src" output="components/promotion/build/classes" path="components/promotion/src/main/java"/>
 	<classpathentry kind="src" output="components/promotion/build/tests" path="components/promotion/src/test/java"/>
-	<classpathentry kind="src" output="components/resources/src/main/resources" path="components/resources/src/main/resources"/>
 	<classpathentry kind="src" output="components/rudp/build/classes" path="components/rudp/src/main/java"/>
 	<classpathentry kind="src" output="components/rudp/build/tests" path="components/rudp/src/test/java"/>
 	<classpathentry kind="src" output="components/security/build/classes" path="components/security/src/main/java"/>
