@@ -89,7 +89,10 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "OnDemandUnicaster.Expirer", "ScheduledService",
         "OnDemandUnicaster.QueriedHostsExpirer", "ScheduledService",
         "ForMeReplyHandler.Clear Push Requests", "ScheduledService",
-        "DiskContrller.CacheCleaner", "ScheduledService"};
+        "DiskContrller.CacheCleaner", "ScheduledService",
+        "urncache persister", "ScheduledService",
+        
+        };
         
         List<String> missing = new ArrayList<String>();
         

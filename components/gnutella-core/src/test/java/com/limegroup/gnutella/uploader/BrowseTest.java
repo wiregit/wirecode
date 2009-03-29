@@ -118,8 +118,8 @@ public class BrowseTest extends LimeTestCase {
                 Response[] results = q.getResultsArray();
                 for (Response result : results) {
                     files.add(result.getName());
-                    assertTrue("Expected .class or LimeWire file, got: " + result.getName(),
-                            result.getName().endsWith(".class") || result.getName().toLowerCase().startsWith("limewire"));
+                    assertTrue("Expected .tmp or LimeWire file, got: " + result.getName(),
+                            result.getName().endsWith(".tmp") || result.getName().toLowerCase().startsWith("limewire"));
                 }
             }
 
