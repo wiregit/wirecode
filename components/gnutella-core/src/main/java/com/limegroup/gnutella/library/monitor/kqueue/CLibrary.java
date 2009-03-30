@@ -84,7 +84,9 @@ public interface CLibrary extends Library {
 
     // public Pointer errno = null;
     public int perror(String s);
-
+    
+    public String strerror(int errnum);
+    
     // / just here to test that JNA works well...
     public int atol(String s);
 

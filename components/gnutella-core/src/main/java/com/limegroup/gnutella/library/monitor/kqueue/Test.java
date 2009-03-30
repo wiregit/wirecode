@@ -8,6 +8,7 @@ public class Test {
         String path = "/Users/pvertenten/test1";
 
         FileMonitor fileMonitor = FileMonitor.createInstance();
+        
         fileMonitor.addWatch(new File(path));
         
         Thread.sleep(100000000);

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 /**
@@ -282,7 +283,7 @@ public abstract class FileMonitor {
 
             recursive = recursive && file.isDirectory();
             // ke.udata = recursive ? NATIVE_1L : NATIVE_0L;
-            ke.udata = Pointer.NULL;
+            ke.udata = null;
 
             synchronized (pendingDeclarationEvents) {
                 pendingDeclarationEvents.put(file, ke);
@@ -381,11 +382,13 @@ public abstract class FileMonitor {
                         modifEvent.set((kevent) entry.getValue());
                         modifEvent.write();
 
+                        kevent rEvent = new kevent();
+                        rEvent.write();
                         int nev = CLibrary.INSTANCE.kevent(kqueueHandle, pModifEvent, 1,
-                                Pointer.NULL, 0, Pointer.NULL);
+                                rEvent.getPointer(), 1, null);
                         if (nev != 0)
                             new IOException("kevent did not like modification event for "
-                                    + entry.getKey()).printStackTrace();
+                                    + entry.getKey()+ " " + CLibrary.INSTANCE.strerror(Native.getLastError())).printStackTrace() ;
                     }
                     pendingDeclarationEvents.clear();
                 }
@@ -397,7 +400,7 @@ public abstract class FileMonitor {
                 event.read();
                 System.out.println("kevent = " + nev);
                 if (nev < 0) {
-                    throw new RuntimeException("kevent call returned negative value !");
+                    //throw new RuntimeException("kevent call returned negative value !");
                 } else if (nev > 0) {
                     if (notificationFileDescriptor == event.ident) {
                         // This is a fake event, triggered by modification of
