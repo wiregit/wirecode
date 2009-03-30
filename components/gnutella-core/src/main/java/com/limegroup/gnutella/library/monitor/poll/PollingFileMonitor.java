@@ -175,6 +175,8 @@ public class PollingFileMonitor implements FileMonitor {
     }
 
     public List<FileMonitorEvent> poll() {
+        
+        //TODO could move each tree into seperate threads. with threadpool
         List<FileMonitorEvent> changes = new ArrayList<FileMonitorEvent>();
         for (WatchFile watchFile : watchTrees.values()) {
             WatchFile newWatch = WatchFile.createWatchFile(watchFile.getPath(), watchFile
