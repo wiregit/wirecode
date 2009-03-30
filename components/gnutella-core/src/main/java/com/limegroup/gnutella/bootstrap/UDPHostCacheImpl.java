@@ -16,7 +16,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.NetworkUtils;
 import org.limewire.net.address.StrictIpPortSet;
 
 import com.google.inject.Inject;
@@ -169,7 +168,8 @@ class UDPHostCacheImpl implements UDPHostCache {
     }
 
     /**
-     * Attempts to contact some UHCs to retrieve hosts.
+     * Attempts to contact some UHCs to retrieve hosts. This method blocks
+     * while resolving hostnames.
      */
     @Override
     public synchronized boolean fetchHosts() {
@@ -196,10 +196,8 @@ class UDPHostCacheImpl implements UDPHostCache {
                 continue;
             }
 
-            // if it was private (couldn't look up too) drop it.
-            if(!networkInstanceUtils.isValidExternalIpPort(next) || 
-                    !NetworkUtils.isValidIpPort(next) || // this does explicit resolving.
-                    networkInstanceUtils.isPrivateAddress(next.getAddress())) {
+            // Resolve addresses and remove UHCs with invalid addresses
+            if(!networkInstanceUtils.isValidExternalIpPort(next)) {
                 if(LOG.isInfoEnabled())
                     LOG.info("Invalid address for " + next);
                 invalidHosts.add(next);
