@@ -54,7 +54,7 @@ import org.limewire.xmpp.api.client.XMPPService;
  *
  * Test browse/downloads over a real life network.
  */
-public class NetworkIntegrationTest extends IntegrationTestCase {
+public class FriendBrowseDownloadRUDPTest extends IntegrationTestCase {
 
     private static final int SECONDS_TO_WAIT = 10;
     private static final String USERNAME_1 = "limenetworktest1@gmail.com";
@@ -68,7 +68,7 @@ public class NetworkIntegrationTest extends IntegrationTestCase {
     protected XMPPService service;
     protected Injector injector;
 
-    public NetworkIntegrationTest(String name) {
+    public FriendBrowseDownloadRUDPTest(String name) {
         super(name);
     }
 
