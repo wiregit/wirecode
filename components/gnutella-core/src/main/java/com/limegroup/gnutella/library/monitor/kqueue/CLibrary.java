@@ -95,7 +95,7 @@ public interface CLibrary extends Library {
      * @param timeout
      * @return
      */
-    public int kevent(int kq, Pointer ptr, int nchanges, Pointer ptr1, int nevents,
+    public int kevent(int kq, kevent[] ptr, int nchanges, kevent[] ptr1, int nevents,
             Pointer timeout);
 
     public int kqueue();

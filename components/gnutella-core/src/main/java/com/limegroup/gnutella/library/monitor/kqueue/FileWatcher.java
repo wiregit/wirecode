@@ -62,7 +62,7 @@ public class FileWatcher extends Thread {
             }
 
             Pointer fEventPointer = fileEvent.getPointer();
-            int nev = CLibrary.INSTANCE.kevent(kq, fEventPointer, 1, null, 0,
+            int nev = CLibrary.INSTANCE.kevent(kq, null, 1, null, 0,
                     Pointer.NULL);
             if (nev != 0) {
                 new IOException("Failed to watch " + file).printStackTrace();
@@ -83,7 +83,7 @@ public class FileWatcher extends Thread {
             Pointer pTimeout = timeout.getPointer();
 
             for (;;) {
-                int nev = CLibrary.INSTANCE.kevent(kq, Pointer.NULL, 0, pEvent, 1, pTimeout);
+                int nev = CLibrary.INSTANCE.kevent(kq, null, 0, null, 1, pTimeout);
                 if (Thread.interrupted())
                     break;
 

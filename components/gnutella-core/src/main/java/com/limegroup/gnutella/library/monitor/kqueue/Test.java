@@ -11,7 +11,7 @@ import com.sun.jna.Union;
 import com.sun.jna.ptr.PointerByReference;
 
 public class Test {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         String path = "/Users/pvertenten/test1";
         int num_of_event_slots = 1;
         int num_of_event_fds = 1;
@@ -20,7 +20,7 @@ public class Test {
         
         Pointer user_data;
         
-        timespec timeout = new timespec(1, 1);
+        timespec timeout = new timespec(0, 50000000);
         
         int kq = CLibrary.INSTANCE.kqueue();
         
@@ -51,32 +51,55 @@ public class Test {
        
         int num_files = 1;
         events_data[0] = new kevent();
+        events_data[0].write(); 
+       
         
-        Memory memory = new Memory(Pointer.SIZE);
-        memory.write(0, new Pointer[] {events_to_monitor[0].getPointer()}, 0, 1);
-        
-        Memory memory2 = new Memory(Pointer.SIZE);
-        memory.write(0, new Pointer[] {events_data[0].getPointer()}, 0, 1);
-        
-        int test_count = CLibrary.INSTANCE.kevent(kq, events_to_monitor[0].getPointer(), num_of_event_slots, events_data[0].getPointer(), 1, Pointer.NULL);
-        System.out.println(CLibrary.INSTANCE.strerror(Native.getLastError()));
+        int test_count = CLibrary.INSTANCE.kevent(kq, events_to_monitor, 1, events_data, 1, null);
+        if(test_count < 0) {
+            System.out.println(CLibrary.INSTANCE.strerror(Native.getLastError()));
+            throw new IOException("Failure registering events.");
+        }
         
         
         while(true) {
             
             
             
-            int event_count = CLibrary.INSTANCE.kevent(kq, events_to_monitor[0].getPointer(), 1, events_data[0].getPointer(), num_files, Pointer.NULL);
+            int event_count = CLibrary.INSTANCE.kevent(kq, null, 0, events_data, num_files, Pointer.NULL);
             
-            System.out.println(CLibrary.INSTANCE.strerror(Native.getLastError()));
+           
             
             if(event_count < 0) {
+                System.out.println(CLibrary.INSTANCE.strerror(Native.getLastError()));
                 throw new IOException("Error reading events");
             }
-            events_data[0].read();
             
-            System.out.println(events_data[0]);
-        
+            kevent resultEvent = events_data[0];
+            resultEvent.read();
+            
+            if(resultEvent.flags == CLibrary.EV_ERROR) {
+                System.out.println(CLibrary.INSTANCE.strerror(Native.getLastError()));
+                throw new IOException("Error reading events");
+            }
+            System.out.println(resultEvent);
+            
+            if (KQueueEventMask.NOTE_DELETE.isSet(resultEvent.fflags)) {
+                System.out.println("delete");
+            }
+            if (KQueueEventMask.NOTE_RENAME.isSet(resultEvent.fflags)) {
+                System.out.println("renamed");
+            }
+            if (KQueueEventMask.NOTE_EXTEND.isSet(resultEvent.fflags)
+                    || KQueueEventMask.NOTE_WRITE.isSet(resultEvent.fflags)) {
+                System.out.println("file size changed");
+            }
+            if (KQueueEventMask.NOTE_ATTRIB.isSet(resultEvent.fflags)) {
+                System.out.println("attributes changed");
+            }
+            
+            System.out.println("udata: " + (resultEvent.udata == Pointer.NULL));
+            
+            Thread.sleep(5000);
         }
         
     }
