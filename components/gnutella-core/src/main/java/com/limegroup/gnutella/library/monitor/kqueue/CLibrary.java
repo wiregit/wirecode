@@ -13,11 +13,10 @@ package com.limegroup.gnutella.library.monitor.kqueue;
  * Lesser General Public License for more details.  
  */
 
-import org.xbill.DNS.PTRRecord;
-
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.Structure;
 
 /**
  * CLibrary for BSD systems, including Mac OS X and FreeBSD
@@ -25,19 +24,19 @@ import com.sun.jna.Pointer;
  * @author Olivier Chafik
  */
 public interface CLibrary extends Library {
-    
-    
-
-    String strerror(int errnum);
-    
     // public CLibrary INSTANCE =
     // (CLibrary)Native.loadLibrary("/usr/lib/libc.dylib", CLibrary.class);
     public CLibrary INSTANCE = (CLibrary) Native.loadLibrary("c", CLibrary.class);
 
+    public int FILE_NOTIFY_CHANGE_LAST_ACCESS = 32;// TODO the mac code was
+                                                   // referencing the windows
+                                                   // Kernel 32 value, is this
+                                                   // jsut wrong?
+
     public static final int O_RDONLY = 0x0000, // open for reading only
             O_WRONLY = 0x0001, // open for writing only
             O_RDWR = 0x0002, // open for reading and writing
-            O_EVTONLY = 0x8000, // descriptor requested for event notifications 
+            O_EVTONLY = 0x8000, // descriptor requested for event notifications
                                 // only
 
             // actions
@@ -58,9 +57,16 @@ public interface CLibrary extends Library {
             EV_EOF = 0x8000, // EOF detected
             EV_ERROR = 0x4000, // error, data contains errno
 
-            EVFILT_VNODE = -4;
+            EVFILT_VNODE = -4,
 
-    // data/hint fflags for EVFILT_VNODE, shared with userspace
+            // data/hint fflags for EVFILT_VNODE, shared with userspace
+            NOTE_DELETE = 0x00000001, // vnode was removed
+            NOTE_WRITE = 0x00000002, // data contents changed
+            NOTE_EXTEND = 0x00000004, // size increased
+            NOTE_ATTRIB = 0x00000008, // attributes changed
+            NOTE_LINK = 0x00000010, // link count changed
+            NOTE_RENAME = 0x00000020, // vnode was renamed
+            NOTE_REVOKE = 0x00000040; // vnode access was revoked
 
     /*
      * Error constants : ENOMEM, // The kernel failed to allocate enough memory
@@ -87,15 +93,15 @@ public interface CLibrary extends Library {
      * 
      * @see https://jna.dev.java.net/javadoc/overview-summary.html
      * @param kq
-     * @param events1 pointer to kevent[] array of things to monitor for
+     * @param changelist pointer to kevent[] array of things to monitor for
      *        changes
      * @param nchanges size of changelist
-     * @param pointer2 pointer to kevent[] array of monitoring results
+     * @param eventlist pointer to kevent[] array of monitoring results
      * @param nevents size of relevant values returned in eventlist
      * @param timeout
      * @return
      */
-    public int kevent(int kq, kevent[] ptr, int nchanges, kevent[] ptr1, int nevents,
+    public int kevent(int kq, Pointer changelist, int nchanges, Pointer eventlist, int nevents,
             Pointer timeout);
 
     public int kqueue();
@@ -108,6 +114,24 @@ public interface CLibrary extends Library {
     // / http://www.ipnom.com/FreeBSD-Man-Pages/getdents.2.html
     public int getdents(int fd, Pointer dirp, int count);
 
-    public int open(String path, int evtonly);
+    public static class timespec extends Structure {
+        // / seconds
+        public int tv_sec;
+
+        // / nanoseconds
+        public int tv_nsec;
+
+        public timespec() {
+            super();
+        }
+
+        // / Convenient constructor
+        public timespec(int tv_sec, int tv_nsec) {
+            super();
+            this.tv_sec = tv_sec;
+            this.tv_nsec = tv_nsec;
+            write();
+        }
+    }
 
 }
