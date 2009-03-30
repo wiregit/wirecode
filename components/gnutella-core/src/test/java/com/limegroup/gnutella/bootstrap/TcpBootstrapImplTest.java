@@ -68,7 +68,7 @@ public class TcpBootstrapImplTest extends LimeTestCase {
             will(returnValue(false));
         }});
         server.setResponseData(emptyResponse);
-        tcpBootstrap.add(serverUri);
+        assertTrue(tcpBootstrap.add(serverUri));
         assertTrue(tcpBootstrap.fetchHosts(listener));
         Thread.sleep(500);
         context.assertIsSatisfied();        
@@ -82,7 +82,7 @@ public class TcpBootstrapImplTest extends LimeTestCase {
             will(returnValue(2));
         }});
         server.setResponseData(twoHostResponse);
-        tcpBootstrap.add(serverUri);
+        assertTrue(tcpBootstrap.add(serverUri));
         assertTrue(tcpBootstrap.fetchHosts(listener));
         Thread.sleep(500);
         context.assertIsSatisfied();
@@ -96,11 +96,30 @@ public class TcpBootstrapImplTest extends LimeTestCase {
             will(returnValue(2));
         }});
         server.setResponseData(twoHostResponse);
-        tcpBootstrap.add(serverUri);
+        assertTrue(tcpBootstrap.add(serverUri));
         assertTrue(tcpBootstrap.fetchHosts(listener));
         Thread.sleep(500);
         // No more servers to try - fetchHosts() should return false
         assertFalse(tcpBootstrap.fetchHosts(listener));
         context.assertIsSatisfied();
+    }
+    
+    public void testRemembersFailedServers() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(connectionServices).isConnected();
+            will(returnValue(false));
+        }});
+        URI wrongUri = new URI("http://localhost" + (serverPort + 1));
+        assertTrue(tcpBootstrap.add(wrongUri));
+        assertTrue(tcpBootstrap.fetchHosts(listener));
+        Thread.sleep(500);
+        // No more servers to try - fetchHosts() should return false
+        assertFalse(tcpBootstrap.fetchHosts(listener));        
+        context.assertIsSatisfied();
+    }
+    
+    public void testDuplicatesNotAdded() throws Exception {
+        assertTrue(tcpBootstrap.add(serverUri));
+        assertFalse(tcpBootstrap.add(serverUri));
     }
 }

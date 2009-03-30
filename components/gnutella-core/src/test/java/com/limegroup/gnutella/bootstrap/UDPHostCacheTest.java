@@ -139,6 +139,17 @@ public class UDPHostCacheTest extends LimeTestCase {
         }
     }
     
+    public void testIgnoresInvalidAddresses() {
+        assertEquals(0, cache.getSize());
+        // Invalid hosts are added...
+        cache.add(create("192.168.1.2"));
+        assertEquals(1, cache.getSize());
+        cache.add(create("localhost"));
+        assertEquals(2, cache.getSize());
+        // ...but later removed, so fetchHosts() should return false
+        assertFalse(cache.fetchHosts());
+    }
+    
     public void testUsesFiveAtATime() {
         assertEquals(0, cache.getSize());
         
