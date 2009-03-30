@@ -2,11 +2,11 @@ package org.limewire.listener;
 
 import org.limewire.util.Objects;
 
-public class DefaultSourceEvent<S> {
+public class DefaultSourcedEvent<S> implements SourcedEvent<S> {
     
     private final S source;
     
-    public DefaultSourceEvent(S source) {
+    public DefaultSourcedEvent(S source) {
         this.source = Objects.nonNull(source, "source");
     }
     
@@ -16,17 +16,15 @@ public class DefaultSourceEvent<S> {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + source.hashCode();
-        return hash;
+        return source.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if(!obj.getClass().equals(getClass())) {
+        if (!(obj instanceof SourcedEvent)) {
             return false;
         }
-        return source.equals(((DefaultSourceEvent)obj).getSource());
+        return source.equals(((SourcedEvent)obj).getSource());
     }
 
     @Override
