@@ -161,6 +161,7 @@ public class PollingFileMonitor implements FileMonitor {
                     if (!contains(file)) {
                         changes.add(new FileMonitorEvent(FileMonitorEventType.CREATE, file
                                 .getPath()));
+                        //TODO recurse
                     }
                 }
             }
