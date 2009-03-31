@@ -108,7 +108,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     private ImageCellRenderer enableMyLibraryRenderer(ImageList imageList) {
         ImageCellRenderer renderer = new LibraryImageCellRenderer(imageList.getFixedCellWidth(), imageList.getFixedCellHeight() - 2, thumbnailManager);
         renderer.setOpaque(false);
-        JComponent buttonRenderer = shareTableRendererEditorFactory.createShareTableRendererEditor(null);
+        JComponent buttonRenderer = shareTableRendererEditorFactory.createShareTableRendererEditor(null, null);
         buttonRenderer.setOpaque(false);
         buttonRenderer.setPreferredSize(subPanelDimension);
         buttonRenderer.setSize(subPanelDimension);
@@ -118,9 +118,11 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     }
     
     private TableRendererEditor enableMyLibraryEditor(ShareWidget<File> shareWidget, LibraryImageSubPanel parent){
-        ShareAction action = new ShareAction(I18n.tr("Sharing"), shareWidget, parent);
-        ShareTableRendererEditor shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(action);
-        action.setEditor(shareEditor);
+        FriendShareAction friendShareAction = new FriendShareAction(I18n.tr("Sharing"), shareWidget, parent);
+        P2PShareAction p2pAction = new P2PShareAction(I18n.tr("Sharing"), parent, shareListManager);
+        ShareTableRendererEditor shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(friendShareAction, p2pAction);
+        friendShareAction.setEditor(shareEditor);
+        p2pAction.setEditor(shareEditor);
         shareEditor.setPreferredSize(subPanelDimension);
         shareEditor.setSize(subPanelDimension);
         shareEditor.setOpaque(false);
@@ -129,12 +131,12 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         return shareEditor;
     }
 
-    private static class ShareAction extends AbstractAction {
+    private static class FriendShareAction extends AbstractAction {
         private ShareTableRendererEditor shareEditor;
         private ShareWidget<File> shareWidget;
         private LibraryImageSubPanel parent;
 
-        public ShareAction(String text, ShareWidget<File> shareWidget, LibraryImageSubPanel parent){
+        public FriendShareAction(String text, ShareWidget<File> shareWidget, LibraryImageSubPanel parent){
             super(text);
             this.shareWidget = shareWidget;
             this.parent = parent;
@@ -145,15 +147,54 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
-            shareWidget.setShareable(shareEditor.getLocalFileItem().getFile());
-          
+        public void actionPerformed(ActionEvent e) {          
             JComponent source = (JComponent)e.getSource();
             Point convertedLocation = 
                 SwingUtilities.convertPoint(shareEditor, source.getLocation(), parent.getImageList());
             selectImage(convertedLocation);
+            
+            shareWidget.setShareable(shareEditor.getLocalFileItem().getFile());
             shareWidget.show(source);
             shareEditor.cancelCellEditing();
+        }
+        
+        private void selectImage(Point point) {
+            int index = parent.getImageList().locationToIndex(point);
+            if(index > -1)
+                parent.getImageList().setSelectedIndex(index);
+        }
+    }
+    
+    private static class P2PShareAction extends AbstractAction {
+        private ShareTableRendererEditor shareEditor;
+        private LibraryImageSubPanel parent;
+        private ShareListManager shareListManaber;
+
+        public P2PShareAction(String text, LibraryImageSubPanel parent, ShareListManager shareListManaber){
+            super(text);
+            this.parent = parent;
+            this.shareListManaber = shareListManaber;
+        }
+        
+        public void setEditor(ShareTableRendererEditor editor) {
+            this.shareEditor = editor;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {   
+            shareEditor.cancelCellEditing();
+            JComponent source = (JComponent)e.getSource();
+            Point convertedLocation = 
+                SwingUtilities.convertPoint(shareEditor, source.getLocation(), parent.getImageList());
+            selectImage(convertedLocation);
+            
+           LocalFileItem fileItem = shareEditor.getLocalFileItem();
+           if (fileItem.isSharedWithGnutella()){
+               shareListManaber.getGnutellaShareList().removeFile(fileItem.getFile());
+           } else {
+               shareListManaber.getGnutellaShareList().addFile(fileItem.getFile());
+           }
+           shareEditor.configure(fileItem, true);
         }
         
         private void selectImage(Point point) {

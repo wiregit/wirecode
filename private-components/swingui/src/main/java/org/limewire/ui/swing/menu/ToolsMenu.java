@@ -10,7 +10,6 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
-import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -37,15 +36,6 @@ public class ToolsMenu extends MnemonicMenu {
             final Navigator navigator,
             SearchHandler searchHandler, final LibraryManager libraryManager, final Provider<UploadPanel> uploadPanelProvider) {
         super(I18n.tr("&Tools"));
-
-        add(new AbstractAction(I18n.tr("&Downloads")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                NavItem navItem = navigator
-                        .getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
-                navItem.select();
-            }
-        });
         
         add(new AbstractAction(I18n.tr("&Uploads")) {
             @Override

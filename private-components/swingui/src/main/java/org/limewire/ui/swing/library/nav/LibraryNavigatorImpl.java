@@ -129,25 +129,25 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         setOpaque(false);
         setScrollableTracksViewportHeight(false);
         
-        String libraryTitle = I18n.tr("My Library");
-        NavItem libraryNavItem = navigator.createNavItem(NavCategory.LIBRARY, libraryTitle, myLibraryPanel);
-        myLibrary = initializePanel(I18n.tr("My Library"),  createLibraryAction(libraryNavItem), "LibraryNavigator.myLibrary");
-        myLibrary.updateLibraryState(myLibraryPanel.getLibrary().getState());
-        myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, myLibraryPanel.getLibrary(), saveLocationExceptionHandler));
-        try {
-            myLibrary.getDropTarget().addDropTargetListener(new GhostDropTargetListener(myLibrary,ghostPane));
-        } catch (TooManyListenersException ignoreException) {            
-        }   
-        
-        
-        myLibraryPanel.getLibrary().addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if(evt.getPropertyName().equals("state")) {
-                    myLibrary.updateLibraryState((LibraryState)evt.getNewValue());
-                }
-            }
-        });
+//        String libraryTitle = I18n.tr("My Library");
+        NavItem libraryNavItem = navigator.createNavItem(NavCategory.LIBRARY, MyLibraryPanel.NAME, myLibraryPanel);
+        myLibrary = initializePanel(null,  createLibraryAction(libraryNavItem), "LibraryNavigator.myLibrary");
+//        myLibrary.updateLibraryState(myLibraryPanel.getLibrary().getState());
+//        myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, myLibraryPanel.getLibrary(), saveLocationExceptionHandler));
+//        try {
+//            myLibrary.getDropTarget().addDropTargetListener(new GhostDropTargetListener(myLibrary,ghostPane));
+//        } catch (TooManyListenersException ignoreException) {            
+//        }   
+//        
+//        
+//        myLibraryPanel.getLibrary().addPropertyChangeListener(new PropertyChangeListener() {
+//            @Override
+//            public void propertyChange(PropertyChangeEvent evt) {
+//                if(evt.getPropertyName().equals("state")) {
+//                    myLibrary.updateLibraryState((LibraryState)evt.getNewValue());
+//                }
+//            }
+//        });
         
         p2pNetwork = initializePanel(I18n.tr("P2P Network"), createP2PAction(libraryNavItem), "LibraryNavigator.p2pNetwork"); 
         p2pNetwork.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getGnutellaShareList()));
@@ -179,12 +179,12 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         friendsScrollArea.setBorder(BorderFactory.createEmptyBorder());
         
         // Increase the painted gaps a bit to make sure it's not smushed.
-        myLibrary.setTopGap(2);
-        myLibrary.setBottomGap(2);
+//        myLibrary.setTopGap(2);
+//        myLibrary.setBottomGap(2);
         allFriends.setTopGap(2);
         allFriends.setBottomGap(2);
         
-        addItem(myLibrary, this, "growx, wmin 0, wrap", null, p2pNetwork.getAction());
+   //     addItem(myLibrary, this, "growx, wmin 0, wrap", null, p2pNetwork.getAction());
         addItem(p2pNetwork, this, "growx, wmin 0, wrap", myLibrary.getAction(), allFriends.getAction());
         addItem(allFriends, this, "growx, wmin 0, wrap", p2pNetwork.getAction(), new MoveAction(limewireList, true));
         addItem(friendsPanel, this, "growx, wmin 0, wrap", null, null);
@@ -659,5 +659,5 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         @Override
         public void setName(String name) {
         }
-    }
+    }    
 }

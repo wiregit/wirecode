@@ -9,7 +9,6 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JList;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 import org.jdesktop.application.Resource;
@@ -58,7 +57,6 @@ public class ImageList extends JXList implements Disposable, SelectAllable<Local
         GuiUtils.assignResources(this); 
         
         setBackground(backgroundListcolor);
-        setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setLayoutOrientation(JList.HORIZONTAL_WRAP);
         //this must be set to negative 1 to get horizontal line wrap
         setVisibleRowCount(-1);

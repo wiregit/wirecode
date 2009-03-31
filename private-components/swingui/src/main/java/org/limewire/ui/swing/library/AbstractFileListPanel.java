@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
@@ -112,6 +113,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     protected void addNavPanel() {
+        selectionPanel.setMinimumSize(new Dimension(150, 0));
         add(selectionPanel, "dock west");
         // TODO: move to properties -- funky because this class gets subclassed.
         add(Line.createVerticalLine(Color.decode("#696969")), "dock west, width 1!");        
@@ -493,7 +495,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         private AbstractFileListPanel libraryPanel;
         
         public SelectionPanel(Action action, AbstractFileListPanel library) {
-            super(new MigLayout("insets 0, fill, hidemode 3"));
+            super(new MigLayout("insets 0 12 0 0, fill, hidemode 3"));
 
             this.libraryPanel = library;
             

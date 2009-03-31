@@ -1,10 +1,19 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
+import org.limewire.ui.swing.downloads.table.renderer.ButtonRendererEditor;
+import org.limewire.ui.swing.downloads.table.renderer.MessageRenderer;
+import org.limewire.ui.swing.downloads.table.renderer.DownloadProgressRenderer;
+import org.limewire.ui.swing.downloads.table.renderer.DownloadTitleRenderer;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -23,7 +32,7 @@ public class DownloadTable extends AbstractDownloadTable {
     private DownloadTableModel model;
 
     @AssistedInject
-	public DownloadTable(DownloadTableCellFactory tableCellFactory, DownloadActionHandler actionHandler, 
+	public DownloadTable(ProgressBarDecorator progressBarDecorator, CategoryIconManager iconManager, DownloadTableCellFactory tableCellFactory, DownloadActionHandler actionHandler, 
 	        @Assisted EventList<DownloadItem> downloadItems) {	
         
 
@@ -33,19 +42,15 @@ public class DownloadTable extends AbstractDownloadTable {
         
         setStripeHighlighterEnabled(false);
         
-        setShowGrid(false, false);
+        setShowGrid(true, false);
         
-        setRowSelectionAllowed(false);
-      
-        DownloadTableCell editorMutator   = tableCellFactory.create();
-        DownloadTableCell rendererMutator = tableCellFactory.create();
+        setRowSelectionAllowed(true);
+
+        getColumnModel().getColumn(0).setCellRenderer(new DownloadTitleRenderer(iconManager));
+        getColumnModel().getColumn(1).setCellRenderer(new DownloadProgressRenderer(progressBarDecorator));
+        getColumnModel().getColumn(2).setCellRenderer(new MessageRenderer());
+        getColumnModel().getColumn(3).setCellRenderer(new ButtonRendererEditor());
         
-        DownloadTableEditor editor = new DownloadTableEditor(editorMutator);
-        editor.initialiseEditor(downloadItems, actionHandler);
-        getColumnModel().getColumn(0).setCellEditor(editor);
-        
-        DownloadTableRenderer renderer = new DownloadTableRenderer(rendererMutator);
-        getColumnModel().getColumn(0).setCellRenderer(renderer);
         
         setRowHeight(this.rowHeight);
     }
@@ -73,6 +78,11 @@ public class DownloadTable extends AbstractDownloadTable {
         };
 
         setDoubleClickHandler(clickHandler);
+        
+
+        ButtonRendererEditor editor = new ButtonRendererEditor();
+        editor.setActionHandler(actionHandler);
+        getColumnModel().getColumn(3).setCellEditor(editor);
 
     }
 }

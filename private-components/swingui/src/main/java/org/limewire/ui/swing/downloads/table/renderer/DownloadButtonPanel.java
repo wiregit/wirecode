@@ -1,17 +1,19 @@
-package org.limewire.ui.swing.downloads.table;
+package org.limewire.ui.swing.downloads.table.renderer;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -24,80 +26,77 @@ public class DownloadButtonPanel extends JPanel {
 	private JButton pauseButton;
     private JButton cancelButton;
     private JButton resumeButton;
+    private JButton tryAgainButton;
     private JButton removeButton;
 
 
-    @Resource
-    private Icon pauseIcon;    
-    @Resource
-    private Icon pauseIconPressed;    
-    @Resource
-    private Icon pauseIconRollover;
+   
     @Resource
     private Icon cancelIcon;
     @Resource
     private Icon cancelIconPressed;
     @Resource
     private Icon cancelIconRollover;
-    @Resource
-    private Icon resumeIcon;
-    @Resource
-    private Icon resumeIconPressed;
-    @Resource
-    private Icon resumeIconRollover;   
 
+    public DownloadButtonPanel() {
+        this(null);
+    }
 	/**
 	 * Create the panel
 	 */
 	public DownloadButtonPanel(ActionListener actionListener) {
-	    super(new BorderLayout(0,0));
+	    super(new MigLayout("insets 0 0 0 0, gap 0 0 0 0, novisualpadding, fill, aligny center"));
 	    
 	    GuiUtils.assignResources(this);		
+	    
+	    setOpaque(false);
+	    
+	    Font font = new DownloadRendererProperties().getFont();
 
-		pauseButton = new IconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
+		pauseButton = new HyperlinkButton(I18n.tr("Pause"));
 		pauseButton.setActionCommand(DownloadActionHandler.PAUSE_COMMAND);
 		pauseButton.addActionListener(actionListener);
-		pauseButton.setToolTipText(I18n.tr("Pause"));		
-
+		pauseButton.setToolTipText(I18n.tr("Pause download"));		
+		pauseButton.setFont(font);
 
         cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
         cancelButton.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
         cancelButton.addActionListener(actionListener);
-        cancelButton.setToolTipText(I18n.tr("Cancel Download"));
+        cancelButton.setToolTipText(I18n.tr("Cancel download"));
 
         removeButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
         removeButton.setActionCommand(DownloadActionHandler.REMOVE_COMMAND);
         removeButton.addActionListener(actionListener);
-        removeButton.setToolTipText(I18n.tr("Remove Download"));
+        removeButton.setToolTipText(I18n.tr("Remove download"));
 
-		resumeButton = new IconButton(resumeIcon, resumeIconRollover, resumeIconPressed);
+        tryAgainButton = new HyperlinkButton(I18n.tr("Try again"));
+        tryAgainButton.setActionCommand(DownloadActionHandler.TRY_AGAIN_COMMAND);
+        tryAgainButton.addActionListener(actionListener);
+        tryAgainButton.setToolTipText(I18n.tr("Try again"));    
+        tryAgainButton.setFont(font);
+
+		resumeButton =  new HyperlinkButton(I18n.tr("Resume"));;
 		resumeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
 		resumeButton.addActionListener(actionListener);
 		resumeButton.setVisible(false);
-        resumeButton.setToolTipText(I18n.tr("Resume"));
+        resumeButton.setToolTipText(I18n.tr("Resume download"));    
+        resumeButton.setFont(font);
 		
-		JPanel leadPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0,0));
-		leadPanel.setOpaque(false);
 		
-		leadPanel.add(resumeButton);
-		leadPanel.add(pauseButton);
-		
-		JPanel cancelPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0,0));
-		cancelPanel.setOpaque(false);
-		cancelPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,15));
-		cancelPanel.add(cancelButton);
-		cancelPanel.add(removeButton);
-		
-				
-		add(leadPanel, BorderLayout.WEST);
-		add(cancelPanel, BorderLayout.EAST);
+		add(resumeButton, "hidemode 3, push");
+        add(pauseButton, "hidemode 3, push");
+        add(tryAgainButton, "hidemode 1, push");		
+	
+		add(cancelButton, "hidemode 3, gapright 6");
+		add(removeButton, "hidemode 3, gapright 6");
 	}	
 	
-	public void setActionListener(ActionListener actionListener){
+	public void addActionListener(ActionListener actionListener){
 	    pauseButton.addActionListener(actionListener);
         cancelButton.addActionListener(actionListener);
         resumeButton.addActionListener(actionListener);
         removeButton.addActionListener(actionListener);
+        tryAgainButton.addActionListener(actionListener);
 	}
 
 	
@@ -107,6 +106,7 @@ public class DownloadButtonPanel extends JPanel {
 		resumeButton.setVisible(state.isResumable());
         cancelButton.setVisible(state != DownloadState.DONE);
         removeButton.setVisible(state == DownloadState.DONE);
+        tryAgainButton.setVisible(state == DownloadState.STALLED);
 	}
 
 }

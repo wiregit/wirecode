@@ -2,6 +2,10 @@ package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -13,8 +17,12 @@ import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXLabel;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.AbstractPainter;
+import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
@@ -23,7 +31,7 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.BackAction;
 import org.limewire.ui.swing.components.HeaderBar;
-import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
@@ -32,6 +40,7 @@ import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.painter.TextShadowPainter;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -44,8 +53,20 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class MainDownloadPanel extends JPanel {
+    
+    @Resource
+    private Color topBorderColor;
+    @Resource
+    private Color bottomBorderColor;
+    @Resource
+    private Color topGradientColor;
+    @Resource
+    private Color bottomGradientColor;
+    @Resource
+    private Color leftBorderColor;
+    @Resource
+    private Color rightBorderColor;
 	
-    private final ButtonDecorator buttonDecorator;
     private final ComboBoxDecorator comboBoxDecorator;
     
     public static final String NAME = "MainDownloadPanel";
@@ -56,7 +77,7 @@ public class MainDownloadPanel extends JPanel {
 	
 	private final DownloadMediator downloadMediator;
 	
-	private final HeaderBar settingsPanel;
+	private final JXPanel settingsPanel;
     
 	private LimeComboBox moreButton;
     private JXButton clearFinishedNowButton;
@@ -126,13 +147,12 @@ public class MainDownloadPanel extends JPanel {
 	public MainDownloadPanel(AllDownloadPanelFactory allDownloadPanelFactory, 
 	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
 	        DownloadMediator downloadMediator,
-	        HeaderBarDecorator headerBarDecorator, ComboBoxDecorator comboBoxFactory,
-	        ButtonDecorator buttonDecorator, DockIconFactory dockIconFactory,
+	        ComboBoxDecorator comboBoxFactory,
+	        DockIconFactory dockIconFactory,
 	        BackAction backAction) {
-	    
+	    GuiUtils.assignResources(this);
 	    
 		this.downloadMediator = downloadMediator;
-		this.buttonDecorator = buttonDecorator;
 		this.comboBoxDecorator = comboBoxFactory;
 		
 		dock = dockIconFactory.createDockIcon();
@@ -157,21 +177,21 @@ public class MainDownloadPanel extends JPanel {
 		categoryPanel.setName(CATEGORY);
 		cardPanel.add(categoryPanel, categoryPanel.getName());
 		
-		JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0, gap 0, fill, aligny center"));
+		JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0 0 0 0, gap 0 0 0 0, novisualpadding, fill, aligny center"));
         headerTitlePanel.setOpaque(false);        
         JXLabel titleTextLabel = new JXLabel(I18n.tr("Downloads"));
-        titleTextLabel.setForegroundPainter(new TextShadowPainter());
-        IconButton backButton = new IconButton(backAction);
-        backButton.removeActionHandListener();
-        backButton.setRolloverEnabled(true);        
-        headerTitlePanel.add(backButton, "gapafter 6, gapbottom 1");
+    //    titleTextLabel.setForegroundPainter(new TextShadowPainter());
+//        IconButton backButton = new IconButton(backAction);
+//        backButton.removeActionHandListener();
+//        backButton.setRolloverEnabled(true);        
+//        headerTitlePanel.add(backButton, "gapafter 6, gapbottom 1");
         headerTitlePanel.add(titleTextLabel, "gapbottom 2");        
         
         settingsPanel = new HeaderBar(headerTitlePanel);
-        settingsPanel.linkTextComponent(titleTextLabel);
-        headerBarDecorator.decorateBasic(settingsPanel);
+//       / settingsPanel.linkTextComponent(titleTextLabel);
+      //  headerBarDecorator.decorateBasic(settingsPanel);
         
-        this.initHeader();
+        initHeader();
 		add(settingsPanel, BorderLayout.NORTH);
 		
 		cardLayout.show(cardPanel, NO_CATEGORY);
@@ -203,6 +223,8 @@ public class MainDownloadPanel extends JPanel {
                 clearFinishedNowAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
             }
         });
+        
+        downloadMediator.getDownloadList().addListEventListener(new VisibilityListListener(downloadMediator.getDownloadList()));
     }
 	
 	public void setCategorized(boolean categorized){
@@ -210,11 +232,11 @@ public class MainDownloadPanel extends JPanel {
 	}
 	
 	private void initHeader() {
-	    clearFinishedNowButton = new JXButton(clearFinishedNowAction);
-	    buttonDecorator.decorateDarkFullButton(clearFinishedNowButton);
+	    settingsPanel.setBackgroundPainter(new HeaderBackgroundPainter());
+	    clearFinishedNowButton = new HyperlinkButton(clearFinishedNowAction);
 	    
 	    moreButton = new LimeComboBox();
-	    comboBoxDecorator.decorateDarkFullComboBox(moreButton);
+	    comboBoxDecorator.decorateLinkComboBox(moreButton);
 	    moreButton.setText(I18n.tr("more"));
 
 	    categoriseCheckBox = new JCheckBoxMenuItem(categorizeAction);
@@ -241,12 +263,14 @@ public class MainDownloadPanel extends JPanel {
 	    
 	    moreButton.overrideMenu(menu);
 	    
-	    this.settingsPanel.setLayout(new MigLayout("insets 0, fillx, filly","push[][]"));
-	    this.settingsPanel.add(clearFinishedNowButton, "gapafter 5");
-	    this.settingsPanel.add(moreButton, "gapafter 5");
+	    settingsPanel.setLayout(new MigLayout("insets 0, fillx, filly","push[][]"));
+	    settingsPanel.add(clearFinishedNowButton, "gapafter 5");
+	    settingsPanel.add(moreButton, "gapafter 5");
 	}
 	
-	
+	public Component getHeader(){
+	    return settingsPanel;
+	}
 	
 	private static class PausableMatcher implements Matcher<DownloadItem> {
         @Override
@@ -259,6 +283,59 @@ public class MainDownloadPanel extends JPanel {
         @Override
         public boolean matches(DownloadItem item) {
             return item.getState().isResumable();
+        }
+    }
+    
+    private class VisibilityListListener implements ListEventListener<DownloadItem> {
+        private EventList<DownloadItem> list;
+
+        public VisibilityListListener(EventList<DownloadItem> list) {
+            this.list = list;
+        }
+
+        @Override
+        public void listChanged(ListEvent<DownloadItem> listChanges) {
+            if (list.size() > 0) {
+                setVisible(true);
+            }
+        }
+    }
+    
+    /**
+     * Painter for the background of the header
+     */
+    private class HeaderBackgroundPainter extends AbstractPainter<JXPanel> {
+
+        private RectanglePainter<JXPanel> painter;
+        
+        public HeaderBackgroundPainter() {
+            painter = new RectanglePainter<JXPanel>();
+            painter.setFillPaint(new GradientPaint(0,0, topGradientColor, 0, 1, bottomGradientColor, false));
+            painter.setFillVertical(true);
+            painter.setFillHorizontal(true);
+            painter.setPaintStretched(true);
+            painter.setBorderPaint(null);
+        }
+        
+        @Override
+        protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
+            painter.paint(g, object, width, height);
+            
+            // paint the top border
+            g.setColor(topBorderColor);
+            g.drawLine(0, 0, width, 0);
+
+            //paint the bottom border
+            g.setColor(bottomBorderColor);
+            g.drawLine(0, height-1, width, height-1);
+            
+            //paint the left border
+            g.setColor(leftBorderColor);
+            g.drawLine(0, 0, 0, height-2);
+
+            //paint the bottom border
+            g.setColor(rightBorderColor);
+            g.drawLine(width-1, 0, width-1, height);
         }
     }
 

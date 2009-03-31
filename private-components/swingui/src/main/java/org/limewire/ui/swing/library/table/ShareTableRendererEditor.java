@@ -49,7 +49,7 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     private final ToolTipMouseListener friendsTooltipListener;
     
     @AssistedInject
-    public ShareTableRendererEditor(@Assisted Action shareAction, XMPPService xmppService){
+    public ShareTableRendererEditor(@Assisted Action friendShareAction, @Assisted Action p2pShareAction, XMPPService xmppService){
         GuiUtils.assignResources(this);
         
         this.xmppService = xmppService;
@@ -61,8 +61,8 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
         p2pButton.setDisabledIcon(p2pDisabledIcon);
         friendsButton.setDisabledIcon(friendsDisabledIcon);
         
-        p2pButton.addActionListener(shareAction);
-        friendsButton.addActionListener(shareAction);
+        p2pButton.addActionListener(p2pShareAction);
+        friendsButton.addActionListener(friendShareAction);
         friendsButton.setHorizontalTextPosition(SwingConstants.RIGHT);
         friendsButton.setVerticalTextPosition(SwingConstants.CENTER);
     

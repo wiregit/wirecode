@@ -28,6 +28,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.Sharable;
@@ -142,11 +143,11 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         return new TableColumnSelector(this, format).getPopupMenu();
     }
     
-    public void enableMyLibrarySharing(ShareWidget<File> shareWidget) {
+    public void enableMyLibrarySharing(ShareWidget<File> shareWidget, ShareListManager shareListManager) {
         this.shareWidget = shareWidget;
-        shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(new ShareAction(I18n.tr("Share")));
+        shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(new ShareAction(I18n.tr("Share")), new P2PShareAction(I18n.tr("Share"), shareListManager));
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(shareEditor);
-        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(shareTableRendererEditorFactory.createShareTableRendererEditor(null));
+        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(shareTableRendererEditorFactory.createShareTableRendererEditor(null, null));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(shareEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(shareEditor.getPreferredSize().width);
         setRowHeight(rowHeight);
@@ -220,6 +221,30 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
             shareWidget.setShareable(((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(selectedIndex)).getFile());
             shareWidget.show(shareEditor);
             shareEditor.cancelCellEditing();
+        }
+        
+    }
+    
+    private class P2PShareAction extends AbstractAction {
+        
+        private ShareListManager shareListManager;
+
+        public P2PShareAction(String text, ShareListManager shareListManager){
+            super(text);
+            this.shareListManager = shareListManager;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // highlight the row that has the share widget was pressed in
+            int selectedIndex = convertRowIndexToModel(getEditingRow());
+            getSelectionModel().setSelectionInterval(selectedIndex, selectedIndex);
+            LocalFileItem fileItem = (LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(selectedIndex);
+            if (fileItem.isSharedWithGnutella()) {
+                shareListManager.getGnutellaShareList().removeFile(fileItem.getFile());
+            } else {
+                shareListManager.getGnutellaShareList().addFile(fileItem.getFile());
+            }
         }
         
     }

@@ -106,6 +106,8 @@ import com.google.inject.name.Named;
 
 public class MyLibraryPanel extends LibraryPanel implements EventListener<FriendEvent> {
     
+    public static final String NAME = "My Library";
+    
     @Resource(key="LibraryPanel.selectionPanelBackgroundOverride")
     private Color selectionPanelBackgroundOverride = null;
     @Resource
@@ -434,7 +436,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         if (category != Category.IMAGE) {
             LibraryTable<LocalFileItem> table = tableFactory.createMyTable(category, filterList, currentFriendFilterChanger);
-            table.enableMyLibrarySharing(fileShareWidget);
+            table.enableMyLibrarySharing(fileShareWidget, shareListManager);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(catalog, getTableModel(table)));
             selectableMap.put(catalog, table);
             scrollPane = new JScrollPane(table);

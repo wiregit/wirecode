@@ -12,6 +12,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -29,6 +30,8 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.home.HomePanel;
+import org.limewire.ui.swing.library.MyLibraryIntroPanel;
+import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -61,7 +64,11 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     private final FancyTabList searchList;
     private final Navigator navigator;        
-    private final NavItem homeNav;
+    private final NavItem homeNav;      
+    private final NavItem libraryNav;  
+    private final NavItem friendNav;
+    private JButton myLibraryIntroButton;
+
         
     @Inject
     public TopPanel(final SearchHandler searchHandler,
@@ -74,12 +81,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     BarPainterFactory barPainterFactory,
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryNavigator libraryNavigator,
-                    AdvancedSearchPanel advancedSearchPanel) {        
+                    AdvancedSearchPanel advancedSearchPanel,
+                    final MyLibraryPanel myLibraryPanel) {        
         GuiUtils.assignResources(this);
         
         this.searchBar = searchBar;
         this.navigator = navigator;
-        this.searchBar.addSearchActionListener(new Searcher(searchHandler));        
+        this.searchBar.addSearchActionListener(new Searcher(searchHandler)); 
         
         setName("WireframeTop");
         
@@ -124,6 +132,48 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 storePanel.loadDefaultUrl();
             }
         });
+         
+        libraryNav = navigator.createNavItem(NavCategory.LIBRARY, MyLibraryPanel.NAME, myLibraryPanel);      
+        final JButton myLibraryButton = new IconButton(NavigatorUtils.getNavAction(libraryNav));
+        myLibraryButton.setName("WireframeTop.libraryButton");
+        myLibraryButton.setToolTipText(I18n.tr("My Library"));
+        myLibraryButton.setText(null);
+        myLibraryButton.setIconTextGap(1);
+        myLibraryButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                myLibraryPanel.showAllFiles();                
+            }            
+        });
+        
+        if (true) {
+            myLibraryButton.setVisible(false);
+            Action introAction = new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    myLibraryButton.setVisible(true);
+                    myLibraryIntroButton.setVisible(false);
+                    myLibraryPanel.showAllFiles();
+                    libraryNav.select();
+                }
+            };
+            NavItem introNav = navigator.createNavItem(NavCategory.LIBRARY, MyLibraryIntroPanel.NAME, new MyLibraryIntroPanel(introAction));
+            myLibraryIntroButton = new IconButton(NavigatorUtils.getNavAction(introNav));
+            myLibraryIntroButton.setName("WireframeTop.libraryIntroButton");
+            myLibraryIntroButton.setToolTipText(I18n.tr("My Library"));
+            myLibraryIntroButton.setText(null);
+            myLibraryIntroButton.setIconTextGap(1);
+        } else {
+            myLibraryIntroButton = null;
+        }
+        
+        friendNav = navigator.createNavItem(NavCategory.LIBRARY, "Friend panel", new JPanel());      
+        JButton friendButton = new IconButton(NavigatorUtils.getNavAction(friendNav));
+        friendButton.setName("WireframeTop.friendButton");
+        friendButton.setToolTipText(I18n.tr("My Friends"));
+        friendButton.setText(null);
+        friendButton.setIconTextGap(1);
+   
      
         searchList = fancyTabListFactory.create();
         searchList.setName("WireframeTop.SearchList");
@@ -137,11 +187,16 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setHighlightPainter(tabPainterFactory.createHighlightPainter());
         searchList.setTabInsets(new Insets(0,10,2,10));
 
-        setLayout(new MigLayout("gap 0, insets 0, filly, alignx leading"));        
-        add(homeButton, "gapbottom 2, gaptop 0");
-        add(storeButton, "gapbottom 2, gaptop 0");
+        setLayout(new MigLayout("gap 0 0 0 0, insets 0 0 0 0, novisualpadding, filly"));        
+        add(myLibraryButton, "gapbottom 2, gaptop 0, gapleft 15, hidemode 3");       
+        if (myLibraryIntroButton != null) {
+            add(myLibraryIntroButton, "gapbottom 2, gaptop 0, gapleft 15, hidemode 3");
+        }
+        //add(homeButton, "gapbottom 2, gaptop 0");
+        add(storeButton, "gapbottom 2, gaptop 0, gapleft 10");
+        add(friendButton, "gapbottom 2, gaptop 0, gapleft 10");
 
-        add(searchBar, "gapleft 70, gapbottom 2, gaptop 0");
+        add(searchBar, "gapleft 14, gapbottom 2, gaptop 0");
         add(searchList, "gapleft 10, gaptop 3, gapbottom 1, growy");
         
         // Do not show store if mozilla failed to load.

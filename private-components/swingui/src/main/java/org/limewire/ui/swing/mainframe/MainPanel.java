@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.mainframe;
 
 import java.awt.CardLayout;
+import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.HashMap;
@@ -50,6 +51,7 @@ public class MainPanel extends JPanel {
             @Override
             public void componentResized(ComponentEvent e) {
                 MainPanel.this.revalidate();
+                repaint();
             }
 
         });
@@ -60,6 +62,8 @@ public class MainPanel extends JPanel {
                 LOG.debugf("Added item {0}", navItem);
                 keyToComponents.put(asString(navItem), panel);
                 add(panel, asString(navItem));
+                //this is necessary for heavyweight components to work in the JSplitPane
+                panel.setMinimumSize(new Dimension(0, 0));
             }
 
             @Override

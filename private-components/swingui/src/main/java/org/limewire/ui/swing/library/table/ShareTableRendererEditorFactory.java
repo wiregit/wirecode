@@ -5,6 +5,6 @@ import javax.swing.Action;
 
 public interface ShareTableRendererEditorFactory {
 
-    public ShareTableRendererEditor createShareTableRendererEditor(Action action);
+    public ShareTableRendererEditor createShareTableRendererEditor(Action friendAction, Action p2pAction);
     
 }

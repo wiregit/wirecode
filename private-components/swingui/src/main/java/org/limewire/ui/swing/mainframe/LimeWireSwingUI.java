@@ -7,11 +7,14 @@ import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
@@ -22,7 +25,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.PanelResizer;
 import org.limewire.ui.swing.components.ShapeDialog;
-import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
+import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNagController;
@@ -46,8 +49,8 @@ public class LimeWireSwingUI extends JPanel {
             TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel friendsPanel,
-            AudioPlayer player, DownloadSummaryPanel downloadSummaryPanel,
-            ShapeDialog shapeDialog, ProNagController proNagController) {
+            AudioPlayer player, //DownloadSummaryPanel downloadSummaryPanel,
+            ShapeDialog shapeDialog, ProNagController proNagController, final MainDownloadPanel mainDownloadPanel) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;
@@ -56,6 +59,40 @@ public class LimeWireSwingUI extends JPanel {
     	this.proNagController = proNagController;
     	
     	JPanel centerPanel = new JPanel(new GridBagLayout());
+    	final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, mainPanel, mainDownloadPanel);
+    	final BasicSplitPaneUI splitUI = new BasicSplitPaneUI();    	
+    	splitPane.setUI(splitUI);
+    	splitPane.setOneTouchExpandable(true);  
+    	mainDownloadPanel.addComponentListener(new ComponentListener(){
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                splitUI.getDivider().setVisible(false);                
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {}
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                System.out.println(mainDownloadPanel.getSize().height);                
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+                splitUI.getDivider().setVisible(true);
+
+                splitUI.getDivider().setLayout(new BorderLayout());
+                splitUI.getDivider().removeAll();
+                splitUI.getDivider().add(mainDownloadPanel.getHeader());    
+                splitPane.setDividerSize(mainDownloadPanel.getHeader().getPreferredSize().height);
+                mainDownloadPanel.setSize(mainDownloadPanel.getPreferredSize().width, 160);
+                splitPane.setDividerLocation(splitPane.getSize().height - splitPane.getInsets().bottom - splitPane.getDividerSize() - mainDownloadPanel.getHeight());
+
+            }
+        });
+    	mainDownloadPanel.setVisible(false);
+
         setLayout(new BorderLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -84,17 +121,17 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        centerPanel.add(mainPanel, gbc);
+        centerPanel.add(splitPane, gbc);
         
-        // The download summary panel
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.SOUTH;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.gridheight = GridBagConstraints.REMAINDER;
-
-        centerPanel.add(downloadSummaryPanel, gbc);
+//        // The download summary panel
+//        gbc.fill = GridBagConstraints.HORIZONTAL;
+//        gbc.anchor = GridBagConstraints.SOUTH;
+//        gbc.weightx = 1;
+//        gbc.weighty = 0;
+//        gbc.gridwidth = GridBagConstraints.REMAINDER;
+//        gbc.gridheight = GridBagConstraints.REMAINDER;
+//
+//        centerPanel.add(downloadSummaryPanel, gbc);
         
         layeredPane.addComponentListener(new MainPanelResizer(centerPanel));
         layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER);

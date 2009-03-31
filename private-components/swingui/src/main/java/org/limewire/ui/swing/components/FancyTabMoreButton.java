@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -7,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -27,8 +29,11 @@ import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.ui.swing.util.GuiUtils;
 
 class FancyTabMoreButton extends LimeComboBox {
-    
+
     @Resource private Icon selectedIcon;
+    @Resource private Icon buttonUp;
+    @Resource private Icon buttonDown;
+    @Resource private Icon buttonHover;
     private Icon unselectedIcon;
     
     private JPopupMenu menu = new JPopupMenu();
@@ -40,7 +45,18 @@ class FancyTabMoreButton extends LimeComboBox {
         overrideMenu(menu);
         MoreListener listener = new MoreListener(tabs);
         menu.addPopupMenuListener(listener);
-        setFocusable(false);
+     //   setFocusable(false);
+        setSelectedIcon(buttonDown);
+        setRolloverIcon(buttonHover);
+        setIcon(buttonUp);
+        setMargin(new Insets(0, 0, 0, 0));
+        setBorderPainted(false);
+        setContentAreaFilled(false);
+        setFocusPainted(false);
+        setRolloverEnabled(true);
+        setHideActionText(true);
+        setBorder(BorderFactory.createEmptyBorder());
+        setOpaque(false);
     }
     
     private JComponent createMenuItemFor(

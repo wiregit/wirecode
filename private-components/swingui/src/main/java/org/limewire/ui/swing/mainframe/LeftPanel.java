@@ -1,10 +1,16 @@
 package org.limewire.ui.swing.mainframe;
 
+import javax.swing.JComponent;
+
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.NavSelectable;
+import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.EnabledListener;
 import org.limewire.ui.swing.util.EnabledListenerList;
@@ -37,6 +43,8 @@ public class LeftPanel extends JXPanel implements VisibleComponent {
         Line line = Line.createVerticalLine();
         line.setName("LeftPanel.rightBorder");
         add(line, "grow");
+        
+        navigator.addNavigationListener(new LeftPanelNavigationListener());
     }
 
     public void toggleVisibility() {
@@ -76,6 +84,34 @@ public class LeftPanel extends JXPanel implements VisibleComponent {
     @Override
     public boolean isActionEnabled() {
         return true;
+    }
+    
+    private class LeftPanelNavigationListener implements NavigationListener {
+
+        @Override
+        public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, JComponent panel) {
+            setVisible(false);//(category == NavCategory.LIBRARY);
+        }
+
+        @Override
+        public void categoryAdded(NavCategory category) {
+            // Do nothing
+        }
+
+        @Override
+        public void categoryRemoved(NavCategory category) {
+            // Do nothing
+        }
+
+        @Override
+        public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {
+            // Do nothing
+        }
+
+        @Override
+        public void itemRemoved(NavCategory category, NavItem navItem, JComponent panel) {
+            // Do nothing
+        }
     }
 
 }
