@@ -1,6 +1,5 @@
 package org.limewire.core.impl.search;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +27,10 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+/**
+ * A class to generate a compatible {@link SearchResult} for the ui using an anonymous or non 
+ *  anonymous {@link FriendPrecence} a {@link RemoteFileDesc} and a list of altlocs.
+ */
 public class RemoteFileDescAdapter implements SearchResult {
 
     private final FriendPresence friendPresence;
@@ -37,12 +40,30 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final Category category;    
     private final String extension;
     private final String fileName;
+    
+    /**
+     * Cached lists of sources from {@link getSources()}
+     */
+    private List<RemoteHost> remoteHosts;
+    
+    /**
+     * The cached relevance value from {@link getRelevance}, -1 is unset
+     */
+    private int relevance = -1;
 
+    /**
+     * Constructs {@link RemoteFileDescAdapter} with an anonymous Gnutella precence based on the rfd's
+     *  address and a set of altlocs. 
+     */
     public RemoteFileDescAdapter(RemoteFileDesc rfd,
                                  Set<? extends IpPort> locs) {
         this(rfd, locs, new GnutellaPresence(rfd.getAddress(), GUID.toHexString(rfd.getClientGUID())));
     }
     
+    /**
+     * Constructs {@link RemoteFileDescAdapter} with a specific and possibly non anonymous presence
+     *  and a set of altlocs. 
+     */
     public RemoteFileDescAdapter(RemoteFileDesc rfd,
             Set<? extends IpPort> locs,
             FriendPresence friendPresence) {    
@@ -53,57 +74,61 @@ public class RemoteFileDescAdapter implements SearchResult {
         fileName = rfd.getFileName();
         extension = FileUtils.getFileExtension(rfd.getFileName());
         category = CategoryConverter.categoryForExtension(extension);
-
+        
         LimeXMLDocument doc = rfd.getXMLDocument();
         long fileSize = rfd.getSize();
         FilePropertyKeyPopulator.populateProperties(fileName, fileSize, rfd.getCreationTime(), properties, doc);
     }
 
     /**
-     * TODO come up with a better algorithm, right now just using number of sources and friends.
-     * Friends are given a greater weight.
+     * Calculates a rough "relevance", which is a measure of the quality of the sources.  
+     *  Non anonymous sources with active capabilities (ie. browseable) are given greatest weight.
      */
+    @Override
     public int getRelevance() {
-        int relevance = 0;
+        // If the value has already been calculated take that one, since it can not change
+        //  during the lifecycle of this object
+        if (relevance != -1) {
+            return relevance;
+        }
+        
+        relevance = 0;
+
+        // Calculate the relevance based on the (truncated) sources list
         for(RemoteHost remoteHost : getSources()) {
-            if(remoteHost.getFriendPresence().getFriend().isAnonymous()) {
-                if(remoteHost.isBrowseHostEnabled()) {
-                    relevance += 5;
-                }
-                
-                if(remoteHost.isChatEnabled()) {
-                    relevance += 2;
-                }
-                
-                if(remoteHost.isSharingEnabled()) {
-                    relevance += 10;
-                }
-                
-                relevance++;//TODO might want to drop this line, spammers have lots of sources with nothing enabled.
-            } else {
-                relevance += 20;
+	        if (remoteHost instanceof RelevantRemoteHost) {
+                relevance += ((RelevantRemoteHost) remoteHost).getRelevance();
             }
         }
+       
         return relevance;
     }
 
+    /**
+     * @returns the complete list of AltLocs.
+     */
     public List<IpPort> getAlts() {
         return locs;
     }
 
+    /**
+     * @return the extension for the sourced rfd.
+     */
     @Override
     public String getFileExtension() {
         return extension;
     }
 
+    /**
+     * @return if the file has licence info in its xml doc.
+     */
     @Override
     public boolean isLicensed() {
         LimeXMLDocument doc = rfd.getXMLDocument();
         return (doc != null) && (doc.getLicenseString() != null);
     }
+        
     
-    
-
     @Override
     public Map<FilePropertyKey, Object> getProperties() {
         return properties;
@@ -128,41 +153,34 @@ public class RemoteFileDescAdapter implements SearchResult {
         return rfd.getSize();
     }
     
+    /**
+     * Gets the GUI relevant sources.  Includes friends plus at most two anonymous sources. 
+     */
     @Override
     public List<RemoteHost> getSources() {
-        List<RemoteHost> remoteHosts = new ArrayList<RemoteHost>();
-        int maxToAdd = 2;
-        int numAdded = 0;
         
-        for(RemoteHost remoteHost : buildSources()) {
-            boolean anonymous = remoteHost.getFriendPresence().getFriend().isAnonymous();
-            if(!anonymous) {
-                remoteHosts.add(remoteHost);
-            } else if(numAdded < maxToAdd) {
-                remoteHosts.add(remoteHost);
-                numAdded++;
-            }
+        // Check that the list has not already been retrieved
+        if (remoteHosts != null) {
+            return remoteHosts;
         }
+        
+        // Initialise a new list
+        remoteHosts = new ArrayList<RemoteHost>();
+        
+        // TODO: setting?
+        int maxAltSourcesToAdd = 1;
+        
+        // Add the RfdRemoteHost for the FriendPrecence
+        remoteHosts.add(new RfdRemoteHost());
+        
+        // Add a specific number of the altlocs
+        for( int i=0 ; i < maxAltSourcesToAdd && i<locs.size() ; i++ ) {
+            remoteHosts.add(new AltLocRemoteHost(locs.get(i)));
+        }
+    
         return remoteHosts;
     }
-    
-    private List<RemoteHost> buildSources() {
-        return new AbstractList<RemoteHost>() {
-            @Override
-            public RemoteHost get(final int index) {
-                if (index == 0) {
-                    return new RfdRemoteHost();
-                } else {
-                    return new AltLocRemoteHost(index);
-                }
-            }
-
-            @Override
-            public int size() {
-                return 1 + locs.size();
-            }
-        };
-    }
+   
 
     @Override
     public URN getUrn() {
@@ -184,7 +202,11 @@ public class RemoteFileDescAdapter implements SearchResult {
         return friendPresence;
     }
     
-    private final class RfdRemoteHost implements RemoteHost {
+    /**
+     * An adapter that creates a compatible {@link RemoteHost} from the {@link RemoteFileDesc} and anonymous
+     *  or non anonymous {@link FriendPrecence} that the main {@link RemoteFileDescAdapter} was constructed with.
+     */
+    private class RfdRemoteHost implements RelevantRemoteHost {
         @Override
         public boolean isBrowseHostEnabled() {
             return rfd.isBrowseHostEnabled();
@@ -207,17 +229,35 @@ public class RemoteFileDescAdapter implements SearchResult {
             return false;
         }
 
+        @Override
         public FriendPresence getFriendPresence() {
             return friendPresence;
         }
+
+        /**
+         * @return 20 for non anonymous friend (ie. XMPP),
+         *         6  for browsable anonymous
+         *         1  otherwise
+         */
+        @Override
+        public int getRelevance() {
+            if(friendPresence.getFriend().isAnonymous()) {
+                if (rfd.isBrowseHostEnabled()) {
+                    return 6;
+                }
+                return 1;
+            } 
+            return 20;
+        }
     }
     
-    
-    private final class AltLocRemoteHost implements RemoteHost {
+    /**
+     * An adapter class for an altloc based on {@link IpPort} and translated to a {@link RemoteHost}.
+     */
+    private static class AltLocRemoteHost implements RelevantRemoteHost {
         private final FriendPresence presence;        
 
-        private AltLocRemoteHost(int index) {
-            IpPort ipPort = locs.get(index - 1);
+        private AltLocRemoteHost(IpPort ipPort) {
             if(ipPort instanceof Connectable) {
                 this.presence = new GnutellaPresence((Connectable)ipPort, ipPort.getInetSocketAddress().toString());
             } else {
@@ -225,24 +265,45 @@ public class RemoteFileDescAdapter implements SearchResult {
             }
         }
 
+        /**
+         * Indicates that a browse host is possible, however, in this case, it actually
+         *  may not be 100% of the time.  Returning true allows a browse host attempts
+         *  to be started.
+         */
         @Override
         public boolean isBrowseHostEnabled() {
-            return false;
+            return true;
         }
 
+        /**
+         * Chat is unsupported for Gnutella/anonymous sources so it will
+         *  never be supported in an altloc.
+         */
         @Override
         public boolean isChatEnabled() {
             return false;
         }
 
+        /**
+         * Share is unsupported for Gnutella/anonymous sources so it will
+         *  never be supported in an altloc.
+         */
         @Override
         public boolean isSharingEnabled() {
             return false;
         }
 
+        /**
+         * @return the anonymous {@link FriendPresence} assosiated with this altloc.
+         */
         @Override
         public FriendPresence getFriendPresence() {
             return presence;
+        }
+
+        @Override
+        public int getRelevance() {
+            return 1;
         }
     }
 
@@ -251,10 +312,19 @@ public class RemoteFileDescAdapter implements SearchResult {
        return fileName;
     }
 
+    
     @Override
     public String getMagnetURL() {
         MagnetOptions magnet = MagnetOptions.createMagnet(rfd, null, rfd.getClientGUID());
         return magnet.toExternalForm();
+    }
+
+
+    /**
+     * Defines a relevance calculation unique to a specific {@link RemoteHost} type.
+     */
+    private static interface RelevantRemoteHost extends RemoteHost {
+        public int getRelevance();
     }
 
 }
