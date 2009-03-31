@@ -309,8 +309,11 @@ public class CoreSearch implements Search {
         @Override
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
                 Set<? extends IpPort> locs) {
+            
+            RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs);
+            
             for (SearchListener listener : searchListeners) {
-                listener.handleSearchResult(CoreSearch.this, new RemoteFileDescAdapter(rfd, locs));
+                listener.handleSearchResult(CoreSearch.this, rfdAdapter);
             }
         }
     }
