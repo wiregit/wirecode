@@ -37,7 +37,7 @@ public class GetInfoTest extends AbstractCommunicationSupportWithNoLocalServer {
         Map<String, String> propertiesInResponse = new HashMap<String, String>();
         for (String pair: res.split(Pattern.quote("\t"))) {
             String[] parts = pair.split("=");
-            assert(parts.length == 2);
+            assertEquals("invalid format: " + pair, 2, parts.length);
             propertiesInResponse.put(parts[0], parts[1]);
         }
 
@@ -54,18 +54,16 @@ public class GetInfoTest extends AbstractCommunicationSupportWithNoLocalServer {
                 put(Info.IsTestingVersion, String.valueOf(LimeWireUtils.isTestingVersion()));
             }};
 
-        assert (expectedProperties.size() == Info.values().length) :
-            "not testing all properties";
-        assert (propertiesInResponse.size() == Info.values().length) :
-            "response does not contain all properties";
+        assertEquals("not testing all properties",
+            Info.values().length, expectedProperties.size());
+        assertEquals("response does not contain all properties",
+            Info.values().length, propertiesInResponse.size());
 
         for (Info key: expectedProperties.keySet()) {
             String expectedValue = expectedProperties.get(key);
-            String actualValue = propertiesInResponse.get(key.name());
-            assert (expectedValue.equals(actualValue)) : 
-                "key: " + key.name() +
-                " expected value: " + actualValue +
-                " actual value: " + expectedValue;
+            String actualValue = propertiesInResponse.get(key.getValue());
+            assertEquals("key: " + key.getValue(),
+                expectedValue, actualValue);
         }
     }
 }
