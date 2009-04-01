@@ -90,7 +90,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     protected void layoutComponent() {
-        setLayout(new MigLayout("fill, gap 0, insets 0"));
+        setLayout(new MigLayout("fill, gap 0 0 0 0, insets 0 0 0 0, nogrid"));
         
         addHeaderPanel();
         addNavPanel();
@@ -109,7 +109,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     protected void addHeaderPanel() {
-        add(headerPanel, "dock north, growx");       
+        add(headerPanel, "growx, wrap");       
     }
     
     protected void addNavPanel() {
