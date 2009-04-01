@@ -760,11 +760,11 @@ public class ConnectionManagerTest extends LimeTestCase {
         @Override
         public void doneWithConnect(Endpoint e, boolean success) {
             if (success) {
-                successLatch.countDown();
                 successes.incrementAndGet();
+                successLatch.countDown();
             } else {
-                failureLatch.countDown();
                 failures.incrementAndGet();
+                failureLatch.countDown();
             }
         }
         
