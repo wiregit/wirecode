@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
@@ -22,7 +24,7 @@ public class FSEventMonitor {
 
     private int currentEvent = -1;
 
-    private Pointer streamRef;
+    private RunLoop runLoop;
 
     public FSEventMonitor() {
         listeners = new EventListenerList<FSEvent>();
@@ -52,18 +54,8 @@ public class FSEventMonitor {
 
     private synchronized void updateStream() {
         closeStream();
-        int flags = 2;
-        Pointer pathsToWatch = coreFoundation.CFArrayCreate(watchDirs.toArray(new String[watchDirs
-                .size()]));
-        streamRef = coreServices.FSEventStreamCreate(null, new StreamEventCallback(), null,
-                pathsToWatch, currentEvent, 1.0, flags);
-        Pointer runLoopMode = NativeLibrary.getInstance("CoreFoundation").getGlobalVariableAddress(
-                "kCFRunLoopDefaultMode").getPointer(0);
-        Pointer runLoopGetCurrent = coreFoundation.CFRetain(coreFoundation.CFRunLoopGetCurrent());
-
-        coreServices.FSEventStreamScheduleWithRunLoop(streamRef, runLoopGetCurrent, runLoopMode);
-
-        boolean started = coreServices.FSEventStreamStart(streamRef);
+        runLoop = new RunLoop();
+        runLoop.start();
     }
 
     public synchronized void dispose() {
@@ -73,12 +65,9 @@ public class FSEventMonitor {
         coreServices = null;
     }
 
-    private synchronized void closeStream() {
-        if (streamRef != null) {
-            coreServices.FSEventStreamStop(streamRef);
-            coreServices.FSEventStreamInvalidate(streamRef);
-            coreServices.FSEventStreamRelease(streamRef);
-            streamRef = null;
+    private void closeStream() {
+        if (runLoop != null) {
+            runLoop.cancel();
         }
     }
 
@@ -87,10 +76,72 @@ public class FSEventMonitor {
         dispose();
     }
 
+    private class RunLoop extends Thread {
+
+        private Pointer runLoop;
+
+        private Pointer streamRef;
+boolean starting = true;
+        public RunLoop() {
+
+        }
+
+        @Override
+        public void run() {
+            Pointer runLoopMode = null;
+            synchronized (this) {
+                starting = false;
+                notifyAll();
+                
+                System.out.println("thread started");
+                int flags = 2;
+                Pointer pathsToWatch = coreFoundation.CFArrayCreate(watchDirs
+                        .toArray(new String[watchDirs.size()]));
+                streamRef = coreServices.FSEventStreamCreate(null, new StreamEventCallback(), null,
+                        pathsToWatch, currentEvent, 1.0, flags);
+                runLoopMode = NativeLibrary.getInstance("CoreFoundation").getGlobalVariableAddress(
+                        "kCFRunLoopDefaultMode").getPointer(0);
+                runLoop = coreFoundation.CFRetain(coreFoundation.CFRunLoopGetCurrent());
+
+
+            coreServices.FSEventStreamScheduleWithRunLoop(streamRef, runLoop, runLoopMode);
+
+            boolean started = coreServices.FSEventStreamStart(streamRef);
+
+            }
+            coreFoundation.CFRunLoopRun();
+
+            System.out.println(coreFoundation.getLastError());
+            System.out.println("thread stopped");
+        }
+
+        private synchronized void cancel() {
+            while(starting) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            if (runLoop != null) {
+                coreFoundation.CFRunLoopStop(runLoop);
+                runLoop = null;
+            }
+
+            if (streamRef != null) {
+                coreServices.FSEventStreamStop(streamRef);
+                coreServices.FSEventStreamInvalidate(streamRef);
+                coreServices.FSEventStreamRelease(streamRef);
+                streamRef = null;
+            }
+        }
+    }
+
     private class StreamEventCallback implements FSEventStreamCallback {
         public void callback(Pointer streamRef, Pointer clientCallbackInfo, int numEvents,
                 Pointer eventPaths, Pointer eventFlags, Pointer eventIds) {
-            synchronized (FSEventMonitor.this) {
+            synchronized (StreamEventCallback.class) {
                 int[] myEventFlags = eventFlags.getIntArray(0, numEvents);
                 int[] myEventIds = eventIds.getIntArray(0, numEvents);
 

@@ -17,6 +17,8 @@ public interface CoreFoundation extends Library {
     public Pointer CFStringCreateWithCString(String string);
 
     public Pointer CFRunLoopGetCurrent();
+    
+    public void CFRunLoopStop(Pointer pointer);
 
     public void CFRunLoopRun();
 

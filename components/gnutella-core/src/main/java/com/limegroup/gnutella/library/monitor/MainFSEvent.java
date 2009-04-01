@@ -21,5 +21,8 @@ public class MainFSEvent {
         });
 
         fEventMonitor.addWatch(new File("/Users/pvertenten/test1"));
+        fEventMonitor.addWatch(new File("/Users/pvertenten/test2"));
+       
+        Thread.sleep(100000000);
     }
 }

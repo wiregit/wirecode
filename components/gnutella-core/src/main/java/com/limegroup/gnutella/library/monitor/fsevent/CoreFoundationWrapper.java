@@ -57,4 +57,8 @@ public class CoreFoundationWrapper implements CoreFoundation {
         return coreFoundation.CFRetain(pointer);
     }
 
+    public void CFRunLoopStop(Pointer pointer) {
+        coreFoundation.CFRunLoopStop(pointer);
+    }
+
 }
