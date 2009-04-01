@@ -1,10 +1,13 @@
 package org.limewire.ui.swing.library;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -46,13 +49,17 @@ public class MyLibraryIntroPanel extends JXPanel{
         FontUtils.setSize(label3, 30);
         
 
-        setLayout(new MigLayout("gap 0 0 0 0, insets 0 0 0 0, novisualpadding, nogrid, fillx"));
-        add(label1, "gapleft 15, gaptop 50, growx, wrap");
-        add(label2, "gapleft 15, gaptop 10, growx, wrap");
-        add(Line.createHorizontalLine(), "gaptop 60, growx, wrap");
-        add(label3, "gapleft 15, gaptop 40, growx, wrap");
-        add(new JLabel(libraryImage), "grow, gaptop 20, alignx 40%, wrap");
-        add(continueButton, "alignx 100%, gapright 15, gaptop 15");
+        JPanel panel = new JPanel();
+        panel.setLayout(new MigLayout("gap 0 0 0 0, insets 0 0 0 0, novisualpadding, nogrid, fillx"));
+        panel.add(label1, "gapleft 15, gaptop 50, growx, wrap");
+        panel.add(label2, "gapleft 15, gaptop 10, growx, wrap");
+        panel.add(Line.createHorizontalLine(), "gaptop 60, growx, wrap");
+        panel.add(label3, "gapleft 15, gaptop 40, growx, wrap");
+        panel.add(new JLabel(libraryImage), "grow, gaptop 20, alignx 40%, wrap");
+        panel.add(continueButton, "alignx 100%, gapright 15, gaptop 15");
+                
+        setLayout(new BorderLayout());
+        add(new JScrollPane(panel));
     }
 
 }
