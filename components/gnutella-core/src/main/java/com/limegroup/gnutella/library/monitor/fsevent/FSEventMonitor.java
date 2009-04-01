@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
@@ -32,7 +30,6 @@ public class FSEventMonitor {
     }
 
     public void init() {
-
         coreServices = new CoreServicesWrapper();
         coreFoundation = new CoreFoundationWrapper();
         currentEvent = coreServices.FSEventsGetCurrentEventId();
@@ -81,33 +78,32 @@ public class FSEventMonitor {
         private Pointer runLoop;
 
         private Pointer streamRef;
-boolean starting = true;
-        public RunLoop() {
 
-        }
+        boolean starting = true;
 
         @Override
         public void run() {
             Pointer runLoopMode = null;
             synchronized (this) {
-                starting = false;
-                notifyAll();
-                
-                System.out.println("thread started");
-                int flags = 2;
-                Pointer pathsToWatch = coreFoundation.CFArrayCreate(watchDirs
-                        .toArray(new String[watchDirs.size()]));
-                streamRef = coreServices.FSEventStreamCreate(null, new StreamEventCallback(), null,
-                        pathsToWatch, currentEvent, 1.0, flags);
-                runLoopMode = NativeLibrary.getInstance("CoreFoundation").getGlobalVariableAddress(
-                        "kCFRunLoopDefaultMode").getPointer(0);
-                runLoop = coreFoundation.CFRetain(coreFoundation.CFRunLoopGetCurrent());
 
+                try {
+                    System.out.println("thread started");
+                    int flags = 2;
+                    Pointer pathsToWatch = coreFoundation.CFArrayCreate(watchDirs
+                            .toArray(new String[watchDirs.size()]));
+                    streamRef = coreServices.FSEventStreamCreate(null, new StreamEventCallback(),
+                            null, pathsToWatch, currentEvent, 1.0, flags);
+                    runLoopMode = NativeLibrary.getInstance("CoreFoundation")
+                            .getGlobalVariableAddress("kCFRunLoopDefaultMode").getPointer(0);
+                    runLoop = coreFoundation.CFRetain(coreFoundation.CFRunLoopGetCurrent());
 
-            coreServices.FSEventStreamScheduleWithRunLoop(streamRef, runLoop, runLoopMode);
+                    coreServices.FSEventStreamScheduleWithRunLoop(streamRef, runLoop, runLoopMode);
 
-            boolean started = coreServices.FSEventStreamStart(streamRef);
-
+                    coreServices.FSEventStreamStart(streamRef);
+                } finally {
+                    starting = false;
+                    notifyAll();
+                }
             }
             coreFoundation.CFRunLoopRun();
 
@@ -116,7 +112,7 @@ boolean starting = true;
         }
 
         private synchronized void cancel() {
-            while(starting) {
+            while (starting) {
                 try {
                     wait();
                 } catch (InterruptedException e) {
