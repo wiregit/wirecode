@@ -145,14 +145,7 @@ public class ConnectionManagerTest extends LimeTestCase {
 
     @Override
     public void tearDown() throws Exception {
-        //Kill all connections
-        if (connectionServices != null) {
-            connectionServices.disconnect();
-        }
-        if (lifecycleManager != null) {
-            lifecycleManager.shutdown();
-        }
-        Thread.sleep(500);
+        lifecycleManager.shutdown();
     }
     
     /**
