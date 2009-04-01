@@ -86,9 +86,7 @@ public class FSEventMonitor {
         @Override
         public void run() {
             Pointer runLoopMode = null;
-            synchronized (this) {
-
-                try {
+                 try {
                     System.out.println("thread started");
                     int flags = 2;
                     Pointer pathsToWatch = null;
@@ -107,7 +105,6 @@ public class FSEventMonitor {
                 } finally {
                     started.countDown();
                 }
-            }
             coreFoundation.CFRunLoopRun();
 
             System.out.println(coreFoundation.getLastError());
