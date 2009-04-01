@@ -98,7 +98,7 @@ public class FSEventMonitor {
                             null, pathsToWatch, currentEvent, 1.0, flags);
                     runLoopMode = NativeLibrary.getInstance("CoreFoundation")
                             .getGlobalVariableAddress("kCFRunLoopDefaultMode").getPointer(0);
-                    runLoop = coreFoundation.CFRetain(coreFoundation.CFRunLoopGetCurrent());
+                    runLoop = coreFoundation.CFRunLoopGetCurrent();
 
                     coreServices.FSEventStreamScheduleWithRunLoop(streamRef, runLoop, runLoopMode);
 
