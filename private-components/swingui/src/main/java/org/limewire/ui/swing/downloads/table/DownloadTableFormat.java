@@ -5,7 +5,11 @@ import java.util.Comparator;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.table.AbstractAdvancedTableFormat;
 
-public class DownloadTableFormat extends AbstractAdvancedTableFormat<DownloadItem> {
+class DownloadTableFormat extends AbstractAdvancedTableFormat<DownloadItem> {
+    public static final int TITLE = 0;
+    public static final int PROGRESS = 1;
+    public static final int MESSAGE = 2;
+    public static final int ACTION = 3;
     public DownloadTableFormat(){
         super("title", "progress", "message", "action");
     }

@@ -3,7 +3,6 @@ package org.limewire.ui.swing.downloads;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -11,6 +10,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -33,13 +33,10 @@ import org.limewire.ui.swing.action.BackAction;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
-import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
-import org.limewire.ui.swing.painter.TextShadowPainter;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -57,15 +54,11 @@ public class MainDownloadPanel extends JPanel {
     @Resource
     private Color topBorderColor;
     @Resource
-    private Color bottomBorderColor;
+    private Color outerBorderColor;
     @Resource
     private Color topGradientColor;
     @Resource
     private Color bottomGradientColor;
-    @Resource
-    private Color leftBorderColor;
-    @Resource
-    private Color rightBorderColor;
 	
     private final ComboBoxDecorator comboBoxDecorator;
     
@@ -268,7 +261,7 @@ public class MainDownloadPanel extends JPanel {
 	    settingsPanel.add(moreButton, "gapafter 5");
 	}
 	
-	public Component getHeader(){
+	public JComponent getHeader(){
 	    return settingsPanel;
 	}
 	
@@ -322,20 +315,14 @@ public class MainDownloadPanel extends JPanel {
             painter.paint(g, object, width, height);
             
             // paint the top border
-            g.setColor(topBorderColor);
+            g.setColor(outerBorderColor);
             g.drawLine(0, 0, width, 0);
+            g.setColor(topBorderColor);
+            g.drawLine(0, 1, width, 1);
 
             //paint the bottom border
-            g.setColor(bottomBorderColor);
+            g.setColor(outerBorderColor);
             g.drawLine(0, height-1, width, height-1);
-            
-            //paint the left border
-            g.setColor(leftBorderColor);
-            g.drawLine(0, 0, 0, height-2);
-
-            //paint the bottom border
-            g.setColor(rightBorderColor);
-            g.drawLine(width-1, 0, width-1, height);
         }
     }
 

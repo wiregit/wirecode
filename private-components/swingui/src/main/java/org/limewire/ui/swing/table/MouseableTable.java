@@ -252,7 +252,7 @@ public class MouseableTable extends StripedJXTable {
                             colors.evenForeground, colors.evenColor,
                             colors.evenForeground),
                     new ColorHighlighter(HighlightPredicate.ODD, colors.evenColor,
-                            colors.evenForeground, colors.evenForeground,
+                            colors.evenForeground, colors.evenColor,
                             colors.evenForeground),
                     new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,
                             colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));

@@ -25,7 +25,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
-import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -36,7 +35,6 @@ import com.google.inject.assistedinject.AssistedInject;
  */
 public class FancyTabList extends JXPanel {
     
-    private final ComboBoxDecorator comboBoxDecorator;
     
     private final List<FancyTab> tabs = new ArrayList<FancyTab>();
     private final ButtonGroup tabGroup = new ButtonGroup();
@@ -51,7 +49,6 @@ public class FancyTabList extends JXPanel {
         
     @AssistedInject
     FancyTabList(@Assisted Iterable<? extends TabActionMap> actionMaps, ComboBoxDecorator comboBoxDecorator) {
-        this.comboBoxDecorator = comboBoxDecorator;
         
         setOpaque(false);
         setLayout(new MigLayout("insets 0, gap 0, filly, hidemode 2"));  

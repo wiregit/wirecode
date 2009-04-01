@@ -1,16 +1,16 @@
 package org.limewire.ui.swing.downloads.table;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.ButtonRendererEditor;
-import org.limewire.ui.swing.downloads.table.renderer.MessageRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadProgressRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadTitleRenderer;
+import org.limewire.ui.swing.downloads.table.renderer.MessageRenderer;
+import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -32,34 +32,37 @@ public class DownloadTable extends AbstractDownloadTable {
     private DownloadTableModel model;
 
     @AssistedInject
-	public DownloadTable(ProgressBarDecorator progressBarDecorator, CategoryIconManager iconManager, DownloadTableCellFactory tableCellFactory, DownloadActionHandler actionHandler, 
-	        @Assisted EventList<DownloadItem> downloadItems) {	
+	public DownloadTable(ProgressBarDecorator progressBarDecorator, CategoryIconManager iconManager, DownloadActionHandler actionHandler, 
+	        @Assisted EventList<DownloadItem> downloadItems) {
         
-
         GuiUtils.assignResources(this);
                 
-        initialise(downloadItems, actionHandler);
+        initialize(downloadItems, actionHandler);
         
-        setStripeHighlighterEnabled(false);
+        TableColors colors = new TableColors();
+        setHighlighters(
+                new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor,
+                        colors.evenForeground, colors.selectionColor,
+                        colors.selectionForeground),
+                new ColorHighlighter(HighlightPredicate.ODD, colors.evenColor,
+                        colors.evenForeground, colors.selectionColor,
+                        colors.selectionForeground));
         
-        setShowGrid(true, false);
-        
-        setRowSelectionAllowed(true);
+        setShowGrid(true, false);        
 
-        getColumnModel().getColumn(0).setCellRenderer(new DownloadTitleRenderer(iconManager));
-        getColumnModel().getColumn(1).setCellRenderer(new DownloadProgressRenderer(progressBarDecorator));
-        getColumnModel().getColumn(2).setCellRenderer(new MessageRenderer());
-        getColumnModel().getColumn(3).setCellRenderer(new ButtonRendererEditor());
+        getColumnModel().getColumn(DownloadTableFormat.TITLE).setCellRenderer(new DownloadTitleRenderer(iconManager));
+        getColumnModel().getColumn(DownloadTableFormat.PROGRESS).setCellRenderer(new DownloadProgressRenderer(progressBarDecorator));
+        getColumnModel().getColumn(DownloadTableFormat.MESSAGE).setCellRenderer(new MessageRenderer());
+        getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellRenderer(new ButtonRendererEditor());
         
-        
-        setRowHeight(this.rowHeight);
+        setRowHeight(rowHeight);
     }
 	
 	public DownloadItem getDownloadItem(int row){
 	    return model.getDownloadItem(convertRowIndexToModel(row));
 	}
 
-    private void initialise(EventList<DownloadItem> downloadItems, DownloadActionHandler actionHandler) {
+    private void initialize(EventList<DownloadItem> downloadItems, DownloadActionHandler actionHandler) {
         model = new DownloadTableModel(downloadItems);
         setModel(model);
 
@@ -77,12 +80,11 @@ public class DownloadTable extends AbstractDownloadTable {
             }
         };
 
-        setDoubleClickHandler(clickHandler);
-        
+        setDoubleClickHandler(clickHandler);        
 
         ButtonRendererEditor editor = new ButtonRendererEditor();
         editor.setActionHandler(actionHandler);
-        getColumnModel().getColumn(3).setCellEditor(editor);
+        getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellEditor(editor);
 
     }
 }

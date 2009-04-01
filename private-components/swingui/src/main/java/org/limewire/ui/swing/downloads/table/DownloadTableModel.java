@@ -4,7 +4,6 @@
 package org.limewire.ui.swing.downloads.table;
 
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.ui.swing.table.LimeSingleColumnTableFormat;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventTableModel;
