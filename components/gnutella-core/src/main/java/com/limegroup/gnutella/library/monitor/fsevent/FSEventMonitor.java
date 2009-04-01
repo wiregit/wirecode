@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library.monitor.fsevent;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.limewire.listener.EventListener;
@@ -26,7 +27,7 @@ public class FSEventMonitor {
 
     public FSEventMonitor() {
         listeners = new EventListenerList<FSEvent>();
-        watchDirs = new ArrayList<String>();
+        watchDirs = Collections.synchronizedList(new ArrayList<String>());
     }
 
     public void init() {
@@ -89,7 +90,9 @@ public class FSEventMonitor {
                 try {
                     System.out.println("thread started");
                     int flags = 2;
-                    Pointer pathsToWatch = coreFoundation.CFArrayCreate(watchDirs
+                    Pointer pathsToWatch = null;
+                    
+                    pathsToWatch = coreFoundation.CFArrayCreate(watchDirs
                             .toArray(new String[watchDirs.size()]));
                     streamRef = coreServices.FSEventStreamCreate(null, new StreamEventCallback(),
                             null, pathsToWatch, currentEvent, 1.0, flags);
