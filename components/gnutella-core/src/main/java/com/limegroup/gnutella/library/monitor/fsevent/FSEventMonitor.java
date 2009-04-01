@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
@@ -80,7 +81,7 @@ public class FSEventMonitor {
 
         private Pointer streamRef;
 
-        boolean starting = true;
+        private CountDownLatch started = new CountDownLatch(1);
 
         @Override
         public void run() {
@@ -91,7 +92,7 @@ public class FSEventMonitor {
                     System.out.println("thread started");
                     int flags = 2;
                     Pointer pathsToWatch = null;
-                    
+
                     pathsToWatch = coreFoundation.CFArrayCreate(watchDirs
                             .toArray(new String[watchDirs.size()]));
                     streamRef = coreServices.FSEventStreamCreate(null, new StreamEventCallback(),
@@ -104,8 +105,7 @@ public class FSEventMonitor {
 
                     coreServices.FSEventStreamStart(streamRef);
                 } finally {
-                    starting = false;
-                    notifyAll();
+                    started.countDown();
                 }
             }
             coreFoundation.CFRunLoopRun();
@@ -115,14 +115,14 @@ public class FSEventMonitor {
         }
 
         private synchronized void cancel() {
-            while (starting) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+
+            try {
+                started.await();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
+
             if (runLoop != null) {
                 coreFoundation.CFRunLoopStop(runLoop);
                 runLoop = null;
@@ -140,19 +140,19 @@ public class FSEventMonitor {
     private class StreamEventCallback implements FSEventStreamCallback {
         public void callback(Pointer streamRef, Pointer clientCallbackInfo, int numEvents,
                 Pointer eventPaths, Pointer eventFlags, Pointer eventIds) {
-           
-                int[] myEventFlags = eventFlags.getIntArray(0, numEvents);
-                int[] myEventIds = eventIds.getIntArray(0, numEvents);
 
-                Pointer[] myPaths = eventPaths.getPointerArray(0, numEvents);
-                for (Pointer pointer : myPaths) {
-                    String path = pointer.getString(0);
-                    System.out.println(path);
-                }
+            int[] myEventFlags = eventFlags.getIntArray(0, numEvents);
+            int[] myEventIds = eventIds.getIntArray(0, numEvents);
 
-                currentEvent = myEventIds[myEventIds.length - 1];
-                System.out.println("in callback");
-                System.out.println("numEvents: " + numEvents);
+            Pointer[] myPaths = eventPaths.getPointerArray(0, numEvents);
+            for (Pointer pointer : myPaths) {
+                String path = pointer.getString(0);
+                System.out.println(path);
+            }
+
+            currentEvent = myEventIds[myEventIds.length - 1];
+            System.out.println("in callback");
+            System.out.println("numEvents: " + numEvents);
         }
     };
 }
