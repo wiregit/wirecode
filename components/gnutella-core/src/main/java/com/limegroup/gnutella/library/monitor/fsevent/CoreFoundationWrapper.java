@@ -4,51 +4,57 @@ import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 public class CoreFoundationWrapper implements CoreFoundation {
-	private final CoreFoundation coreFoundation;
-	public CoreFoundationWrapper() {
-		coreFoundation = (CoreFoundation) Native.loadLibrary("CoreFoundation", CoreFoundation.class);
-	}
-	
+    private final CoreFoundation coreFoundation;
 
-	public String strerror(int errnum) {
-		return coreFoundation.strerror(errnum);
-	}
-	
-	public String getLastError() {
-		return strerror(Native.getLastError());
-	}
+    public CoreFoundationWrapper() {
+        coreFoundation = (CoreFoundation) Native
+                .loadLibrary("CoreFoundation", CoreFoundation.class);
+    }
 
+    public String strerror(int errnum) {
+        return coreFoundation.strerror(errnum);
+    }
 
-	public Pointer CFArrayCreate(Pointer allocator, Pointer[] values,
-			int numValues, CFArrayCallBacks callBacks) {
-		return coreFoundation.CFArrayCreate(allocator, values, numValues, callBacks);
-	}
+    public String getLastError() {
+        return strerror(Native.getLastError());
+    }
 
-	public Pointer CFStringCreateWithCString(Pointer allocator, String string,
-			int encoding) {
-		return coreFoundation.CFStringCreateWithCString(allocator, string, encoding);
-	}
+    public Pointer CFArrayCreate(Pointer allocator, Pointer[] values, int numValues,
+            CFArrayCallBacks callBacks) {
+        return coreFoundation.CFArrayCreate(allocator, values, numValues, callBacks);
+    }
 
+    public Pointer CFStringCreateWithCString(Pointer allocator, String string, int encoding) {
+        return coreFoundation.CFStringCreateWithCString(allocator, string, encoding);
+    }
 
-	public Pointer CFStringCreateWithCString(String string) {
-		return CFStringCreateWithCString(null, string, 0x08000100);
-	}
+    public Pointer CFStringCreateWithCString(String string) {
+        return CFStringCreateWithCString(null, string, 0x08000100);
+    }
 
+    public Pointer CFArrayCreate(Pointer[] values) {
+        return coreFoundation.CFArrayCreate(null, values, values.length, null);
+    }
 
-	public Pointer CFRunLoopGetCurrent() {
-		return coreFoundation.CFRunLoopGetCurrent();
-	}
+    public Pointer CFArrayCreate(String[] stringVals) {
+        Pointer[] values = new Pointer[stringVals.length];
+        for (int i = 0; i < stringVals.length; i++) {
+            values[i] = CFStringCreateWithCString(stringVals[i]);
+        }
+        return CFArrayCreate(values);
+    }
 
+    public Pointer CFRunLoopGetCurrent() {
+        return coreFoundation.CFRunLoopGetCurrent();
+    }
 
-	public void CFRunLoopRun() {
-		coreFoundation.CFRunLoopRun();
-		
-	}
+    public void CFRunLoopRun() {
+        coreFoundation.CFRunLoopRun();
 
+    }
 
-	public Pointer CFRetain(Pointer pointer) {
-		return coreFoundation.CFRetain(pointer);
-	}
-	
-	
+    public Pointer CFRetain(Pointer pointer) {
+        return coreFoundation.CFRetain(pointer);
+    }
+
 }

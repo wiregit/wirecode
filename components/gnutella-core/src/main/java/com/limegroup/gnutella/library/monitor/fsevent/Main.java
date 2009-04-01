@@ -1,10 +1,7 @@
 package com.limegroup.gnutella.library.monitor.fsevent;
 
-import com.sun.jna.Memory;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
-import com.sun.jna.ptr.ByteByReference;
-import com.sun.jna.ptr.PointerByReference;
 
 
 
