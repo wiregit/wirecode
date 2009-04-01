@@ -140,7 +140,7 @@ public class FSEventMonitor {
     private class StreamEventCallback implements FSEventStreamCallback {
         public void callback(Pointer streamRef, Pointer clientCallbackInfo, int numEvents,
                 Pointer eventPaths, Pointer eventFlags, Pointer eventIds) {
-            synchronized (StreamEventCallback.class) {
+           
                 int[] myEventFlags = eventFlags.getIntArray(0, numEvents);
                 int[] myEventIds = eventIds.getIntArray(0, numEvents);
 
@@ -153,7 +153,6 @@ public class FSEventMonitor {
                 currentEvent = myEventIds[myEventIds.length - 1];
                 System.out.println("in callback");
                 System.out.println("numEvents: " + numEvents);
-            }
         }
     };
 }
