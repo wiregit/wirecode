@@ -25,7 +25,6 @@ import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.library.LibraryListSourceChanger;
-import org.limewire.ui.swing.library.FriendLibraryPanel;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
@@ -234,8 +233,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     /**
      * Creates a table when viewing a Friend's Library or performing a BrowseHost
      */
-    public <T extends RemoteFileItem> LibraryTable<T> createFriendTable(Category category, EventList<T> eventList,
-            FriendLibraryPanel panel) {
+    public <T extends RemoteFileItem> LibraryTable<T> createFriendTable(Category category, EventList<T> eventList) {
 
         LibraryTable<T> libTable;
         SortedList<T> sortedList = GlazedListsFactory.sortedList(eventList);

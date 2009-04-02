@@ -281,7 +281,7 @@ public class FriendLibraryPanel extends AbstractFileListPanel {
                 new TextComponentMatcherEditor<RemoteFileItem>(getFilterTextField(), new LibraryTextFilterator<RemoteFileItem>()));
         addDisposable(filterList);
         
-        LibraryTable table = tableFactory.createFriendTable(category, filterList, this);
+        LibraryTable table = tableFactory.createFriendTable(category, filterList);
         table.setTransferHandler(transferHandler); 
         table.enableDownloading(downloadListManager, libraryNavigator, libraryManager.getLibraryManagedList());
         addDisposable(table);
