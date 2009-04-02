@@ -252,6 +252,7 @@ class CoreDownloadItem implements DownloadItem {
         }
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == null || !(o instanceof CoreDownloadItem)) {
             return false;
@@ -260,6 +261,7 @@ class CoreDownloadItem implements DownloadItem {
     }
     
     //TODO: better hashCode
+    @Override
     public int hashCode(){
         if(hashCode == 0){
            hashCode =  37* getDownloader().hashCode();

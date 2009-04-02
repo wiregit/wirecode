@@ -79,6 +79,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
     }
 
 
+    @Override
     protected void setUp() throws Exception {
         injector = createInjector(getModules());
         registry = injector.getInstance(ServiceRegistry.class);
@@ -91,6 +92,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
         conn = loginTask.get(SECONDS_TO_WAIT, TimeUnit.SECONDS);
     }
 
+    @Override
     public void tearDown() throws Exception {
         service.logout();
         registry.stop();

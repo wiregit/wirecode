@@ -115,6 +115,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
 	}
 	
     
+    @Override
     public void setUp() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	    
@@ -1637,10 +1638,12 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         private static int off2;
         private static int len2;
 
+        @Override
         protected Object engineGetParameter(String arg0) throws InvalidParameterException {
             return null;
         }
 
+        @Override
         protected void engineInitSign(PrivateKey arg0) throws InvalidKeyException {
             update1 = null;
             off1 = -1;
@@ -1650,19 +1653,24 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
             len2 = -1;
         }
 
+        @Override
         protected void engineInitVerify(PublicKey arg0) throws InvalidKeyException {
         }
 
+        @Override
         protected void engineSetParameter(String arg0, Object arg1) throws InvalidParameterException {
         }
 
+        @Override
         protected byte[] engineSign() throws SignatureException {
             return null;
         }
 
+        @Override
         protected void engineUpdate(byte arg0) throws SignatureException {
         }
 
+        @Override
         protected void engineUpdate(byte[] data, int off, int len) throws SignatureException {
             if(update1 == null) {
                 update1 = data;
@@ -1677,6 +1685,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
             }
         }
 
+        @Override
         protected boolean engineVerify(byte[] arg0) throws SignatureException {
             return false;
         }

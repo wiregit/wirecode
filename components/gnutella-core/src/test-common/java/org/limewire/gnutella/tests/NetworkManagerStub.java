@@ -25,6 +25,7 @@ import com.limegroup.gnutella.NetworkManager;
 public class NetworkManagerStub implements NetworkManager {
     
     public static final Module MODULE = new AbstractModule() {
+        @Override
         protected void configure() {
             bind(NetworkManager.class).to(NetworkManagerStub.class);
             bind(TLSManager.class).to(NetworkManagerStub.class);

@@ -91,6 +91,7 @@ public class ToolsMenu extends MnemonicMenu {
                 if (advancedTools == null) {
                     advancedTools = advancedProvider.get();
                     closeListener = new WindowAdapter() {
+                        @Override
                         public void windowClosing(WindowEvent e) {
                             advancedTools = null;
                         }

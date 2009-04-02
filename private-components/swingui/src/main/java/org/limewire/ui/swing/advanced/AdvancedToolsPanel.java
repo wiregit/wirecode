@@ -64,6 +64,7 @@ public class AdvancedToolsPanel extends JPanel {
             return tooltip;
         }
         
+        @Override
         public String toString() {
             return name;
         }
@@ -226,6 +227,7 @@ public class AdvancedToolsPanel extends JPanel {
             // Add listeners to handle system menu close action.
             frame.addWindowListener(windowListener);
             frame.addWindowListener(new WindowAdapter() {
+                @Override
                 public void windowClosing(WindowEvent e) {
                     disposeWindow();
                 }
@@ -518,14 +520,17 @@ public class AdvancedToolsPanel extends JPanel {
      */
     private class MainFrameListener extends WindowAdapter {
         
+        @Override
         public void windowClosed(WindowEvent e) {
             disposeWindow();
         }
         
+        @Override
         public void windowDeiconified(WindowEvent e) {
             restoreWindow();
         }
         
+        @Override
         public void windowIconified(WindowEvent e) {
             minimizeWindow(e.getWindow().isVisible());
         }

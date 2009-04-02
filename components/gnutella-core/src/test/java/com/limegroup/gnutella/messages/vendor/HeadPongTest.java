@@ -74,6 +74,7 @@ public class HeadPongTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
     public void setUp() throws Exception {
         mockery = new Mockery();
         downloadManager = mockery.mock(DownloadManager.class);
@@ -95,6 +96,7 @@ public class HeadPongTest extends LimeTestCase {
         networkManager.setIncomingTLSEnabled(false);
     }
     
+    @Override
     public void tearDown() throws Exception {
         mockery.assertIsSatisfied();
         

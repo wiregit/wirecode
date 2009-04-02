@@ -150,6 +150,7 @@ public class SharingFilterComboBox extends LimeComboBox {
             SharingFilterComboBox.this.fireChangeEvent(this);
         }
 
+        @Override
         public String toString() {
             return friend.getRenderName();
         }

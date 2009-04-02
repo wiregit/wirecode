@@ -297,6 +297,7 @@ public class TestUploader {
         LOG.debug("starting to handle request with direct socket given");
         
         Thread t = new ManagedThread(name) {
+            @Override
             public void run() {
                 synchronized(TestUploader.this) {
                     try{

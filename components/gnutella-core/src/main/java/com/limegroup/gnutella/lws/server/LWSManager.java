@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.lws.server;
 
 
-import java.util.Map;
-
 import org.apache.http.nio.protocol.NHttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.LWSConnectionListener;

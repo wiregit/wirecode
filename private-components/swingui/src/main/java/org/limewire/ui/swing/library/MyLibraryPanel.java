@@ -765,6 +765,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             panel.setVisible(false);     
         }
         
+        @Override
         @SuppressWarnings("unchecked")
         public void installUI(JComponent c) {
             super.installUI(c);
@@ -781,6 +782,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
             l.getGlassPane().remove(panel);
         }
         
+        @Override
         public void setLocked(boolean isLocked) {
             super.setLocked(isLocked);
             panel.setVisible(isLocked);

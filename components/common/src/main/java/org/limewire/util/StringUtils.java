@@ -31,6 +31,7 @@ public class StringUtils {
     private volatile static Collator COLLATOR;
     
     private static final ThreadLocal<CharsetEncoder> ASCII_ENCODER = new ThreadLocal<CharsetEncoder>() {
+        @Override
         protected CharsetEncoder initialValue() {
             return Charset.forName("ISO-8859-1").newEncoder();
         }

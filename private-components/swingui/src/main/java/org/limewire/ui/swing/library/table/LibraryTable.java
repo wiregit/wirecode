@@ -287,6 +287,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         ensureRowVisible(getSelectedRow());
     }
     
+    @Override
     public boolean isCellEditable(int row, int column) {
         return super.isCellEditable(row, column) && !isRowDisabled(row);
     }
@@ -389,6 +390,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         return null;
     }
     
+    @Override
     public void selectAll() {
         if (getRowCount() > 0) {
             getSelectionModel().setSelectionInterval(0, getRowCount() - 1);

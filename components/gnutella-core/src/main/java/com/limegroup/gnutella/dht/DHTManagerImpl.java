@@ -429,6 +429,7 @@ public class DHTManagerImpl implements DHTManager, Service {
 
         // instantiated here so it can record its instantiation time
         TimeInspector<FindValueResult> inspector = new TimeInspector<FindValueResult>(getInspectable) {
+            @Override
             public void handleFutureSuccess(FindValueResult result) {
                 count(result.isSuccess());
             }

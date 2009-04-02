@@ -35,6 +35,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         super(name);
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         injector = LimeTestUtils.createInjectorAndStart(new AbstractModule() {
@@ -49,6 +50,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         acceptor.setListeningPort(0);
     }
     
+    @Override
     protected void tearDown() {
         LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.shutdown();    

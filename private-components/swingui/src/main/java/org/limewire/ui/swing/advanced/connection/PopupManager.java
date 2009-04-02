@@ -43,6 +43,7 @@ public class PopupManager {
         if ((popup == null) && (content != null)) {
             // Add listener to dismiss popup on mouse click.
             content.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseClicked(MouseEvent e) {
                     hidePopup();
                 }

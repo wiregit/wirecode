@@ -252,6 +252,7 @@ public class ConnectionSummaryPanel extends JPanel {
         
         public FirewallLabel() {
             addMouseMotionListener(new MouseMotionAdapter() {
+                @Override
                 public void mouseMoved(MouseEvent e) {
                     popupLocation = e.getPoint();
                 }

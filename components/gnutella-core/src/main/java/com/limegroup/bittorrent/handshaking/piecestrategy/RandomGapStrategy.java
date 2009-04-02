@@ -25,6 +25,7 @@ public class RandomGapStrategy extends RandomPieceStrategy {
         super(btMetaInfo, randomizer);
     }
 
+    @Override
     public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
         List<BTInterval> nextPieces = new ArrayList<BTInterval>();
         BitField interestingBlocks = new AndView(availableBlocks, neededBlocks);

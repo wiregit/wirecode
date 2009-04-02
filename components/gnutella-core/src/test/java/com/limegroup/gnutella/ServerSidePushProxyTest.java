@@ -107,6 +107,7 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
     // ------------------------------------------------------
 
     
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         drainAll();

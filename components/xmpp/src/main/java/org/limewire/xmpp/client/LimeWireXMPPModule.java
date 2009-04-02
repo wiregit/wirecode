@@ -46,6 +46,7 @@ public class LimeWireXMPPModule extends AbstractModule {
         this.jabberSettingsClass = jabberSettingsClass;
     }
     
+    @Override
     protected void configure() {
         install(new LimeWireFriendXmppModule());
         

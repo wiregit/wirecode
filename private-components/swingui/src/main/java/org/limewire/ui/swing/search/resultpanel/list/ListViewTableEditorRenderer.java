@@ -452,6 +452,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     
     private void initializeComponents() {
         searchResultTextPanel = new JXPanel(){
+            @Override
             public void paint(Graphics g){
                 super.paint(g);
               //the visible rect width is always 0 for renderers so we cache the width here

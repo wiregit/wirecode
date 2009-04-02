@@ -91,6 +91,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	}
 
     
+    @Override
     public void setUp() throws Exception {
         SearchSettings.DISABLE_OOB_V2.revertToDefault();
         OOBv2Disabled = false;

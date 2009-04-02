@@ -247,6 +247,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         return null;
     }
 
+    @Override
     public File getSaveFile() {
         // TODO revamp to make better file names
 
@@ -375,6 +376,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         return false;
     }
 
+    @Override
     public void setInactivePriority(int priority) {
 
     }

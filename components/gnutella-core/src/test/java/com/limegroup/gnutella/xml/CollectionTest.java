@@ -74,6 +74,7 @@ public class CollectionTest extends LimeTestCase {
         return buildTestSuite(CollectionTest.class);
     }
     
+    @Override
     protected void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjector();
         urnCache = injector.getInstance(UrnCache.class);

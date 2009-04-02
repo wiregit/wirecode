@@ -70,6 +70,7 @@ public final class HandshakeResponseTest extends LimeTestCase {
     /**
      * Individual tests will change these as needed.
      */    
+    @Override
     public void setUp() {
         // TODO: with the new HandshakeServices, only need to stub out that class --
         // don't need all the other things.

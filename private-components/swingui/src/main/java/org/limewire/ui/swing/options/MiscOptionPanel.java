@@ -353,6 +353,7 @@ public class MiscOptionPanel extends OptionPanel {
     }
 
     private class Renderer extends DefaultListCellRenderer {
+        @Override
         public Component getListCellRendererComponent(JList list, Object value,
                 int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -368,6 +369,7 @@ public class MiscOptionPanel extends OptionPanel {
     }
     
     private static class LocaleRenderer extends DefaultListCellRenderer {
+        @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
             

@@ -99,6 +99,7 @@ public class SettingTest extends BaseTestCase {
         return buildTestSuite(SettingTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
         settingsFile = new File("testSettings.props");
         settingsFile.delete();
@@ -106,6 +107,7 @@ public class SettingTest extends BaseTestCase {
     }
         
     
+    @Override
     public void tearDown() {
        settingsFile.delete();
     }

@@ -132,7 +132,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         ULTRAPEER_2 = connectionFactory.createConnection("localhost", PORT); 
     }
 
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client to listen on port 6667, with
         //incoming slots and no connections.
@@ -180,7 +181,8 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 					 NetworkSettings.PORT.getValue());
 	}
 
-	public void tearDown() throws Exception {
+	@Override
+    public void tearDown() throws Exception {
         drainAll();
 		sleep();
 		LEAF.close();
