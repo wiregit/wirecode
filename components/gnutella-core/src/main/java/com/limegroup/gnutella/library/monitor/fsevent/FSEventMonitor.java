@@ -87,7 +87,6 @@ public class FSEventMonitor {
         public void run() {
             Pointer runLoopMode = null;
                  try {
-                    System.out.println("thread started");
                     int flags = 2;
                     Pointer pathsToWatch = null;
 
@@ -106,9 +105,6 @@ public class FSEventMonitor {
                     started.countDown();
                 }
             coreFoundation.CFRunLoopRun();
-
-            System.out.println(coreFoundation.getLastError());
-            System.out.println("thread stopped");
         }
 
         private synchronized void cancel() {
@@ -140,16 +136,18 @@ public class FSEventMonitor {
 
             int[] myEventFlags = eventFlags.getIntArray(0, numEvents);
             int[] myEventIds = eventIds.getIntArray(0, numEvents);
-
             Pointer[] myPaths = eventPaths.getPointerArray(0, numEvents);
-            for (Pointer pointer : myPaths) {
-                String path = pointer.getString(0);
-                System.out.println(path);
+            
+            for(int i = 0; i < numEvents; i++) {
+                String path = myPaths[i].getString(0);
+                int eventId = myEventIds[i];
+                int eventFlag = myEventFlags[i];
+                FSEvent event = new FSEvent(path, eventId, eventFlag);
+                currentEvent = eventId;
+                //TODO broadcast asynchronously
+                listeners.broadcast(event);
             }
 
-            currentEvent = myEventIds[myEventIds.length - 1];
-            System.out.println("in callback");
-            System.out.println("numEvents: " + numEvents);
         }
     };
 }

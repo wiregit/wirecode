@@ -7,9 +7,11 @@ public class FSEvent {
 
     private final int eventId;
 
-    public FSEvent(String path, int eventId) {
+    private final int eventFlag;
+    public FSEvent(String path, int eventId, int eventFlag) {
         this.path = path;
         this.eventId = eventId;
+        this.eventFlag = eventFlag;
     }
 
     public String getPath() {
@@ -22,6 +24,6 @@ public class FSEvent {
 
     @Override
     public String toString() {
-        return eventId + " - " + path;
+        return eventId + " -  " + eventFlag + " - " + path;
     }
 }
