@@ -6,10 +6,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.listener.EventListener;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.monitor.FileMonitor;
 import com.limegroup.gnutella.library.monitor.FileMonitorEvent;
 import com.limegroup.gnutella.library.monitor.FileMonitorEventType;
 
+@Singleton
 public class FileMonitorMac implements FileMonitor {
 
     private final FSEventMonitor fsEventMonitor;
@@ -21,6 +24,7 @@ public class FileMonitorMac implements FileMonitor {
         this.listeners = new ConcurrentHashMap<EventListener<FileMonitorEvent>, EventListener<FSEvent>>();
     }
 
+    @Inject
     @Override
     public void init() throws IOException {
         fsEventMonitor.init();
