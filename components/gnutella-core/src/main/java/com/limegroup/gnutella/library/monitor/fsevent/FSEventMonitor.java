@@ -149,5 +149,10 @@ public class FSEventMonitor {
             }
 
         }
+    }
+
+    public synchronized void removeWatch(File dir) {
+        watchDirs.remove(dir.getAbsolutePath());
+        updateStream();
     };
 }
