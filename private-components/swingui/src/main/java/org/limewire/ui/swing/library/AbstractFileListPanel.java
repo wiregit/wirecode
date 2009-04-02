@@ -76,6 +76,22 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
 
     private PromptTextField filterField;        
     
+    /** 
+	 * Panel to display if no categories are visible. This panel
+     * is not guarenteed to be set. If no empty panel has been set,
+     * an empty table will be shown.
+	 */
+    protected JComponent emptyPanel = null;
+    
+    /** String for the emptyPanel in the CardLayout */
+    private static final String EMPTY_PANEL = "EMPTY_PANEL";
+    
+    /** List of all components in CardLayout because we have no easy way to retrieve them */
+    private Map<String, JComponent> cardLayoutMap = new HashMap<String, JComponent>();
+    
+    /** Component that is currently displayed in the cardLayout */
+    private JComponent currentComponent = null;
+    
     public AbstractFileListPanel(HeaderBarDecorator headerBarFactory, TextFieldDecorator textFieldDecorator) {        
         cardPanel.setLayout(cardLayout);              
         filterField = createFilterField(textFieldDecorator, I18n.tr("Find..."));
@@ -99,8 +115,26 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         addMainPanels();
     }
     
-    protected abstract HeaderBar createHeaderBar(HeaderBarDecorator headerBarFactory);
-    protected abstract PromptTextField createFilterField(TextFieldDecorator decorator, String prompt);
+    protected HeaderBar createHeaderBar(HeaderBarDecorator headerBarDecorator) {
+        HeaderBar bar = new HeaderBar();
+        headerBarDecorator.decorateBasic(bar);
+        return bar;
+    }
+    protected PromptTextField createFilterField(TextFieldDecorator decorator, String prompt) {
+        PromptTextField field = new PromptTextField(prompt);
+        decorator.decorateClearablePromptField(field, AccentType.SHADOW);
+        return field;
+    }
+    
+    protected void setEmptyPanel(JComponent emptyPanel) {
+        if(this.emptyPanel != null) {
+            cardPanel.remove(this.emptyPanel);
+            cardLayoutMap.remove(EMPTY_PANEL);
+        }
+        this.emptyPanel = emptyPanel;
+        cardPanel.add(emptyPanel, EMPTY_PANEL);
+        cardLayoutMap.put(EMPTY_PANEL, emptyPanel);
+    }
     
     protected HeaderBar getHeaderPanel() {
         return headerPanel;
@@ -164,7 +198,12 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
             currentItem = catalogTables.get(catalog);
             currentItem.fireSelected(true);
             cardLayout.show(cardPanel, catalog.getId());
-        }    
+            currentComponent = cardLayoutMap.get(catalog.getId());
+        } else if(emptyPanel != null){
+        	// if no category is visible, show the empty message panel if one was set
+            cardLayout.show(cardPanel, EMPTY_PANEL);
+            currentComponent = cardLayoutMap.get(EMPTY_PANEL);
+        }
         selectionPanel.showCard(catalog);
     }
     
@@ -180,6 +219,15 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     protected Category getSelectedCategory() {
         return (currentItem != null) ? currentItem.getCatalog().getCategory() : null;
+    }
+    
+    /**
+     * Selects the first visible category if one has been made visible and the
+     * EmptyPanel is currently being shown. 
+     */
+    protected void selectIfEmptyPanelShown() {
+        if(currentComponent == emptyPanel)
+            selectFirstVisible();
     }
     
     protected void selectFirstVisible() {
@@ -210,6 +258,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
             JComponent component, FilterList<T> filteredAllFileList, FilterList<T> filteredList,
             CatalogSelectionCallback callback) {
         cardPanel.add(component, catalog.getId());
+        cardLayoutMap.put(catalog.getId(), component);
         
         ButtonItemImpl item = new ButtonItemImpl(catalog);
         catalogTables.put(catalog, item);
@@ -236,6 +285,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
             CatalogSelectionCallback callback) {
         Catalog catalog = new Catalog(category); 
         cardPanel.add(component, catalog.getId());
+        cardLayoutMap.put(catalog.getId(), component);
         
         ButtonItemImpl item = new ButtonItemImpl(catalog);
         catalogTables.put(catalog, item);
@@ -280,8 +330,9 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     /** Adds a listener to the category so things can bind to the action, if necessary. */
-    protected abstract <T extends FileItem> void addCategorySizeListener(Category category, Action action,
-            FilterList<T> filteredAllFileList, FilterList<T> filteredList);
+    protected <T extends FileItem> void addCategorySizeListener(Category category, Action action,
+            FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
+    }
     
     /** Creates a catalog selection button using the specified action. */
     protected <T extends FileItem> SelectionPanel createCatalogButton(Action action,
@@ -535,6 +586,11 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
                         if(value == false && button.getAction().getValue(Action.SELECTED_KEY) != null && 
                                 button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
                             libraryPanel.selectFirstVisible();
+                        }
+                        // if this is now visible, select this category if
+                        // the empty panel is currently showing
+                        if(value) {
+                            libraryPanel.selectIfEmptyPanelShown();
                         }
                     }
                 }

@@ -105,7 +105,7 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class MyLibraryPanel extends LibraryPanel implements EventListener<FriendEvent> {
+public class MyLibraryPanel extends AbstractFileListPanel implements EventListener<FriendEvent> {
     
     @Resource(key="LibraryPanel.selectionPanelBackgroundOverride")
     private Color selectionPanelBackgroundOverride = null;
@@ -331,7 +331,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         return getSelectedCategory();
     }
     
-    public void addFriendListener(LibraryListSourceChanger.FriendChangedListener listener) {
+    public void addFriendListener(ListSourceChanger.ListChangedListener listener) {
         currentFriendFilterChanger.addListener(listener);
     }
     
@@ -1136,7 +1136,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         public PlayListListener(Action action) {
             this.action = action;
             
-            currentFriendFilterChanger.addListener(new LibraryListSourceChanger.FriendChangedListener() {
+            currentFriendFilterChanger.addListener(new ListSourceChanger.ListChangedListener() {
                 @Override
                 public void friendChanged(Friend currentFriend) {
                     updateList();
@@ -1216,7 +1216,7 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
                 LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
             }
             
-            currentFriendFilterChanger.addListener(new LibraryListSourceChanger.FriendChangedListener() {
+            currentFriendFilterChanger.addListener(new ListSourceChanger.ListChangedListener() {
                 @Override
                 public void friendChanged(Friend currentFriend) {
                     setText();
