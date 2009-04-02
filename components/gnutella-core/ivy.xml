@@ -5,6 +5,7 @@
     </configurations>
     <publications>
         <artifact name="gnutella-core" conf="master"/>
+        <artifact name="gnutella-core-test-common" conf="test-common"/>
     </publications>
     <dependencies>
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="compile,runtime"/>

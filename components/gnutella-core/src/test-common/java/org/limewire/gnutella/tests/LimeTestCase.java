@@ -18,6 +18,7 @@ import org.limewire.service.ErrorCallback;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.TestUtils;
 
@@ -260,10 +261,16 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     
     protected static File getRootDir() throws Exception {
         // Get a marker file.
-        File f = TestUtils.getResourceFile("org/limewire/gnutella/tests/LimeTestCase.class");
+        File f = TestUtils.getResourceInPackage(_testClass.getSimpleName() + ".class", _testClass);
         f = f.getCanonicalFile();
-                 //tests       // gnutella       // limewire        //org       // test-common     // build     // gnutella-core
-        return f.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();        
+        // step out to find the root folder of the component
+        int packageDepth = StringUtils.countOccurrences(_testClass.getName(), '.');
+        // + 1 to back out of top level package 
+        for (int i = 0; i < packageDepth + 1; i++) {
+            f = f.getParentFile();
+        }
+        //      build/          tests/          
+        return f.getParentFile().getParentFile();
     }
 }       
 

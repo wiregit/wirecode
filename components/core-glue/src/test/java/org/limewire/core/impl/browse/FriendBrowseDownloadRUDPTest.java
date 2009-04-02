@@ -25,15 +25,17 @@ import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.CoreGlueModule;
-import org.limewire.core.impl.integration.IntegrationTestCase;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.core.impl.xmpp.XMPPRemoteFileDescDeserializer;
+import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.IpPort;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
@@ -56,8 +58,10 @@ import com.limegroup.gnutella.SearchServices;
  *
  * Test browse/downloads over a real life network.
  */
-public class FriendBrowseDownloadRUDPTest extends IntegrationTestCase {
+public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
 
+    private static Log LOG = LogFactory.getLog(FriendBrowseDownloadRUDPTest.class);
+    
     private static final int SECONDS_TO_WAIT = 10;
     private static final String USERNAME_1 = "limenetworktest1@gmail.com";
     private static final String FRIEND = "limenetworktest2@gmail.com";
@@ -76,7 +80,6 @@ public class FriendBrowseDownloadRUDPTest extends IntegrationTestCase {
 
 
     protected void setUp() throws Exception {
-        super.setUp();
         injector = createInjector(getModules());
         registry = injector.getInstance(ServiceRegistry.class);
         registry.initialize();                                                                                
@@ -195,7 +198,7 @@ public class FriendBrowseDownloadRUDPTest extends IntegrationTestCase {
                     if (state == DownloadState.DONE) {
                         latch.countDown();
                     }
-                    System.out.println("current download state: " + state);
+                    LOG.debugf("current download state: {0}", state);
                 }
             }
         });

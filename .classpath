@@ -11,6 +11,8 @@
 	<classpathentry kind="src" output="components/core-api/build/classes" path="components/core-api/src/main/java"/>
 	<classpathentry kind="src" output="components/core-glue/build/classes" path="components/core-glue/src/main/java"/>
 	<classpathentry kind="src" output="components/core-glue/build/tests" path="components/core-glue/src/test/java"/>
+	<classpathentry kind="src" output="components/core-glue/src/test/resources" path="components/core-glue/src/test/resources"/>
+	<classpathentry kind="src" output="components/core-glue/build/test-common" path="components/core-glue/src/test-common/java"/>
 	<classpathentry kind="src" output="components/core-settings/build/classes" path="components/core-settings/src/main/java"/>
 	<classpathentry kind="src" output="components/geocode/build/classes" path="components/geocode/src/main/java"/>
 	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
