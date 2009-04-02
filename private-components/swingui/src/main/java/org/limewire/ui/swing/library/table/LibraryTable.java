@@ -245,6 +245,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
             } else {
                 shareListManager.getGnutellaShareList().addFile(fileItem.getFile());
             }
+            shareEditor.cancelCellEditing();
         }
         
     }
