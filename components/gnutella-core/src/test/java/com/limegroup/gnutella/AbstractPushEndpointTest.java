@@ -24,6 +24,10 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
 
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.name.Names;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 /**
@@ -81,9 +85,10 @@ public class AbstractPushEndpointTest extends BaseTestCase {
         Injector injector = LimeTestUtils.createInjector();
         HTTPHeaderUtils httpHeaderUtils = injector.getInstance(HTTPHeaderUtils.class);
         NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
+        Provider<IPFilter> hostilesFilter = injector.getProvider(Key.get(IPFilter.class, Names.named("hostileFilter")));
         
         pushEndpointCache = new PushEndpointCacheImpl(httpHeaderUtils, networkInstanceUtils);
-        factory = new PushEndpointFactoryImpl(Providers.of((PushEndpointCache)pushEndpointCache), null, networkInstanceUtils);
+        factory = new PushEndpointFactoryImpl(Providers.of((PushEndpointCache)pushEndpointCache), null, networkInstanceUtils, hostilesFilter);
     }
     
     public void testConstructorGUID() throws Exception {
