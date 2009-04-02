@@ -6,8 +6,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.limewire.listener.EventListener;
@@ -23,6 +25,7 @@ public class FileDescStub implements FileDesc {
     public static final URN DEFAULT_SHA1;
     public static final Set<URN> DEFAULT_SET;
     public static final int DEFAULT_SIZE = 1126400;
+    private final Map<String, Object> clientProperties = new HashMap<String, Object>();
     
     static {
         DEFAULT_SET = new HashSet<URN>();
@@ -296,13 +299,11 @@ public class FileDescStub implements FileDesc {
     
     @Override
     public Object getClientProperty(String property) {
-        // TODO Auto-generated method stub
-        return null;
+        return clientProperties.get(property);
     }
     
     @Override
     public void putClientProperty(String property, Object value) {
-        // TODO Auto-generated method stub
-        
+        clientProperties.put(property, value);
     }
 }
