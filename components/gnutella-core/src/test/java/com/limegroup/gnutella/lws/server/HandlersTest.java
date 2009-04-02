@@ -7,12 +7,11 @@ import junit.framework.Test;
 import junit.textui.TestRunner;
 
 import org.limewire.lws.server.LWSServerUtil;
-import org.limewire.lws.server.LWSDispatcherSupport.Commands;
 import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 
 /**
  * Makes sure
- * {@link LWSManager#registerListener(String, com.limegroup.gnutella.lws.server.LWSManager.Listener)}
+ * {@link LWSManager#registerHandler(String, LWSManagerCommandResponseHandler)}
  * is working.
  */
 public class HandlersTest extends AbstractCommunicationSupportWithNoLocalServer {
@@ -29,201 +28,105 @@ public class HandlersTest extends AbstractCommunicationSupportWithNoLocalServer 
         TestRunner.run(suite());
     }
 
-    public void testAddTwoHandlers() {
+    private class Handler extends LWSManager.AbstractHandler {
+        
+        public Handler(String command) {
+            super(command);
+        }
 
-        final boolean handled[] = { false, false };
+        private boolean handled = false;
+        
+        public boolean getHandled() {
+            return handled;
+        }
+        
+        public void resetHandled() {
+            handled = false;
+        }
+        
+        public String handle(Map<String, String> args) {
+            assertEquals("a1 should map to A1", args.get("a1"), "A1");
+            assertEquals("b1 should map to B1", args.get("b1"), "B1");
+            assertEquals("c1 should map to C1", args.get("c1"), "C1");
 
-        // Add the handlers
-        String cmd1 = "Foo1";
-        LWSManager.AbstractHandler lis1 = new LWSManager.AbstractHandler(cmd1) {
-            public String handle(Map<String, String> args) {
-                assertEquals("a1 should map to A1", args.get("a1"), "A1");
-                assertEquals("b1 should map to B1", args.get("b1"), "B1");
-                assertEquals("c1 should map to C1", args.get("c1"), "C1");
-                handled[0] = true;
-                return Responses.OK;
-            }
-        };
-        assertTrue(getLWSManager().registerHandler(cmd1, lis1));
-
-        String cmd2 = "Foo2";
-        LWSManager.AbstractHandler lis2 = new LWSManager.AbstractHandler(cmd2) {
-            public String handle(Map<String, String> args) {
-                assertEquals("a2 should map to A2", args.get("a2"), "A2");
-                assertEquals("b2 should map to B2", args.get("b2"), "B2");
-                assertEquals("c2 should map to C2", args.get("c2"), "C2");
-                handled[1] = true;
-                return Responses.OK;
-            }
-        };
-        assertTrue(getLWSManager().registerHandler(cmd2, lis2));
-
-        // Send a message
-
-        String response1, response2;
-
-        Map<String, String> args1 = new HashMap<String, String>();
-        args1.put("a1", "A1");
-        args1.put("b1", "B1");
-        args1.put("c1", "C1");
-
-        response1 = sendCommandToClient(cmd1, args1, true);
-        note("Got response1 '" + response1 + "'");
-        assertEquals(Responses.OK, LWSServerUtil.removeCallback(response1));
-        assertTrue(handled[0]);
-
-        Map<String, String> args2 = new HashMap<String, String>();
-        args2.put("a2", "A2");
-        args2.put("b2", "B2");
-        args2.put("c2", "C2");
-
-        response2 = sendCommandToClient(cmd2, args2, true);
-        assertEquals(Responses.OK, LWSServerUtil.removeCallback(response2));
-        assertTrue(handled[1]);
-
-        assertTrue(getLWSManager().unregisterHandler(cmd1));
-        assertTrue(getLWSManager().unregisterHandler(cmd2));
-
-        handled[0] = false;
-        response1 = sendCommandToClient(Commands.MSG, args1, true);
-        assertEquals("", LWSServerUtil.removeCallback(response1));
-        assertFalse(handled[0]);
-
-        handled[1] = false;
-        response2 = sendCommandToClient(Commands.MSG, args2, true);
-        assertEquals("", LWSServerUtil.removeCallback(response2));
-        assertFalse(handled[0]);
+            handled = true;
+            return Responses.OK;
+        }
     }
 
-    /**
-     * This should fail because you can't register to handlers for the same
-     * command, since each has to return a result.
-     */
-    public void testWithTowHandlersAndSameName() {
+    private void doCommand(String command, Handler handler, boolean handlingExpected) {
+        Map<String, String> args = new HashMap<String, String>() {{
+            put("a1", "A1");
+            put("b1", "B1");
+            put("c1", "C1");
+        }};
 
-        final boolean handled[] = { false, false };
+        String response = sendCommandToClient(command, args, true);
 
-        // Add the handlers
-        String cmd1 = "Foo1";
-        LWSManager.AbstractHandler lis1 = new LWSManager.AbstractHandler(cmd1) {
-            public String handle(Map<String, String> args) {
-                assertEquals("a1 should map to A1", args.get("a1"), "A1");
-                assertEquals("b1 should map to B1", args.get("b1"), "B1");
-                assertEquals("c1 should map to C1", args.get("c1"), "C1");
-                handled[0] = true;
-                return Responses.OK;
-            }
-        };
-        assertTrue(getLWSManager().registerHandler(cmd1, lis1));
+        String responseSubstring = LWSServerUtil.removeCallback(response);
+        String expectedResponse = handlingExpected ? Responses.OK : "";
+        assertEquals("unexpected response",
+                expectedResponse, responseSubstring);        
 
-        String cmd2 = "Foo1";
-        LWSManager.AbstractHandler lis2 = new LWSManager.AbstractHandler(cmd2) {
-            public String handle(Map<String, String> args) {
-                assertEquals("a2 should map to A2", args.get("a2"), "A2");
-                assertEquals("b2 should map to B2", args.get("b2"), "B2");
-                assertEquals("c2 should map to C2", args.get("c2"), "C2");
-                handled[1] = true;
-                return Responses.OK;
-            }
-        };
-        assertTrue(getLWSManager().registerHandler(cmd2, lis2));
+        assertEquals("unexpected handled state",
+                handlingExpected, handler.getHandled());
+    }
 
+    private void testHandlers(int count) {
+
+        String [] commands = new String[count];
+        Handler [] handlers = new Handler[count];
+
+        // Create and register handlers
+        for (int i=0; i < count; i++) {
+            commands[i] = "Foo" + i;
+            handlers[i] = new Handler(commands[i]);
+            assertTrue("registration failed",
+                    getLWSManager().registerHandler(commands[i], handlers[i]));            
+        }            
+
+        // Send messages and expect handling
+        for (int i=0; i < count; i++) {
+            doCommand(commands[i], handlers[i], true);
+        }            
+
+        // Unregister handlers
+        for (int i=0; i < count; i++) {
+            assertTrue("unregistration failed",
+                    getLWSManager().unregisterHandler(commands[i]));
+        }            
+
+        // Send messages again and expect no handling
+        for (int i=0; i < count; i++) {
+            handlers[i].resetHandled();
+            doCommand(commands[i], handlers[i], false);
+        }            
+    }
+    
+    public void testAddTwoHandlers() {
+        testHandlers(2);
     }
 
     public void testAddThreeHandlers() {
+        testHandlers(3);
+    }
 
-        final boolean[] handled = { false, false, false };
+    /**
+     * Registering more than one handler for the same command overwrites
+     * the old registration with the new one.
+     */
+    public void testWithTowHandlersAndSameName() {
 
-        // Add the handlers
-        String cmd1 = "Foo1";
-        LWSManager.AbstractHandler lis1 = new LWSManager.AbstractHandler(cmd1) {
-            public String handle(Map<String, String> args) {
-                assertEquals("a1 should map to A1", args.get("a1"), "A1");
-                assertEquals("b1 should map to B1", args.get("b1"), "B1");
-                assertEquals("c1 should map to C1", args.get("c1"), "C1");
-                handled[0] = true;
-                return Responses.OK;
-            }
-        };
-        assertTrue(getLWSManager().registerHandler(cmd1, lis1));
+        String command = "Foo";
 
-        String cmd2 = "Foo2";
-        LWSManager.AbstractHandler lis2 = new LWSManager.AbstractHandler(cmd2) {
-            public String handle(Map<String, String> args) {
-                assertEquals("a2 should map to A2", args.get("a2"), "A2");
-                assertEquals("b2 should map to B2", args.get("b2"), "B2");
-                assertEquals("c2 should map to C2", args.get("c2"), "C2");
-                handled[1] = true;
-                return Responses.OK;
-            }
-        };
-        assertTrue(getLWSManager().registerHandler(cmd2, lis2));
+        Handler handler1 = new Handler(command);
+        assertTrue("first registration failed", 
+                getLWSManager().registerHandler(command, handler1));
 
-        String cmd3 = "Foo3";
-        LWSManager.AbstractHandler lis3 = new LWSManager.AbstractHandler(cmd3) {
-            public String handle(Map<String, String> args) {
-                assertEquals("a3 should map to A3", args.get("a3"), "A3");
-                assertEquals("b3 should map to B3", args.get("b3"), "B3");
-                assertEquals("c3 should map to C3", args.get("c3"), "C3");
-                handled[2] = true;
-                return Responses.OK;
-            }
-        };
-        assertTrue(getLWSManager().registerHandler(cmd3, lis3));
+        Handler handler2 = new Handler(command);
+        assertTrue("duplicate registration failed",
+                getLWSManager().registerHandler(command, handler2));
 
-        // Send a message
-
-
-        String response1, response2, response3;
-
-        Map<String, String> args1 = new HashMap<String, String>();
-        args1.put("a1", "A1");
-        args1.put("b1", "B1");
-        args1.put("c1", "C1");
-
-        response1 = sendCommandToClient(cmd1, args1, true);
-        note("Got response1: '" + response1 + "'");
-        assertEquals(Responses.OK, LWSServerUtil.removeCallback(response1));
-        assertTrue(handled[0]);
-
-        Map<String, String> args2 = new HashMap<String, String>();
-        args2.put("a2", "A2");
-        args2.put("b2", "B2");
-        args2.put("c2", "C2");
-
-        response2 = sendCommandToClient(cmd2, args2, true);
-        note("Got response2: '" + response2 + "'");
-        assertEquals(Responses.OK, LWSServerUtil.removeCallback(response2));
-        assertTrue(handled[1]);
-
-        Map<String, String> args3 = new HashMap<String, String>();
-        args3.put("a3", "A3");
-        args3.put("b3", "B3");
-        args3.put("c3", "C3");
-
-        response3 = sendCommandToClient(cmd3, args3, true);
-        note("Got response3: '" + response3 + "'");
-        assertEquals(Responses.OK, LWSServerUtil.removeCallback(response3));
-        assertTrue(handled[2]);
-
-        assertTrue(getLWSManager().unregisterHandler(cmd1));
-        assertTrue(getLWSManager().unregisterHandler(cmd2));
-        assertTrue(getLWSManager().unregisterHandler(cmd3));
-
-        handled[0] = false;
-        response1 = sendCommandToClient(Commands.MSG, args1, true);
-        assertEquals("", LWSServerUtil.removeCallback(response1));
-        assertFalse(handled[0]);
-
-        handled[1] = false;
-        response2 = sendCommandToClient(Commands.MSG, args2, true);
-        assertEquals("", LWSServerUtil.removeCallback(response2));
-        assertFalse(handled[0]);
-
-        handled[2] = false;
-        response3 = sendCommandToClient(Commands.MSG, args3, true);
-        assertEquals("", LWSServerUtil.removeCallback(response3));
-        assertFalse(handled[2]);
     }
 
 }

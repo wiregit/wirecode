@@ -192,7 +192,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
             notifyConnectionListeners(true);
             return;
         }
-        final Handler h = names2handlers.get(command.toLowerCase());
+        final Handler h = names2handlers.get(command.toLowerCase(Locale.US));
         if (h == null) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Couldn't create a handler for " + command);

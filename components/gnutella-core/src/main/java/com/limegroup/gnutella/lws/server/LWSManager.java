@@ -59,10 +59,10 @@ public interface LWSManager {
     String PREFIX = LWSDispatcher.PREFIX;
     
     /**
-     * Returns the instance of {@link HttpRequestHandler} responsible for
+     * Returns the instance of {@link NHttpRequestHandler} responsible for
      * passing along messages.
      * 
-     * @return the instance of {@link HttpRequestHandler} responsible for
+     * @return the instance of {@link NHttpRequestHandler} responsible for
      *         passing along messages
      */
     NHttpRequestHandler getHandler();
@@ -95,26 +95,25 @@ public interface LWSManager {
     boolean removeConnectionListener(LWSConnectionListener lis);    
     
     /**
-     * Register a handler for the command <code>cmd</code>There
+     * Register a handler for the command <code>command</code>. There
      * can be only <b>one</b> {@link LWSManagerCommandResponseHandler} for every
      * command.  If one already exists, it will be overwritten.
      * 
-     * @param cmd String that invokes this listener
-     * @param lis handler
-     * @return <code>true</code> if we added <code>lis</code>
+     * @param command String that invokes this handler
+     * @return <code>true</code> if we added <code>handler</code>
      */
-    boolean registerHandler(String cmd, LWSManagerCommandResponseHandler lis);
+    boolean registerHandler(String command, LWSManagerCommandResponseHandler handler);
     
     /**
-     * Unregisters a handler for the command <code>cmd</code>, and returns
+     * Unregisters a handler for the command <code>command</code>, and returns
      * <code>true</code> on success and <code>false</code> on failure. There can be
      * only <b>one</b> {@link LWSManagerCommandResponseHandler} for every command.
      * 
-     * @param cmd String that invokes this listener
+     * @param command String that invokes this handler
      * @return <code>true</code> if we removed the {@link LWSManagerCommandResponseHandler} for
-     *         <code>cmd</code>
+     *         <code>command</code>
      */
-    boolean unregisterHandler(String cmd);
+    boolean unregisterHandler(String command);
 
     /**
      * An abstract implementation of {@link LWSManagerCommandResponseHandler} that abstracts away
@@ -137,30 +136,6 @@ public interface LWSManager {
             return "Handler(" + name() + ")";
         }
     }
-    
-    /**
-     * An abstract implementation of {@link AbstractHandler} that abstracts away
-     * returning a value from {@link #handle(Map)}.
-     */
-    public abstract static class OK extends AbstractHandler {
-
-        public OK(String name) {
-            super(name);
-        }
-
-        public final String handle(Map<String, String> args) {
-            doHandle(args);
-            return "OK";
-        }
-
-        /**
-         * Override this to do some work, but return nothing.
-         * 
-         * @param args unchanged CGI parameters passed in to
-         *        {@link #handle(Map)}
-         */
-        abstract void doHandle(Map<String, String> args);
-    }    
     
     /**
      * Clears all the handlers.  This is used mainly for testing.
