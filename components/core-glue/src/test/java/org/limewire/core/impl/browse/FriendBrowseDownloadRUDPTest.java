@@ -14,15 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.google.inject.TypeLiteral;
-import com.limegroup.gnutella.LimeWireCoreModule;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SearchServices;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.browse.BrowseListener;
@@ -39,6 +30,7 @@ import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.core.impl.xmpp.XMPPRemoteFileDescDeserializer;
 import org.limewire.io.IpPort;
+import org.limewire.io.UnresolvedIpPort;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -49,6 +41,16 @@ import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPService;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
+import com.limegroup.gnutella.LimeWireCoreModule;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SearchServices;
 
 /**
  *
@@ -107,6 +109,7 @@ public class FriendBrowseDownloadRUDPTest extends IntegrationTestCase {
             @Override public EventListener<RosterEvent> getRosterListener() { return null; }
             @Override public String getCanonicalizedLocalID() { return getUserInputLocalID(); }
             @Override public String getNetworkName() { return getServiceName(); }
+            @Override public List<UnresolvedIpPort> getDefaultServers() { return UnresolvedIpPort.EMPTY_LIST;}
         };
     }
 
