@@ -86,24 +86,24 @@ public class FSEventMonitor {
         @Override
         public void run() {
             Pointer runLoopMode = null;
-                 try {
-                    int flags = 2;
-                    Pointer pathsToWatch = null;
+            try {
+                int flags = 2;
+                Pointer pathsToWatch = null;
 
-                    pathsToWatch = coreFoundation.CFArrayCreate(watchDirs
-                            .toArray(new String[watchDirs.size()]));
-                    streamRef = coreServices.FSEventStreamCreate(null, new StreamEventCallback(),
-                            null, pathsToWatch, currentEvent, 1.0, flags);
-                    runLoopMode = NativeLibrary.getInstance("CoreFoundation")
-                            .getGlobalVariableAddress("kCFRunLoopDefaultMode").getPointer(0);
-                    runLoop = coreFoundation.CFRunLoopGetCurrent();
+                pathsToWatch = coreFoundation.CFArrayCreate(watchDirs.toArray(new String[watchDirs
+                        .size()]));
+                streamRef = coreServices.FSEventStreamCreate(null, new StreamEventCallback(), null,
+                        pathsToWatch, currentEvent, 1.0, flags);
+                runLoopMode = NativeLibrary.getInstance("CoreFoundation").getGlobalVariableAddress(
+                        "kCFRunLoopDefaultMode").getPointer(0);
+                runLoop = coreFoundation.CFRunLoopGetCurrent();
 
-                    coreServices.FSEventStreamScheduleWithRunLoop(streamRef, runLoop, runLoopMode);
+                coreServices.FSEventStreamScheduleWithRunLoop(streamRef, runLoop, runLoopMode);
 
-                    coreServices.FSEventStreamStart(streamRef);
-                } finally {
-                    started.countDown();
-                }
+                coreServices.FSEventStreamStart(streamRef);
+            } finally {
+                started.countDown();
+            }
             coreFoundation.CFRunLoopRun();
         }
 
@@ -137,14 +137,16 @@ public class FSEventMonitor {
             int[] myEventFlags = eventFlags.getIntArray(0, numEvents);
             int[] myEventIds = eventIds.getIntArray(0, numEvents);
             Pointer[] myPaths = eventPaths.getPointerArray(0, numEvents);
-            
-            for(int i = 0; i < numEvents; i++) {
+
+            for (int i = 0; i < numEvents; i++) {
                 String path = myPaths[i].getString(0);
                 int eventId = myEventIds[i];
                 int eventFlag = myEventFlags[i];
                 FSEvent event = new FSEvent(path, eventId, eventFlag);
-                currentEvent = eventId;
-                //TODO broadcast asynchronously
+                if (eventId > currentEvent) {
+                    currentEvent = eventId;
+                }
+                // TODO broadcast asynchronously
                 listeners.broadcast(event);
             }
 
