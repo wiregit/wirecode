@@ -1,4 +1,4 @@
-#Fri Aug 08 13:51:45 EDT 2008
+#Mon Mar 30 18:03:04 EDT 2009
 eclipse.preferences.version=1
 instance/org.eclipse.core.net/org.eclipse.core.net.hasMigrated=true
 org.eclipse.jdt.core.builder.cleanOutputFolder=clean
@@ -39,7 +39,7 @@ org.eclipse.jdt.core.compiler.problem.indirectStaticAccess=ignore
 org.eclipse.jdt.core.compiler.problem.localVariableHiding=ignore
 org.eclipse.jdt.core.compiler.problem.methodWithConstructorName=warning
 org.eclipse.jdt.core.compiler.problem.missingDeprecatedAnnotation=ignore
-org.eclipse.jdt.core.compiler.problem.missingOverrideAnnotation=ignore
+org.eclipse.jdt.core.compiler.problem.missingOverrideAnnotation=warning
 org.eclipse.jdt.core.compiler.problem.missingSerialVersion=ignore
 org.eclipse.jdt.core.compiler.problem.noEffectAssignment=warning
 org.eclipse.jdt.core.compiler.problem.noImplicitStringConversion=warning
@@ -58,7 +58,7 @@ org.eclipse.jdt.core.compiler.problem.syntheticAccessEmulation=ignore
 org.eclipse.jdt.core.compiler.problem.typeParameterHiding=warning
 org.eclipse.jdt.core.compiler.problem.uncheckedTypeOperation=warning
 org.eclipse.jdt.core.compiler.problem.undocumentedEmptyBlock=ignore
-org.eclipse.jdt.core.compiler.problem.unhandledWarningToken=ignore
+org.eclipse.jdt.core.compiler.problem.unhandledWarningToken=warning
 org.eclipse.jdt.core.compiler.problem.unnecessaryElse=ignore
 org.eclipse.jdt.core.compiler.problem.unnecessaryTypeCheck=warning
 org.eclipse.jdt.core.compiler.problem.unqualifiedFieldAccess=ignore
