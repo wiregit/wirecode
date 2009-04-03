@@ -136,7 +136,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     private Map<Category, JXLayer> map = new HashMap<Category, JXLayer>();
     private Map<Category, LockableUI> lockMap = new HashMap<Category, LockableUI>();
     
-    private Timer repaintTimer;
+    private final Timer repaintTimer;
     private ListenerSupport<XMPPConnectionEvent> connectionListeners;
     private ListenerSupport<FriendEvent> knownFriendsListeners;
 
@@ -262,19 +262,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
             getDropTarget().addDropTargetListener(ghostDropTargetListener);
         } catch (TooManyListenersException ignoreException) {            
         }      
-        
-        shareListManager.getCombinedShareList().getModel().addListEventListener(new ListEventListener<LocalFileItem>(){
-            @Override
-            public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                //coalesces repaint calls. Updates usually come in bulk, ie you sign on/off,
-                // share a collection, etc..
-                if(repaintTimer.isRunning())
-                    repaintTimer.restart();
-                else
-                    repaintTimer.start();
-            }
-        });
-        
+                
         repaintTimer = new Timer(250, new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -300,6 +288,21 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
                 case DISCONNECTED:
                     showCorrectButton();
                     break;
+                }
+            }
+        });
+        
+        //listens for changes to shared items and calls repaint to update ui features
+        shareListManager.getCombinedShareList().getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>(){
+            @Override
+            public void listChanged(ListEvent<LocalFileItem> listChanges) {
+                //coalesces repaint calls. Updates usually come in bulk, ie you sign on/off,
+                // share a collection, etc..
+                if(MyLibraryPanel.this.isShowing()) {
+                    if(repaintTimer.isRunning())
+                        repaintTimer.restart();
+                    else
+                        repaintTimer.start();
                 }
             }
         });
