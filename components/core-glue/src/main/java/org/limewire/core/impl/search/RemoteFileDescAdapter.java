@@ -29,30 +29,43 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A class to generate a compatible {@link SearchResult} for the ui using an anonymous or non 
- *  anonymous {@link FriendPrecence} a {@link RemoteFileDesc} and a list of altlocs.
+ *  anonymous {@link FriendPresence} a {@link RemoteFileDesc} and a list of alternate locations (AltLocs).
  */
 public class RemoteFileDescAdapter implements SearchResult {
+   
+    /**
+     * AltLocs are given a weight of one since we do not really know anything about them but
+     *  they will improve the quality of the result if they work or are not spam.
+     */
+    private static int ALTLOC_FACTOR = 1;
+    
+    private static int BROWSABLE_ANONYMOUS_PEER_FACTOR = 6;
+    private static int NON_BROWSABLE_ANONYMOUS_PEER_FACTOR = 1;
 
+    /**
+     * Non anonymous sources, XMPP friends, are considered very important. 
+     */
+    private static int FRIENDLY_PEER_FACTOR = 20;
+    
     private final FriendPresence friendPresence;
     private final RemoteFileDesc rfd;
     private final List<IpPort> locs;
     private final Map<FilePropertyKey, Object> properties;    
-    private final Category category;    
     private final String extension;
     private final String fileName;
     
     /**
-     * Cached lists of sources from {@link getSources()}
+     * Cached lists of sources from {@link #getSources()}
      */
     private List<RemoteHost> remoteHosts;
     
     /**
-     * The cached relevance value from {@link getRelevance}, -1 is unset
+     * The cached relevance value from {@link #getRelevance()}, -1 is unset
      */
     private int relevance = -1;
 
     /**
-     * Constructs {@link RemoteFileDescAdapter} with an anonymous Gnutella precence based on the rfd's
+     * Constructs {@link RemoteFileDescAdapter} with an anonymous Gnutella presence based on the rfd's
      *  address and a set of altlocs. 
      */
     public RemoteFileDescAdapter(RemoteFileDesc rfd,
@@ -70,10 +83,9 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.rfd = rfd;
         this.locs = new ArrayList<IpPort>(locs);
         this.friendPresence = friendPresence;
-        this.properties = new HashMap<FilePropertyKey, Object>();
+        properties = new HashMap<FilePropertyKey, Object>();
         fileName = rfd.getFileName();
         extension = FileUtils.getFileExtension(rfd.getFileName());
-        category = CategoryConverter.categoryForExtension(extension);
         
         LimeXMLDocument doc = rfd.getXMLDocument();
         long fileSize = rfd.getSize();
@@ -112,6 +124,14 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
 
     /**
+     * @return the full filename of the rfd.
+     */
+    @Override
+    public String getFileName() {
+       return fileName;
+    }
+    
+    /**
      * @return the extension for the sourced rfd.
      */
     @Override
@@ -129,32 +149,62 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
         
     
+    /**
+     * @return the property map associated with the rfd used to generate this adaptor.
+     */
     @Override
     public Map<FilePropertyKey, Object> getProperties() {
         return properties;
     }
 
+    /**
+     * @return the specified property using the file key provided. 
+     */
     @Override
     public Object getProperty(FilePropertyKey key) {
         return getProperties().get(key);
     }
 
+    /**
+     * @return the category the rfd filetype falls into.
+     */
     @Override
     public Category getCategory() {
-        return category;
+        return CategoryConverter.categoryForExtension(extension);
     }
 
+    /**
+     * @return the rfd used to generate this adapter.
+     */
     public RemoteFileDesc getRfd() {
         return rfd;
     }
 
+    /**
+     * @return the {@link FriendPresence} used to generate this adaptor.  
+     */
+    public FriendPresence getFriendPresence() {
+        return friendPresence;
+    }
+    
+    /**
+     * @return the file size of the rfd.
+     */
     @Override
     public long getSize() {
         return rfd.getSize();
     }
+
+    /**
+     * @return whether the rfd has been marked as spam or not.
+     */
+    @Override
+    public boolean isSpam() {
+        return rfd.isSpam();
+    }
     
     /**
-     * Gets the GUI relevant sources.  Includes friends plus at most two anonymous sources. 
+     * @return the GUI relevant sources.  Includes friends plus at most two anonymous sources. 
      */
     @Override
     public List<RemoteHost> getSources() {
@@ -170,7 +220,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         // TODO: setting?
         int maxAltSourcesToAdd = 1;
         
-        // Add the RfdRemoteHost for the FriendPrecence
+        // Add the RfdRemoteHost for the FriendPresence
         remoteHosts.add(new RfdRemoteHost());
         
         // Add a specific number of the altlocs
@@ -181,32 +231,34 @@ public class RemoteFileDescAdapter implements SearchResult {
         return remoteHosts;
     }
    
-
+    /**
+     * @return the {@link URNImpl} for the rfd.
+     */
     @Override
     public URN getUrn() {
         com.limegroup.gnutella.URN urn = rfd.getSHA1Urn();
         return urn == null ? null : new URNImpl(urn);
     }
 
+    /**
+     * @return the a magnet link URL string for the rfd.
+     */
     @Override
-    public boolean isSpam() {
-        return rfd.isSpam();
+    public String getMagnetURL() {
+        MagnetOptions magnet = MagnetOptions.createMagnet(rfd, null, rfd.getClientGUID());
+        return magnet.toExternalForm();
     }
-
+    
     @Override
     public String toString() {
         return StringUtils.toString(this);
     }
-
-    public FriendPresence getFriendPresence() {
-        return friendPresence;
-    }
     
     /**
      * An adapter that creates a compatible {@link RemoteHost} from the {@link RemoteFileDesc} and anonymous
-     *  or non anonymous {@link FriendPrecence} that the main {@link RemoteFileDescAdapter} was constructed with.
+     *  or non anonymous {@link FriendPresence} that the main {@link RemoteFileDescAdapter} was constructed with.
      */
-    private class RfdRemoteHost implements RelevantRemoteHost {
+    class RfdRemoteHost implements RelevantRemoteHost {
         @Override
         public boolean isBrowseHostEnabled() {
             return rfd.isBrowseHostEnabled();
@@ -235,29 +287,28 @@ public class RemoteFileDescAdapter implements SearchResult {
         }
 
         /**
-         * @return 20 for non anonymous friend (ie. XMPP),
-         *         6  for browsable anonymous
-         *         1  otherwise
+         * @return the relevance for a primary host calculated from its
+         *          capabilities.
          */
         @Override
         public int getRelevance() {
             if(friendPresence.getFriend().isAnonymous()) {
                 if (rfd.isBrowseHostEnabled()) {
-                    return 6;
+                    return BROWSABLE_ANONYMOUS_PEER_FACTOR;
                 }
-                return 1;
+                return NON_BROWSABLE_ANONYMOUS_PEER_FACTOR;
             } 
-            return 20;
+            return FRIENDLY_PEER_FACTOR;
         }
     }
     
     /**
-     * An adapter class for an altloc based on {@link IpPort} and translated to a {@link RemoteHost}.
+     * An adapter class for an AltLoc based on {@link IpPort} and translated to a {@link RemoteHost}.
      */
-    private static class AltLocRemoteHost implements RelevantRemoteHost {
+    static class AltLocRemoteHost implements RelevantRemoteHost {
         private final FriendPresence presence;        
 
-        private AltLocRemoteHost(IpPort ipPort) {
+        AltLocRemoteHost(IpPort ipPort) {
             if(ipPort instanceof Connectable) {
                 this.presence = new GnutellaPresence((Connectable)ipPort, ipPort.getInetSocketAddress().toString());
             } else {
@@ -286,7 +337,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         /**
          * Share is unsupported for Gnutella/anonymous sources so it will
-         *  never be supported in an altloc.
+         *  never be supported in an AltLoc.
          */
         @Override
         public boolean isSharingEnabled() {
@@ -294,7 +345,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         }
 
         /**
-         * @return the anonymous {@link FriendPresence} assosiated with this altloc.
+         * @return the anonymous {@link FriendPresence} associated with this altloc.
          */
         @Override
         public FriendPresence getFriendPresence() {
@@ -303,27 +354,14 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public int getRelevance() {
-            return 1;
+            return ALTLOC_FACTOR;
         }
     }
-
-    @Override
-    public String getFileName() {
-       return fileName;
-    }
-
-    
-    @Override
-    public String getMagnetURL() {
-        MagnetOptions magnet = MagnetOptions.createMagnet(rfd, null, rfd.getClientGUID());
-        return magnet.toExternalForm();
-    }
-
 
     /**
      * Defines a relevance calculation unique to a specific {@link RemoteHost} type.
      */
-    private static interface RelevantRemoteHost extends RemoteHost {
+    protected static interface RelevantRemoteHost extends RemoteHost {
         public int getRelevance();
     }
 
