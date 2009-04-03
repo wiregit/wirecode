@@ -370,15 +370,18 @@ class UDPHostCacheImpl implements UDPHostCache {
          */
         @Override
         public void processMessage(Message m, ReplyHandler handler) {
-            // We expect only UDP replies, and only from hosts we pinged
-            assert handler instanceof UDPReplyHandler;
-            boolean removed = hosts.remove(handler);
-            assert removed;
-            // OPTIMIZATION: if we've got successful responses from
-            // all the UHCs, unregister ourselves early
-            if(hosts.isEmpty()) {
-                LOG.trace("Unregistering message listener");
-                messageRouter.get().unregisterMessageListener(guid, this);
+            // We expect only UDP replies
+            if(handler instanceof UDPReplyHandler) {
+                if(hosts.remove(handler)) {
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("Recieved: " + m);
+                }
+                // OPTIMIZATION: if we've got successful responses from
+                // all the UHCs, unregister ourselves early
+                if(hosts.isEmpty()) {
+                    LOG.trace("Unregistering message listener");
+                    messageRouter.get().unregisterMessageListener(guid, this);
+                }
             }
        }
 
