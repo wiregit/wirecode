@@ -55,6 +55,10 @@ public class LimeWireUiSearchModule extends AbstractModule {
             FactoryProvider.newFactory(
                 SortAndFilterPanelFactory.class, SortAndFilterPanel.class));
         
+        bind(AdvancedFilterPanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                AdvancedFilterPanelFactory.class, AdvancedFilterPanel.class));
+        
         bind(BaseResultPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
                 BaseResultPanelFactory.class, BaseResultPanel.class));

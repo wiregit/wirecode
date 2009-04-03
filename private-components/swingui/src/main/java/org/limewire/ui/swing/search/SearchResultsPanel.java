@@ -67,6 +67,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      */
     private final SearchTabItems searchTabItems;
     
+    /** Panel containing filter components. */
+    private final AdvancedFilterPanel filterPanel; // TODO NEW!!!
+    
     /**
      * This is the subpanel that displays the actual search results.
      */
@@ -121,6 +124,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             @Assisted SearchResultsModel searchResultsModel,
             ResultsContainerFactory containerFactory,
             SortAndFilterPanelFactory sortAndFilterFactory,
+            AdvancedFilterPanelFactory filterPanelFactory,
             SearchTabItemsFactory searchTabItemsFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
             HeaderBarDecorator headerBarDecorator) {        
@@ -135,6 +139,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         // Create sort and filter components.
         this.sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
+        
+        this.filterPanel = filterPanelFactory.create(searchResultsModel); // TODO NEW!!!
         
         scrollPane = new JScrollPane();
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -170,6 +176,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             public void categorySelected(SearchCategory category) {
                 sortAndFilterPanel.clearFilterBox();
                 sortAndFilterPanel.setSearchCategory(category);
+                filterPanel.setSearchCategory(category); // TODO NEW!!!
                 resultsContainer.showCategory(category);
                 syncScrollPieces();
             }
@@ -284,7 +291,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      */
     private void layoutComponents() {
         MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!", 
-        		                "[grow]", "[][][][grow]");
+        		                "[][grow]",       // col constraints
+        		                "[][][][grow]");  // row constraints
         
         setLayout(layout);
         setMinimumSize(new Dimension(getPreferredSize().width, 33));
@@ -308,6 +316,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         headerBarDecorator.decorateBasic(header);
         
         sortAndFilterPanel.layoutComponents(header);
+        add(filterPanel, "spany 4, grow"); // TODO NEW!!!
         add(header, "growx, wrap");
         add(classicSearchReminderPanel, "growx, wrap");
         add(messagePanel, "growx, wrap");
