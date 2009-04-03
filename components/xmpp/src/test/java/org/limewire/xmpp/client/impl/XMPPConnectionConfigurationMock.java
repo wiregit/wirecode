@@ -62,4 +62,14 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     public EventListener<RosterEvent> getRosterListener() {
         return rosterListener;
     }
+
+    @Override
+    public String getSMTPHost() {
+        return null;
+    }
+
+    @Override
+    public String getSMTPPort() {
+        return null;
+    }
 }

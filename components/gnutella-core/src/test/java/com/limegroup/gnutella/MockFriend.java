@@ -61,6 +61,16 @@ public class MockFriend implements Friend {
             public String getNetworkName() {
                 return "";
             }
+
+            @Override
+            public String getSMTPHost() {
+                return null;
+            }
+
+            @Override
+            public String getSMTPPort() {
+                return null;
+            }
         };
     }
 

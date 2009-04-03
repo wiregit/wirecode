@@ -10,7 +10,8 @@ import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 
 /**
- * Stores all the information required to log into an XMPP server and
+ * Stores all the information require
+ * d to log into an XMPP server and
  * describe the server in the UI.
  */
 class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
@@ -135,5 +136,15 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     @Override
     public String toString() {
         return StringUtils.toStringBlacklist(this, password);
+    }
+
+    @Override
+    public String getSMTPHost() {
+        return null;
+    }
+
+    @Override
+    public String getSMTPPort() {
+        return null;
     }
 }
