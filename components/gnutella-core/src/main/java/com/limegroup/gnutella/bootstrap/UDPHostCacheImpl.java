@@ -368,26 +368,25 @@ class UDPHostCacheImpl implements UDPHostCache {
         /**
          * Notification that a message has been processed.
          */
+        @Override
         public void processMessage(Message m, ReplyHandler handler) {
-            // We expect only UDP replies
-            if(handler instanceof UDPReplyHandler) {
-                if(hosts.remove(handler)) {
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("Recieved: " + m);
-                }
-                // OPTIMIZATION: if we've got successful responses from
-                // all the UHCs, unregister ourselves early
-                if(hosts.isEmpty()) {
-                    LOG.trace("Unregistering message listener");
-                    messageRouter.get().unregisterMessageListener(guid, this);
-                }
+            // We expect only UDP replies, and only from hosts we pinged
+            assert handler instanceof UDPReplyHandler;
+            boolean removed = hosts.remove(handler);
+            assert removed;
+            // OPTIMIZATION: if we've got successful responses from
+            // all the UHCs, unregister ourselves early
+            if(hosts.isEmpty()) {
+                LOG.trace("Unregistering message listener");
+                messageRouter.get().unregisterMessageListener(guid, this);
             }
-        }
+       }
 
         /**
          * Notification that this listener is now registered with the 
          * specified GUID.
          */
+        @Override
         public void registered(byte[] g) {
             this.guid = g;
         }
@@ -396,6 +395,7 @@ class UDPHostCacheImpl implements UDPHostCache {
          * Notification that this listener is now unregistered for the 
          * specified guid.
          */
+        @Override
         public void unregistered(byte[] g) {
             synchronized(UDPHostCacheImpl.this) {
                 // Record the failures...
