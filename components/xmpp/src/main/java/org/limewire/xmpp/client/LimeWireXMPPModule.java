@@ -74,8 +74,10 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(new TypeLiteral<EventBroadcaster<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
         bind(new TypeLiteral<ListenerSupport<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);        
         
+        AsynchronousMulticaster<XMPPConnectionEvent> asyncConnectionMulticaster =
+            new AsynchronousMulticaster<XMPPConnectionEvent>(executor, LogFactory.getLog(XMPPConnectionEvent.class));
         CachingEventMulticasterImpl<XMPPConnectionEvent> connectionMulticaster =
-            new CachingEventMulticasterImpl<XMPPConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS, new AsynchronousMulticaster<XMPPConnectionEvent>(executor, LogFactory.getLog(XMPPConnectionEvent.class)));
+            new CachingEventMulticasterImpl<XMPPConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS, asyncConnectionMulticaster, asyncConnectionMulticaster.getListenerContext());
         bind(new TypeLiteral<EventBean<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<EventMulticaster<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<EventBroadcaster<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);

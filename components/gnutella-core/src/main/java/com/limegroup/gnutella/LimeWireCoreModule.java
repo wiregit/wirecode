@@ -372,14 +372,18 @@ public class LimeWireCoreModule extends AbstractModule {
         
         Executor fwtEventExecutor = ExecutorsHelper.newProcessingQueue("FirewallEventThread");
         
+        AsynchronousMulticaster<FirewallTransferStatusEvent> asyncTransferMulticaster 
+            = new AsynchronousMulticaster<FirewallTransferStatusEvent>(fwtEventExecutor);
         CachingEventMulticaster<FirewallTransferStatusEvent> fwtStatusMulticaster =
-            new CachingEventMulticasterImpl<FirewallTransferStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS, new AsynchronousMulticaster<FirewallTransferStatusEvent>(fwtEventExecutor));
+            new CachingEventMulticasterImpl<FirewallTransferStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS, asyncTransferMulticaster, asyncTransferMulticaster.getListenerContext());
         bind(new TypeLiteral<EventBean<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         bind(new TypeLiteral<ListenerSupport<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         
+        AsynchronousMulticaster<FirewallStatusEvent> asyncStatusMulticaster =
+            new AsynchronousMulticaster<FirewallStatusEvent>(fwtEventExecutor);
         CachingEventMulticaster<FirewallStatusEvent> firewalledStatusMulticaster =
-            new CachingEventMulticasterImpl<FirewallStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS, new AsynchronousMulticaster<FirewallStatusEvent>(fwtEventExecutor));
+            new CachingEventMulticasterImpl<FirewallStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS, asyncStatusMulticaster, asyncStatusMulticaster.getListenerContext());
         bind(new TypeLiteral<EventBean<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
         bind(new TypeLiteral<ListenerSupport<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
