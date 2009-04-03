@@ -33,13 +33,14 @@ public class FilterFactory {
     }
     
     /**
-     * Returns an array of filters for the specified search category.
+     * Returns an array of filters for the specified search category and list 
+     * of search results.
      */
-    public Filter[] getFilters(SearchCategory searchCategory) {
-        // Get results list for search category.
-        FilterList<VisualSearchResult> categoryList = getUnfilteredCategoryList(searchCategory);
-        
+    public Filter[] getCategoryFilters(SearchCategory searchCategory, 
+            EventList<VisualSearchResult> categoryList) {
+        // Create filter array.
         Filter[] filters = new Filter[0];
+        
         switch (searchCategory) {
         case AUDIO:
             filters = new Filter[5];
@@ -61,7 +62,7 @@ public class FilterFactory {
      * Returns an unfiltered list of search results for the specified search
      * category.
      */
-    private FilterList<VisualSearchResult> getUnfilteredCategoryList(SearchCategory searchCategory) {
+    public FilterList<VisualSearchResult> getUnfilteredCategoryList(SearchCategory searchCategory) {
         EventList<VisualSearchResult> unfilteredList = searchResultsModel.getObservableSearchResults();
         
         if (searchCategory == SearchCategory.ALL) {

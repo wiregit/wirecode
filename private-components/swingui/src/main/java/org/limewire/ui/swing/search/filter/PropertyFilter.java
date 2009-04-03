@@ -19,7 +19,6 @@ import org.limewire.util.Objects;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.FunctionList.Function;
@@ -51,7 +50,7 @@ class PropertyFilter extends AbstractFilter {
      * Constructs a PropertyFilterComponent using the specified results list,
      * filter type, and property key.
      */
-    public PropertyFilter(FilterList<VisualSearchResult> resultsList,
+    public PropertyFilter(EventList<VisualSearchResult> resultsList,
             FilterType filterType, FilePropertyKey propertyKey) {
         
         if ((filterType == FilterType.PROPERTY) && (propertyKey == null)) {
@@ -102,7 +101,6 @@ class PropertyFilter extends AbstractFilter {
     public void dispose() {
         selectionModel.dispose();
         listModel.dispose();
-        // TODO verify whether resultsList needs to be disposed
     }
     
     /**

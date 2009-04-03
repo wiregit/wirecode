@@ -26,6 +26,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.matchers.CompositeMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
@@ -140,6 +141,7 @@ public class AdvancedFilterPanel extends JPanel {
      */
     private class CategoryFilterPanel extends JPanel implements FilterListener {
         
+        private FilterList<VisualSearchResult> categoryList;
         private Filter[] filters = new Filter[0];
         
         public CategoryFilterPanel() {
@@ -155,9 +157,13 @@ public class AdvancedFilterPanel extends JPanel {
                 editorList.remove(filter.getMatcherEditor());
                 filter.dispose();
             }
+            
+            // Dispose of old results list, and get new one.
+            if (categoryList != null) categoryList.dispose();
+            categoryList = filterFactory.getUnfilteredCategoryList(searchCategory);
 
             // Get filters for category.
-            filters = filterFactory.getFilters(searchCategory);
+            filters = filterFactory.getCategoryFilters(searchCategory, categoryList);
             
             // Add new filters.
             for (Filter filter : filters) {
