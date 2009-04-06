@@ -75,6 +75,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
     public void handleEvent(final FriendShareListEvent event) {
         if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED) {
             LibraryChangedSender listener = new LibraryChangedSender(event.getFriend());
+            listener.scheduleSendRefreshCheck();
             listeners.put(event.getFriend().getId(), listener);
             event.getFileList().getModel().addListEventListener(listener);
         } else if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED) {
@@ -122,6 +123,14 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                 libraryRefreshPeriodic.rescheduleIfLater(5000);                                
             }
         }        
+        
+        /**
+         * Schedules an immediate check if a library refresh should be sent
+         * to the friend.
+         */
+        private void scheduleSendRefreshCheck() {
+            libraryRefreshPeriodic.rescheduleIfLater(0);
+        }
     
         class ScheduledLibraryRefreshSender implements Runnable {
     

@@ -20,6 +20,7 @@ import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeatu
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.FriendShareListEvent.Type;
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.FinishedLoadingListener;
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender;
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender.ScheduledLibraryRefreshSender;
@@ -32,6 +33,7 @@ import org.limewire.xmpp.api.client.XMPPService;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 
+import com.limegroup.gnutella.MockFriend;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.ManagedFileList;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
@@ -86,9 +88,10 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final FriendShareListEvent event3 = context.mock(FriendShareListEvent.class);
         final Friend friend = context.mock(Friend.class);
         final LocalFileList localFileList = context.mock(LocalFileList.class);
-        final EventList<LocalFileItem> eventList = context.mock(EventList.class);;
+        final EventList<LocalFileItem> eventList = context.mock(EventList.class);
+        final ScheduledExecutorService executor = context.mock(ScheduledExecutorService.class);
         
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(null, null, null);
+        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(null, null, executor);
         
         final Sequence resultSequence = context.sequence("resultSequence");
         
@@ -128,6 +131,8 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 
                 exactly(1).of(eventList).removeListEventListener(with(any(LibraryChangedSender.class)));
                 inSequence(resultSequence);
+                
+                one(executor).execute(with(any(Runnable.class)));
             }});
         
         
@@ -484,7 +489,34 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         
         context.assertIsSatisfied();
     }
-
+    
+    /**
+     * Ensures that friend add event causes the {@link ScheduledLibraryRefreshSender} 
+     * to be executed to possibly send out library refresh notifications.
+     */
+    public void testCallsLibraryRefresherOnAddEvent() {
+        Mockery context = new Mockery();
+        final ScheduledExecutorService executor = context.mock(ScheduledExecutorService.class);
+        final LocalFileList localFileList = context.mock(LocalFileList.class);
+        @SuppressWarnings("unchecked")
+        final EventList<LocalFileItem> eventList = context.mock(EventList.class);
+        
+        FriendShareListRefresher refresher = new FriendShareListRefresher(null, null, executor);
+        
+        context.checking(new Expectations() {{
+            // stub stuff
+            allowing(localFileList).getModel();
+            will(returnValue(eventList));
+            allowing(eventList).addListEventListener(with(any(LibraryChangedSender.class)));
+            // assertions
+            one(executor).execute(with(any(ScheduledLibraryRefreshSender.class)));
+        }});
+        
+        refresher.handleEvent(new FriendShareListEvent(Type.FRIEND_SHARE_LIST_ADDED, localFileList, new MockFriend("hello")));
+        
+        context.assertIsSatisfied();
+    }
+    
     /**
      * Force fire a refresh action with the last browse time after the 
      *  last refresh time, therefore with notifications necessary.  Also,

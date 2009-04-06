@@ -38,6 +38,7 @@ public class LibraryChangedNotifierFeatureInitializer implements FeatureInitiali
     }
 
     private static class LibraryChangedNotifierImpl implements LibraryChangedNotifier {
+        
         private final String presenceId;
         private final XMPPConnection connection;
 
@@ -47,12 +48,14 @@ public class LibraryChangedNotifierFeatureInitializer implements FeatureInitiali
         }
 
         public void sendLibraryRefresh() {
+            LOG.debug("send library refresh");
             if(connection.isConnected()) {
                 final LibraryChangedIQ libraryChangedIQ = new LibraryChangedIQ();
                 libraryChangedIQ.setType(IQ.Type.SET);
                 libraryChangedIQ.setTo(presenceId);
                 libraryChangedIQ.setPacketID(IQ.nextID());
                 try {
+                    LOG.debugf("sending refresh to {0}", presenceId);
                     connection.sendPacket(libraryChangedIQ);
                 } catch (XMPPException e) {
                     LOG.debugf("library refresh failed", e);
