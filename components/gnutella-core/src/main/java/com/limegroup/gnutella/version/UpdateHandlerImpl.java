@@ -97,8 +97,10 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
      */
     private static final String FILENAME = "version.xml";
     
-    private static final int IGNORE_ID = Integer.MAX_VALUE;
+    // Package access for testing
+    protected static final int IGNORE_ID = Integer.MAX_VALUE;
     
+    // Package access for testing
     protected static enum UpdateType {
         FROM_NETWORK, FROM_DISK, FROM_HTTP;
     }

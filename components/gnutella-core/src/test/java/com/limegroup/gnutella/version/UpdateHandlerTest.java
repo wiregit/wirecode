@@ -166,7 +166,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 inSequence(requestSequence);
 
                 atLeast(1).of(updateCollection).getId();
-                will(returnValue(Integer.MAX_VALUE));
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 inSequence(requestSequence);
 
                 allowing(applicationServices).getMyGUID();
@@ -268,7 +268,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 will(returnValue(new byte[16]));
 
                 atLeast(1).of(updateCollection).getId();
-                will(returnValue(Integer.MAX_VALUE));
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
             }
         });
 
@@ -306,7 +306,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 inSequence(requestSequence);
 
                 atLeast(1).of(updateCollection).getId();
-                will(returnValue(Integer.MAX_VALUE));
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 inSequence(requestSequence);
 
                 allowing(applicationServices).getMyGUID();
@@ -408,7 +408,7 @@ public class UpdateHandlerTest extends LimeTestCase {
 
                 atLeast(1).of(httpCollection).getId();
                 inSequence(requestSequence);
-                will(returnValue(Integer.MAX_VALUE));
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
 
                 one(httpCollection).getTimestamp();
                 inSequence(requestSequence);
@@ -425,7 +425,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         httpClientListenerRef.get().requestComplete(method, response);
         assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
         assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
-        assertEquals(Integer.MAX_VALUE, h.getLatestId());
+        assertEquals(UpdateHandlerImpl.IGNORE_ID, h.getLatestId());
         assertTrue(saveFile.exists());
 
         mockery.assertIsSatisfied();
@@ -447,7 +447,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 inSequence(requestSequence);
 
                 atLeast(1).of(updateCollection).getId();
-                will(returnValue(Integer.MAX_VALUE));
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 inSequence(requestSequence);
 
                 allowing(applicationServices).getMyGUID();
@@ -587,7 +587,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 inSequence(requestSequence);
 
                 atLeast(1).of(updateCollection).getId();
-                will(returnValue(Integer.MAX_VALUE));
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 inSequence(requestSequence);
 
                 allowing(applicationServices).getMyGUID();
@@ -689,7 +689,7 @@ public class UpdateHandlerTest extends LimeTestCase {
 
                 atLeast(1).of(httpCollection).getId();
                 inSequence(requestSequence);
-                will(returnValue(Integer.MAX_VALUE));
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
 
                 one(httpCollection).getTimestamp();
                 inSequence(requestSequence);
@@ -706,7 +706,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         httpClientListenerRef.get().requestComplete(method, response);
         assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
         assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
-        assertEquals(Integer.MAX_VALUE, h.getLatestId());
+        assertEquals(UpdateHandlerImpl.IGNORE_ID, h.getLatestId());
         assertTrue(saveFile.exists());
         
         clock.setNow(999999);        
@@ -725,7 +725,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 inSequence(requestSequence);
 
                 atLeast(1).of(secondUpdateCollection).getId();
-                will(returnValue(Integer.MAX_VALUE));
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 inSequence(requestSequence);
             }
         });
@@ -733,7 +733,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         
         assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
         assertEquals(54321L, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
-        assertEquals(Integer.MAX_VALUE, h.getLatestId());
+        assertEquals(UpdateHandlerImpl.IGNORE_ID, h.getLatestId());
         assertFalse(saveFile.exists());
         assertNull(backgroundExecutor.getRunnable());
 
@@ -765,6 +765,63 @@ public class UpdateHandlerTest extends LimeTestCase {
         UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
         h.handleDataInternal(data, UpdateType.FROM_NETWORK, handler);
         mockery.assertIsSatisfied();        
+    }
+    
+    public void testVerifiedDataFromNetworkIsValid() {
+        final byte[] data = new byte[0];
+        final String verified = "";
+        final ReplyHandler handler = mockery.mock(ReplyHandler.class);
+        final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
+        final int id = 12345;
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(data);
+                will(returnValue(verified));
+                one(networkUpdateSanityChecker).handleValidResponse(handler, RequestType.VERSION);
+                one(updateCollectionFactory).createUpdateCollection(verified);
+                will(returnValue(updateCollection));
+                atLeast(1).of(updateCollection).getId();
+                will(returnValue(id));
+                // The ID is not IGNORE_ID and the update type is FROM_NETWORK,
+                // so the update will be stored and propagated
+                one(updateCollection).getTimestamp();
+                will(returnValue(System.currentTimeMillis()));
+                one(capabilitiesVmFactory).updateCapabilities();
+                one(connectionManager).sendUpdatedCapabilities();
+            }
+        });
+        UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
+        assertLessThan(id, h.getLatestId());
+        h.handleDataInternal(data, UpdateType.FROM_NETWORK, handler);
+        assertEquals(id, h.getLatestId());
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testVerifiedDataFromDiskIsNotSanityChecked() {
+        final byte[] data = new byte[0];
+        final String verified = "";
+        final ReplyHandler handler = mockery.mock(ReplyHandler.class);
+        final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
+        final int id = 12345;
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(data);
+                will(returnValue(verified));
+                one(updateCollectionFactory).createUpdateCollection(verified);
+                will(returnValue(updateCollection));
+                atLeast(1).of(updateCollection).getId();
+                will(returnValue(id));
+                // The ID is not IGNORE_ID and the update type is FROM_DISK,
+                // so the update will be stored but not propagated
+                one(updateCollection).getTimestamp();
+                will(returnValue(System.currentTimeMillis()));
+            }
+        });
+        UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
+        assertLessThan(id, h.getLatestId());
+        h.handleDataInternal(data, UpdateType.FROM_DISK, handler);
+        assertEquals(id, h.getLatestId());
+        mockery.assertIsSatisfied();
     }
     
     private class ImmediateExecutor extends ScheduledExecutorServiceStub {
