@@ -86,7 +86,7 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
     
     @Override
     public void handleEvent(AddressEvent event) {
-        if (event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
+        if (event.getType().equals(AddressEvent.Type.ADDRESS_CHANGED)) {
             // TODO async?
             LOG.debugf("new address to publish: {0}", event);
             synchronized (AddressIQListener.this) {

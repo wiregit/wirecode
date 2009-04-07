@@ -16,7 +16,6 @@ import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.inject.AbstractModule;
-import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.net.address.AddressEvent;
@@ -130,7 +129,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
 
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
-                Address.EventType.ADDRESS_CHANGED));
+                AddressEvent.Type.ADDRESS_CHANGED));
 
         Thread.sleep(SLEEP);
 
@@ -240,7 +239,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
     public void testOfferFile() throws InterruptedException, IOException, XmlPullParserException, XMPPException {
 
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
-                Address.EventType.ADDRESS_CHANGED));
+                AddressEvent.Type.ADDRESS_CHANGED));
 
         Thread.sleep(SLEEP);
 
@@ -280,7 +279,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
 
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
-                Address.EventType.ADDRESS_CHANGED));
+                AddressEvent.Type.ADDRESS_CHANGED));
 
         Thread.sleep(SLEEP);
 
@@ -313,7 +312,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(true, address.isTLSCapable());
 
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("200.200.200.200", 5000, false),
-                Address.EventType.ADDRESS_CHANGED));
+                AddressEvent.Type.ADDRESS_CHANGED));
 
         Thread.sleep(SLEEP);
 
@@ -363,7 +362,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
 
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(
                 new ConnectableImpl("199.199.199.199", 2048, true),
-                Address.EventType.ADDRESS_CHANGED));
+                AddressEvent.Type.ADDRESS_CHANGED));
         Thread.sleep(SLEEP);
 
         // Simulate Alice talking to two presences of Bob
