@@ -37,11 +37,15 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ClockStub;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
+import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
+import com.limegroup.gnutella.version.UpdateHandlerImpl.UpdateType;
 
 public class UpdateHandlerTest extends LimeTestCase {
     
@@ -54,32 +58,20 @@ public class UpdateHandlerTest extends LimeTestCase {
     }
 
     private Injector injector;
-
     private Mockery mockery;
-
     private ImmediateExecutor backgroundExecutor;
-
     private ActivityCallback activityCallback;
-
     private HttpExecutor httpExecutor;
-
     private CapabilitiesVMFactory capabilitiesVmFactory;
-
     private ConnectionManager connectionManager;
-
     private FileManager fileManager;
-
     private ApplicationServices applicationServices;
-
     private UpdateCollectionFactory updateCollectionFactory;
-
     private ClockStub clock;
-
     private DownloadManager downloadManager;
-
     private SettingsProvider settingsProvider;
-
     private UpdateMessageVerifier updateMessageVerifier;
+    private NetworkUpdateSanityChecker networkUpdateSanityChecker;
 
     private File saveFile;
 
@@ -96,6 +88,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         downloadManager = mockery.mock(DownloadManager.class);
         backgroundExecutor = new ImmediateExecutor();
         updateMessageVerifier = mockery.mock(UpdateMessageVerifier.class);
+        networkUpdateSanityChecker = mockery.mock(NetworkUpdateSanityChecker.class);
         clock = new ClockStub();
         settingsProvider = new SettingsProvider() {
             public long getChangePeriod() {
@@ -123,6 +116,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 bind(DownloadManager.class).toInstance(downloadManager);
                 bind(SettingsProvider.class).toInstance(settingsProvider);
                 bind(UpdateMessageVerifier.class).toInstance(updateMessageVerifier);
+                bind(NetworkUpdateSanityChecker.class).toInstance(networkUpdateSanityChecker);
             }
         });
 
@@ -745,7 +739,34 @@ public class UpdateHandlerTest extends LimeTestCase {
 
         mockery.assertIsSatisfied();
     }
-
+    
+    public void testNullDataFromNetworkIsInvalid() {
+        final ReplyHandler handler = mockery.mock(ReplyHandler.class);
+        mockery.checking(new Expectations() {
+            {
+                one(networkUpdateSanityChecker).handleInvalidResponse(handler, RequestType.VERSION);
+            }
+        });
+        UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
+        h.handleDataInternal(null, UpdateType.FROM_NETWORK, handler);
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testUnverifiableDataFromNetworkIsInvalid() {
+        final byte[] data = new byte[0];
+        final ReplyHandler handler = mockery.mock(ReplyHandler.class);
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(data);
+                will(returnValue(null));
+                one(networkUpdateSanityChecker).handleInvalidResponse(handler, RequestType.VERSION);
+            }
+        });
+        UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
+        h.handleDataInternal(data, UpdateType.FROM_NETWORK, handler);
+        mockery.assertIsSatisfied();        
+    }
+    
     private class ImmediateExecutor extends ScheduledExecutorServiceStub {
 
         private volatile Runnable scheduled;
