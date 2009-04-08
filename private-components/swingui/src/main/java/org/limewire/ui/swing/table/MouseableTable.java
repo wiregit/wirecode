@@ -181,18 +181,7 @@ public class MouseableTable extends StripedJXTable {
                                 columnDoubleClickHandler.handleDoubleClick(col);
                             }
                         }
-					}
-					
-					if (isCellEditable(row, col)) { // TODO include check for isEditing()
-                        TableCellEditor editor = getCellEditor(row, col);
-                        if (editor != null) {
-                            // force update editor colors
-                            prepareEditor(editor, row, col);
-                            // editor.repaint() takes about a second to show
-                            // sometimes
-                            repaint();
-                        }                        
-                    }
+					}					
 				}
 			}
 			
@@ -209,6 +198,15 @@ public class MouseableTable extends StripedJXTable {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                int col = columnAtPoint(e.getPoint());
+                int row = rowAtPoint(e.getPoint());
+                if (isEditing() && isCellEditable(row, col)) { 
+                    TableCellEditor editor = getCellEditor(row, col);
+                    if (editor != null) {
+                        // force update editor colors
+                        prepareEditor(editor, row, col);
+                    }                        
+                }
                 maybeShowPopup(e);
             }
 
