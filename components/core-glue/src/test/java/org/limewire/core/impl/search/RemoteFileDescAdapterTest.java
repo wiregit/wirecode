@@ -325,7 +325,10 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         assertTrue(rfdRemoteHostFound);
         assertTrue(altLocFound);
         
-
+        // Test duplicate getSources() call, ensure they are the same
+        List<RemoteHost> hosts2repeat = friendRfdAdapter.getSources();
+        assertEquals(hosts2, hosts2repeat);
+        
         context.assertIsSatisfied();
         
     }
@@ -546,6 +549,23 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         assertTrue(rfdAdapter.getMagnetURL().startsWith("magnet"));
         
         context.assertIsSatisfied();
+    }
+    
+    public void testToString() {
+        Mockery context = new Mockery();
+        
+        final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
+        final Set<IpPort> locs = new HashSet<IpPort>();
+        context.checking(new Expectations() {{
+            allowing(rfd).getClientGUID();
+            will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
+            
+            allowing(rfd);
+        }});
+        
+        RemoteFileDescAdapter rfdAdapter1 = new RemoteFileDescAdapter(rfd, locs);
+        
+        assertNotNull(rfdAdapter1.toString());
     }
     
     /**
