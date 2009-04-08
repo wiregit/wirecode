@@ -72,6 +72,7 @@ public class UpdateHandlerTest extends LimeTestCase {
     private SettingsProvider settingsProvider;
     private UpdateMessageVerifier updateMessageVerifier;
     private NetworkUpdateSanityChecker networkUpdateSanityChecker;
+    private byte[] guid;
 
     private File saveFile;
 
@@ -89,6 +90,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         backgroundExecutor = new ImmediateExecutor();
         updateMessageVerifier = mockery.mock(UpdateMessageVerifier.class);
         networkUpdateSanityChecker = mockery.mock(NetworkUpdateSanityChecker.class);
+        guid = new byte[16];
         clock = new ClockStub();
         settingsProvider = new SettingsProvider() {
             public long getChangePeriod() {
@@ -170,7 +172,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 inSequence(requestSequence);
 
                 allowing(applicationServices).getMyGUID();
-                will(returnValue(new byte[16]));
+                will(returnValue(guid));
                 inSequence(requestSequence);
             }
         });
@@ -265,7 +267,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 will(returnValue(updateCollection));
 
                 allowing(applicationServices).getMyGUID();
-                will(returnValue(new byte[16]));
+                will(returnValue(guid));
 
                 atLeast(1).of(updateCollection).getId();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
@@ -310,7 +312,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 inSequence(requestSequence);
 
                 allowing(applicationServices).getMyGUID();
-                will(returnValue(new byte[16]));
+                will(returnValue(guid));
                 inSequence(requestSequence);
             }
         });
@@ -451,7 +453,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 inSequence(requestSequence);
 
                 allowing(applicationServices).getMyGUID();
-                will(returnValue(new byte[16]));
+                will(returnValue(guid));
                 inSequence(requestSequence);
             }
         });
@@ -591,7 +593,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 inSequence(requestSequence);
 
                 allowing(applicationServices).getMyGUID();
-                will(returnValue(new byte[16]));
+                will(returnValue(guid));
                 inSequence(requestSequence);
             }
         });
@@ -737,6 +739,175 @@ public class UpdateHandlerTest extends LimeTestCase {
         assertFalse(saveFile.exists());
         assertNull(backgroundExecutor.getRunnable());
 
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testFailedHttpRequestUpdatesFailoverTime() throws Exception {
+        final AtomicReference<HttpClientListener> httpClientListenerRef = new AtomicReference<HttpClientListener>();
+        final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
+        final byte[] data = new byte[0];
+        final String verified = "";
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(data);
+                will(returnValue(verified));
+                one(updateCollectionFactory).createUpdateCollection(verified);
+                will(returnValue(updateCollection));
+                atLeast(1).of(updateCollection).getId();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
+                allowing(applicationServices).getMyGUID();
+                will(returnValue(guid));
+            }
+        });
+
+        UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
+        assertEquals(0, h.getLatestId());
+        h.setMaxUrls(Arrays.asList("http://127.0.0.1:9999/update.def"));
+        h.setSilentPeriodForMaxHttpRequest(0);
+        backgroundExecutor.scheduled = null;
+        clock.setNow(12345);
+        h.handleNewData(data, null);
+        assertNotNull(backgroundExecutor.scheduled);
+
+        mockery.checking(new Expectations() {
+            {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpGet>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                        description.appendText("httpMethod");
+                    }
+
+                    @Override
+                    public boolean matchesSafely(HttpGet item) {
+                        assertEquals("GET", item.getMethod());
+                        assertTrue(item.getURI().toString(), item.getURI().toString()
+                                .startsWith("http://127.0.0.1:9999/update.def?"));
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpParams>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                    }
+
+                    @Override
+                    public boolean matchesSafely(HttpParams item) {
+                        assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
+                        assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpClientListener>() {
+                    public void describeTo(Description description) {
+                    }
+
+                    @Override
+                    public boolean matchesSafely(HttpClientListener item) {
+                        httpClientListenerRef.set(item);
+                        return true;
+                    }
+                }));
+            }
+        });
+
+        backgroundExecutor.scheduled.run();
+        assertNotNull(httpClientListenerRef.get());
+
+        final HttpGet method = new HttpGet();
+        final HttpResponse response = mockery.mock(HttpResponse.class);
+        mockery.checking(new Expectations() {
+            {
+                one(httpExecutor).releaseResources(response);
+            }
+        });
+        httpClientListenerRef.get().requestFailed(method, response, null);
+        assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
+        assertEquals(0, h.getLatestId());
+        assertFalse(saveFile.exists());
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testBadHttpBodyUpdatesFailoverTime() throws Exception {
+        final AtomicReference<HttpClientListener> httpClientListenerRef = new AtomicReference<HttpClientListener>();
+        final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
+        final byte[] data = new byte[0];
+        final String verified = "";
+        mockery.checking(new Expectations() {
+            {
+                one(updateMessageVerifier).getVerifiedData(data);
+                will(returnValue(verified));
+                one(updateCollectionFactory).createUpdateCollection(verified);
+                will(returnValue(updateCollection));
+                atLeast(1).of(updateCollection).getId();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
+                allowing(applicationServices).getMyGUID();
+                will(returnValue(guid));
+            }
+        });
+
+        UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
+        assertEquals(0, h.getLatestId());
+        h.setMaxUrls(Arrays.asList("http://127.0.0.1:9999/update.def"));
+        h.setSilentPeriodForMaxHttpRequest(0);
+        backgroundExecutor.scheduled = null;
+        clock.setNow(12345);
+        h.handleNewData(data, null);
+        assertNotNull(backgroundExecutor.scheduled);
+
+        mockery.checking(new Expectations() {
+            {
+                one(httpExecutor).execute(with(new TypeSafeMatcher<HttpGet>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                        description.appendText("httpMethod");
+                    }
+
+                    @Override
+                    public boolean matchesSafely(HttpGet item) {
+                        assertEquals("GET", item.getMethod());
+                        assertTrue(item.getURI().toString(), item.getURI().toString()
+                                .startsWith("http://127.0.0.1:9999/update.def?"));
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpParams>() {
+                    public void describeTo(org.hamcrest.Description description) {
+                    }
+
+                    @Override
+                    public boolean matchesSafely(HttpParams item) {
+                        assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
+                        assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
+                        return true;
+                    }
+                }), with(new TypeSafeMatcher<HttpClientListener>() {
+                    public void describeTo(Description description) {
+                    }
+
+                    @Override
+                    public boolean matchesSafely(HttpClientListener item) {
+                        httpClientListenerRef.set(item);
+                        return true;
+                    }
+                }));
+            }
+        });
+
+        backgroundExecutor.scheduled.run();
+        assertNotNull(httpClientListenerRef.get());
+
+        final HttpGet method = new HttpGet();
+        final HttpResponse response = mockery.mock(HttpResponse.class);
+        final StatusLine statusLine = mockery.mock(StatusLine.class);
+        mockery.checking(new Expectations() {
+            {
+                atLeast(1).of(response).getStatusLine();
+                will(returnValue(statusLine));
+                atLeast(1).of(statusLine).getStatusCode();
+                will(returnValue(200));
+                atLeast(1).of(response).getEntity();
+                will(returnValue(null));
+                one(httpExecutor).releaseResources(response);
+            }
+        });
+        httpClientListenerRef.get().requestComplete(method, response);
+        assertEquals(12345, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
+        assertEquals(0, h.getLatestId());
+        assertFalse(saveFile.exists());
         mockery.assertIsSatisfied();
     }
     

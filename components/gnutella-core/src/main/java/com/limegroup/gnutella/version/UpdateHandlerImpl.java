@@ -996,6 +996,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     /**
      * Listens for events from FileManager
      */
+    @Override
     public void handleEvent(ManagedListStatusEvent evt) {
         if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
             tryToDownloadUpdates();
