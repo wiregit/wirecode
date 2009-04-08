@@ -1,8 +1,5 @@
 package org.limewire.inject;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
