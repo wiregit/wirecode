@@ -18,9 +18,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.swing.AbstractAction;
@@ -52,8 +50,6 @@ import org.jdesktop.swingx.decorator.BorderHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -71,16 +67,8 @@ import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.IncomingChatListener;
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.FileOfferEvent;
-import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.FileOffer;
 
-import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
@@ -92,12 +80,10 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * The pane that lists all available friends in the chat area.
  */
-@Singleton
 public class ChatFriendListPane extends JPanel {
     
     private static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
@@ -110,51 +96,49 @@ public class ChatFriendListPane extends JPanel {
     private final EventList<ChatFriend> chatFriends;
     private final JTable friendsTable;
     private final IconLibrary icons;
-    private final Map<String, ChatFriend> idToFriendMap;
+    private final ChatModel chatModel;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final LibraryNavigator libraryNavigator;
 
-    private String myID;
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
-    @Resource(key="ChatFriendList.rightEdgeBorderColor") private Color rightBorderColor;
-    @Resource(key="ChatFriendList.conversationsSeparatorColor") private Color conversationsSeparatorColor;
-    @Resource(key="ChatFriendList.friendColor") private Color friendColor;
-    @Resource(key="ChatFriendList.friendFont") private Font friendFont;
-    @Resource(key="ChatFriendList.friendSelectionColor") private Color friendSelectionColor;
-    @Resource(key="ChatFriendList.activeConversationBackgroundColor") private Color activeConversationBackgroundColor;
+    @Resource private Color rightEdgeBorderColor;
+    @Resource private Color conversationsSeparatorColor;
+    @Resource private Color friendColor;
+    @Resource private Font  friendFont;
+    @Resource private Color friendSelectionColor;
+    @Resource private Color activeConversationBackgroundColor;
 
     @Inject
-    public ChatFriendListPane(IconLibrary icons, LibraryNavigator libraryNavigator) {
+    public ChatFriendListPane(IconLibrary icons, LibraryNavigator libraryNavigator, ChatModel chatModel) {
         super(new BorderLayout());
         this.icons = icons;
-        this.chatFriends = new BasicEventList<ChatFriend>();
-        this.idToFriendMap = new HashMap<String, ChatFriend>();
+        this.chatModel = chatModel;
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
         this.libraryNavigator = libraryNavigator;
         
+        this.chatFriends = chatModel.getChatFriendList();
+        
         GuiUtils.assignResources(this);
         
-        ObservableElementList<ChatFriend> observableList = GlazedListsFactory.observableElementList(chatFriends, GlazedLists.beanConnector(ChatFriend.class));
+        ObservableElementList<ChatFriend> observableList = GlazedListsFactory.observableElementList(chatModel.getChatFriendList(), GlazedLists.beanConnector(ChatFriend.class));
         SortedList<ChatFriend> sortedFriends = GlazedListsFactory.sortedList(observableList,  new FriendAvailabilityComparator());
         friendsTable = createFriendsTable(sortedFriends);
 
         addPopupMenus(friendsTable);
         
-        setBorder(new DropShadowBorder(rightBorderColor, 1, 1.0f, 0, false, false, false, true));
+        setBorder(new DropShadowBorder(rightEdgeBorderColor, 1, 1.0f, 0, false, false, false, true));
         
         JScrollPane scrollPane = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         add(scrollPane);
         setPreferredSize(new Dimension(PREFERRED_WIDTH, 200));
+        setMinimumSize(new Dimension(PREFERRED_WIDTH, 200));
         
         EventAnnotationProcessor.subscribe(this);
     }
     
-    @Inject void register(ListenerSupport<XMPPConnectionEvent> connectionSupport,
-                          ListenerSupport<FileOfferEvent> fileOfferEventListenerSupport,
-                          ListenerSupport<FriendPresenceEvent> presenceSupport) {
-
+    @Inject void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
         connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
             @Override
             @SwingEDTEvent
@@ -166,47 +150,11 @@ public class ChatFriendListPane extends JPanel {
                 }
             }
         });
-
-        fileOfferEventListenerSupport.addListener(new EventListener<FileOfferEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FileOfferEvent event) {
-                FileOffer fileOfferReceived = event.getData();
-                handleIncomingFileOffer(fileOfferReceived.getFile(), fileOfferReceived.getFromJID());
-
-            }
-        });
-
-        presenceSupport.addListener(new EventListener<FriendPresenceEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendPresenceEvent event) {
-                handlePresenceEvent(event);
-            }
-        });
     }
 
     private void handleSignoff() {
         closeAllChats();
     }
-
-    private void handleIncomingFileOffer(FileMetaData metadata, String fromJID) {
-        int slashIndex = fromJID.indexOf("/");
-        String fromFriendId = (slashIndex < 0) ? fromJID : fromJID.substring(0, slashIndex);
-
-        // look up and get chatFriend, and get presence which sent the file offer
-        ChatFriend chatFriend = idToFriendMap.get(fromFriendId);
-
-        if (chatFriend != null) {
-            Map<String, FriendPresence> presences = chatFriend.getUser().getFriendPresences();
-            FriendPresence fileOfferPresence = presences.get(fromJID);
-            if (fileOfferPresence != null) {
-                new MessageReceivedEvent(new MessageFileOfferImpl(fromFriendId, fromFriendId,
-                        Type.Received, metadata, fileOfferPresence)).publish();
-            }
-        }
-    }
-
 
     private void addPopupMenus(JComponent comp) {
         FriendContext context = new FriendContext();
@@ -333,7 +281,6 @@ public class ChatFriendListPane extends JPanel {
     }
     
     private class ChattingUnderlineHighlightPredicate implements HighlightPredicate {
-
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             //Clear the border on the renderer because the same panel is being reused for every cell
@@ -358,57 +305,12 @@ public class ChatFriendListPane extends JPanel {
             return false;
         }
     }
-    
-    private void handlePresenceEvent(FriendPresenceEvent event) {
-        LOG.debugf("handling presence event {0}", event);
-        final Presence presence = (Presence)event.getData();
-        final User user = presence.getUser();
-        ChatFriend chatFriend = idToFriendMap.get(user.getId());
-        switch(event.getType()) {
-        case ADDED:
-            if(chatFriend == null) {
-                chatFriend = new ChatFriendImpl(presence);
-                chatFriends.add(chatFriend);
-                idToFriendMap.put(user.getId(), chatFriend);
-            }
-
-            final ChatFriend chatFriendForIncomingChat = chatFriend;
-            IncomingChatListener incomingChatListener = new IncomingChatListener() {
-                public MessageReader incomingChat(MessageWriter writer) {
-                    LOG.debugf("{0} is typing a message", presence.getJID());
-                    MessageWriter writerWrapper = new MessageWriterImpl(myID, chatFriendForIncomingChat, writer);
-                    ConversationSelectedEvent event =
-                            new ConversationSelectedEvent(chatFriendForIncomingChat, writerWrapper, false);
-                    event.publish();
-                    //Hang out until a responder has processed this event
-                    event.await();
-                    return new MessageReaderImpl(chatFriendForIncomingChat);
-                }
-            };
-            user.setChatListenerIfNecessary(incomingChatListener);
-            chatFriend.update();
-            break;
-        case UPDATE:
-            if (chatFriend != null) {
-                chatFriend.update();
-            }
-            break;
-        case REMOVED:
-            if (chatFriend != null) {
-                if (shouldRemoveFromFriendsList(chatFriend)) {
-                    chatFriends.remove(idToFriendMap.remove(user.getId()));
-                }
-                chatFriend.update();
-            }
-            break;
-        }
-    }
 
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
-        ChatFriend chatFriend = idToFriendMap.get(message.getFriendID());
+        ChatFriend chatFriend = chatModel.getChatFriend(message.getFriendID());
 
         if (message.getType() != Type.Sent) {
             chatFriend.setReceivedUnviewedMessages(true);
@@ -421,34 +323,13 @@ public class ChatFriendListPane extends JPanel {
             }
         }
     }
-
-    /**
-     * Remove from the friends list only when:
-     *
-     * 1. The user (buddy) associated with the chatfriend is no longer signed in, AND
-     * 2. The chat has been closed (by clicking on the "x" on the friend in the friend's list)
-     *
-     * @param chatFriend the ChatFriend to decide whether to remove (no null check)
-     * @return true if chatFriend should be removed.
-     */
-    private boolean shouldRemoveFromFriendsList(ChatFriend chatFriend) {
-        return (!chatFriend.isChatting()) && (!chatFriend.isSignedIn());
-    }
     
     public String getMessagingTopicPatternName() {
         return ALL_CHAT_MESSAGES_TOPIC_PATTERN;
     }
     
-    public void setLoggedInID(String id) {
-        this.myID = id;
-    }
-
-    String getLoggedInID() {
-        return myID;
-    }
-    
     public void fireConversationStarted(String friendId) {
-        ChatFriend chatFriend = idToFriendMap.get(friendId);
+        ChatFriend chatFriend = chatModel.getChatFriend(friendId);
         if(chatFriend != null) {
             startOrSelectConversation(chatFriend);
         } else {
@@ -460,7 +341,7 @@ public class ChatFriendListPane extends JPanel {
         MessageWriter writerWithEventDispatch = null;
         if (!chatFriend.isChatting() && chatFriend.isSignedIn()) {
             MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend));
-            writerWithEventDispatch = new MessageWriterImpl(myID, chatFriend, writer);
+            writerWithEventDispatch = new MessageWriterImpl(chatModel.getLoggedInId(), chatFriend, writer);
         }
         new ConversationSelectedEvent(chatFriend, writerWithEventDispatch, true).publish();
         setActiveConversation(chatFriend);
@@ -519,7 +400,7 @@ public class ChatFriendListPane extends JPanel {
 
             chatFriend.stopChat();
             if (!chatFriend.isSignedIn()) {
-                chatFriends.remove(idToFriendMap.remove(chatFriend.getID()));
+                chatFriends.remove(chatModel.removeChatFriend(chatFriend.getID()));
             }
             
             ChatFriend nextFriend = null;
@@ -541,8 +422,8 @@ public class ChatFriendListPane extends JPanel {
     private void closeAllChats() {
         for (ChatFriend chatFriend : chatFriends) {
             String userId = chatFriend.getID();
-            if (idToFriendMap.get(userId) != null) {
-                idToFriendMap.remove(userId);
+            if (chatModel.getChatFriend(userId) != null) {
+                chatModel.removeChatFriend(userId);
             }
             chatFriend.stopChat();
         }

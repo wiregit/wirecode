@@ -36,7 +36,7 @@ class ChatFriendsUtil {
     }
     
     private static String getURL(String path) {
-        URL resource = ChatTopPanel.class.getResource(path);
+        URL resource = ChatFriendsUtil.class.getResource(path);
         return resource != null ? resource.toExternalForm() : "";
     }
 }

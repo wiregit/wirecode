@@ -15,6 +15,7 @@ public class LimeWireUiFriendsChatModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(IconLibrary.class).to(IconLibraryImpl.class);
+        bind(ChatFrame.class).to(ChatFramePanel.class);
         bind(ChatHyperlinkListenerFactory.class).toProvider(
                 FactoryProvider.newFactory(
                         ChatHyperlinkListenerFactory.class, ChatHyperlinkListener.class));        

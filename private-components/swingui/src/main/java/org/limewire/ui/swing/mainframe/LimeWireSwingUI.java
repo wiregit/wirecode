@@ -45,7 +45,7 @@ public class LimeWireSwingUI extends JPanel {
     public LimeWireSwingUI(
             TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
-            SearchHandler searchHandler, ChatFramePanel friendsPanel,
+            SearchHandler searchHandler, ChatFramePanel chatFrame,
             AudioPlayer player, DownloadSummaryPanel downloadSummaryPanel,
             ShapeDialog shapeDialog, ProNagController proNagController) {
     	GuiUtils.assignResources(this);
@@ -98,8 +98,7 @@ public class LimeWireSwingUI extends JPanel {
         
         layeredPane.addComponentListener(new MainPanelResizer(centerPanel));
         layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(friendsPanel));
-        layeredPane.add(friendsPanel, JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(chatFrame, JLayeredPane.PALETTE_LAYER);
         layeredPane.addComponentListener(new PanelResizer(shapeDialog));
         layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
         add(layeredPane, BorderLayout.CENTER);

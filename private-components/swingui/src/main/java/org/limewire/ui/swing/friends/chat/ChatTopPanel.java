@@ -11,10 +11,10 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import java.util.Map;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -29,23 +29,21 @@ import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.xmpp.api.client.Presence.Mode;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.util.Objects;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * The top border of the chat panel, for minimizing the chat window
  * & other controls.
  */
-@Singleton
 public class ChatTopPanel extends JXPanel {
     @Resource(key="ChatTopPanel.backgroundGradientTop") private Color gradientTop; 
     @Resource(key="ChatTopPanel.backgroundGradientBottom") private Color gradientBottom; 
@@ -177,8 +175,6 @@ public class ChatTopPanel extends JXPanel {
         PropertyChangeListener statusAndModeListener = friendStatusAndModeListeners.remove(finishedFriend.getID());
         finishedFriend.removePropertyChangeListener(statusAndModeListener);
     }
-
-
 
     private void update(ChatFriend chatFriend) {
         friendAvailabiltyIcon.setText(getAvailabilityHTML(chatFriend.getMode()));

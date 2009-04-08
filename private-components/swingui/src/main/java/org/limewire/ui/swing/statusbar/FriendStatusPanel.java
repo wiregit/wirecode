@@ -17,7 +17,7 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.friends.chat.ChatFramePanel;
+import org.limewire.ui.swing.friends.chat.ChatFrame;
 import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -29,6 +29,9 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Button in the status bar that hides/shows the friend chat window.
+ */
 @Singleton
 class FriendStatusPanel {
 
@@ -36,15 +39,15 @@ class FriendStatusPanel {
     
     private Component mainComponent;
     
-    private final ChatFramePanel friendsPanel;
+    private final ChatFrame chatFrame;
     
-    @Inject FriendStatusPanel(final ChatFramePanel friendsPanel, IconLibrary iconLibrary) {
+    @Inject FriendStatusPanel(final ChatFrame chatFrame, IconLibrary iconLibrary) {
         GuiUtils.assignResources(this);
-        this.friendsPanel = friendsPanel;
+        this.chatFrame = chatFrame;
         chatButton = new JXButton(new AbstractAction(I18n.tr("Chat")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                friendsPanel.toggleVisibility();
+                chatFrame.toggleVisibility();
                 mainComponent.invalidate();
                 mainComponent.repaint();
             }
@@ -67,8 +70,8 @@ class FriendStatusPanel {
         chatButton.setBorder(BorderFactory.createEmptyBorder(2, 10, 0, 10));
         chatButton.setPaintBorderInsets(true);
         
-        friendsPanel.setUnseenMessageListener(chatButtonPainter);       
-        friendsPanel.addVisibilityListener(new EventListener<VisibilityType>() {
+        chatFrame.setUnseenMessageListener(chatButtonPainter);       
+        chatFrame.addVisibilityListener(new EventListener<VisibilityType>() {
             @Override
             public void handleEvent(VisibilityType event) {
                 chatButton.repaint();
@@ -120,7 +123,7 @@ class FriendStatusPanel {
         
         @Override
         protected void doPaint(Graphics2D g, JXButton object, int width, int height) {
-            if (friendsPanel.isVisible()) {
+            if(chatFrame.isVisible()) {
                 g.setPaint(activeBackground);
                 g.fillRect(0, 0, width, height);
                 g.setPaint(activeBorder);
@@ -128,7 +131,7 @@ class FriendStatusPanel {
                 g.drawLine(0, height-1, width-1, height-1);
                 g.drawLine(width-1, 0, width-1, height-1);
                 
-                if (friendsPanel.getLastSelectedConversationFriendId() != null) {
+                if (chatFrame.getLastSelectedConversationFriendId() != null) {
                     g.setPaint(border);
                     g.drawLine(0,0,width-1,0);
                 }
@@ -167,5 +170,4 @@ class FriendStatusPanel {
             updateButtonText();
         }
     }
-
 }
