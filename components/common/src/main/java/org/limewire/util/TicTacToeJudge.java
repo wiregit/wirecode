@@ -97,7 +97,7 @@ public class TicTacToeJudge {
         }
         return TicTacToeWinner.DRAW;
     }
-    
+    //For testing
     public static void main(String[] args) {
         TicTacToeBoard b1 = new TicTacToeBoard('x', 'x', 'x', 
                                                'o', 'o', 'x', 
@@ -140,7 +140,7 @@ public class TicTacToeJudge {
 
         w = test.result(b5);
         if (w != TicTacToeWinner.O) {
-            System.out.println("y won failure - diagonal 2");
+            System.out.println("o won failure - diagonal 2");
         }
         TicTacToeBoard b6 = new TicTacToeBoard( 'x', 'x', 'o', 
                                                 'o', 'o', 'o', 
@@ -148,7 +148,7 @@ public class TicTacToeJudge {
 
         w = test.result(b6);
         if (w != TicTacToeWinner.O) {
-            System.out.println("y won failure - across 2");
+            System.out.println("o won failure - across 2");
         }
         TicTacToeBoard b7 = new TicTacToeBoard( 'x', 'x', 'o', 
                                                 'o', 'o', 'x', 
@@ -156,7 +156,7 @@ public class TicTacToeJudge {
 
         w = test.result(b7);
         if (w != TicTacToeWinner.O) {
-            System.out.println("y won failure - across 3");
+            System.out.println("o won failure - across 3");
         }
 
         TicTacToeBoard b8 = new TicTacToeBoard( 'x', 'o', 'o', 
@@ -165,7 +165,7 @@ public class TicTacToeJudge {
 
         w = test.result(b8);
         if (w != TicTacToeWinner.O) {
-            System.out.println("y won failure - down 2");
+            System.out.println("o won failure - down 2");
         }
 
         TicTacToeBoard b9 = new TicTacToeBoard( 'x', 'o', 'o', 
@@ -174,7 +174,7 @@ public class TicTacToeJudge {
 
         w = test.result(b9);
         if (w != TicTacToeWinner.O) {
-            System.out.println("y won failure - down 3");
+            System.out.println("o won failure - down 3");
         }
         System.out.println("Finished TicTactoeJudge test");        
     }
