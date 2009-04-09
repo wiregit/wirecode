@@ -1,33 +1,35 @@
 package org.limewire.ui.swing.friends.chat;
 
-import java.net.URLDecoder;
-import java.net.URL;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Map;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
+
+import javax.swing.JOptionPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.html.FormSubmitEvent;
-import javax.swing.JOptionPane;
 
-import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.DownloadAction;
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.ResultDownloader;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.io.InvalidDataException;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
-import com.google.inject.assistedinject.AssistedInject;
+
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * HyperlinkListener for links to libraries, form submissions (file offers)
@@ -42,18 +44,24 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
     private final RemoteFileItemFactory remoteFileItemFactory;
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
     private final LibraryNavigator libraryNavigator;
+    
+//    private final MessageWriter writer;
 
     @AssistedInject
     public ChatHyperlinkListener(@Assisted Conversation conversation, ResultDownloader downloader,
                                  RemoteFileItemFactory remoteFileItemFactory,
                                  SaveLocationExceptionHandler saveLocationExceptionHandler,
-                                 LibraryNavigator libraryNavigator) {
+                                 LibraryNavigator libraryNavigator
+//                                 ,
+//                                 @Assisted MessageWriter writer
+                                 ) {
 
         this.conversation = conversation;
         this.downloader = downloader;
         this.remoteFileItemFactory = remoteFileItemFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.libraryNavigator = libraryNavigator;
+//        this.writer = writer;
     }
 
     @Override
@@ -68,15 +76,41 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
                 String dataStr = event.getData();
                 String fileIdEncoded = dataStr.substring(dataStr.indexOf("=")+1).trim();
                 String fileId = URLDecoder.decode(fileIdEncoded, "UTF-8");
-                downloadFileOffer(fileId);
+                                
+                if (conversation.getFileOfferMessages().size() != 0) {
+                    downloadFileOffer(fileId);
+                }else {
+                    //publish an event so it's created in ConversationPane
+                    //cause that place is getting the messages.
+                    new ChallengeToPlayTicTacToeAcceptedEvent(1).publish();
+                }
             } catch(UnsupportedEncodingException uee) {
                 throw new RuntimeException(uee); // impossible
             }
         } else if (HyperlinkEvent.EventType.ACTIVATED == e.getEventType()) {
             handleLinkClick(e.getDescription(), e.getURL());
         }
+        
     }
+    /**
+     * send no TicTacToeMessages.NO_THANKS_GAME
 
+     */
+    void fireChallengeToPlayTicTacToeRejected() {
+        //the request to play is rejected, publish an event so we know to create the
+        //dialog box in conversationPane
+        ChallengeToPlayTicTacToeRejectedEvent event = new ChallengeToPlayTicTacToeRejectedEvent(1);
+        event.publish();
+    }
+    
+//    void fireChallengeToPlayTicTacToeAccepted() {
+//        
+//        //the request to play is accepted, publish an event so we know to create the
+//        //dialog box in conversationPane
+//        ChallengeToPlayTicTacToeAcceptedEvent event = new ChallengeToPlayTicTacToeAcceptedEvent(1);
+//        event.publish();
+//    }
+    
     /**
      *
      * Download the file offer given a file ID
@@ -118,7 +152,9 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
     }
 
     private void handleLinkClick(String linkDescription, URL url) {
-
+        if (TicTacToeMessages.REJECT_GAME.equals(linkDescription)) {
+            fireChallengeToPlayTicTacToeRejected();            
+        }
         if (ChatDocumentBuilder.LIBRARY_LINK.equals(linkDescription)) {
             ChatFriend libraryChatFriend = conversation.getChatFriend();
             LOG.debugf("Opening a view to {0}'s library", libraryChatFriend.getName());

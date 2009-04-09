@@ -10,6 +10,7 @@ public class MessageReceivedEvent extends AbstractEDTEvent {
     private final Message message;
 
     public MessageReceivedEvent(Message message) {
+//        System.out.println("messagereceivedEvent 1: " + message.toString());
         this.message = message;
     }
 
@@ -24,6 +25,7 @@ public class MessageReceivedEvent extends AbstractEDTEvent {
     @Override
     public void publish() {
         LOG.debugf("Publishing message: Type: {0} From: {1} Text: {2}", message.getType(), message.getSenderName(), message.toString());
+        System.out.println("In MessageREceivedEvent, message type: " + message.getType() + ", publish: " + message.toString());
         super.publish(buildTopic(message.getFriendID()));
     }
 }

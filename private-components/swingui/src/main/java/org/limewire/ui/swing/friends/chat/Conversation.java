@@ -2,6 +2,8 @@ package org.limewire.ui.swing.friends.chat;
 
 import java.util.Map;
 
+import org.limewire.xmpp.api.client.MessageWriter;
+
 /**
  * Interface for chat window ui object.  Intended to be a way
  * to get information about and control what happens to the
@@ -31,6 +33,9 @@ public interface Conversation {
      *
      */
     public Map<String, MessageFileOffer> getFileOfferMessages();
+
+
+    public MessageWriter getWriter();
 
     
     // TODO: create a way to get/search for any message(s)

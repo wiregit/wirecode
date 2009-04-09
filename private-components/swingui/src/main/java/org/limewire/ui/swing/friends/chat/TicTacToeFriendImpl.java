@@ -15,7 +15,7 @@ import org.limewire.xmpp.api.client.Presence.Mode;
 
 public class TicTacToeFriendImpl extends AbstractBean implements TicTacToeFriend {
 
-    private boolean chatting;
+    private boolean playing;
     private boolean activeConversation;
     private final User user;
     private String status;
@@ -24,6 +24,7 @@ public class TicTacToeFriendImpl extends AbstractBean implements TicTacToeFriend
     private boolean hasUnviewedMessages;
 
     TicTacToeFriendImpl(final Presence presence) {
+        
         this.user = presence.getUser();
         this.status = presence.getStatus();
         this.mode = presence.getMode();
@@ -67,13 +68,13 @@ public class TicTacToeFriendImpl extends AbstractBean implements TicTacToeFriend
     }
 
     @Override
-    public boolean isChatting() {
-        return chatting;
+    public boolean isPlaying() {
+        return playing;
     }
 
     void setChatting(final boolean chatting) {
-        final boolean oldChatting = isChatting();
-        this.chatting = chatting;
+        final boolean oldChatting = isPlaying();
+        this.playing = chatting;
         SwingUtils.invokeLater(new Runnable(){
             public void run() {
                 firePropertyChange("chatting", oldChatting, chatting);                
@@ -82,18 +83,18 @@ public class TicTacToeFriendImpl extends AbstractBean implements TicTacToeFriend
     }
 
     @Override
-    public MessageWriter createChat(MessageReader reader) {
+    public MessageWriter createTicTacToe(MessageReader reader) {
         return user.createChat(reader);
     }
 
     @Override
-    public void startChat() {
-        if (isChatting() == false) {
+    public void startTicTacToeGame() {
+        if (isPlaying() == false) {
             chatStartTime = System.currentTimeMillis();
             setChatting(true);
         }
     }
-
+    
     @Override
     public void update() {
         // If there's an available presence, set to "Available"
@@ -106,7 +107,7 @@ public class TicTacToeFriendImpl extends AbstractBean implements TicTacToeFriend
     }
 
     @Override
-    public void stopChat() {
+    public void stopTicTacToeGame() {
         setChatting(false);
         setActiveConversation(false);
     }
@@ -175,4 +176,27 @@ public class TicTacToeFriendImpl extends AbstractBean implements TicTacToeFriend
             return Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
         }
     }
+
+    @Override
+    public MessageWriter createChat(MessageReader reader) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void startChat() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void stopChat() {
+        // TODO Auto-generated method stub
+            
+    }
+    @Override
+    public boolean isChatting() {
+        return false;
+    }
+    
 }

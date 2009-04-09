@@ -7,6 +7,7 @@ public class CloseTicTacToeEvent extends AbstractEDTEvent {
     
     public CloseTicTacToeEvent(TicTacToeFriend tictactoeFriend) {
         this.tictactoeFriend = tictactoeFriend;
+        System.out.println("CloseTicTacToeEvent");
     }
     
     public TicTacToeFriend getFriend() {

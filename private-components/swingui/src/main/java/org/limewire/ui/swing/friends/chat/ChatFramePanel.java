@@ -175,6 +175,9 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         }
         if (event.getMessage().getType() != Message.Type.Sent &&
              (!GuiUtils.getMainFrame().isActive() || !isVisible())) {
+
+            
+
             LOG.debug("Sending a message to the tray notifier");
             notifier.showMessage(getNoticeForMessage(event));
             
@@ -186,6 +189,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     }
     
     private void notifyUnseenMessageListener(MessageReceivedEvent event) {
+        
         String messageFriendID = event.getMessage().getFriendID();
         if (!messageFriendID.equals(lastSelectedConversationFriendId) || !isVisible()) {
             unseenMessageListener.messageReceivedFrom(messageFriendID, isVisible());

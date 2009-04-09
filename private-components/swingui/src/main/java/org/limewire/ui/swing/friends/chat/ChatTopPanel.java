@@ -189,6 +189,7 @@ public class ChatTopPanel extends JXPanel {
     
     @EventSubscriber
     public void handleConversationEnded(CloseChatEvent event) {
+        System.out.println("ChatTopPanel handleConversationEnded");
         clearFriendInfo();
         removeChatFriendStatusListener(event.getFriend());
     }

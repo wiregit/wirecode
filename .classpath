@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
+	<classpathentry kind="src" path="components/games/tictactoe"/>
 	<classpathentry kind="src" path="components/core-glue/src/test/java"/>
 	<classpathentry kind="src" output="components/player/build/tests" path="components/player/src/test/java"/>
 	<classpathentry kind="src" output="components/player/build/classes" path="components/player/src/main/java"/>
@@ -60,7 +61,6 @@
 	<classpathentry kind="src" path="lib/resources/osx"/>
 	<classpathentry kind="src" output="components/xmpp-api/build/classes" path="components/xmpp-api/src/main/java"/>
 	<classpathentry kind="src" path="components/xmpp-api/src/test/java"/>
-	<classpathentry kind="src" path="components/games/tictactoe"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/cocoaFoundation.jar"/>

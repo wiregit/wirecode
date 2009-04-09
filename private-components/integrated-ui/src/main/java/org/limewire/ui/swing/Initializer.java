@@ -358,7 +358,7 @@ public final class Initializer {
         ActiveLimeWireCheck activeLimeWireCheck = new ActiveLimeWireCheck(args, StartupSettings.ALLOW_MULTIPLE_INSTANCES.getValue());
         stopwatch.resetAndLog("Create ActiveLimeWireCheck");
         if (activeLimeWireCheck.checkForActiveLimeWire()) {
-            System.exit(0);
+           // System.exit(0); //for testing running two lw sessions on one system
         }
         stopwatch.resetAndLog("Run ActiveLimeWireCheck");
     }

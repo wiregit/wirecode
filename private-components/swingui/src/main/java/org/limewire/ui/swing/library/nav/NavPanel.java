@@ -21,6 +21,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -33,6 +36,8 @@ import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.ActionLabel;
+import org.limewire.ui.swing.friends.chat.ChallengeToPlayTicTacToeAcceptedEvent;
+import org.limewire.ui.swing.friends.chat.TicTacToeInitiateGameEvent;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.listener.MousePopupListener;
@@ -47,8 +52,6 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-
-import net.miginfocom.swing.MigLayout;
 
 public class NavPanel extends JXPanel {
     
@@ -86,7 +89,7 @@ public class NavPanel extends JXPanel {
     
     private final Provider<ChatAction> chatActionProvider;
 
- //   private final Provider<TicTacToeAction> tictactoeActionProvider;
+    private final Provider<TicTacToeAction> tictactoeActionProvider;
 
     @AssistedInject
     NavPanel(@Assisted Action action,
@@ -95,7 +98,8 @@ public class NavPanel extends JXPanel {
             RemoteLibraryManager remoteLibraryManager,
             LibraryNavigator libraryNavigator,
             Provider<ChatAction> chatActionProvider
-//            ,Provider<TicTacToeAction> tictactoeActionProvider
+            ,
+            Provider<TicTacToeAction> tictactoeActionProvider
             ) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
@@ -104,7 +108,7 @@ public class NavPanel extends JXPanel {
         setOpaque(false);
         
         this.chatActionProvider = chatActionProvider;
-//        this.tictactoeActionProvider = tictactoeActionProvider;
+        this.tictactoeActionProvider = tictactoeActionProvider;
         this.action = action;
         this.friend = friend;           
         this.libraryPanel = libraryPanel;
@@ -123,7 +127,7 @@ public class NavPanel extends JXPanel {
             categoryLabel.setText(friend.getRenderName());
             String toolTipText = getToolTipText(friend);
             categoryLabel.setToolTipText(toolTipText);
-            
+
             if(!friend.isAnonymous()) {
                 categoryLabel.addMouseListener(new ContextMenuListener());
             }
@@ -180,7 +184,7 @@ public class NavPanel extends JXPanel {
             }
         });
     }
-
+     
     private String getToolTipText(Friend friend) {
         StringBuffer toolTipText = new StringBuffer();
         String name = friend.getName();
@@ -388,18 +392,38 @@ public class NavPanel extends JXPanel {
                     libraryNavigator.selectFriendShareList(friend);
                 }                
             }));
-            
-                        
+                       
             ChatAction chatAction = chatActionProvider.get();
             chatAction.setFriend(friend);
             menu.add(new JMenuItem(chatAction));
             menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 3);
 
-//            TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
-//            tictactoeAction.setFriend(friend);
-//            menu.add(new JMenuItem(tictactoeAction));
-//            menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 3);
+//use remotelibrarymanager#hasFriendLibrary if true then you know the person
+//is on limewire
+            
+//TODO: must know if they support tic tac toe            
+            if(remoteLibraryManager.hasFriendLibrary(friend)) {
+                TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
+                tictactoeAction.setFriend(friend);
+                menu.add(new JMenuItem(tictactoeAction));
+                menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 13);   
+            }
             
         }
     }
+
+    /**
+     * Called from ChatFriendListPane and ConversationPane to send off a request to 
+     * play a game.
+     * @param event
+     */
+    
+    @EventSubscriber
+    public void handleTicTacToeInitiatedGameEvent(TicTacToeInitiateGameEvent event) {
+        TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
+        System.out.println("in handleTicTacToeInitiatedGameEvent, friend: " + friend.getId());
+        tictactoeAction.setFriend(friend);
+        
+    }
+
 }

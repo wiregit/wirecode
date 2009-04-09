@@ -145,6 +145,7 @@ public class ChatPanel extends JPanel implements Displayable {
 
     @EventSubscriber
     public void handleCloseChat(CloseChatEvent event) {
+//        System.out.println("ChatPanel handleCloseChatEvent");
         ConversationPane conversationPane = chats.get(event.getFriend().getID());
         if(conversationPane != null) {
             conversationPane.setChatStateGone();

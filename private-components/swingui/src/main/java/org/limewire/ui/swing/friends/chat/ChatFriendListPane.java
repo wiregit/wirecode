@@ -52,8 +52,8 @@ import org.jdesktop.swingx.decorator.BorderHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -66,19 +66,20 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.menu.actions.TicTacToeAction;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.IncomingChatListener;
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.FileOffer;
+import org.limewire.xmpp.api.client.FileOfferEvent;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -207,17 +208,27 @@ public class ChatFriendListPane extends JPanel {
         }
     }
 
+    /**
+     * For right click of a friend in the chat panel.
+     * @param comp
+     */
 
     private void addPopupMenus(JComponent comp) {
         FriendContext context = new FriendContext();
         ViewLibrary viewLibrary = new ViewLibrary(context);
         ViewSharedFiles viewSharedFiles = new ViewSharedFiles(context);
+        
+//        ChallengeSomeoneToTicTacToeAction tictactoeChallenge = new ChallengeSomeoneToTicTacToeAction();
+        
         JPopupMenu nonChattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(false, context), new OpenChat(context));
         nonChattingPopup.addSeparator();
         nonChattingPopup.add(viewLibrary);
         nonChattingPopup.add(viewSharedFiles);
-       
+
+//        nonChattingPopup.add(tictactoeChallenge);
+
         JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles);
+//        JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles, tictactoeChallenge);
         chattingPopup.addSeparator();
         chattingPopup.add(new CloseChat(context));
     }
@@ -406,6 +417,7 @@ public class ChatFriendListPane extends JPanel {
 
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
+
         Message message = event.getMessage();
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         ChatFriend chatFriend = idToFriendMap.get(message.getFriendID());
@@ -455,6 +467,16 @@ public class ChatFriendListPane extends JPanel {
             //TODO notify that chat no longer possible.
         }
     }
+    
+//    private void challengeToTicTacToe(ChatFriend chatFriend) {
+////        MessageWriter writerWithEventDispatch = null;
+////        if (!chatFriend.isChatting() && chatFriend.isSignedIn()) {
+////            MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend));
+////            writerWithEventDispatch = new MessageWriterImpl(myID, chatFriend, writer);
+////        }
+//        new TicTacToeInitiateGameEvent(chatFriend).publish();
+//    }
+
 
     private void startOrSelectConversation(ChatFriend chatFriend) {
         MessageWriter writerWithEventDispatch = null;
@@ -849,6 +871,21 @@ public class ChatFriendListPane extends JPanel {
         }
     }
     
+//    private class OpenTicTacToe extends AbstractContextAction {
+//        public OpenTicTacToe(FriendContext context) {
+//            super(I18n.tr("Challenge to Tic Tac Toe"), context);
+////            System.out.println("OpenTicTacToe - can/should i pass a remotelibrarymanager here");            
+//        }
+//
+//        @Override
+//        public void actionPerformed(ActionEvent e) {
+//            ChatFriend chatFriend = context.getFriend();
+//            if (chatFriend != null) {
+//                challengeToTicTacToe(chatFriend);
+//            }
+//        }
+//    }
+    
     class ViewLibrary extends AbstractContextAction implements ItemNotifyable {
         public ViewLibrary(FriendContext context) {
             super("", context);
@@ -898,6 +935,34 @@ public class ChatFriendListPane extends JPanel {
             item.setText(tr("What I'm Sharing"));
         }
     }
+
+    /**
+     * If someone right clicked on a friend and then selected to challenge to a tic tac toe game
+     * @author dsullivan
+     *
+     */
+//    private class ChallengeSomeoneToTicTacToe extends AbstractContextAction implements ItemNotifyable {
+//        public ChallengeSomeoneToTicTacToe(FriendContext context) {
+//            super("", context);
+//        }
+//
+//        @Override
+//        public void actionPerformed(ActionEvent e) {
+//            new TicTacToeInitiateGameEvent(1).publish();
+//        }
+//
+//        @Override
+//        public void notifyItem(JMenuItem item) {
+//            ChatFriend chatFriend = context.getFriend();
+//            
+//            if (chatFriend == null) {
+//                return;
+//            }
+//            
+//            item.setText(tr("Challenge to Tic Tac Toe"));
+//        }
+//    }
+
     
     private class CloseChat extends AbstractContextAction {
         public CloseChat(FriendContext context) {

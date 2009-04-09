@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends.chat;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -19,12 +21,14 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -34,6 +38,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -42,6 +47,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.html.HTMLEditorKit;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.concurrent.FutureEvent;
@@ -70,10 +78,10 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.menu.actions.TicTacToeAction;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
@@ -81,15 +89,14 @@ import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPException;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
-
-import net.miginfocom.swing.MigLayout;
 
 /**
  *
@@ -115,6 +122,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final LibraryNavigator libraryNavigator;
     private HyperlinkButton downloadlink;
     private HyperlinkButton sharelink;
+//    private HyperlinkButton tttlink;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
 
@@ -130,12 +138,15 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
     private final JScrollPane conversationScroll;
     private final JPanel chatWrapper;
-    
+
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
                             ShareListManager libraryManager, IconManager iconManager, LibraryNavigator libraryNavigator,
                             IconLibrary iconLibrary, ChatHyperlinkListenerFactory chatHyperlinkListenerFactory,
-                            @Named("backgroundExecutor")ScheduledExecutorService schedExecService) {
+                            @Named("backgroundExecutor")ScheduledExecutorService schedExecService
+//                            ,
+//                            Provider<TicTacToeAction> tictactoeActionProvider                        
+    ) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.conversationName = chatFriend.getName();
@@ -164,6 +175,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         final JButton closeConversation = new IconButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("ConversationPane CloseChatEvent");
                 new CloseChatEvent(chatFriend).publish();
             }
         });
@@ -228,7 +240,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         editor.addHyperlinkListener(chatHyperlinkListenerFactory.create(this));
         EventAnnotationProcessor.subscribe(this);
     }
-
     
     @Inject
     public void register(@Named("available")ListenerSupport<FriendEvent> friendSupport,
@@ -257,11 +268,101 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         };
         friendSupport.addListener(friendListener);
         featureSupport.addListener(featureListener);
+    }             
+    
+    //TODO: chris is getting two publish messages, i think this is related to
+    //not having the writer's set up properly, so i'm gonna fix that before
+    //worrying about the double writers
+    public void tictactoeInterceptor(Message message){
+//        System.out.println("ConversationPane#tictactoeInterceptor: " + message);
+        if(message.toString().indexOf(TicTacToeMessages.TICTACTOE) == -1) {
+            return;
+        }       
+        //we don't need sent messages, only messages received from a friend
+        if(message.getType() != Type.Received) {
+            //TODO: feature creep, this is where you would catch outgoing
+            //messages from the chat window if someone typed a 
+            //move there and didn't click - enabled buttons, and cells
+            //selected is still off though.
+            return;
+        }       
+        if(Message.Type.Received == message.getType()) {
+            System.out.println("conversationpane interceptor");
+            if(message.toString().indexOf(TicTacToeMessages.INITIATE_GAME) > -1) {                   
+                User chatUser = chatFriend.getUser();
+                MessageTicTacToeOffer tttOfferMessage =
+                        new MessageTicTacToeOfferImpl(loggedInID, friendId, Message.Type.Received, chatUser.getActivePresence());
+                //I need this to get the button on the chat window
+                new MessageReceivedEvent(tttOfferMessage).publish();            
+                
+            }else {
+                //TODO send the message through the event bus so it lands in miglayout?            
+                System.out.println("conversationpane interceptor part 2");
+                if(message.toString().indexOf(TicTacToeMessages.TICTACTOE) > -1) {
+                    new TicTacToeSelectedEventFromFriend(message).publish();
+                }
+
+            }
+            
+        }
+//        
     }
 
+    /**
+     * This method is called when ChatHyperLinkListener publishes 
+     * ChallengeToPlayTicTacToeAcceptedEvent. This method creates
+     * the tic tac toe board
+     */
+    @EventSubscriber
+    public void handleChallengeToPlayTicTacToeAcceptedEvent(ChallengeToPlayTicTacToeAcceptedEvent event) {        
+
+        System.out.println("ConversationPane: handleChallengeToPlayTicTacToeAcceptedEvent chat friend: " + chatFriend.getID());
+        
+        //at this point, i have two TicTacToeMigLayout objects for the friend who accepted to play the game
+        //which is bad
+        //TODO fix this
+        final TicTacToeMigLayout tictactoePanel = new TicTacToeMigLayout(writer);
+        tictactoePanel.setPlayerX(true);
+        tictactoePanel.setWriter(writer);
+        
+        
+        tictactoePanel.setFriend(chatFriend.getID());
+
+        JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setResizable(false);
+        frame.setTitle("Tic Tac Toe Layout");
+        
+        frame.getContentPane().setLayout(new BorderLayout());
+        frame.getContentPane().add(tictactoePanel, BorderLayout.CENTER);
+        
+        frame.pack();
+        frame.setLocationRelativeTo(this);
+        frame.setVisible(true);       
+            
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e) {
+                tictactoePanel.exitGame();                
+            }            
+        });
+    }
+    @EventSubscriber
+    public void handleChallengeToPlayTicTacToeRejectedEvent(ChallengeToPlayTicTacToeRejectedEvent event) {        
+
+        
+        final TicTacToeMigLayout panel = new TicTacToeMigLayout(writer);
+        panel.setWriter(writer);
+        panel.exitGame();                
+           
+    }
+    
+    
+    
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
+        System.out.println("conversationpane#handleConversationMessage for topic: " + topic + " and event: " + event.getMessage().format());
         Message message = event.getMessage();
+        tictactoeInterceptor(message);
         LOG.debugf("Message: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         messages.add(message);
         Type type = message.getType();
@@ -345,6 +446,10 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     public ChatFriend getChatFriend() {
         return chatFriend;
     }
+    
+    public MessageWriter getWriter() {
+        return writer;
+    }
 
     public Map<String, MessageFileOffer> getFileOfferMessages() {
         return Collections.unmodifiableMap(new HashMap<String, MessageFileOffer>(idToMessageWithFileOffer));
@@ -427,6 +532,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         sharelink = new HyperlinkButton(new ShareAction());
         sharelink.setFont(linkFont);
         
+//        tttlink = new HyperlinkButton(new AcceptTicTacToeAction());
+//        tttlink.setFont(linkFont);
         
         JXPanel toolbar = new JXPanel(new MigLayout("insets 0 0 0 5, gap 10, alignx right, aligny 50%"));
         ResizeUtils.forceHeight(toolbar, 22);
@@ -438,7 +545,20 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         
         toolbar.add(downloadlink);
         toolbar.add(sharelink);
-
+//        toolbar.add(tttlink);
+        if(writer == null){
+System.out.println("conversationPane writer is null");
+        }else{
+            System.out.println("conversationPane writer is not null");
+            
+        }
+        if(schedExecService == null){
+            System.out.println("conversationPane schedExecService is null");
+                    }else{
+                        System.out.println("conversationPane schedExecService is not null");
+                        
+                    }
+        
         inputPanel = new ResizingInputPanel(writer, schedExecService);
         inputPanel.setBorder(BorderFactory.createEmptyBorder());
         panel.add(toolbar, BorderLayout.NORTH);
@@ -480,6 +600,17 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         }
     }
 
+//    private class AcceptTicTacToeAction extends AbstractAction {
+//        public AcceptTicTacToeAction() {
+//            super(tr("<html><u>{0}</u></html>", "Challenge to Tic Tac Toe"));
+//        }
+//        
+//        @Override
+//        public void actionPerformed(ActionEvent e) {
+//            System.out.println("in AcceptTicTacToeAction actionPerformed");
+//            new TicTacToeInitiateGameEvent(1).publish();
+//        }
+//    }
     public void offerFolder(ListeningFuture<List<ListeningFuture<LocalFileItem>>> future) {
         // TODO: Change this to show event immediately & update as status changes.
         future.addFutureListener(new EventListener<FutureEvent<List<ListeningFuture<LocalFileItem>>>>() {
@@ -544,7 +675,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
             }
         });
     }
-    
+
+
     private class FriendShareDropTarget implements DropTargetListener {
         private final DropTarget dropTarget;
         private LocalFileList fileList;

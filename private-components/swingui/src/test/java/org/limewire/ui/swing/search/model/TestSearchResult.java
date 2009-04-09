@@ -86,6 +86,11 @@ public class TestSearchResult implements SearchResult {
             public FriendPresence getFriendPresence() {
                 return new MockFriendPresence(new MockFriend(randomUUID.toString()));
             }
+            @Override
+            public boolean isTicTacToeEnabled() {
+                return false;                
+            }
+
         });
         return sources;
     }

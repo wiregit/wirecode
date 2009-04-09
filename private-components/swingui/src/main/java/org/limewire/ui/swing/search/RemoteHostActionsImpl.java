@@ -10,9 +10,11 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.menu.actions.TicTacToeAction;
 import org.limewire.ui.swing.nav.Navigator;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -25,16 +27,23 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     private final ChatFriendListPane friendsPane;
 
     private final LibraryNavigator libraryNavigator;
+    private final Provider<TicTacToeAction> tictactoeActionProvider;
+
 
     @Inject
     public RemoteHostActionsImpl(RemoteLibraryManager remoteLibraryManager,
             ChatFriendListPane friendsPane,
             ChatFramePanel friendsPanel,
-            LibraryNavigator libraryNavigator, Navigator navigator) {
+            LibraryNavigator libraryNavigator, Navigator navigator
+            ,
+            Provider<TicTacToeAction> tictactoeActionProvider
+            ) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.friendsPane = friendsPane;
         this.friendsPanel = friendsPanel;
         this.libraryNavigator = libraryNavigator;
+        this.tictactoeActionProvider = tictactoeActionProvider;
+
     }
 
     @Override
@@ -69,4 +78,14 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
             }
         });
     }
+    
+    @Override
+    public void tictactoeWith(RemoteHost person) {
+        LOG.debugf("tictactoe: {0}", person.getFriendPresence().getFriend());
+        Friend friend = person.getFriendPresence().getFriend();
+
+        TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
+        tictactoeAction.setFriend(friend);        
+    }
+
 }

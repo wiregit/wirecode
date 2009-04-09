@@ -8,8 +8,8 @@ public class TicTacToeFriendAvailabilityComparator implements Comparator<TicTacT
 
     @Override
     public int compare(TicTacToeFriend a, TicTacToeFriend b) {
-        boolean a_chatting = a.isChatting() || a.hasReceivedUnviewedMessages();
-        boolean b_chatting = b.isChatting() || b.hasReceivedUnviewedMessages();
+        boolean a_chatting = a.isPlaying() || a.hasReceivedUnviewedMessages();
+        boolean b_chatting = b.isPlaying() || b.hasReceivedUnviewedMessages();
         
         if(a_chatting && b_chatting) {
             return new Long(a.getChatStartTime()).compareTo(new Long(b.getChatStartTime()));

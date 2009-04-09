@@ -8,10 +8,9 @@ import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
- * @author Mario Aquino, Object Computing, Inc.
  *
  */
-public interface TicTacToeFriend {
+public interface TicTacToeFriend extends ChatFriend {
 
     /**
      * @return User object used by this chat friend
@@ -43,7 +42,7 @@ public interface TicTacToeFriend {
      * @return true if this chat has been marked as started, but has
      * not been stopped.
      */
-    boolean isChatting();
+    boolean isPlaying();
 
     /**
      * Returns true if the current chat is the active chat. An active conversation
@@ -73,12 +72,12 @@ public interface TicTacToeFriend {
     /**
      * If not yet started, marks the current chat as started
      */
-    void startChat();
+    void startTicTacToeGame();
 
     /**
      * If chat is currently started, marks the chat as stopped
      */
-    void stopChat();
+    void stopTicTacToeGame();
 
     /**
      * Gets the time at which the chat started.
@@ -113,7 +112,7 @@ public interface TicTacToeFriend {
      * @return messageWriter {@link MessageWriter} impl on which methods are called to send messages
      * and update chat state.
      */
-    MessageWriter createChat(MessageReader reader);
+    MessageWriter createTicTacToe(MessageReader reader);
 
     void addPropertyChangeListener(PropertyChangeListener listener);
     

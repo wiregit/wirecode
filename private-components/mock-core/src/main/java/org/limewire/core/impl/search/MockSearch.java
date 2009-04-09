@@ -1220,5 +1220,11 @@ public class MockSearch implements Search {
         public FriendPresence getFriendPresence() {
             return new MockFriendPresence(new MockFriend(description));
         }
+        
+        @Override
+        public boolean isTicTacToeEnabled() {
+            return false;            
+        }
+
     }
 }
