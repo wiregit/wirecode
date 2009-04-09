@@ -190,7 +190,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
     public String getFileSize(PropertiableFile propertiable) {
         Long fileSize = getFileSizeLong(propertiable);
         if (fileSize != null) {
-            return GuiUtils.toUnitbytes(fileSize);
+            return GuiUtils.toUnitbytes(fileSize) + "  (" + GuiUtils.toBytes(fileSize) + ")";
         }
         return "";
     }
