@@ -278,6 +278,7 @@ public class AppFrame extends SingleFrameApplication {
      */
     @Action
     public void shutdownAfterTransfers() { // DO NOT CHANGE THIS METHOD NAME!
+        trayNotifier.showTrayIcon();
         delayedShutdownHandler.shutdownAfterTransfers();
     }
     
