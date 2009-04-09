@@ -9,6 +9,8 @@ public class LimeWireUiComponentsModule extends AbstractModule {
     protected void configure() {
         bind(FancyTabListFactory.class).toProvider(
                 FactoryProvider.newFactory(FancyTabListFactory.class, FancyTabList.class));   
+        bind(FlexibleTabListFactory.class).toProvider(
+                FactoryProvider.newFactory(FlexibleTabListFactory.class, FlexibleTabList.class));   
         
         bind(ShapeDialog.class);
         
