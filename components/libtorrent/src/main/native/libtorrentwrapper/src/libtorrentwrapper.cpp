@@ -107,6 +107,7 @@ struct torrent_s {
 	int num_peers;
 	int state;
 	float progress;
+	int paused;
 };
 
 extern "C" void* get_torrent_status(const char* id, void* stat) {
@@ -120,12 +121,14 @@ extern "C" void* get_torrent_status(const char* id, void* stat) {
 	int num_peers = status.num_peers;
 	int state = status.state;
 	float progress = status.progress;
+	bool paused = status.paused;
 
 	stats->total_done = total_done;
 	stats->download_rate = download_rate;
 	stats->num_peers = num_peers;
 	stats->state = state;
 	stats->progress = progress;
+	stats->paused = paused;
 
 	return stats;
 }
