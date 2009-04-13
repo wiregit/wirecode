@@ -54,8 +54,6 @@ extern "C" const char* add_torrent(const char* id, char* path) {
 
 	libtorrent::torrent_info torrent_info = h.get_torrent_info();
 
-	//std::string sha1 = std::string(id);
-
 	sha1_hash sha1 = torrent_info.info_hash();
 	std::cout << "sha1: " << sha1 << std::endl;
 
@@ -133,7 +131,10 @@ extern "C" void* get_torrent_status(const char* id, void* stat) {
 }
 
 extern "C" void get_alerts(void(*alertCallback)(const char*),
-		void(*torrentFinishedCallback)(const char*)) {
+		void(*torrentFinishedCallback)(const char*, const char*),
+		void(*torrentPausedCallback)(const char*, const char*),
+		void(*torrentResumedCallback)(const char*, const char*)) {
+
 	std::auto_ptr<libtorrent::alert> alerts;
 
 	alerts = s.pop_alert();
@@ -145,7 +146,9 @@ extern "C" void get_alerts(void(*alertCallback)(const char*),
 		if (libtorrent::torrent_finished_alert * a
 				= dynamic_cast<libtorrent::torrent_finished_alert*> (alert)) {
 			std::cout << "torrent_finished_alert" << std::endl;
-			torrentFinishedCallback(message.c_str());
+			libtorrent::torrent_handle handle = a->handle;
+			const char* sha1 = getSha1String(handle.info_hash());
+			torrentFinishedCallback(sha1, message.c_str());
 		} else if (libtorrent::external_ip_alert * a
 				= dynamic_cast<libtorrent::external_ip_alert*> (alert)) {
 			std::cout << "external_ip_alert" << std::endl;
@@ -241,11 +244,15 @@ extern "C" void get_alerts(void(*alertCallback)(const char*),
 		} else if (libtorrent::torrent_paused_alert * a
 				= dynamic_cast<libtorrent::torrent_paused_alert*> (alert)) {
 			std::cout << "torrent_paused_alert" << std::endl;
-			alertCallback(message.c_str());
+			libtorrent::torrent_handle handle = a->handle;
+			const char* sha1 = getSha1String(handle.info_hash());
+			torrentPausedCallback(sha1, message.c_str());
 		} else if (libtorrent::torrent_resumed_alert * a
 				= dynamic_cast<libtorrent::torrent_resumed_alert*> (alert)) {
 			std::cout << "torrent_resumed_alert" << std::endl;
-			alertCallback(message.c_str());
+			libtorrent::torrent_handle handle = a->handle;
+			const char* sha1 = getSha1String(handle.info_hash());
+			torrentResumedCallback(sha1, message.c_str());
 		} else if (libtorrent::save_resume_data_alert * a
 				= dynamic_cast<libtorrent::save_resume_data_alert*> (alert)) {
 			std::cout << "save_resume_data_alert" << std::endl;
@@ -263,12 +270,20 @@ extern "C" void get_alerts(void(*alertCallback)(const char*),
 	}
 }
 
-void TestFunc(const char* message) {
+void Alert(const char* message) {
 	std::cout << message << std::endl;
 }
 
-void TestFunc2(const char* message) {
-	std::cout << "Complete: " << message << std::endl;
+void Completed(const char* sha1, const char* message) {
+	std::cout << "Complete: " << sha1 << " - " << message << std::endl;
+}
+
+void Resumed(const char* sha1, const char* message) {
+	std::cout << "Resumed: " << sha1 << " - " << message << std::endl;
+}
+
+void Paused(const char* sha1, const char* message) {
+	std::cout << "Resumed: " << sha1 << " - " << message << std::endl;
 }
 
 extern "C" int abort_torrent() {
@@ -300,7 +315,7 @@ int main(int argc, char* argv[]) {
 					paused = true;
 				}
 			}
-			get_alerts(TestFunc, TestFunc2);
+			get_alerts(Alert, Completed, Paused, Resumed);
 			std::cout << "status: " << std::endl;
 			//			struct torrent_s s = get_torrent_status("id");
 			//			std::cout << "total_payload_download: " << s.total_payload_download

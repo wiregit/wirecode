@@ -26,6 +26,7 @@ public class Main {
             System.out.println("num_peers_java: " + torrentStatus.num_peers);
             System.out.println("state_java: " + torrentStatus.state);
             System.out.println("progress_java: " + torrentStatus.progress);
+            Thread.sleep(3000);
         }
     }
 }

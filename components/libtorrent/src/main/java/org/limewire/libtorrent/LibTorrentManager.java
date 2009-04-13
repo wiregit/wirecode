@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.libtorrent.callback.TorrentFinishedCallback;
+import org.limewire.libtorrent.callback.TorrentPausedCallback;
+import org.limewire.libtorrent.callback.TorrentResumedCallback;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
@@ -79,8 +81,18 @@ public class LibTorrentManager {
                     }
                 }, new TorrentFinishedCallback() {
                     @Override
-                    public void callback(String message, int i) {
-                        System.out.println("Complete!: " + message);
+                    public void callback(String id, String message) {
+                        System.out.println("Complete!: " + id + " - " + message);
+                    }
+                }, new TorrentPausedCallback() {
+                    @Override
+                    public void callback(String id, String message) {
+                        System.out.println("Paused: " + id + " - " + message);
+                    }
+                }, new TorrentResumedCallback() {
+                    @Override
+                    public void callback(String id, String message) {
+                        System.out.println("Resumed: " + id + " - " + message);
                     }
                 });
             }
