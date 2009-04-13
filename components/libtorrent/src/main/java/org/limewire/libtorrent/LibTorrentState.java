@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public enum LibTorrentState {
     /**
      * These state align with the torrent_status.state_t enum. We need to
-     * maintain in the indexes in order to properly map from the in jna type to
+     * maintain in the indexes in order to properly map from the int jna type to
      * the enum.
      */
     queued_for_checking(0), checking_files(1), downloading_metadata(2), downloading(3), finished(4), seeding(

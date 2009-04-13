@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.libtorrent.callback.AlertCallback;
-import org.limewire.libtorrent.callback.TorrentFinishedCallback;
-import org.limewire.libtorrent.callback.TorrentPausedCallback;
-import org.limewire.libtorrent.callback.TorrentResumedCallback;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
@@ -40,7 +37,7 @@ public class LibTorrentManager {
     }
 
     public String addTorrent(File torrent) {
-        String id = libTorrent.add_torrent("id", torrent.getAbsolutePath());
+        String id = libTorrent.add_torrent(torrent.getAbsolutePath());
         return id;
     }
 
@@ -76,23 +73,20 @@ public class LibTorrentManager {
             while (!isInterrupted()) {
                 libTorrent.get_alerts(new AlertCallback() {
                     @Override
-                    public void callback(String message) {
-                        System.out.println("alert: " + message);
-                    }
-                }, new TorrentFinishedCallback() {
-                    @Override
-                    public void callback(String id, String message) {
-                        System.out.println("Complete!: " + id + " - " + message);
-                    }
-                }, new TorrentPausedCallback() {
-                    @Override
-                    public void callback(String id, String message) {
-                        System.out.println("Paused: " + id + " - " + message);
-                    }
-                }, new TorrentResumedCallback() {
-                    @Override
-                    public void callback(String id, String message) {
-                        System.out.println("Resumed: " + id + " - " + message);
+                    public void callback(LibTorrentAlert alert, LibTorrentStatus torrentStatus) {
+                        alert.read();
+
+                        System.out.println("sha1: " + alert.sha1);
+                        System.out.println("category: " + alert.category);
+                        System.out.println("message: " + alert.message);
+
+                        System.out.println("total_done_java: " + torrentStatus.total_done);
+                        System.out.println("download_rate_java: " + torrentStatus.download_rate);
+                        System.out.println("num_peers_java: " + torrentStatus.num_peers);
+                        System.out.println("state_java: " + torrentStatus.state + " - "
+                                + LibTorrentState.forId(torrentStatus.state));
+                        System.out.println("progress_java: " + torrentStatus.progress);
+                        System.out.println("paused_java: " + torrentStatus.paused);
                     }
                 });
             }
