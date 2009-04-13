@@ -23,10 +23,10 @@ extern "C" int init(const char* path) {
 	return 0;
 }
 
-std::string getSha1String(sha1_hash sha1) {
+const char* getSha1String(sha1_hash sha1) {
 	std::stringstream oss;
 	oss << sha1;
-	return oss.str();
+	return oss.str().c_str();
 }
 
 sha1_hash getSha1Hash(const char* sha1String) {
@@ -59,10 +59,10 @@ extern "C" const char* add_torrent(const char* id, char* path) {
 	sha1_hash sha1 = torrent_info.info_hash();
 	std::cout << "sha1: " << sha1 << std::endl;
 
-	std::string sha1String = getSha1String(sha1);
+	const char* sha1String = getSha1String(sha1);
 
 	std::cout << "[" << sha1String << "]" << std::endl;
-	return sha1String.c_str();
+	return sha1String;
 }
 
 extern "C" int pause_torrent(const char* id) {
