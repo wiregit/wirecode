@@ -24,7 +24,7 @@ public class Main {
             System.out.println("total_done_java: " + torrentStatus.total_done);
             System.out.println("download_rate_java: " + torrentStatus.download_rate);
             System.out.println("num_peers_java: " + torrentStatus.num_peers);
-            System.out.println("state_java: " + torrentStatus.state);
+            System.out.println("state_java: " + torrentStatus.state + " - " + LibTorrentState.forId(torrentStatus.state));
             System.out.println("progress_java: " + torrentStatus.progress);
             System.out.println("paused_java: " + torrentStatus.paused);
             Thread.sleep(3000);
