@@ -2,6 +2,7 @@ package org.limewire.libtorrent;
 
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.libtorrent.callback.TorrentFinishedCallback;
+
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 
@@ -15,7 +16,7 @@ public class LibTorrentWrapper implements LibTorrent {
 	}
 
 	@Override
-	public int add_torrent(String id, String path) {
+	public String add_torrent(String id, String path) {
 		return libTorrent.add_torrent(id, path);
 	}
 
@@ -46,14 +47,14 @@ public class LibTorrentWrapper implements LibTorrent {
 	}
 
 	@Override
-	public TorrentStatus get_torrent_status(String id) {
-		int size = new TorrentStatus().size();
+	public LibTorrentStatus get_torrent_status(String id) {
+		int size = new LibTorrentStatus().size();
 		Memory memory = new Memory(size);
 		return libTorrent.get_torrent_status(id, memory);
 	}
 
 	@Override
-	public TorrentStatus get_torrent_status(String id, Memory memory) {
+	public LibTorrentStatus get_torrent_status(String id, Memory memory) {
 		return libTorrent.get_torrent_status(id);
 	}
 

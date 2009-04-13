@@ -8,12 +8,13 @@
 #include "libtorrent/alert.hpp"
 #include "libtorrent/alert_types.hpp"
 #include <dlfcn.h>
+#include "libtorrent/peer_id.hpp"
 
 libtorrent::session s;
 std::string savePath;
-std::map<std::string, libtorrent::torrent_handle> handles;
+typedef libtorrent::big_number sha1_hash;
 
-extern "C" int init(char* path) {
+extern "C" int init(const char* path) {
 	std::string newPath(path);
 	savePath = newPath;
 	s.set_alert_mask(0xffffffff);
@@ -22,50 +23,82 @@ extern "C" int init(char* path) {
 	return 0;
 }
 
-extern "C" int add_torrent(char* id, char* path) {
+std::string getSha1String(sha1_hash sha1) {
+	std::stringstream oss;
+	oss << sha1;
+	return oss.str();
+}
+
+sha1_hash getSha1Hash(const char* sha1String) {
+	sha1_hash sha1;
+	std::stringstream oss;
+	oss << sha1String;
+	oss >> sha1;
+	return sha1;
+}
+
+libtorrent::torrent_handle findTorrentHandle(const char* sha1String) {
+	sha1_hash sha1 = getSha1Hash(sha1String);
+	libtorrent::torrent_handle torrent_handle = s.find_torrent(sha1);
+	return torrent_handle;
+}
+
+extern "C" const char* add_torrent(const char* id, char* path) {
+	std::cout << "adding torrent" << std::endl;
+	std::cout << "id: " << id << std::endl;
+	std::cout << "path: " << path << std::endl;
 	libtorrent::add_torrent_params p;
 	p.save_path = savePath;
 	p.ti = new libtorrent::torrent_info(path);
 	libtorrent::torrent_handle h = s.add_torrent(p);
 
-	handles.insert(std::make_pair(std::string(id), h));
-	return 0;
+	libtorrent::torrent_info torrent_info = h.get_torrent_info();
+
+	//std::string sha1 = std::string(id);
+
+	sha1_hash sha1 = torrent_info.info_hash();
+	std::cout << "sha1: " << sha1 << std::endl;
+
+	std::string sha1String = getSha1String(sha1);
+
+	std::cout << "[" << sha1String << "]" << std::endl;
+	return sha1String.c_str();
 }
 
-extern "C" int pause_torrent(char* id) {
-	libtorrent::torrent_handle h = handles[std::string(id)];
+extern "C" int pause_torrent(const char* id) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
 	h.pause();
 	return 0;
 }
 
-extern "C" bool is_torrent_paused(char* id) {
-	libtorrent::torrent_handle h = handles[std::string(id)];
+extern "C" bool is_torrent_paused(const char* id) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
 	return h.is_paused();
 }
 
-extern "C" bool is_torrent_seed(char* id) {
-	libtorrent::torrent_handle h = handles[std::string(id)];
+extern "C" bool is_torrent_seed(const char* id) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
 	return h.is_seed();
 }
 
-extern "C" const char* get_torrent_name(char* id) {
-	libtorrent::torrent_handle h = handles[std::string(id)];
+extern "C" const char* get_torrent_name(const char* id) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
 	return h.name().c_str();
 }
 
-extern "C" bool is_torrent_finished(char* id) {
-	libtorrent::torrent_handle h = handles[std::string(id)];
+extern "C" bool is_torrent_finished(const char* id) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
 	return h.is_finished();
 }
 
-extern "C" bool is_torrent_valid(char* id) {
-	libtorrent::torrent_handle h = handles[std::string(id)];
+extern "C" bool is_torrent_valid(const char* id) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
 	std::cout << "is_torrent_valid: " << h.is_valid() << std::endl;
 	return h.is_valid();
 }
 
-extern "C" int resume_torrent(char* id) {
-	libtorrent::torrent_handle h = handles[std::string(id)];
+extern "C" int resume_torrent(const char* id) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
 	h.resume();
 	return 0;
 }
@@ -78,9 +111,10 @@ struct torrent_s {
 	float progress;
 };
 
-extern "C" void* get_torrent_status(char* id, void* stat) {
-	struct torrent_s* s = (struct torrent_s *) stat;
-	libtorrent::torrent_handle h = handles[std::string(id)];
+extern "C" void* get_torrent_status(const char* id, void* stat) {
+	struct torrent_s* stats = (struct torrent_s *) stat;
+
+	libtorrent::torrent_handle h = findTorrentHandle(id);
 	libtorrent::torrent_status status = h.status();
 
 	float download_rate = status.download_rate;
@@ -89,17 +123,17 @@ extern "C" void* get_torrent_status(char* id, void* stat) {
 	int state = status.state;
 	float progress = status.progress;
 
-	s->total_done = total_done;
-	s->download_rate = download_rate;
-	s->num_peers = num_peers;
-	s->state = state;
-	s->progress = progress;
+	stats->total_done = total_done;
+	stats->download_rate = download_rate;
+	stats->num_peers = num_peers;
+	stats->state = state;
+	stats->progress = progress;
 
-	return s;
+	return stats;
 }
 
 extern "C" void get_alerts(void(*alertCallback)(const char*),
-		void(*torrentFinishedCallback)(const char*, int)) {
+		void(*torrentFinishedCallback)(const char*)) {
 	std::auto_ptr<libtorrent::alert> alerts;
 
 	alerts = s.pop_alert();
@@ -111,7 +145,7 @@ extern "C" void get_alerts(void(*alertCallback)(const char*),
 		if (libtorrent::torrent_finished_alert * a
 				= dynamic_cast<libtorrent::torrent_finished_alert*> (alert)) {
 			std::cout << "torrent_finished_alert" << std::endl;
-			torrentFinishedCallback(message.c_str(), 1);
+			torrentFinishedCallback(message.c_str());
 		} else if (libtorrent::external_ip_alert * a
 				= dynamic_cast<libtorrent::external_ip_alert*> (alert)) {
 			std::cout << "external_ip_alert" << std::endl;
@@ -233,7 +267,7 @@ void TestFunc(const char* message) {
 	std::cout << message << std::endl;
 }
 
-void TestFunc2(const char* message, int i) {
+void TestFunc2(const char* message) {
 	std::cout << "Complete: " << message << std::endl;
 }
 
@@ -244,24 +278,25 @@ extern "C" int abort_torrent() {
 
 int main(int argc, char* argv[]) {
 	try {
-		char* id = "id";
 		init("/home/pvertenten/Desktop");
-		add_torrent(
-				id,
-				"/home/pvertenten/Desktop/wndw - wireless networking in the developing world.torrent");
+		const char
+				* id =
+						add_torrent(
+								"id",
+								"/home/pvertenten/Desktop/wndw - wireless networking in the developing world.torrent");
 
 		int count = 1;
 		bool paused = false;
 		while (true) {
-			std::cout << "paused: " << is_torrent_paused("id") << std::endl;
-			std::cout << "finished: " << is_torrent_finished("id") << std::endl;
-			std::cout << "valid: " << is_torrent_valid("id") << std::endl;
+			std::cout << "paused: " << is_torrent_paused(id) << std::endl;
+			std::cout << "finished: " << is_torrent_finished(id) << std::endl;
+			std::cout << "valid: " << is_torrent_valid(id) << std::endl;
 			if (count % 30 == 0) {
 				if (paused) {
-					resume_torrent("id");
+					resume_torrent(id);
 					paused = false;
 				} else {
-					pause_torrent("id");
+					pause_torrent(id);
 					paused = true;
 				}
 			}
