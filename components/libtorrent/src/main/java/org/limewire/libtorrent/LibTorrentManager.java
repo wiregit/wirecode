@@ -75,18 +75,14 @@ public class LibTorrentManager {
                     @Override
                     public void callback(LibTorrentAlert alert, LibTorrentStatus torrentStatus) {
                         alert.read();
-
-                        System.out.println("sha1: " + alert.sha1);
-                        System.out.println("category: " + alert.category);
-                        System.out.println("message: " + alert.message);
-
-                        System.out.println("total_done_java: " + torrentStatus.total_done);
-                        System.out.println("download_rate_java: " + torrentStatus.download_rate);
-                        System.out.println("num_peers_java: " + torrentStatus.num_peers);
-                        System.out.println("state_java: " + torrentStatus.state + " - "
-                                + LibTorrentState.forId(torrentStatus.state));
-                        System.out.println("progress_java: " + torrentStatus.progress);
-                        System.out.println("paused_java: " + torrentStatus.paused);
+                        String sha1 = alert.sha1;
+                        if (sha1 != null) {
+                            EventListenerList<LibTorrentEvent> listenerList = listeners
+                                    .get(alert.sha1);
+                            if (listenerList != null) {
+                                listenerList.broadcast(new LibTorrentEvent(alert, torrentStatus));
+                            }
+                        }
                     }
                 });
             }
