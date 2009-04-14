@@ -12,8 +12,9 @@ public class LibTorrentManager {
     private final LibTorrent libTorrent;
 
     private final Map<String, EventListenerList<LibTorrentEvent>> listeners;
-    //TODO use SourcedEventMulticaster
-    
+
+    // TODO use SourcedEventMulticaster
+
     public LibTorrentManager() {
         this.libTorrent = new LibTorrentWrapper();
         this.listeners = new ConcurrentHashMap<String, EventListenerList<LibTorrentEvent>>();
@@ -22,6 +23,7 @@ public class LibTorrentManager {
     }
 
     public void init() {
+        // TODO this location can change, so need to be able to update it.
         libTorrent.init("/home/pvertenten/Desktop");
         EventPoller eventPoller = new EventPoller();
         eventPoller.setName("Libtorrent Event Poller");
@@ -83,7 +85,7 @@ public class LibTorrentManager {
                             EventListenerList<LibTorrentEvent> listenerList = listeners
                                     .get(alert.sha1);
                             if (listenerList != null) {
-                                //TODO asynchronous broadcast
+                                // TODO asynchronous broadcast
                                 listenerList.broadcast(new LibTorrentEvent(alert, torrentStatus));
                             }
                         }
