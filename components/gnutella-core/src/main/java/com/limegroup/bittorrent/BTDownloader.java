@@ -1,5 +1,8 @@
 package com.limegroup.bittorrent;
 
+import java.io.File;
+import java.util.List;
+
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
 /**
@@ -8,8 +11,11 @@ import com.limegroup.gnutella.downloader.CoreDownloader;
  */
 public interface BTDownloader extends CoreDownloader {
 
-    /**
-     * Initializes the downloader with the given meta information. 
-     */
-    public void initBtMetaInfo(BTMetaInfo btMetaInfo);
+    void init(File torrent);
+
+    File getCompleteFile();
+
+    List<File> getIncompleteFiles();
+
+    List<File> getFiles();
 }

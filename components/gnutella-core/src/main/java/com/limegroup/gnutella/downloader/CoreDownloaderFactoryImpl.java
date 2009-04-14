@@ -104,9 +104,9 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         return sd;
     }
 
-    public BTDownloader createBTDownloader(BTMetaInfo info) {
+    public BTDownloader createBTDownloader(File torrent) {
         BTDownloader bd = btDownloaderFactory.get();
-        bd.initBtMetaInfo(info);
+        bd.init(torrent);
         return bd;
     }
     

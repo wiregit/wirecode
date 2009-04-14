@@ -102,14 +102,6 @@ public class DownloadServicesImpl implements DownloadServices {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadServices#downloadTorrent(com.limegroup.bittorrent.BTMetaInfo, boolean)
-     */
-    public Downloader downloadTorrent(BTMetaInfo info, boolean overwrite)
-    		throws SaveLocationException {
-    	return downloadManager.get().downloadTorrent(info, overwrite);
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadServices#getNumActiveDownloads()
      */
     public int getNumActiveDownloads() {

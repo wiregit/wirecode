@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent;
 
+import java.io.File;
 import java.net.URI;
 
 import com.limegroup.gnutella.downloader.CoreDownloader;
@@ -17,8 +18,8 @@ import com.limegroup.gnutella.http.HttpClientListener;
  */
 public interface BTTorrentFileDownloader extends HttpClientListener, CoreDownloader {
 
-    public abstract BTMetaInfo getBtMetaInfo();
-
     public void initDownloadInformation(URI torrentURI, boolean overwrite);
+
+    public File getTorrentFile();
 
 }

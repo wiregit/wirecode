@@ -12,9 +12,8 @@ public enum LibTorrentState {
     queued_for_checking(0), checking_files(1), downloading_metadata(2), downloading(3), finished(4), seeding(
             5), allocating(6);
 
-    
     private static final Map<Integer, LibTorrentState> map = new ConcurrentHashMap<Integer, LibTorrentState>();
-    
+
     static {
         map.put(queued_for_checking.id, queued_for_checking);
         map.put(checking_files.id, checking_files);
@@ -24,13 +23,17 @@ public enum LibTorrentState {
         map.put(seeding.id, seeding);
         map.put(allocating.id, allocating);
     }
+
     private final int id;
 
     private LibTorrentState(int id) {
         this.id = id;
     }
-    
-    
+
+    public int getId() {
+        return id;
+    }
+
     public static LibTorrentState forId(int id) {
         return map.get(id);
     }

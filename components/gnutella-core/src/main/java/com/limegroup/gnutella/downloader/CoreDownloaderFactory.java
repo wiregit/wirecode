@@ -48,7 +48,7 @@ public interface CoreDownloaderFactory {
     public StoreDownloader createStoreDownloader(RemoteFileDesc rfd, File saveDirectory,
             String fileName, boolean overwrite) throws SaveLocationException;
     
-    public BTDownloader createBTDownloader(BTMetaInfo info);
+    public BTDownloader createBTDownloader(File torrent);
 
     /**
      * Creates the appropriate kind of downloader from a given DownloadMemento.

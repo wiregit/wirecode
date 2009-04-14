@@ -76,35 +76,42 @@ import com.limegroup.mozilla.MozillaDownload;
 import com.limegroup.mozilla.MozillaDownloaderImpl;
 
 @Singleton
-public class DownloadManagerImpl implements DownloadManager, Service, EventListener<ManagedListStatusEvent> {
-    
+public class DownloadManagerImpl implements DownloadManager, Service,
+        EventListener<ManagedListStatusEvent> {
+
     private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
-    
-    /** The time in milliseconds between checkpointing downloads.dat.  The more
+
+    /**
+     * The time in milliseconds between checkpointing downloads.dat. The more
      * often this is written, the less the lost data during a crash, but the
-     * greater the chance that downloads.dat itself is corrupt.  */
-    private int SNAPSHOT_CHECKPOINT_TIME=30*1000; //30 seconds
+     * greater the chance that downloads.dat itself is corrupt.
+     */
+    private int SNAPSHOT_CHECKPOINT_TIME = 30 * 1000; // 30 seconds
 
+    /**
+     * The list of all ManagedDownloader's attempting to download. INVARIANT:
+     * active.size()<=slots() && active contains no duplicates LOCKING: obtain
+     * this' monitor
+     */
+    private final List<CoreDownloader> active = new LinkedList<CoreDownloader>();
 
-    /** The list of all ManagedDownloader's attempting to download.
-     *  INVARIANT: active.size()<=slots() && active contains no duplicates 
-     *  LOCKING: obtain this' monitor */
-    private final List <CoreDownloader> active=new LinkedList<CoreDownloader>();
-    /** The list of all queued ManagedDownloader. 
-     *  INVARIANT: waiting contains no duplicates 
-     *  LOCKING: obtain this' monitor */
-    
-    private final List <CoreDownloader> waiting=new LinkedList<CoreDownloader>();
-    
-    private final MultiIterable<CoreDownloader> activeAndWaiting = 
-        new MultiIterable<CoreDownloader>(active,waiting); 
-    
+    /**
+     * The list of all queued ManagedDownloader. INVARIANT: waiting contains no
+     * duplicates LOCKING: obtain this' monitor
+     */
+
+    private final List<CoreDownloader> waiting = new LinkedList<CoreDownloader>();
+
+    private final MultiIterable<CoreDownloader> activeAndWaiting = new MultiIterable<CoreDownloader>(
+            active, waiting);
+
     /**
      * Whether or not the GUI has been init'd.
      */
     private volatile boolean downloadsReadFromDisk = false;
-    
-    /** The number if IN-NETWORK active downloaders.  We don't count these when
+
+    /**
+     * The number if IN-NETWORK active downloaders. We don't count these when
      * determining how many downloaders are active.
      */
     private int innetworkCount = 0;
@@ -114,57 +121,63 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      * how many downloaders are active
      */
     private int storeDownloadCount = 0;
-    
+
     private int mozillaDownloadCount = 0;
-    
+
     /**
      * The number of times we've been bandwidth measures
      */
     private int numMeasures = 0;
-    
+
     /**
-     * The average bandwidth over all downloads.
-     * This is only counted while downloads are active.
+     * The average bandwidth over all downloads. This is only counted while
+     * downloads are active.
      */
     private float averageBandwidth = 0;
-    
+
     /** The last measured bandwidth, as counted from measureBandwidth. */
     private volatile float lastMeasuredBandwidth;
-    
+
     /**
      * The runnable that pumps inactive downloads to the correct state.
      */
     private Runnable _waitingPump;
-    
-    private final EventListenerList<DownloadManagerEvent> listeners =
-        new EventListenerList<DownloadManagerEvent>();
+
+    private final EventListenerList<DownloadManagerEvent> listeners = new EventListenerList<DownloadManagerEvent>();
 
     private final DownloadCallback innetworkCallback;
+
     private final Provider<DownloadCallback> downloadCallback;
+
     private final Provider<MessageRouter> messageRouter;
+
     private final ScheduledExecutorService backgroundExecutor;
+
     private final Provider<TorrentManager> torrentManager;
+
     private final Provider<PushDownloadManager> pushDownloadManager;
+
     private final CoreDownloaderFactory coreDownloaderFactory;
+
     private final DownloadSerializer downloadSerializer;
+
     private final IncompleteFileManager incompleteFileManager;
+
     private final RemoteFileDescFactory remoteFileDescFactory;
+
     private final BTMetaInfoFactory btMetaInfoFactory;
 
     private final PushEndpointFactory pushEndpointFactory;
-    
+
     @Inject
     public DownloadManagerImpl(@Named("inNetwork") DownloadCallback innetworkCallback,
-            Provider<DownloadCallback> downloadCallback,
-            Provider<MessageRouter> messageRouter,
+            Provider<DownloadCallback> downloadCallback, Provider<MessageRouter> messageRouter,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<TorrentManager> torrentManager,
             Provider<PushDownloadManager> pushDownloadManager,
-            CoreDownloaderFactory coreDownloaderFactory,
-            DownloadSerializer downloaderSerializer,
+            CoreDownloaderFactory coreDownloaderFactory, DownloadSerializer downloaderSerializer,
             IncompleteFileManager incompleteFileManager,
-            RemoteFileDescFactory remoteFileDescFactory,
-            BTMetaInfoFactory btMetaInfoFactory,
+            RemoteFileDescFactory remoteFileDescFactory, BTMetaInfoFactory btMetaInfoFactory,
             PushEndpointFactory pushEndpointFactory) {
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
@@ -180,22 +193,26 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         this.pushEndpointFactory = pushEndpointFactory;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#register(com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#register(com.limegroup.gnutella
+     * .downloader.PushedSocketHandlerRegistry)
      */
-    // DO NOT REMOVE!  Guice calls this because of the @Inject
+    // DO NOT REMOVE! Guice calls this because of the @Inject
     @Inject
     public void register(PushedSocketHandlerRegistry registry) {
         registry.register(this);
     }
-    
+
     @Inject
     void register(ListenerSupport<ManagedListStatusEvent> listeners) {
         listeners.addListener(this);
     }
 
-    //////////////////////// Creation and Saving /////////////////////////
-    
+    // ////////////////////// Creation and Saving /////////////////////////
+
     @Inject
     void register(org.limewire.lifecycle.ServiceRegistry registry) {
         registry.register(this);
@@ -216,76 +233,89 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         }).in(ServiceStage.LATE);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#start()
      */
     public void start() {
         scheduleWaitingPump();
     }
-    
+
     public String getServiceName() {
         return org.limewire.i18n.I18nMarker.marktr("Download Management");
     }
+
     public void initialize() {
     }
+
     public void stop() {
         writeSnapshot();
     }
-    
+
     /**
      * Adds a new downloader to this manager.
+     * 
      * @param downloader the core downloader
      */
     public void addNewDownloader(CoreDownloader downloader) {
         initializeDownload(downloader, false);
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#loadSavedDownloadsAndScheduleWriting()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#loadSavedDownloadsAndScheduleWriting
+     * ()
      */
     public void loadSavedDownloadsAndScheduleWriting() {
         loadSavedDownloads();
         scheduleSnapshots();
     }
-    
+
     public void loadSavedDownloads() {
         boolean failedAll = true;
         boolean failedSome = false;
-        
+
         List<DownloadMemento> mementos;
         try {
             mementos = downloadSerializer.readFromDisk();
-            if(mementos.isEmpty())
+            if (mementos.isEmpty())
                 failedAll = false;
-        } catch(IOException ioex) {
+        } catch (IOException ioex) {
             mementos = Collections.emptyList();
         }
-        for(DownloadMemento memento : mementos) {
+        for (DownloadMemento memento : mementos) {
             CoreDownloader coreDownloader = prepareMemento(memento);
-            if(coreDownloader != null) {
+            if (coreDownloader != null) {
                 failedAll = false;
                 addNewDownloader(coreDownloader);
             } else {
                 failedSome = true;
             }
         }
-        
+
         loadResumeDownloaders();
-        
+
         downloadsReadFromDisk = true;
-        
-        if(failedAll) {
-            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When LimeWire finds a source for the file, the download will pick up where it left off."));
-        } else if(failedSome) {
-            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read some of your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When LimeWire finds a source for the file, the download will pick up where it left off."));
+
+        if (failedAll) {
+            MessageService
+                    .showError(I18nMarker
+                            .marktr("Sorry, LimeWire couldn't read your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When LimeWire finds a source for the file, the download will pick up where it left off."));
+        } else if (failedSome) {
+            MessageService
+                    .showError(I18nMarker
+                            .marktr("Sorry, LimeWire couldn't read some of your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When LimeWire finds a source for the file, the download will pick up where it left off."));
         }
     }
-    
+
     private void loadResumeDownloaders() {
-        Collection<File> incompleteFiles = 
-            incompleteFileManager.getUnregisteredIncompleteFilesInDirectory(
-                    SharingSettings.INCOMPLETE_DIRECTORY.get());
-        for(File file : incompleteFiles) {
+        Collection<File> incompleteFiles = incompleteFileManager
+                .getUnregisteredIncompleteFilesInDirectory(SharingSettings.INCOMPLETE_DIRECTORY
+                        .get());
+        for (File file : incompleteFiles) {
             try {
                 download(file);
             } catch (SaveLocationException e) {
@@ -295,134 +325,144 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             }
         }
     }
-    
+
     public CoreDownloader prepareMemento(DownloadMemento memento) {
         try {
             return coreDownloaderFactory.createFromMemento(memento);
-        } catch(InvalidDataException ide) {
+        } catch (InvalidDataException ide) {
             LOG.warn("Unable to read download from memento: " + memento, ide);
             return null;
         }
     }
-    
+
     public void scheduleSnapshots() {
-        Runnable checkpointer=new Runnable() {
+        Runnable checkpointer = new Runnable() {
             public void run() {
-                if (downloadsInProgress() > 0) { //optimization
+                if (downloadsInProgress() > 0) { // optimization
                     writeSnapshot();
                 }
             }
         };
-        backgroundExecutor.scheduleWithFixedDelay(checkpointer, 
-                               SNAPSHOT_CHECKPOINT_TIME, 
-                               SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);   
-    }      
-    
+        backgroundExecutor.scheduleWithFixedDelay(checkpointer, SNAPSHOT_CHECKPOINT_TIME,
+                SNAPSHOT_CHECKPOINT_TIME, TimeUnit.MILLISECONDS);
+    }
+
     public void writeSnapshot() {
         List<DownloadMemento> mementos;
-        synchronized(this) {
+        synchronized (this) {
             mementos = new ArrayList<DownloadMemento>(active.size() + waiting.size());
-            for(CoreDownloader downloader : activeAndWaiting) {
-                if(downloader.isMementoSupported()) {
+            for (CoreDownloader downloader : activeAndWaiting) {
+                if (downloader.isMementoSupported()) {
                     mementos.add(downloader.toMemento());
                 }
             }
         }
-        
+
         downloadSerializer.writeToDisk(mementos);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#isGUIInitd()
      */
     public boolean isSavedDownloadsLoaded() {
         return downloadsReadFromDisk;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#hasInNetworkDownload()
      */
     public synchronized boolean hasInNetworkDownload() {
-        if(innetworkCount > 0)
+        if (innetworkCount > 0)
             return true;
-        for(CoreDownloader d : waiting) {
-            if(d.getDownloadType() == DownloaderType.INNETWORK)
+        for (CoreDownloader d : waiting) {
+            if (d.getDownloadType() == DownloaderType.INNETWORK)
                 return true;
         }
         return false;
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#killDownloadersNotListed(java.util.Collection)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#killDownloadersNotListed(java.
+     * util.Collection)
      */
-    public synchronized void killDownloadersNotListed(Collection<? extends DownloadInformation> updates) {
+    public synchronized void killDownloadersNotListed(
+            Collection<? extends DownloadInformation> updates) {
         if (updates == null)
             return;
-        
+
         Set<String> urns = new HashSet<String>(updates.size());
-        for(DownloadInformation ui : updates)
+        for (DownloadInformation ui : updates)
             urns.add(ui.getUpdateURN().httpStringValue());
-        
-        for (Iterator<CoreDownloader> iter = new DualIterator<CoreDownloader>(waiting.iterator(),active.iterator());
-        iter.hasNext();) {
+
+        for (Iterator<CoreDownloader> iter = new DualIterator<CoreDownloader>(waiting.iterator(),
+                active.iterator()); iter.hasNext();) {
             CoreDownloader d = iter.next();
-            if (d.getDownloadType() == DownloaderType.INNETWORK  && 
-                    !urns.contains(d.getSha1Urn().httpStringValue())) 
+            if (d.getDownloadType() == DownloaderType.INNETWORK
+                    && !urns.contains(d.getSha1Urn().httpStringValue()))
                 d.stop();
         }
-        
+
         Set<String> hopeless = UpdateSettings.FAILED_UPDATES.get();
         hopeless.retainAll(urns);
         UpdateSettings.FAILED_UPDATES.set(hopeless);
     }
-    
+
     PushDownloadManager getPushManager() {
         return pushDownloadManager.get();
     }
 
     /**
-     * Delegates the incoming socket out to BrowseHostHandler & then attempts to assign it
-     * to any ManagedDownloader.
+     * Delegates the incoming socket out to BrowseHostHandler & then attempts to
+     * assign it to any ManagedDownloader.
      * 
-     * Closes the socket if neither BrowseHostHandler nor any ManagedDownloaders wanted it.
+     * Closes the socket if neither BrowseHostHandler nor any ManagedDownloaders
+     * wanted it.
      * 
      */
-    private synchronized boolean handleIncomingPush(String file, int index, byte [] clientGUID, Socket socket) {
-         boolean handled = false;
-         for (CoreDownloader md : activeAndWaiting) {
-            if (! (md instanceof ManagedDownloader))
+    private synchronized boolean handleIncomingPush(String file, int index, byte[] clientGUID,
+            Socket socket) {
+        boolean handled = false;
+        for (CoreDownloader md : activeAndWaiting) {
+            if (!(md instanceof ManagedDownloader))
                 continue; // pushes apply to gnutella downloads only
-            ManagedDownloader mmd = (ManagedDownloader)md;
+            ManagedDownloader mmd = (ManagedDownloader) md;
             if (mmd.acceptDownload(file, socket, index, clientGUID)) {
                 return true;
             }
-         }                 
-         return handled;
+        }
+        return handled;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#acceptPushedSocket(java.lang.String, int, byte[], java.net.Socket)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#acceptPushedSocket(java.lang.String
+     * , int, byte[], java.net.Socket)
      */
-    public boolean acceptPushedSocket(String file, int index,
-            byte[] clientGUID, Socket socket) {
+    public boolean acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket) {
         return handleIncomingPush(file, index, clientGUID, socket);
     }
-    
-    
+
     public void scheduleWaitingPump() {
-        if(_waitingPump != null)
+        if (_waitingPump != null)
             return;
-            
+
         _waitingPump = new Runnable() {
             public void run() {
                 pumpDownloads();
             }
         };
-        backgroundExecutor.scheduleWithFixedDelay(_waitingPump,
-                               1000,
-                               1000, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleWithFixedDelay(_waitingPump, 1000, 1000, TimeUnit.MILLISECONDS);
     }
-    
+
     /**
      * Pumps through each waiting download, either removing it because it was
      * stopped, or adding it because there's an active slot and it requires
@@ -430,51 +470,60 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      */
     protected synchronized void pumpDownloads() {
         int index = 1;
-        for(Iterator<CoreDownloader> i = waiting.iterator(); i.hasNext(); ) {
+        for (Iterator<CoreDownloader> i = waiting.iterator(); i.hasNext();) {
             CoreDownloader md = i.next();
-            if(md.isAlive()) {
+            if (md.isAlive()) {
                 continue;
-            } else if(md.shouldBeRemoved()) {
+            } else if (md.shouldBeRemoved()) {
                 i.remove();
                 cleanupCompletedDownload(md, false);
             }
             // handle downloads from LWS separately, only allow 3 at a time
-            else if( storeDownloadCount < 3 && md.getDownloadType() == DownloaderType.STORE ) {
-                    i.remove();
-                    storeDownloadCount++;
-                    active.add(md);
-                    md.startDownload();
-            } else if(hasFreeSlot() && (md.shouldBeRestarted()) && (md.getDownloadType() != DownloaderType.STORE)) {
+            else if (storeDownloadCount < 3 && md.getDownloadType() == DownloaderType.STORE) {
                 i.remove();
-                if(md.getDownloadType() == DownloaderType.INNETWORK)
+                storeDownloadCount++;
+                active.add(md);
+                md.startDownload();
+            } else if (hasFreeSlot() && (md.shouldBeRestarted())
+                    && (md.getDownloadType() != DownloaderType.STORE)) {
+                i.remove();
+                if (md.getDownloadType() == DownloaderType.INNETWORK)
                     innetworkCount++;
                 active.add(md);
                 md.startDownload();
             } else {
-                if(md.isQueuable())
+                if (md.isQueuable())
                     md.setInactivePriority(index++);
                 md.handleInactivity();
             }
         }
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#isIncomplete(com.limegroup.gnutella.URN)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#isIncomplete(com.limegroup.gnutella
+     * .URN)
      */
     public boolean isIncomplete(URN urn) {
         return incompleteFileManager.getFileForUrn(urn) != null;
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#isActivelyDownloading(com.limegroup.gnutella.URN)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#isActivelyDownloading(com.limegroup
+     * .gnutella.URN)
      */
     public boolean isActivelyDownloading(URN urn) {
         Downloader md = getDownloaderForURN(urn);
-        
-        if(md == null)
+
+        if (md == null)
             return false;
-            
-        switch(md.getState()) {
+
+        switch (md.getState()) {
         case QUEUED:
         case BUSY:
         case ABORTED:
@@ -488,52 +537,66 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             return true;
         }
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#getIncompleteFileManager()
      */
     public IncompleteFileManager getIncompleteFileManager() {
         return incompleteFileManager;
-    }    
- 
-    /* (non-Javadoc)
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#downloadsInProgress()
      */
     public synchronized int downloadsInProgress() {
         return active.size() + waiting.size();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#getNumIndividualDownloaders()
      */
     public synchronized int getNumIndividualDownloaders() {
         int ret = 0;
-        for (Iterator<CoreDownloader> iter=active.iterator(); iter.hasNext(); ) {  //active
+        for (Iterator<CoreDownloader> iter = active.iterator(); iter.hasNext();) { // active
             Object next = iter.next();
-            if (! (next instanceof ManagedDownloader))
+            if (!(next instanceof ManagedDownloader))
                 continue; // TODO: count torrents separately
-            ManagedDownloader md=(ManagedDownloader)next;
+            ManagedDownloader md = (ManagedDownloader) next;
             ret += md.getNumDownloaders();
-       }
-       return ret;
+        }
+        return ret;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#getNumActiveDownloads()
      */
     public synchronized int getNumActiveDownloads() {
         return active.size() - innetworkCount - storeDownloadCount - mozillaDownloadCount;
     }
-   
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#getNumWaitingDownloads()
      */
     public synchronized int getNumWaitingDownloads() {
         return waiting.size();
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#getDownloaderForURN(com.limegroup.gnutella.URN)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#getDownloaderForURN(com.limegroup
+     * .gnutella.URN)
      */
     public synchronized Downloader getDownloaderForURN(URN sha1) {
         for (CoreDownloader md : activeAndWaiting) {
@@ -542,9 +605,13 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         }
         return null;
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#getDownloaderForURNString(java.lang.String)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#getDownloaderForURNString(java
+     * .lang.String)
      */
     public synchronized Downloader getDownloaderForURNString(String urn) {
         for (CoreDownloader md : activeAndWaiting) {
@@ -552,10 +619,14 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                 return md;
         }
         return null;
-    }    
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#getDownloaderForIncompleteFile(java.io.File)
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#getDownloaderForIncompleteFile
+     * (java.io.File)
      */
     public synchronized Downloader getDownloaderForIncompleteFile(File file) {
         for (CoreDownloader dl : activeAndWaiting) {
@@ -566,8 +637,12 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#isGuidForQueryDownloading(com.limegroup.gnutella.GUID)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#isGuidForQueryDownloading(com.
+     * limegroup.gnutella.GUID)
      */
     public synchronized boolean isGuidForQueryDownloading(GUID guid) {
         for (CoreDownloader md : activeAndWaiting) {
@@ -577,59 +652,60 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         }
         return false;
     }
-    
+
     void clearAllDownloads() {
         List<CoreDownloader> buf;
-        synchronized(this) {
+        synchronized (this) {
             buf = new ArrayList<CoreDownloader>(active.size() + waiting.size());
             buf.addAll(active);
             buf.addAll(waiting);
             active.clear();
             waiting.clear();
         }
-        for(CoreDownloader md : buf ) { 
+        for (CoreDownloader md : buf) {
             md.stop();
             fireEvent(md, DownloadManagerEvent.Type.REMOVED);
         }
     }
-           
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella.RemoteFileDesc[], java.util.List, com.limegroup.gnutella.GUID, boolean, java.io.File, java.lang.String)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella
+     * .RemoteFileDesc[], java.util.List, com.limegroup.gnutella.GUID, boolean,
+     * java.io.File, java.lang.String)
      */
     public synchronized Downloader download(RemoteFileDesc[] files,
-                                            List<? extends RemoteFileDesc> alts, GUID queryGUID, 
-                                            boolean overwrite, File saveDir,
-                                            String fileName) 
-        throws SaveLocationException {
+            List<? extends RemoteFileDesc> alts, GUID queryGUID, boolean overwrite, File saveDir,
+            String fileName) throws SaveLocationException {
 
         String fName = getFileName(files, fileName);
-        if (conflicts(files, new File(saveDir,fName))) {
+        if (conflicts(files, new File(saveDir, fName))) {
             addRemoteFileDescsToDownloader(files);
-            
-            throw new SaveLocationException
-            (LocationCode.FILE_ALREADY_DOWNLOADING,
-                    new File(fName != null ? fName : ""));
+
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, new File(
+                    fName != null ? fName : ""));
         }
 
-        //Purge entries from incompleteFileManager that have no corresponding
-        //file on disk.  This protects against stupid users who delete their
-        //temporary files while LimeWire is running, either through the command
-        //prompt or the library.  Note that you could optimize this by just
-        //purging files corresponding to the current download, but it's not
-        //worth it.
+        // Purge entries from incompleteFileManager that have no corresponding
+        // file on disk. This protects against stupid users who delete their
+        // temporary files while LimeWire is running, either through the command
+        // prompt or the library. Note that you could optimize this by just
+        // purging files corresponding to the current download, but it's not
+        // worth it.
         incompleteFileManager.purge();
 
-        //Start download asynchronously.  This automatically moves downloader to
-        //active if it can.
-        ManagedDownloader downloader =
-            coreDownloaderFactory.createManagedDownloader(files, 
+        // Start download asynchronously. This automatically moves downloader to
+        // active if it can.
+        ManagedDownloader downloader = coreDownloaderFactory.createManagedDownloader(files,
                 queryGUID, saveDir, fileName, overwrite);
 
         initializeDownload(downloader, true);
-        
-        //Now that the download is started, add the sources w/o caching
-        downloader.addDownload(alts,false);
-        
+
+        // Now that the download is started, add the sources w/o caching
+        downloader.addDownload(alts, false);
+
         return downloader;
     }
 
@@ -638,245 +714,244 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      * matches up with it.
      */
     private void addRemoteFileDescsToDownloader(RemoteFileDesc[] files) {
-        List<CoreDownloader> downloaders = new ArrayList<CoreDownloader>(active.size() + waiting.size());
-        synchronized (this) { 
+        List<CoreDownloader> downloaders = new ArrayList<CoreDownloader>(active.size()
+                + waiting.size());
+        synchronized (this) {
             // add to all downloaders, even if they are waiting....
             downloaders.addAll(active);
             downloaders.addAll(waiting);
         }
-        
-        for(CoreDownloader downloader : downloaders) {
-            if(downloader instanceof ManagedDownloader) {
+
+        for (CoreDownloader downloader : downloaders) {
+            if (downloader instanceof ManagedDownloader) {
                 ManagedDownloader managedDownloader = (ManagedDownloader) downloader;
-                if(managedDownloader.addDownload(Arrays.asList(files), true)) {
-                    //only add fileDescs to 1 downloader
+                if (managedDownloader.addDownload(Arrays.asList(files), true)) {
+                    // only add fileDescs to 1 downloader
                     break;
                 }
             }
         }
     }
-    
-    /* (non-Javadoc)
-    * @see com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella.browser.MagnetOptions, boolean, java.io.File, java.lang.String)
-    */
-    public synchronized Downloader download(MagnetOptions magnet,
-            boolean overwrite,
-            File saveDir,
-            String fileName)
-    throws IllegalArgumentException, SaveLocationException {
-        
-        if (!magnet.isDownloadable()) 
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella
+     * .browser.MagnetOptions, boolean, java.io.File, java.lang.String)
+     */
+    public synchronized Downloader download(MagnetOptions magnet, boolean overwrite, File saveDir,
+            String fileName) throws IllegalArgumentException, SaveLocationException {
+
+        if (!magnet.isDownloadable())
             throw new IllegalArgumentException("magnet not downloadable");
-        
-        //remove entry from IFM if the incomplete file was deleted.
+
+        // remove entry from IFM if the incomplete file was deleted.
         incompleteFileManager.purge();
-        
+
         if (fileName == null) {
             fileName = magnet.getFileNameForSaving();
         }
-        if (conflicts(magnet.getSHA1Urn(), 0, new File(saveDir,fileName))) {
-            throw new SaveLocationException
-            (LocationCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
+        if (conflicts(magnet.getSHA1Urn(), 0, new File(saveDir, fileName))) {
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, new File(
+                    fileName));
         }
 
-        //Note: If the filename exists, it would be nice to check that we are
-        //not already downloading the file by calling conflicts with the
-        //filename...the problem is we cannot do this effectively without the
-        //size of the file (at least, not without being risky in assuming that
-        //two files with the same name are the same file). So for now we will
-        //just leave it and download the same file twice.
+        // Note: If the filename exists, it would be nice to check that we are
+        // not already downloading the file by calling conflicts with the
+        // filename...the problem is we cannot do this effectively without the
+        // size of the file (at least, not without being risky in assuming that
+        // two files with the same name are the same file). So for now we will
+        // just leave it and download the same file twice.
 
-        //Instantiate downloader, validating incompleteFile first.
-        MagnetDownloader downloader = 
-            coreDownloaderFactory.createMagnetDownloader( magnet,
+        // Instantiate downloader, validating incompleteFile first.
+        MagnetDownloader downloader = coreDownloaderFactory.createMagnetDownloader(magnet,
                 overwrite, saveDir, fileName);
         initializeDownload(downloader, true);
         return downloader;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#downloadFromStore(com.limegroup.gnutella.RemoteFileDesc, boolean, java.io.File, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#downloadFromStore(com.limegroup
+     * .gnutella.RemoteFileDesc, boolean, java.io.File, java.lang.String)
      */
-    public synchronized Downloader downloadFromStore( RemoteFileDesc rfd,
-            boolean overwrite,
-            File saveDir,
-            String fileName)
-    throws IllegalArgumentException, SaveLocationException {
-        
-        //Purge entries from incompleteFileManager that have no corresponding
-        //file on disk.  This protects against stupid users who delete their
-        //temporary files while LimeWire is running, either through the command
-        //prompt or the library.  Note that you could optimize this by just
-        //purging files corresponding to the current download, but it's not
-        //worth it.
+    public synchronized Downloader downloadFromStore(RemoteFileDesc rfd, boolean overwrite,
+            File saveDir, String fileName) throws IllegalArgumentException, SaveLocationException {
+
+        // Purge entries from incompleteFileManager that have no corresponding
+        // file on disk. This protects against stupid users who delete their
+        // temporary files while LimeWire is running, either through the command
+        // prompt or the library. Note that you could optimize this by just
+        // purging files corresponding to the current download, but it's not
+        // worth it.
         incompleteFileManager.purge();
-        
-        if (conflicts(rfd.getSHA1Urn(), 0, new File(saveDir,fileName))) {
-            throw new SaveLocationException
-            (LocationCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
+
+        if (conflicts(rfd.getSHA1Urn(), 0, new File(saveDir, fileName))) {
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, new File(
+                    fileName));
         }
-      
-        //Start download asynchronously.  This automatically moves downloader to
-        //active if it can.
-        StoreDownloader downloader =
-            coreDownloaderFactory.createStoreDownloader(rfd,  
-                                  saveDir, fileName, overwrite);
+
+        // Start download asynchronously. This automatically moves downloader to
+        // active if it can.
+        StoreDownloader downloader = coreDownloaderFactory.createStoreDownloader(rfd, saveDir,
+                fileName, overwrite);
 
         initializeDownload(downloader, true);
-        
+
         return downloader;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#download(java.io.File)
-     */ 
-    public synchronized Downloader download(File incompleteFile)
-            throws CantResumeException, SaveLocationException { 
-     
+     */
+    public synchronized Downloader download(File incompleteFile) throws CantResumeException,
+            SaveLocationException {
+
         if (conflictsWithIncompleteFile(incompleteFile)) {
-            throw new SaveLocationException
-            (LocationCode.FILE_ALREADY_DOWNLOADING, incompleteFile);
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, incompleteFile);
         }
-        
-        if (IncompleteFileManager.isTorrentFolder(incompleteFile)) 
+
+        if (IncompleteFileManager.isTorrentFolder(incompleteFile))
             return resumeTorrentDownload(incompleteFile);
 
-        //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
-        //to the GUI, so they know what they're overwriting.
-        //if (! overwrite) {
-        //    try {
-        //        File downloadDir=SettingsManager.instance().getSaveDirectory();
-        //        File completeFile=new File(
-        //            downloadDir, 
-        //            incompleteFileManager.getCompletedName(incompleteFile));
-        //        if (completeFile.exists())
-        //            throw new FileExistsException(filename);
-        //    } catch (IllegalArgumentException e) {
-        //        throw new CantResumeException(incompleteFile.getName());
-        //    }
-        //}
+        // Check if file exists. TODO3: ideally we'd pass ALL conflicting files
+        // to the GUI, so they know what they're overwriting.
+        // if (! overwrite) {
+        // try {
+        // File downloadDir=SettingsManager.instance().getSaveDirectory();
+        // File completeFile=new File(
+        // downloadDir,
+        // incompleteFileManager.getCompletedName(incompleteFile));
+        // if (completeFile.exists())
+        // throw new FileExistsException(filename);
+        // } catch (IllegalArgumentException e) {
+        // throw new CantResumeException(incompleteFile.getName());
+        // }
+        // }
 
-        //Purge entries from incompleteFileManager that have no corresponding
-        //file on disk.  This protects against stupid users who delete their
-        //temporary files while LimeWire is running, either through the command
-        //prompt or the library.  Note that you could optimize this by just
-        //purging files corresponding to the current download, but it's not
-        //worth it.
+        // Purge entries from incompleteFileManager that have no corresponding
+        // file on disk. This protects against stupid users who delete their
+        // temporary files while LimeWire is running, either through the command
+        // prompt or the library. Note that you could optimize this by just
+        // purging files corresponding to the current download, but it's not
+        // worth it.
         incompleteFileManager.purge();
 
-        //Instantiate downloader, validating incompleteFile first.
-        ResumeDownloader downloader=null;
+        // Instantiate downloader, validating incompleteFile first.
+        ResumeDownloader downloader = null;
         try {
             incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
-            String name=IncompleteFileManager.getCompletedName(incompleteFile);
-            long size= IncompleteFileManager.getCompletedSize(incompleteFile);
-            downloader = coreDownloaderFactory.createResumeDownloader(
-                                              incompleteFile,
-                                              name,
-                                              size);
+            String name = IncompleteFileManager.getCompletedName(incompleteFile);
+            long size = IncompleteFileManager.getCompletedSize(incompleteFile);
+            downloader = coreDownloaderFactory.createResumeDownloader(incompleteFile, name, size);
         } catch (IllegalArgumentException e) {
             throw new CantResumeException(e, incompleteFile.getName());
         } catch (IOException ioe) {
             throw new CantResumeException(ioe, incompleteFile.getName());
         }
-        
+
         initializeDownload(downloader, true);
         return downloader;
     }
-    
-    private Downloader resumeTorrentDownload(File torrentFolder) 
-    throws CantResumeException, SaveLocationException {
-        File infohash = null; 
-        for (File f : torrentFolder.listFiles()){
-            if (f.getName().startsWith(".dat")) {
-                infohash = f;
-                break;
-            }
-        }
+
+    private Downloader resumeTorrentDownload(File torrentFolder) throws CantResumeException,
+            SaveLocationException {
+//        File infohash = null;
+//        for (File f : torrentFolder.listFiles()) {
+//            if (f.getName().startsWith(".dat")) {
+//                infohash = f;
+//                break;
+//            }
+//        }
+//
+//        String name = IncompleteFileManager.getCompletedName(torrentFolder);
+//        if (infohash == null)
+//            throw new CantResumeException(name);
+//
+//        BTMetaInfoMemento memento = null;
+//        try {
+//            Object infoObj = FileUtils.readObject(infohash.getAbsolutePath());
+//            memento = (BTMetaInfoMemento) infoObj;
+//        } catch (Throwable bad) {
+//            throw new CantResumeException(name);
+//        }
+//
+//        BTMetaInfo info;
+//        try {
+//            info = btMetaInfoFactory.createBTMetaInfoFromMemento(memento);
+//        } catch (InvalidDataException ide) {
+//            throw new CantResumeException(name);
+//        }
+//
+//        Downloader ret = downloadTorrent(info, false);
+//        if (ret.isResumable())
+//            ret.resume();
+//        return ret;
         
-        String name = IncompleteFileManager.getCompletedName(torrentFolder);
-        if(infohash == null)
-            throw new CantResumeException(name);
-        
-        BTMetaInfoMemento memento = null;
-        try {
-            Object infoObj = FileUtils.readObject(infohash.getAbsolutePath());
-            memento = (BTMetaInfoMemento)infoObj;
-        } catch (Throwable bad) {
-            throw new CantResumeException(name);
-        }
-        
-        BTMetaInfo info;
-        try {
-            info = btMetaInfoFactory.createBTMetaInfoFromMemento(memento);
-        } catch(InvalidDataException ide) {
-            throw new CantResumeException(name);
-        }
-        
-        Downloader ret = downloadTorrent(info, false);
-        if (ret.isResumable())
-            ret.resume();
-        return ret;
+        //TODO
+        return null;
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella.version.DownloadInformation, long)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella
+     * .version.DownloadInformation, long)
      */
-    public synchronized Downloader download(DownloadInformation info, long now) 
-    throws SaveLocationException {
+    public synchronized Downloader download(DownloadInformation info, long now)
+            throws SaveLocationException {
         File dir = LibraryUtils.PREFERENCE_SHARE;
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
-        if(conflicts(info.getUpdateURN(), (int)info.getSize(), f))
+        if (conflicts(info.getUpdateURN(), (int) info.getSize(), f))
             throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, f);
-        
+
         incompleteFileManager.purge();
-        ManagedDownloader d = coreDownloaderFactory.createInNetworkDownloader(
-                info, dir, now);
+        ManagedDownloader d = coreDownloaderFactory.createInNetworkDownloader(info, dir, now);
         initializeDownload(d, true);
         return d;
     }
-    
+
     @Override
-    public Downloader downloadTorrent(URI torrentURI, final boolean overwrite) throws SaveLocationException {
-        final BTTorrentFileDownloader torrentDownloader = coreDownloaderFactory.createTorrentFileDownloader(torrentURI, true);
+    public Downloader downloadTorrent(URI torrentURI, final boolean overwrite)
+            throws SaveLocationException {
+        final BTTorrentFileDownloader torrentDownloader = coreDownloaderFactory
+                .createTorrentFileDownloader(torrentURI, true);
         initializeDownload(torrentDownloader, false);
         return torrentDownloader;
     }
 
     @Override
-    public Downloader downloadTorrent(File torrentFile, boolean overwrite) throws SaveLocationException {
-        if(torrentFile.length() > 1024 * 1024 * 5 ) {
-            //torrent files are supposed to be small. If it is large it is probably not a valid torrent file 
-            throw new SaveLocationException(SaveLocationException.LocationCode.TORRENT_FILE_TOO_LARGE, torrentFile);
+    public Downloader downloadTorrent(File torrentFile, boolean overwrite)
+            throws SaveLocationException {
+        if (torrentFile.length() > 1024 * 1024 * 5) {
+            // torrent files are supposed to be small. If it is large it is
+            // probably not a valid torrent file
+            throw new SaveLocationException(
+                    SaveLocationException.LocationCode.TORRENT_FILE_TOO_LARGE, torrentFile);
         }
-        BTMetaInfo btMetaInfo = null;
-        try {
-            btMetaInfo = btMetaInfoFactory.createMetaInfo(torrentFile);
-        } catch(IOException e) {
-            throw new SaveLocationException(e, torrentFile);
-        }
-        return downloadTorrent(btMetaInfo, overwrite);
-    }
-    
-    @Override
-    public synchronized Downloader downloadTorrent(BTMetaInfo info, boolean overwrite) 
-    throws SaveLocationException {
-        TorrentFileSystem system = info.getFileSystem();
-        checkActiveAndWaiting(info.getURN(), system);
-        if (!overwrite)
-            checkTargetLocation(system, overwrite);
-        else
-            torrentManager.get().killTorrentForFile(system.getCompleteFile());
-        CoreDownloader ret = coreDownloaderFactory.createBTDownloader(info);
+        // TODO checkActiveAndWaiting(info.getURN(), system);
+
+        // TODO
+        // if (!overwrite)
+        // checkTargetLocation(system, overwrite);
+        // else
+        // torrentManager.get().killTorrentForFile(system.getCompleteFile());
+        CoreDownloader ret = coreDownloaderFactory.createBTDownloader(torrentFile);
         initializeDownload(ret, true);
         return ret;
     }
-    
+
     public synchronized Downloader downloadFromMozilla(MozillaDownload listener) {
-        
+
         CoreDownloader downloader = new MozillaDownloaderImpl(this, listener);
-        
+
         downloader.initialize();
         callback(downloader).addDownload(downloader);
         active.add(downloader);
@@ -884,45 +959,42 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
         return downloader;
     }
-    
-    private void checkTargetLocation(TorrentFileSystem info, boolean overwrite) 
-    throws SaveLocationException{
+
+    private void checkTargetLocation(TorrentFileSystem info, boolean overwrite)
+            throws SaveLocationException {
         for (File f : info.getFilesAndFolders()) {
             if (f.exists())
-                throw new SaveLocationException
-                (LocationCode.FILE_ALREADY_EXISTS, f);
+                throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, f);
         }
     }
-    
-    private void checkActiveAndWaiting(URN urn, TorrentFileSystem system) 
-    throws SaveLocationException {
+
+    private void checkActiveAndWaiting(URN urn, TorrentFileSystem system)
+            throws SaveLocationException {
         for (CoreDownloader current : activeAndWaiting) {
             if (urn.equals(current.getSha1Urn())) {
                 // this is the place to add new trackers eventually.
-                throw new SaveLocationException
-                (LocationCode.FILE_ALREADY_DOWNLOADING, system.getCompleteFile());
+                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, system
+                        .getCompleteFile());
             }
             for (File f : system.getFilesAndFolders()) {
                 if (current.conflictsSaveFile(f)) {
-                    throw new SaveLocationException
-                    (LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, f);
+                    throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, f);
                 }
             }
         }
     }
-    
+
     /**
-     * Performs common tasks for initializing the download.
-     * 1) Initializes the downloader.
-     * 2) Adds the download to the waiting list.
-     * 3) Notifies the callback about the new downloader.
-     * 4) Writes the new snapshot out to disk.
+     * Performs common tasks for initializing the download. 1) Initializes the
+     * downloader. 2) Adds the download to the waiting list. 3) Notifies the
+     * callback about the new downloader. 4) Writes the new snapshot out to
+     * disk.
      */
     private synchronized void initializeDownload(final CoreDownloader md, boolean saveState) {
         md.initialize();
         waiting.add(md);
         callback(md).addDownload(md);
-        if(saveState) {
+        if (saveState) {
             backgroundExecutor.execute(new Runnable() {
                 public void run() {
                     writeSnapshot(); // Save state for crash recovery.
@@ -932,14 +1004,14 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         // TODO: do this outside the lock
         fireEvent(md, DownloadManagerEvent.Type.ADDED);
     }
-    
+
     /**
      * Returns the callback that should be used for the given md.
      */
     private DownloadCallback callback(Downloader md) {
         return (md instanceof InNetworkDownloader) ? innetworkCallback : downloadCallback.get();
     }
-        
+
     /**
      * Returns true if there already exists a download for the same file.
      * <p>
@@ -950,34 +1022,41 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         for (int i = 0; i < rfds.length && urn == null; i++) {
             urn = rfds[0].getSHA1Urn();
         }
-        
+
         return conflicts(urn, rfds[0].getSize(), fileName);
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#conflicts(com.limegroup.gnutella.URN, long, java.io.File)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#conflicts(com.limegroup.gnutella
+     * .URN, long, java.io.File)
      */
     public boolean conflicts(URN urn, long fileSize, File... fileName) {
-        
+
         if (urn == null && fileSize == 0) {
             return false;
         }
-        
+
         synchronized (this) {
             for (CoreDownloader md : activeAndWaiting) {
-                if (md.conflicts(urn, fileSize, fileName)) 
+                if (md.conflicts(urn, fileSize, fileName))
                     return true;
             }
             return false;
         }
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#isSaveLocationTaken(java.io.File)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#isSaveLocationTaken(java.io.File)
      */
     public synchronized boolean isSaveLocationTaken(File candidateFile) {
         for (CoreDownloader md : activeAndWaiting) {
-            if (md.conflictsSaveFile(candidateFile)) 
+            if (md.conflictsSaveFile(candidateFile))
                 return true;
         }
         return false;
@@ -990,9 +1069,13 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         }
         return false;
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#handleQueryReply(com.limegroup.gnutella.messages.QueryReply)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#handleQueryReply(com.limegroup
+     * .gnutella.messages.QueryReply)
      */
     public void handleQueryReply(QueryReply qr, Address address) {
         // first check if the qr is of 'sufficient quality', if not just
@@ -1004,51 +1087,54 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         try {
             qr.validate();
             responses = qr.getResultsAsList();
-        } catch(BadPacketException bpe) {
+        } catch (BadPacketException bpe) {
             return; // bad packet, do nothing.
         }
-        
+
         addDownloadWithResponses(responses, qr, address);
     }
 
     /**
-     * Iterates through all responses seeing if they can be matched
-     * up to any existing downloaders, adding them as possible
-     * sources if they do.
-     * @param address can be null 
+     * Iterates through all responses seeing if they can be matched up to any
+     * existing downloaders, adding them as possible sources if they do.
+     * 
+     * @param address can be null
      */
-    private void addDownloadWithResponses(List<? extends Response> responses, QueryReply queryReply, Address address) {
-        if(responses == null)
+    private void addDownloadWithResponses(List<? extends Response> responses,
+            QueryReply queryReply, Address address) {
+        if (responses == null)
             throw new NullPointerException("null responses");
-        if(queryReply == null)
+        if (queryReply == null)
             throw new NullPointerException("null queryReply");
 
         // need to synch because active and waiting are not thread safe
-        List<CoreDownloader> downloaders = new ArrayList<CoreDownloader>(active.size() + waiting.size());
-        synchronized (this) { 
+        List<CoreDownloader> downloaders = new ArrayList<CoreDownloader>(active.size()
+                + waiting.size());
+        synchronized (this) {
             // add to all downloaders, even if they are waiting....
             downloaders.addAll(active);
             downloaders.addAll(waiting);
         }
-        
+
         // short-circuit.
-        if(downloaders.isEmpty())
+        if (downloaders.isEmpty())
             return;
 
-        //For each response i, offer it to each downloader j.  Give a response
+        // For each response i, offer it to each downloader j. Give a response
         // to at most one downloader.
         // TODO: it's possible that downloader x could accept response[i] but
-        //that would cause a conflict with downloader y.  Check for this.
-        for(Response r : responses) {
+        // that would cause a conflict with downloader y. Check for this.
+        for (Response r : responses) {
             // Don't bother with making XML from the EQHD.
             RemoteFileDesc rfd;
             try {
-                rfd = r.toRemoteFileDesc(queryReply, address, remoteFileDescFactory, pushEndpointFactory);
+                rfd = r.toRemoteFileDesc(queryReply, address, remoteFileDescFactory,
+                        pushEndpointFactory);
             } catch (UnknownHostException e) {
                 throw new RuntimeException(e);
             }
-            for(Downloader current : downloaders) {
-                if ( !(current instanceof ManagedDownloader))
+            for (Downloader current : downloaders) {
+                if (!(current instanceof ManagedDownloader))
                     continue; // can't add sources to torrents yet
                 ManagedDownloader currD = (ManagedDownloader) current;
                 // If we were able to add this specific rfd,
@@ -1056,9 +1142,10 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                 // also.
                 LOG.debugf("adding rfd {0} to downloader {1}", rfd, currD);
                 if (currD.addDownload(rfd, true)) {
-                    for(IpPort ipp : r.getLocations()) {
+                    for (IpPort ipp : r.getLocations()) {
                         // don't cache alts.
-                        currD.addDownload(remoteFileDescFactory.createRemoteFileDesc(rfd, ipp), false);
+                        currD.addDownload(remoteFileDescFactory.createRemoteFileDesc(rfd, ipp),
+                                false);
                     }
                     break;
                 }
@@ -1070,51 +1157,57 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
-        return active.size() - innetworkCount - storeDownloadCount - mozillaDownloadCount
-            < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
+        return active.size() - innetworkCount - storeDownloadCount - mozillaDownloadCount < DownloadSettings.MAX_SIM_DOWNLOAD
+                .getValue();
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#remove(com.limegroup.gnutella.downloader.CoreDownloader, boolean)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#remove(com.limegroup.gnutella.
+     * downloader.CoreDownloader, boolean)
      */
-    public synchronized void remove(CoreDownloader downloader, 
-                                    boolean completed) {
-        if(active.remove(downloader)) {
+    public synchronized void remove(CoreDownloader downloader, boolean completed) {
+        if (active.remove(downloader)) {
             DownloaderType type = downloader.getDownloadType();
             // These counters only apply to active downloads
-            if(type == DownloaderType.INNETWORK)
+            if (type == DownloaderType.INNETWORK)
                 innetworkCount--;
-            else if(type == DownloaderType.STORE)
+            else if (type == DownloaderType.STORE)
                 storeDownloadCount--;
-            else if(type == DownloaderType.MOZILLA)
+            else if (type == DownloaderType.MOZILLA)
                 mozillaDownloadCount--;
         }
         waiting.remove(downloader);
-        if(completed)
+        if (completed)
             cleanupCompletedDownload(downloader, true);
         else
             waiting.add(downloader);
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#bumpPriority(com.limegroup.gnutella.Downloader, boolean, int)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#bumpPriority(com.limegroup.gnutella
+     * .Downloader, boolean, int)
      */
-    public synchronized void bumpPriority(Downloader downl,
-                                          boolean up, int amt) {
-        CoreDownloader downloader = (CoreDownloader)downl;
+    public synchronized void bumpPriority(Downloader downl, boolean up, int amt) {
+        CoreDownloader downloader = (CoreDownloader) downl;
         int idx = waiting.indexOf(downloader);
-        if(idx == -1)
+        if (idx == -1)
             return;
 
-        if(up && idx != 0) {
+        if (up && idx != 0) {
             waiting.remove(idx);
             if (amt > idx)
                 amt = idx;
             if (amt != 0)
                 waiting.add(idx - amt, downloader);
             else
-                waiting.add(0, downloader);     //move to top of list
-        } else if(!up && idx != waiting.size() - 1) {
+                waiting.add(0, downloader); // move to top of list
+        } else if (!up && idx != waiting.size() - 1) {
             waiting.remove(idx);
             if (amt != 0) {
                 amt += idx;
@@ -1122,14 +1215,14 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                     amt = waiting.size();
                 waiting.add(amt, downloader);
             } else {
-                waiting.add(downloader);    //move to bottom of list
+                waiting.add(downloader); // move to bottom of list
             }
         }
     }
 
     /**
      * Cleans up the given Downloader after completion.
-     *
+     * 
      * If ser is true, also writes a snapshot to the disk.
      */
     private void cleanupCompletedDownload(CoreDownloader dl, boolean ser) {
@@ -1137,127 +1230,142 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         if (dl.getQueryGUID() != null)
             messageRouter.get().downloadFinished(dl.getQueryGUID());
         callback(dl).removeDownload(dl);
-        
-        //Save this' state to disk for crash recovery.
-        if(ser)
+
+        // Save this' state to disk for crash recovery.
+        if (ser)
             writeSnapshot();
 
         // Enable auto shutdown
-        if(active.isEmpty() && waiting.isEmpty())
+        if (active.isEmpty() && waiting.isEmpty())
             callback(dl).downloadsComplete();
-        
+
         fireEvent(dl, DownloadManagerEvent.Type.REMOVED);
-    }           
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#sendQuery(com.limegroup.gnutella.downloader.ManagedDownloader, com.limegroup.gnutella.messages.QueryRequest)
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.gnutella.DownloadManager#sendQuery(com.limegroup.gnutella
+     * .downloader.ManagedDownloader,
+     * com.limegroup.gnutella.messages.QueryRequest)
      */
     public void sendQuery(QueryRequest query) {
         messageRouter.get().sendDynamicQuery(query);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#measureBandwidth()
      */
     public void measureBandwidth() {
         List<CoreDownloader> activeCopy;
-        synchronized(this) {
+        synchronized (this) {
             activeCopy = new ArrayList<CoreDownloader>(active);
         }
-        
+
         float currentTotal = 0f;
         boolean c = false;
         for (BandwidthTracker bt : activeCopy) {
             if (bt instanceof InNetworkDownloader)
                 continue;
-            
+
             c = true;
             bt.measureBandwidth();
             currentTotal += bt.getAverageBandwidth();
         }
-        
-        if ( c ) {
-            synchronized(this) {
-                averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
-                    / ++numMeasures;
+
+        if (c) {
+            synchronized (this) {
+                averageBandwidth = ((averageBandwidth * numMeasures) + currentTotal)
+                        / ++numMeasures;
             }
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#getMeasuredBandwidth()
      */
     public float getMeasuredBandwidth() {
         List<CoreDownloader> activeCopy;
-        synchronized(this) {
+        synchronized (this) {
             activeCopy = new ArrayList<CoreDownloader>(active);
         }
-        
-        float sum=0;
+
+        float sum = 0;
         for (BandwidthTracker bt : activeCopy) {
             if (bt instanceof InNetworkDownloader)
                 continue;
-            
+
             float curr = 0;
-            try{
+            try {
                 curr = bt.getMeasuredBandwidth();
-            } catch(InsufficientDataException ide) {
-                curr = 0;//insufficient data? assume 0
+            } catch (InsufficientDataException ide) {
+                curr = 0;// insufficient data? assume 0
             }
-            sum+=curr;
+            sum += curr;
         }
-                
+
         lastMeasuredBandwidth = sum;
         return sum;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#getAverageBandwidth()
      */
     public synchronized float getAverageBandwidth() {
         return averageBandwidth;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#getLastMeasuredBandwidth()
      */
     public float getLastMeasuredBandwidth() {
         return lastMeasuredBandwidth;
     }
-    
+
     private String getFileName(RemoteFileDesc[] rfds, String fileName) {
         for (int i = 0; i < rfds.length && fileName == null; i++) {
             fileName = rfds[i].getFileName();
         }
         return fileName;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.DownloadManager#getAllDownloaders()
      */
     public final Iterable<CoreDownloader> getAllDownloaders() {
         return activeAndWaiting;
     }
-    
+
     /**
      * Listens for events from FileManager
      */
     public void handleEvent(ManagedListStatusEvent evt) {
-        switch(evt.getType()){
-            case LOAD_FINISHING:
-                getIncompleteFileManager().registerAllIncompleteFiles();
-                break;
+        switch (evt.getType()) {
+        case LOAD_FINISHING:
+            getIncompleteFileManager().registerAllIncompleteFiles();
+            break;
         }
     }
-    
+
     // ---------------------------------------------------------------
-    // Implementation of LWSIntegrationServicesDelegate    
+    // Implementation of LWSIntegrationServicesDelegate
 
     public synchronized void visitDownloads(Visitor<CoreDownloader> visitor) {
         for (CoreDownloader downloader : activeAndWaiting) {
             visitor.visit(downloader);
         }
-    }    
+    }
 
     private void fireEvent(CoreDownloader downloader, DownloadManagerEvent.Type type) {
         listeners.broadcast(new DownloadManagerEvent(downloader, type));
@@ -1273,8 +1381,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
     @Override
     public synchronized boolean contains(Downloader downloader) {
-        for(CoreDownloader coreDownloader : activeAndWaiting) {
-            if(coreDownloader == downloader) {
+        for (CoreDownloader coreDownloader : activeAndWaiting) {
+            if (coreDownloader == downloader) {
                 return true;
             }
         }

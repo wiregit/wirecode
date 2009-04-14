@@ -154,7 +154,6 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
-        final BTMetaInfo bMetaInfo = context.mock(BTMetaInfo.class);
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
         downloadItems.add(downloadItem);
 
@@ -162,11 +161,8 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
             {
                 one(downloader).getState();
                 will(returnValue(DownloadState.COMPLETE));
-                one(downloader).getBtMetaInfo();
-                will(returnValue(bMetaInfo));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
-                one(downloadManager).downloadTorrent(bMetaInfo, false);
             }
         });
 
@@ -191,22 +187,18 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
         downloadItems.add(downloadItem);
 
+        // TODO put in savelocatuion exception handling
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(DownloadState.COMPLETE));
-                one(downloader).getBtMetaInfo();
-                will(returnValue(bMetaInfo));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
-                one(downloadManager).downloadTorrent(bMetaInfo, false);
-                will(throwException(sle));
                 one(activityCallback).handleSaveLocationException(
                         with(new IsAnything<DownloadAction>()),
                         with(new IsEqual<SaveLocationException>(sle)),
                         with(new IsEqual<Boolean>(false)));
                 will(new DownloadActionCaller());
-                one(downloadManager).downloadTorrent(bMetaInfo, true);
             }
         });
 
@@ -216,9 +208,8 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
     }
 
     /**
-     * Used to call the downloadAction when entering the SaveLocationException block.
-     * Uses override = true
-     * saveFile = null 
+     * Used to call the downloadAction when entering the SaveLocationException
+     * block. Uses override = true saveFile = null
      */
     private class DownloadActionCaller implements Action {
 

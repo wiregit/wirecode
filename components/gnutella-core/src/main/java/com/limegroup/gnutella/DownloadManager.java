@@ -221,12 +221,6 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
     public Downloader downloadTorrent(File torrentFile, boolean overwrite) throws SaveLocationException;
     
     /**
-     * Downloads the given torrent specified by the meta info object.
-     */
-    public Downloader downloadTorrent(BTMetaInfo info, boolean overwrite)
-            throws SaveLocationException;
-
-    /**
      * Returns <code>true</code> if there already is a download with the same urn. 
      * @param urn may be <code>null</code>, then a check based on the fileName
      * and the fileSize is performed

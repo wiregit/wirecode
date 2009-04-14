@@ -114,9 +114,9 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
         btTorrentFileDownloader.startDownload();
         finishDownload(btTorrentFileDownloader);
         
-        BTMetaInfo btMetaInfo = btTorrentFileDownloader.getBtMetaInfo();
+        File torrentFile = btTorrentFileDownloader.getTorrentFile();
         
-        Assert.assertNotNull(btMetaInfo);
+        Assert.assertNotNull(torrentFile);
 
     }
 
@@ -202,12 +202,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
 
             @Override
             public Downloader downloadTorrent(File torrentFile, boolean overwrite)
-                    throws SaveLocationException {
-                return null;
-            }
-
-            @Override
-            public Downloader downloadTorrent(BTMetaInfo info, boolean overwrite)
                     throws SaveLocationException {
                 return null;
             }
