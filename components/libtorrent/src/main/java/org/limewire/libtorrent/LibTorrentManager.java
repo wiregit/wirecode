@@ -12,7 +12,8 @@ public class LibTorrentManager {
     private final LibTorrent libTorrent;
 
     private final Map<String, EventListenerList<LibTorrentEvent>> listeners;
-
+    //TODO use SourcedEventMulticaster
+    
     public LibTorrentManager() {
         this.libTorrent = new LibTorrentWrapper();
         this.listeners = new ConcurrentHashMap<String, EventListenerList<LibTorrentEvent>>();
