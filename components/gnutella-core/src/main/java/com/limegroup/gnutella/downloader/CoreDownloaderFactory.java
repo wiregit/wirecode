@@ -8,7 +8,6 @@ import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 
 import com.limegroup.bittorrent.BTDownloader;
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;

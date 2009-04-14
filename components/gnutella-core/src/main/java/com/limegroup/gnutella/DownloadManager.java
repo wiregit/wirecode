@@ -12,7 +12,6 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.listener.ListenerSupport;
 
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.CoreDownloader;

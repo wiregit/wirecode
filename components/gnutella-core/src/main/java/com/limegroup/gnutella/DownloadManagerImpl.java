@@ -43,11 +43,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
-import com.limegroup.bittorrent.TorrentFileSystem;
-import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.CoreDownloader;
@@ -63,7 +60,6 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.downloader.Visitor;
-import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
 import com.limegroup.gnutella.library.LibraryUtils;
@@ -153,8 +149,6 @@ public class DownloadManagerImpl implements DownloadManager, Service,
 
     private final ScheduledExecutorService backgroundExecutor;
 
-    private final Provider<TorrentManager> torrentManager;
-
     private final Provider<PushDownloadManager> pushDownloadManager;
 
     private final CoreDownloaderFactory coreDownloaderFactory;
@@ -165,15 +159,12 @@ public class DownloadManagerImpl implements DownloadManager, Service,
 
     private final RemoteFileDescFactory remoteFileDescFactory;
 
-    private final BTMetaInfoFactory btMetaInfoFactory;
-
     private final PushEndpointFactory pushEndpointFactory;
 
     @Inject
     public DownloadManagerImpl(@Named("inNetwork") DownloadCallback innetworkCallback,
             Provider<DownloadCallback> downloadCallback, Provider<MessageRouter> messageRouter,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<TorrentManager> torrentManager,
             Provider<PushDownloadManager> pushDownloadManager,
             CoreDownloaderFactory coreDownloaderFactory, DownloadSerializer downloaderSerializer,
             IncompleteFileManager incompleteFileManager,
@@ -183,13 +174,11 @@ public class DownloadManagerImpl implements DownloadManager, Service,
         this.downloadCallback = downloadCallback;
         this.messageRouter = messageRouter;
         this.backgroundExecutor = backgroundExecutor;
-        this.torrentManager = torrentManager;
         this.pushDownloadManager = pushDownloadManager;
         this.coreDownloaderFactory = coreDownloaderFactory;
         this.downloadSerializer = downloaderSerializer;
         this.incompleteFileManager = incompleteFileManager;
         this.remoteFileDescFactory = remoteFileDescFactory;
-        this.btMetaInfoFactory = btMetaInfoFactory;
         this.pushEndpointFactory = pushEndpointFactory;
     }
 
@@ -960,29 +949,29 @@ public class DownloadManagerImpl implements DownloadManager, Service,
         return downloader;
     }
 
-    private void checkTargetLocation(TorrentFileSystem info, boolean overwrite)
-            throws SaveLocationException {
-        for (File f : info.getFilesAndFolders()) {
-            if (f.exists())
-                throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, f);
-        }
-    }
-
-    private void checkActiveAndWaiting(URN urn, TorrentFileSystem system)
-            throws SaveLocationException {
-        for (CoreDownloader current : activeAndWaiting) {
-            if (urn.equals(current.getSha1Urn())) {
-                // this is the place to add new trackers eventually.
-                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, system
-                        .getCompleteFile());
-            }
-            for (File f : system.getFilesAndFolders()) {
-                if (current.conflictsSaveFile(f)) {
-                    throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, f);
-                }
-            }
-        }
-    }
+//    private void checkTargetLocation(TorrentFileSystem info, boolean overwrite)
+//            throws SaveLocationException {
+//        for (File f : info.getFilesAndFolders()) {
+//            if (f.exists())
+//                throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, f);
+//        }
+//    }
+//
+//    private void checkActiveAndWaiting(URN urn, TorrentFileSystem system)
+//            throws SaveLocationException {
+//        for (CoreDownloader current : activeAndWaiting) {
+//            if (urn.equals(current.getSha1Urn())) {
+//                // this is the place to add new trackers eventually.
+//                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, system
+//                        .getCompleteFile());
+//            }
+//            for (File f : system.getFilesAndFolders()) {
+//                if (current.conflictsSaveFile(f)) {
+//                    throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, f);
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Performs common tasks for initializing the download. 1) Initializes the

@@ -8,7 +8,6 @@ import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
-import org.limewire.libtorrent.LibTorrentAlert;
 import org.limewire.libtorrent.LibTorrentEvent;
 import org.limewire.libtorrent.LibTorrentManager;
 import org.limewire.libtorrent.LibTorrentState;
@@ -448,7 +447,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             public void handleEvent(LibTorrentEvent event) {
                 // TODO make threadsafe
 
-                LibTorrentAlert alert = event.getAlert();
+//                LibTorrentAlert alert = event.getAlert();
                 LibTorrentStatus status = event.getTorrentStatus();
 
                 paused = status.paused;

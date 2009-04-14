@@ -16,7 +16,6 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -181,7 +180,6 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
-        final BTMetaInfo bMetaInfo = context.mock(BTMetaInfo.class);
         final SaveLocationException sle = new SaveLocationException(
                 SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING, null);
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
