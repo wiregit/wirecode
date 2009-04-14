@@ -117,6 +117,9 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         createComponents(barPainterFactory);
         
         pack();
+        
+        getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), "closeAction");
+        getRootPane().getActionMap().put("closeAction", new CancelOptionAction(this));
     }
     
     public void applyOptions() {
