@@ -80,6 +80,7 @@ public class LibTorrentManager {
                             EventListenerList<LibTorrentEvent> listenerList = listeners
                                     .get(alert.sha1);
                             if (listenerList != null) {
+                                //TODO asynchronous broadcast
                                 listenerList.broadcast(new LibTorrentEvent(alert, torrentStatus));
                             }
                         }
