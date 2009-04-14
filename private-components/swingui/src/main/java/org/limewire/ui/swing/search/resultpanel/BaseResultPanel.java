@@ -26,6 +26,8 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.nav.Navigator;
@@ -41,6 +43,7 @@ import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
 import org.limewire.ui.swing.search.resultpanel.classic.ImageTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
+import org.limewire.ui.swing.search.resultpanel.classic.ResultEnterAction;
 import org.limewire.ui.swing.search.resultpanel.classic.VideoTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewDisplayedRowsLimit;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
@@ -62,6 +65,7 @@ import ca.odell.glazedlists.RangeList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.assistedinject.Assisted;
@@ -110,6 +114,7 @@ public class BaseResultPanel extends JXPanel {
     private ListEventListener<VisualSearchResult> maxSizedListener;
     
     private EventListJXTableSorting resultsTableSorting; 
+    private EventSelectionModel<VisualSearchResult> selectionModel;
     private ColorHighlighter resultsColorHighlighter;
     private Scrollable visibleComponent;
 
@@ -141,6 +146,8 @@ public class BaseResultPanel extends JXPanel {
         // Create tables.
         this.resultsList = createList();
         this.resultsTable = createTable();
+        
+        searchResultsModel.addDisposalListener(new ResultModelDisposalListener());
         
         setLayout(layout);
  
@@ -317,11 +324,19 @@ public class BaseResultPanel extends JXPanel {
         ResultsTableFormat<VisualSearchResult> tableFormat = tableFormatFactory.createTableFormat(selectedCategory);
 
         // Create sorted list and set table model.
-        SortedList<VisualSearchResult> sortedList = new SortedList<VisualSearchResult>(eventList);
+        SortedList<VisualSearchResult> sortedList = GlazedListsFactory.sortedList(eventList);
         resultsTable.setEventListFormat(sortedList, tableFormat, true);
-
+        
         //link the jxtable column headers to the sorted list
-        resultsTableSorting = EventListJXTableSorting.install(resultsTable, sortedList, tableFormat);
+        resultsTableSorting = EventListJXTableSorting.install(resultsTable, sortedList, tableFormat);   
+        
+        //create and install new EventSelectionModel and enter key action        
+        if (selectionModel != null) {
+            selectionModel.dispose();
+        }
+        selectionModel = new EventSelectionModel<VisualSearchResult>(sortedList, false);
+        resultsTable.setSelectionModel(selectionModel);
+        resultsTable.setEnterKeyAction(new ResultEnterAction(selectionModel.getSelected(), downloadHandler));
             
         setupCellRenderers(tableFormat);
         
@@ -469,6 +484,16 @@ public class BaseResultPanel extends JXPanel {
      */
     public Scrollable getScrollable() {
         return visibleComponent;
+    }
+    
+    /**Disposes of the selection model when the result model is disposed*/
+    private class ResultModelDisposalListener implements DisposalListener {
+        @Override
+        public void objectDisposed(Disposable source) {
+            if(selectionModel != null){
+                selectionModel.dispose();
+            }
+        }        
     }
     
     /**

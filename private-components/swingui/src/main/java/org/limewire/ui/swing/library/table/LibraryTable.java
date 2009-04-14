@@ -158,6 +158,8 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
         
+        setEnterKeyAction(downloadAction);
+        
         applySavedColumnSettings();
     }
     

@@ -58,6 +58,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
@@ -88,6 +89,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -440,6 +442,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
             LibraryTable<LocalFileItem> table = tableFactory.createMyTable(category, filterList, currentFriendFilterChanger);
             table.enableMyLibrarySharing(fileShareWidget);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(catalog, getTableModel(table)));
+            table.setEnterKeyAction(new MyLibraryEnterListener(catalog, table));
             selectableMap.put(catalog, table);
             scrollPane = new JScrollPane(table);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());    
@@ -605,6 +608,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(
                 new Catalog(playlist), getTableModel(table)));
         
+        table.setEnterKeyAction(new MyLibraryEnterListener(new Catalog(playlist), table));
+        
         // Add table to selectable map.  The map is referenced when we select
         // the next/previous item for the media player.
         selectableMap.put(new Catalog(playlist), table);
@@ -700,23 +705,48 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
 
         @Override
         public void handleDoubleClick(int row) {
-            File file = model.getFileItem(row).getFile();
-            switch (model.getFileItem(row).getCategory()){
-            case AUDIO:
-                libraryNavigator.setActiveCatalog(catalog);
-                PlayerUtils.playOrLaunch(file);
-                break;
-            case OTHER:
-            case PROGRAM:
-                NativeLaunchUtils.launchExplorer(file);
-                break;
-            case IMAGE:
-            case VIDEO:
-            case DOCUMENT:
-                NativeLaunchUtils.safeLaunchFile(file);
-            }
-        }
+            playOrLaunch(model.getFileItem(row).getFile(), catalog);
+        }        
     }
+    
+    private class MyLibraryEnterListener extends AbstractAction{
+        private final Catalog catalog;
+        private final LibraryTable<? extends LocalFileItem> table;
+
+        public MyLibraryEnterListener(Catalog catalog, LibraryTable<? extends LocalFileItem> table){
+            this.catalog = catalog;
+            this.table = table;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            List<? extends LocalFileItem> selected = table.getSelectedItems();
+            if (selected.size() > 0) {
+                //Launching multiple items would be a bit chaotic so we only want 
+                //to launch the first selected item. 
+                playOrLaunch(selected.get(0).getFile(), catalog);
+            }
+        }       
+    }
+    
+    private void playOrLaunch(File file, Catalog catalog){
+
+        switch (CategoryUtils.getCategory(file)){
+        case AUDIO:
+            libraryNavigator.setActiveCatalog(catalog);
+            PlayerUtils.playOrLaunch(file);
+            break;
+        case OTHER:
+        case PROGRAM:
+            NativeLaunchUtils.launchExplorer(file);
+            break;
+        case IMAGE:
+        case VIDEO:
+        case DOCUMENT:
+            NativeLaunchUtils.safeLaunchFile(file);
+        }
+    }    
+
     
     public LibraryFileList getLibrary() {
         return libraryManager.getLibraryManagedList();
@@ -1245,7 +1275,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
                 else
                     fileList = shareListManager.getFriendShareList(currentFriendFilterChanger.getCurrentFriend());
                 
-                // if category shaaring, lock the ui
+                // if category sharing, lock the ui
                 if( (category == Category.AUDIO || category == Category.IMAGE || category == Category.VIDEO) && 
                         fileList != null && fileList.isCategoryAutomaticallyAdded(category)) {
                         showCollectionShare(category, currentFriendFilterChanger.getCurrentFriend());

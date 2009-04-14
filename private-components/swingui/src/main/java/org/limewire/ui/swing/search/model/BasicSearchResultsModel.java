@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.model;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -32,6 +34,7 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.GroupingList;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.FunctionList.AdvancedFunction;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
@@ -90,6 +93,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
     
     /** Current sort option. */
     private SortOption sortOption;
+    
+    private List<DisposalListener> disposalListeners = new ArrayList<DisposalListener>();
 
     /**
      * Constructs a BasicSearchResultsModel with the specified search details,
@@ -105,8 +110,8 @@ class BasicSearchResultsModel implements SearchResultsModel {
         this.downloadListManager = downloadListManager;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         
-        // Create list of all search results.
-        allSearchResults = new BasicEventList<SearchResult>();
+        // Create list of all search results.  Must be thread safe for EventSelectionModel to work properly.
+        allSearchResults = GlazedListsFactory.threadSafeList(new BasicEventList<SearchResult>());
         
         // Create list of search results grouped by URN.
         GroupingList<SearchResult> groupingListUrns = GlazedListsFactory.groupingList(
@@ -160,6 +165,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
             search.removeSearchListener(searchListener);
             searchListener = null;
         }
+        
+        if (allSearchResults instanceof TransformedList){
+            ((TransformedList)allSearchResults).dispose();
+        }
+        notifyDisposalListeners();
     }
     
     @Override
@@ -413,6 +423,22 @@ class BasicSearchResultsModel implements SearchResultsModel {
             ((SearchResultAdapter) transformedValue).update();
             resultCount.addAndGet(transformedValue.getSources().size());
             return transformedValue;
+        }
+    }
+
+    @Override
+    public void addDisposalListener(DisposalListener listener) {
+        disposalListeners.add(listener);
+    }
+
+    @Override
+    public void removeDisposalListener(DisposalListener listener) {
+        disposalListeners.remove(listener);
+    }
+    
+    private void notifyDisposalListeners(){
+        for (DisposalListener listener : disposalListeners){
+            listener.objectDisposed(this);
         }
     }
 }
