@@ -36,36 +36,36 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final LibTorrentManager libTorrentManager;
 
-    private File torrent = null;
+    private volatile File torrent = null;
 
-    private String id = null;
+    private volatile String id = null;
 
-    private boolean paused = false;
+    private volatile boolean paused = false;
 
-    private long contentLength;
+    private volatile long contentLength;
 
-    private int numPeers;
+    private volatile int numPeers;
 
-    private int nonInterestingPeers;
+    private volatile int nonInterestingPeers;
 
-    private int chokingPeers;
+    private volatile int chokingPeers;
 
-    private boolean finished;
+    private volatile boolean finished;
 
-    private long amountVerified;
+    private volatile long amountVerified;
 
-    private int pieceLength;
+    private volatile int pieceLength;
 
-    private long amountLost;
+    private volatile long amountLost;
 
-    private int amountPending;
+    private volatile int amountPending;
 
-    private int numConnections;
+    private volatile int numConnections;
 
-    private int triedHostCount;
+    private volatile int triedHostCount;
 
     // TODO thread safe
-    private DownloadState state = DownloadState.QUEUED;
+    private volatile DownloadState state = DownloadState.QUEUED;
 
     private long amountRead;
 
@@ -75,8 +75,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.libTorrentManager = libTorrentManager;
-        // TODO init torrent manager elsewhere.
-        this.libTorrentManager.init();
     }
 
     @Override
@@ -435,10 +433,17 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // btUploaderFactory.createBTUploader((ManagedTorrent) torrent,
         // btMetaInfo);
         // torrent.start();
+        
+        state = DownloadState.CONNECTING;
 
         // TODO TODO
 
         id = libTorrentManager.addTorrent(torrent);
+        
+        LibTorrentStatus status = libTorrentManager.getStatus(id);
+        LibTorrentState state = LibTorrentState.forId(status.state);
+        setStatus(state);
+        
         libTorrentManager.addListener(id, new EventListener<LibTorrentEvent>() {
             public void handleEvent(LibTorrentEvent event) {
                 // TODO make threadsafe
@@ -456,42 +461,47 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
                 LibTorrentState state = LibTorrentState.forId(status.state);
 
-                switch (state) {
-                case downloading:
-                    if (paused) {
-                        BTDownloaderImpl.this.state = DownloadState.PAUSED;
-                    } else {
-                        BTDownloaderImpl.this.state = DownloadState.DOWNLOADING;
-                    }
-                    break;
-                case queued_for_checking:
-                    BTDownloaderImpl.this.state = DownloadState.RESUMING;
-                    break;
-                case checking_files:
-                    BTDownloaderImpl.this.state = DownloadState.RESUMING;
-                    break;
-                case seeding:
-                    BTDownloaderImpl.this.state = DownloadState.COMPLETE;
-                    break;
-                case finished:
-                    BTDownloaderImpl.this.state = DownloadState.COMPLETE;
-                    break;
-                case allocating:
-                    BTDownloaderImpl.this.state = DownloadState.CONNECTING;
-                    break;
-                case downloading_metadata:
-                    BTDownloaderImpl.this.state = DownloadState.CONNECTING;
-                    break;
-                }
-
+                setStatus(state);
                 System.out.println("event!");
-            };
-        });
+            }
 
-        state = DownloadState.CONNECTING;
+        });
 
         // TODO moving to complete folder when complete and starting to seed
         // again
+    }
+
+    private void setStatus(LibTorrentState state) {
+        synchronized (BTDownloaderImpl.this) {
+
+            switch (state) {
+            case downloading:
+                if (paused) {
+                    BTDownloaderImpl.this.state = DownloadState.PAUSED;
+                } else {
+                    BTDownloaderImpl.this.state = DownloadState.DOWNLOADING;
+                }
+                break;
+            case queued_for_checking:
+                BTDownloaderImpl.this.state = DownloadState.RESUMING;
+                break;
+            case checking_files:
+                BTDownloaderImpl.this.state = DownloadState.RESUMING;
+                break;
+            case seeding:
+                BTDownloaderImpl.this.state = DownloadState.COMPLETE;
+                break;
+            case finished:
+                BTDownloaderImpl.this.state = DownloadState.COMPLETE;
+                break;
+            case allocating:
+                BTDownloaderImpl.this.state = DownloadState.CONNECTING;
+                break;
+            case downloading_metadata:
+                BTDownloaderImpl.this.state = DownloadState.CONNECTING;
+                break;
+            }
+        }
     }
 
     @Override

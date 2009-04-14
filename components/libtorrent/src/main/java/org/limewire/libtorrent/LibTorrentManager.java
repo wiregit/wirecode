@@ -17,6 +17,8 @@ public class LibTorrentManager {
     public LibTorrentManager() {
         this.libTorrent = new LibTorrentWrapper();
         this.listeners = new ConcurrentHashMap<String, EventListenerList<LibTorrentEvent>>();
+        // TODO init torrent manager elsewhere.
+        init();
     }
 
     public void init() {
