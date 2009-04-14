@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-04-06 11:31-0400\n"
+"POT-Creation-Date: 2009-04-13 11:30-0400\n"
 "PO-Revision-Date: 2009-02-20 16:59+0000\n"
 "Last-Translator: pwang <Unknown>\n"
 "Language-Team: \n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2009-04-07 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-04-14 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Language: Chinese\n"
 
@@ -289,11 +289,11 @@ msgstr "Mojito DHT 网络"
 msgid "LimeWire Store Integration"
 msgstr "LimeWire 音乐店整合"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:24
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
 msgstr ""
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:76
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:78
 msgid "Shared Files"
 msgstr "共享的文件"
 
@@ -325,7 +325,7 @@ msgstr "连接时间统计"
 msgid "Browse"
 msgstr "浏览"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1005
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:982
 msgid "Update Checks"
 msgstr "更新查寻"
 
@@ -561,7 +561,7 @@ msgid "Application"
 msgstr "应用"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:138
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:267
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:215
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:50
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:33
@@ -601,7 +601,7 @@ msgstr "出版社"
 msgid "Platform"
 msgstr "平台"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:84
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:83
 msgid "Metadata Loader"
 msgstr "文件元数据加载器"
 
@@ -1006,7 +1006,7 @@ msgstr "去掉"
 
 #. * Action to view files on host.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:44
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:865
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:746
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:463
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:104
 msgid "Browse Files"
@@ -1671,26 +1671,26 @@ msgstr "{0} 正在写..."
 msgid "{0} has entered text"
 msgstr "{0} 已输入文本"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:225
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:162
 #, java-format
 msgid "Chat from {0}"
 msgstr "和 {0} 聊天"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:227
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:164
 msgid "Reply"
 msgstr "回复"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:598
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:636
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:904
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:479
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:517
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:785
 msgid "Close conversation"
 msgstr "结束谈话"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:840
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:721
 msgid "Open Chat"
 msgstr "打开聊天"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:898
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:779
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:474
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:212
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:228
@@ -1707,7 +1707,7 @@ msgstr "不能访问远程数据"
 msgid "Hyperlink"
 msgstr "超链结"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:95
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:93
 msgid "Hide"
 msgstr ""
 
@@ -1832,66 +1832,66 @@ msgstr "复制链接"
 msgid "Find..."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:199
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:196
 #, java-format
 msgid "{0} is offline"
 msgstr "{0} 不在线"
 
 #. {1}: number of files, {0,2}: html tags
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:201
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:210
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:234
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:198
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:207
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:231
 msgid "You're {0}sharing {1} file{2} with your friend."
 msgid_plural "You're {0}sharing {1} files{2} with your friend."
 msgstr[0] ""
 msgstr[1] ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:208
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:205
 #, java-format
 msgid "{0} isn't on LimeWire"
 msgstr "{0} 不在 LimeWire 上"
 
 #. {0}, {1}: html tags
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:212
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:209
 #, java-format
 msgid "{0}Chat{1} about signing into LimeWire 5."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:221
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:218
 #, java-format
 msgid "Loading {0}'s files..."
 msgstr "加载{0}的文件"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:223
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:220
 msgid "Loading files..."
 msgstr "加载文件..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:232
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:229
 #, java-format
 msgid "{0} isn't sharing with you"
 msgstr "{0} 没有与你共享"
 
 #. {0}, {1}: html tags
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:236
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:233
 #, java-format
 msgid "{0}Chat{1} about LimeWire 5."
 msgstr ""
 
 #. this should never happen
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:239
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:236
 msgid "This person isn't sharing any files with you."
 msgstr "这个用户没有与你共享文件"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:250
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:247
 #, java-format
 msgid "There was a problem viewing {0}'s files."
 msgstr "在观看{0}的文件时，遇到了问题"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:252
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:249
 msgid "There was a problem viewing this person's files."
 msgstr "在观看这个人的文件时，遇到了问题"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:261
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:258
 msgid "There are no files to browse."
 msgstr ""
 
@@ -2475,7 +2475,7 @@ msgid ""
 "LiveJournal service or technology."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:153
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:152
 msgid "New Version Available!"
 msgstr "新版本已出了！"
 
@@ -2619,7 +2619,7 @@ msgstr "添加一个或多个文件夹"
 msgid "All Folders"
 msgstr "全部文件夹"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ChatAction.java:22
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ChatAction.java:20
 msgid "&Chat"
 msgstr ""
 
@@ -3798,8 +3798,8 @@ msgid "{0} is marked as spam."
 msgstr "{0} 被标记为垃圾邮件"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:91
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FriendStatusPanel.java:44
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FriendStatusPanel.java:158
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FriendStatusPanel.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FriendStatusPanel.java:161
 msgid "Chat"
 msgstr "聊天"
 
@@ -4015,7 +4015,7 @@ msgstr "非常好的连接"
 msgid "You have a turbo-charged connection"
 msgstr "你有一个非常好的连接"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FriendStatusPanel.java:158
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FriendStatusPanel.java:161
 #, java-format
 msgid "Chat ({0})"
 msgstr "聊天({0})"
@@ -4190,15 +4190,15 @@ msgstr "TB"
 msgid "KB/s"
 msgstr "KB/s"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:419
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:438
 msgid "Poor Quality"
 msgstr "质量差"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:421
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:440
 msgid "Good Quality"
 msgstr "质量好"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:423
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:442
 msgid "Excellent Quality"
 msgstr "质量优异"
 
