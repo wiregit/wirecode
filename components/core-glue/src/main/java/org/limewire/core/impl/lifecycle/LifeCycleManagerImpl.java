@@ -3,10 +3,10 @@ package org.limewire.core.impl.lifecycle;
 import org.limewire.core.api.lifecycle.LifeCycleEvent;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.listener.EventListener;
+import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.internal.base.Objects;
 import com.limegroup.gnutella.LifecycleManager;
 
 @Singleton
@@ -17,7 +17,6 @@ public class LifeCycleManagerImpl implements LifeCycleManager {
     @Inject
     public LifeCycleManagerImpl(LifecycleManager lifecycleManager) {
         this.lifecycleManager = Objects.nonNull(lifecycleManager, "lifecycleMaanger");
-
     }
 
     @Override
