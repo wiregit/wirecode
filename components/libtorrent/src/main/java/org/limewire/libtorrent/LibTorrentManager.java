@@ -41,9 +41,9 @@ public class LibTorrentManager {
         }
     }
 
-    public String addTorrent(File torrent) {
-        String id = libTorrent.add_torrent(torrent.getAbsolutePath());
-        return id;
+    public LibTorrentInfo addTorrent(File torrent) {
+        LibTorrentInfo info = libTorrent.add_torrent(torrent.getAbsolutePath());
+        return info;
     }
 
     public void removeTorrent(String id) {

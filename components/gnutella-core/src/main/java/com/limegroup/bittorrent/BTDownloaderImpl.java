@@ -9,6 +9,7 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.libtorrent.LibTorrentEvent;
+import org.limewire.libtorrent.LibTorrentInfo;
 import org.limewire.libtorrent.LibTorrentManager;
 import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
@@ -437,7 +438,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         // TODO TODO
 
-        id = libTorrentManager.addTorrent(torrent);
+        LibTorrentInfo info = libTorrentManager.addTorrent(torrent);
+        System.out.println(info);
+        id = info.sha1;
         
         LibTorrentStatus status = libTorrentManager.getStatus(id);
         LibTorrentState state = LibTorrentState.forId(status.state);

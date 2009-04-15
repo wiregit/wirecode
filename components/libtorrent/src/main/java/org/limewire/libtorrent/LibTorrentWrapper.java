@@ -14,7 +14,7 @@ public class LibTorrentWrapper implements LibTorrent {
     }
 
     @Override
-    public String add_torrent(String path) {
+    public LibTorrentInfo add_torrent(String path) {
         return libTorrent.add_torrent(path);
     }
 

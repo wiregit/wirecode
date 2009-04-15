@@ -9,10 +9,14 @@
 #include "libtorrent/alert_types.hpp"
 #include <dlfcn.h>
 #include "libtorrent/peer_id.hpp"
+#include <boost/filesystem/path.hpp>
 
 libtorrent::session s;
 std::string savePath;
 typedef libtorrent::big_number sha1_hash;
+
+
+//TODO fix memory leaks
 
 extern "C" int init(const char* path) {
 	std::string newPath(path);
@@ -71,7 +75,15 @@ libtorrent::torrent_handle findTorrentHandle(const char* sha1String) {
 	return torrent_handle;
 }
 
-extern "C" const char* add_torrent(char* path) {
+struct info_s {
+	const char* sha1;
+	int piece_length;
+	int num_pieces;
+	int num_files;
+	const char** paths;
+};
+
+extern "C" const void* add_torrent(char* path) {
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "path: " << path << std::endl;
 	libtorrent::add_torrent_params p;
@@ -81,13 +93,34 @@ extern "C" const char* add_torrent(char* path) {
 
 	libtorrent::torrent_info torrent_info = h.get_torrent_info();
 
+	int piece_length = torrent_info.piece_length();
+	int num_pieces = torrent_info.num_pieces();
+	int num_files = torrent_info.num_files();
+
+	libtorrent::file_storage files = torrent_info.files();
+
+	const char** paths = new const char*[num_files];
+	for(int i = 0; i < num_files; i++) {
+		libtorrent::file_entry file = files.at(i);
+		boost::filesystem::path path = file.path;
+		const char* p = path.string().c_str();
+		paths[i] = p;
+	}
+
 	sha1_hash sha1 = torrent_info.info_hash();
 	std::cout << "sha1: " << sha1 << std::endl;
 
 	const char* sha1String = getSha1String(sha1);
 
-	std::cout << "[" << sha1String << "]" << std::endl;
-	return sha1String;
+	//TODO free memory
+	info_s* info = new info_s();
+	info->sha1 = sha1String;
+	info->num_files = num_files;
+	info->num_pieces = num_pieces;
+	info->piece_length = piece_length;
+	info->paths = paths;
+
+	return info;
 }
 
 extern "C" int pause_torrent(const char* id) {
@@ -188,11 +221,11 @@ void Alert(void* alert, void* stats) {
 int main(int argc, char* argv[]) {
 	try {
 		init("/home/pvertenten/Desktop");
-		const char
-				* id =
+		info_s* info =(info_s*)
 						add_torrent(
 								"/home/pvertenten/Desktop/wndw - wireless networking in the developing world.torrent");
 
+		const char* id = info->sha1;
 		int count = 1;
 		bool paused = false;
 		while (true) {

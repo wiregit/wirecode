@@ -9,7 +9,7 @@ public interface LibTorrent extends Library {
 
     public void init(String path);
 
-    public String add_torrent(String path);
+    public LibTorrentInfo add_torrent(String path);
 
     public int pause_torrent(String id);
 
