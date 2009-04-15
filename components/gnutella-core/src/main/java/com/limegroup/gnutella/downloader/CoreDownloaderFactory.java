@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
+import java.io.IOError;
+import java.io.IOException;
 import java.net.URI;
 
 import org.limewire.core.api.download.SaveLocationException;
@@ -47,7 +49,7 @@ public interface CoreDownloaderFactory {
     public StoreDownloader createStoreDownloader(RemoteFileDesc rfd, File saveDirectory,
             String fileName, boolean overwrite) throws SaveLocationException;
     
-    public BTDownloader createBTDownloader(File torrent);
+    public BTDownloader createBTDownloader(File torrent) throws IOException;
 
     /**
      * Creates the appropriate kind of downloader from a given DownloadMemento.

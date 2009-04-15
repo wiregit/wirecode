@@ -29,4 +29,6 @@ public interface LibTorrent extends Library {
 
     public LibTorrentStatus get_torrent_status(String id, Memory memory);
 
+    public int remove_torrent(String id);
+
 }

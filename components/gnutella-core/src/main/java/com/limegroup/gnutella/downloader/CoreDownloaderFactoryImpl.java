@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
@@ -103,7 +104,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         return sd;
     }
 
-    public BTDownloader createBTDownloader(File torrent) {
+    public BTDownloader createBTDownloader(File torrent) throws IOException {
         BTDownloader bd = btDownloaderFactory.get();
         bd.init(torrent);
         return bd;

@@ -932,7 +932,12 @@ public class DownloadManagerImpl implements DownloadManager, Service,
         // checkTargetLocation(system, overwrite);
         // else
         // torrentManager.get().killTorrentForFile(system.getCompleteFile());
-        CoreDownloader ret = coreDownloaderFactory.createBTDownloader(torrentFile);
+        CoreDownloader ret;
+        try {
+            ret = coreDownloaderFactory.createBTDownloader(torrentFile);
+        } catch (IOException e) {
+           throw new SaveLocationException(e, torrentFile);
+        }
         initializeDownload(ret, true);
         return ret;
     }

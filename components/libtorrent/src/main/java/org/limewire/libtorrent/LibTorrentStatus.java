@@ -10,4 +10,5 @@ public class LibTorrentStatus extends Structure {
 	public int state;
 	public float progress;
 	public boolean paused;
+	public boolean finished;
 }

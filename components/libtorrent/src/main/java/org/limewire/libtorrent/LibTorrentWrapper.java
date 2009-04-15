@@ -70,4 +70,9 @@ public class LibTorrentWrapper implements LibTorrent {
         return libTorrent.is_torrent_seed(id);
     }
 
+    @Override
+    public int remove_torrent(String id) {
+        return libTorrent.remove_torrent(id);
+    }
+
 }

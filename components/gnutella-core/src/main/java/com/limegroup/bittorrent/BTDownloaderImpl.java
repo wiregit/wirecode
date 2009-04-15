@@ -1,12 +1,18 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
+import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.libtorrent.LibTorrentEvent;
 import org.limewire.libtorrent.LibTorrentInfo;
@@ -16,6 +22,8 @@ import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
+import com.limegroup.bittorrent.BTData.BTFileData;
+import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -42,10 +50,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private volatile int numPeers;
 
-    private volatile int nonInterestingPeers;
-
-    private volatile int chokingPeers;
-
     private volatile boolean finished;
 
     private volatile long amountVerified;
@@ -54,16 +58,16 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private volatile int amountPending;
 
-    private volatile int numConnections;
-
-    private volatile int triedHostCount;
-    
     private volatile LibTorrentInfo info;
+
+    private volatile File incompleteFile = null;
 
     // TODO thread safe
     private volatile DownloadState state = DownloadState.QUEUED;
 
     private long amountRead;
+
+    private List<String> paths = new ArrayList<String>();
 
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
@@ -74,8 +78,32 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public void init(File torrent) {
+    public void init(File torrent) throws IOException {
         this.torrent = torrent;
+        FileInputStream fis = null;
+        FileChannel fileChannel = null;
+        try {
+            fis = new FileInputStream(torrent);
+            fileChannel = fis.getChannel();
+            Map metaInfo = (Map) Token.parse(fileChannel);
+            BTData btData = new BTDataImpl(metaInfo);
+            String name = btData.getName();
+
+            // TODO pull this from somewhere
+            File torrentDownloadFolder = new File("/home/pvertenten/Desktop");
+            incompleteFile = new File(torrentDownloadFolder, name);
+
+            if (btData.getFiles() != null) {
+                for (BTFileData fileData : btData.getFiles()) {
+                    paths.add(fileData.getPath());
+                }
+            }
+
+        } finally {
+            IOUtils.close(fileChannel);
+            IOUtils.close(fis);
+        }
+
     }
 
     /**
@@ -85,7 +113,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
-
+        libTorrentManager.removeTorrent(info.sha1);
     }
 
     @Override
@@ -141,11 +169,16 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public File getFile() {
-        // if (torrent.isComplete())
-        // return torrentFileSystem.getCompleteFile();
-        // return torrentFileSystem.getIncompleteFile();
-        // TODO
-        return null;
+        if (finished) {
+            return getCompleteFile();
+        } else {
+            return getIncompleteFile();
+        }
+    }
+
+    @Override
+    public File getIncompleteFile() {
+        return incompleteFile;
     }
 
     @Override
@@ -219,13 +252,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getRemainingStateTime() {
-        // if (getState() != DownloadState.WAITING_FOR_GNET_RESULTS)
-        // return 0;
-        // return Math.max(0,
-        // (int) (torrent.getNextTrackerRequestTime() -
-        // System.currentTimeMillis()) / 1000);
         return 0;
-        // TODO
     }
 
     @Override
@@ -294,12 +321,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getBusyHostCount() {
-        return nonInterestingPeers;
+        return 0;
     }
 
     @Override
     public int getQueuedHostCount() {
-        return chokingPeers;
+        return 0;
     }
 
     @Override
@@ -406,7 +433,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getNumHosts() {
-        return numConnections;
+        return numPeers;
     }
 
     @Override
@@ -428,7 +455,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // btUploaderFactory.createBTUploader((ManagedTorrent) torrent,
         // btMetaInfo);
         // torrent.start();
-        
+
         state = DownloadState.CONNECTING;
 
         // TODO TODO
@@ -436,27 +463,29 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         LibTorrentInfo info = libTorrentManager.addTorrent(torrent);
         System.out.println(info);
         this.info = info;
-        
+
         System.out.println("sha1_java: " + info.sha1);
-        
+
         LibTorrentStatus status = libTorrentManager.getStatus(info.sha1);
         LibTorrentState state = LibTorrentState.forId(status.state);
         setStatus(state);
-        
+
         libTorrentManager.addListener(info.sha1, new EventListener<LibTorrentEvent>() {
             public void handleEvent(LibTorrentEvent event) {
                 // TODO make threadsafe
 
-//                LibTorrentAlert alert = event.getAlert();
+                // LibTorrentAlert alert = event.getAlert();
                 LibTorrentStatus status = event.getTorrentStatus();
 
                 paused = status.paused;
-                //TODO get real values for variables.
+                // TODO get real values for variables.
                 amountVerified = status.total_done.longValue();
                 amountRead = status.total_done.longValue();
 
                 LibTorrentState state = LibTorrentState.forId(status.state);
 
+                BTDownloaderImpl.this.finished = status.finished;
+                
                 setStatus(state);
                 System.out.println("event!");
             }
@@ -566,8 +595,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getTriedHostCount() {
-        return triedHostCount;
-        // TODO
+        return 0;
     }
 
     @Override
@@ -633,20 +661,40 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public File getCompleteFile() {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO real file.
+        return getIncompleteFile();
     }
 
     @Override
-    public List<File> getFiles() {
-        // TODO Auto-generated method stub
-        return null;
+    public List<File> getCompleteFiles() {
+        List<File> files = new ArrayList<File>();
+        File completeFile = getCompleteFile();
+        if (paths.size() > 0) {
+            for (String path : paths) {
+                // TODO assuming unix path??
+                File file = new File(completeFile, path);
+                files.add(file);
+            }
+        } else {
+            files.add(completeFile);
+        }
+        return files;
     }
 
     @Override
     public List<File> getIncompleteFiles() {
-        // TODO Auto-generated method stub
-        return null;
+        List<File> files = new ArrayList<File>();
+        File incompleteFile = getIncompleteFile();
+        if (paths.size() > 0) {
+            for (String path : paths) {
+                // TODO assuming unix path??
+                File file = new File(incompleteFile, path);
+                files.add(file);
+            }
+        } else {
+            files.add(incompleteFile);
+        }
+        return files;
     }
 
     @Override

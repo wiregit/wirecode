@@ -15,7 +15,6 @@ libtorrent::session s;
 std::string savePath;
 typedef libtorrent::big_number sha1_hash;
 
-
 //TODO fix memory leaks
 
 extern "C" int init(const char* path) {
@@ -51,6 +50,7 @@ struct torrent_s {
 	int state;
 	float progress;
 	int paused;
+	int finished;
 };
 
 void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
@@ -62,6 +62,7 @@ void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
 	int state = status.state;
 	float progress = status.progress;
 	bool paused = status.paused;
+	bool finished = handle.is_finished();
 
 	stats->total_done = total_done;
 	stats->download_rate = download_rate;
@@ -69,6 +70,7 @@ void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
 	stats->state = state;
 	stats->progress = progress;
 	stats->paused = paused;
+	stats->finished = finished;
 
 }
 
@@ -107,7 +109,7 @@ extern "C" const void* add_torrent(char* path) {
 	libtorrent::file_storage files = torrent_info.files();
 
 	const char** paths = new const char*[num_files];
-	for(int i = 0; i < num_files; i++) {
+	for (int i = 0; i < num_files; i++) {
 		libtorrent::file_entry file = files.at(i);
 		boost::filesystem::path path = file.path;
 		const char* p = path.string().c_str();
@@ -136,6 +138,12 @@ extern "C" const void* add_torrent(char* path) {
 extern "C" int pause_torrent(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 	h.pause();
+	return 0;
+}
+
+extern "C" int remove_torrent(const char* id) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
+	s.remove_torrent(h);
 	return 0;
 }
 
@@ -231,8 +239,9 @@ void Alert(void* alert, void* stats) {
 int main(int argc, char* argv[]) {
 	try {
 		init("/home/pvertenten/Desktop");
-		info_s* info =(info_s*)
-						add_torrent(
+		info_s
+				* info =
+						(info_s*) add_torrent(
 								"/home/pvertenten/Desktop/wndw - wireless networking in the developing world.torrent");
 
 		const char* id = info->sha1;
