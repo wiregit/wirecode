@@ -38,11 +38,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private volatile File torrent = null;
 
-    private volatile String id = null;
-
     private volatile boolean paused = false;
-
-    private volatile long contentLength;
 
     private volatile int numPeers;
 
@@ -54,8 +50,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private volatile long amountVerified;
 
-    private volatile int pieceLength;
-
     private volatile long amountLost;
 
     private volatile int amountPending;
@@ -63,6 +57,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private volatile int numConnections;
 
     private volatile int triedHostCount;
+    
+    private volatile LibTorrentInfo info;
 
     // TODO thread safe
     private volatile DownloadState state = DownloadState.QUEUED;
@@ -94,7 +90,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void pause() {
-        libTorrentManager.pauseTorrent(id);
+        libTorrentManager.pauseTorrent(info.sha1);
     }
 
     @Override
@@ -139,7 +135,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean resume() {
-        libTorrentManager.resumeTorrent(id);
+        libTorrentManager.resumeTorrent(info.sha1);
         return true;
     }
 
@@ -234,8 +230,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public long getContentLength() {
-        // return torrentFileSystem.getTotalSize();
-        return contentLength;
+        return info.content_length.longValue();
     }
 
     @Override
@@ -336,7 +331,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getChunkSize() {
-        return pieceLength;
+        return info.piece_length;
     }
 
     @Override
@@ -440,15 +435,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         LibTorrentInfo info = libTorrentManager.addTorrent(torrent);
         System.out.println(info);
-        id = info.sha1;
+        this.info = info;
         
-        System.out.println("sha1_java: " + id);
+        System.out.println("sha1_java: " + info.sha1);
         
-        LibTorrentStatus status = libTorrentManager.getStatus(id);
+        LibTorrentStatus status = libTorrentManager.getStatus(info.sha1);
         LibTorrentState state = LibTorrentState.forId(status.state);
         setStatus(state);
         
-        libTorrentManager.addListener(id, new EventListener<LibTorrentEvent>() {
+        libTorrentManager.addListener(info.sha1, new EventListener<LibTorrentEvent>() {
             public void handleEvent(LibTorrentEvent event) {
                 // TODO make threadsafe
 
@@ -456,12 +451,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 LibTorrentStatus status = event.getTorrentStatus();
 
                 paused = status.paused;
+                //TODO get real values for variables.
                 amountVerified = status.total_done.longValue();
                 amountRead = status.total_done.longValue();
-
-                // TODO get real content length
-                float length = amountVerified / status.progress;
-                contentLength = (long) length;
 
                 LibTorrentState state = LibTorrentState.forId(status.state);
 

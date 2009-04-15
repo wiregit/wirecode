@@ -1,17 +1,22 @@
 package org.limewire.libtorrent;
 
+import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 public class LibTorrentInfo extends Structure {
 
     public String sha1;
+    
+    public String name;
 
     public int piece_length;
 
     public int num_pieces;
 
     public int num_files;
+    
+    public NativeLong content_length;
 
     public Pointer paths;
 

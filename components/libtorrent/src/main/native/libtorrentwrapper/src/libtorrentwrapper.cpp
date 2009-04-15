@@ -30,7 +30,10 @@ extern "C" int init(const char* path) {
 const char* getSha1String(sha1_hash sha1) {
 	std::stringstream oss;
 	oss << sha1;
-	return oss.str().c_str();
+
+	std::string* sha1String = new std::string(oss.str().c_str());
+	//TODO clean memory
+	return sha1String->c_str();
 }
 
 sha1_hash getSha1Hash(const char* sha1String) {
@@ -77,9 +80,11 @@ libtorrent::torrent_handle findTorrentHandle(const char* sha1String) {
 
 struct info_s {
 	const char* sha1;
+	const char* name;
 	int piece_length;
 	int num_pieces;
 	int num_files;
+	long content_length;
 	const char** paths;
 };
 
@@ -93,9 +98,11 @@ extern "C" const void* add_torrent(char* path) {
 
 	libtorrent::torrent_info torrent_info = h.get_torrent_info();
 
+	const char* name = torrent_info.name().c_str();
 	int piece_length = torrent_info.piece_length();
 	int num_pieces = torrent_info.num_pieces();
 	int num_files = torrent_info.num_files();
+	long content_length = torrent_info.total_size();
 
 	libtorrent::file_storage files = torrent_info.files();
 
@@ -112,12 +119,15 @@ extern "C" const void* add_torrent(char* path) {
 
 	const char* sha1String = getSha1String(sha1);
 
+	std::cout << "sha1String: " << sha1String << std::endl;
 	//TODO free memory
 	info_s* info = new info_s();
 	info->sha1 = sha1String;
+	info->name = name;
 	info->num_files = num_files;
 	info->num_pieces = num_pieces;
 	info->piece_length = piece_length;
+	info->content_length = content_length;
 	info->paths = paths;
 
 	return info;
