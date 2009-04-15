@@ -113,6 +113,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
+        //TODO, put back in logic
         libTorrentManager.removeTorrent(info.sha1);
     }
 
