@@ -28,6 +28,7 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
@@ -46,26 +47,84 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private volatile File torrent = null;
 
-    private volatile boolean paused = false;
-
-    private volatile int numPeers;
-
-    private volatile boolean finished;
-
-    private volatile long amountVerified;
-
-    private volatile long amountLost;
-
-    private volatile int amountPending;
-
-    private volatile LibTorrentInfo info;
-
     private volatile File incompleteFile = null;
 
-    // TODO thread safe
-    private volatile DownloadState state = DownloadState.QUEUED;
+    private final TorrentStatus torrentStatus;
 
-    private long amountRead;
+    private class TorrentStatus {
+        private LibTorrentInfo info = null;
+
+        private LibTorrentStatus status = null;
+
+        public synchronized String getSha1() {
+            return info.sha1;
+        }
+
+        public synchronized boolean isPaused() {
+            return status == null ? false : status.paused;
+        }
+
+        public synchronized DownloadState getState() {
+            if (status == null) {
+                return DownloadState.QUEUED;
+            }
+            LibTorrentState state = LibTorrentState.forId(status.state);
+            return convertState(state);
+        }
+
+        public synchronized boolean isFinished() {
+            return status == null ? false : status.finished;
+        }
+
+        public synchronized long getTotalSize() {
+            return info.content_length.longValue();
+        }
+
+        public synchronized long getTotalDownloaded() {
+            return status == null ? 0 : status.total_done.longValue();
+        }
+
+        public synchronized int getNumPeers() {
+            return status == null ? 0 : status.num_peers;
+        }
+
+        public synchronized int getPieceLength() {
+            return info.piece_length;
+        }
+
+        public synchronized void setInfo(LibTorrentInfo info) {
+            this.info = info;
+        }
+
+        public synchronized void setStatus(LibTorrentStatus status) {
+            this.status = status;
+        }
+
+        private DownloadState convertState(LibTorrentState state) {
+            switch (state) {
+            case downloading:
+                if (isPaused()) {
+                    return DownloadState.PAUSED;
+                } else {
+                    return DownloadState.DOWNLOADING;
+                }
+            case queued_for_checking:
+                return DownloadState.RESUMING;
+            case checking_files:
+                return DownloadState.RESUMING;
+            case seeding:
+                return DownloadState.COMPLETE;
+            case finished:
+                return DownloadState.COMPLETE;
+            case allocating:
+                return DownloadState.CONNECTING;
+            case downloading_metadata:
+                return DownloadState.CONNECTING;
+            default:
+                throw new IllegalStateException("Unknown libtorrent state: " + state);
+            }
+        }
+    }
 
     private List<String> paths = new ArrayList<String>();
 
@@ -75,6 +134,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.libTorrentManager = libTorrentManager;
+        this.torrentStatus = new TorrentStatus();
+
     }
 
     @Override
@@ -113,64 +174,50 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
-        //TODO, put back in logic
-        libTorrentManager.removeTorrent(info.sha1);
+        // TODO, put back in logic
+        libTorrentManager.removeTorrent(torrentStatus.getSha1());
     }
 
     @Override
     public void pause() {
-        libTorrentManager.pauseTorrent(info.sha1);
+        libTorrentManager.pauseTorrent(torrentStatus.getSha1());
     }
 
     @Override
     public boolean isPaused() {
-        return paused;
+        return torrentStatus.isPaused();
     }
 
     @Override
     public boolean isPausable() {
-        // return torrent.isPausable();
-        return false;
-        // TODO
-
+        return !isPaused();
     }
 
     @Override
     public boolean isInactive() {
-        // return isResumable() || torrent.getState() == TorrentState.QUEUED;
-        return false;
-        // TODO
+        return isResumable() || torrentStatus.getState() == DownloadState.QUEUED;
     }
 
     @Override
     public boolean isLaunchable() {
-        // return torrentFileSystem.getFiles().size() == 1
-        // && torrentContext.getDiskManager().getLastVerifiedOffset() > 0;
+        // TODO add back in
         return false;
-        // TODO
     }
 
     @Override
     public boolean isResumable() {
-        // switch (torrent.getState()) {
-        // case PAUSED:
-        // case TRACKER_FAILURE:
-        // return true;
-        // }
-        // return false;
-        return false;
-        // TODO
+        return isPaused();
     }
 
     @Override
     public boolean resume() {
-        libTorrentManager.resumeTorrent(info.sha1);
+        libTorrentManager.resumeTorrent(torrentStatus.getSha1());
         return true;
     }
 
     @Override
     public File getFile() {
-        if (finished) {
+        if (torrentStatus.isFinished()) {
             return getCompleteFile();
         } else {
             return getIncompleteFile();
@@ -184,15 +231,16 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public File getDownloadFragment() {
-        // if (!isLaunchable())
-        // return null;
-        // if (torrent.isComplete())
-        // return getFile();
-        // long size = torrentContext.getDiskManager().getLastVerifiedOffset();
-        // if (size <= 0)
-        // return null;
-        // File file = new
-        // File(torrentFileSystem.getIncompleteFile().getParent(),
+        if (!isLaunchable()) {
+            return null;
+        }
+
+        if (isCompleted()) {
+            return getCompleteFile();
+        }
+
+        // TODO add in preview capability for single file torrents.
+        // File file = new File(getIncompleteFile().getParent(),
         // IncompleteFileManager.PREVIEW_PREFIX
         // + torrentFileSystem.getIncompleteFile().getName());
         // // Copy first block, returning if nothing was copied.
@@ -202,53 +250,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // return file;
 
         return null;
-        // TODO
     }
 
     @Override
     public DownloadState getState() {
-        // // aborted seeding torrents are shown as complete in the
-        // // downloads pane.
-        // if (torrent.isComplete())
-        // return DownloadState.COMPLETE;
-        // switch (torrent.getState()) {
-        // case WAITING_FOR_TRACKER:
-        // return DownloadState.WAITING_FOR_GNET_RESULTS;
-        // case VERIFYING:
-        // return DownloadState.RESUMING;
-        // case CONNECTING:
-        // return DownloadState.CONNECTING;
-        // }
-        //
-        // if (torrent.isDownloading()) {
-        // return DownloadState.DOWNLOADING;
-        // }
-        // switch (torrent.getState()) {
-        // case SAVING:
-        // return DownloadState.SAVING;
-        // case SEEDING:
-        // return DownloadState.COMPLETE;
-        // case QUEUED:
-        // return DownloadState.QUEUED;
-        // case PAUSED:
-        // return DownloadState.PAUSED;
-        // case STOPPED:
-        // return DownloadState.ABORTED;
-        // case DISK_PROBLEM:
-        // return DownloadState.DISK_PROBLEM;
-        // case TRACKER_FAILURE:
-        // return DownloadState.WAITING_FOR_USER; // let the user trigger a
-        // // scrape
-        // case SCRAPING:
-        // return DownloadState.ITERATIVE_GUESSING; // bad name but practically
-        // // the same
-        // case INVALID:
-        // return DownloadState.INVALID;
-        // }
-        // throw new IllegalStateException("unknown torrent state");
-
-        return state;
-        // TODO
+        return torrentStatus.getState();
     }
 
     @Override
@@ -258,26 +264,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public long getContentLength() {
-        return info.content_length.longValue();
+        return torrentStatus.getTotalSize();
     }
 
     @Override
     public long getAmountRead() {
-        // // if the download is complete, just return the length
-        // if (btMetaInfo == null)
-        // return getContentLength();
-        //
-        // // return the number of verified bytes
-        // long ret = torrentContext.getDiskManager().getBlockSize();
-        //
-        // // if this is initial checking, add the number of processed bytes
-        // // too.
-        // if (torrent.getState() == TorrentState.VERIFYING)
-        // ret += torrentContext.getDiskManager().getNumCorruptedBytes();
-        // return ret;
-
-        return amountRead;
-        // TOOD
+        return torrentStatus.getTotalDownloaded();
     }
 
     @Override
@@ -317,7 +309,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getPossibleHostCount() {
-        return numPeers;
+        return torrentStatus.getNumPeers();
     }
 
     @Override
@@ -337,7 +329,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isCompleted() {
-        return finished;
+        return torrentStatus.isFinished();
     }
 
     @Override
@@ -352,19 +344,19 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // TODO
     }
 
-    @Override
     public long getAmountVerified() {
-        return amountVerified;
+        return torrentStatus.getTotalDownloaded();
     }
 
     @Override
     public int getChunkSize() {
-        return info.piece_length;
+        return torrentStatus.getPieceLength();
     }
 
     @Override
     public long getAmountLost() {
-        return amountLost;
+        // TODO ???
+        return 0;
     }
 
     @Override
@@ -429,12 +421,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getAmountPending() {
-        return amountPending;
+        // TODO ???
+        return 0;
     }
 
     @Override
     public int getNumHosts() {
-        return numPeers;
+        return torrentStatus.getNumPeers();
     }
 
     @Override
@@ -457,19 +450,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // btMetaInfo);
         // torrent.start();
 
-        state = DownloadState.CONNECTING;
-
-        // TODO TODO
-
         LibTorrentInfo info = libTorrentManager.addTorrent(torrent);
+        torrentStatus.setInfo(info);
+
         System.out.println(info);
-        this.info = info;
 
         System.out.println("sha1_java: " + info.sha1);
 
         LibTorrentStatus status = libTorrentManager.getStatus(info.sha1);
-        LibTorrentState state = LibTorrentState.forId(status.state);
-        setStatus(state);
+        torrentStatus.setStatus(status);
 
         libTorrentManager.addListener(info.sha1, new EventListener<LibTorrentEvent>() {
             public void handleEvent(LibTorrentEvent event) {
@@ -477,57 +466,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
                 // LibTorrentAlert alert = event.getAlert();
                 LibTorrentStatus status = event.getTorrentStatus();
-
-                paused = status.paused;
-                // TODO get real values for variables.
-                amountVerified = status.total_done.longValue();
-                amountRead = status.total_done.longValue();
-
-                LibTorrentState state = LibTorrentState.forId(status.state);
-
-                BTDownloaderImpl.this.finished = status.finished;
-                
-                setStatus(state);
-                System.out.println("event!");
+                torrentStatus.setStatus(status);
             }
 
         });
 
         // TODO moving to complete folder when complete and starting to seed
         // again
-    }
-
-    private void setStatus(LibTorrentState state) {
-        synchronized (BTDownloaderImpl.this) {
-
-            switch (state) {
-            case downloading:
-                if (paused) {
-                    BTDownloaderImpl.this.state = DownloadState.PAUSED;
-                } else {
-                    BTDownloaderImpl.this.state = DownloadState.DOWNLOADING;
-                }
-                break;
-            case queued_for_checking:
-                BTDownloaderImpl.this.state = DownloadState.RESUMING;
-                break;
-            case checking_files:
-                BTDownloaderImpl.this.state = DownloadState.RESUMING;
-                break;
-            case seeding:
-                BTDownloaderImpl.this.state = DownloadState.COMPLETE;
-                break;
-            case finished:
-                BTDownloaderImpl.this.state = DownloadState.COMPLETE;
-                break;
-            case allocating:
-                BTDownloaderImpl.this.state = DownloadState.CONNECTING;
-                break;
-            case downloading_metadata:
-                BTDownloaderImpl.this.state = DownloadState.CONNECTING;
-                break;
-            }
-        }
     }
 
     @Override
@@ -601,12 +546,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public String getCustomIconDescriptor() {
-        // if (torrentFileSystem.getFiles().size() == 1)
-        // return null;
-        // return BITTORRENT_DOWNLOAD;
-
-        // TODO
-
         return BITTORRENT_DOWNLOAD;
     }
 
@@ -617,8 +556,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     protected DownloadMemento createMemento() {
-        if (finished)
+        if (torrentStatus.isFinished()) {
             throw new IllegalStateException("creating memento for finished torrent!");
+        }
+
+        // TODO overwrite this
         return new BTDownloadMementoImpl();
     }
 
