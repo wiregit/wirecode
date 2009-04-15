@@ -15,6 +15,8 @@ public class Main {
                         "/home/pvertenten/Desktop/wndw - wireless networking in the developing world.torrent"));
         System.out.println(info);
         String id = info.sha1;
+        
+        System.out.println("sha1_java: " + id);
 
         libTorrentManager.addListener(id, new EventListener<LibTorrentEvent>() {
             @Override

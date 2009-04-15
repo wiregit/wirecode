@@ -442,6 +442,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         System.out.println(info);
         id = info.sha1;
         
+        System.out.println("sha1_java: " + id);
+        
         LibTorrentStatus status = libTorrentManager.getStatus(id);
         LibTorrentState state = LibTorrentState.forId(status.state);
         setStatus(state);
