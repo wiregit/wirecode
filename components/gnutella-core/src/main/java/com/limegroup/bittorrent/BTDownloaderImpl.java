@@ -402,9 +402,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public File getSaveFile() {
-        // return torrentFileSystem.getCompleteFile();
-        // TODO
-        return new File("SaveFile");
+        return getCompleteFile();
     }
 
     @Override
