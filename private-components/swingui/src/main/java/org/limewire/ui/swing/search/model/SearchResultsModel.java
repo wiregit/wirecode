@@ -32,6 +32,11 @@ public interface SearchResultsModel extends DownloadHandler, Disposable {
     String getSearchQuery();
     
     /**
+     * Returns the title string for the search.
+     */
+    String getSearchTitle();
+    
+    /**
      * Returns the total number of results in the search.
      */
     int getResultCount();
@@ -47,6 +52,11 @@ public interface SearchResultsModel extends DownloadHandler, Disposable {
      * place. 
      */
     EventList<VisualSearchResult> getObservableSearchResults();
+
+    /**
+     * Returns a filtered list of grouped results in the search.
+     */
+    EventList<VisualSearchResult> getFilteredSearchResults();
 
     /**
      * Returns a list of filtered results for the specified search category.
