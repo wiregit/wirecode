@@ -6,7 +6,7 @@ import org.limewire.listener.EventListener;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        LibTorrentManager libTorrentManager = new LibTorrentManager();
+        TorrentManager libTorrentManager = new TorrentManager();
 
         libTorrentManager.init();
 

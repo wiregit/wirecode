@@ -16,9 +16,9 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.libtorrent.LibTorrentEvent;
 import org.limewire.libtorrent.LibTorrentInfo;
-import org.limewire.libtorrent.LibTorrentManager;
-import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
+import org.limewire.libtorrent.Torrent;
+import org.limewire.libtorrent.TorrentManager;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
@@ -28,7 +28,6 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
@@ -43,98 +42,23 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final DownloadManager downloadManager;
 
-    private final LibTorrentManager libTorrentManager;
+    private final TorrentManager libTorrentManager;
 
     private volatile File torrent = null;
 
     private volatile File incompleteFile = null;
 
-    private final TorrentStatus torrentStatus;
-
-    private class TorrentStatus {
-        private LibTorrentInfo info = null;
-
-        private LibTorrentStatus status = null;
-
-        public synchronized String getSha1() {
-            return info.sha1;
-        }
-
-        public synchronized boolean isPaused() {
-            return status == null ? false : status.paused;
-        }
-
-        public synchronized DownloadState getState() {
-            if (status == null) {
-                return DownloadState.QUEUED;
-            }
-            LibTorrentState state = LibTorrentState.forId(status.state);
-            return convertState(state);
-        }
-
-        public synchronized boolean isFinished() {
-            return status == null ? false : status.finished;
-        }
-
-        public synchronized long getTotalSize() {
-            return info.content_length.longValue();
-        }
-
-        public synchronized long getTotalDownloaded() {
-            return status == null ? 0 : status.total_done.longValue();
-        }
-
-        public synchronized int getNumPeers() {
-            return status == null ? 0 : status.num_peers;
-        }
-
-        public synchronized int getPieceLength() {
-            return info.piece_length;
-        }
-
-        public synchronized void setInfo(LibTorrentInfo info) {
-            this.info = info;
-        }
-
-        public synchronized void setStatus(LibTorrentStatus status) {
-            this.status = status;
-        }
-
-        private DownloadState convertState(LibTorrentState state) {
-            switch (state) {
-            case downloading:
-                if (isPaused()) {
-                    return DownloadState.PAUSED;
-                } else {
-                    return DownloadState.DOWNLOADING;
-                }
-            case queued_for_checking:
-                return DownloadState.RESUMING;
-            case checking_files:
-                return DownloadState.RESUMING;
-            case seeding:
-                return DownloadState.COMPLETE;
-            case finished:
-                return DownloadState.COMPLETE;
-            case allocating:
-                return DownloadState.CONNECTING;
-            case downloading_metadata:
-                return DownloadState.CONNECTING;
-            default:
-                throw new IllegalStateException("Unknown libtorrent state: " + state);
-            }
-        }
-    }
+    private final Torrent torrentStatus;
 
     private List<String> paths = new ArrayList<String>();
 
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
-            LibTorrentManager libTorrentManager) {
+            TorrentManager libTorrentManager) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.libTorrentManager = libTorrentManager;
-        this.torrentStatus = new TorrentStatus();
+        this.torrentStatus = new Torrent();
 
     }
 
@@ -175,7 +99,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void stop() {
         // TODO, put back in logic
-        libTorrentManager.removeTorrent(torrentStatus.getSha1());
+        finish();
     }
 
     @Override
@@ -526,15 +450,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public synchronized void finish() {
-        // // when finish is called it is expected that the downloader has
-        // already
-        // // been removed from the download manager.
-        // assert downloadManager.contains(this) == false;
-        // finished = true;
-        // torrentManager.get().removeEventListener(this);
-        // torrent = new FinishedTorrentDownload(torrent);
-        // btMetaInfo = null;
-        // TODO TODO
+        libTorrentManager.removeTorrent(torrentStatus.getSha1());
+        // TODO cleanup things
     }
 
     @Override

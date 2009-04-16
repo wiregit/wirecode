@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
-public class LibTorrentManager {
+public class TorrentManager {
     private final LibTorrent libTorrent;
 
     private final Map<String, EventListenerList<LibTorrentEvent>> listeners;
@@ -21,7 +20,7 @@ public class LibTorrentManager {
 
     // TODO use SourcedEventMulticaster
 
-    public LibTorrentManager() {
+    public TorrentManager() {
         this.libTorrent = new LibTorrentWrapper();
         this.listeners = new ConcurrentHashMap<String, EventListenerList<LibTorrentEvent>>();
         this.torrents = new ArrayList<String>();
@@ -90,19 +89,17 @@ public class LibTorrentManager {
         public void run() {
             while (!isInterrupted()) {
                 synchronized (this) {
-                    pumpStatus();
                     try {
+                        pumpStatus();
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        break;
                     }
                 }
             }
         }
 
         private void pumpStatus() {
-
             for (String id : torrents) {
                 LibTorrentStatus torrentStatus = libTorrent.get_torrent_status(id);
                 EventListenerList<LibTorrentEvent> listenerList = listeners.get(id);
@@ -112,25 +109,6 @@ public class LibTorrentManager {
                 }
             }
         }
-
-        // private void pumpAlerts() {
-        // libTorrent.get_alerts(new AlertCallback() {
-        // @Override
-        // public void callback(LibTorrentAlert alert, LibTorrentStatus
-        // torrentStatus) {
-        // alert.read();
-        // String sha1 = alert.sha1;
-        // if (sha1 != null) {
-        // EventListenerList<LibTorrentEvent> listenerList =
-        // listeners.get(alert.sha1);
-        // if (listenerList != null) {
-        // // TODO asynchronous broadcast
-        // listenerList.broadcast(new LibTorrentEvent(alert, torrentStatus));
-        // }
-        // }
-        // }
-        // });
-        // }
     }
 
 }

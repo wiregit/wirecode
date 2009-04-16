@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.IOError;
 import java.io.IOException;
 import java.net.URI;
 
