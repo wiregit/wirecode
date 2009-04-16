@@ -149,6 +149,7 @@ public class ChatTopPanel extends JXPanel {
     @EventSubscriber
     public void handleConversationStarted(ConversationSelectedEvent event) {
         ChatFriend chatFriend = event.getFriend();
+//        System.out.println("ChatFramePane ConversationSelectedEvent #3: " + chatFriend.getID());
         if (event.isLocallyInitiated()) {
             update(chatFriend);
         }
