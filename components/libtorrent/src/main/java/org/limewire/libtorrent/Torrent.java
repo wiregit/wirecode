@@ -3,13 +3,54 @@
  */
 package org.limewire.libtorrent;
 
+import java.io.File;
+
+import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.Downloader.DownloadState;
 
 public class Torrent {
+
+    private final TorrentManager torrentManager;
+
     private LibTorrentInfo info = null;
 
     private LibTorrentStatus status = null;
+
+    public Torrent(TorrentManager torrentManager) {
+        this.torrentManager = torrentManager;
+    }
+
+    public synchronized void init(File torrent) {
+        LibTorrentInfo info = torrentManager.addTorrent(torrent);
+        setInfo(info);
+
+        LibTorrentStatus status = torrentManager.getStatus(info.sha1);
+        setStatus(status);
+
+        torrentManager.addListener(info.sha1, new EventListener<LibTorrentEvent>() {
+            public void handleEvent(LibTorrentEvent event) {
+                LibTorrentStatus status = event.getTorrentStatus();
+                setStatus(status);
+            }
+        });
+    }
+
+    public void pause() {
+        torrentManager.pauseTorrent(getSha1());
+    }
+
+    public void resume() {
+        torrentManager.resumeTorrent(getSha1());
+    }
+
+    public float getDownloadRate() {
+        return status == null ? 0 : status.download_rate;
+    }
+
+    public void cancel() {
+        torrentManager.removeTorrent(getSha1());
+    }
 
     public synchronized String getSha1() {
         return info.sha1;

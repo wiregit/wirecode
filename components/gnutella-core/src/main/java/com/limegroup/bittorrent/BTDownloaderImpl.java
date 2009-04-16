@@ -14,9 +14,6 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
-import org.limewire.libtorrent.LibTorrentEvent;
-import org.limewire.libtorrent.LibTorrentInfo;
-import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentManager;
 import org.limewire.listener.EventListener;
@@ -44,11 +41,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final TorrentManager libTorrentManager;
 
-    private volatile File torrent = null;
+    private volatile File torrentFile = null;
 
     private volatile File incompleteFile = null;
 
-    private final Torrent torrentStatus;
+    private final Torrent torrent;
 
     private List<String> paths = new ArrayList<String>();
 
@@ -58,17 +55,16 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.libTorrentManager = libTorrentManager;
-        this.torrentStatus = new Torrent();
-
+        this.torrent = new Torrent(libTorrentManager);
     }
 
     @Override
-    public void init(File torrent) throws IOException {
-        this.torrent = torrent;
+    public void init(File torrentFile) throws IOException {
+        this.torrentFile = torrentFile;
         FileInputStream fis = null;
         FileChannel fileChannel = null;
         try {
-            fis = new FileInputStream(torrent);
+            fis = new FileInputStream(torrentFile);
             fileChannel = fis.getChannel();
             Map metaInfo = (Map) Token.parse(fileChannel);
             BTData btData = new BTDataImpl(metaInfo);
@@ -88,7 +84,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             IOUtils.close(fileChannel);
             IOUtils.close(fis);
         }
-
     }
 
     /**
@@ -104,12 +99,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void pause() {
-        libTorrentManager.pauseTorrent(torrentStatus.getSha1());
+        libTorrentManager.pauseTorrent(torrent.getSha1());
     }
 
     @Override
     public boolean isPaused() {
-        return torrentStatus.isPaused();
+        return torrent.isPaused();
     }
 
     @Override
@@ -119,7 +114,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isInactive() {
-        return isResumable() || torrentStatus.getState() == DownloadState.QUEUED;
+        return isResumable() || torrent.getState() == DownloadState.QUEUED;
     }
 
     @Override
@@ -135,13 +130,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean resume() {
-        libTorrentManager.resumeTorrent(torrentStatus.getSha1());
+        libTorrentManager.resumeTorrent(torrent.getSha1());
         return true;
     }
 
     @Override
     public File getFile() {
-        if (torrentStatus.isFinished()) {
+        if (torrent.isFinished()) {
             return getCompleteFile();
         } else {
             return getIncompleteFile();
@@ -178,7 +173,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public DownloadState getState() {
-        return torrentStatus.getState();
+        return torrent.getState();
     }
 
     @Override
@@ -188,12 +183,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public long getContentLength() {
-        return torrentStatus.getTotalSize();
+        return torrent.getTotalSize();
     }
 
     @Override
     public long getAmountRead() {
-        return torrentStatus.getTotalDownloaded();
+        return torrent.getTotalDownloaded();
     }
 
     @Override
@@ -233,7 +228,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getPossibleHostCount() {
-        return torrentStatus.getNumPeers();
+        return torrent.getNumPeers();
     }
 
     @Override
@@ -253,7 +248,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isCompleted() {
-        return torrentStatus.isFinished();
+        return torrent.isFinished();
     }
 
     @Override
@@ -269,12 +264,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     public long getAmountVerified() {
-        return torrentStatus.getTotalDownloaded();
+        return torrent.getTotalDownloaded();
     }
 
     @Override
     public int getChunkSize() {
-        return torrentStatus.getPieceLength();
+        return torrent.getPieceLength();
     }
 
     @Override
@@ -295,8 +290,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // if (averagedBandwidth.size() < 3)
         // throw new InsufficientDataException();
         // return averagedBandwidth.average().floatValue();
-        return 0;
         // TODO
+        return (torrent.getDownloadRate() / 1024);
     }
 
     @Override
@@ -304,9 +299,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // long now = stopTime > 0 ? stopTime : System.currentTimeMillis();
         // long runTime = now - startTime;
         // return runTime > 0 ? getTotalAmountDownloaded() / runTime : 0;
-
-        return 0;
         // TODO
+        return (torrent.getDownloadRate() / 1024);
     }
 
     @Override
@@ -349,7 +343,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getNumHosts() {
-        return torrentStatus.getNumPeers();
+        return torrent.getNumPeers();
     }
 
     @Override
@@ -372,26 +366,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // btMetaInfo);
         // torrent.start();
 
-        LibTorrentInfo info = libTorrentManager.addTorrent(torrent);
-        torrentStatus.setInfo(info);
-
-        System.out.println(info);
-
-        System.out.println("sha1_java: " + info.sha1);
-
-        LibTorrentStatus status = libTorrentManager.getStatus(info.sha1);
-        torrentStatus.setStatus(status);
-
-        libTorrentManager.addListener(info.sha1, new EventListener<LibTorrentEvent>() {
-            public void handleEvent(LibTorrentEvent event) {
-                // TODO make threadsafe
-
-                // LibTorrentAlert alert = event.getAlert();
-                LibTorrentStatus status = event.getTorrentStatus();
-                torrentStatus.setStatus(status);
-            }
-
-        });
+        torrent.init(torrentFile);
 
         // TODO moving to complete folder when complete and starting to seed
         // again
@@ -450,7 +425,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public synchronized void finish() {
-        libTorrentManager.removeTorrent(torrentStatus.getSha1());
+        libTorrentManager.removeTorrent(torrent.getSha1());
         // TODO cleanup things
     }
 
@@ -471,7 +446,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     protected DownloadMemento createMemento() {
-        if (torrentStatus.isFinished()) {
+        if (torrent.isFinished()) {
             throw new IllegalStateException("creating memento for finished torrent!");
         }
 
