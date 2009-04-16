@@ -66,7 +66,6 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.menu.actions.TicTacToeAction;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -202,6 +201,7 @@ public class ChatFriendListPane extends JPanel {
             Map<String, FriendPresence> presences = chatFriend.getUser().getFriendPresences();
             FriendPresence fileOfferPresence = presences.get(fromJID);
             if (fileOfferPresence != null) {
+//System.out.println("***********ChatFriendListPane");                
                 new MessageReceivedEvent(new MessageFileOfferImpl(fromFriendId, fromFriendId,
                         Type.Received, metadata, fileOfferPresence)).publish();
             }
@@ -217,18 +217,13 @@ public class ChatFriendListPane extends JPanel {
         FriendContext context = new FriendContext();
         ViewLibrary viewLibrary = new ViewLibrary(context);
         ViewSharedFiles viewSharedFiles = new ViewSharedFiles(context);
-        
-//        ChallengeSomeoneToTicTacToeAction tictactoeChallenge = new ChallengeSomeoneToTicTacToeAction();
-        
+               
         JPopupMenu nonChattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(false, context), new OpenChat(context));
         nonChattingPopup.addSeparator();
         nonChattingPopup.add(viewLibrary);
         nonChattingPopup.add(viewSharedFiles);
 
-//        nonChattingPopup.add(tictactoeChallenge);
-
         JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles);
-//        JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles, tictactoeChallenge);
         chattingPopup.addSeparator();
         chattingPopup.add(new CloseChat(context));
     }
@@ -468,16 +463,6 @@ public class ChatFriendListPane extends JPanel {
         }
     }
     
-//    private void challengeToTicTacToe(ChatFriend chatFriend) {
-////        MessageWriter writerWithEventDispatch = null;
-////        if (!chatFriend.isChatting() && chatFriend.isSignedIn()) {
-////            MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend));
-////            writerWithEventDispatch = new MessageWriterImpl(myID, chatFriend, writer);
-////        }
-//        new TicTacToeInitiateGameEvent(chatFriend).publish();
-//    }
-
-
     private void startOrSelectConversation(ChatFriend chatFriend) {
         MessageWriter writerWithEventDispatch = null;
         if (!chatFriend.isChatting() && chatFriend.isSignedIn()) {
@@ -870,22 +855,7 @@ public class ChatFriendListPane extends JPanel {
             }
         }
     }
-    
-//    private class OpenTicTacToe extends AbstractContextAction {
-//        public OpenTicTacToe(FriendContext context) {
-//            super(I18n.tr("Challenge to Tic Tac Toe"), context);
-////            System.out.println("OpenTicTacToe - can/should i pass a remotelibrarymanager here");            
-//        }
-//
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            ChatFriend chatFriend = context.getFriend();
-//            if (chatFriend != null) {
-//                challengeToTicTacToe(chatFriend);
-//            }
-//        }
-//    }
-    
+       
     class ViewLibrary extends AbstractContextAction implements ItemNotifyable {
         public ViewLibrary(FriendContext context) {
             super("", context);
@@ -935,35 +905,7 @@ public class ChatFriendListPane extends JPanel {
             item.setText(tr("What I'm Sharing"));
         }
     }
-
-    /**
-     * If someone right clicked on a friend and then selected to challenge to a tic tac toe game
-     * @author dsullivan
-     *
-     */
-//    private class ChallengeSomeoneToTicTacToe extends AbstractContextAction implements ItemNotifyable {
-//        public ChallengeSomeoneToTicTacToe(FriendContext context) {
-//            super("", context);
-//        }
-//
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            new TicTacToeInitiateGameEvent(1).publish();
-//        }
-//
-//        @Override
-//        public void notifyItem(JMenuItem item) {
-//            ChatFriend chatFriend = context.getFriend();
-//            
-//            if (chatFriend == null) {
-//                return;
-//            }
-//            
-//            item.setText(tr("Challenge to Tic Tac Toe"));
-//        }
-//    }
-
-    
+   
     private class CloseChat extends AbstractContextAction {
         public CloseChat(FriendContext context) {
             super(I18n.tr("Close conversation"), context);

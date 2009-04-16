@@ -179,8 +179,7 @@ public class TicTacToeFriendImpl extends AbstractBean implements TicTacToeFriend
 
     @Override
     public MessageWriter createChat(MessageReader reader) {
-        // TODO Auto-generated method stub
-        return null;
+        return user.createChat(reader);
     }
 
     @Override

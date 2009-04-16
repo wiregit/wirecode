@@ -54,6 +54,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
@@ -78,7 +79,6 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.menu.actions.TicTacToeAction;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -93,7 +93,6 @@ import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPException;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
@@ -131,6 +130,9 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private EventListener<FeatureEvent> featureListener;
     private EventListener<FriendEvent> friendListener;
     
+    private final TicTacToeMigLayout tictactoePane = null;
+
+    
     @Resource(key="ChatConversation.toolbarTopColor") private Color toolbarTopColor;
     @Resource(key="ChatConversation.toolbarBottomColor") private Color toolbarBottomColor;
     @Resource(key="ChatConversation.toolbarBorderColor") private Color toolbarBorderColor;
@@ -144,8 +146,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                             ShareListManager libraryManager, IconManager iconManager, LibraryNavigator libraryNavigator,
                             IconLibrary iconLibrary, ChatHyperlinkListenerFactory chatHyperlinkListenerFactory,
                             @Named("backgroundExecutor")ScheduledExecutorService schedExecService
-//                            ,
-//                            Provider<TicTacToeAction> tictactoeActionProvider                        
     ) {
         this.writer = writer;
         this.chatFriend = chatFriend;
@@ -175,7 +175,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         final JButton closeConversation = new IconButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("ConversationPane CloseChatEvent");
                 new CloseChatEvent(chatFriend).publish();
             }
         });
@@ -287,26 +286,27 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
             return;
         }       
         if(Message.Type.Received == message.getType()) {
-            System.out.println("conversationpane interceptor");
+            
             if(message.toString().indexOf(TicTacToeMessages.INITIATE_GAME) > -1) {                   
                 User chatUser = chatFriend.getUser();
                 MessageTicTacToeOffer tttOfferMessage =
                         new MessageTicTacToeOfferImpl(loggedInID, friendId, Message.Type.Received, chatUser.getActivePresence());
                 //I need this to get the button on the chat window
+                
                 new MessageReceivedEvent(tttOfferMessage).publish();            
                 
             }else {
                 //TODO send the message through the event bus so it lands in miglayout?            
-                System.out.println("conversationpane interceptor part 2");
                 if(message.toString().indexOf(TicTacToeMessages.TICTACTOE) > -1) {
+                    //Handled in TicTAcToeMigLayout
                     new TicTacToeSelectedEventFromFriend(message).publish();
                 }
 
             }
             
         }
-//        
     }
+
 
     /**
      * This method is called when ChatHyperLinkListener publishes 
@@ -315,8 +315,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
      */
     @EventSubscriber
     public void handleChallengeToPlayTicTacToeAcceptedEvent(ChallengeToPlayTicTacToeAcceptedEvent event) {        
-
-        System.out.println("ConversationPane: handleChallengeToPlayTicTacToeAcceptedEvent chat friend: " + chatFriend.getID());
         
         //at this point, i have two TicTacToeMigLayout objects for the friend who accepted to play the game
         //which is bad
@@ -330,8 +328,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setResizable(false);
-        frame.setTitle("Tic Tac Toe Layout");
+        frame.setResizable(true);
+        frame.setTitle("Tic Tac Toe with " + chatFriend.getID());
         
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(tictactoePanel, BorderLayout.CENTER);
@@ -348,7 +346,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     }
     @EventSubscriber
     public void handleChallengeToPlayTicTacToeRejectedEvent(ChallengeToPlayTicTacToeRejectedEvent event) {        
-
         
         final TicTacToeMigLayout panel = new TicTacToeMigLayout(writer);
         panel.setWriter(writer);
@@ -360,7 +357,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
-        System.out.println("conversationpane#handleConversationMessage for topic: " + topic + " and event: " + event.getMessage().format());
         Message message = event.getMessage();
         tictactoeInterceptor(message);
         LOG.debugf("Message: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
@@ -432,6 +428,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     }
 
     public String getMessageReceivedTopicName() {
+//        System.out.println("***********Conversationpane 3");                
+
         return MessageReceivedEvent.buildTopic(friendId);
     }
 
@@ -445,10 +443,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
     public ChatFriend getChatFriend() {
         return chatFriend;
-    }
-    
-    public MessageWriter getWriter() {
-        return writer;
     }
 
     public Map<String, MessageFileOffer> getFileOfferMessages() {
@@ -545,20 +539,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         
         toolbar.add(downloadlink);
         toolbar.add(sharelink);
-//        toolbar.add(tttlink);
-        if(writer == null){
-System.out.println("conversationPane writer is null");
-        }else{
-            System.out.println("conversationPane writer is not null");
-            
-        }
-        if(schedExecService == null){
-            System.out.println("conversationPane schedExecService is null");
-                    }else{
-                        System.out.println("conversationPane schedExecService is not null");
-                        
-                    }
-        
+
         inputPanel = new ResizingInputPanel(writer, schedExecService);
         inputPanel.setBorder(BorderFactory.createEmptyBorder());
         panel.add(toolbar, BorderLayout.NORTH);

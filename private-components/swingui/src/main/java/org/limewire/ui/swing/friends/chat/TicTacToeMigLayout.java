@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.friends.chat;
 
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -10,10 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -23,6 +20,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.util.Objects;
 import org.limewire.util.TicTacToeBoard;
 import org.limewire.util.TicTacToeJudge;
 import org.limewire.util.TicTacToeWinner;
@@ -47,15 +45,17 @@ public class TicTacToeMigLayout extends JPanel {
     
     private TicTacToeBoard board;    
     
-    private String myID;
-    private TicTacToeFriend friend;
+    private static String myID;
+    private String friendsID;
+    
+//    private ChatFriend friend = null;
+    private TicTacToeFriend friend = null;
     private static Map<String, TicTacToeFriend> idToFriendMap = null;
     private final EventList<TicTacToeFriend> tictactoeFriends;
 
     private MessageWriter messageWriter;//for sending your move, TicTacToeMessageWriter
     
     private boolean isX = false;
-    private TicTacToeResult lastGameStatus = TicTacToeResult.DRAW;
             
     ///////////Ernie's work
     private JPanel gamePanel = new JPanel();
@@ -65,12 +65,11 @@ public class TicTacToeMigLayout extends JPanel {
     private JLabel playerLabel = new JLabel();
     private JLabel statusText = new JLabel();
     private JButton playAgainButton = new JButton();
-    
+    private JButton againButton = new JButton();
+       
     public TicTacToeMigLayout() {
         this(null);
-        System.out.println("in TicTacToeMigLayout default constructor");        
     }
-        
     public TicTacToeMigLayout(@Assisted MessageWriter writer) {
         
         this.idToFriendMap = new HashMap<String, TicTacToeFriend>();
@@ -91,14 +90,18 @@ public class TicTacToeMigLayout extends JPanel {
         
         statusText.setText("Make a move");
         
-        playAgainButton.setVisible(false);
+        playAgainButton.setVisible(false);        
         playAgainButton.setText("Play again");
         
+        againButton.setVisible(false);
+        againButton.setText("Again?");
+
         add(gamePanel, "center,wrap");
         add(playerLabel, "wrap");
         add(statusText, "wrap");
-        add(playAgainButton, "center");
-    
+        add(playAgainButton, "center, hidemode 3");
+        add(againButton, "center, hidemode 3");
+        
         EventAnnotationProcessor.subscribe(this);
                     
     }
@@ -114,6 +117,10 @@ public class TicTacToeMigLayout extends JPanel {
                 switch(event.getType()) {
                 case DISCONNECTED:
                     break;
+                case CONNECTED:
+                    handleConnectionEstablished(event);
+                    break;
+                    
                 }
             }
         });
@@ -134,17 +141,12 @@ public class TicTacToeMigLayout extends JPanel {
             "insets 0 0 0 0,fill",
             "[left]6[left]6[left]",  // col constraints
             "[top]6[top]6[top]"));   // row constraints
-        
+                
         gameButtons = new TicTacToeJButton[9];
         for (int i = 0; i < gameButtons.length; i++) {
             gameButtons[i] = new TicTacToeJButton(i);
             gameButtons[i].setPreferredSize(new Dimension(60, 60));
-            
-            // Change button appearance. 
-            //gameButtons[i].setContentAreaFilled(false);
-            //gameButtons[i].setOpaque(true);
-            //gameButtons[i].setBackground(Color.LIGHT_GRAY);
-            
+                        
             gamePanel.add(gameButtons[i], ((i % 3) == 2) ? "wrap" : null);
         }
         
@@ -154,11 +156,6 @@ public class TicTacToeMigLayout extends JPanel {
     }
     
     public void setWriter(MessageWriter writer) {
-        if(writer == null) {
-            System.out.println("that writer is null in miglayout");
-        } else {
-            System.out.println("set that writer in miglayout");
-        }
         messageWriter = writer;
     }
         
@@ -170,12 +167,22 @@ public class TicTacToeMigLayout extends JPanel {
             playerLabel.setText("You are O");
         }
     }
+    
+    private void handleConnectionEstablished(XMPPConnectionEvent event) {
+        setLoggedInID(formatLoggedInName(event.getSource().getConfiguration().getCanonicalizedLocalID()));
+    }
+    private String formatLoggedInName(String fullLoggedInId) {
+        int index = fullLoggedInId.lastIndexOf("@");
+        return (index == -1) ? fullLoggedInId : fullLoggedInId.substring(0, index);
+    }
+
     boolean isPlayerX() {
         return isX;
     }
     
     public void setLoggedInID(String id) {
         this.myID = id;
+        System.out.println("I am " + id);
     }
 
     String getLoggedInID() {
@@ -184,19 +191,19 @@ public class TicTacToeMigLayout extends JPanel {
     //When the friend is accepted, set the writer. important note for the documentation
 
     public void setFriend(String friendId) {
+        friendsID = formatLoggedInName(friendId);
         
         friend = idToFriendMap.get(friendId);
-        if(friend != null) { 
-            if(!createWriter()) {
-                System.out.println("couldn't create the writer 1");
-            }
-        }
+        if(friend != null && !createWriter(friend)) {
+                System.out.println("TicTacToeMigLayout Error creating the writer");
+        } 
     }
 
     //When the friend is accepted, set the writer. important note for the documentation
     public void setFriend(TicTacToeFriend friend) {
         this.friend = friend;
-        if(!createWriter()) {
+        friendsID = formatLoggedInName(friend.getID());
+        if(!createWriter(friend)) {
             System.out.println("couldn't create the writer 2");
         }
 
@@ -219,13 +226,14 @@ public class TicTacToeMigLayout extends JPanel {
     private void handlePresenceEvent(FriendPresenceEvent event) {
         final Presence presence = (Presence)event.getSource();
         final User user = presence.getUser();
+//        ChatFriend tictactoeFriend = idToFriendMap.get(user.getId());
         TicTacToeFriend tictactoeFriend = idToFriendMap.get(user.getId());
         
         switch(event.getType()) {
         case ADDED:
             if(tictactoeFriend == null) {
                 tictactoeFriend = new TicTacToeFriendImpl(presence);
-                tictactoeFriends.add(tictactoeFriend);
+//                tictactoeFriends.add(tictactoeFriend);
                 idToFriendMap.put(user.getId(), tictactoeFriend);
                 
             } 
@@ -252,16 +260,33 @@ public class TicTacToeMigLayout extends JPanel {
             if (tictactoeFriend != null) {
                 if (shouldRemoveFromFriendsList(tictactoeFriend)) {
                     tictactoeFriends.remove(idToFriendMap.remove(user.getId()));
+                    
                 }
                 tictactoeFriend.update();
             }
             break;
         }
     }
+    /**
+     * Sends a string to your friend's chat frame.
+     * @param message
+     */
+    void sendMessage(String message) {
+        try {   
+            if(messageWriter == null && !createWriter(friend)) {
+                System.out.println("************need to create the writer first");
+                    return;
+            }
+            messageWriter.writeMessage(message);
+        } catch(XMPPException x) {
+            x.printStackTrace();
+        }        
+    }
 
-    //TicTacToeAction calls this method
-    public void challengeExtended(String friendId) {
+    //TicTacToeAction calls this method. In NavPanel, if your right click to challenge a friend, this method is eventually called.
+    public void challengeExtended(TicTacToeFriend tttFriend) {
 
+        Objects.nonNull(tttFriend, "TicTacToeFriend");
         setPlayerX(false);
         yourTurn(false);
         board.initialize();
@@ -275,64 +300,39 @@ public class TicTacToeMigLayout extends JPanel {
         } else {
             playerLabel.setText("You are O");
         }
-        
-        TicTacToeFriend tictactoeFriend = idToFriendMap.get(friendId);
-        if(tictactoeFriend != null) {            
-            setFriend(tictactoeFriend);
+
+//        TicTacToeFriend tictactoeFriend = idToFriendMap.get(friendId);
+//        if(tictactoeFriend != null) {            
+          setFriend(tttFriend.getID());
+//            setFriend(tictactoeFriend);
             String message = new String();
             message = TicTacToeMessages.TICTACTOE + TicTacToeMessages.INITIATE_GAME;
                         
             sendMessage(message);        
-        }
-    }
+//        } 
     
-    void sendMessage(String message) {
-        try {   
-            if(messageWriter == null ) {
-                if(!createWriter()) {
-                    return;
-                }
-                messageWriter.writeMessage(message);
-            }else {
-                messageWriter.writeMessage(message);
-            }
-        } catch(XMPPException x) {
-            x.printStackTrace();
-        }        
     }
-    
-    void sendMessage(String message, TicTacToeFriend friend) {
-        if(friend == null) { 
-            sendMessage(message);
-            return;
-        }
-        if(messageWriter == null) {
-            if(!createWriter()) {
-                System.out.println("didn't create writer cause friend is null-2");
-                return;
-            }
-        }
-        try {   
-            messageWriter.writeMessage(message);
-        } catch(XMPPException x) {
-            x.printStackTrace();
-        }
-    }    
+    //TicTacToeAction calls this method. In NavPanel, if your right click to challenge a friend, this method is eventually called.
     
     public void fireGameStarted(String friendId) {
-        
-        ChatFriend tttFriend = idToFriendMap.get(friendId);
+        TicTacToeFriend tttFriend = idToFriendMap.get(friendId);
         if(tttFriend != null) {
             extendChallenge(tttFriend);
+            challengeExtended(tttFriend);
+
+        } else {
+            System.out.println("2 Failed to get friend: " + friendId + " map size: " + idToFriendMap.size());            
         }
+        
     }
 
+          
     /**
      * The tic tac toe game uses the conversationpane to send messages back and forth. Therefore, when you start a game
      * you need to kick off a ConversationSelectedEvent.
      * @param tttFriend who you challenged to play a game
      */
-    private void extendChallenge(ChatFriend tttFriend) {
+    private void extendChallenge(TicTacToeFriend tttFriend) {
         MessageWriter writerWithEventDispatch = null;
         if (tttFriend.isSignedIn()) {
             MessageWriter writer = tttFriend.createChat(new MessageReaderImpl(tttFriend));
@@ -342,23 +342,32 @@ public class TicTacToeMigLayout extends JPanel {
     }    
     
     
-    boolean createWriter() {
-        if(friend != null) {
-            MessageWriter writer = friend.createTicTacToe(new TicTacToeMessageReader(friend));                        
-            messageWriter = new TicTacToeMessageWriter(friend.getID(), friend, writer);  
-            return true;
-        } else {
-            return false;
-        }
-                
-    }             
+//    boolean createWriter() {
+//        if(friend != null) {
+//            System.out.println("TicTacToeMigLayout#createWriter friend: " + friend.getID());        
+//            
+//            MessageWriter writer = friend.createTicTacToe(new TicTacToeMessageReader(friend));      
+//            if (messageWriter == null) {                
+//                if(myID == null)
+//                    myID = "not set";
+//                messageWriter = new TicTacToeMessageWriter(myID, friend, writer);  
+//            }
+//            return true;
+//        } else {
+//            return false;
+//        }
+//                
+//    }             
 
     public boolean createWriter(TicTacToeFriend myfriend) {
         friend = myfriend;
         if(friend != null) {
             MessageWriter writer = friend.createTicTacToe(new TicTacToeMessageReader(friend));
-            messageWriter = new TicTacToeMessageWriter("local id", friend, writer);           
-            System.out.println("create that writer 2");
+            if(myID == null) {
+                myID = "not set";
+            }
+            messageWriter = new TicTacToeMessageWriter(myID, friend, writer);           
+            
             return true;
         } else {
             return false;
@@ -382,7 +391,7 @@ public class TicTacToeMigLayout extends JPanel {
             message = TicTacToeMessages.TICTACTOE + TicTacToeMessages.EXIT_GAME;
         }                       
                 
-        sendMessage(message, friend);
+        sendMessage(message);
     }
 
     /**
@@ -402,6 +411,13 @@ public class TicTacToeMigLayout extends JPanel {
 
     //The @EventSubscriber handle methods are to handle internal events        
         
+    
+    
+//    @EventSubscriber
+//    public void handleTicTacToeCreatePanelEvent(TicTacToeCreatePanelEvent event) {        
+//        System.out.println("In TicTacToeMigLayout#handleChallengeCreateBoard");
+//    }
+
     /**
      * These events are intercepted form ConversationPane which catches from 
      * what your friend sent. When caught here, this updates your board
@@ -416,10 +432,20 @@ public class TicTacToeMigLayout extends JPanel {
     public void handleTicTacToeSelectedEventFromFriend(TicTacToeSelectedEventFromFriend event) {   
         
         String tttMessage = event.getMessage().toString();        
-        System.out.println("message from friend: " + tttMessage);
+//        System.out.println("message from friend: " + tttMessage);
+        //sent from my friend challenging me to play again, I need to show the "Again" button
         if(tttMessage.toString().indexOf(TicTacToeMessages.PLAY_AGAIN) > -1) {
-            showPlayAgain(false);
+            showAgain();
         }
+        //friend accepted the challenge
+        if(tttMessage.toString().indexOf(TicTacToeMessages.PLAY_AGAIN_YES) > -1) {
+            //at this point, you asked to play again, friend said yes, you are x
+            playAgainChallengeAccepted();
+        }       
+        
+        if(tttMessage.toString().indexOf(TicTacToeMessages.DRAW) > -1) {
+            showAgain();
+        }       
 
         if(tttMessage.toString().indexOf(TicTacToeMessages.NO_THANKS_GAME) > -1) {
             statusText.setText("Friend not interested");
@@ -428,102 +454,46 @@ public class TicTacToeMigLayout extends JPanel {
             statusText.setText("Friend quit the game");            
         }
         if(tttMessage.toString().indexOf(TicTacToeMessages.O_MOVE) > -1) {
-            System.out.println("handleTicTacToeSelectedEventFromFriend 1: " + tttMessage);
 
-            markFriendsMove(parseMessage(tttMessage));
+            markFriendsMove(tttMessage, false);
         }
         if(tttMessage.toString().indexOf(TicTacToeMessages.X_MOVE) > -1) {
-            System.out.println("handleTicTacToeSelectedEventFromFriend 2: " + tttMessage);
             //parse statusText for move
-            markFriendsMove(parseMessage(tttMessage));
-        }
-        if(tttMessage.toString().indexOf(TicTacToeMessages.DRAW) > -1) {
-            statusText.setText(TicTacToeMessages.DRAW);
-            hideDraw();
-            showPlayAgain(false);            
-        }       
-    }
-            
-    @EventSubscriber
-    public void handleTicTacToeSelectedEvent(TicTacToeEvent event) {   
-        
-        //Need to translate message to a move
-        String tttMessage = event.getMessage().toString();        
-        
-        if(tttMessage.toString().indexOf(TicTacToeMessages.O_MOVE) > -1) {
-            statusText.setText(TicTacToeMessages.X_NEXT_MOVE);
-        }
-        if(tttMessage.toString().indexOf(TicTacToeMessages.X_MOVE) > -1) {
-            statusText.setText(TicTacToeMessages.O_NEXT_MOVE);
+            markFriendsMove(tttMessage, true);
         }
     }
-    
+                
     //Tic Tac Toe UI related methods, like which status message to show, which cells to mark, etc.
     /**
      * my friend's move
      * @param cellNum
      */
-    public void markFriendsMove(int cellNum) {
+    public void markFriendsMove(String message, boolean isXMove) {
               
+        int cellNum = parseMessage(message);
 
-        //need to switch on the actual cell, need to know if it's x
-        //or o
-        //X goes first
-//        System.out.println("cells selected: " + board.cellsSelected() + " friend: is x: " + isPlayerX() + " mod: " + (board.cellsSelected() % 2));
-
-        if(board.cellsSelected() % 2 == 0) {    
+        if(isXMove) {    
             xMove(cellNum);
         } else {
             
             oMove(cellNum);
         }
-        
-        TicTacToeJudge judge = new TicTacToeJudge();
 
-        TicTacToeWinner winner = judge.result(board);
-        //if not yet, or a draw, someone won
-        if(winner == TicTacToeWinner.DRAW) {
-            statusText.setText(TicTacToeMessages.DRAW);
-            enableButtons(false);
-            hideDraw();
-            
-            String message = TicTacToeMessages.TICTACTOE + TicTacToeMessages.DRAW;
-            statusText.setText(TicTacToeMessages.DRAW);
-            sendMessage(message, friend);
+        yourTurn(true);
+        determineIfFriendWon();
 
-        } else if(winner != TicTacToeWinner.NO_ONE_YET) {
-            hideNonWin(winner);
-            if(winner == TicTacToeWinner.X_ACROSS_1 || winner == TicTacToeWinner.X_ACROSS_2 || winner == TicTacToeWinner.X_ACROSS_3
-                    || winner == TicTacToeWinner.X_DOWN_1 || winner == TicTacToeWinner.X_DOWN_2
-                    || winner == TicTacToeWinner.X_DOWN_3 || winner == TicTacToeWinner.X_DIAG_1 
-                    || winner == TicTacToeWinner.X_DIAG_2) {
-                //x won
-                statusText.setText(TicTacToeMessages.X_WON);
-            } else {
-                //o won
-                statusText.setText(TicTacToeMessages.O_WON);
-            } 
-            //you lost, your friend won
-            lastGameStatus = TicTacToeResult.LOST;
-            enableButtons(false);
-        } else {
-            yourTurn(true);
-        }
     }
 
     /**
      * my move
      * @param cellNum
      */
-    public void makeMove(int cellNum) {
+    public void makeMyMove(int cellNum) {
         
         String message = new String();
         message = TicTacToeMessages.TICTACTOE;
                
-        //need to switch on the actual cell, need to know if it's x
-        //or o
-        System.out.println("TicTacToeMigLayout cells selected: " + board.cellsSelected() + " is x: " + isPlayerX() + " mod: " + (board.cellsSelected() % 2));
-        if(board.cellsSelected() % 2 == 0) {    
+        if(isX) {
             message = TicTacToeMessages.TICTACTOE + TicTacToeMessages.X_MOVE + cellNum;
             if(!xMove(cellNum)) {
                 //you made a bad pick, pick again.
@@ -538,7 +508,9 @@ public class TicTacToeMigLayout extends JPanel {
             }
         }
         yourTurn(false);
-        determineWinner(message);  
+        determineIfIWon(message);  
+        sendMessage(message);
+
         
     }
     /**
@@ -553,9 +525,6 @@ public class TicTacToeMigLayout extends JPanel {
             return false;
         } 
         setX(cellNum);
-        if(isPlayerX()) {
-            yourTurn(true);
-        }
         return true;        
     }
     /**
@@ -571,18 +540,57 @@ public class TicTacToeMigLayout extends JPanel {
             return false;
         }
         setO(cellNum);
-        if(!isPlayerX()) {
-            yourTurn(false);
-        }
+        
         return true;
 
+    }
+    
+    void determineIfFriendWon() {
+        
+        TicTacToeJudge judge = new TicTacToeJudge();
+
+        TicTacToeWinner winner = judge.result(board);
+        //if not yet, or a draw, someone won
+        if(winner == TicTacToeWinner.DRAW) {
+            statusText.setText(TicTacToeMessages.DRAW);
+            enableButtons(false);
+            hideDraw();
+            statusText.setText(TicTacToeMessages.DRAW);
+            showPlayAgain();
+
+        } else if(winner != TicTacToeWinner.NO_ONE_YET) {
+            hideNonWin(winner);
+            if(winner == TicTacToeWinner.X_ACROSS_1 || winner == TicTacToeWinner.X_ACROSS_2 || winner == TicTacToeWinner.X_ACROSS_3
+                    || winner == TicTacToeWinner.X_DOWN_1 || winner == TicTacToeWinner.X_DOWN_2
+                    || winner == TicTacToeWinner.X_DOWN_3 || winner == TicTacToeWinner.X_DIAG_1 
+                    || winner == TicTacToeWinner.X_DIAG_2) {
+                //x won
+                if (friendsID != null) {
+                    statusText.setText(friendsID + " won");                    
+                } else {                   
+                    statusText.setText(TicTacToeMessages.X_WON);
+                }
+            } else {
+                //o won
+                if (friendsID != null) {
+                    statusText.setText(friendsID + " won");                    
+                } else {                   
+                    statusText.setText(TicTacToeMessages.O_WON);
+                }
+            } 
+            //you lost, your friend won
+            showPlayAgain();
+
+            enableButtons(false);
+        }
+        
     }
     
     /**
      * called by me for my move.
      * @param theMove
      */
-    void determineWinner(String theMove) {
+    void determineIfIWon(String theMove) {
         TicTacToeJudge judge = new TicTacToeJudge();
         
         TicTacToeWinner winner = judge.result(board);
@@ -596,15 +604,13 @@ public class TicTacToeMigLayout extends JPanel {
                 winner == TicTacToeWinner.X_DIAG_1 ||
                 winner == TicTacToeWinner.X_DIAG_2
                 ) {
-            //let the friend figure out that i won
-            sendMessage(theMove, friend);
-            statusText.setText(TicTacToeMessages.X_WON);
-            lastGameStatus = TicTacToeResult.WON;
+            
+            if(myID != null) {
+                statusText.setText(myID + ", you won");                    
+            } else {                   
+                statusText.setText(TicTacToeMessages.X_WON);
+            }
 
-//            move = 10;//game over
-            //only let the person who lost play again
-            //the winner sees the play again screen so the loser can pick first
-            showPlayAgain(true);
             return;
         }
         
@@ -617,35 +623,33 @@ public class TicTacToeMigLayout extends JPanel {
                 winner == TicTacToeWinner.O_DIAG_1 ||
                 winner == TicTacToeWinner.O_DIAG_2) {
 
-            lastGameStatus = TicTacToeResult.WON;
-
-            sendMessage(theMove, friend);
-
-            statusText.setText(TicTacToeMessages.O_WON);            
-//            move = 10;//game over
-            showPlayAgain(true);
+            if(myID != null) {
+                statusText.setText(myID + ", you won");                    
+            } else {                   
+                statusText.setText(TicTacToeMessages.O_WON);            
+            }
             
             return;
         }
-        if(winner == TicTacToeWinner.DRAW) {
-            //send the last pick, friend wills end back that it's a draw
-            sendMessage(theMove, friend);
-        }
-        if(winner == TicTacToeWinner.NO_ONE_YET) {
-            sendMessage(theMove, friend);
-        }           
-       
-//        move = board.cellsSelected();
     }
     
-    void showPlayAgain(boolean showChallenge) {
-        if(showChallenge) {
-            playAgainButton.setVisible(true);
-            playAgainButton.setText("Play again");
+    void showPlayAgain() {
+        playAgainButton.setVisible(true);
+        
+        if(friendsID != null) {
+            playAgainButton.setText("Play " + friendsID + " again");
         } else {
-            playAgainButton.setVisible(true);
-            playAgainButton.setText("Again");            
+            playAgainButton.setText("Play again");            
         }
+    }
+    void showAgain() { 
+        if(friendsID != null) {
+                againButton.setText(friendsID + " wants to play again");
+        } else {
+            againButton.setText("Again?");            
+        }
+
+        againButton.setVisible(true);
     }
     
 //UI methods for buttons, etc.
@@ -668,7 +672,7 @@ public class TicTacToeMigLayout extends JPanel {
             gameButtons[i].addActionListener(new TicTacToeCellAction(i));            
         }
         playAgainButton.addActionListener(new PlayAgainAction());
-
+        againButton.addActionListener(new AgainAction());        
     }
     private void setX(int cell) {
         gameButtons[cell].setText("X");
@@ -693,8 +697,8 @@ public class TicTacToeMigLayout extends JPanel {
     //You went first the previous time, so now you are o and go second
     //You'll send a play again challenge
     void challengePlayAgain() {
-        setPlayerX(false);
-        yourTurn(false);
+        setPlayerX(true);
+        yourTurn(true);
         board.initialize();
 
         clearButtonText();
@@ -702,7 +706,7 @@ public class TicTacToeMigLayout extends JPanel {
 
         String message = new String();
         message = TicTacToeMessages.TICTACTOE + TicTacToeMessages.PLAY_AGAIN;
-        sendMessage(message, friend);
+        sendMessage(message);
     }
            
     public void hideDraw() {
@@ -843,9 +847,17 @@ public class TicTacToeMigLayout extends JPanel {
     
     public void yourTurn(boolean yourGo) {
         if(yourGo) {
-            statusText.setText("Make a move");
+            if(myID != null) {
+                statusText.setText(myID + ", make a move");
+            } else {
+                statusText.setText("Make a move");                
+            }
         } else {
-            statusText.setText("Wait your turn");                
+            if(friendsID != null) {
+                statusText.setText(friendsID + "'s pick, wait");                
+            } else {
+                statusText.setText("Wait your turn");                                                        
+            }
         }
         enableButtons(yourGo);
     }
@@ -855,7 +867,6 @@ public class TicTacToeMigLayout extends JPanel {
             gameButtons[i].setEnabled(show);
         }        
     }
-    
     
     public class TicTacToeJButton extends JButton {
         public int cellNum;
@@ -869,7 +880,9 @@ public class TicTacToeMigLayout extends JPanel {
             setMinimumSize(d);  
             setPreferredSize(d);
             setSize(d);       
-            setBorderPainted(false);
+//TODO: check if this is the right call
+            //setBorderPainted(false);
+            setFocusable(false);
 //            setContentAreaFilled(true);//this will give you the button look
         }
         public void winner() {
@@ -895,30 +908,30 @@ public class TicTacToeMigLayout extends JPanel {
     public class PlayAgainAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            //The person who won the last game can challenge
-            //to play again
-            boolean makesChallenge = false;
-            //if a draw, then O goes first, so X needs to extend challenge
-            if(lastGameStatus == TicTacToeResult.DRAW) {
-                makesChallenge = isPlayerX();
-            } else {
-                if(lastGameStatus == TicTacToeResult.WON) {
-                    makesChallenge = true;
-                }
-            }
-            
-            if (makesChallenge) {
-                challengePlayAgain();            
-            } else {
-                playAgainChallengeAccepted();
-            }
-            initialCellAppearance();
-            clearButtonText();
-
+            challengePlayAgain();            
             playAgainButton.setVisible(false);
 
         }
     }
+    public class AgainAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {                                    
+            againButton.setVisible(false);
+            
+            setPlayerX(false);
+            yourTurn(false);
+            board.initialize();
+            clearButtonText();
+            initialCellAppearance();                  
+
+            //send a message saying yes, I want to play again            
+            String message = new String();
+            message = TicTacToeMessages.TICTACTOE + TicTacToeMessages.PLAY_AGAIN_YES;                        
+            sendMessage(message);        
+                        
+        }
+    }
+    
     public class TicTacToeCellAction implements ActionListener {
         int cellNum;
         TicTacToeCellAction(int cellNum){
@@ -930,20 +943,7 @@ public class TicTacToeMigLayout extends JPanel {
          */
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(friend != null) {
-                System.out.println("TicTacToeCellAction#actionPerformed - my friend: " + friend.getID());
-            } else {
-                System.out.println("TicTacToeCellAction#actionPerformed - my friend is null");
-                if(messageWriter == null) {
-                    System.out.println("TicTacToeCellAction#actionPerformed - and the writer is null");                    
-                } else {
-                    System.out.println("TicTacToeCellAction#actionPerformed - and the writer is not null");                    
-                }
-            }
-            makeMove(cellNum);
+            makeMyMove(cellNum);
         }
-    }
-    public enum TicTacToeResult {
-        WON, LOST, DRAW
     }
 }

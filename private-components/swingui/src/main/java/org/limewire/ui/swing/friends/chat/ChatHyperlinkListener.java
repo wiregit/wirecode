@@ -45,15 +45,11 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
     private final LibraryNavigator libraryNavigator;
     
-//    private final MessageWriter writer;
-
     @AssistedInject
     public ChatHyperlinkListener(@Assisted Conversation conversation, ResultDownloader downloader,
                                  RemoteFileItemFactory remoteFileItemFactory,
                                  SaveLocationExceptionHandler saveLocationExceptionHandler,
                                  LibraryNavigator libraryNavigator
-//                                 ,
-//                                 @Assisted MessageWriter writer
                                  ) {
 
         this.conversation = conversation;
@@ -61,7 +57,6 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
         this.remoteFileItemFactory = remoteFileItemFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.libraryNavigator = libraryNavigator;
-//        this.writer = writer;
     }
 
     @Override
@@ -102,15 +97,7 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
         ChallengeToPlayTicTacToeRejectedEvent event = new ChallengeToPlayTicTacToeRejectedEvent(1);
         event.publish();
     }
-    
-//    void fireChallengeToPlayTicTacToeAccepted() {
-//        
-//        //the request to play is accepted, publish an event so we know to create the
-//        //dialog box in conversationPane
-//        ChallengeToPlayTicTacToeAcceptedEvent event = new ChallengeToPlayTicTacToeAcceptedEvent(1);
-//        event.publish();
-//    }
-    
+        
     /**
      *
      * Download the file offer given a file ID

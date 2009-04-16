@@ -13,13 +13,7 @@ class MessageReaderImpl implements MessageReader {
     @Override
     public void readMessage(final String message) {
         if (message != null) {
-//            System.out.println("messagereaderimpl: " + message);
             final Message msg = newMessage(message, Message.Type.Received);
-            //TODO send the message through the event bus so it lands in miglayout?            
-            if(message.indexOf(TicTacToeMessages.TICTACTOE) > -1) {
-                new TicTacToeEvent(msg).publish();
-            }
-
             new MessageReceivedEvent(msg).publish();
         }
     }

@@ -8,7 +8,6 @@ import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.menu.actions.ChatAction;
 import org.limewire.ui.swing.menu.actions.SignInOutAction;
 import org.limewire.ui.swing.menu.actions.SwitchUserAction;
-import org.limewire.ui.swing.menu.actions.TicTacToeAction;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavSelectable;
@@ -21,14 +20,15 @@ import com.google.inject.Inject;
 public class FriendMenu extends MnemonicMenu {
     
     private final ChatAction chatAction;
-    private final TicTacToeAction tttAction;
+//    private final TicTacToeAction tttAction;
     
   
     @Inject
-    public FriendMenu(SwitchUserAction switchUserAction, SignInOutAction signInOutAction, ChatAction chatAction, TicTacToeAction tttAction, StatusActions statusActions) {
+    public FriendMenu(SwitchUserAction switchUserAction, SignInOutAction signInOutAction, ChatAction chatAction, StatusActions statusActions) {
+//    public FriendMenu(SwitchUserAction switchUserAction, SignInOutAction signInOutAction, ChatAction chatAction, TicTacToeAction tttAction, StatusActions statusActions) {
         super(I18n.tr("F&riend"));
         this.chatAction = chatAction;
-        this.tttAction = tttAction;
+//        this.tttAction = tttAction;
         add(chatAction);
 //        add(tttAction);
 //        add(new FriendDownloadAction());

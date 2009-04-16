@@ -1,7 +1,8 @@
 package org.limewire.util;
 
 public enum TicTacToeWinner {
-    X, O, DRAW, NO_ONE_YET, 
+//    X, O, 
+    DRAW, NO_ONE_YET, 
     X_ACROSS_1, X_ACROSS_2, X_ACROSS_3, 
     X_DOWN_1, X_DOWN_2, X_DOWN_3,
     X_DIAG_1, X_DIAG_2,

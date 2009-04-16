@@ -177,7 +177,6 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
              (!GuiUtils.getMainFrame().isActive() || !isVisible())) {
 
             
-
             LOG.debug("Sending a message to the tray notifier");
             notifier.showMessage(getNoticeForMessage(event));
             
@@ -199,6 +198,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     @EventSubscriber
     public void handleConversationSelected(ConversationSelectedEvent event) {
         if (event.isLocallyInitiated()) {
+//            System.out.println("ChatFramePane ConversationSelectedEvent #1: " + event.getFriend().getID());
             lastSelectedConversationFriendId = event.getFriend().getID();
             unseenMessageListener.conversationSelected(lastSelectedConversationFriendId);
             borderPanel.invalidate();

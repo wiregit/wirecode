@@ -18,6 +18,7 @@ public class TicTacToeAction extends AbstractAction {
 
     private Friend friend;
     private final TicTacToeMigLayout tictactoePane;
+    
 
     /**
      * Need to send the friendsPanel, and then when you make a challenge to play tic tac toe, 
@@ -36,32 +37,31 @@ public class TicTacToeAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Friend friend = getFriend();
+//        System.out.println("In TicTacToeAction#actionPerformed friend: " + getFriend().getId());
+//        new TicTacToeCreatePanelEvent(getFriend()).publish();
 
+        final Friend friend = getFriend();
         if (friend != null) {
             tictactoePane.fireGameStarted(friend.getId());
         
             JFrame frame = new JFrame();
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            frame.setResizable(false);
-            frame.setTitle("Tic Tac Toe Layout");
-            
+            frame.setResizable(true);
+            frame.setTitle("Tic Tac Toe with " + friend.getId());            
             frame.getContentPane().setLayout(new BorderLayout());
-            frame.getContentPane().add(tictactoePane, BorderLayout.CENTER);
-            
+            frame.getContentPane().add(tictactoePane, BorderLayout.CENTER);            
             frame.pack();
-
-            tictactoePane.challengeExtended(friend.getId());   
-
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
             
             frame.addWindowListener(new WindowAdapter() {
+                //If I challenged a friend, but he rejected the offer, don't call exitGame
                 public void windowClosed(WindowEvent e) {
                     tictactoePane.exitGame();                
                 }            
             });
-        } //TODO: what if the friend is null
+            
+        } 
         
     }
 

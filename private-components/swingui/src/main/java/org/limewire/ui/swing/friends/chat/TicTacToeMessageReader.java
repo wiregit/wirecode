@@ -13,14 +13,11 @@ public class TicTacToeMessageReader implements MessageReader {
     
     @Override
     public void newChatState(ChatState chatState) {
-        // TODO Auto-generated method stub
-        System.out.println("in TicTacToeMessageReader#newChatState");
-//        new ChatStateEvent(chatFriend, chatState).publish();      
+        new ChatStateEvent(tictactoeFriend, chatState).publish();      
     }
 
     @Override
     public void readMessage(String message) {
-        System.out.println("in TicTacToeMessageReader#readMessage");
         if (message != null) {
             final Message msg = newMessage(message, Message.Type.Received);
             new MessageReceivedEvent(msg).publish();

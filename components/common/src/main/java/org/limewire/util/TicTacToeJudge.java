@@ -71,7 +71,7 @@ public class TicTacToeJudge {
             }
             return TicTacToeWinner.O_DOWN_3;
         }
-            
+                    
         /* diagonal
          * 0 & 4 & 8
          * 2 & 4 & 6
@@ -103,14 +103,49 @@ public class TicTacToeJudge {
                                                'o', 'o', 'x', 
                                                'o', 'o', 'e');
         TicTacToeJudge test = new TicTacToeJudge();
-        TicTacToeWinner w = test.result(b1);
-        if (w != TicTacToeWinner.X) {
+        TicTacToeWinner w = null;
+        w = test.result(b1);
+        if (w != TicTacToeWinner.X_ACROSS_1) {
             System.out.println("x won failure");
         }
 
+        TicTacToeBoard x2 = new TicTacToeBoard('o', 'x', 'x', 
+                                               'x', 'x', 'x', 
+                                               'o', 'o', 'e');
+        w = test.result(x2);
+        if (w != TicTacToeWinner.X_ACROSS_2) {
+            System.out.println("x 2 won failure");
+        }
+
+        TicTacToeBoard x3 = new TicTacToeBoard('o', 'x', 'o', 
+                                               'o', 'o', 'x', 
+                                               'x', 'x', 'x');
+        w = test.result(x3);
+        if (w != TicTacToeWinner.X_ACROSS_3) {
+            System.out.println("x 3 won failure");
+        }
+        
+        TicTacToeBoard xd1 = new TicTacToeBoard( 'x', 'x', 'o', 
+                                                'o', 'x', 'x', 
+                                                'x', 'o', 'x');
+
+        w = test.result(xd1);
+        if (w != TicTacToeWinner.X_DIAG_1) {
+            System.out.println("X won failure - diagonal 1");
+        }
+        TicTacToeBoard xd2 = new TicTacToeBoard( 'x', 'o', 'x', 
+                                                 'o', 'x', 'x', 
+                                                 'x', 'o', 'o');
+
+        w = test.result(xd2);
+        if (w != TicTacToeWinner.X_DIAG_2) {
+            System.out.println("X won failure - diagonal 2");
+        }
+
+        
         TicTacToeBoard b2 = new TicTacToeBoard( 'x', 'x', 'e', 
-                                                'o', 'o', 'x', 
-                                                'o', 'o', 'e');
+                'o', 'o', 'x', 
+                'o', 'o', 'e');
 
         w = test.result(b2);
         if (w != TicTacToeWinner.NO_ONE_YET) {
@@ -131,23 +166,32 @@ public class TicTacToeJudge {
                                                 'x', 'o', 'o');
 
         w = test.result(b4);
-        if (w != TicTacToeWinner.O) {
-            System.out.println("y won failure - diagonal 1");
+        if (w != TicTacToeWinner.O_DIAG_1) {
+            System.out.println("O won failure - diagonal 1");
         }
-        TicTacToeBoard b5 = new TicTacToeBoard( 'x', 'x', 'o', 
-                                                'o', 'o', 'x', 
-                                                'o', 'o', 'o');
+        TicTacToeBoard od2 = new TicTacToeBoard( 'x', 'x', 'o', 
+                                                 'o', 'o', 'x', 
+                                                 'o', 'x', 'o');
 
-        w = test.result(b5);
-        if (w != TicTacToeWinner.O) {
+        w = test.result(od2);
+        if (w != TicTacToeWinner.O_DIAG_2) {
             System.out.println("o won failure - diagonal 2");
         }
+        TicTacToeBoard o1 = new TicTacToeBoard( 'o', 'o', 'o', 
+                                                'o', 'x', 'o', 
+                                                'x', 'o', 'x');
+
+        w = test.result(o1);
+        if (w != TicTacToeWinner.O_ACROSS_1) {
+            System.out.println("o won failure - across 1");
+        }
+
         TicTacToeBoard b6 = new TicTacToeBoard( 'x', 'x', 'o', 
                                                 'o', 'o', 'o', 
                                                 'o', 'o', 'x');
 
         w = test.result(b6);
-        if (w != TicTacToeWinner.O) {
+        if (w != TicTacToeWinner.O_ACROSS_2) {
             System.out.println("o won failure - across 2");
         }
         TicTacToeBoard b7 = new TicTacToeBoard( 'x', 'x', 'o', 
@@ -155,16 +199,25 @@ public class TicTacToeJudge {
                                                 'o', 'o', 'o');
 
         w = test.result(b7);
-        if (w != TicTacToeWinner.O) {
+        if (w != TicTacToeWinner.O_ACROSS_3) {
             System.out.println("o won failure - across 3");
         }
 
+        TicTacToeBoard od1 = new TicTacToeBoard( 'o', 'x', 'o', 
+                                                'o', 'o', 'x', 
+                                                'o', 'o', 'x');
+
+        w = test.result(od1);
+        if (w != TicTacToeWinner.O_DOWN_1) {
+            System.out.println("o won failure - down 1");
+        }
+        
         TicTacToeBoard b8 = new TicTacToeBoard( 'x', 'o', 'o', 
                                                 'o', 'o', 'x', 
                                                 'o', 'o', 'x');
 
         w = test.result(b8);
-        if (w != TicTacToeWinner.O) {
+        if (w != TicTacToeWinner.O_DOWN_2) {
             System.out.println("o won failure - down 2");
         }
 
@@ -173,7 +226,7 @@ public class TicTacToeJudge {
                                                 'o', 'x', 'o');
 
         w = test.result(b9);
-        if (w != TicTacToeWinner.O) {
+        if (w != TicTacToeWinner.O_DOWN_3) {
             System.out.println("o won failure - down 3");
         }
         System.out.println("Finished TicTactoeJudge test");        

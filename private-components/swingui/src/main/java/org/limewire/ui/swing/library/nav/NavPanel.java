@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library.nav;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -11,12 +12,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
@@ -31,13 +37,16 @@ import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.BusyPainter;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.features.TicTacToeFeature;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.ActionLabel;
-import org.limewire.ui.swing.friends.chat.ChallengeToPlayTicTacToeAcceptedEvent;
+import org.limewire.ui.swing.friends.chat.TicTacToeCreatePanelEvent;
 import org.limewire.ui.swing.friends.chat.TicTacToeInitiateGameEvent;
+import org.limewire.ui.swing.friends.chat.TicTacToeMigLayout;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.listener.MousePopupListener;
@@ -398,20 +407,60 @@ public class NavPanel extends JXPanel {
             menu.add(new JMenuItem(chatAction));
             menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 3);
 
-//use remotelibrarymanager#hasFriendLibrary if true then you know the person
-//is on limewire
-            
-//TODO: must know if they support tic tac toe            
-            if(remoteLibraryManager.hasFriendLibrary(friend)) {
-                TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
-                tictactoeAction.setFriend(friend);
-                menu.add(new JMenuItem(tictactoeAction));
-                menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 13);   
+            //Check if the friend supports Tic Tac Toe, only show the ability to 
+            //challenge to Tic Tac Toe if he does support the feature.
+            Map<String, FriendPresence> feature = friend.getFriendPresences();
+        
+            Iterator it = feature.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pairs = (Map.Entry)it.next();
+                FriendPresence fp = (FriendPresence)pairs.getValue();
+                if(fp != null && fp.hasFeatures(TicTacToeFeature.ID)) {
+//                    if(remoteLibraryManager.hasFriendLibrary(friend)) {//this only checks that they have a library
+//                    TicTacToeAction tictactoeAction = new TicTacToeAction();
+                    TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
+                    tictactoeAction.setFriend(friend);
+                    menu.add(new JMenuItem(tictactoeAction));
+                    menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 13);                       
+                }
             }
-            
         }
     }
 
+//    /**
+//     * Creates the Tic Tac Toe panel, whether this person initiated the game, or 
+//     * accepted to play a game.
+//     * @param event includes the friend's name and the writer
+//     */
+//    @EventSubscriber
+//    public void handleTicTacToeCreatePanelEvent(TicTacToeCreatePanelEvent event) {        
+//        System.out.println("In ConversationPane#handleChallengeCreateBoard friend: " + event.getFriend().getId());
+//
+//        Friend friend = event.getFriend();
+//        if (friend != null) {
+//            final TicTacToeMigLayout tictactoePanel = new TicTacToeMigLayout(null);
+//
+//            tictactoePanel.fireGameStarted(friend.getId());
+//        
+//            JFrame frame = new JFrame();
+//            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//            frame.setResizable(true);
+//            frame.setTitle("Tic Tac Toe with " + friend.getId());            
+//            frame.getContentPane().setLayout(new BorderLayout());
+//            frame.getContentPane().add(tictactoePanel, BorderLayout.CENTER);            
+//            frame.pack();
+//            frame.setLocationRelativeTo(null);
+//            frame.setVisible(true);
+//            
+//            frame.addWindowListener(new WindowAdapter() {
+//                //If I challenged a friend, but he rejected the offer, don't call exitGame
+//                public void windowClosed(WindowEvent e) {
+//                    tictactoePanel.exitGame();                
+//                }            
+//            });            
+//        } 
+//    }
+    
     /**
      * Called from ChatFriendListPane and ConversationPane to send off a request to 
      * play a game.
@@ -423,7 +472,8 @@ public class NavPanel extends JXPanel {
         TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
         System.out.println("in handleTicTacToeInitiatedGameEvent, friend: " + friend.getId());
         tictactoeAction.setFriend(friend);
-        
+//        throw new NotImplementedException();
+
     }
 
 }

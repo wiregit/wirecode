@@ -13,8 +13,8 @@ public class TicTacToeMessages {
     public static String X_WON = new String("X won");
     public static String O_WON = new String("O won");
     public static String DRAW = new String("Draw");
-    public static String X_NEXT_MOVE = new String("X next move");
-    public static String O_NEXT_MOVE = new String("O next move");
+//    public static String X_NEXT_MOVE = new String("X next move");
+//    public static String O_NEXT_MOVE = new String("O next move");
     
     public static String BAD_PICK = new String("Can't pick that spot");
 //    public static String ACCEPT_GAME = new String("I accept");

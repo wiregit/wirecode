@@ -209,16 +209,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         public FriendPresence getFriendPresence() {
             return friendPresence;
-        }
-        
-        @Override
-        public boolean isTicTacToeEnabled() {
-            if (!friendPresence.getFriend().isAnonymous()) {
-                return true;
-            }
-            return false;
-        }
-
+        }        
     }
     
     
@@ -252,11 +243,6 @@ public class RemoteFileDescAdapter implements SearchResult {
         @Override
         public FriendPresence getFriendPresence() {
             return presence;
-        }
-
-        @Override
-        public boolean isTicTacToeEnabled() {
-            return false;
         }
 
     }

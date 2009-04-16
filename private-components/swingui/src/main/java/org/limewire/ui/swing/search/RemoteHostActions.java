@@ -11,6 +11,4 @@ public interface RemoteHostActions {
     void showFilesSharedBy(RemoteHost person);
 
     void viewLibraryOf(RemoteHost person);
-    
-    void tictactoeWith(RemoteHost person);
 }
