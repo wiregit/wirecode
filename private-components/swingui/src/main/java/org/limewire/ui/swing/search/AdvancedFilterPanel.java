@@ -24,6 +24,7 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
+import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.filter.CategoryDetector;
 import org.limewire.ui.swing.search.filter.CategoryFilter;
@@ -90,6 +91,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     public AdvancedFilterPanel(
             @Assisted SearchResultsModel searchResultsModel,
             TextFieldDecorator textFieldDecorator,
+            FriendActions friendManager,
             IconManager iconManager) {
         
         this.searchResultsModel = searchResultsModel;
@@ -109,6 +111,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         // Create source filter and display component.
         sourceFilter = filterFactory.getSourceFilter();
         JComponent sourceComp = sourceFilter.getComponent();
+        sourceComp.setVisible(friendManager.isSignedIn());
         
         add(filterTextField   , "gap 3 3 6 6, growx, wrap");
         add(filterDisplayPanel, "gap 0 0 0 0, growx, wrap");
@@ -145,12 +148,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         
         // Add listeners to standard filters.
         categoryFilter.addFilterListener(new AddFilterListener());
-
-        // TODO add source filter listener 
-        //sourceFilter.addFilterListener(new AddFilterListener());
-        // TODO determine if user logged into XMPP, show source filter
-        // TODO listen to login activity, maybe show/hide source filter?
-        sourceFilter.getComponent().setVisible(false);
+        sourceFilter.addFilterListener(new AddFilterListener());
     }
 
     /**
