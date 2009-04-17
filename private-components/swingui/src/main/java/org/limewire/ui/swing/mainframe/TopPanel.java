@@ -39,6 +39,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.painter.factories.SearchTabPainterFactory;
+import org.limewire.ui.swing.search.AdvancedSearchBuilder;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchBar;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -62,6 +63,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final FancyTabList searchList;
     private final Navigator navigator;        
     private final NavItem homeNav;
+    private final AdvancedSearchBuilder advancedSearchBuilder;
         
     @Inject
     public TopPanel(final SearchHandler searchHandler,
@@ -74,12 +76,14 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     BarPainterFactory barPainterFactory,
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryNavigator libraryNavigator,
-                    AdvancedSearchPanel advancedSearchPanel) {        
+                    AdvancedSearchPanel advancedSearchPanel,
+                    AdvancedSearchBuilder advancedSearchBuilder) {        
         GuiUtils.assignResources(this);
         
         this.searchBar = searchBar;
         this.navigator = navigator;
         this.searchBar.addSearchActionListener(new Searcher(searchHandler));        
+        this.advancedSearchBuilder = advancedSearchBuilder;
         
         setName("WireframeTop");
         
@@ -198,6 +202,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
             @Override
             public void itemSelected(boolean selected) {
                 searchBar.setText(item.getId());
+                searchBar.setCategory(search.getCategory());
                 action.putValue(Action.SELECTED_KEY, selected);
             }
         });
@@ -267,9 +272,18 @@ class TopPanel extends JXPanel implements SearchNavigator {
             // Get search text, and do search if non-empty.
             String searchText = searchBar.getSearchText();
             if (!searchText.isEmpty()) {
-                if(searchHandler.doSearch(
-                        DefaultSearchInfo.createKeywordSearch(searchText,  
-                                searchBar.getCategory()))) {
+                
+                // Attempt to parse an advanced search from the search query
+                SearchInfo search = advancedSearchBuilder.attemptToCreateAdvancedSearch(
+                        searchText, searchBar.getCategory());
+                
+                // Fall back on the normal search
+                if (search == null) {
+                    search = DefaultSearchInfo.createKeywordSearch(searchText,  
+                        searchBar.getCategory());
+                }
+                
+                if(searchHandler.doSearch(search)) {
                     searchBar.selectAllSearchText();
                 }
             }
