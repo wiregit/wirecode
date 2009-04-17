@@ -67,7 +67,7 @@ class ConnectionStatusPanel extends JXPanel {
         connectionStatusLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
         connectionStatusLabel.setFont(font);
         connectionStatusLabel.setForeground(this.getForeground());
-        tryAgainButton = new HyperlinkButton("Try Again");
+        tryAgainButton = new HyperlinkButton(I18n.tr("Try Again"));
         tryAgainButton.setFont(font);
         tryAgainButton.setVisible(false);
         
