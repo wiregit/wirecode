@@ -1,10 +1,16 @@
 package org.limewire.ui.swing.search.filter;
 
+import java.awt.Font;
+
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
@@ -37,6 +43,8 @@ class SourceFilter extends AbstractFilter {
         }
     }
 
+    private final JPanel panel = new JPanel();
+    private final JLabel label = new JLabel();
     private final JList list = new JList();
     
     private final FilterMatcherEditor editor;
@@ -48,6 +56,13 @@ class SourceFilter extends AbstractFilter {
      */
     public SourceFilter() {
         // Set up visual components.
+        panel.setLayout(new MigLayout("insets 6 0 6 0, gap 0 0", 
+                "[left,grow]", ""));
+        panel.setOpaque(false);
+        
+        label.setText(I18n.tr("From"));
+        label.setFont(label.getFont().deriveFont(Font.BOLD));
+        
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setVisibleRowCount(3);
         
@@ -68,16 +83,34 @@ class SourceFilter extends AbstractFilter {
         
         // Add selection listener to update filter.
         list.addListSelectionListener(new SelectionListener());
+        
+        panel.add(label, "wrap");
+        panel.add(list , "gap 6 6, grow");
+    }
+    
+    @Override
+    public boolean isActive() {
+        return false;
+    }
+    
+    @Override
+    public String getActiveText() {
+        return null;
     }
 
     @Override
     public JComponent getComponent() {
-        return list;
+        return panel;
     }
 
     @Override
     public MatcherEditor<VisualSearchResult> getMatcherEditor() {
         return editor;
+    }
+
+    @Override
+    public void reset() {
+        editor.setMatcher(null);
     }
     
     @Override

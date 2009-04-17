@@ -19,9 +19,14 @@ class FilterMatcherEditor extends AbstractMatcherEditor<VisualSearchResult> {
 
     /**
      * Sets the specified matcher, and notifies listeners that the matcher has
-     * changed.
+     * changed.  If <code>matcher</code> is null, then the default Matcher is
+     * applied.
      */
     public void setMatcher(Matcher<VisualSearchResult> matcher) {
-        fireChanged(matcher);
+        if (matcher != null) {
+            fireChanged(matcher);
+        } else {
+            fireMatchAll();
+        }
     }
 }

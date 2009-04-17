@@ -25,6 +25,16 @@ public interface Filter extends Disposable {
     void removeFilterListener(FilterListener listener);
     
     /**
+     * Returns an indicator that determines whether the filter is in use.
+     */
+    boolean isActive();
+    
+    /**
+     * Returns the display text for an active filter.
+     */
+    String getActiveText();
+    
+    /**
      * Returns the Swing component that displays the filter controls.
      */
     JComponent getComponent();
@@ -33,5 +43,10 @@ public interface Filter extends Disposable {
      * Returns the matcher/editor used to filter search results.
      */
     MatcherEditor<VisualSearchResult> getMatcherEditor();
+    
+    /**
+     * Resets the filter.
+     */
+    void reset();
     
 }
