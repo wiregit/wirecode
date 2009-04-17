@@ -1,7 +1,12 @@
 package org.limewire.ui.swing.search.filter;
 
+import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -18,7 +23,6 @@ import org.limewire.ui.swing.util.I18n;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
@@ -28,9 +32,8 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 class SourceFilter extends AbstractFilter {
     /** Source types for search results. */
     public enum SourceType {
-        ALL(I18n.tr("Everyone")),
         P2P(I18n.tr("P2P Network")), 
-        FRIENDS(I18n.tr("Friends"));
+        FRIENDS(I18n.tr("All Friends"));
         
         private String displayName;
         
@@ -47,12 +50,12 @@ class SourceFilter extends AbstractFilter {
     private final JLabel label = new JLabel();
     private final JList list = new JList();
     
-    private final FilterMatcherEditor editor;
+    private final EventList<SourceType> sourceList = new BasicEventList<SourceType>();
     
-    private final EventList<Object> sourceList;
+    private EventSelectionModel<SourceType> selectionModel;
 
     /**
-     * Constructs a SourceFilterComponent.
+     * Constructs a SourceFilter.
      */
     public SourceFilter() {
         // Set up visual components.
@@ -63,59 +66,81 @@ class SourceFilter extends AbstractFilter {
         label.setText(I18n.tr("From"));
         label.setFont(label.getFont().deriveFont(Font.BOLD));
         
+        list.setCellRenderer(new SourceCellRenderer());
+        list.setOpaque(false);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setVisibleRowCount(3);
         
+        // Add listener to show cursor on mouse over.
+        list.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                e.getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                e.getComponent().setCursor(Cursor.getDefaultCursor());
+            }
+        });
+        
+        panel.add(label, "wrap");
+        panel.add(list , "gap 6 6, grow");
+        
+        initialize();
+    }
+    
+    /**
+     * Initializes the filter.
+     */
+    private void initialize() {
         // Create list of sources.
-        sourceList = new BasicEventList<Object>();
         for (SourceType type : SourceType.values()) {
             sourceList.add(type);
         }
         
         // Create list and selection models.
-        EventListModel<Object> listModel = new EventListModel<Object>(sourceList);
-        final EventSelectionModel<Object> selectionModel = new EventSelectionModel<Object>(sourceList);
+        EventListModel<SourceType> listModel = new EventListModel<SourceType>(sourceList);
+        selectionModel = new EventSelectionModel<SourceType>(sourceList);
         list.setModel(listModel);
         list.setSelectionModel(selectionModel);
         
-        // Create matcher editor for filtering.
-        editor = new FilterMatcherEditor();
-        
         // Add selection listener to update filter.
         list.addListSelectionListener(new SelectionListener());
-        
-        panel.add(label, "wrap");
-        panel.add(list , "gap 6 6, grow");
     }
     
-    @Override
-    public boolean isActive() {
-        return false;
-    }
-    
-    @Override
-    public String getActiveText() {
-        return null;
-    }
-
     @Override
     public JComponent getComponent() {
         return panel;
     }
 
     @Override
-    public MatcherEditor<VisualSearchResult> getMatcherEditor() {
-        return editor;
-    }
-
-    @Override
     public void reset() {
-        editor.setMatcher(null);
+        selectionModel.clearSelection();
+        // Deactivate filter.
+        deactivate();
     }
     
     @Override
     public void dispose() {
         // Do nothing.
+    }
+    
+    /**
+     * Activates the filter using the specified text description and matcher.
+     * This method also hides the filter component.
+     */
+    protected void activate(String activeText, Matcher<VisualSearchResult> matcher) {
+        super.activate(activeText, matcher);
+        getComponent().setVisible(false);
+    }
+    
+    /**
+     * Deactivates the filter by clearing the text description and matcher.
+     * This method also displays the filter component.
+     */
+    protected void deactivate() {
+        super.deactivate();
+        getComponent().setVisible(true);
     }
 
     /**
@@ -125,12 +150,47 @@ class SourceFilter extends AbstractFilter {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            Object value = list.getSelectedValue();
-            if (value instanceof SourceType) {
-                // Change matcher in editor.
-                Matcher<VisualSearchResult> newMatcher = new SourceMatcher((SourceType) value);
-                editor.setMatcher(newMatcher);
+            // Skip selection change if filter is active.
+            if (isActive()) {
+                return;
             }
+            
+            // Get list of selected values.
+            EventList<SourceType> selectedList = selectionModel.getSelected();
+            if (selectedList.size() > 0) {
+                SourceType value = selectedList.get(0);
+                // Create new matcher and activate.
+                Matcher<VisualSearchResult> newMatcher = new SourceMatcher(value);
+                activate(value.toString(), newMatcher);
+                
+            } else {
+                // Deactivate to clear matcher.
+                deactivate();
+            }
+            
+            // Notify filter listeners.
+            fireFilterChanged(SourceFilter.this);
+        }
+    }
+    
+    /**
+     * Cell renderer for source values.
+     */
+    private class SourceCellRenderer extends DefaultListCellRenderer {
+        
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value, 
+                int index, boolean isSelected, boolean cellHasFocus) {
+            
+            Component renderer = super.getListCellRendererComponent(list, value,
+                    index, isSelected, cellHasFocus);
+            
+            if (renderer instanceof JLabel) {
+                // Set colors.
+                ((JLabel) renderer).setOpaque(false);
+            }
+
+            return renderer;
         }
     }
 }

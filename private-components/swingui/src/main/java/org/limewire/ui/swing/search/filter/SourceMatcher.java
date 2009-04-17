@@ -27,6 +27,6 @@ class SourceMatcher implements Matcher<VisualSearchResult> {
         
         // TODO implement real logic
         
-        return (sourceType == SourceType.ALL) || (sourceType == SourceType.P2P);
+        return (sourceType == SourceType.P2P);
     }
 }
