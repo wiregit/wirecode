@@ -9,7 +9,6 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.impl.search.AdvancedQueryStringBuilder;
 import org.limewire.ui.swing.util.FilePropertyKeyUtils;
 import org.limewire.ui.swing.util.Translator;
 import org.limewire.util.BaseTestCase;
@@ -46,7 +45,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
 
     
     /**
-     * Tests {@link AdvancedQueryStringBuilder#createCompositeQuery(Map)}.
+     * Tests {@link AdvancedSearchBuilder#createCompositeQuery(Map)}.
      */
     public void testCreateCompositeQueryBasic() {
         Mockery context = new Mockery() {{
