@@ -39,6 +39,7 @@ import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.search.AdvancedFilterPanel.CategoryListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -60,15 +61,19 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     /** Decorator used to set the appearance of the header bar. */
     private final HeaderBarDecorator headerBarDecorator;
     
+    // TODO REMOVE
     /**
      * This is the subpanel that appears in the upper-left corner
      * of each search results tab.  It displays the numbers of results
      * found for each file type.
-     */
-    private final SearchTabItems searchTabItems;
+     *
+    private final SearchTabItems searchTabItems;*/
+    
+    /** Label that displays the search title. */
+    private final JLabel searchTitleLabel = new JLabel();
     
     /** Panel containing filter components. */
-    private final AdvancedFilterPanel filterPanel; // TODO NEW!!!
+    private final AdvancedFilterPanel filterPanel;
     
     /**
      * This is the subpanel that displays the actual search results.
@@ -138,9 +143,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         this.sponsoredResultsPanel.setVisible(false);
         
         // Create sort and filter components.
-        this.sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
+        sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
         
-        this.filterPanel = filterPanelFactory.create(searchResultsModel); // TODO NEW!!!
+        filterPanel = filterPanelFactory.create(searchResultsModel);
         
         scrollPane = new JScrollPane();
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -148,7 +153,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         configureEnclosingScrollPane();
         
         // Create results container with tables.
-        this.resultsContainer = containerFactory.create(searchResultsModel);
+        resultsContainer = containerFactory.create(searchResultsModel);
         
         viewTypeListener = new SettingListener() {
             int oldSearchViewTypeId = SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue();
@@ -169,28 +174,47 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             } 
         };
         SwingUiSettings.SEARCH_VIEW_TYPE_ID.addSettingListener(viewTypeListener);
+        
+        searchTitleLabel.setText(I18n.tr("Results from {0}", searchResultsModel.getSearchTitle()));
 
-        SearchTabItems.SearchTabListener listener =
+        // TODO REMOVE
+        /*SearchTabItems.SearchTabListener listener =
             new SearchTabItems.SearchTabListener() {
             @Override
             public void categorySelected(SearchCategory category) {
-                sortAndFilterPanel.clearFilterBox();
-                sortAndFilterPanel.setSearchCategory(category);
-                filterPanel.setSearchCategory(category); // TODO NEW!!!
-                resultsContainer.showCategory(category);
-                syncScrollPieces();
+                //sortAndFilterPanel.clearFilterBox();
+                //sortAndFilterPanel.setSearchCategory(category);
+                //resultsContainer.showCategory(category);
+                //syncScrollPieces();
             }
         };
         
         searchTabItems = searchTabItemsFactory.create(
                 searchResultsModel.getSearchCategory(), 
                 searchResultsModel.getObservableSearchResults());
-        searchTabItems.addSearchTabListener(listener);
+        searchTabItems.addSearchTabListener(listener);*/
+        
+        // Configure sort panel and results container.
+        sortAndFilterPanel.setSearchCategory(searchResultsModel.getSearchCategory());
+        resultsContainer.showCategory(searchResultsModel.getSearchCategory());
+        syncScrollPieces();
+        
+        // Configure advanced filters.
+        filterPanel.setSearchCategory(searchResultsModel.getSearchCategory());
+        filterPanel.addCategoryListener(new CategoryListener() {
+            @Override
+            public void categorySelected(SearchCategory searchCategory) {
+                sortAndFilterPanel.setSearchCategory(searchCategory);
+                resultsContainer.showCategory(searchCategory);
+                syncScrollPieces();
+            }
+        });
 
-        for (Map.Entry<SearchCategory, Action> entry : searchTabItems.getResultCountActions()) {
+        // TODO REMOVE
+        /*for (Map.Entry<SearchCategory, Action> entry : searchTabItems.getResultCountActions()) {
             resultsContainer.synchronizeResultCount(
                 entry.getKey(), entry.getValue());
-        }
+        }*/
 
         messageLabel = new JLabel();
         messagePanel = new JPanel();
@@ -209,6 +233,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     public void dispose() {
         SwingUiSettings.SEARCH_VIEW_TYPE_ID.removeSettingListener(viewTypeListener);
         sortAndFilterPanel.dispose();
+        filterPanel.dispose();
         classicSearchReminderPanel.dispose();
         searchResultsModel.dispose();
     }
@@ -304,7 +329,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         tabHighlight.setInsets(new Insets(0,0,1,0));
         tabHighlight.setBorderPaint(null);
         
-        FancyTabList searchTab = searchTabItems.getSearchTab();
+        // TODO REMOVE
+        /*FancyTabList searchTab = searchTabItems.getSearchTab();
         
         searchTab.setUnderlineEnabled(false);
         searchTab.setHighlightPainter(tabHighlight);
@@ -312,15 +338,17 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         searchTab.setSelectionPainter(createTabSelectionPainter());
         searchTab.setTabTextSelectedColor(tabSelectionTextColor);
         
-        HeaderBar header = new HeaderBar(searchTab);
+        HeaderBar header = new HeaderBar(searchTab);*/
+        
+        HeaderBar header = new HeaderBar(searchTitleLabel);
         headerBarDecorator.decorateBasic(header);
         
         sortAndFilterPanel.layoutComponents(header);
-        add(filterPanel, "spany 4, grow"); // TODO NEW!!!
-        add(header, "growx, wrap");
-        add(classicSearchReminderPanel, "growx, wrap");
-        add(messagePanel, "growx, wrap");
-        add(scrollPane, "grow, wrap");
+        add(header                    , "spanx 2, growx, wrap");
+        add(classicSearchReminderPanel, "spanx 2, growx, wrap");
+        add(messagePanel              , "spanx 2, growx, wrap");
+        add(filterPanel, "grow");
+        add(scrollPane , "grow");
 
         scrollablePanel.setScrollableTracksViewportHeight(false);
         scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0, insets 0", "[]", "[grow][]"));
