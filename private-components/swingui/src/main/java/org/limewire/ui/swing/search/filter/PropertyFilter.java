@@ -1,20 +1,30 @@
 package org.limewire.ui.swing.search.filter;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -56,6 +66,7 @@ class PropertyFilter extends AbstractFilter {
     private UniqueList<Object> uniqueList;
     private EventListModel<Object> listModel;
     private EventSelectionModel<Object> selectionModel;
+    private JPopupMenu morePopup;
     
     /**
      * Constructs a PropertyFilterComponent using the specified results list,
@@ -97,7 +108,7 @@ class PropertyFilter extends AbstractFilter {
             }
         });
         
-        moreButton.setText(I18n.tr("more"));
+        moreButton.setAction(new MoreAction());
         
         panel.add(propertyLabel, "wrap");
         panel.add(list         , "gap 6 6, wmax 132, hmax 48, grow, wrap");
@@ -248,6 +259,121 @@ class PropertyFilter extends AbstractFilter {
     }
 
     /**
+     * Returns a new instance of the popup that displays all property values.
+     */
+    private JPopupMenu createMorePopup() {
+        // Create popup containing display panel.
+        JPopupMenu popup = new JPopupMenu();
+        popup.setFocusable(false);
+        popup.add(new MorePopupPanel());
+
+        // Add listener to clear reference when popup is hidden.
+        popup.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+            }
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                morePopup = null;
+            }
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+            }
+        });
+
+        return popup;
+    }
+    
+    /**
+     * Displays the "more" popup that displays all property values.
+     */
+    private void showMorePopup() {
+        if (morePopup == null) {
+            morePopup = createMorePopup();
+        }
+        // Limit popup width.
+        if (morePopup.getPreferredSize().width > 240) {
+            morePopup.setPreferredSize(new Dimension(240, morePopup.getPreferredSize().height));
+        }
+        // Display popup next to property label.
+        morePopup.show(moreButton, list.getWidth(), -moreButton.getY() + 3);
+    }
+    
+    /**
+     * Hides the "more" popup that displays all property values.
+     */
+    private void hideMorePopup() {
+        if (morePopup != null) {
+            morePopup.setVisible(false);
+            morePopup = null;
+        }
+    }
+    
+    /**
+     * Action to display list of all property values.
+     */
+    private class MoreAction extends AbstractAction {
+
+        public MoreAction() {
+            super(I18n.tr("more"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            showMorePopup();
+        }
+    }
+    
+    /**
+     * Display panel for "more" popup component. 
+     */
+    private class MorePopupPanel extends JPanel {
+        
+        private JLabel titleLabel = new JLabel();
+        private JList moreList = new JList();
+        private JScrollPane scrollPane = new JScrollPane();
+        
+        public MorePopupPanel() {
+            setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            setLayout(new BorderLayout());
+            
+            titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
+            titleLabel.setBackground(Color.BLACK);
+            titleLabel.setForeground(Color.WHITE);
+            titleLabel.setOpaque(true);
+            titleLabel.setText(I18n.tr("All {0}", getPropertyText()));
+            
+            moreList.setCellRenderer(new PropertyCellRenderer());
+            moreList.setOpaque(false);
+            moreList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            
+            // Add listener to show cursor on mouse over.
+            moreList.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    e.getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                }
+                
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    e.getComponent().setCursor(Cursor.getDefaultCursor());
+                }
+            });
+            
+            // Set list and selection models.
+            moreList.setModel(listModel);
+            moreList.setSelectionModel(selectionModel);
+            
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());
+            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollPane.setViewportView(moreList);
+            
+            add(titleLabel, BorderLayout.NORTH);
+            add(scrollPane, BorderLayout.CENTER);
+        }
+    }
+    
+    /**
      * Listener to handle selection changes to update the matcher editor.  
      */
     private class SelectionListener implements ListSelectionListener {
@@ -271,6 +397,9 @@ class PropertyFilter extends AbstractFilter {
                 // Deactivate to clear matcher.
                 deactivate();
             }
+            
+            // Hide popup if showing.
+            hideMorePopup();
             
             // Notify filter listeners.
             fireFilterChanged(PropertyFilter.this);
