@@ -128,17 +128,6 @@ public final class LocalIPFilter extends AbstractIPFilter {
           || !badHosts.isEmpty();
     }
     
-    /** The logmin distance to bad or hostile ips. */
-    public int logMinDistanceTo(IP ip) {
-        // If the address is on the whitelist, return the maximum distance
-        if(goodHosts.logMinDistanceTo(ip) == 0)
-            return 32;
-        int min = badHosts.logMinDistanceTo(ip);
-        if(FilterSettings.USE_NETWORK_FILTER.getValue())
-            min = Math.min(min, hostileNetworkFilter.logMinDistanceTo(ip));
-        return min;
-    }
-    
     @Override
     protected boolean allowImpl(IP ip) {
         if (goodHosts.contains(ip)) {

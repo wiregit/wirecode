@@ -155,7 +155,7 @@ public class RatingTable implements Service {
 	}
     
     /**
-     * Assigns the given rating to a QueryReply
+     * Assigns the given rating to a QueryReply, ignoring keyword tokens
      * 
      * @param qr a QueryReply to be rated
      * @param rating a rating between 0 (not spam) and 1 (spam)
@@ -245,8 +245,6 @@ public class RatingTable implements Service {
                 = GenericsUtils.scanForList(is.readObject(),
                     Token.class, GenericsUtils.ScanMode.REMOVE);
             for(Token t : list) {
-                if(t instanceof AddressToken)
-                    tokenizer.setIPFilter((AddressToken) t);
                 tokenMap.put(t, t);
             }
             if(LOG.isDebugEnabled())
