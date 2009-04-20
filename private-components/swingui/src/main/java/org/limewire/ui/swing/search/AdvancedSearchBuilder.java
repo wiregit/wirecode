@@ -91,13 +91,18 @@ public class AdvancedSearchBuilder {
      */
     public SearchInfo attemptToCreateAdvancedSearch(String query, SearchCategory searchCategory) {
         
+        if (searchCategory == SearchCategory.ALL) { 
+            return null;
+        }
+        
         String translatedKeySeparator = getTranslatedKeySeprator();
+        String untranslatedKeySeparator = UNTRANSLATED_SEPARATOR;
         String lowerCaseUntranslatedQuery = translator.toLowerCaseEnglish(query);
         String lowerCaseTranslatedQuery = translator.toLowerCaseCurrentLocale(query);
         
         // Only attempt to parse an advanced search if the query has at least one special
         //  key separator sequence
-        if (query.indexOf(translatedKeySeparator) > -1) {
+        if (query.indexOf(translatedKeySeparator) > -1 || query.indexOf(untranslatedKeySeparator) > -1) {
 
             Map<FilePropertyKey,String> map = new HashMap<FilePropertyKey,String>();
 
@@ -113,7 +118,7 @@ public class AdvancedSearchBuilder {
                 // Check for English key
                 KeyPacket keyPacket = attemptToFindKey(candidateKey, 
                         translator.toLowerCaseEnglish(untranslatedKeyName),
-                        UNTRANSLATED_SEPARATOR, lowerCaseUntranslatedQuery);
+                        untranslatedKeySeparator, lowerCaseUntranslatedQuery);
                 
                 // If the key was found then add it to the list of found keys
                 if (keyPacket != null) {
