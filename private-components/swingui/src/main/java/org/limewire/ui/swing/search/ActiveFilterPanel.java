@@ -19,6 +19,9 @@ import net.miginfocom.swing.MigLayout;
  */
 class ActiveFilterPanel extends JPanel {
 
+    // TODO create resources
+    private Color removeForeColor = Color.RED;
+    
     private final JLabel label = new JLabel();
     private final JButton removeButton = new JButton();
 
@@ -26,8 +29,9 @@ class ActiveFilterPanel extends JPanel {
      * Constructs an ActiveFilterPanel with the specified remove action.
      */
     public ActiveFilterPanel(Action removeAction) {
-        setLayout(new MigLayout("insets 0 0 0 0, gap 0!, fill", 
+        setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
                 "[left][right]", ""));
+        setOpaque(false);
         
         label.setHorizontalAlignment(JLabel.LEADING);
         label.setText((String) removeAction.getValue(Action.NAME));
@@ -36,7 +40,7 @@ class ActiveFilterPanel extends JPanel {
         removeButton.setBorder(BorderFactory.createEmptyBorder());
         removeButton.setContentAreaFilled(false);
         removeButton.setFont(removeButton.getFont().deriveFont(Font.BOLD));
-        removeButton.setForeground(Color.RED);
+        removeButton.setForeground(removeForeColor);
         removeButton.setText("x");
         
         // Add listener to show cursor on mouse over.
@@ -52,8 +56,8 @@ class ActiveFilterPanel extends JPanel {
             }
         });
         
-        add(label       , "wmax 125, growx");
-        add(removeButton, "");
+        add(label       , "wmax 126");
+        add(removeButton, "gap 5 5");
     }
     
 }
