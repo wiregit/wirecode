@@ -58,23 +58,23 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
      
         context.checking(new Expectations() {{
             allowing(translator).translate(
-                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.ALL));
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.DOCUMENT));
             will(returnValue("hello"));
             
             allowing(translator).translate(
-                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.AUTHOR, SearchCategory.ALL));
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.AUTHOR, SearchCategory.DOCUMENT));
             will(returnValue("bye"));
             
             allowing(translator).translateWithComment(with(any(String.class)), with(equal(":")));
             will(returnValue(":"));
         }});
         
-        assertEquals("", searchBuilder.createCompositeQuery(new HashMap<FilePropertyKey, String>(), SearchCategory.ALL));
+        assertEquals("", searchBuilder.createCompositeQuery(new HashMap<FilePropertyKey, String>(), SearchCategory.DOCUMENT));
         
         Map<FilePropertyKey,String> map = new HashMap<FilePropertyKey,String>();
         map.put(FilePropertyKey.YEAR, "1982");
         
-        String query = searchBuilder.createCompositeQuery(map, SearchCategory.ALL);
+        String query = searchBuilder.createCompositeQuery(map, SearchCategory.DOCUMENT);
         
         assertTrue(query.startsWith("hello"));
         assertTrue(query.endsWith("1982"));
@@ -116,7 +116,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
      
         context.checking(new Expectations() {{
             allowing(translator).translate(
-                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.ALL));
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.DOCUMENT));
             will(returnValue("hello"));
             
             allowing(translator).translateWithComment(with(any(String.class)), with(equal(":")));
@@ -126,7 +126,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
         Map<FilePropertyKey,String> map = new HashMap<FilePropertyKey,String>();
         map.put(FilePropertyKey.YEAR, "1982");
         
-        String query = searchBuilder.createCompositeQuery(map, SearchCategory.ALL);
+        String query = searchBuilder.createCompositeQuery(map, SearchCategory.DOCUMENT);
         
         assertTrue(query.startsWith("hello"));
         assertTrue(query.endsWith("1982"));
@@ -220,7 +220,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
      
         context.checking(new Expectations() {{
             allowing(translator).translate(
-                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.ALL));
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.DOCUMENT));
             will(returnValue("key"));
             
             allowing(translator).translateWithComment(with(any(String.class)), with(equal(":")));
@@ -254,7 +254,15 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
             will(returnValue(false));
             
             allowing(mockedTranslator).translate(
-                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.ALL));
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.DOCUMENT));
+            will(returnValue("key"));
+
+            allowing(mockedTranslator).translate(
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.PROGRAM));
+            will(returnValue("key"));
+            
+            allowing(mockedTranslator).translate(
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.AUDIO));
             will(returnValue("key"));
             
             // Do not match any other translations
@@ -265,9 +273,9 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
             will(returnValue(":"));
         }});
         
-        SearchInfo search1 = searchBuilder.attemptToCreateAdvancedSearch("key:value", SearchCategory.ALL);
+        SearchInfo search1 = searchBuilder.attemptToCreateAdvancedSearch("key:value", SearchCategory.DOCUMENT);
         assertNotNull(search1);
-        assertEquals(SearchCategory.ALL, search1.getSearchCategory());
+        assertEquals(SearchCategory.DOCUMENT, search1.getSearchCategory());
         assertEquals("value", search1.getAdvancedDetails().get(FilePropertyKey.YEAR));
         
         SearchInfo search2 = searchBuilder.attemptToCreateAdvancedSearch("  key:   value  ", SearchCategory.PROGRAM);
@@ -319,7 +327,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
             allowing(mockedTranslator1).isCurrentLanguageEnglish();
             will(returnValue(false));
             allowing(mockedTranslator1).translate(
-                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.ALL));
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.AUDIO));
             will(returnValue("key"));
             // Do not match any other translations
             allowing(mockedTranslator1).translate(with(any(String.class)));
@@ -330,7 +338,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
             allowing(mockedTranslator2).isCurrentLanguageEnglish();
             will(returnValue(false));
             allowing(mockedTranslator2).translate(
-                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.ALL));
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.AUDIO));
             will(returnValue("key"));
             // Do not match any other translations
             allowing(mockedTranslator2).translate(with(any(String.class)));
@@ -340,34 +348,34 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
         }});
         
         SearchInfo search1 = searchBuilder1.attemptToCreateAdvancedSearch("not a key: not a value name: impossible", 
-                SearchCategory.ALL);
+                SearchCategory.AUDIO);
         assertNull(search1);
         
         SearchInfo search2 = searchBuilder1.attemptToCreateAdvancedSearch("not a key, impossible", 
-                SearchCategory.ALL);
+                SearchCategory.AUDIO);
         assertNull(search2);
         
         SearchInfo search3 = searchBuilder1.attemptToCreateAdvancedSearch("artist: is not a key in all", 
-                SearchCategory.ALL);
+                SearchCategory.DOCUMENT);
         assertNull(search3);
         
         SearchInfo search4 = searchBuilder1.attemptToCreateAdvancedSearch("", 
-                SearchCategory.ALL);
+                SearchCategory.AUDIO);
         assertNull(search4);
         
         SearchInfo search5 = searchBuilder1.attemptToCreateAdvancedSearch("    ", 
-                SearchCategory.ALL);
+                SearchCategory.AUDIO);
         assertNull(search5);
         
         SearchInfo search6 = searchBuilder1.attemptToCreateAdvancedSearch("   name-insert my name here  ", 
-                SearchCategory.ALL);
+                SearchCategory.AUDIO);
         assertNull(search6);
         
         SearchInfo search7 = searchBuilder1.attemptToCreateAdvancedSearch("   name-insert my name here  ", 
-                SearchCategory.ALL);
+                SearchCategory.AUDIO);
         assertNull(search7);
         
-        SearchInfo search8 = searchBuilder2.attemptToCreateAdvancedSearch("   artist:insert my name here  ", 
+        SearchInfo search8 = searchBuilder2.attemptToCreateAdvancedSearch("   artist-insert my name here  ", 
                 SearchCategory.AUDIO);
         assertNull(search8);
         
@@ -393,7 +401,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
             allowing(mockedTranslator1).isCurrentLanguageEnglish();
             will(returnValue(false));
             allowing(mockedTranslator1).translate(
-                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.ALL));
+                    FilePropertyKeyUtils.getUntraslatedDisplayName(FilePropertyKey.YEAR, SearchCategory.AUDIO));
             will(returnValue("key hat cat rANDo-mAt:"));
             // Do not match any other translations
             allowing(mockedTranslator1).translate(with(any(String.class)));
@@ -404,9 +412,9 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
         }});
         
         SearchInfo search1 = searchBuilder1.attemptToCreateAdvancedSearch("key hat cat rando-mat::: a ::hello", 
-                SearchCategory.ALL);
+                SearchCategory.AUDIO);
         assertNotNull(search1);
-        assertEquals(SearchCategory.ALL, search1.getSearchCategory());
+        assertEquals(SearchCategory.AUDIO, search1.getSearchCategory());
         assertEquals("hello", search1.getAdvancedDetails().get(FilePropertyKey.YEAR));
             
         context.assertIsSatisfied();
