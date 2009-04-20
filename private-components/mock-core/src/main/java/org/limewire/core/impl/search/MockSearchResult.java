@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -186,7 +187,10 @@ public class MockSearchResult implements Cloneable, SearchResult {
     }
 
     public int getRelevance() {
-        return 0;
+        Random r = new Random();
+
+        return Math.abs(r.nextInt()) % 100;
+
     }
 
     public boolean isLicensed() {

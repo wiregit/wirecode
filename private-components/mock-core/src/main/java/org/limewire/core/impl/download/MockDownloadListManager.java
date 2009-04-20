@@ -54,7 +54,7 @@ public class MockDownloadListManager implements DownloadListManager {
 	@Override
 	public DownloadItem addDownload(
             Search search, List<? extends SearchResult> coreSearchResults) {
-        String title = coreSearchResults.get(0).getFileName(); 
+        String title = coreSearchResults.get(0).getFileName();
         long totalSize = coreSearchResults.get(0).getSize();
         DownloadState state = DownloadState.DOWNLOADING;
         Category category = coreSearchResults.get(0).getCategory();
@@ -71,42 +71,18 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 	
 	private void initializeMockData(){
-	    MockDownloadItem item = new MockDownloadItem("Monkey on ice skates", 4416,
-				DownloadState.DOWNLOADING, Category.VIDEO);
-		item.addDownloadSource(new MockDownloadSource("134.23.2.7"));
-		addDownload(item);
-
-		item = new MockDownloadItem("Psychology 101 Lecture 3", 446,
-				DownloadState.DOWNLOADING, Category.AUDIO);
-		item.addDownloadSource(new MockDownloadSource("245.2.7.78"));
-		addDownload(item);
-		
-		item = new MockDownloadItem("New England Foliage.bmp", 46,
-				DownloadState.DOWNLOADING, Category.IMAGE);
+	    MockDownloadItem item;
+	
+		item = new MockDownloadItem("Cancun Trip", 46,
+		        DownloadState.STALLED, Category.IMAGE);
 		item.addDownloadSource(new MockDownloadSource("234.2.3.4"));
 		addDownload(item);
 
-		item = new MockDownloadItem("Psychology 101 Lecture 2.avi", 55,
-				DownloadState.LOCAL_QUEUED, Category.VIDEO);
-		item.addDownloadSource(new MockDownloadSource("34.2.7.7"));
+		item = new MockDownloadItem("Ski Trip", 126,
+		        DownloadState.DOWNLOADING, Category.IMAGE);
+		item.addDownloadSource(new MockDownloadSource("244.2.43.4"));
 		addDownload(item);
 
-        item = new MockDownloadItem("Psychology 101 Lecture 1", 55,
-                DownloadState.ERROR, Category.VIDEO);
-        item.addDownloadSource(new MockDownloadSource("23.12.33.4"));
-        item.setErrorState(ErrorState.DISK_PROBLEM);
-        addDownload(item);
-        
-        item = new MockDownloadItem("Psychology 102 Lecture 1", 55,
-                DownloadState.CONNECTING, Category.VIDEO);
-        item.addDownloadSource(new MockDownloadSource("23.12.33.4"));
-        addDownload(item);
-        
-        item = new MockDownloadItem("Cancun.bmp", 232753,
-                DownloadState.STALLED, Category.AUDIO);
-        item.setCurrentSize(113472);
-        item.addDownloadSource(new MockDownloadSource("234.2.2.2"));
-        addDownload(item);
 
 	}
 	

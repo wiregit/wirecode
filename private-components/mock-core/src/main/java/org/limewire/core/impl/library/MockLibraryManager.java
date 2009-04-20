@@ -60,13 +60,36 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     }
     
     private void initializeMockGnutellaData(){
-//        MockLocalFileItem item = new MockLocalFileItem("Big Town Hero.mp3", 1000,12345,23456, 5,1, Category.AUDIO);
-//        gnutellaList.addFileItem(item);
-//        allFileList.addFileItem(item);
-        
-        MockLocalFileItem item = new MockLocalFileItem("Pictures.jpg", 12345,12312,534512,3,2, Category.IMAGE);
+
+        MockLocalFileItem item = new MockLocalFileItem("c:\\Usability\\Giant_Guitar.JPG", 12345,12312,534512,3,2, Category.IMAGE);
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
+
+        //The Franks - Live and Kickin v1.mp3
+        //The Franks - Better now than late.mp3
+        //The Franks - Pursuit of Happiness.mp3
+        //The Franks - Business Casual.mp3
+      item = new MockLocalFileItem("c:\\Usability\\The Franks - Live and Kickin v1.mp3", 1000,12345,23456, 5,1, Category.AUDIO);
+      gnutellaList.addFileItem(item);
+      allFileList.addFileItem(item);
+
+      item = new MockLocalFileItem("c:\\Usability\\The Franks - Better now than late.mp3", 1000,12345,23456, 5,1, Category.AUDIO);
+      gnutellaList.addFileItem(item);
+      allFileList.addFileItem(item);
+
+      
+      item = new MockLocalFileItem("c:\\Usability\\The Franks - Pursuit of Happiness.mp3.mp3", 1000,12345,23456, 5,1, Category.AUDIO);
+      gnutellaList.addFileItem(item);
+      allFileList.addFileItem(item);
+
+      item = new MockLocalFileItem("c:\\Usability\\The Franks - Business Casual.mp3", 1000,12345,23456, 5,1, Category.AUDIO);
+      gnutellaList.addFileItem(item);
+      allFileList.addFileItem(item);
+      
+      
+//        item = new MockLocalFileItem("c:\\Usability\\cancun.JPG", 12345,12312,534512,3,2, Category.IMAGE);
+//        gnutellaList.addFileItem(item);
+//        allFileList.addFileItem(item);
         
 //        item = new MockLocalFileItem("LimeWireStore.html", 32423, 3415412, 123123,0,0, Category.DOCUMENT);
 //        gnutellaList.addFileItem(item);
@@ -76,33 +99,33 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
 //        gnutellaList.addFileItem(item);
 //        allFileList.addFileItem(item);
         
-        Thread t = new Thread(new Runnable(){
-            public void run(){
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    return;
-                }
-                MockLocalFileItem item = new MockLocalFileItem("Lazy load.bmp", 32423, 3415412, 123123,0,0, Category.IMAGE);
-                gnutellaList.addFileItem(item);
-                allFileList.addFileItem(item);
-            }
-        });
-        t.start();
+//        Thread t = new Thread(new Runnable(){
+//            public void run(){
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException e) {
+//                    return;
+//                }
+//                MockLocalFileItem item = new MockLocalFileItem("Lazy load.bmp", 32423, 3415412, 123123,0,0, Category.IMAGE);
+//                gnutellaList.addFileItem(item);
+//                allFileList.addFileItem(item);
+//            }
+//        });
+//        t.start();
     }
     
     private void initializeMockFriendData(){
-        MockLocalFileItem item = new MockLocalFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1, Category.AUDIO);
-        friendList.addFileItem(item);
-        allFileList.addFileItem(item);
-        
-        item = new MockLocalFileItem("LimeWire4.18.exe", 12345,12312,534512,5,0, Category.PROGRAM);
-        friendList.addFileItem(item);
-        allFileList.addFileItem(item);
-        
-        item = new MockLocalFileItem("Pictures_SanFrancisco.zip", 32423, 3415412, 123123,0,0, Category.OTHER);
-        friendList.addFileItem(item);
-        allFileList.addFileItem(item);
+//        MockLocalFileItem item = new MockLocalFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1, Category.AUDIO);
+//        friendList.addFileItem(item);
+//        allFileList.addFileItem(item);
+//        
+//        item = new MockLocalFileItem("LimeWire4.18.exe", 12345,12312,534512,5,0, Category.PROGRAM);
+//        friendList.addFileItem(item);
+//        allFileList.addFileItem(item);
+//        
+//        item = new MockLocalFileItem("Pictures_SanFrancisco.zip", 32423, 3415412, 123123,0,0, Category.OTHER);
+//        friendList.addFileItem(item);
+//        allFileList.addFileItem(item);
     }
     
     private void initializeFriends() {

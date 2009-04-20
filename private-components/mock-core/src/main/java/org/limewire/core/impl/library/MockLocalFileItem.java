@@ -38,7 +38,7 @@ public class MockLocalFileItem implements LocalFileItem {
 
     @Override
     public File getFile() {
-        return null;
+        return new File(name);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class MockLocalFileItem implements LocalFileItem {
 
     @Override
     public String getFileName() {
-        return "FileName.doc";
+        return name;
     }
     
     @Override
@@ -97,10 +97,7 @@ public class MockLocalFileItem implements LocalFileItem {
     
     @Override
     public boolean isSharedWithGnutella() {
-        // TODO Auto-generated method stub
-        if(name.indexOf(".bmp") > -1 || name.indexOf(".jpg") > -1)
-            return true;
-        return false;
+        return true;
     }
     
     @Override
