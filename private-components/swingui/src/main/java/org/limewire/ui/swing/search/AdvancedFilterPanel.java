@@ -12,7 +12,6 @@ import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 
@@ -54,7 +53,7 @@ import com.google.inject.assistedinject.AssistedInject;
 public class AdvancedFilterPanel extends JPanel implements Disposable {
 
     // TODO create resources
-    private Color backgroundColor = new Color(216, 216, 216);
+    private Color backgroundColor = new Color(216, 216, 216); //Color.WHITE;
     
     /** Search results data model. */
     private final SearchResultsModel searchResultsModel;
@@ -98,6 +97,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         this.editorList = new BasicEventList<MatcherEditor<VisualSearchResult>>();
         this.filterFactory = new FilterFactory(searchResultsModel, iconManager);
         
+        // TODO draw light gray line on right border
         setBackground(backgroundColor);
         setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 2", 
                 "[grow]", ""));
@@ -113,11 +113,10 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         JComponent sourceComp = sourceFilter.getComponent();
         sourceComp.setVisible(friendManager.isSignedIn());
         
-        add(filterTextField   , "gap 3 3 6 6, growx, wrap");
+        add(filterTextField   , "gap 6 6 6 6, growx, wrap");
         add(filterDisplayPanel, "gap 0 0 0 0, growx, wrap");
         add(categoryComp      , "gap 6 6 0 0, growx, wrap");
         add(sourceComp        , "gap 6 6 0 0, growx, wrap");
-        add(new JSeparator()  , "gap 6 6 6 0, growx, wrap");
         add(propertyPanel     , "gap 6 6 0 0, grow");
         
         configureFilters();
@@ -323,22 +322,24 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
      */
     private class FilterDisplayPanel extends JPanel {
         
-        private final JLabel displayLabel = new JLabel(I18n.tr("Showing only:"));
         private final JPanel displayPanel = new JPanel();
         private final HyperlinkButton resetButton = new HyperlinkButton();
         
         private final Map<Filter, JComponent> displayMap = new HashMap<Filter, JComponent>();
         
         public FilterDisplayPanel() {
-            setLayout(new MigLayout("insets 0 6 0 6, gap 0!", "[grow]", ""));
+            setLayout(new MigLayout("insets 0 0 0 0, gap 0!", "[grow]", ""));
+            setOpaque(false);
             
-            displayPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!", "[grow]", ""));
+            displayPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 2", 
+                    "[grow]", ""));
+            displayPanel.setOpaque(false);
             
             resetButton.setAction(new RemoveAllAction());
             
-            add(displayLabel, "growx, wrap");
-            add(displayPanel, "growx, wrap");
-            add(resetButton , "alignx right");
+            add(displayPanel    , "gap 6 6 3 0, growx, wrap");
+            add(resetButton     , "gap 6 6 0 0, alignx right, wrap");
+            add(new JSeparator(), "gap 0 0 3 0, growx");
         }
         
         /**
@@ -354,7 +355,10 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             displayMap.put(filter, activeFilterPanel);
             
             // Add filter display to container.
-            displayPanel.add(activeFilterPanel, "gap 6 6, wmax 132, growx, wrap");
+            displayPanel.add(activeFilterPanel, "gap 6 6, wmax 138, growx, wrap");
+            
+            // Display reset button if multiple filters.
+            resetButton.setVisible(displayMap.size() > 1);
             
             // Display this container.
             setVisible(true);
@@ -374,6 +378,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             
             // Remove filter display from map.
             displayMap.remove(filter);
+            
+            // Hide reset button if not multiple filters.
+            resetButton.setVisible(displayMap.size() > 1);
 
             // Hide this container if no active filters.
             if (displayMap.size() < 1) {
