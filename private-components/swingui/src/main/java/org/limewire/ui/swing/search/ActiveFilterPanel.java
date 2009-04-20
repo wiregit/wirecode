@@ -52,7 +52,7 @@ class ActiveFilterPanel extends JPanel {
             }
         });
         
-        add(label       , "growx");
+        add(label       , "wmax 125, growx");
         add(removeButton, "");
     }
     
