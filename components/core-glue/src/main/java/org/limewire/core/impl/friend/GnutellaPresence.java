@@ -74,7 +74,7 @@ public class GnutellaPresence implements FriendPresence {
             "Owl", "Ox", "Oyster", "Panda", "Parrot", "Peafowl", "Penguin", "Pheasant", "Pig",
             "Pigeon", "Platypus", "Porpoise", "PrarieDog", "Pronghorn", "Quail", "Rabbit",
             "Raccoon", "Rat", "Raven", "Reindeer", "Rhinoceros", "Seal", "Seastar", "Serval",
-            "Shark", "Sheep", "Skunk", "Snake", "Snipe", "Sparrow", "Spider", "Squrrel", "Swallow",
+            "Shark", "Sheep", "Skunk", "Snake", "Snipe", "Sparrow", "Spider", "Squirrel", "Swallow",
             "Swan", "Termite", "Tiger", "Toad", "Trout", "Turkey", "Turtle", "Wallaby", "Walrus",
             "Wasp", "Weasel", "Whale", "Wolf", "Wombat", "Woodpecker", "Wren", "Yak", "Zebra",
             "Ball", "Bed", "Book", "Bun", "Can", "Cake", "Cap", "Car", "Cat", "Day", "Fan", "Feet",
