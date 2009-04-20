@@ -53,6 +53,10 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
  */
 class PropertyFilter extends AbstractFilter {
 
+    // TODO create resources
+    private Color popupTitleBackColor = Color.BLACK;
+    private Color popupTitleForeColor = Color.WHITE;
+    
     private final FilterType filterType;
     private final FilePropertyKey propertyKey;
     private final IconManager iconManager;
@@ -338,8 +342,8 @@ class PropertyFilter extends AbstractFilter {
             setLayout(new BorderLayout());
             
             titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
-            titleLabel.setBackground(Color.BLACK);
-            titleLabel.setForeground(Color.WHITE);
+            titleLabel.setBackground(popupTitleBackColor);
+            titleLabel.setForeground(popupTitleForeColor);
             titleLabel.setOpaque(true);
             titleLabel.setText(I18n.tr("All {0}", getPropertyText()));
             
