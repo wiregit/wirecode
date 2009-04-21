@@ -11,18 +11,17 @@ public class LibTorrentWrapper implements LibTorrent {
     private final LibTorrent libTorrent;
 
     public LibTorrentWrapper() {
-        NativeLibrary.getInstance("test");
-        NativeLibrary.getInstance("mingwm10");
-        //NativeLibrary.getInstance("msvcrt");
-        //NativeLibrary.getInstance("ws2_32");
-        NativeLibrary.getInstance("ieframe");
-        NativeLibrary.getInstance("shlwapi");
-        NativeLibrary.getInstance("torrent");
-        NativeLibrary.getInstance("boost_system-mgw34-mt-1_36");
-        NativeLibrary.getInstance("boost_date_time-mgw34-mt-1_36");
-        NativeLibrary.getInstance("boost_filesystem-mgw34-mt-1_36");
-        NativeLibrary.getInstance("boost_thread-mgw34-mt-1_36");
-        
+        System.loadLibrary("test");
+        System.loadLibrary("mingwm10");
+        // System.loadLibrary("msvcrt");
+        // System.loadLibrary("ws2_32");
+        //System.loadLibrary("shlwapi");
+        System.loadLibrary("torrent");
+        System.loadLibrary("boost_system-mgw34-mt-1_36");
+        System.loadLibrary("boost_date_time-mgw34-mt-1_36");
+        System.loadLibrary("boost_filesystem-mgw34-mt-1_36");
+        System.loadLibrary("boost_thread-mgw34-mt-1_36");
+
         this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
     }
 
