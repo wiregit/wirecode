@@ -21,14 +21,22 @@ public class MessageRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
         DownloadItem item = (DownloadItem)value;
-        return super.getTableCellRendererComponent(table, getMessage(item.getState(), item), isSelected, hasFocus, row, column);
+        return super.getTableCellRendererComponent(table, getPercentMessage(item) + getMessage(item.getState(), item), isSelected, hasFocus, row, column);
+    }
+    
+    private String getPercentMessage(DownloadItem item){
+        int percent = item.getPercentComplete();
+        DownloadState state = item.getState();
+        if (percent == 0 || state == DownloadState.DONE ||  state == DownloadState.DOWNLOADING ||  state == DownloadState.ERROR){
+            return "";
+        }
+        return percent + "% - ";    
     }
     
     private String getMessage(DownloadState state, DownloadItem item) {
         switch (state) {
         case RESUMING:
-            return I18n.tr("Resuming at {0}%",
-                    item.getPercentComplete());
+            return I18n.tr("Resuming");
         case CANCELLED:
             return I18n.tr("Cancelled");
         case FINISHING:
@@ -50,18 +58,15 @@ public class MessageRenderer extends DefaultTableCellRenderer {
         case TRYING_AGAIN:
             return getTryAgainMessage(item.getRemainingTimeInState());
         case STALLED:
-            return I18n.tr("Stalled - {0} of {1} ({2}%)", 
+            return I18n.tr("Stalled - {0} of {1}", 
                     GuiUtils.toUnitbytes(item.getCurrentSize()),
-                    GuiUtils.toUnitbytes(item.getTotalSize()),
-                    item.getPercentComplete()
-                    );
+                    GuiUtils.toUnitbytes(item.getTotalSize()));
         case ERROR:         
-            return I18n.tr("Unable to download: ");
+            return I18n.tr("Unable to download: ") + I18n.tr(item.getErrorState().getMessage());
         case PAUSED:
             // {0}: current size, {1} total size, {2} percent complete
-            return I18n.tr("Paused - {0} of {1} ({2}%)", 
-                    GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
-                    item.getPercentComplete());
+            return I18n.tr("Paused - {0} of {1}", 
+                    GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()));
         case LOCAL_QUEUED:
             return getQueueTimeMessage(item.getRemainingTimeInState());
         case REMOTE_QUEUED:

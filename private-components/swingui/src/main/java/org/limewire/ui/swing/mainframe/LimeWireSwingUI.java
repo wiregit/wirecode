@@ -125,7 +125,7 @@ public class LimeWireSwingUI extends JPanel {
     
     //TODO: make this a component
     private JSplitPane createScrollPane(JComponent top, final JComponent bottom, JComponent divider){
-        final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, mainPanel, bottom);
+        final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
         splitPane.setBorder(BorderFactory.createEmptyBorder());
         final BasicSplitPaneUI splitUI = new BasicSplitPaneUI();        
         splitPane.setUI(splitUI);
@@ -153,6 +153,10 @@ public class LimeWireSwingUI extends JPanel {
 
             }
         });
+
+        top.setMinimumSize(new Dimension(0, 0));
+        bottom.setMinimumSize(new Dimension(0, 0));
+        
         return splitPane;
     }
     

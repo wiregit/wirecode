@@ -6,11 +6,13 @@ import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
 
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -18,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JViewport;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -181,18 +184,7 @@ public class MouseableTable extends StripedJXTable {
                                 columnDoubleClickHandler.handleDoubleClick(col);
                             }
                         }
-					}
-					
-					if (isCellEditable(row, col)) { // TODO include check for isEditing()
-                        TableCellEditor editor = getCellEditor(row, col);
-                        if (editor != null) {
-                            // force update editor colors
-                            prepareEditor(editor, row, col);
-                            // editor.repaint() takes about a second to show
-                            // sometimes
-                            repaint();
-                        }                        
-                    }
+					}					
 				}
 			}
 			
@@ -209,6 +201,15 @@ public class MouseableTable extends StripedJXTable {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                int col = columnAtPoint(e.getPoint());
+                int row = rowAtPoint(e.getPoint());
+                if (isEditing() && isCellEditable(row, col)) { 
+                    TableCellEditor editor = getCellEditor(row, col);
+                    if (editor != null) {
+                        // force update editor colors
+                        prepareEditor(editor, row, col);
+                    }                        
+                }
                 maybeShowPopup(e);
             }
 
@@ -437,6 +438,14 @@ public class MouseableTable extends StripedJXTable {
         if (stripesPainted) {
             super.paintEmptyRows(g);
         }
+    }
+    
+    /**
+     * @param action the action that occurs when the user presses the enter key on the table
+     */
+    public void setEnterKeyAction(Action action){
+        getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), "launchAction");
+        getActionMap().put("launchAction", action);
     }
 
 

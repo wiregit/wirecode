@@ -1,5 +1,12 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -10,13 +17,17 @@ import org.limewire.ui.swing.downloads.table.renderer.ButtonRendererEditor;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadProgressRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadTitleRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.MessageRenderer;
+import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ListSelection;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -25,11 +36,13 @@ import com.google.inject.assistedinject.AssistedInject;
  * Table showing DownloadItems. Provides popup menus and double click handling.
  * No renderers or editors are set by default.
  */
-public class DownloadTable extends AbstractDownloadTable {   
+public class DownloadTable extends MouseableTable {   
     
     @Resource private int rowHeight;    
     
     private DownloadTableModel model;
+
+    private EventList<DownloadItem> selectedItems;
 
     @AssistedInject
 	public DownloadTable(ProgressBarDecorator progressBarDecorator, CategoryIconManager iconManager, DownloadActionHandler actionHandler, 
@@ -55,16 +68,26 @@ public class DownloadTable extends AbstractDownloadTable {
         getColumnModel().getColumn(DownloadTableFormat.MESSAGE).setCellRenderer(new MessageRenderer());
         getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellRenderer(new ButtonRendererEditor());
         
-        setRowHeight(rowHeight);
+        setRowHeight(rowHeight);        
     }
 	
 	public DownloadItem getDownloadItem(int row){
 	    return model.getDownloadItem(convertRowIndexToModel(row));
 	}
+	
+    /** Returns a copy of all selected items. */
+    public List<DownloadItem> getSelectedItems() {
+        return new ArrayList<DownloadItem>(selectedItems);
+    }
 
     private void initialize(EventList<DownloadItem> downloadItems, DownloadActionHandler actionHandler) {
         model = new DownloadTableModel(downloadItems);
         setModel(model);
+        
+        EventSelectionModel<DownloadItem> model = GlazedListsSwingFactory.eventSelectionModel(downloadItems);
+        setSelectionModel(model);
+        model.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
+        this.selectedItems = model.getSelected();
 
         TablePopupHandler popupHandler = new DownloadPopupHandler(actionHandler, this);
 
@@ -73,18 +96,34 @@ public class DownloadTable extends AbstractDownloadTable {
         TableDoubleClickHandler clickHandler = new TableDoubleClickHandler() {
             @Override
             public void handleDoubleClick(int row) {
-                DownloadItem item = getDownloadItem(row);
-                if(item.isLaunchable()) {
-                    DownloadItemUtils.launch(item);
-                }
+               launch(row);
             }
         };
 
         setDoubleClickHandler(clickHandler);        
+        
+        Action enterAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int row = getSelectedRow();
+                if (row > -1) {
+                    launch(row);
+                }
+            }
+        };        
+
+        setEnterKeyAction(enterAction);
 
         ButtonRendererEditor editor = new ButtonRendererEditor();
         editor.setActionHandler(actionHandler);
         getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellEditor(editor);
 
+    }
+    
+    private void launch(int row){
+        DownloadItem item = getDownloadItem(row);
+        if(item.isLaunchable()) {
+            DownloadItemUtils.launch(item);
+        }
     }
 }
