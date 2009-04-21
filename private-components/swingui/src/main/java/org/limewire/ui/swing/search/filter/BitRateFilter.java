@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search.filter;
 
-import java.awt.Font;
-
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -42,13 +40,17 @@ class BitRateFilter extends AbstractFilter {
      * Constructs a BitRateFilter.
      */
     public BitRateFilter() {
-        panel.setLayout(new MigLayout("insets 1 1 0 0", 
-                "[left]3[left]",
-                "[top]3[top]"));
+        panel.setLayout(new MigLayout("insets 3 0 3 0, gap 0!", 
+                "[left][left]",
+                "[top][top]3[top]"));
         panel.setOpaque(false);
 
-        rateLabel.setText(I18n.tr("Bitrate:"));
-        rateLabel.setFont(rateLabel.getFont().deriveFont(Font.BOLD));
+        rateLabel.setFont(getHeaderFont());
+        rateLabel.setForeground(getHeaderColor());
+        rateLabel.setText(I18n.tr("Bitrate"));
+        
+        rateValue.setFont(getRowFont());
+        rateValue.setForeground(getRowColor());
         
         rateSlider.setMinimum(0);
         rateSlider.setMaximum(RATES.length - 1);
@@ -63,9 +65,9 @@ class BitRateFilter extends AbstractFilter {
         // Add listener to update filter.
         rateSlider.addChangeListener(new SliderListener());
         
-        panel.add(rateLabel , "");
+        panel.add(rateLabel , "wrap");
         panel.add(rateValue , "wrap");
-        panel.add(rateSlider, "spanx 2, growx");
+        panel.add(rateSlider, "growx");
     }
 
     @Override

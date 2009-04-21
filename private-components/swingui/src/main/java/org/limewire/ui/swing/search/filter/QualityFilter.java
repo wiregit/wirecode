@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search.filter;
 
-import java.awt.Font;
-
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -40,13 +38,17 @@ class QualityFilter extends AbstractFilter {
      * Constructs a QualityFilter.
      */
     public QualityFilter() {
-        panel.setLayout(new MigLayout("insets 1 1 0 0", 
-                "[left]3[left]",
-                "[top]3[top]"));
+        panel.setLayout(new MigLayout("insets 3 0 3 0, gap 0!", 
+                "[left][left]",
+                "[top][top]3[top]"));
         panel.setOpaque(false);
 
-        qualityLabel.setText(I18n.tr("Quality:"));
-        qualityLabel.setFont(qualityLabel.getFont().deriveFont(Font.BOLD));
+        qualityLabel.setFont(getHeaderFont());
+        qualityLabel.setForeground(getHeaderColor());
+        qualityLabel.setText(I18n.tr("Quality"));
+        
+        qualityValue.setFont(getRowFont());
+        qualityValue.setForeground(getRowColor());
         
         qualitySlider.setMinimum(0);
         qualitySlider.setMaximum(QUALITIES.length - 1);
@@ -61,9 +63,9 @@ class QualityFilter extends AbstractFilter {
         // Add listener to update filter.
         qualitySlider.addChangeListener(new SliderListener());
         
-        panel.add(qualityLabel , "");
+        panel.add(qualityLabel , "wrap");
         panel.add(qualityValue , "wrap");
-        panel.add(qualitySlider, "spanx 2, growx");
+        panel.add(qualitySlider, "growx");
     }
 
     @Override

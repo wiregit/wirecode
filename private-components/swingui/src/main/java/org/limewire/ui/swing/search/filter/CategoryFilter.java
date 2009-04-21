@@ -2,11 +2,11 @@ package org.limewire.ui.swing.search.filter;
 
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -55,10 +55,13 @@ public class CategoryFilter extends AbstractFilter {
                 "[left,grow]", ""));
         panel.setOpaque(false);
 
+        categoryLabel.setFont(getHeaderFont());
+        categoryLabel.setForeground(getHeaderColor());
         categoryLabel.setText(I18n.tr("Categories"));
-        categoryLabel.setFont(categoryLabel.getFont().deriveFont(Font.BOLD));
         
         list.setCellRenderer(new CategoryCellRenderer());
+        list.setFont(getRowFont());
+        list.setForeground(getRowColor());
         list.setOpaque(false);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
@@ -76,7 +79,7 @@ public class CategoryFilter extends AbstractFilter {
         });
         
         panel.add(categoryLabel, "wrap");
-        panel.add(list         , "gap 6 6, grow");
+        panel.add(list         , "grow");
 
         // Apply results list to filter.
         initialize(resultsList);
@@ -228,7 +231,8 @@ public class CategoryFilter extends AbstractFilter {
                 buf.append(value.toString()).append(" (").append(count).append(")");
                 ((JLabel) renderer).setText(buf.toString());
 
-                // Set colors.
+                // Set appearance.
+                ((JLabel) renderer).setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
                 ((JLabel) renderer).setOpaque(false);
             }
 

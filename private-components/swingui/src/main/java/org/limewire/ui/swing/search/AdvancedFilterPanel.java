@@ -17,11 +17,14 @@ import javax.swing.JSeparator;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.components.SideLineBorder;
+import org.limewire.ui.swing.components.SideLineBorder.Side;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
@@ -33,6 +36,7 @@ import org.limewire.ui.swing.search.filter.FilterListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualSearchResultTextFilterator;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
@@ -52,8 +56,10 @@ import com.google.inject.assistedinject.AssistedInject;
  */
 public class AdvancedFilterPanel extends JPanel implements Disposable {
 
-    // TODO create resources
-    private Color backgroundColor = new Color(216, 216, 216); //Color.WHITE;
+    @Resource private Color backgroundColor;
+    @Resource private Color borderColor;
+    @Resource private Color dividerBackgroundColor;
+    @Resource private Color dividerForegroundColor;
     
     /** Search results data model. */
     private final SearchResultsModel searchResultsModel;
@@ -75,9 +81,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     
     private final PromptTextField filterTextField = new PromptTextField(I18n.tr("Refine results..."));
     
-    private final FilterDisplayPanel filterDisplayPanel = new FilterDisplayPanel();
+    private final FilterDisplayPanel filterDisplayPanel;
     
-    private final PropertyFilterPanel propertyPanel = new PropertyFilterPanel();
+    private final PropertyFilterPanel propertyPanel;
     
     private SearchCategory defaultSearchCategory;
     private SearchCategory defaultFilterCategory;
@@ -97,12 +103,18 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         this.editorList = new BasicEventList<MatcherEditor<VisualSearchResult>>();
         this.filterFactory = new FilterFactory(searchResultsModel, iconManager);
         
-        // TODO draw light gray line on right border
+        GuiUtils.assignResources(this);
+        
         setBackground(backgroundColor);
+        setBorder(new SideLineBorder(borderColor, Side.RIGHT));
         setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 2", 
                 "[grow]", ""));
         
-        textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.SHADOW);
+        textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.NONE);
+        
+        filterDisplayPanel = new FilterDisplayPanel();
+        
+        propertyPanel = new PropertyFilterPanel();
         
         // Create category filter and display component.
         categoryFilter = filterFactory.getCategoryFilter();
@@ -324,6 +336,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         
         private final JPanel displayPanel = new JPanel();
         private final HyperlinkButton resetButton = new HyperlinkButton();
+        private final JSeparator separator = new JSeparator();
         
         private final Map<Filter, JComponent> displayMap = new HashMap<Filter, JComponent>();
         
@@ -337,9 +350,12 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             
             resetButton.setAction(new RemoveAllAction());
             
-            add(displayPanel    , "gap 6 6 3 0, growx, wrap");
-            add(resetButton     , "gap 6 6 0 0, alignx right, wrap");
-            add(new JSeparator(), "gap 0 0 3 0, growx");
+            separator.setBackground(dividerBackgroundColor);
+            separator.setForeground(dividerForegroundColor);
+            
+            add(displayPanel, "gap 6 6 3 0, growx, wrap");
+            add(resetButton , "gap 6 6 0 0, alignx right, wrap");
+            add(separator   , "gap 0 0 3 0, growx");
         }
         
         /**
@@ -437,7 +453,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             // Add new filters to container.
             for (Filter filter : filters) {
                 JComponent component = filter.getComponent();
-                add(component, "gaptop 6, aligny top, growx, wrap");
+                add(component, "gaptop 8, aligny top, growx, wrap");
                 filter.addFilterListener(this);
             }
             

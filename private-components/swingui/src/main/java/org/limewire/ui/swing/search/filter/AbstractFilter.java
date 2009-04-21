@@ -1,9 +1,13 @@
 package org.limewire.ui.swing.search.filter;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
@@ -18,6 +22,9 @@ abstract class AbstractFilter implements Filter {
     
     /** Matcher/editor used to filter search results. */
     private final FilterMatcherEditor editor;
+    
+    /** Resources for filters. */
+    private final FilterResources resources = new FilterResources();
     
     /** Indicator that determines whether the filter is active. */
     private boolean active;
@@ -113,5 +120,69 @@ abstract class AbstractFilter implements Filter {
         editor.setMatcher(null);
         activeText = null;
         active = false;
+    }
+    
+    /**
+     * Returns the text color for the filter header.
+     */
+    protected Color getHeaderColor() {
+        return resources.headerColor;
+    }
+    
+    /**
+     * Returns the text font for the filter header.
+     */
+    protected Font getHeaderFont() {
+        return resources.headerFont;
+    }
+    
+    /**
+     * Returns the header background for the filter popup.
+     */
+    protected Color getPopupHeaderBackground() {
+        return resources.popupHeaderBackground;
+    }
+    
+    /**
+     * Returns the header foreground for the filter popup.
+     */
+    protected Color getPopupHeaderForeground() {
+        return resources.popupHeaderForeground;
+    }
+    
+    /**
+     * Returns the text color for filter rows.
+     */
+    protected Color getRowColor() {
+        return resources.rowColor;
+    }
+    
+    /**
+     * Returns the text font for filter rows.
+     */
+    protected Font getRowFont() {
+        return resources.rowFont;
+    }
+    
+    /**
+     * Resource container for filters.
+     */
+    private static class FilterResources {
+        @Resource(key="AdvancedFilter.headerColor")
+        Color headerColor;
+        @Resource(key="AdvancedFilter.headerFont")
+        Font headerFont;
+        @Resource(key="AdvancedFilter.rowColor")
+        Color rowColor;
+        @Resource(key="AdvancedFilter.rowFont")
+        Font rowFont;
+        @Resource(key="AdvancedFilter.popupHeaderBackground")
+        Color popupHeaderBackground;
+        @Resource(key="AdvancedFilter.popupHeaderForeground")
+        Color popupHeaderForeground;
+        
+        FilterResources() {
+            GuiUtils.assignResources(this);
+        }
     }
 }

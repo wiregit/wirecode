@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search.filter;
 
-import java.awt.Font;
-
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -44,13 +42,17 @@ class LengthFilter extends AbstractFilter {
      * Constructs a LengthFilter.
      */
     public LengthFilter() {
-        panel.setLayout(new MigLayout("insets 1 1 0 0", 
-                "[left]3[left]",
-                "[top]3[top]"));
+        panel.setLayout(new MigLayout("insets 3 0 3 0, gap 0!", 
+                "[left][left]",
+                "[top][top]3[top]"));
         panel.setOpaque(false);
 
-        lengthLabel.setText(I18n.tr("Length:"));
-        lengthLabel.setFont(lengthLabel.getFont().deriveFont(Font.BOLD));
+        lengthLabel.setFont(getHeaderFont());
+        lengthLabel.setForeground(getHeaderColor());
+        lengthLabel.setText(I18n.tr("Length"));
+        
+        lengthValue.setFont(getRowFont());
+        lengthValue.setForeground(getRowColor());
         
         lengthSlider.setMinimum(0);
         lengthSlider.setMaximum(LENGTHS.length - 1);
@@ -65,9 +67,9 @@ class LengthFilter extends AbstractFilter {
         // Add listener to update filter.
         lengthSlider.addChangeListener(new SliderListener());
         
-        panel.add(lengthLabel , "");
+        panel.add(lengthLabel , "wrap");
         panel.add(lengthValue , "wrap");
-        panel.add(lengthSlider, "spanx 2, growx");
+        panel.add(lengthSlider, "growx");
     }
 
     @Override

@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search.filter;
 
-import java.awt.Font;
-
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -45,13 +43,17 @@ class FileSizeFilter extends AbstractFilter {
      * Constructs a FileSizeFilter.
      */
     public FileSizeFilter() {
-        panel.setLayout(new MigLayout("insets 1 1 0 0", 
-                "[left]3[left]",
-                "[top]3[top]"));
+        panel.setLayout(new MigLayout("insets 3 0 3 0, gap 0!", 
+                "[left]",
+                "[top][top]3[top]"));
         panel.setOpaque(false);
 
-        sizeLabel.setText(I18n.tr("Size:"));
-        sizeLabel.setFont(sizeLabel.getFont().deriveFont(Font.BOLD));
+        sizeLabel.setFont(getHeaderFont());
+        sizeLabel.setForeground(getHeaderColor());
+        sizeLabel.setText(I18n.tr("Size"));
+        
+        sizeValue.setFont(getRowFont());
+        sizeValue.setForeground(getRowColor());
         
         sizeSlider.setMinimum(0);
         sizeSlider.setMaximum(SIZES.length - 1);
@@ -66,9 +68,9 @@ class FileSizeFilter extends AbstractFilter {
         // Add listener to update filter.
         sizeSlider.addChangeListener(new SliderListener());
         
-        panel.add(sizeLabel , "");
+        panel.add(sizeLabel , "wrap");
         panel.add(sizeValue , "wrap");
-        panel.add(sizeSlider, "spanx 2, growx");
+        panel.add(sizeSlider, "growx");
     }
     
     @Override

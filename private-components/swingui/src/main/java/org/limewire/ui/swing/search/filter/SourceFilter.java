@@ -2,10 +2,10 @@ package org.limewire.ui.swing.search.filter;
 
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -63,10 +63,13 @@ class SourceFilter extends AbstractFilter {
                 "[left,grow]", ""));
         panel.setOpaque(false);
         
+        label.setFont(getHeaderFont());
+        label.setForeground(getHeaderColor());
         label.setText(I18n.tr("From"));
-        label.setFont(label.getFont().deriveFont(Font.BOLD));
         
         list.setCellRenderer(new SourceCellRenderer());
+        list.setFont(getRowFont());
+        list.setForeground(getRowColor());
         list.setOpaque(false);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
@@ -186,7 +189,8 @@ class SourceFilter extends AbstractFilter {
                     index, isSelected, cellHasFocus);
             
             if (renderer instanceof JLabel) {
-                // Set colors.
+                // Set appearance.
+                ((JLabel) renderer).setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
                 ((JLabel) renderer).setOpaque(false);
             }
 

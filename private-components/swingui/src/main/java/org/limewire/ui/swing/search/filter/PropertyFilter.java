@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -23,8 +22,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -53,10 +50,6 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
  */
 class PropertyFilter extends AbstractFilter {
 
-    // TODO create resources
-    private Color popupTitleBackColor = Color.BLACK;
-    private Color popupTitleForeColor = Color.WHITE;
-    
     private final FilterType filterType;
     private final FilePropertyKey propertyKey;
     private final IconManager iconManager;
@@ -68,8 +61,8 @@ class PropertyFilter extends AbstractFilter {
     
     private FunctionList<VisualSearchResult, Object> propertyList;
     private UniqueList<Object> uniqueList;
-    private EventListModel<Object> listModel;
     private EventSelectionModel<Object> selectionModel;
+    private EventSelectionModel<Object> popupSelectionModel;
     private JPopupMenu morePopup;
     
     /**
@@ -92,10 +85,13 @@ class PropertyFilter extends AbstractFilter {
                 "[left,grow]", ""));
         panel.setOpaque(false);
         
+        propertyLabel.setFont(getHeaderFont());
+        propertyLabel.setForeground(getHeaderColor());
         propertyLabel.setText(getPropertyText());
-        propertyLabel.setFont(propertyLabel.getFont().deriveFont(Font.BOLD));
 
         list.setCellRenderer(new PropertyCellRenderer());
+        list.setFont(getRowFont());
+        list.setForeground(getRowColor());
         list.setOpaque(false);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
@@ -113,13 +109,18 @@ class PropertyFilter extends AbstractFilter {
         });
         
         moreButton.setAction(new MoreAction());
+        moreButton.setFont(getRowFont());
         
-        panel.add(propertyLabel, "wrap");
-        panel.add(list         , "gap 6 6, wmax 132, hmax 48, grow, wrap");
-        panel.add(moreButton   , "gap 6 6");
-
         // Apply results list to filter.
         initialize(resultsList);
+        
+        // Calculate max list height.
+        list.setPrototypeCellValue("Type");
+        int listHeight = 3 * list.getFixedCellHeight();
+        
+        panel.add(propertyLabel, "wrap");
+        panel.add(list         , "wmax 144, hmax " + listHeight + ", grow, wrap");
+        panel.add(moreButton   , "");
     }
     
     /**
@@ -149,13 +150,13 @@ class PropertyFilter extends AbstractFilter {
         EventList<Object> sortedList = GlazedListsFactory.sortedList(uniqueList, new PropertyCountComparator());
         
         // Create list and selection models.
-        listModel = new EventListModel<Object>(sortedList);
+        EventListModel<Object> listModel = new EventListModel<Object>(sortedList);
         selectionModel = new EventSelectionModel<Object>(sortedList);
         list.setModel(listModel);
         list.setSelectionModel(selectionModel);
         
         // Add selection listener to update filter.
-        selectionModel.addListSelectionListener(new SelectionListener());
+        selectionModel.addListSelectionListener(new SelectionListener(selectionModel));
     }
     
     @Override
@@ -165,7 +166,13 @@ class PropertyFilter extends AbstractFilter {
 
     @Override
     public void reset() {
-        selectionModel.clearSelection();
+        // Clear selections.
+        if (selectionModel != null) {
+            selectionModel.clearSelection();
+        }
+        if (popupSelectionModel != null) {
+            popupSelectionModel.clearSelection();
+        }
         // Deactivate filter.
         deactivate();
     }
@@ -270,21 +277,6 @@ class PropertyFilter extends AbstractFilter {
         JPopupMenu popup = new JPopupMenu();
         popup.setFocusable(false);
         popup.add(new MorePopupPanel());
-
-        // Add listener to clear reference when popup is hidden.
-        popup.addPopupMenuListener(new PopupMenuListener() {
-            @Override
-            public void popupMenuCanceled(PopupMenuEvent e) {
-            }
-            @Override
-            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                morePopup = null;
-            }
-            @Override
-            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-            }
-        });
-
         return popup;
     }
     
@@ -309,7 +301,6 @@ class PropertyFilter extends AbstractFilter {
     private void hideMorePopup() {
         if (morePopup != null) {
             morePopup.setVisible(false);
-            morePopup = null;
         }
     }
     
@@ -333,21 +324,23 @@ class PropertyFilter extends AbstractFilter {
      */
     private class MorePopupPanel extends JPanel {
         
-        private JLabel titleLabel = new JLabel();
-        private JList moreList = new JList();
-        private JScrollPane scrollPane = new JScrollPane();
+        private final JLabel titleLabel = new JLabel();
+        private final JList moreList = new JList();
+        private final JScrollPane scrollPane = new JScrollPane();
         
         public MorePopupPanel() {
             setBorder(BorderFactory.createLineBorder(Color.BLACK));
             setLayout(new BorderLayout());
             
-            titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
-            titleLabel.setBackground(popupTitleBackColor);
-            titleLabel.setForeground(popupTitleForeColor);
+            titleLabel.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 3));
+            titleLabel.setBackground(getPopupHeaderBackground());
+            titleLabel.setForeground(getPopupHeaderForeground());
             titleLabel.setOpaque(true);
             titleLabel.setText(I18n.tr("All {0}", getPropertyText()));
             
             moreList.setCellRenderer(new PropertyCellRenderer());
+            moreList.setFont(getRowFont());
+            moreList.setForeground(getRowColor());
             moreList.setOpaque(false);
             moreList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             
@@ -364,11 +357,17 @@ class PropertyFilter extends AbstractFilter {
                 }
             });
             
-            // Set list and selection models.
+            // Set list and selection models.  We use the unique list directly
+            // to display values alphabetically.
+            EventListModel<Object> listModel = new EventListModel<Object>(uniqueList);
+            popupSelectionModel = new EventSelectionModel<Object>(uniqueList);
             moreList.setModel(listModel);
-            moreList.setSelectionModel(selectionModel);
+            moreList.setSelectionModel(popupSelectionModel);
             
-            scrollPane.setBorder(BorderFactory.createEmptyBorder());
+            // Add selection listener to update filter.
+            popupSelectionModel.addListSelectionListener(new SelectionListener(popupSelectionModel));
+            
+            scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 0));
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setViewportView(moreList);
             
@@ -381,7 +380,12 @@ class PropertyFilter extends AbstractFilter {
      * Listener to handle selection changes to update the matcher editor.  
      */
     private class SelectionListener implements ListSelectionListener {
+        private final EventSelectionModel<Object> selectionModel;
 
+        public SelectionListener(EventSelectionModel<Object> selectionModel) {
+            this.selectionModel = selectionModel;
+        }
+        
         @Override
         public void valueChanged(ListSelectionEvent e) {
             // Skip selection change if filter is active.
@@ -431,7 +435,8 @@ class PropertyFilter extends AbstractFilter {
                 buf.append(value.toString()).append(" (").append(count).append(")");
                 ((JLabel) renderer).setText(buf.toString());
                 
-                // Set colors.
+                // Set appearance.
+                ((JLabel) renderer).setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
                 ((JLabel) renderer).setOpaque(false);
             }
             
