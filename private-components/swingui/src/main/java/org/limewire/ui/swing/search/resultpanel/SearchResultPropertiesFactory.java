@@ -13,6 +13,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.action.BitziLookupAction;
 import org.limewire.ui.swing.listener.MousePopupListener;
@@ -58,7 +59,7 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
         public void showProperties(VisualSearchResult vsr) {
             icon.setIcon(categoryIconManager.getIcon(vsr, iconManager));
             location.setLayout(new MigLayout("nocache", "[50%!]", "[]"));
-            readOnlyInfoModel.setColumnIdentifiers(new Object[] { tr("Address"), tr("Filename") });
+            readOnlyInfoModel.setColumnIdentifiers(new Object[] { tr("Name"), tr("Address"), tr("Filename") });
             location.add(new JScrollPane(readOnlyInfo));
             populateCommonFields(vsr);
             copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction(vsr));
@@ -69,8 +70,12 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
 
             for (SearchResult result : vsr.getCoreSearchResults()) {
                 for (RemoteHost host : result.getSources()) {
-                    readOnlyInfoModel.addRow(new Object[] { host.getFriendPresence().getFriend().getRenderName(),
-                            result.getFileName() });
+                    Friend f = host.getFriendPresence().getFriend();
+                    readOnlyInfoModel.addRow(new Object[] {
+                            f.getRenderName(),
+                            f.getName(),
+                            result.getFileName()
+                    });
                 }
             }
             
@@ -82,7 +87,7 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
                         @Override
                         public void actionPerformed(ActionEvent actionEvent) {
                             int blockRow = readOnlyInfo.rowAtPoint(e.getPoint());
-                            Object value = readOnlyInfoModel.getValueAt(blockRow, 0);
+                            Object value = readOnlyInfoModel.getValueAt(blockRow, 1);
                             if (value != null) {
                                 filterList.addIPToFilter(value.toString());
                             }

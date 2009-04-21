@@ -97,11 +97,20 @@ public class GnutellaPresence implements FriendPresence {
     public GnutellaPresence(Address address, String id) {
         this.id = id;
         this.features.put(AddressFeature.ID, new AddressFeature(address));
-        this.friend = new GnutellaFriend(describe(address), id, this);
+        this.friend = new GnutellaFriend(describe(address),
+                describeFriendly(address), id, this);
     }
     
-    
     private String describe(Address address) {
+        if(address instanceof Connectable || address instanceof PushEndpoint) {
+            IpPort ipp = (IpPort)address;
+            return ipp.getInetAddress().getHostAddress();
+        } else {
+            return address.getAddressDescription();            
+        }
+    }
+    
+    private String describeFriendly(Address address) {
         if(address instanceof Connectable || address instanceof PushEndpoint) {
             // Convert IP addr into a #.
             IpPort ipp = (IpPort)address;
