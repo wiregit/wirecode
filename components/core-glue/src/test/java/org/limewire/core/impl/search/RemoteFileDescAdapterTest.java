@@ -165,6 +165,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
                     will(returnValue(new byte[]{24,101,1,(byte) (i % 255)}));
                     allowing(loc);
                     locs.add(loc);
+                    allowing(addr);
                 }
 
                 

@@ -215,6 +215,8 @@ public class CoreUploadItemTest extends BaseTestCase {
                 
                 allowing(uploader).getLastTransferState();
                 will(returnValue(UploadStatus.BROWSE_HOST));
+                
+                allowing(addr);
             }});
         
         CoreUploadItem upload = new CoreUploadItem(uploader);
