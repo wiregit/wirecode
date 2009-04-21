@@ -212,6 +212,8 @@ public class CoreUploadItemTest extends BaseTestCase {
                 
                 atLeast(1).of(addr).getAddress();
                 will(returnValue(new byte[] {1,2,3,4}));
+                atLeast(1).of(addr).getHostAddress();
+                will(returnValue("1.2.3.4"));
                 
                 allowing(uploader).getLastTransferState();
                 will(returnValue(UploadStatus.BROWSE_HOST));

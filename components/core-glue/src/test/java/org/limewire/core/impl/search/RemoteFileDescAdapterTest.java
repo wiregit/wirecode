@@ -163,6 +163,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
                     will(returnValue(addr));
                     allowing(addr).getAddress();
                     will(returnValue(new byte[]{24,101,1,(byte) (i % 255)}));
+                    allowing(addr).getHostAddress();
+                    will(returnValue("24.101.1." + (i % 255)));
                     allowing(loc);
                     locs.add(loc);
                     allowing(addr);
