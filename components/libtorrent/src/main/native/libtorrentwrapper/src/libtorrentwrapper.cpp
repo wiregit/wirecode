@@ -17,7 +17,7 @@ typedef libtorrent::big_number sha1_hash;
 
 //TODO fix memory leaks
 
-extern "C" int __cdecl init(const char* path) {
+extern "C" int init(const char* path) {
 	std::string newPath(path);
 	savePath = newPath;
 	s.set_alert_mask(0xffffffff);
@@ -229,6 +229,10 @@ extern "C" void get_alerts(void(*alertCallback)(void*, void*)) {
 
 		alerts = s.pop_alert();
 	}
+}
+
+extern "C" void print() {
+	std::cout << "print called!" << std::endl;
 }
 
 void Alert(void* alert, void* stats) {
