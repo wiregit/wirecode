@@ -119,6 +119,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         // Create category filter and display component.
         categoryFilter = filterFactory.getCategoryFilter();
         JComponent categoryComp = categoryFilter.getComponent();
+        categoryComp.setVisible(searchResultsModel.getSearchCategory() == SearchCategory.ALL);
         
         // Create source filter and display component.
         sourceFilter = filterFactory.getSourceFilter();
