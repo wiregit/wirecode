@@ -10,7 +10,7 @@ import org.limewire.xmpp.api.client.FileMetaData;
 
 //import com.limegroup.gnutella.FileDetails;
 
-public class MockLocalFileItem implements LocalFileItem {
+public class MockLocalFileItem implements LocalFileItem, Comparable {
 
     private final String name;
     private final long size;
@@ -124,5 +124,13 @@ public class MockLocalFileItem implements LocalFileItem {
     public int getNumUploadAttempts() {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public int compareTo(Object obj) {
+        if (getClass() != obj.getClass()) {
+            return -1;
+        }
+        return getFileName().toLowerCase().compareTo(((MockLocalFileItem) obj).getFileName().toLowerCase());
     }
 }
