@@ -66,10 +66,10 @@ class BasicSearchResultsModel implements SearchResultsModel {
     /** Observable list of grouped search results. */
     private final ObservableElementList<VisualSearchResult> observableList;
 
-    /** Sorted list of grouped search results. */
+    /** Sorted and filtered list of grouped search results. */
     private final SortedList<VisualSearchResult> sortedResultList;
 
-    /** Filtered and sorted list of grouped search results. */
+    /** Filtered list of grouped search results. */
     private final FilterList<VisualSearchResult> filteredResultList;
 
     /** Listener to handle search request events. */
@@ -105,10 +105,9 @@ class BasicSearchResultsModel implements SearchResultsModel {
         observableList = GlazedListsFactory.observableElementList(groupedUrnResults,
                 GlazedLists.beanConnector(VisualSearchResult.class));
         
-        // Create sorted and filtered lists.  We may want to reverse this - a
-        // filtered, unsorted list may be more useful for some tables. 
-        sortedResultList = GlazedListsFactory.sortedList(observableList, null);
-        filteredResultList = GlazedListsFactory.filterList(sortedResultList);
+        // Create filtered and sorted lists. 
+        filteredResultList = GlazedListsFactory.filterList(observableList);
+        sortedResultList = GlazedListsFactory.sortedList(filteredResultList, null);
     }
 
     /**
@@ -156,6 +155,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
     }
     
     @Override
+    public String getSearchTitle() {
+        return searchInfo.getTitle();
+    }
+    
+    @Override
     public int getResultCount() {
         return resultCount.get();
     }
@@ -171,11 +175,19 @@ class BasicSearchResultsModel implements SearchResultsModel {
     }
 
     @Override
+    public EventList<VisualSearchResult> getFilteredSearchResults() {
+        return filteredResultList;
+    }
+
+    /**
+     * Returns a list of filtered results for the specified search category.
+     */
+    @Override
     public EventList<VisualSearchResult> getCategorySearchResults(SearchCategory searchCategory) {
         if (searchCategory == SearchCategory.ALL) {
-            return filteredResultList;
+            return sortedResultList;
         } else {
-            return GlazedListsFactory.filterList(filteredResultList, 
+            return GlazedListsFactory.filterList(sortedResultList, 
                     new CategoryMatcher(searchCategory.getCategory()));
         }
     }
