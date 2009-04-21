@@ -25,12 +25,13 @@ public class TorrentManager {
         this.listeners = new ConcurrentHashMap<String, EventListenerList<LibTorrentEvent>>();
         this.torrents = new ArrayList<String>();
         // TODO init torrent manager elsewhere.
-        init();
+        //init("/home/pvertenten/Desktop");
+        init("C:\\Documents and Settings\\pvertenten\\Desktop");
     }
 
-    public void init() {
+    public void init(String path) {
         // TODO this location can change, so need to be able to update it.
-        libTorrent.init("/home/pvertenten/Desktop");
+        libTorrent.init(path);
         this.eventPoller = new EventPoller();
         eventPoller.setName("Libtorrent Event Poller");
         eventPoller.start();

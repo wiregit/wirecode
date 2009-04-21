@@ -75,4 +75,9 @@ public class LibTorrentWrapper implements LibTorrent {
         return libTorrent.remove_torrent(id);
     }
 
+    @Override
+    public void print() {
+        libTorrent.print();
+    }
+
 }
