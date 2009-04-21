@@ -7,9 +7,9 @@
 #include  "boost/shared_ptr.hpp"
 #include "libtorrent/alert.hpp"
 #include "libtorrent/alert_types.hpp"
-#include <dlfcn.h>
 #include "libtorrent/peer_id.hpp"
 #include <boost/filesystem/path.hpp>
+#include <windows.h>
 
 libtorrent::session s;
 std::string savePath;
@@ -17,7 +17,7 @@ typedef libtorrent::big_number sha1_hash;
 
 //TODO fix memory leaks
 
-extern "C" int init(const char* path) {
+extern "C" int __cdecl init(const char* path) {
 	std::string newPath(path);
 	savePath = newPath;
 	s.set_alert_mask(0xffffffff);
@@ -237,6 +237,7 @@ void Alert(void* alert, void* stats) {
 }
 
 int main(int argc, char* argv[]) {
+	std::cout << "starting" << std::endl;
 	try {
 		init("/home/pvertenten/Desktop");
 		info_s
@@ -266,7 +267,7 @@ int main(int argc, char* argv[]) {
 			//			std::cout << "total_payload_download: " << s.total_payload_download
 			//					<< std::endl;
 			count++;
-			sleep(1);
+			//sleep(1);
 		}
 	} catch (std::exception& e) {
 		std::cout << e.what() << "\n";
