@@ -58,8 +58,14 @@ public class MockDownloadListManager implements DownloadListManager {
         long totalSize = coreSearchResults.get(0).getSize();
         DownloadState state = DownloadState.DOWNLOADING;
         Category category = coreSearchResults.get(0).getCategory();
-        final MockDownloadItem mdi =
-            new MockDownloadItem(title, totalSize, state, category);
+        final MockDownloadItem mdi;
+        if(title.indexOf("Puffy") > -1 || title.indexOf("Cirrus") > -1) {
+            mdi = new MockDownloadItem(title, totalSize, DownloadState.ERROR, category);
+        } else if (title.indexOf("Cumulonimbus") > -1 || title.indexOf("Stratus") > -1) {
+            mdi = new MockDownloadItem(title, totalSize, DownloadState.REMOTE_QUEUED, category);            
+        } else {
+            mdi = new MockDownloadItem(title, totalSize, state, category);
+        }
 
         addDownload(mdi);
 	    return mdi;
@@ -73,12 +79,12 @@ public class MockDownloadListManager implements DownloadListManager {
 	private void initializeMockData(){
 	    MockDownloadItem item;
 	
-		item = new MockDownloadItem("Cancun Trip", 46,
+		item = new MockDownloadItem("Cancun Trip", 2946,
 		        DownloadState.STALLED, Category.IMAGE);
 		item.addDownloadSource(new MockDownloadSource("234.2.3.4"));
 		addDownload(item);
 
-		item = new MockDownloadItem("Ski Trip", 126,
+		item = new MockDownloadItem("Ski Trip", 19126,
 		        DownloadState.DOWNLOADING, Category.IMAGE);
 		item.addDownloadSource(new MockDownloadSource("244.2.43.4"));
 		addDownload(item);

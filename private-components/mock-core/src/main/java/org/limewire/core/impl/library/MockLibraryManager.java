@@ -65,6 +65,36 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
 
+        
+        item = new MockLocalFileItem("c:\\Usability\\feast of san genero.JPG", 12345,12312,534512,3,2, Category.IMAGE);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
+        
+        item = new MockLocalFileItem("c:\\Usability\\subway statue.JPG", 12345,12312,534512,3,2, Category.IMAGE);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
+        
+        item = new MockLocalFileItem("c:\\Usability\\central park.JPG", 12345,12312,534512,3,2, Category.IMAGE);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
+        
+        item = new MockLocalFileItem("c:\\Usability\\empire state building.JPG", 12345,12312,534512,3,2, Category.IMAGE);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
+        
+        item = new MockLocalFileItem("c:\\Usability\\battery park.JPG", 12345,12312,534512,3,2, Category.IMAGE);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
+
+        item = new MockLocalFileItem("c:\\Usability\\fire station.JPG", 12345,12312,534512,3,2, Category.IMAGE);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
+
+        item = new MockLocalFileItem("c:\\Usability\\sky line.JPG", 12345,12312,534512,3,2, Category.IMAGE);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
+        
+        
         //The Franks - Live and Kickin v1.mp3
         //The Franks - Better now than late.mp3
         //The Franks - Pursuit of Happiness.mp3
@@ -86,7 +116,26 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
       gnutellaList.addFileItem(item);
       allFileList.addFileItem(item);
       
+      item = new MockLocalFileItem("c:\\Usability\\limewire_intro_inner_monolo.aif", 1000,12345,23456, 5,1, Category.AUDIO);
+      gnutellaList.addFileItem(item);
+      allFileList.addFileItem(item);
       
+      
+      
+      
+      
+      item = new MockLocalFileItem("c:\\Usability\\WelcomeToLimeWire5.mov", 1000,12345,23456, 5,1, Category.VIDEO);
+      gnutellaList.addFileItem(item);
+      allFileList.addFileItem(item);
+      
+      item = new MockLocalFileItem("c:\\Usability\\DeleteFileGerman.swf", 1000,12345,23456, 5,1, Category.VIDEO);
+      gnutellaList.addFileItem(item);
+      allFileList.addFileItem(item);
+      
+      item = new MockLocalFileItem("c:\\Usability\\SystemTrayTurkey.swf", 1000,12345,23456, 5,1, Category.VIDEO);
+      gnutellaList.addFileItem(item);
+      allFileList.addFileItem(item);
+            
 //        item = new MockLocalFileItem("c:\\Usability\\cancun.JPG", 12345,12312,534512,3,2, Category.IMAGE);
 //        gnutellaList.addFileItem(item);
 //        allFileList.addFileItem(item);

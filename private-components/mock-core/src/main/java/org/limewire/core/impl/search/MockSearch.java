@@ -213,7 +213,7 @@ public class MockSearch implements Search {
         int noun = 0;
 
         String keyword = new String();
-
+        keyword = query;
         if(query.indexOf("monkey") > -1){
             keyword = "monkey";
             createSearchResultVideo("monkey on a skateboard", 256, 256, 256);
@@ -446,7 +446,9 @@ public class MockSearch implements Search {
     private void createSearchResultTheFranks() {
         // Create a search result that will be categorized as "Audio".
         
-        handleSearchResult(createAlbumTrack("Chemical Attraction", "Semantics", 12));
+        handleSearchResult(createAlbumTrack("Lightning Queen", "Rocket me to the moon", 524));
+        handleSearchResult(createAlbumTrack("Lightning Queen", "Gerry Me Ander", 324));
+        handleSearchResult(createAlbumTrack("Lightning Queen", "Smelly Shoes", 124));
         handleSearchResult(createAlbumTrack("Chemical Attraction", "Business Casual"));
         for(int albums = 0; albums < 2; albums++) { 
             String albumName = new String();
