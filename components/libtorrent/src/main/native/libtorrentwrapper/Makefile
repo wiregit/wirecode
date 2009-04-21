@@ -17,8 +17,6 @@ VPATH = src
 INCLUDE_DIR = ./include 
 #INCLUDE_DIR = /home/pvertenten/Desktop/libtorrent-rasterbar-0.14.2/include
 
-WINDOWS = "c:/Program Files/Microsoft Visual Studio 9.0/VC/include"
-
 libtorrentwrapper.o: 
 	${CXX} -c src/libtorrentwrapper.cpp -DIPV6_PROTECTION_LEVEL -I $(INCLUDE_DIR)
 	
