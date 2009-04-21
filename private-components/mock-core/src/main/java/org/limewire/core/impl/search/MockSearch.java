@@ -146,10 +146,9 @@ public class MockSearch implements Search {
         listeners.add(searchListener);
     }
 
-    // TODO: RMV What should this method do?
     @Override
     public SearchCategory getCategory() {
-        return null;
+        return searchDetails.getSearchCategory();
     }
     
     @Override
@@ -216,37 +215,36 @@ public class MockSearch implements Search {
         keyword = query;
         if(query.indexOf("monkey") > -1){
             keyword = "monkey";
-            createSearchResultVideo("monkey on a skateboard", 256, 256, 256);
-            createSearchResultDocument("monkey on a skateboard", 256, 256, 256);
-            createSearchResultAudio("monkey on a skateboard", 256, 256, 256);
-            createSearchResultImages("monkey on a skateboard", 256, 256, 256);
-            createSearchResultProgram("monkey on a skateboard", 256, 256, 256);
+            if (isValidCategory(SearchCategory.VIDEO)) createSearchResultVideo("monkey on a skateboard", 256, 256, 256);
+            if (isValidCategory(SearchCategory.DOCUMENT)) createSearchResultDocument("monkey on a skateboard", 256, 256, 256);
+            if (isValidCategory(SearchCategory.AUDIO)) createSearchResultAudio("monkey on a skateboard", 256, 256, 256);
+            if (isValidCategory(SearchCategory.IMAGE)) createSearchResultImages("monkey on a skateboard", 256, 256, 256);
+            if (isValidCategory(SearchCategory.PROGRAM)) createSearchResultProgram("monkey on a skateboard", 256, 256, 256);
         }
 
         if(query.indexOf("game") > -1 || query.indexOf("design") > -1 || query.indexOf("patterns") > -1){
             keyword = "game";
-            createSearchResultAdobe();
-            
-            createSearchResultDocument("game design patterns", 256, 256, 256);
-            createSearchResultAudio("game design patterns", 256, 256, 256);
-            createSearchResultVideo("game design patterns", 256, 256, 256);
-            createSearchResultProgram("game design patterns", 256, 256, 256);
-            createSearchResultImages("game design patterns", 256, 256, 256);
+            if (isValidCategory(SearchCategory.DOCUMENT)) createSearchResultAdobe();
+            if (isValidCategory(SearchCategory.DOCUMENT)) createSearchResultDocument("game design patterns", 256, 256, 256);
+            if (isValidCategory(SearchCategory.AUDIO)) createSearchResultAudio("game design patterns", 256, 256, 256);
+            if (isValidCategory(SearchCategory.VIDEO)) createSearchResultVideo("game design patterns", 256, 256, 256);
+            if (isValidCategory(SearchCategory.PROGRAM)) createSearchResultProgram("game design patterns", 256, 256, 256);
+            if (isValidCategory(SearchCategory.IMAGE)) createSearchResultImages("game design patterns", 256, 256, 256);
 
         }
         if(query.indexOf("giant") > -1 || query.indexOf("guitar") > -1){
             keyword = "guitar";
-            createSearchResultDocument("giant guitar", 256, 256, 256);
-            createSearchResultAudio("giant guitar", 256, 256, 256);
-            createSearchResultVideo("giant guitar", 256, 256, 256);
-            createSearchResultProgram("giant guitar", 256, 256, 256);            
-            createSearchResultImages("giant guitar", 256, 256, 256);            
+            if (isValidCategory(SearchCategory.DOCUMENT)) createSearchResultDocument("giant guitar", 256, 256, 256);
+            if (isValidCategory(SearchCategory.AUDIO)) createSearchResultAudio("giant guitar", 256, 256, 256);
+            if (isValidCategory(SearchCategory.VIDEO)) createSearchResultVideo("giant guitar", 256, 256, 256);
+            if (isValidCategory(SearchCategory.PROGRAM)) createSearchResultProgram("giant guitar", 256, 256, 256);            
+            if (isValidCategory(SearchCategory.IMAGE)) createSearchResultImages("giant guitar", 256, 256, 256);            
         }
         if(query.indexOf("frank") > -1){
             keyword = "franks";
-            createSearchResultTheFranks();
+            if (isValidCategory(SearchCategory.AUDIO)) createSearchResultTheFranks();
         }
-        if(query.indexOf("lightning") > -1){
+        if(query.indexOf("lightning") > -1 && isValidCategory(SearchCategory.AUDIO)){
             keyword = "lightning";
             String albumName = "Lightning Queen";                
             for(int tracks = 0; tracks < 11; tracks++) {
@@ -260,71 +258,84 @@ public class MockSearch implements Search {
         if(query.indexOf(query) > -1){            
             
             for(int j = 0; j < 64; j++) {
-                                
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultDocument(keyword, verb, adj, noun);
-                try { Thread.sleep(50); } catch (InterruptedException e) {}
-                
-                
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultProgram(keyword, verb, adj, noun);
-                try { Thread.sleep(50); } catch (InterruptedException e) {}                                
-                
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultAudio2(keyword, verb, adj, noun);
-                
-                try { Thread.sleep(50); } catch (InterruptedException e) {}
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultDocument2(keyword, verb, adj, noun);                                
+                if (isValidCategory(SearchCategory.DOCUMENT)) {
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultDocument(keyword, verb, adj, noun);
+                    try { Thread.sleep(50); } catch (InterruptedException e) {}
+                }
 
-                try { Thread.sleep(50); } catch (InterruptedException e) {}
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultAudio(keyword, verb, adj, noun);
+                if (isValidCategory(SearchCategory.PROGRAM)) {
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultProgram(keyword, verb, adj, noun);
+                    try { Thread.sleep(50); } catch (InterruptedException e) {}
+                }
 
-                try { Thread.sleep(50); } catch (InterruptedException e) {}
+                if (isValidCategory(SearchCategory.AUDIO)) {
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultAudio2(keyword, verb, adj, noun);
+                }
 
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultVideo(keyword, verb, adj, noun);
-                
-                try { Thread.sleep(50); } catch (InterruptedException e) {}
+                if (isValidCategory(SearchCategory.DOCUMENT)) {
+                    try { Thread.sleep(50); } catch (InterruptedException e) {}
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultDocument2(keyword, verb, adj, noun);
+                }
 
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultVideo2(keyword, verb, adj, noun);
-                                
-                try { Thread.sleep(50); } catch (InterruptedException e) {}
+                if (isValidCategory(SearchCategory.AUDIO)) {
+                    try { Thread.sleep(50); } catch (InterruptedException e) {}
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultAudio(keyword, verb, adj, noun);
+                    try { Thread.sleep(50); } catch (InterruptedException e) {}
+                }
 
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultProgram2(keyword, verb, adj, noun);
-                try { Thread.sleep(50); } catch (InterruptedException e) {}
-                
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultImages(keyword, verb, adj, noun);
-                
-                try { Thread.sleep(50); } catch (InterruptedException e) {}
+                if (isValidCategory(SearchCategory.VIDEO)) {
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultVideo(keyword, verb, adj, noun);
+                    try { Thread.sleep(50); } catch (InterruptedException e) {}
+                }
 
-                verb = Math.abs(r.nextInt()) % 256;
-                adj = Math.abs(r.nextInt()) % 256;
-                noun = Math.abs(r.nextInt()) % 256;
-                createSearchResultImages2(keyword, verb, adj, noun);
-                
+                if (isValidCategory(SearchCategory.VIDEO)) {
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultVideo2(keyword, verb, adj, noun);
+                    try { Thread.sleep(50); } catch (InterruptedException e) {}
+                }
+
+                if (isValidCategory(SearchCategory.PROGRAM)) {
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultProgram2(keyword, verb, adj, noun);
+                    try { Thread.sleep(50); } catch (InterruptedException e) {}
+                }
+
+                if (isValidCategory(SearchCategory.IMAGE)) {
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultImages(keyword, verb, adj, noun);
+                    try { Thread.sleep(50); } catch (InterruptedException e) {}
+                }
+
+                if (isValidCategory(SearchCategory.IMAGE)) {
+                    verb = Math.abs(r.nextInt()) % 256;
+                    adj = Math.abs(r.nextInt()) % 256;
+                    noun = Math.abs(r.nextInt()) % 256;
+                    createSearchResultImages2(keyword, verb, adj, noun);
+                }
             }
 
         }
@@ -870,6 +881,14 @@ public class MockSearch implements Search {
         handleSearchResult(msr);
 
     }
+    
+    /**
+     * Returns true if the specified category is valid for this search.
+     */
+    private boolean isValidCategory(SearchCategory searchCategory) {
+        return (getCategory() == SearchCategory.ALL) || (getCategory() == searchCategory);
+    }
+    
     static class MockRemoteHost implements RemoteHost {
         private final String description;
         
