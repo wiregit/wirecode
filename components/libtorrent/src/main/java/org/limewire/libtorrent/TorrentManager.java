@@ -26,7 +26,9 @@ public class TorrentManager {
         this.torrents = new ArrayList<String>();
         // TODO init torrent manager elsewhere.
         //init("/home/pvertenten/Desktop");
-        init("C:\\Documents and Settings\\pvertenten\\Desktop");
+        //init("C:\\Documents and Settings\\pvertenten\\Desktop");
+        libTorrent.print();
+        init("C:\\Users\\pvertenten\\Desktop");
     }
 
     public void init(String path) {
@@ -111,5 +113,4 @@ public class TorrentManager {
             }
         }
     }
-
 }

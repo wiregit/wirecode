@@ -7,14 +7,18 @@ import org.limewire.listener.EventListener;
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         TorrentManager libTorrentManager = new TorrentManager();
-
+        
         // LibTorrentInfo info = libTorrentManager
         // .addTorrent(new File(
         // "/home/pvertenten/Desktop/wndw - wireless networking in the developing world.torrent"));
         //        
+//        LibTorrentInfo info = libTorrentManager
+//                .addTorrent(new File(
+//                        "C:\\Documents and Settings\\pvertenten\\Desktop\\wndw - wireless networking in the developing world.torrent"));
         LibTorrentInfo info = libTorrentManager
-                .addTorrent(new File(
-                        "C:\\Documents and Settings\\pvertenten\\Desktop\\wndw - wireless networking in the developing world.torrent"));
+        .addTorrent(new File(
+                "C:\\Users\\pvertenten\\Desktop\\ubuntu-8.10-alternate-i386.iso.torrent"));
+        
         System.out.println(info);
         String id = info.sha1;
 

@@ -4,13 +4,26 @@ import org.limewire.libtorrent.callback.AlertCallback;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
+import com.sun.jna.NativeLibrary;
 
 public class LibTorrentWrapper implements LibTorrent {
 
     private final LibTorrent libTorrent;
 
     public LibTorrentWrapper() {
-        this.libTorrent = (LibTorrent) Native.loadLibrary("torrentwrapper", LibTorrent.class);
+        NativeLibrary.getInstance("test");
+        NativeLibrary.getInstance("mingwm10");
+        //NativeLibrary.getInstance("msvcrt");
+        //NativeLibrary.getInstance("ws2_32");
+        NativeLibrary.getInstance("ieframe");
+        NativeLibrary.getInstance("shlwapi");
+        NativeLibrary.getInstance("torrent");
+        NativeLibrary.getInstance("boost_system-mgw34-mt-1_36");
+        NativeLibrary.getInstance("boost_date_time-mgw34-mt-1_36");
+        NativeLibrary.getInstance("boost_filesystem-mgw34-mt-1_36");
+        NativeLibrary.getInstance("boost_thread-mgw34-mt-1_36");
+        
+        this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
     }
 
     @Override
