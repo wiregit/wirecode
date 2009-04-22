@@ -146,5 +146,6 @@
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jaudiotagger.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="lib/jars/mime-util.jar" sourcepath="lib/sources/mime-util-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

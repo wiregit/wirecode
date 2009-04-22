@@ -128,8 +128,7 @@ import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
 import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.lws.server.LWSManagerImpl;
-import com.limegroup.gnutella.malware.DangerousFileChecker;
-import com.limegroup.gnutella.malware.FileExtensionChecker;
+import com.limegroup.gnutella.malware.LimeWireMalwareModule;
 import com.limegroup.gnutella.messagehandlers.MessageHandlerBinderImpl;
 import com.limegroup.gnutella.messages.LocalPongInfo;
 import com.limegroup.gnutella.messages.LocalPongInfoImpl;
@@ -247,6 +246,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireFiltersModule());
         binder().install(new LimeWireCoreConnectionModule());
         binder().install(new LimeWireBootstrapModule());
+        binder().install(new LimeWireMalwareModule());
         
         if(activityCallbackClass != null) {
             bind(ActivityCallback.class).to(activityCallbackClass);
@@ -358,7 +358,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(OutgoingQueryReplyFactory.class).to(OutgoingQueryReplyFactoryImpl.class);
         bind(UPnPManagerConfiguration.class).to(UPnPManagerConfigurationImpl.class);
         bind(Bootstrapper.Listener.class).to(HostCatcher.class);
-        bind(DangerousFileChecker.class).to(FileExtensionChecker.class);
         bind(RareFileStrategy.class).to(RareFileStrategyImpl.class);
         bind(MulticastService.class).to(MulticastServiceImpl.class);
         bind(NetworkUpdateSanityChecker.class).to(NetworkUpdateSanityCheckerImpl.class);
