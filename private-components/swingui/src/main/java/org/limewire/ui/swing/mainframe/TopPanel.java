@@ -145,8 +145,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 myLibraryPanel.showAllFiles();                
             }            
         });
-        
-        if (true) {
+        //changed for advanced filters usability test, don't need warning cause not testing library and sharing
+        if (false) {
             myLibraryButton.setVisible(false);
             Action introAction = new AbstractAction() {
                 @Override
