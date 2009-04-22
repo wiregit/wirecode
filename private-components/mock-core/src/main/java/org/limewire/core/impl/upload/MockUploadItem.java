@@ -7,6 +7,7 @@ import java.io.File;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
@@ -147,4 +148,8 @@ public class MockUploadItem implements UploadItem {
         return BrowseType.FRIEND;
     }
 
+    @Override
+    public RemoteHost getRemoteHost() {
+        return null;
+    }
 }

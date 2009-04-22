@@ -86,8 +86,7 @@ class CoreBrowse implements Browse {
         @Override
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
                 Set<? extends IpPort> locs) {
-            browseListener.handleBrowseResult(new RemoteFileDescAdapter(rfd,
-                    locs));
+            browseListener.handleBrowseResult(new RemoteFileDescAdapter(rfd, locs));
         }
     }
 }

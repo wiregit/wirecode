@@ -3,6 +3,8 @@ package org.limewire.core.impl.download;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,15 +16,20 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.impl.RemoteHostRFD;
 import org.limewire.core.impl.URNImpl;
+import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.io.Address;
+import org.limewire.io.GUID;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -115,6 +122,22 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public List<Address> getSources() {
         return downloader.getSourcesAsAddresses();
+    }
+
+    @Override
+    public Collection<RemoteHost> getRemoteHosts() {
+        List<RemoteFileDesc> remoteFiles = downloader.getRemoteFileDescs();
+        
+        if(remoteFiles.size() > 0) {
+            List<RemoteHost> remoteHosts = new ArrayList<RemoteHost>(remoteFiles.size());
+            for(RemoteFileDesc rfd : remoteFiles) {
+                remoteHosts.add(new RemoteHostRFD(rfd, 
+                        new GnutellaPresence(rfd.getAddress(), GUID.toHexString(rfd.getClientGUID()))));
+            }
+            return remoteHosts;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override

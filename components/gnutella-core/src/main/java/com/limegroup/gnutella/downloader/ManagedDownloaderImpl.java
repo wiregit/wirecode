@@ -364,7 +364,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 	/** The list of all browsable hosts for this <tt>ManagedDownloader</tt>
 	 *  instance.
 	 */
-	private DownloadBrowseHostList browseList;
+    private final List<RemoteFileDesc> remoteFileDescs = new ArrayList<RemoteFileDesc>();
 
 
     /** The various states of the ManagedDownloade with respect to the 
@@ -574,7 +574,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             _activeWorkers=new LinkedList<DownloadWorker>();
             _workers=new ArrayList<DownloadWorker>();
             _queuedWorkers = new HashMap<DownloadWorker, Integer>();
-            browseList=new DownloadBrowseHostList();
             stopped=false;
             paused = false;
             pushes = pushListProvider.get();
@@ -2219,13 +2218,15 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
         setState(DownloadState.DOWNLOADING);
         addActiveWorker(worker);
-        browseList.addHost(worker.getDownloader());
+        remoteFileDescs.add(worker.getDownloader().getRemoteFileDesc());
     }
     
     public void workerFailed(DownloadWorker failed) {
         HTTPDownloader downloader = failed.getDownloader();
         if (downloader != null) {
-            browseList.removeHost(downloader);
+            synchronized(this) {
+                remoteFileDescs.remove(downloader.getRemoteFileDesc());
+            }
         }
     }
     
@@ -2734,20 +2735,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         return sources;
     }    
-   
-
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getBrowseEnabledHost()
-     */
-	public synchronized RemoteFileDesc getBrowseEnabledHost() {
-		return browseList.getBrowseHostEnabledHost();
-	}
-
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.downloader.ManagedDownloader#hasBrowseEnabledHost()
-     */
-	public synchronized boolean hasBrowseEnabledHost() {
-		return browseList.hasBrowseHostEnabledHost();
+	
+	public synchronized List<RemoteFileDesc> getRemoteFileDescs() {
+	    return new ArrayList<RemoteFileDesc>(remoteFileDescs);
 	}
 
 	/* (non-Javadoc)

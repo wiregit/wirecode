@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 import org.limewire.collection.NumericBuffer;
@@ -262,12 +263,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		// we never give up because of corruption
 	}
 
-	public RemoteFileDesc getBrowseEnabledHost() {
-		return null;
-	}
-
-	public boolean hasBrowseEnabledHost() {
-		return false;
+	@Override
+	public List<RemoteFileDesc> getRemoteFileDescs() {
+	    return Collections.emptyList();
 	}
 
 	public int getQueuePosition() {

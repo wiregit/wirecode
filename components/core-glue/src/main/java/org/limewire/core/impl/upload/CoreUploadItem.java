@@ -10,6 +10,8 @@ import java.util.Map;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
@@ -20,6 +22,7 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import com.limegroup.bittorrent.BTUploader;
 import com.limegroup.gnutella.CategoryConverter;
+import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -38,6 +41,7 @@ class CoreUploadItem implements UploadItem {
     public final static long UNKNOWN_TIME = Long.MAX_VALUE;
     private final UploadItemType uploadItemType;
     private boolean isFinished = false;
+    private UploadRemoteHost uploadRemoteHost;
     
     public CoreUploadItem(Uploader uploader) {
         this.uploader = uploader;
@@ -199,6 +203,13 @@ class CoreUploadItem implements UploadItem {
         }
         return uploader.getHost();
     }
+
+    @Override
+    public RemoteHost getRemoteHost() {
+        if(uploadRemoteHost == null)
+            uploadRemoteHost = new UploadRemoteHost();
+        return uploadRemoteHost;
+    }
     
     @Override
     public BrowseType getBrowseType(){
@@ -347,5 +358,36 @@ class CoreUploadItem implements UploadItem {
     void finish(){
         isFinished = true;
         fireDataChanged();
+    }
+    
+    /**
+     * Creates a RemoteHost for this uploader. This allows browses on the 
+     * person uploading this file.
+     */
+    private class UploadRemoteHost implements RemoteHost {
+        private GnutellaPresence gnutellaPresence;
+        
+        @Override
+        public FriendPresence getFriendPresence() {
+            if(gnutellaPresence == null) {
+                gnutellaPresence = new GnutellaPresence(new Endpoint(uploader.getAddress()+":"+uploader.getPort()), uploader.getHost());
+            }
+            return gnutellaPresence;
+        }
+
+        @Override
+        public boolean isBrowseHostEnabled() {
+            return uploader.isBrowseHostEnabled();
+        }
+
+        @Override
+        public boolean isChatEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isSharingEnabled() {
+            return false;
+        }
     }
 }

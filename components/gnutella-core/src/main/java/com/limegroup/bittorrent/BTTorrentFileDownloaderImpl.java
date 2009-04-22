@@ -181,9 +181,10 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     public long getAmountVerified() {
         return 0;
     }
-
-    public RemoteFileDesc getBrowseEnabledHost() {
-        return null;
+    
+    @Override
+    public List<RemoteFileDesc> getRemoteFileDescs() {
+        return Collections.emptyList();
     }
 
     public int getBusyHostCount() {
@@ -278,14 +279,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     public String getVendor() {
         return null;
-    }
-
-    public boolean hasBrowseEnabledHost() {
-        return false;
-    }
-
-    public boolean hasChatEnabledHost() {
-        return false;
     }
 
     public boolean isCompleted() {

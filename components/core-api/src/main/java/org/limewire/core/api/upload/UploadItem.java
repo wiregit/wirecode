@@ -4,6 +4,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
 
 /**
@@ -58,6 +59,11 @@ public interface UploadItem extends PropertiableFile {
      * of the host being uploaded to.
      */
     public String getHost();
+    
+    /**
+     * Returns the source of this Upload.
+     */
+    public RemoteHost getRemoteHost();
     
     /**
      * Returns the current queue position if queued.
