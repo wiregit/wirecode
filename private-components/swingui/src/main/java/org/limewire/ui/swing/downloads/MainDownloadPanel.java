@@ -39,6 +39,11 @@ public class MainDownloadPanel extends JPanel {
 
     private DownloadMediator downloadMediator;
     
+    private boolean isInitialized = false;
+    private final DownloadTableFactory downloadTableFactory;
+    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    private final DownloadListManager downloadListManager;
+    
     
 	/**
 	 * Create the panel
@@ -48,32 +53,34 @@ public class MainDownloadPanel extends JPanel {
 	        DownloadMediator downloadMediator,
 	        DockIconFactory dockIconFactory,
 	        TrayNotifier notifier, 
-	        DownloadListManager downloadListManager) {
+	        DownloadListManager downloadListManager,
+	        SaveLocationExceptionHandler saveLocationExceptionHandler) {
 	    this.downloadMediator = downloadMediator;
-	    
+	    this.downloadTableFactory = downloadTableFactory;
+	    this.downloadListManager = downloadListManager;
 		this.notifier = notifier;
-				
-		setLayout(new BorderLayout());
-        
-        JXTable table = downloadTableFactory.create(downloadMediator.getDownloadList());
-        table.setTableHeader(null);
-        JScrollPane pane = new JScrollPane(table);
-        pane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-        add(pane, BorderLayout.CENTER);
-				
-
-        
+		this.saveLocationExceptionHandler = saveLocationExceptionHandler;
     }
 
 
-    
-    @Inject
-    public void register(DownloadListManager downloadListManager, SaveLocationExceptionHandler saveLocationExceptionHandler) {
+    private void initialize() {
+        isInitialized = true;
+        setLayout(new BorderLayout());
+
+        JXTable table = downloadTableFactory.create(downloadMediator.getDownloadList());
+        table.setTableHeader(null);
+        JScrollPane pane = new JScrollPane(table);
+        pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        add(pane, BorderLayout.CENTER);
+
         setTransferHandler(new DownloadableTransferHandler(downloadListManager, saveLocationExceptionHandler));
-        
+
         // handle individual completed downloads
         initializeDownloadListeners(downloadListManager);
-        
+    }
+    
+    @Inject
+    public void register() {              
         downloadMediator.getDownloadList().addListEventListener(new VisibilityListListener());
     }
     
@@ -143,6 +150,9 @@ public class MainDownloadPanel extends JPanel {
       
         @Override
         public void listChanged(ListEvent<DownloadItem> listChanges) {
+            if(!isInitialized){
+                initialize();
+            }
             setVisible(listChanges.getSourceList().size() > 0);
         }
     }

@@ -215,15 +215,18 @@ public class DownloadHeaderPanel extends JXPanel {
         GuiUtils.assignResources(this);
         
         this.downloadMediator = downloadMediator;
-        dock = dockIconFactory.createDockIcon();        
-       
+        dock = dockIconFactory.createDockIcon();   
+
+        initialize();
+    }
+    
+    private void initialize(){
         initializeComponents();
-             
+        
         layoutComponents();
         
         setupPainter();
     }
-    
   
 
     private void initializeComponents(){        
@@ -234,8 +237,6 @@ public class DownloadHeaderPanel extends JXPanel {
         fixStalledButton = new HyperlinkButton(fixStalledAction);
 
         initializeMoreButton();
-
-       
         
         titleTextLabel = new JXLabel(I18n.tr("Downloads"));
     }
@@ -256,6 +257,10 @@ public class DownloadHeaderPanel extends JXPanel {
     @Inject
     public void register(){
         downloadMediator.getDownloadList().addListEventListener(new LabelUpdateListListener());
+        initializeListListeners();
+    }
+
+    private void initializeListListeners(){
         EventList<DownloadItem> pausableList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
                 new PausableMatcher());
         EventList<DownloadItem> resumableList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
@@ -293,7 +298,6 @@ public class DownloadHeaderPanel extends JXPanel {
             }
         });
     }
-
     
     private void initializeMoreButton(){
         resumeAction.setEnabled(false);
