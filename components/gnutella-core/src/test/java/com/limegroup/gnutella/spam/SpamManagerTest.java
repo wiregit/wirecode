@@ -390,6 +390,35 @@ public class SpamManagerTest extends LimeTestCase {
         assertEquals(0f, unrelated.getSpamRating());
     }
     
+    /**
+     * Tests that the IP blacklist no longer affects the spam rating - results
+     * from blacklisted IPs should be dropped before reaching this stage
+     */
+    public void testAddressBlacklistDoesNotAffect() throws Exception {
+        FilterSettings.HOSTILE_IPS.set(new String[] {addr1});
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(new String[] {addr2});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(new String[] {addr3});
+
+        // A reply from a hostile address should receive a zero rating
+        RemoteFileDesc hostile = createRFD(addr1, port1, badger, null, urn1, size1);
+        assertFalse(hostile.isSpam());
+        assertEquals(0f, hostile.getSpamRating());
+
+        // A reply from a blacklisted address should receive a zero rating
+        RemoteFileDesc black = createRFD(addr2, port2, badger, null, urn2, size2);
+        assertFalse(black.isSpam());
+        assertEquals(0f, black.getSpamRating());
+
+        // A reply from a whitelisted address should receive a zero rating
+        RemoteFileDesc white = createRFD(addr3, port3, badger, null, urn3, size3);
+        assertFalse(white.isSpam());
+        assertEquals(0f, white.getSpamRating());
+
+        FilterSettings.HOSTILE_IPS.revertToDefault();
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.revertToDefault();
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.revertToDefault();
+    }
+
     /** 
      * Tests that the URN blacklist affects the spam rating
      */
