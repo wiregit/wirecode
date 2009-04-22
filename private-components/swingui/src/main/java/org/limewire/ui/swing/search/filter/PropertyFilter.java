@@ -223,7 +223,7 @@ class PropertyFilter extends AbstractFilter {
                 return propertyKey.toString();
             }
             
-        case TYPE:
+        case FILE_TYPE:
             return I18n.tr("Types");
             
         default:
@@ -240,7 +240,7 @@ class PropertyFilter extends AbstractFilter {
         switch (filterType) {
         case EXTENSION:
         case PROPERTY:
-        case TYPE:
+        case FILE_TYPE:
             // Create list of property values.
             return GlazedListsFactory.functionList(resultsList, 
                     new PropertyFunction(filterType, propertyKey));
@@ -506,7 +506,7 @@ class PropertyFilter extends AbstractFilter {
                 return vsr.getFileExtension().toLowerCase();
             case PROPERTY:
                 return vsr.getProperty(propertyKey);
-            case TYPE:
+            case FILE_TYPE:
                 return iconManager.getMIMEDescription(vsr.getFileExtension());
             default:
                 return null;
