@@ -6,7 +6,7 @@ import java.util.Set;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 
-public interface IncompleteFileList extends SharedFileList {
+public interface IncompleteFileList extends FileCollection {
     
     /**
      * Adds an incomplete file to be used for partial file sharing.

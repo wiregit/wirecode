@@ -5,15 +5,15 @@ import java.util.NoSuchElementException;
 
 class ThreadSafeFileListIterator implements Iterator<FileDesc> {
     
-    private final AbstractFileList fileList;
-    private final ManagedFileListImpl managedList;
+    private final AbstractFileCollection fileList;
+    private final LibraryImpl managedList;
     private final int startRevision;
     
     /** Points to the index that is to be examined next. */
     private int index = 0;
     private FileDesc preview;
     
-    public ThreadSafeFileListIterator(AbstractFileList fileList, ManagedFileListImpl managedList) {
+    public ThreadSafeFileListIterator(AbstractFileCollection fileList, LibraryImpl managedList) {
         this.fileList = fileList;
         this.index = fileList.getMinIndex();
         this.managedList = managedList;

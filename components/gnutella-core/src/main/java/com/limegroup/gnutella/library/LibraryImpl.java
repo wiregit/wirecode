@@ -66,9 +66,9 @@ import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @Singleton
-class ManagedFileListImpl implements ManagedFileList, FileList {
+class LibraryImpl implements Library, FileCollection {
     
-    private static final Log LOG = LogFactory.getLog(ManagedFileListImpl.class);
+    private static final Log LOG = LogFactory.getLog(LibraryImpl.class);
     
     private static enum DirectoryLoadStyle { 
         /**
@@ -211,7 +211,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
 
     @Inject
-    ManagedFileListImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
+    LibraryImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
                         UrnCache urnCache,
                         FileDescFactory fileDescFactory,
                         EventMulticaster<ManagedListStatusEvent> managedListSupportMulticaster,
@@ -409,7 +409,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         // If we were able to remove above, fire the events.
         for(FileDesc fd : removedFds) {
-            dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.REMOVED, fd));
+            dispatch(new FileListChangedEvent(LibraryImpl.this, FileListChangedEvent.Type.REMOVED, fd));
         }
         
         if(managed) {
@@ -491,7 +491,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         // Step 2: Dispatch all removed files.
         for(FileDesc fd : removedFds) {
-            dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.REMOVED, fd));
+            dispatch(new FileListChangedEvent(LibraryImpl.this, FileListChangedEvent.Type.REMOVED, fd));
         }
         
         // Step 3: Go through all newly managed dirs & manage them.
@@ -629,7 +629,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
         
         if(fd != null) {
-            dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.ADDED, fd));
+            dispatch(new FileListChangedEvent(LibraryImpl.this, FileListChangedEvent.Type.ADDED, fd));
         }
     }
 
@@ -656,6 +656,16 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     @Override
     public void clear() {
         throw new UnsupportedOperationException("cannot clear managed list");
+    }
+    
+    @Override
+    public FileDesc getFileDesc(URN urn) {
+        List<FileDesc> matching = getFileDescsMatching(urn);
+        if(matching.isEmpty()) {
+            return null;
+        } else {
+            return matching.get(0);
+        }
     }
     
     @Override
@@ -816,6 +826,13 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     @Override
     public List<File> getDirectoriesToExcludeFromManaging() {
         return getLibraryData().getDirectoriesToExcludeFromManaging();
+    }
+    
+    @Override
+    public boolean add(FileDesc fileDesc) {
+        // an FD should never exist unless it is already in the library
+        assert contains(fileDesc);
+        return true;
     }
     
     @Override
@@ -1166,7 +1183,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             future.cancel(true);
         }
         
-        dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.CLEAR));
+        dispatch(new FileListChangedEvent(LibraryImpl.this, FileListChangedEvent.Type.CLEAR));
         
         fireLoading();
         final List<ListeningFuture<FileDesc>> futures = loadManagedFiles(rev);

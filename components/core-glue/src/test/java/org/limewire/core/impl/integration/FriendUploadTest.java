@@ -37,7 +37,7 @@ import com.limegroup.gnutella.RequestCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
-import com.limegroup.gnutella.library.FriendFileList;
+import com.limegroup.gnutella.library.SharedFileCollection;
 
 
 /**
@@ -79,7 +79,7 @@ public class FriendUploadTest extends LimeTestCase {
     }
     
     private void loadFiles() throws Exception {
-        FriendFileList friendFileList = fileManager.getOrCreateFriendFileList(FRIEND_ID);
+        SharedFileCollection friendFileList = fileManager.getOrCreateFriendFileList(FRIEND_ID);
         File testFile = TestUtils.getResourceInPackage(FILE_NAME, getClass());
         fileDesc = friendFileList.add(testFile).get();
         relativeFileNameUrl = LimeTestUtils.getRelativeRequest(fileDesc.getSHA1Urn());

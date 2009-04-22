@@ -10,9 +10,9 @@ import ca.odell.glazedlists.BasicEventList;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileListChangedEvent.Type;
 
 public class LocalFileListImplTest extends LimeTestCase {
@@ -44,7 +44,7 @@ public class LocalFileListImplTest extends LimeTestCase {
             protected void collectionUpdate(Type type, boolean shared) {
             }
             @Override
-            protected FileList getCoreFileList() {
+            protected FileCollection getCoreFileList() {
                 return null;
             }
         };

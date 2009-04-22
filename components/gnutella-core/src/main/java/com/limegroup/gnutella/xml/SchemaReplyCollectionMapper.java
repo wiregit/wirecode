@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescChangeEvent;
 import com.limegroup.gnutella.library.FileListChangedEvent;
-import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
 
 
@@ -75,7 +75,7 @@ public class SchemaReplyCollectionMapper {
         return mapper.values();
     }
     
-    @Inject void register(ServiceRegistry registry, final ManagedFileList managedList,
+    @Inject void register(ServiceRegistry registry, final Library managedList,
             final ListenerSupport<FileDescChangeEvent> fileDescSupport) {
         registry.register(new Service() {
             @Override

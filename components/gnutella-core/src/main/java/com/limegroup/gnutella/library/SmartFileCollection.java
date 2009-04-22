@@ -2,10 +2,9 @@ package com.limegroup.gnutella.library;
 
 import org.limewire.core.api.Category;
 
-public interface FriendFileList extends SharedFileList {
-
-    /** Adds the FileDesc to this list. */
-    boolean add(FileDesc fileDesc);
+public interface SmartFileCollection extends FileCollection {    
+    
+    //// REMOVE BELOW -- IT EXISTS FOR TRANSITION...
     
     /**
      * Changes the smart sharing value for images. If true, all new images added to
@@ -55,5 +54,4 @@ public interface FriendFileList extends SharedFileList {
      *  to this list.
      */
     void addSnapshotCategory(Category category);
-
 }

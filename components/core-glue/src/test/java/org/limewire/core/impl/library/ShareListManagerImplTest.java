@@ -33,6 +33,7 @@ import ca.odell.glazedlists.util.concurrent.LockFactory;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.SharedFileCollection;
 
 public class ShareListManagerImplTest extends BaseTestCase {
 
@@ -58,8 +59,8 @@ public class ShareListManagerImplTest extends BaseTestCase {
         final Friend friend1 = context.mock(Friend.class);
         final String friendId1 = "1";
 
-        final com.limegroup.gnutella.library.FriendFileList friendFileList1 = context
-                .mock(com.limegroup.gnutella.library.FriendFileList.class);
+        final SharedFileCollection friendFileList1 = context
+                .mock(SharedFileCollection.class);
         final Lock lock1 = new ReentrantLock();
         final Iterator<FileDesc> iterator1 = new ArrayList<FileDesc>().iterator();
 
@@ -123,8 +124,8 @@ public class ShareListManagerImplTest extends BaseTestCase {
         final Friend friend1 = context.mock(Friend.class);
         final String friendId1 = "1";
 
-        final com.limegroup.gnutella.library.FriendFileList friendFileList1 = context
-                .mock(com.limegroup.gnutella.library.FriendFileList.class);
+        final SharedFileCollection friendFileList1 = context
+                .mock(SharedFileCollection.class);
         final Lock lock1 = new ReentrantLock();
         final Iterator<FileDesc> iterator1 = new ArrayList<FileDesc>().iterator();
 
@@ -199,8 +200,8 @@ public class ShareListManagerImplTest extends BaseTestCase {
         final Friend friend1 = context.mock(Friend.class);
         final String friendId1 = "1";
 
-        final com.limegroup.gnutella.library.FriendFileList friendFileList1 = context
-                .mock(com.limegroup.gnutella.library.FriendFileList.class);
+        final SharedFileCollection friendFileList1 = context
+                .mock(SharedFileCollection.class);
         final Lock lock1 = new ReentrantLock();
         final Iterator<FileDesc> iterator1 = new ArrayList<FileDesc>().iterator();
 
@@ -279,8 +280,8 @@ public class ShareListManagerImplTest extends BaseTestCase {
         final Friend friend1 = context.mock(Friend.class);
         final String friendId1 = "1";
 
-        final com.limegroup.gnutella.library.FriendFileList friendFileList1 = context
-                .mock(com.limegroup.gnutella.library.FriendFileList.class);
+        final SharedFileCollection friendFileList1 = context
+                .mock(SharedFileCollection.class);
 
         final Lock lock1 = new ReentrantLock();
         final Iterator<FileDesc> iterator1 = new ArrayList<FileDesc>().iterator();
@@ -356,8 +357,8 @@ public class ShareListManagerImplTest extends BaseTestCase {
         final Friend friend2 = context.mock(Friend.class);
         final String friendId2 = "2";
 
-        final com.limegroup.gnutella.library.FriendFileList friendFileList2 = context
-                .mock(com.limegroup.gnutella.library.FriendFileList.class);
+        final SharedFileCollection friendFileList2 = context
+                .mock(SharedFileCollection.class);
 
         final Iterator<FileDesc> iterator2 = new ArrayList<FileDesc>().iterator();
         

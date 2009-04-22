@@ -1,39 +1,20 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.locks.Lock;
 
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.listener.EventListener;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A collection of FileDescs.
  */
-public interface FileList extends Iterable<FileDesc> {
+public interface FileCollection extends FileView {
 
-    /**
-     * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt> or
-     * null if the file is not shared or not a store file.
-     */
-    FileDesc getFileDesc(File f);
-
-    /**
-     * Returns all FileDescs that match this URN.
-     */
-    List<FileDesc> getFileDescsMatching(URN urn);
-
-    /**
-     * Returns the FileDesc at the given index. This returns the FileDesc for
-     * which FileDesc.getIndex == index. This is supported as an optimization so
-     * that classes can efficiently locate matches.
-     */
-    FileDesc getFileDescForIndex(int index);
+    /** Adds the FileDesc to this list. */
+    boolean add(FileDesc fileDesc);
 
     /**
      * Adds a folder to the FileList. Depending on the kind of FileList, this
@@ -44,7 +25,6 @@ public interface FileList extends Iterable<FileDesc> {
      * added is returned.
      */
     ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder);
-
     /**
      * Asynchronously adds a file to the list. The returned Future can be used
      * to retrieve the resulting FileDesc. If there is an error adding the file,
@@ -79,48 +59,8 @@ public interface FileList extends Iterable<FileDesc> {
      */
     boolean remove(FileDesc fileDesc);
 
-    /** Returns true if this list contains a FileDesc for the given file. */
-    boolean contains(File file);
-
-    /**
-     * Return true if this list contains this FileDesc, false otherwise.
-     */
-    boolean contains(FileDesc fileDesc);
-
-    /**
-     * Returns an iterator over all FileDescs. The returned iterator is *NOT*
-     * thread safe. You must lock on FileList while using it.
-     */
-    Iterator<FileDesc> iterator();
-
-    /**
-     * Returns an iterable that is thread-safe and can be used over a period of
-     * time (iterating through it piecemeal, with time lapses). The returned
-     * iterable is much slower and more inefficient than the default iterator,
-     * though, so only use it if absolutely necessary.
-     */
-    Iterable<FileDesc> pausableIterable();
-
-    /**
-     * Returns the number of files in this list.
-     */
-    int size();
-
     /**
      * Resets all values within this list.
      */
     void clear();
-
-    /**
-     * Adds a listener to this list
-     */
-    void addFileListListener(EventListener<FileListChangedEvent> listener);
-
-    /**
-     * Removes a listener from this list
-     */
-    void removeFileListListener(EventListener<FileListChangedEvent> listener);
-
-    /** Returns a lock to use when iterating over this FileList. */
-    Lock getReadLock();
 }

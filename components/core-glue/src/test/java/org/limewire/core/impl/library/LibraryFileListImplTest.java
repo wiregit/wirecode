@@ -12,7 +12,7 @@ import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.library.FileListChangedEvent;
-import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.Library;
 
 public class LibraryFileListImplTest extends BaseTestCase {
 
@@ -24,7 +24,7 @@ public class LibraryFileListImplTest extends BaseTestCase {
     public void testPropertyChangesUpdateLibraryState() {
         Mockery context = new Mockery();
 
-        final ManagedFileList managedList = context.mock(ManagedFileList.class);
+        final Library managedList = context.mock(Library.class);
         final CoreLocalFileItemFactory coreLocalFileItemFactory = context
                 .mock(CoreLocalFileItemFactory.class);
 

@@ -10,6 +10,7 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.EventList;
 
+import com.limegroup.gnutella.library.SharedFileCollection;
 import com.limegroup.gnutella.library.FileListChangedEvent.Type;
 
 abstract class AbstractFriendFileList extends LocalFileListImpl implements FriendFileList {
@@ -22,7 +23,7 @@ abstract class AbstractFriendFileList extends LocalFileListImpl implements Frien
 
     // upgrade to require FriendFileList
     @Override
-    abstract protected com.limegroup.gnutella.library.FriendFileList getCoreFileList();
+    abstract protected SharedFileCollection getCoreFileList();
 
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {

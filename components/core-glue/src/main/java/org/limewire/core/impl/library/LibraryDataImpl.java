@@ -13,13 +13,13 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryData;
 
 import com.limegroup.gnutella.library.LibraryUtils;
-import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.Library;
 
 class LibraryDataImpl implements LibraryData {
 
-    private final ManagedFileList fileList;
+    private final Library fileList;
     
-    public LibraryDataImpl(ManagedFileList fileList) {
+    public LibraryDataImpl(Library fileList) {
         this.fileList = fileList;
     }
     

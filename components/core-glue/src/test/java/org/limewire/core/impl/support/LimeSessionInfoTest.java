@@ -25,8 +25,8 @@ import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.GnutellaFileList;
-import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.GnutellaFileCollection;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 
@@ -401,8 +401,8 @@ public class LimeSessionInfoTest extends BaseTestCase {
 
         context.checking(new Expectations() {{
             
-            GnutellaFileList gnutellaFileList = context.mock(GnutellaFileList.class);
-            ManagedFileList managedFileList = context.mock(ManagedFileList.class);
+            GnutellaFileCollection gnutellaFileList = context.mock(GnutellaFileCollection.class);
+            Library managedFileList = context.mock(Library.class);
             allowing(fileManager).getGnutellaFileList();
             will(returnValue(gnutellaFileList));
             allowing(fileManager).getManagedFileList();

@@ -18,7 +18,7 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
-class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileList {
+class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileCollection {
     
     /** Size of all the FileDescs in this list in bytes */
     private final AtomicLong numBytes;
@@ -34,7 +34,7 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
     
     private final InspectionHistogram<String> addedFilesByType = new InspectionHistogram<String>();
     
-    public GnutellaFileListImpl(LibraryFileData data, ManagedFileListImpl managedList, HashTreeCache treeCache) {
+    public GnutellaFileListImpl(LibraryFileData data, LibraryImpl managedList, HashTreeCache treeCache) {
         super(data, managedList, Friend.P2P_FRIEND_ID, treeCache); // @'s added to avoid clashes with xmpp ids.
         this.numBytes = new AtomicLong();
     }

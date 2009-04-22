@@ -32,7 +32,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A List of FileDescs that are grouped together 
  */
-abstract class AbstractFileList implements SharedFileList, Inspectable {
+abstract class AbstractFileCollection implements FileCollection, Inspectable {
 
     /**  A list of listeners for this list */
     private final EventMulticaster<FileListChangedEvent> listenerSupport;
@@ -41,7 +41,7 @@ abstract class AbstractFileList implements SharedFileList, Inspectable {
     private final IntSet fileDescIndexes;
     
     /** The managed list of all FileDescs. */
-    protected final ManagedFileListImpl managedList;
+    protected final LibraryImpl managedList;
     
     /** The listener on the ManagedList, to synchronize changes. */
     private final EventListener<FileListChangedEvent> managedListListener;
@@ -49,7 +49,7 @@ abstract class AbstractFileList implements SharedFileList, Inspectable {
     /** A rw lock. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     
-    public AbstractFileList(ManagedFileListImpl managedList) {
+    public AbstractFileCollection(LibraryImpl managedList) {
         this.managedList = managedList;
         this.fileDescIndexes = new IntSet(); 
         this.listenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
@@ -160,9 +160,8 @@ abstract class AbstractFileList implements SharedFileList, Inspectable {
         }
     }
     
-    // This is exposed in subclass interfaces -- so it doesn't override
-    // anything here, but subclasses use it.
-    protected boolean add(FileDesc fileDesc) {
+    @Override
+    public boolean add(FileDesc fileDesc) {
         if(addFileDescImpl(fileDesc)) {
             saveChange(fileDesc.getFile(), true);
             fireAddEvent(fileDesc);
@@ -258,7 +257,7 @@ abstract class AbstractFileList implements SharedFileList, Inspectable {
     
     @Override
     public Iterator<FileDesc> iterator() {
-        return new FileListIterator(AbstractFileList.this, fileDescIndexes);
+        return new FileListIterator(AbstractFileCollection.this, fileDescIndexes);
     }
     
     @Override
@@ -266,7 +265,7 @@ abstract class AbstractFileList implements SharedFileList, Inspectable {
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {
-                return new ThreadSafeFileListIterator(AbstractFileList.this, managedList);
+                return new ThreadSafeFileListIterator(AbstractFileCollection.this, managedList);
             }
         };
     }
@@ -352,7 +351,7 @@ abstract class AbstractFileList implements SharedFileList, Inspectable {
      * @param fileDesc that was added
      */
     protected void fireAddEvent(FileDesc fileDesc) {
-        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.ADDED, fileDesc));
+        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.ADDED, fileDesc));
     }
     
     /**
@@ -360,7 +359,7 @@ abstract class AbstractFileList implements SharedFileList, Inspectable {
      * @param fileDesc that was removed
      */
     protected void fireRemoveEvent(FileDesc fileDesc) {
-        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.REMOVED, fileDesc));
+        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.REMOVED, fileDesc));
     }
 
     /**
@@ -369,12 +368,12 @@ abstract class AbstractFileList implements SharedFileList, Inspectable {
      * @param newFileDesc FileDesc that replaced oldFileDesc
      */
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.CHANGED, oldFileDesc, newFileDesc));
+        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.CHANGED, oldFileDesc, newFileDesc));
     }
     
     /** Fires a clear event to all listeners. */
     protected void fireClearEvent() {
-        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.CLEAR));
+        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.CLEAR));
     }
     
     /** Fires an event when the state of a shared collection changes*/
@@ -468,7 +467,7 @@ abstract class AbstractFileList implements SharedFileList, Inspectable {
             return fd;
         } else {
             throw new ExecutionException(new FileListChangeFailedException(
-                    new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.ADD_FAILED, fd.getFile()),
+                    new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.ADD_FAILED, fd.getFile()),
                     FileListChangeFailedException.Reason.CANT_ADD_TO_LIST));
         }
     }

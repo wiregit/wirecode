@@ -39,9 +39,8 @@ import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.SentMessageHandler;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileList;
-import com.limegroup.gnutella.library.SharedFileList;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.OutgoingQueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -109,9 +108,9 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
                         context, UploadType.BROWSE_HOST, friendID);
             }
             uploader.setState(UploadStatus.BROWSE_HOST);
-            Iterable<SharedFileList> lists = browseRequestFileListProvider.getFileLists(friendID, context);
+            Iterable<FileCollection> lists = browseRequestFileListProvider.getFileLists(friendID, context);
             List<Iterable<FileDesc>> iterables = new ArrayList<Iterable<FileDesc>>();
-            for (FileList list : lists) {
+            for (FileCollection list : lists) {
                 iterables.add(list.pausableIterable());
             }
             Iterable<FileDesc> files = new MultiIterable<FileDesc>(iterables.toArray(new Iterable[0]));

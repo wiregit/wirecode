@@ -20,8 +20,8 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
 
     private QueryRequestFactory queryRequestFactory;
-    private ManagedFileList managedList;
-    private GnutellaFileList fileList;
+    private Library managedList;
+    private GnutellaFileCollection fileList;
     private SharedFilesKeywordIndex keywordIndex;
     private Response[] responses;
     private Injector injector;

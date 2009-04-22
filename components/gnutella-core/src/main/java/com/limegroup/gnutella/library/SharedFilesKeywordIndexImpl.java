@@ -159,7 +159,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * @param matches set of Response objects
      */
     private void incrementHitCount(Set<Response> matches) {
-        FileList fileList = fileManager.getManagedFileList();
+        FileCollection fileList = fileManager.getManagedFileList();
 
         for (Response resp : matches) {
             long index = resp.getIndex();

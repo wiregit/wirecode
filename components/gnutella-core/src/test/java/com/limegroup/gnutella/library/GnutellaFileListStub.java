@@ -10,7 +10,7 @@ import org.limewire.core.api.Category;
 import com.limegroup.gnutella.URN;
 
 
-public class GnutellaFileListStub extends AbstractFileListStub implements GnutellaFileList {
+public class GnutellaFileListStub extends AbstractFileListStub implements GnutellaFileCollection {
     
     public final static URN DEFAULT_URN;
     static {

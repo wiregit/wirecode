@@ -12,8 +12,8 @@ import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.SharedFileList;
 import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
 
 /**
@@ -64,7 +64,7 @@ class FileRequestParser {
         }
     
         FileDesc desc = null;
-        for (SharedFileList fileList : fileListProvider.getFileLists(index == 0 ? null : parseFriendId(uri.substring(0, index)), context)) {
+        for (FileCollection fileList : fileListProvider.getFileLists(index == 0 ? null : parseFriendId(uri.substring(0, index)), context)) {
             desc = fileList.getFileDesc(urn);
             if (desc != null) {
                 break;

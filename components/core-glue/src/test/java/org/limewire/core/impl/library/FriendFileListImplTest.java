@@ -19,7 +19,7 @@ import ca.odell.glazedlists.EventList;
 
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FriendFileList;
+import com.limegroup.gnutella.library.SharedFileCollection;
 
 public class FriendFileListImplTest extends BaseTestCase {
     
@@ -33,7 +33,7 @@ public class FriendFileListImplTest extends BaseTestCase {
 
     private FriendFileListImpl friendFileListImpl = null;
 
-    private FriendFileList testFileList = null;
+    private SharedFileCollection testFileList = null;
 
     private EventList<LocalFileItem> subList = null;
 
@@ -69,7 +69,7 @@ public class FriendFileListImplTest extends BaseTestCase {
         friendFileListImpl = new FriendFileListImpl(coreLocalFileItemFactory, fileManager, name,
                 combinedShareList);
 
-        testFileList = context.mock(FriendFileList.class);
+        testFileList = context.mock(SharedFileCollection.class);
 
         fileListChangeListener = new AtomicReference<EventListener<FileListChangedEvent>>();
 

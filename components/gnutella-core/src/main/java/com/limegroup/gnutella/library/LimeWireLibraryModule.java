@@ -21,7 +21,7 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(CreationTimeCache.class);        
         
         bind(FileManager.class).to(FileManagerImpl.class);
-        bind(ManagedFileList.class).to(ManagedFileListImpl.class);
+        bind(Library.class).to(LibraryImpl.class);
         
         EventMulticaster<ManagedListStatusEvent> managedListMulticaster =
             new EventMulticasterImpl<ManagedListStatusEvent>();

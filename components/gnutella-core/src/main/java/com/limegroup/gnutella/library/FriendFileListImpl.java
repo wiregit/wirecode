@@ -21,7 +21,7 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 /**
  * A collection of FileDescs containing files shared with an individual friend.
  */
-class FriendFileListImpl extends AbstractFileList implements FriendFileList {
+class FriendFileListImpl extends AbstractFileCollection implements SmartFileCollection, SharedFileCollection {
     
     private final String id;
     
@@ -34,7 +34,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
     private final Executor executor;
     private final HashTreeCache treeCache;
 
-    public FriendFileListImpl(LibraryFileData data, ManagedFileListImpl managedList, String id, HashTreeCache treeCache) {
+    public FriendFileListImpl(LibraryFileData data, LibraryImpl managedList, String id, HashTreeCache treeCache) {
         super(managedList);
         this.id = Objects.nonNull(id, "id");
         this.data = data;

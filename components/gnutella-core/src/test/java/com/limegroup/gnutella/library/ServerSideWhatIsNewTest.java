@@ -565,7 +565,7 @@ public class ServerSideWhatIsNewTest
         tempFile2.delete(); tempFile2 = null;
         berkeley.delete(); berkeley = null;
 
-        ((ManagedFileListImpl)fm.getManagedFileList()).loadManagedFiles();
+        ((LibraryImpl)fm.getManagedFileList()).loadManagedFiles();
         Thread.sleep(2000);
         assertEquals("num shared files", 1, fileManager.getGnutellaFileList().size());
 

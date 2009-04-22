@@ -15,17 +15,18 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
 
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.FileListChangedEvent.Type;
 
 class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
-    private final ManagedFileList managedList;
+    private final Library managedList;
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
     private volatile LibraryState libraryState = LibraryState.LOADING;
     
-    LibraryFileListImpl(ManagedFileList managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
+    LibraryFileListImpl(Library managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
         super(new BasicEventList<LocalFileItem>(), coreLocalFileItemFactory);
         this.managedList = managedList;
         this.managedList.addFileListListener(newEventListener());
@@ -46,7 +47,7 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     }
     
     @Override
-    protected ManagedFileList getCoreFileList() {
+    protected FileCollection getCoreFileList() {
         return managedList;
     }
     

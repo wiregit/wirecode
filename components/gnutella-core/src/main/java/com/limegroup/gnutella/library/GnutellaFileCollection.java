@@ -4,16 +4,17 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.Future;
 
-public interface GnutellaFileList extends FriendFileList {
+/** A {@link FileCollection} that is specifically for Gnutella. */
+public interface GnutellaFileCollection extends SharedFileCollection {
     
     /** Adds this FileList just for this session. */
     Future<FileDesc> addForSession(File file);
+    
+    
+///  TODO -- MOVE BELOW ITEMS to GnutellaFileView
 
     /** Returns the size of all files within this list, in <b>bytes</b>. */
     long getNumBytes();
-
-    /** Adds the FileDesc to this list. */
-    boolean add(FileDesc fileDesc);
     
     /** Returns true if any files are shared through application special share folder. */
     boolean hasApplicationSharedFiles();

@@ -35,7 +35,7 @@ import ca.odell.glazedlists.event.ListEvent;
 
 import com.limegroup.gnutella.MockFriend;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
 
 public class FriendShareListRefresherTest extends BaseTestCase {
@@ -49,7 +49,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         Mockery context = new Mockery();
 
         final FileManager fileManager = context.mock(FileManager.class);
-        final ManagedFileList managedFileList = context.mock(ManagedFileList.class);
+        final Library managedFileList = context.mock(Library.class);
         
         final ListenerSupport<FriendShareListEvent> listenerSupport
             = context.mock(ListenerSupport.class);

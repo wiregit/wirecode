@@ -23,7 +23,7 @@ import com.google.inject.Stage;
 //TODO: cleanup and remove sleeps
 public class FriendFileListTest extends LimeTestCase {
 
-    private ManagedFileListImpl managedList;
+    private LibraryImpl managedList;
     private FriendFileListImpl friendList;
     private Injector injector;
 
@@ -41,7 +41,7 @@ public class FriendFileListTest extends LimeTestCase {
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         friendList = (FriendFileListImpl)injector.getInstance(FileManager.class).getOrCreateFriendFileList("test");
-        managedList = (ManagedFileListImpl)injector.getInstance(FileManager.class).getManagedFileList();
+        managedList = (LibraryImpl)injector.getInstance(FileManager.class).getManagedFileList();
         injector.getInstance(ServiceRegistry.class).initialize();
     }
 

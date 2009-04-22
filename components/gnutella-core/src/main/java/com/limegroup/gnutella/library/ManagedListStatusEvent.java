@@ -34,9 +34,9 @@ public class ManagedListStatusEvent {
     }
     
     private final Type type;
-    private final ManagedFileList list;
+    private final Library list;
     
-    public ManagedListStatusEvent(ManagedFileList list, Type type) {
+    public ManagedListStatusEvent(Library list, Type type) {
         this.type = type;
         this.list = list;
     }
@@ -45,7 +45,7 @@ public class ManagedListStatusEvent {
         return type;
     }
     
-    public ManagedFileList getList() {
+    public Library getList() {
         return list;
     }
     

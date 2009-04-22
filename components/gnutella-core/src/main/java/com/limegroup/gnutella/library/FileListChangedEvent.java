@@ -13,14 +13,14 @@ public class FileListChangedEvent {
     }
     
     private final Type type;
-    private final FileList list;
+    private final FileCollection list;
     private final FileDesc newValue;
     private final FileDesc oldValue;
     private final File oldFile;
     private final File newFile;
     private boolean isShared = false;
     
-    public FileListChangedEvent(FileList list, Type type) {
+    public FileListChangedEvent(FileCollection list, Type type) {
         assert type == Type.CLEAR;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -30,7 +30,7 @@ public class FileListChangedEvent {
         this.newValue = null;
     }
     
-    public FileListChangedEvent(FileList list, Type type, File file) {
+    public FileListChangedEvent(FileCollection list, Type type, File file) {
         assert type == Type.ADD_FAILED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -40,7 +40,7 @@ public class FileListChangedEvent {
         this.newValue = null;
     }
     
-    public FileListChangedEvent(FileList list, Type type, File oldFile, FileDesc oldValue, File newValue) {
+    public FileListChangedEvent(FileCollection list, Type type, File oldFile, FileDesc oldValue, File newValue) {
         assert type == Type.CHANGE_FAILED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -50,7 +50,7 @@ public class FileListChangedEvent {
         this.newFile = Objects.nonNull(newValue, "file");
     }
     
-    public FileListChangedEvent(FileList list, Type type, FileDesc value) {
+    public FileListChangedEvent(FileCollection list, Type type, FileDesc value) {
         assert type == Type.ADDED || type == Type.REMOVED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -60,7 +60,7 @@ public class FileListChangedEvent {
         this.newFile = Objects.nonNull(newValue.getFile(), "value.getFile()");
     }
     
-    public FileListChangedEvent(FileList list, Type type, FileDesc oldValue, FileDesc newValue) {
+    public FileListChangedEvent(FileCollection list, Type type, FileDesc oldValue, FileDesc newValue) {
         assert type == Type.CHANGED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -93,7 +93,7 @@ public class FileListChangedEvent {
         return type;
     }
     
-    public FileList getList() {
+    public FileCollection getList() {
         return list;
     }
     

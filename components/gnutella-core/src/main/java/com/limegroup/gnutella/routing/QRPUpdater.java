@@ -24,7 +24,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescChangeEvent;
-import com.limegroup.gnutella.library.FileList;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
@@ -144,7 +144,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
             }
         }
         
-        FileList gnutella = fileManager.getGnutellaFileList();
+        FileCollection gnutella = fileManager.getGnutellaFileList();
         gnutella.getReadLock().lock();
         try {
             for (FileDesc fd : gnutella) {
@@ -167,7 +167,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
         
         //if partial sharing is allowed, add incomplete file keywords also
         if(SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && SharingSettings.PUBLISH_PARTIAL_QRP.getValue()) {
-            FileList incompletes = fileManager.getIncompleteFileList();
+            FileCollection incompletes = fileManager.getIncompleteFileList();
             incompletes.getReadLock().lock();
             try {
                 for(FileDesc fd : incompletes) {

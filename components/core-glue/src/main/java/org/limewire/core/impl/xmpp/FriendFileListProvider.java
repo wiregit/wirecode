@@ -9,8 +9,8 @@ import org.limewire.http.auth.ServerAuthState;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.SharedFileList;
 import com.limegroup.gnutella.uploader.HttpException;
 import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
 
@@ -35,7 +35,7 @@ public class FriendFileListProvider implements HttpRequestFileListProvider {
     }
     
     @Override
-    public Iterable<SharedFileList> getFileLists(String userId, HttpContext httpContext) throws HttpException {
+    public Iterable<FileCollection> getFileLists(String userId, HttpContext httpContext) throws HttpException {
         if (userId == null) {
             throw new HttpException("no user given", HttpStatus.SC_FORBIDDEN);
         }
@@ -47,7 +47,7 @@ public class FriendFileListProvider implements HttpRequestFileListProvider {
                 if (!credentials.getUserPrincipal().getName().equals(userId)) {
                     throw new HttpException("not authorized", HttpStatus.SC_UNAUTHORIZED);
                 }
-                SharedFileList buddyFileList = fileManager.getFriendFileList(credentials.getUserPrincipal().getName());
+                FileCollection buddyFileList = fileManager.getFriendFileList(credentials.getUserPrincipal().getName());
                 if (buddyFileList == null) {
                     throw new HttpException("no such list for: " + credentials.getUserPrincipal().getName(), HttpStatus.SC_NOT_FOUND);
                 }

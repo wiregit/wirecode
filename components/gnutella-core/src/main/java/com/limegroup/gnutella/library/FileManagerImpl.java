@@ -39,7 +39,7 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 @Singleton 
 class FileManagerImpl implements FileManager, Service {
     
-    private final ManagedFileListImpl managedFileList;
+    private final LibraryImpl managedFileList;
     @InspectionPoint("gnutella shared file list")
     private final GnutellaFileListImpl sharedFileList;
     @InspectionPoint("incomplete file list")
@@ -63,7 +63,7 @@ class FileManagerImpl implements FileManager, Service {
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
     @Inject
-    public FileManagerImpl(ManagedFileListImpl managedFileList, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, HashTreeCache treeCache) {
+    public FileManagerImpl(LibraryImpl managedFileList, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, HashTreeCache treeCache) {
         this.backgroundExecutor = backgroundExecutor;
         this.treeCache = treeCache;
         this.managedFileList = managedFileList;
@@ -115,22 +115,22 @@ class FileManagerImpl implements FileManager, Service {
     
     
     @Override
-    public ManagedFileList getManagedFileList() {
+    public Library getManagedFileList() {
         return managedFileList;
     }
 
     @Override
-    public GnutellaFileList getGnutellaFileList() {
+    public GnutellaFileCollection getGnutellaFileList() {
         return sharedFileList;
     }    
     
     @Override
-    public synchronized FriendFileList getFriendFileList(String name) {
+    public synchronized SharedFileCollection getFriendFileList(String name) {
         return friendFileLists.get(name);
     }
 
     @Override
-    public synchronized FriendFileList getOrCreateFriendFileList(String name) {
+    public synchronized SharedFileCollection getOrCreateFriendFileList(String name) {
         FriendFileListImpl fileList = friendFileLists.get(name);
         if(fileList == null) {
             LibrarySettings.addFriendListName(name);
@@ -201,7 +201,7 @@ class FileManagerImpl implements FileManager, Service {
                 int matched = 0;
                 try {
                     RPNParser parser = new RPNParser(MessageSettings.CUSTOM_FD_CRITERIA.get());
-                    FileList shareList = getGnutellaFileList();
+                    FileCollection shareList = getGnutellaFileList();
                     shareList.getReadLock().lock();
                     try {
                         for (FileDesc fd : shareList){
@@ -229,7 +229,7 @@ class FileManagerImpl implements FileManager, Service {
                 Map<String, Object> data = new HashMap<String, Object>();
                 synchronized (FileManagerImpl.this) {
                     List<Integer> sizes = new ArrayList<Integer>(friendFileLists.size());
-                    for (FriendFileList friendFileList : friendFileLists.values()) {
+                    for (SharedFileCollection friendFileList : friendFileLists.values()) {
                         sizes.add(friendFileList.size());
                     }
                     data.put("sizes", sizes);
@@ -273,7 +273,7 @@ class FileManagerImpl implements FileManager, Service {
             Map<Integer, FileDesc> topCupsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
 
             List<FileDesc> fds;
-            FileList shareList = getGnutellaFileList();
+            FileCollection shareList = getGnutellaFileList();
             shareList.getReadLock().lock();
             try {
                 fds = CollectionUtils.listOf(shareList);

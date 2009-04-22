@@ -19,7 +19,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * 
  * Inclusion in this list means only that LimeWire knows about this file.
  */
-public interface ManagedFileList extends FileList {
+public interface Library extends FileCollection {
     
     void addManagedListStatusListener(EventListener<ManagedListStatusEvent> listener);
     void removeManagedListStatusListener(EventListener<ManagedListStatusEvent> listener);

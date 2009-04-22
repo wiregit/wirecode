@@ -21,8 +21,8 @@ import org.limewire.listener.EventListener;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 
 abstract class LocalFileListImpl implements LocalFileList {
@@ -43,7 +43,7 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     /** Returns the FileList this should act on. */
-    protected abstract FileList getCoreFileList();
+    protected abstract FileCollection getCoreFileList();
     
     @Override
     public ListeningFuture<LocalFileItem> addFile(File file) {

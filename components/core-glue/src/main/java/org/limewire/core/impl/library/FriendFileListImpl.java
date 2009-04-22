@@ -4,6 +4,7 @@ import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.SharedFileCollection;
 
 /**
  * Implementation of the FriendFileList interface, used to keep track of what
@@ -12,7 +13,7 @@ import com.limegroup.gnutella.library.FileManager;
 class FriendFileListImpl extends AbstractFriendFileList {
     private final FileManager fileManager;
 
-    private com.limegroup.gnutella.library.FriendFileList friendFileList;
+    private SharedFileCollection friendFileList;
 
     private final String name;
 
@@ -31,7 +32,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
     }
 
     @Override
-    protected com.limegroup.gnutella.library.FriendFileList getCoreFileList() {
+    protected SharedFileCollection getCoreFileList() {
         return friendFileList;
     }
 
@@ -55,7 +56,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
         friendFileList.addFileListListener(eventListener);
         combinedShareList.addMemberList(baseList);
 
-        com.limegroup.gnutella.library.FileList fileList = friendFileList;
+        com.limegroup.gnutella.library.FileCollection fileList = friendFileList;
 
         fileList.getReadLock().lock();
         try {

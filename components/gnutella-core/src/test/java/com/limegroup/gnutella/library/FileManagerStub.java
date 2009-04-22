@@ -34,12 +34,12 @@ public class FileManagerStub implements FileManager {
 
     
     @Override
-    public FriendFileList getFriendFileList(String name) {
+    public SharedFileCollection getFriendFileList(String name) {
         throw new UnsupportedOperationException("not supported");
     }
     
     @Override
-    public FriendFileList getOrCreateFriendFileList(String name) {
+    public SharedFileCollection getOrCreateFriendFileList(String name) {
         throw new UnsupportedOperationException("not supported");
     }
     

@@ -11,7 +11,7 @@ import org.limewire.listener.EventListener;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
-import com.limegroup.gnutella.library.GnutellaFileList;
+import com.limegroup.gnutella.library.GnutellaFileCollection;
 
 public class GnutellaFileListImplTest extends TestCase {
 
@@ -25,7 +25,7 @@ public class GnutellaFileListImplTest extends TestCase {
 
         final CoreLocalFileItemFactory coreLocalFileItemFactory = context
                 .mock(CoreLocalFileItemFactory.class);
-        final GnutellaFileList gnutellaFileList = context.mock(GnutellaFileList.class);
+        final GnutellaFileCollection gnutellaFileList = context.mock(GnutellaFileCollection.class);
         final CombinedShareList combinedShareList = context.mock(CombinedShareList.class);
 
         final EventList<LocalFileItem> memberList = new BasicEventList<LocalFileItem>();

@@ -37,7 +37,7 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileList;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
@@ -470,7 +470,7 @@ public class DaapManager {
         int size = masterPlaylist.getSongCount();        
         Transaction txn = library.beginTransaction();    
    
-        FileList sharedFileList = fileManager.get().getGnutellaFileList();
+        FileCollection sharedFileList = fileManager.get().getGnutellaFileList();
         sharedFileList.getReadLock().lock();
         try {
             for(FileDesc fd : sharedFileList) {
