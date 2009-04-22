@@ -9,7 +9,10 @@
 #include "libtorrent/alert_types.hpp"
 #include "libtorrent/peer_id.hpp"
 #include <boost/filesystem/path.hpp>
+
+#ifdef WINDOWS
 #include <windows.h>
+#endif
 
 libtorrent::session s;
 std::string savePath;

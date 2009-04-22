@@ -1,24 +1,40 @@
 CXXFLAGS =	-O2 -g -Wall -fmessage-length=0 
 
-OBJS =		libtorrentwrapper.o 
 
-LIB_DIR = ./lib
-#LIBS = -l torrent-rasterbar
-LIBS = -l ws2_32 -l torrent
+#TODO make OS variable dynamic
+OS = "Linux"
 
-TARGET =	libtorrentwrapper.exe
-#TARGET =	libtorrentwrapper.out
+ifeq ($(OS),Windows)
+    LIBS = -l ws2_32 -l torrent
+    LIBRARY = torrent-wrapper.dll
+    TARGET = libtorrent-wrapper.exe
+    OPTIONS = -DIPV6_PROTECTION_LEVEL -DWINDOWS
+endif
 
-LIBRARY = libtorrentwrapper.dll
-#LIBRARY = libtorrentwrapper.so
+ifeq  ($(OS),"Linux")
+	LIBS = -l torrent-rasterbar
+	LIBRARY = libtorrent-wrapper.so
+	TARGET = libtorrent-wrapper.out
+endif
 
+ifeq  ($(OS),Mac)
+	LIBS = -l torrent-rasterbar
+	LIBRARY = libtorrent-wrapper.so
+	TARGET = libtorrent-wrapper.out
+endif
+
+
+ifndef LIBS
+    $(error "Unsupported OS: $(OS)")
+endif
+
+OBJS = libtorrentwrapper.o
 VPATH = src
-
+LIB_DIR = ./lib
 INCLUDE_DIR = ./include 
-#INCLUDE_DIR = /home/pvertenten/Desktop/libtorrent-rasterbar-0.14.2/include
 
 libtorrentwrapper.o: 
-	${CXX} -c src/libtorrentwrapper.cpp -DIPV6_PROTECTION_LEVEL -I $(INCLUDE_DIR)
+	${CXX} -c src/libtorrentwrapper.cpp $(OPTIONS) -I $(INCLUDE_DIR)
 	
 $(TARGET):	$(OBJS)
 	$(CXX) -o $(TARGET) $(OBJS) -L $(LIB_DIR) $(LIBS)
