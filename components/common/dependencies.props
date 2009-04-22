@@ -41,6 +41,7 @@ jxlayer.version=
 log4j.version=
 manekineko.version=
 miglayout.version=
+mime-util.version=
 mozdom4java.version=
 MozillaInterfaces.version=1.9
 MozillaGlue.version=1.9
