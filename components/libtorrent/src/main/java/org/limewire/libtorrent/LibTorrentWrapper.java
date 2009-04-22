@@ -1,6 +1,7 @@
 package org.limewire.libtorrent;
 
 import org.limewire.libtorrent.callback.AlertCallback;
+import org.limewire.util.OSUtils;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -11,17 +12,22 @@ public class LibTorrentWrapper implements LibTorrent {
     private final LibTorrent libTorrent;
 
     public LibTorrentWrapper() {
-        System.loadLibrary("test");
-        System.loadLibrary("mingwm10");
-        // System.loadLibrary("msvcrt");
-        // System.loadLibrary("ws2_32");
-        //System.loadLibrary("shlwapi");
-        System.loadLibrary("torrent");
-        System.loadLibrary("boost_system-mgw34-mt-1_36");
-        System.loadLibrary("boost_date_time-mgw34-mt-1_36");
-        System.loadLibrary("boost_filesystem-mgw34-mt-1_36");
-        System.loadLibrary("boost_thread-mgw34-mt-1_36");
-
+        if(OSUtils.isWindows()) {
+            System.loadLibrary("mingwm10");
+            System.loadLibrary("boost_system-mgw34-mt-1_36");
+            System.loadLibrary("boost_date_time-mgw34-mt-1_36");
+            System.loadLibrary("boost_filesystem-mgw34-mt-1_36");
+            System.loadLibrary("boost_thread-mgw34-mt-1_36");
+            System.loadLibrary("torrent");
+        } else if(OSUtils.isLinux()) {
+           System.loadLibrary("boost_system-gcc42-mt-1_38");
+           System.loadLibrary("boost_date_time-gcc42-mt-1_38");
+           System.loadLibrary("boost_filesystem-gcc42-mt-1_38");
+           System.loadLibrary("boost_thread-gcc42-mt-1_38");
+           System.loadLibrary("torrent-0_14_2");
+        }
+        
+        //TODO make sure right libraries are loaded on linux too.
         this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
     }
 
