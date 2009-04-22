@@ -17,9 +17,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
 class HelpMenu extends MnemonicMenu {
 
     @Inject
