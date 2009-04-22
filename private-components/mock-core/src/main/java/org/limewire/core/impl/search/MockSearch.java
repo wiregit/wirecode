@@ -355,9 +355,7 @@ public class MockSearch implements Search {
     
     private void createSearchResultDocument(String keyword, int verb, int adj, int noun) {
         MockSearchResult msr = new MockSearchResult();
-        msr.setExtension("doc");
         msr.setResultType(Category.DOCUMENT);
-        msr.setSize(45367L);
         String name = null;
         if(verb == 256) { 
             name = keyword;
@@ -366,6 +364,15 @@ public class MockSearch implements Search {
         }
 
         Random r = new Random();
+        int num = r.nextInt() % 100 ;
+        if (num < 80 ) { 
+            msr.setSize(945367L);
+            msr.setExtension("doc");
+        } else {
+            msr.setSize(67L);
+            msr.setExtension("txt");
+        }
+
         String ip = new String();
         ip = Math.abs(r.nextInt()) % 256 + "."+ Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256;
         
@@ -396,9 +403,7 @@ public class MockSearch implements Search {
             
     private void createSearchResultDocument2(String keyword, int verb, int adj, int noun) {
         MockSearchResult msr = new MockSearchResult();
-        msr.setExtension("pdf");
         msr.setResultType(Category.DOCUMENT);
-        msr.setSize(45367L);
         String name = null;
         if(verb == 256) { 
             name = keyword;
@@ -407,6 +412,18 @@ public class MockSearch implements Search {
         }
         
         Random r = new Random();
+        int num = r.nextInt() % 100 ;
+        if (num < 80 ) { 
+            msr.setExtension("pdf");
+            msr.setSize(45367L);
+            msr.setProperty(FilePropertyKey.FILE_SIZE, 45367);
+        } else {
+            msr.setExtension("ppt");
+            msr.setSize(367L);
+            msr.setProperty(FilePropertyKey.FILE_SIZE, 367);
+
+        }
+
         String ip = new String();
         ip = Math.abs(r.nextInt()) % 256 + "."+ Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256;
         
@@ -416,7 +433,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.AUTHOR, "Dr. Java");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
-        msr.setProperty(FilePropertyKey.FILE_SIZE, 1.7);
         msr.setProperty(FilePropertyKey.NAME, name);
 
         handleSearchResult(msr);
@@ -430,7 +446,7 @@ public class MockSearch implements Search {
         MockSearchResult msr = new MockSearchResult();
         msr.setExtension("pdf");
         msr.setResultType(Category.DOCUMENT);
-        msr.setSize(45367L);
+        msr.setSize(12L);
         String name = "Game design patterns";
 
         Random r = new Random();
@@ -443,8 +459,8 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.AUTHOR, "Tim Burr");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2003, 2, 7).getTimeInMillis());
-        msr.setProperty(FilePropertyKey.FILE_SIZE, 12.7);
         msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 12.7);
 
         handleSearchResult(msr);
         
@@ -457,8 +473,8 @@ public class MockSearch implements Search {
     private void createSearchResultTheFranks() {
         // Create a search result that will be categorized as "Audio".
         
-        handleSearchResult(createAlbumTrack("Lightning Queen", "Rocket me to the moon", 524));
-        handleSearchResult(createAlbumTrack("Lightning Queen", "Gerry Me Ander", 324));
+        handleSearchResult(createAlbumTrack("Lightning Queen", "Rocket me to the moon", 591224));
+        handleSearchResult(createAlbumTrack("Lightning Queen", "Gerry Me Ander", 5324));
         handleSearchResult(createAlbumTrack("Lightning Queen", "Smelly Shoes", 124));
         handleSearchResult(createAlbumTrack("Chemical Attraction", "Business Casual"));
         for(int albums = 0; albums < 2; albums++) { 
@@ -478,9 +494,15 @@ public class MockSearch implements Search {
     
     private MockSearchResult createAlbumTrack(String albumName, String trackName) {
         MockSearchResult msr = new MockSearchResult();
-        msr.setExtension("mp3");
-        msr.setResultType(Category.AUDIO);
         Random r = new Random();
+
+        if (trackName.indexOf("Puffy") > -1 || trackName.indexOf("Ominous") > -1) {
+            msr.setExtension("wav");            
+        } else {
+            msr.setExtension("mp3");
+        }
+
+        msr.setResultType(Category.AUDIO);
         String ip = new String();
         
         int size =Math.abs(r.nextInt() % 10000000);
@@ -527,7 +549,6 @@ public class MockSearch implements Search {
         String author = new String();
         author = "The Franks";
         msr.setProperty(FilePropertyKey.AUTHOR, author);
-        msr.setProperty(FilePropertyKey.BITRATE, "192");
         msr.setProperty(FilePropertyKey.DESCRIPTION, "very jazzy km lkn nans jaskj asjkbcjkbs bbja " +
                 "scb bjk asc bjkajbsc kbk asbc b bascbbasc b " +
                 "ascb bascb asb cbascbab cb ascbbas cba scbasc");
@@ -535,10 +556,22 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.FILE_SIZE, size);
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, trackName);
-        msr.setProperty(FilePropertyKey.LENGTH, "4:31");
-        msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
+
+        int num = r.nextInt() % 100 ;
+        if (num < 80) {
+            
+            msr.setProperty(FilePropertyKey.BITRATE, 160);
+            msr.setProperty(FilePropertyKey.QUALITY, "good quality");
+            msr.setProperty(FilePropertyKey.LENGTH, 232);
+            
+        } else {
+            msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
+            msr.setProperty(FilePropertyKey.BITRATE, 192);
+            msr.setProperty(FilePropertyKey.LENGTH, 151);
+        }
+
         return msr;
 
     }
@@ -566,7 +599,6 @@ public class MockSearch implements Search {
         }
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
-        msr.setSize(4234L);
         Random r = new Random();
         String ip = new String();
         ip = Math.abs(r.nextInt()) % 256 + "."+ Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256;
@@ -582,6 +614,23 @@ public class MockSearch implements Search {
             } else {
                album = "The " + adjs[adj] + " " + nouns[noun];
             }
+            msr.setExtension("mp3");
+            msr.setSize(4234L);
+            msr.setProperty(FilePropertyKey.QUALITY, "good quality");            
+            msr.setProperty(FilePropertyKey.FILE_SIZE, 4234);
+            msr.setProperty(FilePropertyKey.BITRATE, 128);
+            msr.setProperty(FilePropertyKey.LENGTH, 91);
+
+        } else {
+            msr.setExtension("wav");
+            msr.setSize(133L);
+            msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");            
+            msr.setProperty(FilePropertyKey.FILE_SIZE, 133);
+            msr.setProperty(FilePropertyKey.LENGTH, ":31");
+            msr.setProperty(FilePropertyKey.BITRATE, "192");
+            msr.setProperty(FilePropertyKey.BITRATE, 192);
+            msr.setProperty(FilePropertyKey.LENGTH, 31);
+
         }
 
         msr.setProperty(FilePropertyKey.ALBUM, album);
@@ -589,16 +638,12 @@ public class MockSearch implements Search {
         if (num < 80) { 
             msr.setProperty(FilePropertyKey.AUTHOR, author);
         }
-        msr.setProperty(FilePropertyKey.BITRATE, "192");
         msr.setProperty(FilePropertyKey.DESCRIPTION, "very jazzy km lkn nans jaskj asjkbcjkbs bbja " +
                 "scb bjk asc bjkajbsc kbk asbc b bascbbasc b " +
                 "ascb bascb asb cbascbab cb ascbbas cba scbasc");
         msr.setProperty(FilePropertyKey.TITLE, name);
-        msr.setProperty(FilePropertyKey.FILE_SIZE, 33.9);
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.LENGTH, "4:31");
-        msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
@@ -616,9 +661,7 @@ public class MockSearch implements Search {
         } else {
             name = "The " + nouns[noun] + " " + verbs[verb] + " the " + adjs[adj] + " " + keyword;
         }
-        msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
-        msr.setSize(4234L);
         Random r = new Random();
         String ip = new String();
         ip = Math.abs(r.nextInt()) % 256 + "."+ Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256;
@@ -636,17 +679,34 @@ public class MockSearch implements Search {
         num = r.nextInt() % 100 ;
         if (num < 80 ) { 
             author = "The " + nouns[noun];
+            
+            msr.setExtension("mp3");
+            msr.setSize(30000L);
+            msr.setProperty(FilePropertyKey.QUALITY, "good quality");            
+            msr.setProperty(FilePropertyKey.FILE_SIZE, 30000.9);
+            msr.setProperty(FilePropertyKey.LENGTH, "4:31");
+            msr.setProperty(FilePropertyKey.BITRATE, "160");
+            msr.setProperty(FilePropertyKey.BITRATE, 160);
+            msr.setProperty(FilePropertyKey.LENGTH, 271);            
+
+        } else {
+            msr.setExtension("aac");
+            msr.setSize(423455L);
+            
+            msr.setProperty(FilePropertyKey.QUALITY, "poor quality");            
+            msr.setProperty(FilePropertyKey.FILE_SIZE, 423455);
+            msr.setProperty(FilePropertyKey.LENGTH, "44:31");
+            msr.setProperty(FilePropertyKey.BITRATE, "63");
+            msr.setProperty(FilePropertyKey.BITRATE, 63);
+            msr.setProperty(FilePropertyKey.LENGTH, 44*60);
+
         }
         msr.setProperty(FilePropertyKey.AUTHOR, author);
-        msr.setProperty(FilePropertyKey.BITRATE, "192");
         msr.setProperty(FilePropertyKey.DESCRIPTION, "very jazzy km lkn nans jaskj asjkbcjkbs bbja " +
                 "scb bjk asc bjkajbsc kbk asbc b bascbbasc b " +
                 "ascb bascb asb cbascbab cb ascbbas cba scbasc");
-        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.LENGTH, "4:31");
-        msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
@@ -666,7 +726,6 @@ public class MockSearch implements Search {
         }
 
         msr = new MockSearchResult();
-        msr.setExtension("ogm");
         msr.setResultType(Category.VIDEO);
         msr.setSize(9876L);
 
@@ -694,11 +753,15 @@ public class MockSearch implements Search {
         int num = 0;
         num = r.nextInt() % 100 ;
         if (num < 80 ) { 
+            msr.setExtension("mov");
+
             if(adj == 256) {
                 year = "The " + keyword;
             } else {
                 year = "The " + adjs[adj] + " " + nouns[noun];                
             }
+        } else {
+            msr.setExtension("ogm");
         }
 
         msr.setProperty(FilePropertyKey.YEAR, year);
@@ -712,7 +775,6 @@ public class MockSearch implements Search {
         String name = "The " + nouns[noun] + " " + verbs[verb] + " the " + adjs[adj] + " " + keyword;
 
         msr = new MockSearchResult();
-        msr.setExtension("ogm");
         msr.setResultType(Category.VIDEO);
         msr.setSize(9876L);
 
@@ -740,7 +802,12 @@ public class MockSearch implements Search {
         int num = 0;
         num = r.nextInt() % 100 ;
         if (num < 80 ) { 
+            msr.setExtension("avi");
+
             year = "The " + adjs[adj] + " " + nouns[noun];
+        } else {
+            msr.setExtension("mpeg");
+
         }
 
         msr.setProperty(FilePropertyKey.YEAR, year);
@@ -762,7 +829,6 @@ public class MockSearch implements Search {
         }
 
         msr = new MockSearchResult();
-        msr.setExtension("exe");
         msr.setResultType(Category.PROGRAM);
         msr.setSize(8765L);
         Random r = new Random();
@@ -777,12 +843,15 @@ public class MockSearch implements Search {
         int num = 0;
         num = r.nextInt() % 100 ;
         if (num < 80 ) { 
+            msr.setExtension("exe");
+
             if(adj == 256) {
                 company = "The " + keyword;                
             } else {
                 company = "The " + adjs[adj] + " " + nouns[noun];
-            }
-                
+            }                
+        } else {
+            msr.setExtension("jar");
         }
         msr.setProperty(FilePropertyKey.COMPANY, company);
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.4);
@@ -837,11 +906,19 @@ public class MockSearch implements Search {
             name = "The " + keyword + " " + verbs[verb] + " the " + adjs[adj] + " " + nouns[noun];
         }
         msr = new MockSearchResult();
-        msr.setExtension("png");
+        int num = 0;
+        Random r = new Random();
+
+        num = r.nextInt() % 100 ;
+        if (num < 80 ) { 
+            msr.setExtension("jpg");
+        } else {
+            msr.setExtension("png");
+        }
+
         msr.setResultType(Category.IMAGE);
         msr.setSize(5678L);
 
-        Random r = new Random();
         String ip = new String();
         ip = Math.abs(r.nextInt()) % 256 + "."+ Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256;
         
@@ -862,11 +939,17 @@ public class MockSearch implements Search {
         String name = "The " + nouns[noun] + " " + verbs[verb] + " the " + adjs[adj] + " " + keyword;
 
         msr = new MockSearchResult();
-        msr.setExtension("png");
         msr.setResultType(Category.IMAGE);
         msr.setSize(5678L);
 
         Random r = new Random();
+        int num = r.nextInt() % 100 ;
+        if (num < 80 ) { 
+            msr.setExtension("bmp");
+        } else {
+            msr.setExtension("gif");
+        }
+
         String ip = new String();
         ip = Math.abs(r.nextInt()) % 256 + "."+ Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256 + "." + Math.abs(r.nextInt()) % 256;
         
