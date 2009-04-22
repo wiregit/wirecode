@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
@@ -26,10 +27,7 @@ public class TorrentManager {
         this.torrents = new ArrayList<String>();
         // TODO init torrent manager elsewhere.
         libTorrent.print();
-        //init("/home/pvertenten/Desktop");
-        init("C:\\Documents and Settings\\pvertenten\\Desktop");
-        
-        //init("C:\\Users\\pvertenten\\Desktop");
+        init(SharingSettings.INCOMPLETE_DIRECTORY.getValueAsString());
     }
 
     public void init(String path) {
