@@ -48,7 +48,7 @@ class PropertyMatcher implements Matcher<VisualSearchResult> {
             return values.contains(vsr.getFileExtension().toLowerCase());
         case PROPERTY:
             return values.contains(vsr.getProperty(propertyKey));
-        case TYPE:
+        case FILE_TYPE:
             String type = iconManager.getMIMEDescription(vsr.getFileExtension());
             return values.contains(type);
         default:

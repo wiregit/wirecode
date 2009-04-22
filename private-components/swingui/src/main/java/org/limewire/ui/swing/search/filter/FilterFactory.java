@@ -1,35 +1,34 @@
 package org.limewire.ui.swing.search.filter;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.IconManager;
-
-import ca.odell.glazedlists.EventList;
 
 /**
  * A factory for creating filters.
  */
 public class FilterFactory implements Disposable {
 
+    /** Search results data model. */
     private final SearchResultsModel searchResultsModel;
     
+    /** Icon manager for determining file types. */
     private final IconManager iconManager;
     
-    private CategoryFilter categoryFilter;
-    private Filter bitRateFilter;
-    private Filter extensionFilter;
-    private Filter fileSizeFilter;
-    private Filter fileTypeFilter;
-    private Filter lengthFilter;
-    private Filter qualityFilter;
-    private Map<FilePropertyKey, Filter> propertyFilterMap = new HashMap<FilePropertyKey, Filter>();
+    /** Map containing non-property filters. */
+    private final Map<FilterType, Filter> filterMap = new EnumMap<FilterType, Filter>(FilterType.class);
+    
+    /** Map containing property filters. */
+    private final Map<FilePropertyKey, Filter> propertyFilterMap = new HashMap<FilePropertyKey, Filter>();
     
     /**
      * Constructs a FilterFactory using the specified search results data model
@@ -42,29 +41,15 @@ public class FilterFactory implements Disposable {
     
     @Override
     public void dispose() {
-        if (categoryFilter != null) {
-            categoryFilter.dispose();
-        }
-        if (bitRateFilter != null) {
-            bitRateFilter.dispose();
-        }
-        if (extensionFilter != null) {
-            extensionFilter.dispose();
-        }
-        if (fileSizeFilter != null) {
-            fileSizeFilter.dispose();
-        }
-        if (fileTypeFilter != null) {
-            fileTypeFilter.dispose();
-        }
-        if (lengthFilter != null) {
-            lengthFilter.dispose();
-        }
-        if (qualityFilter != null) {
-            qualityFilter.dispose();
-        }
-        Collection<Filter> filters = propertyFilterMap.values();
+        // Dispose of all non-property filters.
+        Collection<Filter> filters = filterMap.values();
         for (Filter filter : filters) {
+            filter.dispose();
+        }
+        
+        // Dispose of all property filters.
+        Collection<Filter> propertyFilters = propertyFilterMap.values();
+        for (Filter filter : propertyFilters) {
             filter.dispose();
         }
     }
@@ -73,145 +58,141 @@ public class FilterFactory implements Disposable {
      * Returns a filter for file categories.
      */
     public CategoryFilter getCategoryFilter() {
-        if (categoryFilter == null) {
-            categoryFilter = new CategoryFilter(searchResultsModel.getFilteredSearchResults());
-        }
-        return categoryFilter;
+        return (CategoryFilter) getFilter(FilterType.CATEGORY);
     }
     
     /**
      * Returns a filter for file sources.
      */
     public Filter getSourceFilter() {
-        return new SourceFilter();
+        return getFilter(FilterType.SOURCE);
     }
     
     /**
-     * Returns an array of filters for the specified search category and list 
-     * of search results.
+     * Returns the minimum number of property filters for the specified search
+     * category.  A value less than 1 means that there is no minimum and all 
+     * filters are displayed.
+     */
+    public int getPropertyFilterMinimum(SearchCategory searchCategory) {
+        switch (searchCategory) {
+        case AUDIO:
+            return 3;
+        default:
+            return -1;
+        }
+    }
+    
+    /**
+     * Returns an array of filters for the specified search category.
      */
     public Filter[] getPropertyFilters(SearchCategory searchCategory) {
-        // Get filtered results list.
-        EventList<VisualSearchResult> filteredList = searchResultsModel.getFilteredSearchResults();
-        
-        // Create filter array.
-        Filter[] filters = new Filter[0];
-        
         // Return empty array if null.
         if (searchCategory == null) {
-            return filters;
+            return new Filter[0];
         }
+        
+        // Create filter list.
+        List<Filter> filterList = new ArrayList<Filter>();
         
         switch (searchCategory) {
         case AUDIO:
-            filters = new Filter[7];
-            filters[0] = getPropertyFilter(filteredList, FilePropertyKey.AUTHOR);
-            filters[1] = getPropertyFilter(filteredList, FilePropertyKey.ALBUM);
-            filters[2] = getPropertyFilter(filteredList, FilePropertyKey.GENRE);
-            filters[3] = getFileSizeFilter();
-            filters[4] = getExtensionFilter(filteredList);
-            filters[5] = getBitRateFilter();
-            filters[6] = getLengthFilter();
-            return filters;
+            filterList.add(getPropertyFilter(FilePropertyKey.AUTHOR));
+            filterList.add(getPropertyFilter(FilePropertyKey.ALBUM));
+            filterList.add(getPropertyFilter(FilePropertyKey.GENRE));
+            filterList.add(getFilter(FilterType.FILE_SIZE));
+            filterList.add(getFilter(FilterType.EXTENSION));
+            filterList.add(getFilter(FilterType.BIT_RATE));
+            filterList.add(getFilter(FilterType.LENGTH));
+            break;
             
         case VIDEO:
-            filters = new Filter[4];
-            filters[0] = getFileSizeFilter();
-            filters[1] = getExtensionFilter(filteredList);
-            filters[2] = getQualityFilter();
-            filters[3] = getLengthFilter();
-            return filters;
+            filterList.add(getFilter(FilterType.FILE_SIZE));
+            filterList.add(getFilter(FilterType.EXTENSION));
+            filterList.add(getFilter(FilterType.QUALITY));
+            filterList.add(getFilter(FilterType.LENGTH));
+            break;
 
         case DOCUMENT:
         case OTHER:
-            filters = new Filter[3];
-            filters[0] = getFileTypeFilter(filteredList);
-            filters[1] = getFileSizeFilter();
-            filters[2] = getExtensionFilter(filteredList);
-            return filters;
+            filterList.add(getFilter(FilterType.FILE_TYPE));
+            filterList.add(getFilter(FilterType.FILE_SIZE));
+            filterList.add(getFilter(FilterType.EXTENSION));
+            break;
             
         case ALL:
         case IMAGE:
         case PROGRAM:
         default:
-            filters = new Filter[2];
-            filters[0] = getFileSizeFilter();
-            filters[1] = getExtensionFilter(filteredList);
-            return filters;
+            filterList.add(getFilter(FilterType.FILE_SIZE));
+            filterList.add(getFilter(FilterType.EXTENSION));
+            break;
         }
+        
+        return filterList.toArray(new Filter[filterList.size()]);
     }
     
     /**
-     * Returns the bit rate filter.
+     * Returns the filter for the specified filter type.
      */
-    private Filter getBitRateFilter() {
-        if (bitRateFilter == null) {
-            bitRateFilter = new BitRateFilter();
+    private Filter getFilter(FilterType filterType) {
+        Filter filter = filterMap.get(filterType);
+        if (filter == null) {
+            filter = createFilter(filterType, null);
+            filterMap.put(filterType, filter);
         }
-        return bitRateFilter;
+        return filter;
     }
     
     /**
-     * Returns the file extension filter for the specified results list.
+     * Return the property filter for the specified property key.
      */
-    private Filter getExtensionFilter(EventList<VisualSearchResult> filteredList) {
-        if (extensionFilter == null) {
-            extensionFilter = new PropertyFilter(filteredList, FilterType.EXTENSION, null, iconManager);
+    private Filter getPropertyFilter(FilePropertyKey propertyKey) {
+        Filter filter = propertyFilterMap.get(propertyKey);
+        if (filter == null) {
+            filter = createFilter(FilterType.PROPERTY, propertyKey);
+            propertyFilterMap.put(propertyKey, filter);
         }
-        return extensionFilter;
+        return filter;
     }
     
     /**
-     * Returns the file size filter.
+     * Creates a new filter for the specified filter type and property key.
+     * For FilterType.PROPERTY, <code>propertyKey</code> must be non-null.
      */
-    private Filter getFileSizeFilter() {
-        if (fileSizeFilter == null) {
-            fileSizeFilter = new FileSizeFilter();
+    private Filter createFilter(FilterType filterType, FilePropertyKey propertyKey) {
+        switch (filterType) {
+        case BIT_RATE:
+            return new BitRateFilter();
+            
+        case CATEGORY:
+            return new CategoryFilter(searchResultsModel.getFilteredSearchResults());
+            
+        case EXTENSION:
+            return new PropertyFilter(searchResultsModel.getFilteredSearchResults(), 
+                    FilterType.EXTENSION, null, iconManager);
+            
+        case FILE_SIZE:
+            return new FileSizeFilter();
+            
+        case FILE_TYPE:
+            return new PropertyFilter(searchResultsModel.getFilteredSearchResults(), 
+                    FilterType.FILE_TYPE, null, iconManager);
+            
+        case LENGTH:
+            return new LengthFilter();
+            
+        case PROPERTY:
+            return new PropertyFilter(searchResultsModel.getFilteredSearchResults(), 
+                    FilterType.PROPERTY, propertyKey, iconManager);
+            
+        case QUALITY:
+            return new QualityFilter();
+            
+        case SOURCE:
+            return new SourceFilter();
+            
+        default:
+            throw new IllegalArgumentException("Invalid filter type " + filterType);
         }
-        return fileSizeFilter;
-    }
-    
-    /**
-     * Returns the file type filter for the specified results list.
-     */
-    private Filter getFileTypeFilter(EventList<VisualSearchResult> filteredList) {
-        if (fileTypeFilter == null) {
-            fileTypeFilter = new PropertyFilter(filteredList, FilterType.TYPE, null, iconManager);
-        }
-        return fileTypeFilter;
-    }
-    
-    /**
-     * Returns the property value filter for the specified results list and
-     * property key.
-     */
-    private Filter getPropertyFilter(EventList<VisualSearchResult> filteredList, 
-            FilePropertyKey propertyKey) {
-        Filter propertyFilter = propertyFilterMap.get(propertyKey); 
-        if (propertyFilter == null) {
-            propertyFilter = new PropertyFilter(filteredList, FilterType.PROPERTY, propertyKey, iconManager);
-            propertyFilterMap.put(propertyKey, propertyFilter);
-        }
-        return propertyFilter;
-    }
-    
-    /**
-     * Returns the length filter.
-     */
-    private Filter getLengthFilter() {
-        if (lengthFilter == null) {
-            lengthFilter = new LengthFilter();
-        }
-        return lengthFilter;
-    }
-    
-    /**
-     * Returns the quality filter.
-     */
-    private Filter getQualityFilter() {
-        if (qualityFilter == null) {
-            qualityFilter = new QualityFilter();
-        }
-        return qualityFilter;
     }
 }
