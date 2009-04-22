@@ -392,7 +392,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             displayMap.put(filter, activeFilterPanel);
             
             // Add filter display to container.
-            displayPanel.add(activeFilterPanel, "gap 6 6, wmax 138, growx, wrap");
+            displayPanel.add(activeFilterPanel, "gaptop 4, wmax 150, wrap");
             
             // Display reset button if multiple filters.
             resetButton.setVisible(displayMap.size() > 1);
@@ -483,7 +483,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             for (int i = 0; i < filters.length; i++) {
                 JComponent component = filters[i].getComponent();
                 add(component, "gaptop 8, aligny top, growx, wrap");
-                component.setVisible((filterMin < 1) || (i < filterMin));
+                if (!filters[i].isActive()) {
+                    component.setVisible((filterMin < 1) || (i < filterMin));
+                }
                 filters[i].addFilterListener(this);
             }
             
@@ -505,7 +507,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             int filterMin = filterFactory.getPropertyFilterMinimum(currentCategory);
             for (int i = 0; i < filters.length; i++) {
                 JComponent component = filters[i].getComponent();
-                component.setVisible(showAll || (filterMin < 1) || (i < filterMin));
+                if (!filters[i].isActive()) {
+                    component.setVisible(showAll || (filterMin < 1) || (i < filterMin));
+                }
             }
         }
 
