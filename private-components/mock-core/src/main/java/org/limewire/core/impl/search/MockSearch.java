@@ -1,8 +1,6 @@
 package org.limewire.core.impl.search;
 
-import java.util.Arrays;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -14,11 +12,8 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
-import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
-import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
 
 
 public class MockSearch implements Search {
@@ -186,12 +181,12 @@ public class MockSearch implements Search {
         }
     }
     
-    private void handleSponsoredResults(SponsoredResult... sponsoredResults) {
-        List<SponsoredResult> mockList =  Arrays.asList(sponsoredResults);
-        for (SearchListener listener : listeners) {
-            listener.handleSponsoredResults(this, mockList);
-        }
-    }
+//    private void handleSponsoredResults(SponsoredResult... sponsoredResults) {
+//        List<SponsoredResult> mockList =  Arrays.asList(sponsoredResults);
+//        for (SearchListener listener : listeners) {
+//            listener.handleSponsoredResults(this, mockList);
+//        }
+//    }
     
     @Override
     public void repeat() {

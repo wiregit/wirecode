@@ -106,6 +106,7 @@ public class HomePanel extends JXPanel {
     }
 
     public void load(String url) {
+
         url = application.getUniqueUrl(url);
         if(MozillaInitialization.isInitialized()) {
             if(firstRequest) {
@@ -117,8 +118,15 @@ public class HomePanel extends JXPanel {
             }
             // Reset the page to blank before continuing -- blocking is OK because this is fast.
             MozillaAutomation.blockingLoad(browser, "about:blank");
+            //MockApplication isn't correct, needs to implement return getUniqueUrl better
+            //actual url is: http://client-data.limewire.com/client_startup/home/&firstRequest=true
+            //should be:
+            url = "http://client-data.limewire.com/client_startup/home/?guid=2C050845F2C99654A0C223A949378F00&pro=false&lang=en&lv=%40version%40&jv=1.6.0_11&os=Windows+XP&osv=5.1";
             browser.load(url);
+
+            
         } else {
+            
             String offlinePage = "<html><body>This is the offline home page.</body></html>";
             url += "&html32=true";
             if(firstRequest) {

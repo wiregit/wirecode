@@ -79,7 +79,11 @@ public class StorePanel extends JPanel {
         } else {
             // Reset the page to blank before continuing -- blocking is OK because this is fast.
             MozillaAutomation.blockingLoad(browser, "about:blank");
+            //Url it tries to load (but is wrong): http://store.limewire.com/&isClient=true
+            //MockApplication isn't correct, needs to implement return getUniqueUrl better
+            url = "http://store.limewire.com/?guid=2C050845F2C99654A0C223A949378F00&pro=false&lang=en&lv=%40version%40&jv=1.6.0_11&os=Windows+XP&osv=5.1&";
             browser.load(url + "&isClient=true");
+            
         }
     }
 }

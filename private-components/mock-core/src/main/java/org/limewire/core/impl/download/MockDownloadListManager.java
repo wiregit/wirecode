@@ -14,7 +14,6 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;

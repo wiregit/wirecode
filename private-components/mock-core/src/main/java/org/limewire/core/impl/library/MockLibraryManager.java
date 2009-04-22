@@ -32,7 +32,7 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
 
     private FileListAdapter allFileList;
     private FriendFileListAdapter gnutellaList;
-    private FriendFileListAdapter friendList;
+//    private FriendFileListAdapter friendList;
     private LibraryData libraryData;
     
     private Map<String, LocalFileList> friendMap;
@@ -40,7 +40,7 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     public MockLibraryManager() {
         allFileList = new FileListAdapter();
         gnutellaList = new FriendFileListAdapter();
-        friendList = new FriendFileListAdapter();
+//        friendList = new FriendFileListAdapter();
         libraryData = new LibraryDataAdapter();
         
         friendMap = new HashMap<String, LocalFileList>();
