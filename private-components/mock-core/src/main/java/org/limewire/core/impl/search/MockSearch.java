@@ -471,7 +471,7 @@ public class MockSearch implements Search {
         handleSearchResult(createAlbumTrack("Lightning Queen", "Rocket me to the moon", 591224));
         handleSearchResult(createAlbumTrack("Lightning Queen", "Gerry Me Ander", 5324));
         handleSearchResult(createAlbumTrack("Lightning Queen", "Smelly Shoes", 124));
-        handleSearchResult(createAlbumTrack("Chemical Attraction", "Business Casual"));
+        handleSearchResult(createAlbumTrack("Chemical Attraction", "Business Casual", 100));
         for(int albums = 0; albums < 2; albums++) { 
             String albumName = new String();
             for(int tracks = 0; tracks < 11; tracks++) {

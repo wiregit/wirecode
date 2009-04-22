@@ -59,9 +59,9 @@ public class MockDownloadListManager implements DownloadListManager {
         Category category = coreSearchResults.get(0).getCategory();
         final MockDownloadItem mdi;
         if(title.indexOf("Puffy") > -1 || title.indexOf("Cirrus") > -1) {
-            mdi = new MockDownloadItem(title, totalSize, DownloadState.ERROR, category);
-        } else if (title.indexOf("Cumulonimbus") > -1 || title.indexOf("Stratus") > -1) {
-            mdi = new MockDownloadItem(title, totalSize, DownloadState.REMOTE_QUEUED, category);            
+            mdi = new MockDownloadItem(title, totalSize, DownloadState.REMOTE_QUEUED, category);
+        } else if (title.indexOf("Cumulonimbus") > -1 || title.indexOf("Contrail") > -1 || title.indexOf("Altostratus") > -1 || title.indexOf("Nimbostratus") > -1 ){
+            mdi = new MockDownloadItem(title, totalSize, DownloadState.STALLED, category);            
         } else {
             mdi = new MockDownloadItem(title, totalSize, state, category);
         }
