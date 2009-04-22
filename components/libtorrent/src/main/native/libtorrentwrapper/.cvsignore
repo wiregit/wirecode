@@ -3,3 +3,5 @@ libtorrentwrapper.out
 a.out
 libtorrentwrapper.exe
 libtorrentwrapper.dll
+libtorrent-wrapper.so
+libtorrent-wrapper.out
