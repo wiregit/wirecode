@@ -20,11 +20,7 @@ public class LibTorrentWrapper implements LibTorrent {
             System.loadLibrary("boost_thread-mgw34-mt-1_36");
             System.loadLibrary("torrent");
         } else if(OSUtils.isLinux()) {
-           System.loadLibrary("boost_system-gcc42-mt-1_38");
-           System.loadLibrary("boost_date_time-gcc42-mt-1_38");
-           System.loadLibrary("boost_filesystem-gcc42-mt-1_38");
-           System.loadLibrary("boost_thread-gcc42-mt-1_38");
-           System.loadLibrary("torrent-0_14_2");
+           //compile into torrent-wrapper.so
         }
         
         //TODO make sure right libraries are loaded on linux too.
