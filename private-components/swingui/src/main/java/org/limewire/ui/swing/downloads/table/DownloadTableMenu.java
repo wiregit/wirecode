@@ -31,6 +31,8 @@ public class DownloadTableMenu extends JPopupMenu{
     private JMenuItem playMenuItem;
     private JMenuItem viewMenuItem;
     private JMenuItem cancelWithRemoveNameMenuItem;
+    private JMenuItem raisePriorityItem;
+    private JMenuItem lowerPriorityItem;
     
     private MenuListener menuListener;
     private DownloadActionHandler actionHandler;
@@ -104,6 +106,14 @@ public class DownloadTableMenu extends JPopupMenu{
         viewMenuItem = new JMenuItem(I18n.tr("View"));
         viewMenuItem.setActionCommand(DownloadActionHandler.LAUNCH_COMMAND);
         viewMenuItem.addActionListener(menuListener);
+        
+
+        raisePriorityItem = new JMenuItem(I18n.tr("Raise Priority"));
+        raisePriorityItem.addActionListener(menuListener);
+        
+
+        lowerPriorityItem = new JMenuItem(I18n.tr("LowerPriority"));
+        lowerPriorityItem.addActionListener(menuListener);
         
         update(table.getSelectedItems());
 
@@ -211,6 +221,12 @@ public class DownloadTableMenu extends JPopupMenu{
             add(new JSeparator());
             add(cancelMenuItem);
             break;
+        }
+        
+        if (state != DownloadState.DONE){
+            add(new JSeparator());
+            add(raisePriorityItem);
+            add(lowerPriorityItem);
         }
 
         add(new JSeparator());

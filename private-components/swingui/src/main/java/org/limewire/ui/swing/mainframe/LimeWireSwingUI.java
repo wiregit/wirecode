@@ -8,13 +8,11 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
@@ -23,8 +21,10 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.LimeSplitPane;
 import org.limewire.ui.swing.components.PanelResizer;
 import org.limewire.ui.swing.components.ShapeDialog;
+import org.limewire.ui.swing.downloads.DownloadHeaderFactory;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.nav.Navigator;
@@ -50,7 +50,7 @@ public class LimeWireSwingUI extends JPanel {
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel friendsPanel,
             AudioPlayer player, //DownloadSummaryPanel downloadSummaryPanel,
-            ShapeDialog shapeDialog, ProNagController proNagController, final MainDownloadPanel mainDownloadPanel) {
+            ShapeDialog shapeDialog, ProNagController proNagController, final MainDownloadPanel mainDownloadPanel, DownloadHeaderFactory downloadHeaderFactory) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;
@@ -60,7 +60,7 @@ public class LimeWireSwingUI extends JPanel {
     	
     	JPanel centerPanel = new JPanel(new GridBagLayout());
     	
-    	JSplitPane splitPane = createScrollPane(mainPanel, mainDownloadPanel, mainDownloadPanel.getHeader());
+    	JSplitPane splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderFactory.create());
     	mainDownloadPanel.setVisible(false);
 
         setLayout(new BorderLayout());
@@ -123,31 +123,20 @@ public class LimeWireSwingUI extends JPanel {
         topPanel.requestFocusInWindow();
     }
     
-    //TODO: make this a component
-    private JSplitPane createScrollPane(JComponent top, final JComponent bottom, JComponent divider){
-        final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
-        splitPane.setBorder(BorderFactory.createEmptyBorder());
-        final BasicSplitPaneUI splitUI = new BasicSplitPaneUI();        
-        splitPane.setUI(splitUI);
+   private JSplitPane createSplitPane(JComponent top, final JComponent bottom, JComponent divider) {
+        final LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
 
-        splitUI.getDivider().setBorder(BorderFactory.createEmptyBorder());
-        splitUI.getDivider().setLayout(new BorderLayout());
-        splitUI.getDivider().removeAll();
-        splitUI.getDivider().add(divider);   
-        
-        splitPane.setDividerSize(divider.getPreferredSize().height);
-
-        bottom.addComponentListener(new ComponentAdapter(){
+        bottom.addComponentListener(new ComponentAdapter() {
 
             @Override
             public void componentHidden(ComponentEvent e) {
-                splitUI.getDivider().setVisible(false);                
+                splitPane.getDivider().setVisible(false);
             }
 
             @Override
             public void componentShown(ComponentEvent e) {
-                splitUI.getDivider().setVisible(true);   
-                
+                splitPane.getDivider().setVisible(true);
+
                 bottom.setSize(bottom.getPreferredSize().width, 80);
                 splitPane.setDividerLocation(splitPane.getSize().height - splitPane.getInsets().bottom - splitPane.getDividerSize() - bottom.getHeight());
 
@@ -156,7 +145,7 @@ public class LimeWireSwingUI extends JPanel {
 
         top.setMinimumSize(new Dimension(0, 0));
         bottom.setMinimumSize(new Dimension(0, 0));
-        
+
         return splitPane;
     }
     
