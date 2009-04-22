@@ -74,6 +74,10 @@ public class FilterFactory implements Disposable {
      * filters are displayed.
      */
     public int getPropertyFilterMinimum(SearchCategory searchCategory) {
+        if (searchCategory == null) {
+            return -1;
+        }
+        
         switch (searchCategory) {
         case AUDIO:
             return 3;
