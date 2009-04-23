@@ -5,19 +5,25 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.listener.SourcedEventMulticasterFactory;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /** A collection of IncompleteFileDescs. */
+@Singleton
 class IncompleteFileCollectionImpl extends AbstractFileCollection implements IncompleteFileCollection {
     
     private LibraryImpl managedList;
 
-    public IncompleteFileCollectionImpl(LibraryImpl managedList) {
-        super(managedList);
+    @Inject
+    public IncompleteFileCollectionImpl(LibraryImpl managedList, 
+            @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory) {
+        super(managedList, multicasterFactory);
         this.managedList = managedList;
     }
 

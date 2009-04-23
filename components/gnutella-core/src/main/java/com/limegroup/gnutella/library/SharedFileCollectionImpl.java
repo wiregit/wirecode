@@ -8,11 +8,14 @@ import java.util.concurrent.Executor;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.Category;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -34,8 +37,11 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SmartFi
     private final Executor executor;
     private final HashTreeCache treeCache;
 
-    public SharedFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, String id, HashTreeCache treeCache) {
-        super(managedList);
+    @AssistedInject
+    public SharedFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, 
+                                    @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory,
+                                    @Assisted String id, HashTreeCache treeCache) {
+        super(managedList, multicasterFactory);
         this.collectionId = Objects.nonNull(id, "id");
         this.data = data;
         this.executor = ExecutorsHelper.newProcessingQueue("SharedCollectionAdder");

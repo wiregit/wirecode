@@ -5,11 +5,14 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SourcedEventMulticaster;
+import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.listener.SourcedEventMulticasterImpl;
 import org.limewire.listener.SourcedListenerSupport;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryProvider;
 
 
 public class LimeWireLibraryModule extends AbstractModule {
@@ -22,6 +25,14 @@ public class LimeWireLibraryModule extends AbstractModule {
         
         bind(FileManager.class).to(FileManagerImpl.class);
         bind(Library.class).to(LibraryImpl.class);
+        bind(GnutellaFileCollection.class).to(GnutellaFileCollectionImpl.class);
+        bind(IncompleteFileCollection.class).to(IncompleteFileCollectionImpl.class);        
+        bind(SharedFileCollectionImplFactory.class).toProvider(
+                FactoryProvider.newFactory(SharedFileCollectionImplFactory.class, SharedFileCollectionImpl.class));
+        
+        SourcedEventMulticaster<FileViewChangeEvent, FileView> allFileCollectionMulticaster =
+            new SourcedEventMulticasterImpl<FileViewChangeEvent, FileView>();
+        bind(new TypeLiteral<SourcedEventMulticasterFactory<FileViewChangeEvent, FileView>>(){}).annotatedWith(AllFileCollections.class).toInstance(allFileCollectionMulticaster);
         
         EventMulticaster<ManagedListStatusEvent> managedListMulticaster =
             new EventMulticasterImpl<ManagedListStatusEvent>();
@@ -38,6 +49,10 @@ public class LimeWireLibraryModule extends AbstractModule {
 
         bind(FileDescFactory.class).to(FileDescFactoryImpl.class);
         
+    }
+    
+    @Provides LibraryFileData libraryFileData(LibraryImpl library) {
+        return library.getLibraryData();
     }
 
 }

@@ -2,11 +2,12 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 
+import org.limewire.listener.SourcedEvent;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
 
-public class FileViewChangeEvent {
+public class FileViewChangeEvent implements SourcedEvent<FileView> {
     
     public static enum Type {
         ADDED, REMOVED, CHANGED, ADD_FAILED, CHANGE_FAILED, CLEAR, AUDIO_COLLECTION, VIDEO_COLLECTION, IMAGE_COLLECTION;
@@ -81,6 +82,11 @@ public class FileViewChangeEvent {
         this.isShared = state;
     }
     
+    @Override
+    public FileView getSource() {
+        return list;
+    }
+    
     public File getOldFile() {
         return oldFile;
     }
@@ -93,7 +99,7 @@ public class FileViewChangeEvent {
         return type;
     }
     
-    public FileCollection getList() {
+    public FileCollection getFileView() {
         return list;
     }
     

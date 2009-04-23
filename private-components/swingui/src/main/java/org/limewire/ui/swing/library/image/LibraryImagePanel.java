@@ -16,11 +16,11 @@ import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.common.Disposable;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
 import org.limewire.ui.swing.library.LibraryListSourceChanger;

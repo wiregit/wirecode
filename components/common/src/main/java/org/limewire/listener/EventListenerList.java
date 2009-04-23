@@ -31,21 +31,29 @@ import org.limewire.util.Objects;
  */
 public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaster<E> {
     
-    private final Log log;
-    
     private final List<ListenerProxy<E>> listenerList = new CopyOnWriteArrayList<ListenerProxy<E>>();
-    private final EventListenerListContext context = new EventListenerListContext();
+    private final Log log;
+    private final EventListenerListContext context;
 
     public EventListenerList() {
-        this.log = null;        
+        this(null, new EventListenerListContext());
     }
     
     public EventListenerList(Class loggerKey) {
-        this.log = LogFactory.getLog(loggerKey); 
+        this(LogFactory.getLog(loggerKey), new EventListenerListContext());
     }
     
     public EventListenerList(Log log) {
+        this(log, new EventListenerListContext());
+    }
+    
+    public EventListenerList(EventListenerListContext context) {
+        this(null, context);
+    }
+    
+    public EventListenerList(Log log, EventListenerListContext context) {
         this.log = log;
+        this.context = context;
     }
     
     /**

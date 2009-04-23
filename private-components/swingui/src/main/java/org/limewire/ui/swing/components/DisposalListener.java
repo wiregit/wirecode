@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.components;
 
+import org.limewire.common.Disposable;
+
 /**
  * Listens for the disposal of a DisposalListenerList
  *

@@ -3,8 +3,13 @@ package org.limewire.listener;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.limewire.listener.EventListenerList.EventListenerListContext;
+
 public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implements
         SourcedEventMulticaster<E, S> {
+    
+    /** The context all listeners will use. */
+    private final EventListenerListContext listenerContext;
 
     /** The list of listeners for every change event. */
     private final EventListenerList<E> listenersForAll;
@@ -13,8 +18,9 @@ public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implement
     private final Map<S, EventListenerList<E>> sourceListeners;
     
     public SourcedEventMulticasterImpl() {
-        listenersForAll = new EventListenerList<E>();
-        sourceListeners = new ConcurrentHashMap<S, EventListenerList<E>>();
+        this.listenerContext = new EventListenerListContext();
+        this.listenersForAll = new EventListenerList<E>(listenerContext);
+        this.sourceListeners = new ConcurrentHashMap<S, EventListenerList<E>>();
     }
     
     @Override
@@ -46,7 +52,7 @@ public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implement
         synchronized(sourceListeners) {
             EventListenerList<E> list = sourceListeners.get(source);
             if(list == null) {
-                list = new EventListenerList<E>();
+                list = new EventListenerList<E>(listenerContext);
                 sourceListeners.put(source, list);
             }
             list.addListener(listener);
@@ -82,6 +88,39 @@ public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implement
         synchronized(sourceListeners) {
             return sourceListeners.remove(source) != null;
         }
+    }
+    
+    
+    @Override
+    public DisposableEventMulticaster<E> createDisposableMulticaster(final S source) {
+        return new DisposableEventMulticaster<E>() {
+
+            @Override
+            public void addListener(EventListener<E> listener) {
+                SourcedEventMulticasterImpl.this.addListener(source, listener);
+            }
+
+            @Override
+            public boolean removeListener(EventListener<E> listener) {
+                return SourcedEventMulticasterImpl.this.removeListener(source, listener);
+            }
+
+            @Override
+            public void handleEvent(E event) {
+                SourcedEventMulticasterImpl.this.handleEvent(event);
+            }
+
+            @Override
+            public void broadcast(E event) {
+                SourcedEventMulticasterImpl.this.broadcast(event);
+            }
+
+            @Override
+            public void dispose() {
+                SourcedEventMulticasterImpl.this.removeListeners(source);
+            }
+            
+        };
     }
     
 }

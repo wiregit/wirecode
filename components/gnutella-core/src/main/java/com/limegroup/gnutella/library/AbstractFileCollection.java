@@ -19,9 +19,9 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.inspection.Inspectable;
+import org.limewire.listener.DisposableEventMulticaster;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventMulticaster;
-import org.limewire.listener.EventMulticasterImpl;
+import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
@@ -35,7 +35,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 abstract class AbstractFileCollection implements FileCollection, Inspectable {
 
     /**  A list of listeners for this list */
-    private final EventMulticaster<FileViewChangeEvent> listenerSupport;
+    private final DisposableEventMulticaster<FileViewChangeEvent> listenerSupport;
     
     /** All indexes this list is holding. */
     private final IntSet fileDescIndexes;
@@ -49,10 +49,11 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     /** A rw lock. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     
-    public AbstractFileCollection(LibraryImpl managedList) {
+    public AbstractFileCollection(LibraryImpl managedList,
+            SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory) {
         this.managedList = managedList;
         this.fileDescIndexes = new IntSet(); 
-        this.listenerSupport = new EventMulticasterImpl<FileViewChangeEvent>();
+        this.listenerSupport = multicasterFactory.createDisposableMulticaster(this);
         this.managedListListener = new ManagedListSynchronizer();
     }
     
@@ -351,7 +352,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
      * @param fileDesc that was added
      */
     protected void fireAddEvent(FileDesc fileDesc) {
-        listenerSupport.handleEvent(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.ADDED, fileDesc));
+        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.ADDED, fileDesc));
     }
     
     /**
@@ -359,7 +360,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
      * @param fileDesc that was removed
      */
     protected void fireRemoveEvent(FileDesc fileDesc) {
-        listenerSupport.handleEvent(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.REMOVED, fileDesc));
+        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.REMOVED, fileDesc));
     }
 
     /**
@@ -368,17 +369,17 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
      * @param newFileDesc FileDesc that replaced oldFileDesc
      */
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        listenerSupport.handleEvent(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.CHANGED, oldFileDesc, newFileDesc));
+        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.CHANGED, oldFileDesc, newFileDesc));
     }
     
     /** Fires a clear event to all listeners. */
     protected void fireClearEvent() {
-        listenerSupport.handleEvent(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.CLEAR));
+        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.CLEAR));
     }
     
     /** Fires an event when the state of a shared collection changes*/
     protected void fireCollectionEvent(FileViewChangeEvent.Type type, boolean value) {
-        listenerSupport.handleEvent(new FileViewChangeEvent(type, value));
+        listenerSupport.broadcast(new FileViewChangeEvent(type, value));
     }
     
     /**
@@ -425,6 +426,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
 
     public void dispose() {
         managedList.removeFileViewListener(managedListListener);
+        listenerSupport.dispose();
     }
     
     /**

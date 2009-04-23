@@ -25,7 +25,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /**
  * The list of all known files. This creates and maintains a list of 
@@ -40,12 +39,19 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 class FileManagerImpl implements FileManager, Service {
     
     private final LibraryImpl managedFileList;
+    
     @InspectionPoint("gnutella shared file list")
-    private final GnutellaCollectionImpl gnutellaCollection;
+    private final GnutellaFileCollectionImpl gnutellaCollection;
+    
     @InspectionPoint("incomplete file list")
-    private final IncompleteFileCollectionImpl incompleteCollection;    
+    private final IncompleteFileCollectionImpl incompleteCollection;
+    
+    private final SharedFileCollectionImplFactory sharedFileCollectionImplFactory;
+    
     private final GnutellaFileView gnutellaFileView;
-    private final Map<String, SharedFileCollectionImpl> sharedCollections = new TreeMap<String,SharedFileCollectionImpl>(String.CASE_INSENSITIVE_ORDER);
+    
+    private final Map<String, SharedFileCollectionImpl> sharedCollections =
+        new TreeMap<String,SharedFileCollectionImpl>(String.CASE_INSENSITIVE_ORDER);
     
     private Saver saver;
     
@@ -56,22 +62,25 @@ class FileManagerImpl implements FileManager, Service {
     
     /** The background executor. */
     private final ScheduledExecutorService backgroundExecutor;
-    
-    /** The treeCache. */
-    private final HashTreeCache treeCache;
 
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
     @Inject
-    public FileManagerImpl(LibraryImpl managedFileList, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, HashTreeCache treeCache) {
+    public FileManagerImpl(LibraryImpl managedFileList,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            GnutellaFileCollectionImpl gnutellaCollectionImpl,
+            IncompleteFileCollectionImpl incompleteFileCollectionImpl,
+            SharedFileCollectionImplFactory sharedFileCollectionImplFactory) {
+        
         this.backgroundExecutor = backgroundExecutor;
-        this.treeCache = treeCache;
         this.managedFileList = managedFileList;
-        this.gnutellaCollection = new GnutellaCollectionImpl(managedFileList.getLibraryData(), managedFileList, treeCache);
+        this.gnutellaCollection = gnutellaCollectionImpl;
         this.gnutellaCollection.initialize();
-        this.incompleteCollection = new IncompleteFileCollectionImpl(managedFileList);
+        this.incompleteCollection = incompleteFileCollectionImpl;
         this.incompleteCollection.initialize();
+        this.sharedFileCollectionImplFactory = sharedFileCollectionImplFactory;
+        
         this.gnutellaFileView = new GnutellaFileViewImpl(gnutellaCollection);
     }
 
@@ -145,7 +154,7 @@ class FileManagerImpl implements FileManager, Service {
         SharedFileCollectionImpl fileList = sharedCollections.get(name);
         if(fileList == null) {
             LibrarySettings.addFriendListName(name);
-            fileList = new SharedFileCollectionImpl(managedFileList.getLibraryData(), managedFileList, name, treeCache);
+            fileList = sharedFileCollectionImplFactory.createSharedFileCollectionImpl(name);
             fileList.initialize();
             sharedCollections.put(name, fileList);
         }

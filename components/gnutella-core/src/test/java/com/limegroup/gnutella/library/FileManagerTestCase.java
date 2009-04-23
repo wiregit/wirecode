@@ -209,7 +209,7 @@ public class FileManagerTestCase extends LimeTestCase {
         public void handleEvent(FileViewChangeEvent fme) {
             evt = fme;
             latch.countDown();
-            fme.getList().removeFileViewListener(this);
+            fme.getFileView().removeFileViewListener(this);
         }
         
         void await(long timeout) throws Exception {

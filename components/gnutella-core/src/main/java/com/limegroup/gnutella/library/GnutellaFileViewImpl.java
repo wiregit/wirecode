@@ -11,9 +11,9 @@ import com.limegroup.gnutella.URN;
 
 class GnutellaFileViewImpl implements GnutellaFileView {
     
-    private final GnutellaCollectionImpl gnutellaCollection;
+    private final GnutellaFileCollectionImpl gnutellaCollection;
     
-    public GnutellaFileViewImpl(GnutellaCollectionImpl gnutCollection) {
+    public GnutellaFileViewImpl(GnutellaFileCollectionImpl gnutCollection) {
         this.gnutellaCollection = gnutCollection;
     }
 

@@ -11,14 +11,17 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.inspection.InspectionHistogram;
+import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-
-class GnutellaCollectionImpl extends SharedFileCollectionImpl implements GnutellaFileCollection {
+@Singleton
+class GnutellaFileCollectionImpl extends SharedFileCollectionImpl implements GnutellaFileCollection {
     
     /** Size of all the FileDescs in this list in bytes */
     private final AtomicLong numBytes;
@@ -34,8 +37,11 @@ class GnutellaCollectionImpl extends SharedFileCollectionImpl implements Gnutell
     
     private final InspectionHistogram<String> addedFilesByType = new InspectionHistogram<String>();
     
-    public GnutellaCollectionImpl(LibraryFileData data, LibraryImpl managedList, HashTreeCache treeCache) {
-        super(data, managedList, Friend.P2P_FRIEND_ID, treeCache); // @'s added to avoid clashes with xmpp ids.
+    @Inject
+    public GnutellaFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, 
+                                  @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory,
+                                  HashTreeCache treeCache) {
+        super(data, managedList, multicasterFactory, Friend.P2P_FRIEND_ID, treeCache);
         this.numBytes = new AtomicLong();
     }
     
