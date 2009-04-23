@@ -18,7 +18,7 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
-class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileCollection {
+class GnutellaCollectionImpl extends SharedFileCollectionImpl implements GnutellaFileCollection {
     
     /** Size of all the FileDescs in this list in bytes */
     private final AtomicLong numBytes;
@@ -34,7 +34,7 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileCol
     
     private final InspectionHistogram<String> addedFilesByType = new InspectionHistogram<String>();
     
-    public GnutellaFileListImpl(LibraryFileData data, LibraryImpl managedList, HashTreeCache treeCache) {
+    public GnutellaCollectionImpl(LibraryFileData data, LibraryImpl managedList, HashTreeCache treeCache) {
         super(data, managedList, Friend.P2P_FRIEND_ID, treeCache); // @'s added to avoid clashes with xmpp ids.
         this.numBytes = new AtomicLong();
     }
@@ -83,7 +83,7 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileCol
             if(LibraryUtils.isApplicationSpecialShare(fileDesc.getFile())) {
                 applicationShared.incrementAndGet();
             }
-            fileDesc.setSharedWithGnutella(true);
+            fileDesc.setInGnutellaCollection(true);
             return true;
         } else {
             return false;
@@ -98,7 +98,7 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileCol
             if(LibraryUtils.isApplicationSpecialShare(fileDesc.getFile())) {
                 applicationShared.decrementAndGet();
             }
-            fileDesc.setSharedWithGnutella(false);
+            fileDesc.setInGnutellaCollection(false);
             return true;
         } else {
             return false;

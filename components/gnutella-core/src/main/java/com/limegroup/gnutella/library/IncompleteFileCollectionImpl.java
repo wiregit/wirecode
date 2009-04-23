@@ -12,11 +12,11 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /** A collection of IncompleteFileDescs. */
-class IncompleteFileListImpl extends AbstractFileCollection implements IncompleteFileList {
+class IncompleteFileCollectionImpl extends AbstractFileCollection implements IncompleteFileCollection {
     
     private LibraryImpl managedList;
 
-    public IncompleteFileListImpl(LibraryImpl managedList) {
+    public IncompleteFileCollectionImpl(LibraryImpl managedList) {
         super(managedList);
         this.managedList = managedList;
     }

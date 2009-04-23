@@ -9,13 +9,13 @@ import org.limewire.collection.IntSet.IntSetIterator;
 /**
  * This class assumes that a lock is held on the FileList being iterated.
  */
-class FileListIterator implements Iterator<FileDesc> {
+class FileViewIterator implements Iterator<FileDesc> {
     
     private final FileCollection fileList;
     private final IntSetIterator iter;
     private FileDesc preview;
     
-    public FileListIterator(FileCollection fileList, IntSet intSet) {
+    public FileViewIterator(FileCollection fileList, IntSet intSet) {
         this.fileList = fileList;
         this.iter = intSet.iterator();
     }

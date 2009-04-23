@@ -11,7 +11,7 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 import ca.odell.glazedlists.EventList;
 
 import com.limegroup.gnutella.library.SharedFileCollection;
-import com.limegroup.gnutella.library.FileListChangedEvent.Type;
+import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 
 abstract class AbstractFriendFileList extends LocalFileListImpl implements FriendFileList {
 

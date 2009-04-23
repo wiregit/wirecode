@@ -603,7 +603,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             if (isHopeless(next))
                 continue; 
             
-            if(downloadManager.get().isSavedDownloadsLoaded() && fileManager.get().getManagedFileList().isLoadFinished()) {
+            if(downloadManager.get().isSavedDownloadsLoaded() && fileManager.get().getLibrary().isLoadFinished()) {
                 
                 //TODO: remove the cast
                 ManagedDownloader md = (ManagedDownloader)downloadManager.get().getDownloaderForURN(next.getUpdateURN());
@@ -644,7 +644,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
      * Deletes any files in the folder that are not listed in the update message.
      */
     private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
-    	if (!downloadManager.get().isSavedDownloadsLoaded() || !fileManager.get().getManagedFileList().isLoadFinished())
+    	if (!downloadManager.get().isSavedDownloadsLoaded() || !fileManager.get().getLibrary().isLoadFinished())
     		return;
     	
         if (_killingObsoleteNecessary) {
@@ -655,10 +655,10 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            List<FileDesc> shared = fileManager.get().getGnutellaFileList().getFilesInDirectory(LibraryUtils.PREFERENCE_SHARE);
+            List<FileDesc> shared = fileManager.get().getGnutellaFileView().getFilesInDirectory(LibraryUtils.PREFERENCE_SHARE);
             for (FileDesc fd : shared) {
                 if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
-                    fileManager.get().getManagedFileList().remove(fd.getFile());
+                    fileManager.get().getLibrary().remove(fd.getFile());
                     fd.getFile().delete();
                 }
             }
@@ -816,7 +816,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
      * there was nothing to download
      */
     private boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
-        if (!fileManager.get().getManagedFileList().isLoadFinished())
+        if (!fileManager.get().getLibrary().isLoadFinished())
             return false;
         
         URN myUrn = myInfo.getUpdateURN();
@@ -827,7 +827,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     }
     
     private boolean hasCompleteFile(URN urn) {
-        List<FileDesc> fds = fileManager.get().getManagedFileList().getFileDescsMatching(urn);
+        List<FileDesc> fds = fileManager.get().getLibrary().getFileDescsMatching(urn);
         for(FileDesc fd : fds) {
             if(!(fd instanceof IncompleteFileDesc)) {
                 return true;

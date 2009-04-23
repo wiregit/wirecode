@@ -19,7 +19,7 @@ import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.Library;
-import com.limegroup.gnutella.library.FileListChangedEvent.Type;
+import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 
 class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     private final Library managedList;
@@ -29,7 +29,7 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     LibraryFileListImpl(Library managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
         super(new BasicEventList<LocalFileItem>(), coreLocalFileItemFactory);
         this.managedList = managedList;
-        this.managedList.addFileListListener(newEventListener());
+        this.managedList.addFileViewListener(newEventListener());
         this.managedList.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {

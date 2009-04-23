@@ -12,9 +12,9 @@ import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.uploader.authentication.HttpRequestFileViewProvider;
 
 /**
  * Provides methods for parsing Gnutella request URIs.
@@ -38,7 +38,7 @@ class FileRequestParser {
      * @throws IOException thrown if the request is malformed
      * @throws HttpException 
      */
-    public static FileRequest parseRequest(HttpRequestFileListProvider fileListProvider, final String uri,
+    public static FileRequest parseRequest(HttpRequestFileViewProvider fileListProvider, final String uri,
             HttpContext context) throws IOException, com.limegroup.gnutella.uploader.HttpException {
         
         // Only parse URI requests.
@@ -64,7 +64,7 @@ class FileRequestParser {
         }
     
         FileDesc desc = null;
-        for (FileCollection fileList : fileListProvider.getFileLists(index == 0 ? null : parseFriendId(uri.substring(0, index)), context)) {
+        for (FileView fileList : fileListProvider.getFileViews(index == 0 ? null : parseFriendId(uri.substring(0, index)), context)) {
             desc = fileList.getFileDesc(urn);
             if (desc != null) {
                 break;

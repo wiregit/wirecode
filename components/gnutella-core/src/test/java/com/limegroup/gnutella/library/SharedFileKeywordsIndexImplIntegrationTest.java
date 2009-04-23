@@ -39,8 +39,8 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
-        fileList = injector.getInstance(FileManager.class).getGnutellaFileList();
-        managedList = injector.getInstance(FileManager.class).getManagedFileList();
+        fileList = injector.getInstance(FileManager.class).getGnutellaCollection();
+        managedList = injector.getInstance(FileManager.class).getLibrary();
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         injector.getInstance(ServiceRegistry.class).initialize();

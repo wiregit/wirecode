@@ -462,35 +462,35 @@ public class FileDescImpl implements FileDesc {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#incrementShareListCount()
      */
-    public void incrementShareListCount() {
+    public void incrementSharedCollectionCount() {
         shareListCount.incrementAndGet();
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#decrementShareListCount()
      */
-    public void decrementShareListCount() {
+    public void decrementSharedCollectionCount() {
         shareListCount.decrementAndGet();
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#getShareListCount()
      */
-    public int getShareListCount() {
+    public int getSharedCollectionCount() {
         return shareListCount.get();
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#setSharedWithGnutella(boolean)
      */
-    public void setSharedWithGnutella(boolean b) {
+    public void setInGnutellaCollection(boolean b) {
         sharedInGnutella.set(b);
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#isSharedWithGnutella()
      */
-    public boolean isSharedWithGnutella() {
+    public boolean isInGnutellaCollection() {
         return sharedInGnutella.get();
     }
 

@@ -15,7 +15,7 @@ public class CoreGlueXMPPService implements Service {
 
     private final Provider<HTTPAcceptor> httpAcceptor;
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
-    private final Provider<FriendFileListProvider> authenticatingBrowseFriendListProvider;
+    private final Provider<FileViewProvider> authenticatingBrowseFriendListProvider;
     
     final static String FRIEND_BROWSE_PREFIX = "/friend/browse/";
     final static String FRIEND_DOWNLOAD_PREFIX = "/friend/download/";
@@ -25,7 +25,7 @@ public class CoreGlueXMPPService implements Service {
 
     @Inject
     public CoreGlueXMPPService(Provider<HTTPAcceptor> httpAcceptor, HttpRequestHandlerFactory httpRequestHandlerFactory,
-           Provider<FriendFileListProvider> authenticatingBrowseFriendListProvider) {
+           Provider<FileViewProvider> authenticatingBrowseFriendListProvider) {
         this.httpAcceptor = httpAcceptor;
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.authenticatingBrowseFriendListProvider = authenticatingBrowseFriendListProvider;

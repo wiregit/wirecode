@@ -1196,7 +1196,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         addAlternateLocationsToFiles();
         
         boolean checked = false;
-        for(FileDesc fd : fileManager.getGnutellaFileList()) {
+        for(FileDesc fd : fileManager.getGnutellaFileView()) {
 			Response testResponse = responseFactory.createResponse(fd);
 
             String name = fd.getFileName();
@@ -1259,7 +1259,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         addFilesToLibrary();
         addCreationTimeToFiles();
         boolean checked = false;
-        for(FileDesc fd : fileManager.getGnutellaFileList()) {
+        for(FileDesc fd : fileManager.getGnutellaFileView()) {
 			long expectTime = (fd.getIndex() + 1) * 10013;
 			Response testResponse = responseFactory.createResponse(fd);
 			assertEquals(fd.toString(), expectTime, testResponse.getCreateTime());
@@ -1501,17 +1501,17 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
 
         FileManagerTestUtils.waitForLoad(fileManager, 5000);
         for(File file : testFiles) {
-            fileManager.getGnutellaFileList().add(file).get(1, TimeUnit.SECONDS);
+            fileManager.getGnutellaCollection().add(file).get(1, TimeUnit.SECONDS);
         }
 
-        assertEquals("unexpected number of shared files", testFiles.length, fileManager.getGnutellaFileList().size());
+        assertEquals("unexpected number of shared files", testFiles.length, fileManager.getGnutellaCollection().size());
     }
     
     private void addAlternateLocationsToFiles() throws Exception {
         AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
         AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
-        for(FileDesc fd : fileManager.getGnutellaFileList()) {
+        for(FileDesc fd : fileManager.getGnutellaFileView()) {
             URN urn = fd.getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
                 altLocManager.add(alternateLocationFactory.create("1.2.3." + j, urn), null);
@@ -1522,7 +1522,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
     private void addCreationTimeToFiles() throws Exception {
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
-        for(FileDesc fd : fileManager.getGnutellaFileList()) {
+        for(FileDesc fd : fileManager.getGnutellaFileView()) {
             long time = (fd.getIndex() + 1) * 10013;
             creationTimeCache.addTime(fd.getSHA1Urn(), time);
             creationTimeCache.commitTime(fd.getSHA1Urn());

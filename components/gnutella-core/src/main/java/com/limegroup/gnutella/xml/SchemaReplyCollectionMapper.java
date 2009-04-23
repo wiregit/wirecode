@@ -17,7 +17,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescChangeEvent;
-import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
 
@@ -97,9 +97,9 @@ public class SchemaReplyCollectionMapper {
                     }
                 });
                 
-                managedList.addFileListListener(new EventListener<FileListChangedEvent>() {
+                managedList.addFileViewListener(new EventListener<FileViewChangeEvent>() {
                     @Override
-                    public void handleEvent(FileListChangedEvent event) {
+                    public void handleEvent(FileViewChangeEvent event) {
                         switch(event.getType()) {
                         case REMOVED:
                             removeFileDesc(event.getFileDesc());

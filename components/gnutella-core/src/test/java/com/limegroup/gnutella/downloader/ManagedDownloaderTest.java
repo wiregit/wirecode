@@ -164,14 +164,14 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	URN partialURN = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
         
     	IncompleteFileDescStub partialDesc = new IncompleteFileDescStub("incomplete",partialURN,3);
-    	fileManager.getIncompleteFileList().add(partialDesc);
+    	fileManager.getIncompleteFileCollection().add(partialDesc);
     	
     	// then create an rfd from a firewalled host
     	RemoteFileDesc rfd = newPushRFD("incomplete","urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE",GUID.makeGuid());
     	
     	//test that currently we have no altlocs for the incomplete file
     	
-    	FileDesc test = fileManager.getIncompleteFileList().getFileDesc(partialURN);
+    	FileDesc test = fileManager.getIncompleteFileCollection().getFileDesc(partialURN);
     	assertNotNull(test);
     	AltLocManager altLocManager = injector.getInstance(AltLocManager.class);    	
     	assertEquals(0, altLocManager.getNumLocs(test.getSHA1Urn()));

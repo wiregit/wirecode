@@ -72,10 +72,10 @@ public class CreationTimeCacheTest extends LimeTestCase {
         fd2 = new FileDescStub("middle1", hash2, 1);
         fd3 = new FileDescStub("middle2", hash3, 2);
         fd4 = new FileDescStub("young", hash4, 3);
-        fileManager.getGnutellaFileList().add(fd1);
-        fileManager.getGnutellaFileList().add(fd2);
-        fileManager.getGnutellaFileList().add(fd3);
-        fileManager.getGnutellaFileList().add(fd4);
+        fileManager.getGnutellaCollection().add(fd1);
+        fileManager.getGnutellaCollection().add(fd2);
+        fileManager.getGnutellaCollection().add(fd3);
+        fileManager.getGnutellaCollection().add(fd4);
     }
 
     ///////////////////////// Actual Tests ////////////////////////////
@@ -274,7 +274,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
         // should have two values but exclude one
         // ---------------------------
-        fileManager.getGnutellaFileList().remove(fd4);
+        fileManager.getGnutellaCollection().remove(fd4);
         ctCache = new CreationTimeCache(fileManager); // test the deserialization.
         iter = ctCache.getFiles().iterator();
         assertEquals(hash2, iter.next());

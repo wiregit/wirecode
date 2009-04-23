@@ -19,11 +19,11 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 
 /**
- * A collection of FileDescs containing files shared with an individual friend.
+ * A collection of FileDescs containing files that may be shared with one or more people.
  */
-class FriendFileListImpl extends AbstractFileCollection implements SmartFileCollection, SharedFileCollection {
+class SharedFileCollectionImpl extends AbstractFileCollection implements SmartFileCollection, SharedFileCollection {
     
-    private final String id;
+    private final String collectionId;
     
     private volatile boolean addNewImagesAlways = false;
     private volatile boolean addNewAudioAlways = false;
@@ -34,11 +34,11 @@ class FriendFileListImpl extends AbstractFileCollection implements SmartFileColl
     private final Executor executor;
     private final HashTreeCache treeCache;
 
-    public FriendFileListImpl(LibraryFileData data, LibraryImpl managedList, String id, HashTreeCache treeCache) {
+    public SharedFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, String id, HashTreeCache treeCache) {
         super(managedList);
-        this.id = Objects.nonNull(id, "id");
+        this.collectionId = Objects.nonNull(id, "id");
         this.data = data;
-        this.executor = ExecutorsHelper.newProcessingQueue("FriendListAdder");
+        this.executor = ExecutorsHelper.newProcessingQueue("SharedCollectionAdder");
         this.treeCache = treeCache;
         
         addNewAudioAlways = LibrarySettings.containsFriendShareNewAudio(id);
@@ -117,7 +117,7 @@ class FriendFileListImpl extends AbstractFileCollection implements SmartFileColl
         getReadLock().lock();
         try {
             for (FileDesc fd : this) {
-                fd.decrementShareListCount();
+                fd.decrementSharedCollectionCount();
             }
         } finally {
             getReadLock().unlock();
@@ -151,11 +151,11 @@ class FriendFileListImpl extends AbstractFileCollection implements SmartFileColl
     public void setAddNewImageAlways(boolean value) {
         if(value != addNewImagesAlways) {
             if(value == false) {
-                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS, id);
+                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS, collectionId);
             } else {
-                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS, id);
+                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS, collectionId);
             }
-            fireCollectionEvent(FileListChangedEvent.Type.IMAGE_COLLECTION, value);
+            fireCollectionEvent(FileViewChangeEvent.Type.IMAGE_COLLECTION, value);
             addNewImagesAlways = value;
             if(addNewImagesAlways) {
                 executor.execute(new AddCategory(Category.IMAGE));
@@ -170,7 +170,7 @@ class FriendFileListImpl extends AbstractFileCollection implements SmartFileColl
                 List<FileDesc> fdList = new ArrayList<FileDesc>(size());
                 getReadLock().lock();
                 try {
-                    for(FileDesc fd : FriendFileListImpl.this) {
+                    for(FileDesc fd : SharedFileCollectionImpl.this) {
                         if(CategoryConverter.categoryForFile(fd.getFile()) == category) {
                             fdList.add(fd);
                         }
@@ -255,11 +255,11 @@ class FriendFileListImpl extends AbstractFileCollection implements SmartFileColl
     public void setAddNewAudioAlways(boolean value) {
         if(value != addNewAudioAlways) {
             if(value == false) {
-                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS, id);
+                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS, collectionId);
             } else {
-                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS, id);
+                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS, collectionId);
             }
-            fireCollectionEvent(FileListChangedEvent.Type.AUDIO_COLLECTION, value);
+            fireCollectionEvent(FileViewChangeEvent.Type.AUDIO_COLLECTION, value);
             addNewAudioAlways = value;
             if(addNewAudioAlways) {
                 executor.execute(new AddCategory(Category.AUDIO));
@@ -285,11 +285,11 @@ class FriendFileListImpl extends AbstractFileCollection implements SmartFileColl
     public void setAddNewVideoAlways(boolean value) {
         if(value != addNewVideoAlways) {
             if(value == false) {
-                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS, id);
+                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS, collectionId);
             } else {
-                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS, id);
+                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS, collectionId);
             }
-            fireCollectionEvent(FileListChangedEvent.Type.VIDEO_COLLECTION, value);
+            fireCollectionEvent(FileViewChangeEvent.Type.VIDEO_COLLECTION, value);
             addNewVideoAlways = value;
             if(addNewVideoAlways) {
                 executor.execute(new AddCategory(Category.VIDEO));
@@ -307,12 +307,12 @@ class FriendFileListImpl extends AbstractFileCollection implements SmartFileColl
     
     @Override
     protected boolean isPending(File file, FileDesc fd) {
-        return isSmartlySharedType(file) || data.isSharedWithFriend(file, id);
+        return isSmartlySharedType(file) || data.isSharedWithFriend(file, collectionId);
     }
     
     @Override
     protected void saveChange(File file, boolean added) {
-        data.setSharedWithFriend(file, id, added);      
+        data.setSharedWithFriend(file, collectionId, added);      
     }
     
     @Override
@@ -365,20 +365,20 @@ class FriendFileListImpl extends AbstractFileCollection implements SmartFileColl
     
     @Override
     protected void fireAddEvent(FileDesc fileDesc) {
-        fileDesc.incrementShareListCount();
+        fileDesc.incrementSharedCollectionCount();
         super.fireAddEvent(fileDesc);
     }
 
     @Override
     protected void fireRemoveEvent(FileDesc fileDesc) {
-        fileDesc.decrementShareListCount();
+        fileDesc.decrementSharedCollectionCount();
         super.fireRemoveEvent(fileDesc);
     }
 
     @Override
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        oldFileDesc.decrementShareListCount();
-        newFileDesc.incrementShareListCount();
+        oldFileDesc.decrementSharedCollectionCount();
+        newFileDesc.incrementSharedCollectionCount();
         super.fireChangeEvent(oldFileDesc, newFileDesc);
     }
 }

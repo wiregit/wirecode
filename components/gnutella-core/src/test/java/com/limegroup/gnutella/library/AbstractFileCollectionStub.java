@@ -15,18 +15,18 @@ import org.limewire.listener.EventListenerList;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public class AbstractFileListStub implements FileCollection {
+public class AbstractFileCollectionStub implements FileCollection {
 
     private final Lock lock = new ReentrantLock();
     protected final List<FileDesc> fileDescList = new CopyOnWriteArrayList<FileDesc>();
     
-    private final EventListenerList<FileListChangedEvent> listeners
-        = new EventListenerList<FileListChangedEvent>();
+    private final EventListenerList<FileViewChangeEvent> listeners
+        = new EventListenerList<FileViewChangeEvent>();
     
     public boolean add(FileDesc fileDesc) {
         boolean added = fileDescList.add(fileDesc);
         if(added) {
-            listeners.broadcast(new FileListChangedEvent(this, FileListChangedEvent.Type.ADDED, fileDesc));
+            listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.ADDED, fileDesc));
         }
         return added;
     }
@@ -42,7 +42,7 @@ public class AbstractFileListStub implements FileCollection {
     }
     
     @Override
-    public void addFileListListener(EventListener<FileListChangedEvent> listener) {
+    public void addFileViewListener(EventListener<FileViewChangeEvent> listener) {
         listeners.addListener(listener);
     }
     
@@ -54,7 +54,7 @@ public class AbstractFileListStub implements FileCollection {
     @Override
     public void clear() {
         fileDescList.clear();
-        listeners.broadcast(new FileListChangedEvent(this, FileListChangedEvent.Type.CLEAR));
+        listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.CLEAR));
     }
     
     @Override
@@ -156,13 +156,13 @@ public class AbstractFileListStub implements FileCollection {
     public boolean remove(FileDesc fileDesc) {
         boolean removed = fileDescList.remove(fileDesc);
         if(removed) {
-            listeners.broadcast(new FileListChangedEvent(this, FileListChangedEvent.Type.REMOVED, fileDesc));
+            listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.REMOVED, fileDesc));
         }
         return removed;
     }
     
     @Override
-    public void removeFileListListener(EventListener<FileListChangedEvent> listener) {
+    public void removeFileViewListener(EventListener<FileViewChangeEvent> listener) {
         listeners.removeListener(listener);
     }
     

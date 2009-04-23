@@ -169,7 +169,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         BlockingConnectionUtils.drain(testUP[0]);
 
         // make sure leaf is sharing
-        assertEquals(2, fileManager.getGnutellaFileList().size());
+        assertEquals(2, fileManager.getGnutellaFileView().size());
         assertEquals(1, connectionManager.getNumConnections());
 
         // send a query that should be answered

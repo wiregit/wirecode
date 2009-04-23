@@ -40,7 +40,7 @@ import com.limegroup.gnutella.auth.StubContentResponseObserver;
 import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 
-public class GnutellaFileListImplTest extends LimeTestCase {
+public class GnutellaFileCollectionImplTest extends LimeTestCase {
 
     private LibraryImpl managedList;
     private GnutellaFileCollection fileList;
@@ -50,19 +50,19 @@ public class GnutellaFileListImplTest extends LimeTestCase {
     private File f1, f2, f3, f4, f5;
     private List<FileDesc> sharedFiles;
 
-    public GnutellaFileListImplTest(String name) {
+    public GnutellaFileCollectionImplTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(GnutellaFileListImplTest.class);
+        return buildTestSuite(GnutellaFileCollectionImplTest.class);
     }
 
     @Override
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
-        managedList = (LibraryImpl)injector.getInstance(FileManager.class).getManagedFileList();
-        fileList = injector.getInstance(FileManager.class).getGnutellaFileList();
+        managedList = (LibraryImpl)injector.getInstance(FileManager.class).getLibrary();
+        fileList = injector.getInstance(FileManager.class).getGnutellaCollection();
         urnValidator = injector.getInstance(UrnValidator.class);
         injector.getInstance(ServiceRegistry.class).initialize();
     }

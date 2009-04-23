@@ -41,10 +41,11 @@ class FileManagerImpl implements FileManager, Service {
     
     private final LibraryImpl managedFileList;
     @InspectionPoint("gnutella shared file list")
-    private final GnutellaFileListImpl sharedFileList;
+    private final GnutellaCollectionImpl gnutellaCollection;
     @InspectionPoint("incomplete file list")
-    private final IncompleteFileListImpl incompleteFileList;
-    private final Map<String, FriendFileListImpl> friendFileLists = new TreeMap<String,FriendFileListImpl>(String.CASE_INSENSITIVE_ORDER);
+    private final IncompleteFileCollectionImpl incompleteCollection;    
+    private final GnutellaFileView gnutellaFileView;
+    private final Map<String, SharedFileCollectionImpl> sharedCollections = new TreeMap<String,SharedFileCollectionImpl>(String.CASE_INSENSITIVE_ORDER);
     
     private Saver saver;
     
@@ -67,10 +68,11 @@ class FileManagerImpl implements FileManager, Service {
         this.backgroundExecutor = backgroundExecutor;
         this.treeCache = treeCache;
         this.managedFileList = managedFileList;
-        this.sharedFileList = new GnutellaFileListImpl(managedFileList.getLibraryData(), managedFileList, treeCache);
-        this.sharedFileList.initialize();
-        this.incompleteFileList = new IncompleteFileListImpl(managedFileList);
-        this.incompleteFileList.initialize();
+        this.gnutellaCollection = new GnutellaCollectionImpl(managedFileList.getLibraryData(), managedFileList, treeCache);
+        this.gnutellaCollection.initialize();
+        this.incompleteCollection = new IncompleteFileCollectionImpl(managedFileList);
+        this.incompleteCollection.initialize();
+        this.gnutellaFileView = new GnutellaFileViewImpl(gnutellaCollection);
     }
 
     @Override
@@ -111,66 +113,75 @@ class FileManagerImpl implements FileManager, Service {
     public void stop() {
         managedFileList.save();
         shutdown = true;
-    }
-    
+    }    
     
     @Override
-    public Library getManagedFileList() {
+    public Library getLibrary() {
         return managedFileList;
     }
 
     @Override
-    public GnutellaFileCollection getGnutellaFileList() {
-        return sharedFileList;
+    public GnutellaFileCollection getGnutellaCollection() {
+        return gnutellaCollection;
     }    
     
     @Override
-    public synchronized SharedFileCollection getFriendFileList(String name) {
-        return friendFileLists.get(name);
+    public synchronized SharedFileCollection getSharedCollection(String name) {
+        return sharedCollections.get(name);
+    }
+    
+    @Override
+    public synchronized FileView getFileViewForId(String friendId) {
+        return sharedCollections.get(friendId);
+    }
+    
+    @Override
+    public GnutellaFileView getGnutellaFileView() {
+        return gnutellaFileView;
     }
 
     @Override
-    public synchronized SharedFileCollection getOrCreateFriendFileList(String name) {
-        FriendFileListImpl fileList = friendFileLists.get(name);
+    public synchronized SharedFileCollection getOrCreateSharedCollection(String name) {
+        SharedFileCollectionImpl fileList = sharedCollections.get(name);
         if(fileList == null) {
             LibrarySettings.addFriendListName(name);
-            fileList = new FriendFileListImpl(managedFileList.getLibraryData(), managedFileList, name, treeCache);
+            fileList = new SharedFileCollectionImpl(managedFileList.getLibraryData(), managedFileList, name, treeCache);
             fileList.initialize();
-            friendFileLists.put(name, fileList);
+            sharedCollections.put(name, fileList);
         }
         return fileList;
     }
 
     @Override
-    public synchronized void removeFriendFileList(String name) {
+    public synchronized void removeSharedCollection(String name) {
         // if it was a valid key, remove saved references to it
-        FriendFileListImpl removeFileList = friendFileLists.get(name);
+        SharedFileCollectionImpl removeFileList = sharedCollections.get(name);
         if(removeFileList != null) {
             removeFileList.dispose();
-            friendFileLists.remove(name);
+            sharedCollections.remove(name);
             LibrarySettings.removeFriendListName(name);
         }
     }
 
 
     public void unloadFilesForFriend(String friendName) {
-        FriendFileListImpl removeFileList = null;
+        SharedFileCollectionImpl removeFileList = null;
 
         synchronized (this) {
-            removeFileList = friendFileLists.get(friendName);
+            removeFileList = sharedCollections.get(friendName);
 
             if (removeFileList == null) {
                 return;
             }
-            friendFileLists.remove(friendName);
+            sharedCollections.remove(friendName);
         }
         removeFileList.unload();
 
     }
 
     @Override
-    public IncompleteFileList getIncompleteFileList() {
-        return incompleteFileList;
+    public IncompleteFileCollection getIncompleteFileCollection() {
+        return incompleteCollection;
     }
     
     /** A bunch of inspectables for FileManager */
@@ -201,7 +212,7 @@ class FileManagerImpl implements FileManager, Service {
                 int matched = 0;
                 try {
                     RPNParser parser = new RPNParser(MessageSettings.CUSTOM_FD_CRITERIA.get());
-                    FileCollection shareList = getGnutellaFileList();
+                    FileView shareList = getGnutellaFileView();
                     shareList.getReadLock().lock();
                     try {
                         for (FileDesc fd : shareList){
@@ -228,8 +239,8 @@ class FileManagerImpl implements FileManager, Service {
             public Object inspect() {
                 Map<String, Object> data = new HashMap<String, Object>();
                 synchronized (FileManagerImpl.this) {
-                    List<Integer> sizes = new ArrayList<Integer>(friendFileLists.size());
-                    for (SharedFileCollection friendFileList : friendFileLists.values()) {
+                    List<Integer> sizes = new ArrayList<Integer>(sharedCollections.size());
+                    for (SharedFileCollection friendFileList : sharedCollections.values()) {
                         sizes.add(friendFileList.size());
                     }
                     data.put("sizes", sizes);
@@ -273,7 +284,7 @@ class FileManagerImpl implements FileManager, Service {
             Map<Integer, FileDesc> topCupsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
 
             List<FileDesc> fds;
-            FileCollection shareList = getGnutellaFileList();
+            FileView shareList = getGnutellaFileView();
             shareList.getReadLock().lock();
             try {
                 fds = CollectionUtils.listOf(shareList);

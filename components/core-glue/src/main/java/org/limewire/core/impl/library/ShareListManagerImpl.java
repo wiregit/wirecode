@@ -48,7 +48,7 @@ class ShareListManagerImpl implements ShareListManager {
         this.coreLocalFileItemFactory = coreLocalFileItemFactory;
         this.friendShareListEventBroadcaster = friendShareListEventListener;
         this.combinedShareList = new CombinedShareList(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
-        this.gnutellaFileList = new GnutellaFileListImpl(coreLocalFileItemFactory, fileManager.getGnutellaFileList(), combinedShareList);
+        this.gnutellaFileList = new GnutellaFileListImpl(coreLocalFileItemFactory, fileManager.getGnutellaCollection(), combinedShareList);
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
     }
 
@@ -132,7 +132,7 @@ class ShareListManagerImpl implements ShareListManager {
     }
 
     private void deleteFriendShareList(Friend friend) {  
-        fileManager.removeFriendFileList(friend.getId());
+        fileManager.removeSharedCollection(friend.getId());
         FriendFileListImpl list = friendLocalFileLists.remove(friend.getId());
         if(list != null) {
             friendShareListEventBroadcaster.broadcast(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_DELETED, list, friend));

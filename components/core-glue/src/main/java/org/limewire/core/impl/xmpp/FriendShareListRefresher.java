@@ -64,7 +64,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
 
     @Inject
     public void register(FileManager fileManager) {
-        fileManager.getManagedFileList().addManagedListStatusListener(new FinishedLoadingListener());
+        fileManager.getLibrary().addManagedListStatusListener(new FinishedLoadingListener());
     }
 
     @Inject

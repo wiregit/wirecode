@@ -168,7 +168,7 @@ public class PushUploadTest extends LimeTestCase {
         fm = injector.getInstance(FileManager.class);
         FileManagerTestUtils.waitForLoad(fm, 1000);
         File testDir = TestUtils.getResourceFile(testDirName);
-        FileDesc fd = fm.getGnutellaFileList().add(new File(testDir, fileName)).get();
+        FileDesc fd = fm.getGnutellaCollection().add(new File(testDir, fileName)).get();
         url = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
         
         lifeCycleManager = injector.getInstance(LifecycleManager.class);

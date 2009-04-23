@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.library;
 
-public class FileListChangeFailedException extends Exception {
+public class FileViewChangeFailedException extends Exception {
     
-    private final FileListChangedEvent event;
+    private final FileViewChangeEvent event;
     private final Reason reason;
     
     public static enum Reason {
@@ -18,20 +18,20 @@ public class FileListChangeFailedException extends Exception {
         DANGEROUS_FILE
     }
 
-    public FileListChangeFailedException(FileListChangedEvent event, Reason reason) {
+    public FileViewChangeFailedException(FileViewChangeEvent event, Reason reason) {
         super("Event: " + event + ", Reason: " + reason);
         this.event = event;
         this.reason = reason;
     }
     
-    public FileListChangeFailedException(FileListChangedEvent event, Reason reason, Throwable cause) {
+    public FileViewChangeFailedException(FileViewChangeEvent event, Reason reason, Throwable cause) {
         super("Event: " + event + ", Reason: " + reason, cause);
         this.event = event;
         this.reason = reason;
     }
     
     
-    public FileListChangedEvent getEvent() {
+    public FileViewChangeEvent getEvent() {
         return event;
     }
     

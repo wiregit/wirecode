@@ -2010,7 +2010,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // unshare the file if we didn't have a tree
         // otherwise we will have shared only the parts that verified
         if (commonOutFile.getHashTree() == null) 
-            fileManager.getManagedFileList().remove(incompleteFile);
+            fileManager.getLibrary().remove(incompleteFile);
         
         // purge the tree
         tigerTreeCache.get().purgeTree(getSha1Urn());
@@ -2081,7 +2081,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (saveFile.exists())
-            fileManager.getManagedFileList().remove(saveFile);
+            fileManager.getLibrary().remove(saveFile);
 
         // add file hash to manager for fast lookup
         addFileHash(fileHash, saveFile);
@@ -2123,7 +2123,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             if (ttroot != null)
                 urns.add(ttroot);
             urnCache.addUrns(file, urns);
-            fileManager.getManagedFileList().add(file, getXMLDocuments());
+            fileManager.getLibrary().add(file, getXMLDocuments());
         }
     }
     
@@ -2149,7 +2149,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected void shareSavedFile(File saveFile){
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() 
 		        && !isFriendDownload)
-		    fileManager.getGnutellaFileList().add(saveFile, getXMLDocuments());
+		    fileManager.getGnutellaCollection().add(saveFile, getXMLDocuments());
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 
@@ -2890,7 +2890,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             URN sha1 = getSha1Urn();
             URN ttroot = tree.getTreeRootUrn();
             tigerTreeCache.get().addRoot(sha1, ttroot);
-            List<FileDesc> fds = fileManager.getManagedFileList().getFileDescsMatching(sha1);
+            List<FileDesc> fds = fileManager.getLibrary().getFileDescsMatching(sha1);
             for(FileDesc fd : fds) {
                 fd.setTTRoot(ttroot);
             }

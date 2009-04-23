@@ -136,8 +136,8 @@ public class MulticastTest extends LimeTestCase {
         FileManagerTestUtils.waitForLoad(fileManager,3000);
         
         File file = TestUtils.getResourceFile(FILE_NAME);
-        assertNotNull(fileManager.getGnutellaFileList().add(file).get());        
-        assertEquals("unexpected number of shared files", 1, fileManager.getGnutellaFileList().size() );
+        assertNotNull(fileManager.getGnutellaCollection().add(file).get());        
+        assertEquals("unexpected number of shared files", 1, fileManager.getGnutellaCollection().size() );
     }
     
     @Override
@@ -421,17 +421,17 @@ public class MulticastTest extends LimeTestCase {
             new File(_savedDir, "metadata.mp3").exists());
 
         // Get rid of this file, so the -Dtimes=X option works properly... =)
-        assertEquals("unexpected number of shared files", 2, fileManager.getGnutellaFileList().size());
+        assertEquals("unexpected number of shared files", 2, fileManager.getGnutellaFileView().size());
 
         File temp = new File(_savedDir, "metadata.mp3");
         if (temp.exists()) {
-            fileManager.getManagedFileList().remove(temp);
+            fileManager.getLibrary().remove(temp);
             temp.delete();
         }
         sleep(2 * DELAY);
         assertFalse("file should have been deleted", temp.exists());
 
-        assertEquals("unexpected number of shared files", 1, fileManager.getGnutellaFileList().size());
+        assertEquals("unexpected number of shared files", 1, fileManager.getGnutellaFileView().size());
 	}
     
     private static void wipeAddress(QueryReply qr) throws Exception {

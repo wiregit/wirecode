@@ -345,7 +345,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
         Iterator<URN> iter = roots.keySet().iterator();
         while (iter.hasNext()) {
             URN sha1 = iter.next();
-            if (!fileManager.getManagedFileList().getFileDescsMatching(sha1).isEmpty()) {
+            if (!fileManager.getLibrary().getFileDescsMatching(sha1).isEmpty()) {
                 continue;
             } else if (downloadManager.getIncompleteFileManager().getFileForUrn(sha1) != null) {
                 continue;

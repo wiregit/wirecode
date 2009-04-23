@@ -9,10 +9,10 @@ import com.limegroup.gnutella.URN;
 import junit.framework.Test;
 
 /**
- * Unit test for {@link FileListIterator}
+ * Unit test for {@link FileViewIterator}
  *
  */
-public class FileListIteratorTest extends BaseTestCase {
+public class FileViewIteratorTest extends BaseTestCase {
 
     private ManagedFileListStub managedList;
     private IntSet indices;
@@ -20,7 +20,7 @@ public class FileListIteratorTest extends BaseTestCase {
     private URN hash1, hash2, hash3, hash4;
     private FileDesc fd1, fd2, fd3, fd4;
 
-    public FileListIteratorTest(String name) {
+    public FileViewIteratorTest(String name) {
         super(name);
         this.managedList = new ManagedFileListStub();
         this.indices = new IntSet();
@@ -45,13 +45,13 @@ public class FileListIteratorTest extends BaseTestCase {
     }
 
     public static Test suite() {
-        return buildTestSuite(FileListIteratorTest.class);
+        return buildTestSuite(FileViewIteratorTest.class);
     }
 
 
     public void testEmptyList() throws Exception {
         assertEquals(0, managedList.size());
-        FileListIterator iter = new FileListIterator(managedList, indices);
+        FileViewIterator iter = new FileViewIterator(managedList, indices);
         assertEquals(0, iterateHowMany(iter));
     }
 
@@ -68,7 +68,7 @@ public class FileListIteratorTest extends BaseTestCase {
         indices.add(fd3.getIndex());
         indices.add(fd4.getIndex());
 
-        FileListIterator iter = new FileListIterator(managedList, indices);
+        FileViewIterator iter = new FileViewIterator(managedList, indices);
         assertEquals(4, iterateHowMany(iter));
     }
 
@@ -82,7 +82,7 @@ public class FileListIteratorTest extends BaseTestCase {
         indices.add(fd2.getIndex());
         indices.add(fd4.getIndex());
 
-        FileListIterator iter = new FileListIterator(managedList, indices);
+        FileViewIterator iter = new FileViewIterator(managedList, indices);
         assertEquals(3, iterateHowMany(iter));
 
         // test that iterating past hasNext() false yields a NoSuchElementException

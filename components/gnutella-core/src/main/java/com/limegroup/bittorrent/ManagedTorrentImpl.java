@@ -889,15 +889,15 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         File _completeFile = context.getFileSystem().getCompleteFile();
         if (_completeFile.isFile()) {
             if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-                fileManager.getGnutellaFileList().add(_completeFile);
+                fileManager.getGnutellaCollection().add(_completeFile);
             } else {
-                fileManager.getManagedFileList().add(_completeFile);
+                fileManager.getLibrary().add(_completeFile);
             }
         } else if (_completeFile.isDirectory()) {
             if(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-                fileManager.getGnutellaFileList().addFolder(_completeFile);
+                fileManager.getGnutellaCollection().addFolder(_completeFile);
             } else {
-                fileManager.getManagedFileList().addFolder(_completeFile);
+                fileManager.getLibrary().addFolder(_completeFile);
             }
         }
     }

@@ -86,7 +86,7 @@ public class BrowseTest extends LimeTestCase {
         });
         assertGreaterThan("Not enough files to test against", 50, testFiles.length);
         for(File file : testFiles) {
-            assertNotNull(fileManager.getGnutellaFileList().add(file).get(1, TimeUnit.SECONDS));
+            assertNotNull(fileManager.getGnutellaCollection().add(file).get(1, TimeUnit.SECONDS));
         }
         
         host = protocol + "://localhost:" + PORT;
@@ -123,15 +123,15 @@ public class BrowseTest extends LimeTestCase {
                 }
             }
 
-            assertEquals(fileManager.getGnutellaFileList().size(), files.size());
-            fileManager.getGnutellaFileList().getReadLock().lock();
+            assertEquals(fileManager.getGnutellaFileView().size(), files.size());
+            fileManager.getGnutellaFileView().getReadLock().lock();
             try {
-                for(FileDesc result : fileManager.getGnutellaFileList()) {
+                for(FileDesc result : fileManager.getGnutellaFileView()) {
                     boolean contained = files.remove(result.getFileName());
                     assertTrue("File is missing in browse response: " + result.getFileName(), contained);
                 }
             } finally {
-                fileManager.getGnutellaFileList().getReadLock().unlock();
+                fileManager.getGnutellaFileView().getReadLock().unlock();
             }
             assertTrue("Browse returned more results than shared: " + files, files.isEmpty());
         } finally {

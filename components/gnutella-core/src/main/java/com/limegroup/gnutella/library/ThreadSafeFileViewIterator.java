@@ -3,7 +3,7 @@ package com.limegroup.gnutella.library;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-class ThreadSafeFileListIterator implements Iterator<FileDesc> {
+class ThreadSafeFileViewIterator implements Iterator<FileDesc> {
     
     private final AbstractFileCollection fileList;
     private final LibraryImpl managedList;
@@ -13,7 +13,7 @@ class ThreadSafeFileListIterator implements Iterator<FileDesc> {
     private int index = 0;
     private FileDesc preview;
     
-    public ThreadSafeFileListIterator(AbstractFileCollection fileList, LibraryImpl managedList) {
+    public ThreadSafeFileViewIterator(AbstractFileCollection fileList, LibraryImpl managedList) {
         this.fileList = fileList;
         this.index = fileList.getMinIndex();
         this.managedList = managedList;

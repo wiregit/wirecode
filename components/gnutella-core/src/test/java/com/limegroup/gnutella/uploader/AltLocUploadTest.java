@@ -88,8 +88,8 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
-import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileListProvider;
-import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
+import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileViewProvider;
+import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileViewProvider;
 
 public class AltLocUploadTest extends LimeTestCase {
 
@@ -172,7 +172,7 @@ public class AltLocUploadTest extends LimeTestCase {
         File testDir = TestUtils.getResourceFile(testDirName);
         assertTrue("test directory could not be found", testDir.isDirectory());
         File testFile = new File(testDir, fileName);
-        Future<FileDesc> f1 = fileManager.getGnutellaFileList().add(testFile);
+        Future<FileDesc> f1 = fileManager.getGnutellaCollection().add(testFile);
         fd = f1.get(1, TimeUnit.SECONDS);
         assertNotNull(fd);
         
@@ -1409,8 +1409,8 @@ public class AltLocUploadTest extends LimeTestCase {
                 Provider<HTTPAcceptor> httpAcceptor,
                 Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
                 TcpBandwidthStatistics tcpBandwidthStatistics,
-                Provider<GnutellaUploadFileListProvider> gnutellaUploadFileListProvider,
-                Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider,
+                Provider<GnutellaUploadFileViewProvider> gnutellaUploadFileListProvider,
+                Provider<GnutellaBrowseFileViewProvider> gnutellaBrowseFileListProvider,
                 UrnValidator urnValidator) {
             super(slotManager, httpRequestHandlerFactory, httpAcceptor,
                     fileManager, activityCallback, tcpBandwidthStatistics, gnutellaUploadFileListProvider,

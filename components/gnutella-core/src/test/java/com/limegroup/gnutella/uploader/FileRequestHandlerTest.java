@@ -27,9 +27,9 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
-import com.limegroup.gnutella.library.GnutellaFileListStub;
+import com.limegroup.gnutella.library.GnutellaCollectionStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
+import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileViewProvider;
 
 public class FileRequestHandlerTest extends LimeTestCase {
 
@@ -72,12 +72,12 @@ public class FileRequestHandlerTest extends LimeTestCase {
                 9999, false)));
 
         fileManager = (FileManagerStub) injector.getInstance(FileManager.class);
-        GnutellaFileListStub sharedList = fileManager.getGnutellaFileList();
+        GnutellaCollectionStub sharedList = fileManager.getGnutellaCollection();
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
         FileDesc fd1 = new FileDescStub("abc1.txt", urn1, 0);
         sharedList.add(fd1);
         
-        GnutellaUploadFileListProvider uploadProvider = injector.getInstance(GnutellaUploadFileListProvider.class);
+        GnutellaUploadFileViewProvider uploadProvider = injector.getInstance(GnutellaUploadFileViewProvider.class);
         fileRequestHandler = injector.getInstance(FileRequestHandlerFactory.class).createFileRequestHandler(uploadProvider, false);
     }
 

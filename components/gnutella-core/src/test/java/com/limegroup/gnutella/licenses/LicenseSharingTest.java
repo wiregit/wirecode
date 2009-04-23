@@ -83,24 +83,24 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         File cc3 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
         File cc4 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
         File wma5 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
-        assertNotNull(fileManager.getGnutellaFileList().add(cc1).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(cc2).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(cc3).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(cc4).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(wma5).get(5, TimeUnit.SECONDS));
-        fileManager.getGnutellaFileList().remove(berkeleyFD);
-        fileManager.getGnutellaFileList().remove(susheelFD);
+        assertNotNull(fileManager.getGnutellaCollection().add(cc1).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(cc2).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(cc3).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(cc4).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(wma5).get(5, TimeUnit.SECONDS));
+        fileManager.getGnutellaCollection().remove(berkeleyFD);
+        fileManager.getGnutellaCollection().remove(susheelFD);
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
-	    List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaFileList());
+	    List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaFileView());
 	    assertEquals(5, fds.size());
 	    for(FileDesc fd : fds )
 	        assertTrue(fd.toString(), fd.isLicensed());
     }
     
     public void testQRPExchange() throws Exception {
-        assertEquals(5, fileManager.getGnutellaFileList().size());
+        assertEquals(5, fileManager.getGnutellaFileView().size());
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());

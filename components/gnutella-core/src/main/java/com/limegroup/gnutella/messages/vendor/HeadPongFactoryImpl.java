@@ -199,9 +199,9 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         GGEP ggep = new GGEP();
         
         URN urn = ping.getUrn();
-        FileDesc desc = fileManager.get().getGnutellaFileList().getFileDesc(urn);
+        FileDesc desc = fileManager.get().getGnutellaFileView().getFileDesc(urn);
         if(desc == null) {
-            desc = fileManager.get().getIncompleteFileList().getFileDesc(urn);
+            desc = fileManager.get().getIncompleteFileCollection().getFileDesc(urn);
         }
         // Easy case: no file, add code & exit
         if(desc == null) {
@@ -290,9 +290,9 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     	DataOutputStream daos = new DataOutputStream(caos);
     	byte retCode=0;
     	URN urn = ping.getUrn();
-    	FileDesc desc = fileManager.get().getGnutellaFileList().getFileDesc(urn);
+    	FileDesc desc = fileManager.get().getGnutellaFileView().getFileDesc(urn);
     	if(desc == null) {
-    	    desc = fileManager.get().getIncompleteFileList().getFileDesc(urn);
+    	    desc = fileManager.get().getIncompleteFileCollection().getFileDesc(urn);
     	}
     	boolean didNotSendAltLocs=false;
     	boolean didNotSendPushAltLocs = false;

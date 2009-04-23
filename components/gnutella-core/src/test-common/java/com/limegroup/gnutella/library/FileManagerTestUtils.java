@@ -50,9 +50,9 @@ public class FileManagerTestUtils {
                 FileDesc fd = fileList.add(file).get(5, TimeUnit.SECONDS);
                 fail("added: " + fd);
             } catch (ExecutionException expected) {
-                assertInstanceof(FileListChangeFailedException.class, expected.getCause());
-                FileListChangeFailedException cause = (FileListChangeFailedException) expected.getCause();
-                assertEquals(FileListChangedEvent.Type.ADD_FAILED, cause.getEvent().getType());
+                assertInstanceof(FileViewChangeFailedException.class, expected.getCause());
+                FileViewChangeFailedException cause = (FileViewChangeFailedException) expected.getCause();
+                assertEquals(FileViewChangeEvent.Type.ADD_FAILED, cause.getEvent().getType());
                 assertEquals(file, cause.getEvent().getFile());
                 assertEquals(reason, cause.getReason().toString());
             }
@@ -83,9 +83,9 @@ public class FileManagerTestUtils {
             future.get(1, TimeUnit.SECONDS);
             fail("renamed!");
         } catch (ExecutionException expected) {
-            assertInstanceof(FileListChangeFailedException.class, expected.getCause());
-            FileListChangeFailedException cause = (FileListChangeFailedException) expected.getCause();
-            assertEquals(FileListChangedEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
+            assertInstanceof(FileViewChangeFailedException.class, expected.getCause());
+            FileViewChangeFailedException cause = (FileViewChangeFailedException) expected.getCause();
+            assertEquals(FileViewChangeEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
             assertEquals(old, cause.getEvent().getOldFile());
             assertEquals(newFile, cause.getEvent().getFile());
             assertEquals(oldFd, cause.getEvent().getOldValue());
@@ -105,9 +105,9 @@ public class FileManagerTestUtils {
             future.get(1, TimeUnit.SECONDS);
             fail("renamed!");
         } catch (ExecutionException expected) {
-            assertInstanceof(FileListChangeFailedException.class, expected.getCause());
-            FileListChangeFailedException cause = (FileListChangeFailedException) expected.getCause();
-            assertEquals(FileListChangedEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
+            assertInstanceof(FileViewChangeFailedException.class, expected.getCause());
+            FileViewChangeFailedException cause = (FileViewChangeFailedException) expected.getCause();
+            assertEquals(FileViewChangeEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
             assertEquals(file, cause.getEvent().getOldFile());
             assertEquals(file, cause.getEvent().getFile());
             assertEquals(oldFd, cause.getEvent().getOldValue());
@@ -151,7 +151,7 @@ public class FileManagerTestUtils {
      * completed in a certain amount of time.
      */
     public static List<FileDesc> waitForLoad(FileManager fileManager, int timeout) throws Exception {
-        return assertLoads(fileManager.getManagedFileList(), timeout, TimeUnit.MILLISECONDS);
+        return assertLoads(fileManager.getLibrary(), timeout, TimeUnit.MILLISECONDS);
     }
     
     public static List<FileDesc> assertLoads(Library managedList) throws Exception {

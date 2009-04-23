@@ -8,44 +8,56 @@ public class FileManagerStub implements FileManager {
 
     private ManagedFileListStub managedStub;
     private IncompleteFileListStub incompleteStub;
-    private GnutellaFileListStub gnutellaStub;    
+    private GnutellaCollectionStub gnutellaStub;    
+    private GnutellaViewStub gnutellaViewStub;
     
     @Inject
     public FileManagerStub() {    
-        gnutellaStub = new GnutellaFileListStub();
+        gnutellaStub = new GnutellaCollectionStub();
         incompleteStub = new IncompleteFileListStub();
         managedStub = new ManagedFileListStub();
     }
     
     @Override
-    public GnutellaFileListStub getGnutellaFileList() {
+    public GnutellaCollectionStub getGnutellaCollection() {
         return gnutellaStub;
     }
     
     @Override
-    public IncompleteFileListStub getIncompleteFileList() {
+    public IncompleteFileListStub getIncompleteFileCollection() {
         return incompleteStub;
     }
     
     @Override
-    public ManagedFileListStub getManagedFileList() {
+    public ManagedFileListStub getLibrary() {
         return managedStub;
     }   
 
     
     @Override
-    public SharedFileCollection getFriendFileList(String name) {
+    public SharedFileCollection getSharedCollection(String name) {
         throw new UnsupportedOperationException("not supported");
     }
     
     @Override
-    public SharedFileCollection getOrCreateFriendFileList(String name) {
+    public SharedFileCollection getOrCreateSharedCollection(String name) {
         throw new UnsupportedOperationException("not supported");
     }
     
     @Override
-    public void removeFriendFileList(String name) {
+    public void removeSharedCollection(String name) {
         throw new UnsupportedOperationException("not supported");
+    }
+    
+    @Override
+    public FileView getFileViewForId(String friendId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public GnutellaFileView getGnutellaFileView() {
+        return gnutellaViewStub;
     }
     
     @Override

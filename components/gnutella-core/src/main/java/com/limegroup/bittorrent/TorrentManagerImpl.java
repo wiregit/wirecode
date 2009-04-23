@@ -346,7 +346,7 @@ public class TorrentManagerImpl implements TorrentManager {
         Runnable r = new Runnable() {
             public void run() {
             	if (LibraryUtils.isFileManagable(f))
-            		fileManager.getGnutellaFileList().addForSession(f);
+            		fileManager.getGnutellaCollection().addForSession(f);
             }
         };
         threadPool.execute(r);
@@ -364,8 +364,8 @@ public class TorrentManagerImpl implements TorrentManager {
         final boolean fdelete = delete || t.getState().equals(TorrentState.TRACKER_FAILURE); 
         Runnable r = new Runnable() {
             public void run() {
-                if(fileManager.getManagedFileList().remove(f)) {
-                    fileManager.getGnutellaFileList().remove(f);      
+                if(fileManager.getLibrary().remove(f)) {
+                    fileManager.getGnutellaCollection().remove(f);      
                     if(fdelete) {
                         FileUtils.delete(f, false);
                     } else {
@@ -388,7 +388,7 @@ public class TorrentManagerImpl implements TorrentManager {
     public void shareTorrentFile(BTMetaInfo m, File torrentFile) {
         if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() && !m.isPrivate()) {
             final File tFile = getSharedTorrentMetaDataFile(m);
-            fileManager.getGnutellaFileList().remove(tFile);
+            fileManager.getGnutellaCollection().remove(tFile);
 
             File backup = null;
             if (tFile.exists()) {
@@ -396,12 +396,12 @@ public class TorrentManagerImpl implements TorrentManager {
                 FileUtils.forceRename(tFile, backup);
             }
             if(FileUtils.forceRename(torrentFile, tFile)) {
-                fileManager.getGnutellaFileList().add(tFile);
+                fileManager.getGnutellaCollection().add(tFile);
             } else {
                 if (backup != null) {
                     // restore backup
                     if (FileUtils.forceRename(backup, tFile)) {
-                        fileManager.getGnutellaFileList().add(tFile);
+                        fileManager.getGnutellaCollection().add(tFile);
                     }
                 }
             } 

@@ -17,7 +17,7 @@ import org.limewire.util.BaseTestCase;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
-import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.SharedFileCollection;
 
@@ -37,7 +37,7 @@ public class FriendFileListImplTest extends BaseTestCase {
 
     private EventList<LocalFileItem> subList = null;
 
-    private AtomicReference<EventListener<FileListChangedEvent>> fileListChangeListener = null;
+    private AtomicReference<EventListener<FileViewChangeEvent>> fileListChangeListener = null;
 
     public FriendFileListImplTest(String name) {
         super(name);
@@ -71,14 +71,14 @@ public class FriendFileListImplTest extends BaseTestCase {
 
         testFileList = context.mock(SharedFileCollection.class);
 
-        fileListChangeListener = new AtomicReference<EventListener<FileListChangedEvent>>();
+        fileListChangeListener = new AtomicReference<EventListener<FileViewChangeEvent>>();
 
         context.checking(new Expectations() {
             {
-                one(fileManager).getOrCreateFriendFileList(name);
+                one(fileManager).getOrCreateSharedCollection(name);
                 will(returnValue(testFileList));
-                one(testFileList).addFileListListener(with(any(EventListener.class)));
-                will(new AssignParameterAction<EventListener<FileListChangedEvent>>(
+                one(testFileList).addFileViewListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<FileViewChangeEvent>>(
                         fileListChangeListener, 0));
                 allowing(testFileList).getReadLock();
                 will(returnValue(new ReentrantLock()));
@@ -95,7 +95,7 @@ public class FriendFileListImplTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(combinedShareList).removeMemberList(subList);
-                one(testFileList).removeFileListListener(fileListChangeListener.get());
+                one(testFileList).removeFileViewListener(fileListChangeListener.get());
             }
         });
         friendFileListImpl.dispose();

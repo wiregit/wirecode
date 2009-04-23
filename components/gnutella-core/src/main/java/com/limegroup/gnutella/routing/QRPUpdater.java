@@ -24,9 +24,9 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescChangeEvent;
-import com.limegroup.gnutella.library.FileCollection;
-import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -144,7 +144,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
             }
         }
         
-        FileCollection gnutella = fileManager.getGnutellaFileList();
+        FileView gnutella = fileManager.getGnutellaFileView();
         gnutella.getReadLock().lock();
         try {
             for (FileDesc fd : gnutella) {
@@ -167,7 +167,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
         
         //if partial sharing is allowed, add incomplete file keywords also
         if(SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && SharingSettings.PUBLISH_PARTIAL_QRP.getValue()) {
-            FileCollection incompletes = fileManager.getIncompleteFileList();
+            FileView incompletes = fileManager.getIncompleteFileCollection();
             incompletes.getReadLock().lock();
             try {
                 for(FileDesc fd : incompletes) {
@@ -194,9 +194,9 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
     public void initialize() {
         SearchSettings.PUBLISH_LIME_KEYWORDS.addSettingListener(this);
         SearchSettings.LIME_QRP_ENTRIES.addSettingListener(this);
-        fileManager.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+        fileManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
             @Override
-            public void handleEvent(FileListChangedEvent event) {
+            public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {
                 case ADDED:
                 case REMOVED:
@@ -206,9 +206,9 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 }
             }
         });
-        fileManager.getIncompleteFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+        fileManager.getIncompleteFileCollection().addFileViewListener(new EventListener<FileViewChangeEvent>() {
             @Override
-            public void handleEvent(FileListChangedEvent event) {
+            public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {
                 case ADDED:
                 case REMOVED:

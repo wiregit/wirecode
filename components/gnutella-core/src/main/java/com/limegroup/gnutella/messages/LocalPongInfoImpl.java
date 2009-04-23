@@ -37,11 +37,11 @@ public class LocalPongInfoImpl implements LocalPongInfo {
     }
 
     public long getNumSharedFiles() {
-        return fileManager.get().getGnutellaFileList().size();
+        return fileManager.get().getGnutellaFileView().size();
     }
 
     public int getSharedFileSize() {
-        return ByteUtils.long2int(fileManager.get().getGnutellaFileList().getNumBytes());
+        return ByteUtils.long2int(fileManager.get().getGnutellaFileView().getNumBytes());
     }
 
     public boolean isSupernode() {

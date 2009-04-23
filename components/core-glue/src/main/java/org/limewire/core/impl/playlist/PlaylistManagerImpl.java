@@ -10,7 +10,7 @@ import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.Library;
 
 /**
@@ -43,9 +43,9 @@ class PlaylistManagerImpl implements PlaylistManager {
     @Inject
     void register() {
         // Install listener on managed file list.
-        managedList.addFileListListener(new EventListener<FileListChangedEvent>() {
+        managedList.addFileViewListener(new EventListener<FileViewChangeEvent>() {
             @Override
-            public void handleEvent(FileListChangedEvent event) {
+            public void handleEvent(FileViewChangeEvent event) {
                 switch (event.getType()) {
                 case REMOVED:
                     removeFile(event.getFile());

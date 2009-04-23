@@ -15,7 +15,7 @@ import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public class ManagedFileListStub extends AbstractFileListStub implements Library {
+public class ManagedFileListStub extends AbstractFileCollectionStub implements Library {
 
     @Override
     public Collection<File> getDirectoriesWithImportedFiles() {

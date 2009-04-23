@@ -12,17 +12,17 @@ import org.limewire.http.auth.ServerAuthState;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.SharedFileCollection;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.uploader.HttpException;
 
-public class FriendFileListProviderTest extends BaseTestCase {
+public class FriendFileViewProviderTest extends BaseTestCase {
     
     private Mockery context;
     private FileManager fileManager;
-    private FriendFileListProvider friendFileListProvider;
+    private FileViewProvider friendFileListProvider;
         
     
-    public FriendFileListProviderTest(String name) {
+    public FriendFileViewProviderTest(String name) {
         super(name);
     }
 
@@ -30,17 +30,17 @@ public class FriendFileListProviderTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
         fileManager = context.mock(FileManager.class);
-        friendFileListProvider = new FriendFileListProvider(fileManager);
+        friendFileListProvider = new FileViewProvider(fileManager);
     }
     
     public static Test suite() {
-        return buildTestSuite(FriendFileListProviderTest.class);
+        return buildTestSuite(FriendFileViewProviderTest.class);
     }
 
     public void testGetListsForValidUserId() throws Exception {
         context.checking(new Expectations() {{
-            one(fileManager).getFriendFileList("me@you.com");
-            will(returnValue(context.mock(SharedFileCollection.class)));
+            one(fileManager).getFileViewForId("me@you.com");
+            will(returnValue(context.mock(FileView.class)));
         }});
         
         HttpContext httpContext = new BasicHttpContext();
@@ -48,7 +48,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         authState.setCredentials(new UsernamePasswordCredentials("me@you.com", "password"));
         httpContext.setAttribute(ServerAuthState.AUTH_STATE, authState);
         
-        friendFileListProvider.getFileLists("me@you.com", httpContext);
+        friendFileListProvider.getFileViews("me@you.com", httpContext);
         
         context.assertIsSatisfied();
     }
@@ -60,7 +60,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         httpContext.setAttribute(ServerAuthState.AUTH_STATE, authState);
         
         try {
-            friendFileListProvider.getFileLists("hello@world.com", httpContext);
+            friendFileListProvider.getFileViews("hello@world.com", httpContext);
             fail("expected exception");
         } catch (HttpException he) {
             assertEquals(HttpStatus.SC_UNAUTHORIZED, he.getErrorCode());
@@ -69,7 +69,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
     
     public void testGetListsUserIdHasNoFileList() {
         context.checking(new Expectations() {{
-            one(fileManager).getFriendFileList("me@you.com");
+            one(fileManager).getFileViewForId("me@you.com");
             will(returnValue(null));
         }});
         
@@ -79,7 +79,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         httpContext.setAttribute(ServerAuthState.AUTH_STATE, authState);
         
         try {
-            friendFileListProvider.getFileLists("me@you.com", httpContext);
+            friendFileListProvider.getFileViews("me@you.com", httpContext);
             fail("expected exception");
         } catch (HttpException he) {
             assertEquals(HttpStatus.SC_NOT_FOUND, he.getErrorCode());
@@ -92,14 +92,14 @@ public class FriendFileListProviderTest extends BaseTestCase {
     public void testGetFileListsWithBadCredentials() {
         HttpContext httpContext = new BasicHttpContext();
         try {
-            friendFileListProvider.getFileLists(null, httpContext);
+            friendFileListProvider.getFileViews(null, httpContext);
             fail("Did not throw exception for attempt without user.");
         } catch (HttpException e) {
             // Expected
         }
         
         try {
-            friendFileListProvider.getFileLists("tester@test", httpContext);
+            friendFileListProvider.getFileViews("tester@test", httpContext);
             fail("Did not throw exception for attempt without an AuthState.");
         } catch (HttpException e) {
             // Expected
@@ -109,7 +109,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         httpContext.setAttribute(ServerAuthState.AUTH_STATE, authState);
         
         try {
-            friendFileListProvider.getFileLists("tester@test", httpContext);
+            friendFileListProvider.getFileViews("tester@test", httpContext);
             fail("Did not throw exception for attempt without credentials.");
         } catch (HttpException e) {
             // Expected 

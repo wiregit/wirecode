@@ -69,12 +69,12 @@ public interface FileView extends Iterable<FileDesc> {
     /**
      * Adds a listener to this list
      */
-    void addFileListListener(EventListener<FileListChangedEvent> listener);
+    void addFileViewListener(EventListener<FileViewChangeEvent> listener);
 
     /**
      * Removes a listener from this list
      */
-    void removeFileListListener(EventListener<FileListChangedEvent> listener);
+    void removeFileViewListener(EventListener<FileViewChangeEvent> listener);
 
     /** Returns a lock to use when iterating over this FileList. */
     Lock getReadLock();

@@ -117,7 +117,7 @@ class LibraryImpl implements Library, FileCollection {
     
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster;
     private final EventMulticaster<ManagedListStatusEvent> managedListListenerSupport;
-    private final EventMulticaster<FileListChangedEvent> fileListListenerSupport;
+    private final EventMulticaster<FileViewChangeEvent> fileListListenerSupport;
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final UrnCache urnCache;
     private final FileDescFactory fileDescFactory; 
@@ -221,7 +221,7 @@ class LibraryImpl implements Library, FileCollection {
         this.fileDescFactory = fileDescFactory;
         this.fileDescMulticaster = fileDescMulticaster;
         this.managedListListenerSupport = managedListSupportMulticaster;
-        this.fileListListenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
+        this.fileListListenerSupport = new EventMulticasterImpl<FileViewChangeEvent>();
         this.fileLoader = ExecutorsHelper.newProcessingQueue("ManagedList Loader");
         this.files = new ArrayList<FileDesc>();
         this.extensions = new ConcurrentSkipListSet<String>();
@@ -299,16 +299,16 @@ class LibraryImpl implements Library, FileCollection {
      * Dispatches a failure, sending a CHANGE_FAILED & REMOVE event if
      * oldFileDesc is non-null, an ADD_FAILED otherwise.
      */
-    private FileListChangedEvent dispatchFailure(File file, FileDesc oldFileDesc) {
-        FileListChangedEvent event;
+    private FileViewChangeEvent dispatchFailure(File file, FileDesc oldFileDesc) {
+        FileViewChangeEvent event;
         if(oldFileDesc != null) {
-            event = new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, oldFileDesc.getFile(), oldFileDesc, file);
+            event = new FileViewChangeEvent(this, FileViewChangeEvent.Type.CHANGE_FAILED, oldFileDesc.getFile(), oldFileDesc, file);
             // First dispatch a CHANGE_FAILED for the new event
             dispatch(event);
             // Then dispatch a REMOVE for the old FD.
-            dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.REMOVED, oldFileDesc));
+            dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.REMOVED, oldFileDesc));
         } else {
-            event = new FileListChangedEvent(this, FileListChangedEvent.Type.ADD_FAILED, file);
+            event = new FileViewChangeEvent(this, FileViewChangeEvent.Type.ADD_FAILED, file);
             // Just dispatch an ADD_FAIL for the file.
             dispatch(event);
         }
@@ -316,7 +316,7 @@ class LibraryImpl implements Library, FileCollection {
         return event;
     }
     
-    void dispatch(FileListChangedEvent event) {
+    void dispatch(FileViewChangeEvent event) {
         fileListListenerSupport.broadcast(event);
     }
     
@@ -409,7 +409,7 @@ class LibraryImpl implements Library, FileCollection {
         
         // If we were able to remove above, fire the events.
         for(FileDesc fd : removedFds) {
-            dispatch(new FileListChangedEvent(LibraryImpl.this, FileListChangedEvent.Type.REMOVED, fd));
+            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.REMOVED, fd));
         }
         
         if(managed) {
@@ -491,7 +491,7 @@ class LibraryImpl implements Library, FileCollection {
         
         // Step 2: Dispatch all removed files.
         for(FileDesc fd : removedFds) {
-            dispatch(new FileListChangedEvent(LibraryImpl.this, FileListChangedEvent.Type.REMOVED, fd));
+            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.REMOVED, fd));
         }
         
         // Step 3: Go through all newly managed dirs & manage them.
@@ -629,17 +629,17 @@ class LibraryImpl implements Library, FileCollection {
         }
         
         if(fd != null) {
-            dispatch(new FileListChangedEvent(LibraryImpl.this, FileListChangedEvent.Type.ADDED, fd));
+            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.ADDED, fd));
         }
     }
 
     @Override
-    public void addFileListListener(EventListener<FileListChangedEvent> listener) {
+    public void addFileViewListener(EventListener<FileViewChangeEvent> listener) {
         fileListListenerSupport.addListener(listener);
     }
     
     @Override
-    public void removeFileListListener(EventListener<FileListChangedEvent> listener) {
+    public void removeFileViewListener(EventListener<FileViewChangeEvent> listener) {
         fileListListenerSupport.removeListener(listener);
     }
     
@@ -678,7 +678,7 @@ class LibraryImpl implements Library, FileCollection {
             } else if(urnsMatching.size() == 1) { // Optimal case
                 return Collections.singletonList(files.get(urnsMatching.iterator().next()));
             } else {
-                return CollectionUtils.listOf(new FileListIterator(this, urnsMatching));
+                return CollectionUtils.listOf(new FileViewIterator(this, urnsMatching));
             }
         } finally {
             rwLock.readLock().unlock();
@@ -865,8 +865,8 @@ class LibraryImpl implements Library, FileCollection {
             file = FileUtils.getCanonicalFile(file);
         } catch (IOException e) {
             LOG.debugf("Not adding {0} because canonicalize failed", file);
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.CANT_CANONICALIZE));
+            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.CANT_CANONICALIZE));
         }
         
         boolean explicitAdd = false;
@@ -878,8 +878,8 @@ class LibraryImpl implements Library, FileCollection {
             // Exit if already added.
             if(fileToFileDescMap.containsKey(file)) {
                 LOG.debugf("Not loading because file already loaded {0}", file);
-                FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-                return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.ALREADY_MANAGED));
+                FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
+                return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.ALREADY_MANAGED));
             }
         } finally {
             rwLock.readLock().unlock();
@@ -888,14 +888,14 @@ class LibraryImpl implements Library, FileCollection {
         //make sure a FileDesc can be created from this file
         if (!LibraryUtils.isFilePhysicallyManagable(file)) {
             LOG.debugf("Not adding {0} because file isn't physically manageable", file);
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.NOT_MANAGEABLE));
+            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.NOT_MANAGEABLE));
         }
         
         if (!LibraryUtils.isFileAllowedToBeManaged(file)) {
             LOG.debugf("Not adding {0} because programs are not allowed to be manageable", file);
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.PROGRAMS_NOT_MANAGEABLE));
+            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.PROGRAMS_NOT_MANAGEABLE));
         }
         
         final File interned = new File(file.getPath().intern());
@@ -913,8 +913,8 @@ class LibraryImpl implements Library, FileCollection {
         
         if(failed) {
             LOG.debugf("Not adding {0} because revisions changed while loading", interned);
-            FileListChangedEvent event = dispatchFailure(interned, oldFileDesc);
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.REVISIONS_CHANGED));
+            FileViewChangeEvent event = dispatchFailure(interned, oldFileDesc);
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.REVISIONS_CHANGED));
         } else {
             final PendingFuture task = new PendingFuture();
             ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheUrns(interned);
@@ -979,22 +979,22 @@ class LibraryImpl implements Library, FileCollection {
         }
         
         if(revchange) {
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.REVISIONS_CHANGED));
+            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
+            task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.REVISIONS_CHANGED));
         } else if(urnEvent.getType() != FutureEvent.Type.SUCCESS) {
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.ERROR_LOADING_URNS, urnEvent.getException()));
+            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
+            task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.ERROR_LOADING_URNS, urnEvent.getException()));
         } else if(dangerous) {
             LOG.debugf("Not adding {0} because the file is dangerous", file);
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.DANGEROUS_FILE));
+            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
+            task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.DANGEROUS_FILE));
         } else if(fd == null) {
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.CANT_CREATE_FD));
+            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
+            task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.CANT_CREATE_FD));
         } else if(failed) {
             LOG.debugf("Couldn't load FD because FD with file {0} exists already.  FD: {1}", file, fd);
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.ALREADY_MANAGED));
+            FileViewChangeEvent event = dispatchFailure(file, oldFileDesc);
+            task.setException(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.ALREADY_MANAGED));
         } else { // SUCCESS!
             // try loading the XML for this fileDesc
             fileDescMulticaster.broadcast(new FileDescChangeEvent(fd, FileDescChangeEvent.Type.LOAD, metadata));
@@ -1005,10 +1005,10 @@ class LibraryImpl implements Library, FileCollection {
             // prior to the future.get() returning.
             if(oldFileDesc == null) {
                 LOG.debugf("Added file: {0}", file);
-                dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADDED, fd));
+                dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.ADDED, fd));
             } else {
                 LOG.debugf("Changed to new file: {0}", file);
-                dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGED, oldFileDesc, fd));
+                dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.CHANGED, oldFileDesc, fd));
             }
             
             task.set(fd);
@@ -1034,7 +1034,7 @@ class LibraryImpl implements Library, FileCollection {
         file = FileUtils.canonicalize(file);
         FileDesc fd = removeInternal(file, true);        
         if(fd != null) {
-            dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.REMOVED, fd));
+            dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.REMOVED, fd));
         }
         return fd != null;
     }
@@ -1119,7 +1119,7 @@ class LibraryImpl implements Library, FileCollection {
             List<LimeXMLDocument> xmlDocs = new ArrayList<LimeXMLDocument>(fd.getLimeXMLDocuments());
             return add(newName, xmlDocs, revision.get(), fd);
         } else {
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, oldName, null, newName), FileListChangeFailedException.Reason.OLD_WASNT_MANAGED));
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(new FileViewChangeEvent(this, FileViewChangeEvent.Type.CHANGE_FAILED, oldName, null, newName), FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED));
         }
     }
     
@@ -1133,7 +1133,7 @@ class LibraryImpl implements Library, FileCollection {
             urnCache.removeUrns(file); // Explicitly remove URNs to force recalculating.
             return add(file, xmlDocs, revision.get(), fd);
         } else {
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, file, null, file), FileListChangeFailedException.Reason.OLD_WASNT_MANAGED));
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(new FileViewChangeEvent(this, FileViewChangeEvent.Type.CHANGE_FAILED, file, null, file), FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED));
         }
     }
     
@@ -1183,7 +1183,7 @@ class LibraryImpl implements Library, FileCollection {
             future.cancel(true);
         }
         
-        dispatch(new FileListChangedEvent(LibraryImpl.this, FileListChangedEvent.Type.CLEAR));
+        dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.CLEAR));
         
         fireLoading();
         final List<ListeningFuture<FileDesc>> futures = loadManagedFiles(rev);
@@ -1270,8 +1270,8 @@ class LibraryImpl implements Library, FileCollection {
             public void handleEvent(FutureEvent<FileDesc> event) {
                 switch(event.getType()) {
                 case EXCEPTION:
-                    if(event.getException().getCause() instanceof FileListChangeFailedException) {
-                        FileListChangeFailedException ex = (FileListChangeFailedException)event.getException().getCause();
+                    if(event.getException().getCause() instanceof FileViewChangeFailedException) {
+                        FileViewChangeFailedException ex = (FileViewChangeFailedException)event.getException().getCause();
                         switch(ex.getReason()) {
                         case CANT_CANONICALIZE:
                         case CANT_CREATE_FD:

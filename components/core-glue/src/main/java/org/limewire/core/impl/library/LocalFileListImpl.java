@@ -23,7 +23,7 @@ import ca.odell.glazedlists.TransformedList;
 
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 
 abstract class LocalFileListImpl implements LocalFileList {
     
@@ -152,13 +152,13 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     /** Notification that a collection share has changed. */
-    protected abstract void collectionUpdate(FileListChangedEvent.Type type, boolean shared);
+    protected abstract void collectionUpdate(FileViewChangeEvent.Type type, boolean shared);
    
     /** Constructs a new EventListener for list change events. */
-    protected EventListener<FileListChangedEvent> newEventListener() {
-        return new EventListener<FileListChangedEvent>() {
+    protected EventListener<FileViewChangeEvent> newEventListener() {
+        return new EventListener<FileViewChangeEvent>() {
             @Override
-            public void handleEvent(FileListChangedEvent event) {
+            public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {
                 case ADDED:
                     addFileDesc(event.getFileDesc());

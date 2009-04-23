@@ -39,7 +39,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         fileManager = context.mock(FileManager.class);
         managedFileList = context.mock(Library.class);
         sharedFileList = context.mock(GnutellaFileCollection.class);
-        incompleteFileList = context.mock(IncompleteFileList.class);
+        incompleteFileList = context.mock(IncompleteFileCollection.class);
         keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null, null);
     }
     
@@ -50,37 +50,37 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         final FileDesc newFile = new FileDescStub("goodbye world", urn, 2);
         
         final GetterMatcher<Service> serviceGetter = GetterMatcher.create();
-        final GetterMatcher<EventListener<FileListChangedEvent>> listenerGetter = GetterMatcher.create();
+        final GetterMatcher<EventListener<FileViewChangeEvent>> listenerGetter = GetterMatcher.create();
         
         context.checking(new Expectations() {
             {
                 exactly(1).of(registry).register(with(serviceGetter));                
-                exactly(1).of(sharedFileList).addFileListListener(with(listenerGetter));
+                exactly(1).of(sharedFileList).addFileViewListener(with(listenerGetter));
                 exactly(1).of(managedFileList).addManagedListStatusListener(with(any(EventListener.class)));
-                exactly(1).of(incompleteFileList).addFileListListener(with(any(EventListener.class)));
+                exactly(1).of(incompleteFileList).addFileViewListener(with(any(EventListener.class)));
                 exactly(1).of(multicaster).addListener(with(any(EventListener.class)));
                 
-                atLeast(1).of(fileManager).getManagedFileList();
+                atLeast(1).of(fileManager).getLibrary();
                 will(returnValue(managedFileList));
                 
-                atLeast(1).of(fileManager).getIncompleteFileList();
+                atLeast(1).of(fileManager).getIncompleteFileCollection();
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(originalFile);
                 will(returnValue(false));
-                atLeast(1).of(fileManager).getGnutellaFileList();
+                atLeast(1).of(fileManager).getGnutellaFileView();
                 will(returnValue(sharedFileList));
                 atLeast(1).of(sharedFileList).contains(originalFile);
                 will(returnValue(true));
                 
-                atLeast(1).of(fileManager).getIncompleteFileList();
+                atLeast(1).of(fileManager).getIncompleteFileCollection();
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(originalFile);
                 will(returnValue(false));
-                atLeast(1).of(fileManager).getIncompleteFileList();
+                atLeast(1).of(fileManager).getIncompleteFileCollection();
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(newFile);
                 will(returnValue(false));
-                atLeast(1).of(fileManager).getGnutellaFileList();
+                atLeast(1).of(fileManager).getGnutellaFileView();
                 will(returnValue(sharedFileList));
                 atLeast(1).of(sharedFileList).contains(newFile);
                 will(returnValue(true));
@@ -88,7 +88,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         });
         keywordIndex.register(registry, multicaster);
         serviceGetter.get().initialize();
-        listenerGetter.get().handleEvent(new FileListChangedEvent(sharedFileList, FileListChangedEvent.Type.ADDED, originalFile));
+        listenerGetter.get().handleEvent(new FileViewChangeEvent(sharedFileList, FileViewChangeEvent.Type.ADDED, originalFile));
         
         IntSet result = keywordIndex.search("world hello", null, false);
         assertNotNull(result);
@@ -98,7 +98,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         result = keywordIndex.search("goodbye world", null, false);
         assertNull(result);
 
-        listenerGetter.get().handleEvent(new FileListChangedEvent(sharedFileList, FileListChangedEvent.Type.CHANGED, originalFile, newFile));
+        listenerGetter.get().handleEvent(new FileViewChangeEvent(sharedFileList, FileViewChangeEvent.Type.CHANGED, originalFile, newFile));
         
         result = keywordIndex.search("world goodbye", null, false);
         assertNotNull(result);

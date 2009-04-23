@@ -9,10 +9,10 @@ import org.limewire.http.auth.ServerAuthState;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.uploader.HttpException;
-import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
+import com.limegroup.gnutella.uploader.authentication.HttpRequestFileViewProvider;
 
 /**
  * Returns the appropriate friend file list for friend parsing the http request
@@ -25,17 +25,17 @@ import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvide
  * of the {@link HttpContext}.
  */
 @Singleton
-public class FriendFileListProvider implements HttpRequestFileListProvider {
+public class FileViewProvider implements HttpRequestFileViewProvider {
 
     private final FileManager fileManager;
 
     @Inject
-    public FriendFileListProvider(FileManager fileManager) {
+    public FileViewProvider(FileManager fileManager) {
         this.fileManager = fileManager;
     }
     
     @Override
-    public Iterable<FileCollection> getFileLists(String userId, HttpContext httpContext) throws HttpException {
+    public Iterable<FileView> getFileViews(String userId, HttpContext httpContext) throws HttpException {
         if (userId == null) {
             throw new HttpException("no user given", HttpStatus.SC_FORBIDDEN);
         }
@@ -47,7 +47,7 @@ public class FriendFileListProvider implements HttpRequestFileListProvider {
                 if (!credentials.getUserPrincipal().getName().equals(userId)) {
                     throw new HttpException("not authorized", HttpStatus.SC_UNAUTHORIZED);
                 }
-                FileCollection buddyFileList = fileManager.getFriendFileList(credentials.getUserPrincipal().getName());
+                FileView buddyFileList = fileManager.getFileViewForId(credentials.getUserPrincipal().getName());
                 if (buddyFileList == null) {
                     throw new HttpException("no such list for: " + credentials.getUserPrincipal().getName(), HttpStatus.SC_NOT_FOUND);
                 }

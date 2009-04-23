@@ -46,7 +46,7 @@ import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandlerFactory;
 import com.limegroup.gnutella.uploader.FileRequestParser.FileRequest;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
-import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
+import com.limegroup.gnutella.uploader.authentication.HttpRequestFileViewProvider;
 
 /**
  * Handles upload requests for files and THEX trees.
@@ -92,7 +92,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
     private final HashTreeWriteHandlerFactory tigerWriteHandlerFactory;
 
-    private final HttpRequestFileListProvider fileListProvider;
+    private final HttpRequestFileViewProvider fileListProvider;
 
     FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager,
             HTTPHeaderUtils httpHeaderUtils, HttpRequestHandlerFactory httpRequestHandlerFactory,
@@ -102,7 +102,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
             Provider<DownloadManager> downloadManager, Provider<HashTreeCache> tigerTreeCache,
             PushEndpointFactory pushEndpointFactory,
             HashTreeWriteHandlerFactory tigerWriteHandlerFactory, 
-            HttpRequestFileListProvider fileListProvider) {
+            HttpRequestFileViewProvider fileListProvider) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
@@ -465,7 +465,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
-                fileManager.getManagedFileList().fileChanged(file, fd.getLimeXMLDocuments());
+                fileManager.getLibrary().fileChanged(file, fd.getLimeXMLDocuments());
                 return false;
             }
         }

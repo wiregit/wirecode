@@ -2,7 +2,7 @@ package org.limewire.core.impl.library;
 
 import org.limewire.listener.EventListener;
 
-import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.SharedFileCollection;
 
@@ -19,7 +19,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
 
     private volatile boolean committed = false;
 
-    private volatile EventListener<FileListChangedEvent> eventListener;
+    private volatile EventListener<FileViewChangeEvent> eventListener;
 
     private final CombinedShareList combinedShareList;
 
@@ -42,7 +42,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
         if (committed) {
             combinedShareList.removeMemberList(baseList);
             if (friendFileList != null)
-                friendFileList.removeFileListListener(eventListener);
+                friendFileList.removeFileViewListener(eventListener);
         }
     }
 
@@ -52,8 +52,8 @@ class FriendFileListImpl extends AbstractFriendFileList {
     void commit() {
         committed = true;
         eventListener = newEventListener();
-        friendFileList = fileManager.getOrCreateFriendFileList(name);
-        friendFileList.addFileListListener(eventListener);
+        friendFileList = fileManager.getOrCreateSharedCollection(name);
+        friendFileList.addFileViewListener(eventListener);
         combinedShareList.addMemberList(baseList);
 
         com.limegroup.gnutella.library.FileCollection fileList = friendFileList;

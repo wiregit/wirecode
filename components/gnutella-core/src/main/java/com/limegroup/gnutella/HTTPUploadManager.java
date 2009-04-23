@@ -49,8 +49,8 @@ import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
-import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileListProvider;
-import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
+import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileViewProvider;
+import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileViewProvider;
 
 /**
  * Manages {@link HTTPUploader} objects that are created by
@@ -201,9 +201,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
 
-    private final Provider<GnutellaUploadFileListProvider> gnutellaUploadFileListProvider;
+    private final Provider<GnutellaUploadFileViewProvider> gnutellaUploadFileListProvider;
 
-    private final Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider;
+    private final Provider<GnutellaBrowseFileViewProvider> gnutellaBrowseFileListProvider;
     
     private final UrnValidator urnValidator;
     
@@ -213,8 +213,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             Provider<HTTPAcceptor> httpAcceptor,
             Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
             TcpBandwidthStatistics tcpBandwidthStatistics,
-            Provider<GnutellaUploadFileListProvider> gnutellaFileListProvider,
-            Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider,
+            Provider<GnutellaUploadFileViewProvider> gnutellaFileListProvider,
+            Provider<GnutellaBrowseFileViewProvider> gnutellaBrowseFileListProvider,
             UrnValidator urnValidator) {
         this.gnutellaUploadFileListProvider = gnutellaFileListProvider;
         this.gnutellaBrowseFileListProvider = gnutellaBrowseFileListProvider;
@@ -405,7 +405,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             return false;
         }
         
-        if (fileManager.get().getGnutellaFileList().hasApplicationSharedFiles())
+        if (fileManager.get().getGnutellaFileView().hasApplicationSharedFiles())
             return slotManager.hasHTTPSlotForMeta(uploadsInProgress()
                     + getNumQueuedUploads());
         return isServiceable();
@@ -438,7 +438,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public boolean releaseLock(File file) {
         assert started;
         
-        FileDesc fd = fileManager.get().getManagedFileList().getFileDesc(file);
+        FileDesc fd = fileManager.get().getLibrary().getFileDesc(file);
         if (fd != null)
             return killUploadsForFileDesc(fd);
         else

@@ -35,7 +35,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 abstract class AbstractFileCollection implements FileCollection, Inspectable {
 
     /**  A list of listeners for this list */
-    private final EventMulticaster<FileListChangedEvent> listenerSupport;
+    private final EventMulticaster<FileViewChangeEvent> listenerSupport;
     
     /** All indexes this list is holding. */
     private final IntSet fileDescIndexes;
@@ -44,7 +44,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     protected final LibraryImpl managedList;
     
     /** The listener on the ManagedList, to synchronize changes. */
-    private final EventListener<FileListChangedEvent> managedListListener;
+    private final EventListener<FileViewChangeEvent> managedListListener;
     
     /** A rw lock. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -52,13 +52,13 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     public AbstractFileCollection(LibraryImpl managedList) {
         this.managedList = managedList;
         this.fileDescIndexes = new IntSet(); 
-        this.listenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
+        this.listenerSupport = new EventMulticasterImpl<FileViewChangeEvent>();
         this.managedListListener = new ManagedListSynchronizer();
     }
     
     /** Initializes this list.  Until the list is initialized, it is not valid. */
     protected void initialize() {
-        managedList.addFileListListener(managedListListener);
+        managedList.addFileViewListener(managedListListener);
     }
     
     @Override
@@ -257,7 +257,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     
     @Override
     public Iterator<FileDesc> iterator() {
-        return new FileListIterator(AbstractFileCollection.this, fileDescIndexes);
+        return new FileViewIterator(AbstractFileCollection.this, fileDescIndexes);
     }
     
     @Override
@@ -265,7 +265,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {
-                return new ThreadSafeFileListIterator(AbstractFileCollection.this, managedList);
+                return new ThreadSafeFileViewIterator(AbstractFileCollection.this, managedList);
             }
         };
     }
@@ -337,12 +337,12 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     }
 
     @Override
-    public void addFileListListener(EventListener<FileListChangedEvent> listener) {
+    public void addFileViewListener(EventListener<FileViewChangeEvent> listener) {
         listenerSupport.addListener(listener);
     }
 
     @Override
-    public void removeFileListListener(EventListener<FileListChangedEvent> listener) {
+    public void removeFileViewListener(EventListener<FileViewChangeEvent> listener) {
         listenerSupport.removeListener(listener);
     }
     
@@ -351,7 +351,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
      * @param fileDesc that was added
      */
     protected void fireAddEvent(FileDesc fileDesc) {
-        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.ADDED, fileDesc));
+        listenerSupport.handleEvent(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.ADDED, fileDesc));
     }
     
     /**
@@ -359,7 +359,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
      * @param fileDesc that was removed
      */
     protected void fireRemoveEvent(FileDesc fileDesc) {
-        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.REMOVED, fileDesc));
+        listenerSupport.handleEvent(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.REMOVED, fileDesc));
     }
 
     /**
@@ -368,17 +368,17 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
      * @param newFileDesc FileDesc that replaced oldFileDesc
      */
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.CHANGED, oldFileDesc, newFileDesc));
+        listenerSupport.handleEvent(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.CHANGED, oldFileDesc, newFileDesc));
     }
     
     /** Fires a clear event to all listeners. */
     protected void fireClearEvent() {
-        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.CLEAR));
+        listenerSupport.handleEvent(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.CLEAR));
     }
     
     /** Fires an event when the state of a shared collection changes*/
-    protected void fireCollectionEvent(FileListChangedEvent.Type type, boolean value) {
-        listenerSupport.handleEvent(new FileListChangedEvent(type, value));
+    protected void fireCollectionEvent(FileViewChangeEvent.Type type, boolean value) {
+        listenerSupport.handleEvent(new FileViewChangeEvent(type, value));
     }
     
     /**
@@ -424,7 +424,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     }
 
     public void dispose() {
-        managedList.removeFileListListener(managedListListener);
+        managedList.removeFileViewListener(managedListListener);
     }
     
     /**
@@ -466,9 +466,9 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
         if(contains(fd)) {
             return fd;
         } else {
-            throw new ExecutionException(new FileListChangeFailedException(
-                    new FileListChangedEvent(AbstractFileCollection.this, FileListChangedEvent.Type.ADD_FAILED, fd.getFile()),
-                    FileListChangeFailedException.Reason.CANT_ADD_TO_LIST));
+            throw new ExecutionException(new FileViewChangeFailedException(
+                    new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.ADD_FAILED, fd.getFile()),
+                    FileViewChangeFailedException.Reason.CANT_ADD_TO_LIST));
         }
     }
     
@@ -483,9 +483,9 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
             protected FileDesc convertException(ExecutionException ee) throws ExecutionException {
                 // We can fail because we attempted to add a File that already existed --
                 // if that's why we failed, then we return the file anyway (because it is added.)
-                if(ee.getCause() instanceof FileListChangeFailedException) {
-                    FileListChangeFailedException fe = (FileListChangeFailedException)ee.getCause();
-                    if(fe.getEvent().getType() == FileListChangedEvent.Type.ADD_FAILED) {
+                if(ee.getCause() instanceof FileViewChangeFailedException) {
+                    FileViewChangeFailedException fe = (FileViewChangeFailedException)ee.getCause();
+                    if(fe.getEvent().getType() == FileViewChangeEvent.Type.ADD_FAILED) {
                         if(contains(fe.getEvent().getFile())) {
                             return getFileDesc(fe.getEvent().getFile());
                         }
@@ -504,9 +504,9 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
         }
     }
     
-    private class ManagedListSynchronizer implements EventListener<FileListChangedEvent> {
+    private class ManagedListSynchronizer implements EventListener<FileViewChangeEvent> {
         @Override
-        public void handleEvent(FileListChangedEvent event) {
+        public void handleEvent(FileViewChangeEvent event) {
             // Note: We only need to check for pending on adds,
             //       because that's the only kind that doesn't
             //       require it already exists.

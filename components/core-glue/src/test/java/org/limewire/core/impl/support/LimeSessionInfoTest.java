@@ -403,9 +403,9 @@ public class LimeSessionInfoTest extends BaseTestCase {
             
             GnutellaFileCollection gnutellaFileList = context.mock(GnutellaFileCollection.class);
             Library managedFileList = context.mock(Library.class);
-            allowing(fileManager).getGnutellaFileList();
+            allowing(fileManager).getGnutellaFileView();
             will(returnValue(gnutellaFileList));
-            allowing(fileManager).getManagedFileList();
+            allowing(fileManager).getLibrary();
             will(returnValue(managedFileList));
             
             allowing(gnutellaFileList).size();

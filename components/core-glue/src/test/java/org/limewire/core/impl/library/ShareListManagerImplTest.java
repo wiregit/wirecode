@@ -31,7 +31,7 @@ import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.SharedFileCollection;
 
@@ -70,14 +70,12 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 will(returnValue(ListEventAssembler.createListEventPublisher()));
                 one(libraryManager).getReadWriteLock();
                 will(returnValue(LockFactory.DEFAULT.createReadWriteLock()));
-                one(fileManager).getGnutellaFileList();
-                allowing(fileManager).getOrCreateFriendFileList(friendId1);
-                will(returnValue(friendFileList1));
-                allowing(fileManager).getFriendFileList(friendId1);
+                one(fileManager).getGnutellaFileView();
+                allowing(fileManager).getOrCreateSharedCollection(friendId1);
                 will(returnValue(friendFileList1));
                 allowing(friend1).getId();
                 will(returnValue(friendId1));
-                one(friendFileList1).addFileListListener(with(any(EventListener.class)));
+                one(friendFileList1).addFileViewListener(with(any(EventListener.class)));
                 allowing(friendFileList1).getReadLock();
                 will(returnValue(lock1));
                 one(friendFileList1).iterator();
@@ -137,14 +135,12 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 will(returnValue(ListEventAssembler.createListEventPublisher()));
                 one(libraryManager).getReadWriteLock();
                 will(returnValue(LockFactory.DEFAULT.createReadWriteLock()));
-                one(fileManager).getGnutellaFileList();
-                allowing(fileManager).getOrCreateFriendFileList(friendId1);
-                will(returnValue(friendFileList1));
-                allowing(fileManager).getFriendFileList(friendId1);
+                one(fileManager).getGnutellaFileView();
+                allowing(fileManager).getOrCreateSharedCollection(friendId1);
                 will(returnValue(friendFileList1));
                 allowing(friend1).getId();
                 will(returnValue(friendId1));
-                one(friendFileList1).addFileListListener(with(any(EventListener.class)));
+                one(friendFileList1).addFileViewListener(with(any(EventListener.class)));
                 allowing(friendFileList1).getReadLock();
                 will(returnValue(lock1));
                 one(friendFileList1).iterator();
@@ -172,7 +168,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
                         with(new FriendShareListEventMatcher(new FriendShareListEvent(
                                 FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED,
                                 friendFileListForEvent, friend1))));
-                one(friendFileList1).removeFileListListener(with(any(EventListener.class)));
+                one(friendFileList1).removeFileViewListener(with(any(EventListener.class)));
             }
         });
         listenerSupport.fireEvent(new FriendEvent(friend1, FriendEvent.Type.REMOVED));
@@ -213,14 +209,12 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 will(returnValue(ListEventAssembler.createListEventPublisher()));
                 one(libraryManager).getReadWriteLock();
                 will(returnValue(LockFactory.DEFAULT.createReadWriteLock()));
-                one(fileManager).getGnutellaFileList();
-                allowing(fileManager).getOrCreateFriendFileList(friendId1);
-                will(returnValue(friendFileList1));
-                allowing(fileManager).getFriendFileList(friendId1);
+                one(fileManager).getGnutellaFileView();
+                allowing(fileManager).getOrCreateSharedCollection(friendId1);
                 will(returnValue(friendFileList1));
                 allowing(friend1).getId();
                 will(returnValue(friendId1));
-                one(friendFileList1).addFileListListener(with(any(EventListener.class)));
+                one(friendFileList1).addFileViewListener(with(any(EventListener.class)));
                 allowing(friendFileList1).getReadLock();
                 will(returnValue(lock1));
                 one(friendFileList1).iterator();
@@ -244,12 +238,12 @@ public class ShareListManagerImplTest extends BaseTestCase {
 
         context.checking(new Expectations() {
             {
-                one(fileManager).removeFriendFileList(friendId1);
+                one(fileManager).removeSharedCollection(friendId1);
                 one(friendShareListEventBroadcaster).broadcast(
                         with(new FriendShareListEventMatcher(new FriendShareListEvent(
                                 FriendShareListEvent.Type.FRIEND_SHARE_LIST_DELETED,
                                 friendFileListForEvent, friend1))));
-                one(friendFileList1).removeFileListListener(with(any(EventListener.class)));
+                one(friendFileList1).removeFileViewListener(with(any(EventListener.class)));
             }
         });
         listenerSupport.fireEvent(new FriendEvent(friend1, FriendEvent.Type.DELETE));
@@ -288,22 +282,20 @@ public class ShareListManagerImplTest extends BaseTestCase {
 
         final LibraryManager libraryManager = context.mock(LibraryManager.class);
         
-        final AtomicReference<EventListener<FileListChangedEvent>> internalListListener = new AtomicReference<EventListener<FileListChangedEvent>>();
+        final AtomicReference<EventListener<FileViewChangeEvent>> internalListListener = new AtomicReference<EventListener<FileViewChangeEvent>>();
         context.checking(new Expectations() {
             {
                 one(libraryManager).getLibraryListEventPublisher();
                 will(returnValue(ListEventAssembler.createListEventPublisher()));
                 one(libraryManager).getReadWriteLock();
                 will(returnValue(LockFactory.DEFAULT.createReadWriteLock()));
-                one(fileManager).getGnutellaFileList();
-                allowing(fileManager).getOrCreateFriendFileList(friendId1);
-                will(returnValue(friendFileList1));
-                allowing(fileManager).getFriendFileList(friendId1);
+                one(fileManager).getGnutellaFileView();
+                allowing(fileManager).getOrCreateSharedCollection(friendId1);
                 will(returnValue(friendFileList1));
                 allowing(friend1).getId();
                 will(returnValue(friendId1));
-                one(friendFileList1).addFileListListener(with(any(EventListener.class)));
-                will(new AssignParameterAction<EventListener<FileListChangedEvent>>(
+                one(friendFileList1).addFileViewListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<FileViewChangeEvent>>(
                         internalListListener, 0));
                 allowing(friendFileList1).getReadLock();
                 will(returnValue(lock1));
@@ -328,7 +320,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
         assertNotNull(combinedShareList);
         assertEmpty(combinedShareList.getModel());
 
-        EventListener<FileListChangedEvent> fileListChangeEventListener = internalListListener
+        EventListener<FileViewChangeEvent> fileListChangeEventListener = internalListListener
                 .get();
         final FileDesc fileDesc1 = context.mock(FileDesc.class);
         final File file1 = new File("file1");
@@ -345,8 +337,8 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 one(fileDesc1).putClientProperty(LocalFileList.FILE_ITEM_PROPERTY, localFileItem1);
             }
         });
-        fileListChangeEventListener.handleEvent(new FileListChangedEvent(friendFileList1,
-                FileListChangedEvent.Type.ADDED, fileDesc1));
+        fileListChangeEventListener.handleEvent(new FileViewChangeEvent(friendFileList1,
+                FileViewChangeEvent.Type.ADDED, fileDesc1));
 
         assertEquals(1, testFriendFileList1.size());
         assertContains(testFriendFileList1.getModel(), localFileItem1);
@@ -364,14 +356,12 @@ public class ShareListManagerImplTest extends BaseTestCase {
         
         context.checking(new Expectations() {
             {
-                allowing(fileManager).getOrCreateFriendFileList(friendId2);
-                will(returnValue(friendFileList2));
-                allowing(fileManager).getFriendFileList(friendId2);
+                allowing(fileManager).getOrCreateSharedCollection(friendId2);
                 will(returnValue(friendFileList2));
                 allowing(friend2).getId();
                 will(returnValue(friendId2));
-                one(friendFileList2).addFileListListener(with(any(EventListener.class)));
-                will(new AssignParameterAction<EventListener<FileListChangedEvent>>(
+                one(friendFileList2).addFileViewListener(with(any(EventListener.class)));
+                will(new AssignParameterAction<EventListener<FileViewChangeEvent>>(
                         internalListListener, 0));
                 allowing(friendFileList2).getReadLock();
                 will(returnValue(lock1));
@@ -416,8 +406,8 @@ public class ShareListManagerImplTest extends BaseTestCase {
         });
         fileListChangeEventListener = internalListListener
         .get();
-        fileListChangeEventListener.handleEvent(new FileListChangedEvent(friendFileList2,
-                FileListChangedEvent.Type.ADDED, fileDesc2));
+        fileListChangeEventListener.handleEvent(new FileViewChangeEvent(friendFileList2,
+                FileViewChangeEvent.Type.ADDED, fileDesc2));
 
         assertEquals(1, testFriendFileList2.size());
         assertContains(testFriendFileList2.getModel(), localFileItem2);

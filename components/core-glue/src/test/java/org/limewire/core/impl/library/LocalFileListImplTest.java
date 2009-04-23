@@ -13,7 +13,7 @@ import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileListChangedEvent.Type;
+import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 
 public class LocalFileListImplTest extends LimeTestCase {
 

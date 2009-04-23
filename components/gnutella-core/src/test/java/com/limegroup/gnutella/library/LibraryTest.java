@@ -43,7 +43,7 @@ import com.limegroup.gnutella.auth.StubContentResponseObserver;
 import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 
-public class ManagedFileListImplTest extends LimeTestCase {
+public class LibraryTest extends LimeTestCase {
 
     private LibraryImpl fileList;
     private UrnValidator urnValidator;
@@ -52,12 +52,12 @@ public class ManagedFileListImplTest extends LimeTestCase {
     private File f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15;
     private List<FileDesc> fds;
 
-    public ManagedFileListImplTest(String name) {
+    public LibraryTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(ManagedFileListImplTest.class);
+        return buildTestSuite(LibraryTest.class);
     }
 
     @Override

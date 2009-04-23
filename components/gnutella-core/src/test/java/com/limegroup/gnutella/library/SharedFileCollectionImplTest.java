@@ -21,27 +21,27 @@ import com.google.inject.Stage;
  */
 
 //TODO: cleanup and remove sleeps
-public class FriendFileListTest extends LimeTestCase {
+public class SharedFileCollectionImplTest extends LimeTestCase {
 
     private LibraryImpl managedList;
-    private FriendFileListImpl friendList;
+    private SharedFileCollectionImpl friendList;
     private Injector injector;
 
     private File f1, f2, f3, f4;
     
-    public FriendFileListTest(String name) {
+    public SharedFileCollectionImplTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(FriendFileListTest.class);
+        return buildTestSuite(SharedFileCollectionImplTest.class);
     }
     
     @Override
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
-        friendList = (FriendFileListImpl)injector.getInstance(FileManager.class).getOrCreateFriendFileList("test");
-        managedList = (LibraryImpl)injector.getInstance(FileManager.class).getManagedFileList();
+        friendList = (SharedFileCollectionImpl)injector.getInstance(FileManager.class).getOrCreateSharedCollection("test");
+        managedList = (LibraryImpl)injector.getInstance(FileManager.class).getLibrary();
         injector.getInstance(ServiceRegistry.class).initialize();
     }
 

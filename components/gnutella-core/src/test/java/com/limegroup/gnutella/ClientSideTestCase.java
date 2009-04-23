@@ -155,9 +155,9 @@ public abstract class ClientSideTestCase extends LimeTestCase {
         lifecycleManager.start();
         connectionServices.connect();
         
-        Future<FileDesc> f1 = fileManager.getGnutellaFileList().add(
+        Future<FileDesc> f1 = fileManager.getGnutellaCollection().add(
                 TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt"));
-        Future<FileDesc> f2 = fileManager.getGnutellaFileList().add(
+        Future<FileDesc> f2 = fileManager.getGnutellaCollection().add(
                 TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt"));
         
         berkeleyFD = f1.get(1, TimeUnit.SECONDS);

@@ -60,7 +60,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
             {
                 exactly(1).of(listenerSupport).addListener(with(same(friendShareListRefresher)));
                 
-                allowing(fileManager).getManagedFileList();
+                allowing(fileManager).getLibrary();
                 will(returnValue(managedFileList));
                 
                 exactly(1).of(managedFileList).addManagedListStatusListener(with(any(FinishedLoadingListener.class)));

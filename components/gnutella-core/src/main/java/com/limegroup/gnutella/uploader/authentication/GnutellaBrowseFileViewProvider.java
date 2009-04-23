@@ -6,30 +6,30 @@ import org.apache.http.protocol.HttpContext;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileView;
 
 /**
  * Returns the file list for a public Gnutella browse of the client's shared
  * files.
  */
 @Singleton
-public class GnutellaBrowseFileListProvider implements HttpRequestFileListProvider {
+public class GnutellaBrowseFileViewProvider implements HttpRequestFileViewProvider {
 
     private final FileManager fileManager;
 
     @Inject
-    public GnutellaBrowseFileListProvider(FileManager fileManager) {
+    public GnutellaBrowseFileViewProvider(FileManager fileManager) {
         this.fileManager = fileManager;
     }
     
     /**
-     * @return {@link FileManager#getGnutellaFileList()}.
+     * @return {@link FileManager#getGnutellaCollection()}.
      */
     @Override
-    public Iterable<FileCollection> getFileLists(String userID, HttpContext httpContext) {
+    public Iterable<FileView> getFileViews(String userID, HttpContext httpContext) {
         // Broken into two lines so it returns the correct type.
-        FileCollection fileList = fileManager.getGnutellaFileList();
+        FileView fileList = fileManager.getGnutellaFileView();
         return Collections.singletonList(fileList);
     }
 

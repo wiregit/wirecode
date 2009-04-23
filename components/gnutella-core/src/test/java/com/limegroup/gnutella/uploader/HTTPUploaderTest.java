@@ -37,7 +37,7 @@ import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
-import com.limegroup.gnutella.library.GnutellaFileListStub;
+import com.limegroup.gnutella.library.GnutellaCollectionStub;
 
 public class HTTPUploaderTest extends LimeTestCase {
 
@@ -87,7 +87,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         });        
 
         fm = (FileManagerStub) injector.getInstance(FileManager.class);
-        GnutellaFileListStub sharedList = fm.getGnutellaFileList();
+        GnutellaCollectionStub sharedList = fm.getGnutellaCollection();
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
         fd1 = new FileDescStub("abc1.txt", urn1, 0);
         sharedList.add(fd1);
