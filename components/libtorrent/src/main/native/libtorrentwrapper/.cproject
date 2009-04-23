@@ -30,7 +30,11 @@
 </tool>
 <tool id="org.eclipse.cdt.build.core.settings.holder.1014521487" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
 <option id="org.eclipse.cdt.build.core.settings.holder.incpaths.108845176" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
-<listOptionValue builtIn="false" value="/home/pvertenten/Desktop/libtorrent-rasterbar-0.14.2/include"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtorrentwrapper/include}&quot;"/>
+</option>
+<option id="org.eclipse.cdt.build.core.settings.holder.undef.incpaths.1082436042" superClass="org.eclipse.cdt.build.core.settings.holder.undef.incpaths" valueType="undefIncludePath">
+<listOptionValue builtIn="false" value="C:/libtorrent-rasterbar-0.14.2/include"/>
+<listOptionValue builtIn="false" value="C:/boost_1_36_0"/>
 </option>
 <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.727856321" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 </tool>

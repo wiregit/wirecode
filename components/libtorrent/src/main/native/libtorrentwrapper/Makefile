@@ -2,14 +2,14 @@ CXXFLAGS =	-O2 -g -Wall -fmessage-length=0
 
 
 #TODO make OS variable dynamic
-OS = "Linux"
+OS = "Windows"
 
-ifeq ($(OS),Windows)
+ifeq ($(OS),"Windows")
 	LIB_DIR = ./lib/windows
-    LIBS = -l ws2_32 -l torrent
+    LIBS = -l wsock32 -l gdi32 -l ws2_32 -l winmm -l wldap32 -l kernel32 -l ssl -l crypto -l boost_system-mgw34-mt-1_38 -l boost_date_time-mgw34-mt-1_38 -l boost_filesystem-mgw34-mt-1_38 -l boost_thread-mgw34-mt-1_38 -l torrent
     LIBRARY = torrent-wrapper.dll
     TARGET = libtorrent-wrapper.exe
-    OPTIONS = -DIPV6_PROTECTION_LEVEL -DWINDOWS
+    OPTIONS = -DIPV6_PROTECTION_LEVEL -DWINDOWS -D_WIN32_WINNT=0x0501
 endif
 
 ifeq  ($(OS),"Linux")
