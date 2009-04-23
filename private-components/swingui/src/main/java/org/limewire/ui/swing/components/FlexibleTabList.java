@@ -1,15 +1,12 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -24,7 +21,6 @@ import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 /** 
@@ -52,13 +48,10 @@ public class FlexibleTabList extends AbstractTabList {
     private int vizStartIdx = -1;
     
     /**
-     * Constructs a FlexibleTabList with the specified combobox decorator and 
-     * collection of action maps.
+     * Constructs a FlexibleTabList with the specified combobox decorator.
      */
     @AssistedInject
-    FlexibleTabList(ComboBoxDecorator comboBoxDecorator,
-            @Assisted Iterable<? extends TabActionMap> actionMaps) {
-        
+    FlexibleTabList(ComboBoxDecorator comboBoxDecorator) {
         this.comboBoxDecorator = comboBoxDecorator;
         
         GuiUtils.assignResources(this);
@@ -72,8 +65,6 @@ public class FlexibleTabList extends AbstractTabList {
         
         maxVisibleTabs = Integer.MAX_VALUE;
         
-        setTabActionMaps(actionMaps);
-        
         // Add listener to adjust tab layout when container is resized. 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -84,16 +75,6 @@ public class FlexibleTabList extends AbstractTabList {
                 }
             }
         });
-    }
-    
-    /**
-     * Constructs a FlexibleTabList with the specified combobox decorator and
-     * array of action maps.
-     */
-    @AssistedInject
-    FlexibleTabList(ComboBoxDecorator comboBoxDecorator,
-            @Assisted TabActionMap... actionMaps) {
-        this(comboBoxDecorator, Arrays.asList(actionMaps));
     }
 
     /** 
@@ -145,7 +126,7 @@ public class FlexibleTabList extends AbstractTabList {
             more.setPressedIcon(morePressedIcon);
             more.setRolloverIcon(moreRolloverIcon);
             more.setSelectedIcon(morePressedIcon);
-            add(more, "gapleft 0:115");
+            add(more, "gapleft 0:" + String.valueOf(MIN_TAB_WIDTH));
         }
         
         revalidate();
@@ -269,21 +250,6 @@ public class FlexibleTabList extends AbstractTabList {
         getTabProperties().setInsets(insets);
         
         revalidate();
-    }
-    
-    @Override
-    public void setTabTextColor(Color normalColor) {
-        super.setTabTextColor(normalColor);
-    }
-    
-    @Override
-    public void setTabTextSelectedColor(Color selectionColor) {
-        super.setTabTextSelectedColor(selectionColor);
-    }
-    
-    @Override
-    public void setTextFont(Font font) {
-        super.setTextFont(font);
     }
     
     /**

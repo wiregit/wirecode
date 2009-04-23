@@ -6,13 +6,8 @@ package org.limewire.ui.swing.components;
 public interface FlexibleTabListFactory {
 
     /**
-     * Creates a FlexibleTabList using the specified collection of action maps.
+     * Creates a FlexibleTabList.
      */
-    FlexibleTabList create(Iterable<? extends TabActionMap> actionMaps);
-    
-    /**
-     * Creates a FlexibleTabList using the specified array of action maps.
-     */
-    FlexibleTabList create(TabActionMap... actionMaps);
+    FlexibleTabList create();
     
 }

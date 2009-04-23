@@ -22,7 +22,7 @@ import org.jdesktop.swingx.painter.Painter;
  * should specify their own layout managers and implement 
  * <code>layoutTabs()</code> to add visible tabs to the container.
  */
-abstract class AbstractTabList extends JXPanel {
+public abstract class AbstractTabList extends JXPanel {
 
     private final List<FancyTab> tabs = new ArrayList<FancyTab>();
     private final ButtonGroup tabGroup = new ButtonGroup();
