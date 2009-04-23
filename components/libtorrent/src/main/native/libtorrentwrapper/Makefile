@@ -2,7 +2,7 @@ CXXFLAGS =	-O2 -g -Wall -fmessage-length=0
 
 
 #TODO make OS variable dynamic
-OS = "Windows"
+OS = "Linux"
 
 ifeq ($(OS),"Windows")
 	LIB_DIR = ./lib/windows
