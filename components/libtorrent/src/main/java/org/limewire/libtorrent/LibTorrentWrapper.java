@@ -14,13 +14,15 @@ public class LibTorrentWrapper implements LibTorrent {
     public LibTorrentWrapper() {
         if(OSUtils.isWindows()) {
             System.loadLibrary("mingwm10");
-            System.loadLibrary("boost_system-mgw34-mt-1_38");
-            System.loadLibrary("boost_date_time-mgw34-mt-1_38");
-            System.loadLibrary("boost_filesystem-mgw34-mt-1_38");
-            System.loadLibrary("boost_thread-mgw34-mt-1_38");
+            System.loadLibrary("boost_system-mgw34-mt-1_36");
+            System.loadLibrary("boost_date_time-mgw34-mt-1_36");
+            System.loadLibrary("boost_filesystem-mgw34-mt-1_36");
+            System.loadLibrary("boost_thread-mgw34-mt-1_36");
             System.loadLibrary("torrent");
         } else if(OSUtils.isLinux()) {
            //compile into torrent-wrapper.so
+        } else if(OSUtils.isMacOSX()) {
+            System.loadLibrary("torrent");
         }
         
         //TODO make sure right libraries are loaded on linux too.
