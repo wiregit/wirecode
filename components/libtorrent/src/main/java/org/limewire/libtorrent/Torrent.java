@@ -4,6 +4,7 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
+import java.math.BigInteger;
 
 import org.limewire.listener.EventListener;
 
@@ -25,6 +26,8 @@ public class Torrent {
         LibTorrentInfo info = torrentManager.addTorrent(torrent);
         setInfo(info);
 
+        System.out.println(info);
+        
         LibTorrentStatus status = torrentManager.getStatus(info.sha1);
         setStatus(status);
 
@@ -73,7 +76,9 @@ public class Torrent {
     }
 
     public synchronized long getTotalSize() {
-        return info.content_length.longValue();
+        BigInteger size = new BigInteger(info.content_length);
+        
+        return size.longValue();
     }
 
     public synchronized long getTotalDownloaded() {

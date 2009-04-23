@@ -16,7 +16,7 @@ public class LibTorrentInfo extends Structure {
 
     public int num_files;
     
-    public NativeLong content_length;
+    public String content_length;
 
     public Pointer paths;
 
@@ -25,7 +25,7 @@ public class LibTorrentInfo extends Structure {
     @Override
     public void read() {
         super.read();
-
+        
         stringPaths = new String[num_files];
         Pointer[] pointers = paths.getPointerArray(0, num_files);
         for (int i = 0; i < num_files; i++) {

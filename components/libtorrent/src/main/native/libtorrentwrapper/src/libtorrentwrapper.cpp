@@ -89,7 +89,7 @@ struct info_s {
 	int piece_length;
 	int num_pieces;
 	int num_files;
-	long content_length;
+	const char* content_length;
 	const char** paths;
 };
 
@@ -107,7 +107,15 @@ extern "C" const void* add_torrent(char* path) {
 	int piece_length = torrent_info.piece_length();
 	int num_pieces = torrent_info.num_pieces();
 	int num_files = torrent_info.num_files();
-	long content_length = torrent_info.total_size();
+
+	std::stringstream oss;
+	oss << torrent_info.total_size();
+	//TODO cleanup memory
+	std::string* content_length = new std::string(oss.str().c_str());
+
+	std::cout << "total_size_unknown: " << torrent_info.total_size()
+			<< std::endl;
+	std::cout << "total_size_long: " << content_length << std::endl;
 
 	libtorrent::file_storage files = torrent_info.files();
 
@@ -132,7 +140,7 @@ extern "C" const void* add_torrent(char* path) {
 	info->num_files = num_files;
 	info->num_pieces = num_pieces;
 	info->piece_length = piece_length;
-	info->content_length = content_length;
+	info->content_length = content_length->c_str();
 	info->paths = paths;
 
 	return info;
