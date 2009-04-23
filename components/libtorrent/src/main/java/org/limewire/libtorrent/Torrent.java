@@ -27,7 +27,7 @@ public class Torrent {
         setInfo(info);
 
         System.out.println(info);
-        
+
         LibTorrentStatus status = torrentManager.getStatus(info.sha1);
         setStatus(status);
 
@@ -77,12 +77,17 @@ public class Torrent {
 
     public synchronized long getTotalSize() {
         BigInteger size = new BigInteger(info.content_length);
-        
+
         return size.longValue();
     }
 
     public synchronized long getTotalDownloaded() {
-        return status == null ? 0 : status.total_done.longValue();
+        if (status == null) {
+            return 0;
+        } else {
+            BigInteger done = new BigInteger(status.total_done);
+            return done.longValue();
+        }
     }
 
     public synchronized int getNumPeers() {

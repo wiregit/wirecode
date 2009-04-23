@@ -4,7 +4,7 @@ import com.sun.jna.NativeLong;
 import com.sun.jna.Structure;
 
 public class LibTorrentStatus extends Structure {
-	public NativeLong total_done;
+	public String total_done;
 	public float download_rate;
 	public int num_peers;
 	public int state;

@@ -9,6 +9,7 @@
 #include "libtorrent/alert_types.hpp"
 #include "libtorrent/peer_id.hpp"
 #include <boost/filesystem/path.hpp>
+#include "libtorrent/size_type.hpp"
 
 #ifdef WINDOWS
 #include <windows.h>
@@ -29,13 +30,21 @@ extern "C" int init(const char* path) {
 	return 0;
 }
 
-const char* getSha1String(sha1_hash sha1) {
+std::string* getSizeTypeString(libtorrent::size_type size) {
+	std::stringstream oss;
+	oss << size;
+	std::string* sizeString = new std::string(oss.str().c_str());
+	//TODO clean memory
+	return sizeString;
+}
+
+std::string* getSha1String(sha1_hash sha1) {
 	std::stringstream oss;
 	oss << sha1;
 
 	std::string* sha1String = new std::string(oss.str().c_str());
 	//TODO clean memory
-	return sha1String->c_str();
+	return sha1String;
 }
 
 sha1_hash getSha1Hash(const char* sha1String) {
@@ -47,7 +56,7 @@ sha1_hash getSha1Hash(const char* sha1String) {
 }
 
 struct torrent_s {
-	long total_done;
+	const char* total_done;
 	float download_rate;
 	int num_peers;
 	int state;
@@ -60,7 +69,8 @@ void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
 	libtorrent::torrent_status status = handle.status();
 
 	float download_rate = status.download_rate;
-	long total_done = status.total_done;
+	//TODO cleanup memory
+	const char* total_done = getSizeTypeString(status.total_done)->c_str();
 	int num_peers = status.num_peers;
 	int state = status.state;
 	float progress = status.progress;
@@ -108,10 +118,8 @@ extern "C" const void* add_torrent(char* path) {
 	int num_pieces = torrent_info.num_pieces();
 	int num_files = torrent_info.num_files();
 
-	std::stringstream oss;
-	oss << torrent_info.total_size();
 	//TODO cleanup memory
-	std::string* content_length = new std::string(oss.str().c_str());
+	std::string* content_length = getSizeTypeString(torrent_info.total_size());
 
 	std::cout << "total_size_unknown: " << torrent_info.total_size()
 			<< std::endl;
@@ -130,7 +138,7 @@ extern "C" const void* add_torrent(char* path) {
 	sha1_hash sha1 = torrent_info.info_hash();
 	std::cout << "sha1: " << sha1 << std::endl;
 
-	const char* sha1String = getSha1String(sha1);
+	const char* sha1String = getSha1String(sha1)->c_str();
 
 	std::cout << "sha1String: " << sha1String << std::endl;
 	//TODO free memory
@@ -229,7 +237,7 @@ extern "C" void get_alerts(void(*alertCallback)(void*, void*)) {
 			libtorrent::torrent_handle handle = torrentAlert->handle;
 			if (handle.is_valid()) {
 				//some bad events can have invalid handles, i mean really....
-				const char* sha1 = getSha1String(handle.info_hash());
+				const char* sha1 = getSha1String(handle.info_hash())->c_str();
 				a->sha1 = sha1;
 				get_torrent_s(handle, ts);
 			}
