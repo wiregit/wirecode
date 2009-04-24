@@ -42,13 +42,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final TorrentManager libTorrentManager;
 
-    private volatile File torrentFile = null;
-
-    private volatile File incompleteFile = null;
-
     private final Torrent torrent;
-
-    private List<String> paths = new ArrayList<String>();
 
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
@@ -61,30 +55,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void init(File torrentFile) throws IOException {
-        this.torrentFile = torrentFile;
-        FileInputStream fis = null;
-        FileChannel fileChannel = null;
-        try {
-            fis = new FileInputStream(torrentFile);
-            fileChannel = fis.getChannel();
-            Map metaInfo = (Map) Token.parse(fileChannel);
-            BTData btData = new BTDataImpl(metaInfo);
-            String name = btData.getName();
-
-            // TODO pull this from somewhere
-            File torrentDownloadFolder = new File("/home/pvertenten/Desktop");
-            incompleteFile = new File(torrentDownloadFolder, name);
-
-            if (btData.getFiles() != null) {
-                for (BTFileData fileData : btData.getFiles()) {
-                    paths.add(fileData.getPath());
-                }
-            }
-
-        } finally {
-            IOUtils.close(fileChannel);
-            IOUtils.close(fis);
-        }
+        torrent.init(torrentFile);
     }
 
     /**
@@ -146,7 +117,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public File getIncompleteFile() {
-        return incompleteFile;
+        return torrent.getIncompleteFile();
     }
 
     @Override
@@ -275,32 +246,23 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public long getAmountLost() {
-        // TODO ???
+        // Unused
         return 0;
     }
 
     @Override
     public void measureBandwidth() {
-        // torrent.measureBandwidth();
-        // averagedBandwidth.add(torrent.getMeasuredBandwidth(true));
-        // TODO
+        // Unused
     }
 
     @Override
     public float getMeasuredBandwidth() throws InsufficientDataException {
-        // if (averagedBandwidth.size() < 3)
-        // throw new InsufficientDataException();
-        // return averagedBandwidth.average().floatValue();
-        // TODO
         return (torrent.getDownloadRate() / 1024);
     }
 
     @Override
     public float getAverageBandwidth() {
-        // long now = stopTime > 0 ? stopTime : System.currentTimeMillis();
-        // long runTime = now - startTime;
-        // return runTime > 0 ? getTotalAmountDownloaded() / runTime : 0;
-        // TODO
+        // Unused
         return (torrent.getDownloadRate() / 1024);
     }
 
@@ -331,9 +293,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public URN getSha1Urn() {
-        // TODO
-        // return urn;
-        return null;
+        String sha1String = torrent.getSha1();
+        try {
+            return URN.createSHA1Urn(sha1String);
+        } catch (IOException e) {
+            // TODO handle
+            return null;
+        }
     }
 
     @Override
@@ -366,7 +332,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // btMetaInfo);
         // torrent.start();
 
-        torrent.init(torrentFile);
+        torrent.start();
 
         // TODO moving to complete folder when complete and starting to seed
         // again
@@ -494,45 +460,22 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public File getCompleteFile() {
-        // TODO real file.
-        return getIncompleteFile();
-    }
-
-    @Override
-    public List<File> getCompleteFiles() {
-        List<File> files = new ArrayList<File>();
-        File completeFile = getCompleteFile();
-        if (paths.size() > 0) {
-            for (String path : paths) {
-                // TODO assuming unix path??
-                File file = new File(completeFile, path);
-                files.add(file);
-            }
-        } else {
-            files.add(completeFile);
-        }
-        return files;
-    }
-
-    @Override
-    public List<File> getIncompleteFiles() {
-        List<File> files = new ArrayList<File>();
-        File incompleteFile = getIncompleteFile();
-        if (paths.size() > 0) {
-            for (String path : paths) {
-                // TODO assuming unix path??
-                File file = new File(incompleteFile, path);
-                files.add(file);
-            }
-        } else {
-            files.add(incompleteFile);
-        }
-        return files;
+        return torrent.getCompleteFile();
     }
 
     @Override
     public boolean isMementoSupported() {
         return false;
+    }
+
+    @Override
+    public List<File> getCompleteFiles() {
+        return torrent.getCompleteFiles();
+    }
+
+    @Override
+    public List<File> getIncompleteFiles() {
+        return torrent.getIncompleteFiles();
     }
 
 }

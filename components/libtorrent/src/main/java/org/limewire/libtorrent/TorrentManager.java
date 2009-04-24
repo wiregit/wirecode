@@ -19,6 +19,8 @@ public class TorrentManager {
 
     private EventPoller eventPoller;
 
+    private File torrentDownloadFolder = null;
+    
     // TODO use SourcedEventMulticaster
 
     public TorrentManager() {
@@ -31,6 +33,7 @@ public class TorrentManager {
     }
 
     public void init(String path) {
+        torrentDownloadFolder = new File(path);
         // TODO this location can change, so need to be able to update it.
         libTorrent.init(path);
         this.eventPoller = new EventPoller();
@@ -111,5 +114,9 @@ public class TorrentManager {
                 }
             }
         }
+    }
+
+    public File getTorrentDownloadFolder() {
+        return torrentDownloadFolder;
     }
 }
