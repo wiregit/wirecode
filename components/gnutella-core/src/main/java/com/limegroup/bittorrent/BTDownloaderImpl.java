@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -348,8 +349,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public List<Address> getSourcesAsAddresses() {
-        // return torrent.getSourceAddresses();
-        return null;
+        return Collections.emptyList();
         // TODO
     }
 
