@@ -208,7 +208,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public GUID getQueryGUID() {
-        //Unused for torrents
+        // Unused for torrents
         return null;
     }
 
@@ -219,14 +219,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean shouldBeRemoved() {
-        // switch (torrent.getState()) {
-        // case DISK_PROBLEM:
-        // case SEEDING:
-        // return true;
-        // }
-        // return false;
+        switch (torrent.getState()) {
+        case DISK_PROBLEM:
+        case COMPLETE:
+            return true;
+        }
         return false;
-        // TODO
     }
 
     public long getAmountVerified() {
