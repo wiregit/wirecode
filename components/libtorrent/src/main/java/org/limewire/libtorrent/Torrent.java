@@ -127,11 +127,15 @@ public class Torrent {
     }
 
     public long getTotalSize() {
-        if(info == null) {
+        if (info == null) {
             return -1;
         } else {
             return info.getContentLength();
         }
+    }
+
+   public boolean isMultiFileTorrent() {
+        return paths.size() > 0;
     }
 
     public long getTotalDownloaded() {
@@ -161,8 +165,8 @@ public class Torrent {
     }
 
     private DownloadState convertState(LibTorrentState state) {
-        //TODO support error states
-        
+        // TODO support error states
+
         switch (state) {
         case downloading:
             if (isPaused()) {

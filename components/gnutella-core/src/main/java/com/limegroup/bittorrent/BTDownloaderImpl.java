@@ -132,7 +132,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         File file = new File(getIncompleteFile().getParent(), IncompleteFileManager.PREVIEW_PREFIX
                 + getIncompleteFile().getName());
 
-        // TODO come up with correct size for preview.
+        // TODO come up with correct size for preview, look at old code checking
+        // last verified offsets etc.
         long size = Math.min(getIncompleteFile().length(), 2 * 1024 * 1024);
         if (FileUtils.copy(getIncompleteFile(), size, file) <= 0) {
             return null;
@@ -148,6 +149,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getRemainingStateTime() {
+        // Unused
         return 0;
     }
 
@@ -294,7 +296,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         try {
             return URN.createSHA1Urn(sha1String);
         } catch (IOException e) {
-            // TODO handle
+            // TODO handle with pride, cache value? set value on init
             return null;
         }
     }
@@ -327,6 +329,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void startDownload() {
         // btUploaderFactory.createBTUploader((ManagedTorrent) torrent,
         // btMetaInfo);
+        // TODO setup uploader
+
         // torrent.start();
 
         torrent.start();
@@ -342,10 +346,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean shouldBeRestarted() {
-        // return getState() == DownloadState.QUEUED &&
-        // torrentManager.get().allowNewTorrent();
         return getState() == DownloadState.QUEUED;
-        // TODO
     }
 
     @Override
@@ -356,7 +357,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public boolean isQueuable() {
         return !isResumable();
-        // TODO ??
+        // TODO is this logic correct?
     }
 
     @Override
@@ -413,7 +414,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             throw new IllegalStateException("creating memento for finished torrent!");
         }
 
-        // TODO overwrite this
+        // TODO create a new memento type
         return new BTDownloadMementoImpl();
     }
 
