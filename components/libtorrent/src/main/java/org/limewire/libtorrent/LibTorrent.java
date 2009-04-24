@@ -32,4 +32,6 @@ public interface LibTorrent extends Library {
     public int remove_torrent(String id);
 
     public void print();
+
+    public boolean move_torrent(String id, String absolutePath);
 }

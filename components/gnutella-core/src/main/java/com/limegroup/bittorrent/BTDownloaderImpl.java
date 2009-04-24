@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
@@ -38,7 +39,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final TorrentManager libTorrentManager;
 
     private final Torrent torrent;
-
+    
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
             TorrentManager libTorrentManager) {
@@ -293,10 +294,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public URN getSha1Urn() {
         String sha1String = torrent.getSha1();
-        try {
-            return URN.createSHA1Urn(sha1String);
-        } catch (IOException e) {
-            // TODO handle with pride, cache value? set value on init
+        if (sha1String != null) {
+            try {
+                return URN.createSHA1Urn(sha1String);
+            } catch (IOException e) {
+                // TODO handle with pride, cache value? set value on init
+                return null;
+            }
+        } else {
             return null;
         }
     }

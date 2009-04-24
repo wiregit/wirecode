@@ -96,4 +96,9 @@ public class LibTorrentWrapper implements LibTorrent {
         libTorrent.print();
     }
 
+    @Override
+    public boolean move_torrent(String id, String absolutePath) {
+        return libTorrent.move_torrent(id, absolutePath);
+    }
+
 }

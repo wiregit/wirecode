@@ -119,4 +119,8 @@ public class TorrentManager {
     public File getTorrentDownloadFolder() {
         return torrentDownloadFolder;
     }
+
+    public boolean moveTorrent(String id, File directory) {
+       return libTorrent.move_torrent(id, directory.getAbsolutePath());
+    }
 }

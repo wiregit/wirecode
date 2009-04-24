@@ -103,6 +103,13 @@ struct info_s {
 	const char** paths;
 };
 
+extern "C" int move_torrent(const char* id, const char* path) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
+	std::string newPath(path);
+	h.move_storage(newPath);
+	return 0;
+}
+
 extern "C" const void* add_torrent(char* path) {
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "path: " << path << std::endl;

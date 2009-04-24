@@ -6,11 +6,11 @@ package org.limewire.libtorrent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.core.settings.SharingSettings;
@@ -35,7 +35,11 @@ public class Torrent {
 
     private File completeFile;
 
+    private File torrentFile = null;
+
     private List<String> paths;
+
+    private final AtomicBoolean complete = new AtomicBoolean(false);
 
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
@@ -44,6 +48,7 @@ public class Torrent {
     }
 
     public synchronized void init(File torrentFile) throws IOException {
+        this.torrentFile = torrentFile;
         FileInputStream fis = null;
         FileChannel fileChannel = null;
         try {
@@ -67,23 +72,22 @@ public class Torrent {
             IOUtils.close(fileChannel);
             IOUtils.close(fis);
         }
-
-        // TODO not the right place for this really
-
-        LibTorrentInfo info = torrentManager.addTorrent(torrentFile);
-        setInfo(info);
-        torrentManager.pauseTorrent(info.sha1);
     }
 
     public void start() {
-        // TODO make a real start method.
-        torrentManager.resumeTorrent(info.sha1);
+        LibTorrentInfo info = torrentManager.addTorrent(torrentFile);
+        setInfo(info);
+
         torrentManager.addListener(info.sha1, new EventListener<LibTorrentEvent>() {
             public void handleEvent(LibTorrentEvent event) {
                 LibTorrentStatus status = event.getTorrentStatus();
                 setStatus(status);
             }
         });
+    }
+
+    public boolean moveTorrent(File directory) {
+        return torrentManager.moveTorrent(getSha1(), directory);
     }
 
     public void pause() {
@@ -134,7 +138,7 @@ public class Torrent {
         }
     }
 
-   public boolean isMultiFileTorrent() {
+    public boolean isMultiFileTorrent() {
         return paths.size() > 0;
     }
 
@@ -162,6 +166,14 @@ public class Torrent {
 
     public synchronized void setStatus(LibTorrentStatus status) {
         this.status.set(status);
+
+        // TODO move this logic to a more logcal spot, or rename method to know
+        // what is going on better
+        //right now complete variable only used to make sure to move the file only once
+        if (status.finished && !complete.getAndSet(status.finished)) {
+            File completeDir = getCompleteFile().getParentFile();
+            torrentManager.moveTorrent(getSha1(), completeDir);
+        }
     }
 
     private DownloadState convertState(LibTorrentState state) {
