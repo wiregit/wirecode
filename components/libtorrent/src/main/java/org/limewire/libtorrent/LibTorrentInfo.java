@@ -1,6 +1,7 @@
 package org.limewire.libtorrent;
 
-import com.sun.jna.NativeLong;
+import java.math.BigInteger;
+
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
@@ -35,6 +36,15 @@ public class LibTorrentInfo extends Structure {
 
     public String[] getPaths() {
         return stringPaths;
+    }
+
+    public long getContentLength() {
+        if (content_length == null) {
+            return -1;
+        } else {
+            BigInteger contentLength = new BigInteger(content_length);
+            return contentLength.longValue();
+        }
     }
 
 }

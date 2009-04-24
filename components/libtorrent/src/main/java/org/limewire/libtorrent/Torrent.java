@@ -127,18 +127,19 @@ public class Torrent {
     }
 
     public long getTotalSize() {
-        BigInteger size = new BigInteger(info.content_length);
-
-        return size.longValue();
+        if(info == null) {
+            return -1;
+        } else {
+            return info.getContentLength();
+        }
     }
 
     public long getTotalDownloaded() {
         LibTorrentStatus status = this.status.get();
         if (status == null) {
-            return 0;
+            return -1;
         } else {
-            BigInteger done = new BigInteger(status.total_done);
-            return done.longValue();
+            return status.getTotalDone();
         }
     }
 
