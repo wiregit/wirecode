@@ -1,27 +1,20 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
-import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentManager;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
-import com.limegroup.bittorrent.BTData.BTFileData;
-import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -215,6 +208,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public GUID getQueryGUID() {
+        //Unused for torrents
         return null;
     }
 
