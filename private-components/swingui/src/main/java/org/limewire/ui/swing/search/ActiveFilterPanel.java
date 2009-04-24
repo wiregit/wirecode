@@ -57,6 +57,7 @@ class ActiveFilterPanel extends JXPanel {
         removeButton.setAction(removeAction);
         removeButton.setBorder(BorderFactory.createEmptyBorder(5, 5, 3, 5));
         removeButton.setContentAreaFilled(false);
+        removeButton.setFocusPainted(false);
         removeButton.setIcon(removeDefaultIcon);
         removeButton.setText(null);
         
