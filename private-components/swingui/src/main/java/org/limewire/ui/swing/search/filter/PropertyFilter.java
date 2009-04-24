@@ -3,16 +3,14 @@ package org.limewire.ui.swing.search.filter;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -27,7 +25,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -57,7 +55,7 @@ class PropertyFilter extends AbstractFilter {
     private final JPanel panel = new JPanel();
     private final JLabel propertyLabel = new JLabel();
     private final JList list = new JList();
-    private final HyperlinkButton moreButton = new HyperlinkButton();
+    private final JButton moreButton = new JButton();
     
     private FunctionList<VisualSearchResult, Object> propertyList;
     private UniqueList<Object> uniqueList;
@@ -96,20 +94,19 @@ class PropertyFilter extends AbstractFilter {
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         // Add listener to show cursor on mouse over.
-        list.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                e.getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                e.getComponent().setCursor(Cursor.getDefaultCursor());
-            }
-        });
+        list.addMouseListener(new RolloverCursorListener());
         
         moreButton.setAction(new MoreAction());
+        moreButton.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        moreButton.setContentAreaFilled(false);
+        moreButton.setFocusPainted(false);
         moreButton.setFont(getRowFont());
+        moreButton.setHorizontalTextPosition(JButton.LEADING);
+        moreButton.setIcon(getMoreIcon());
+        moreButton.setIconTextGap(2);
+        
+        // Add listener to show cursor on mouse over.
+        moreButton.addMouseListener(new RolloverCursorListener());
         
         // Apply results list to filter.
         initialize(resultsList);
@@ -345,17 +342,7 @@ class PropertyFilter extends AbstractFilter {
             moreList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             
             // Add listener to show cursor on mouse over.
-            moreList.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    e.getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                }
-                
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    e.getComponent().setCursor(Cursor.getDefaultCursor());
-                }
-            });
+            moreList.addMouseListener(new RolloverCursorListener());
             
             // Set list and selection models.  We use the unique list directly
             // to display values alphabetically.

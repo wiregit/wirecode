@@ -1,9 +1,6 @@
 package org.limewire.ui.swing.search.filter;
 
 import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
 import javax.swing.BorderFactory;
@@ -20,6 +17,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.Objects;
@@ -66,17 +64,7 @@ public class CategoryFilter extends AbstractFilter {
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         // Add listener to show cursor on mouse over.
-        list.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                e.getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                e.getComponent().setCursor(Cursor.getDefaultCursor());
-            }
-        });
+        list.addMouseListener(new RolloverCursorListener());
         
         panel.add(categoryLabel, "wrap");
         panel.add(list         , "grow");

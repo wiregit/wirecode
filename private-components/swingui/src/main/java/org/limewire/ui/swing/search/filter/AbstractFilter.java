@@ -5,6 +5,8 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Icon;
+
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -137,6 +139,13 @@ abstract class AbstractFilter implements Filter {
     }
     
     /**
+     * Returns the icon for the "more" button.
+     */
+    protected Icon getMoreIcon() {
+        return resources.moreIcon;
+    }
+    
+    /**
      * Returns the header background for the filter popup.
      */
     protected Color getPopupHeaderBackground() {
@@ -180,6 +189,8 @@ abstract class AbstractFilter implements Filter {
         Color popupHeaderBackground;
         @Resource(key="AdvancedFilter.popupHeaderForeground")
         Color popupHeaderForeground;
+        @Resource(key="AdvancedFilter.moreIcon")
+        Icon moreIcon;
         
         FilterResources() {
             GuiUtils.assignResources(this);

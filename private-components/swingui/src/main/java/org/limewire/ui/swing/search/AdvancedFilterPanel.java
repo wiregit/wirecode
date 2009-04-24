@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,8 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -21,8 +24,8 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.Disposable;
-import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.components.SideLineBorder;
 import org.limewire.ui.swing.components.SideLineBorder.Side;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
@@ -31,8 +34,8 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.filter.CategoryDetector;
 import org.limewire.ui.swing.search.filter.CategoryFilter;
 import org.limewire.ui.swing.search.filter.Filter;
-import org.limewire.ui.swing.search.filter.FilterManager;
 import org.limewire.ui.swing.search.filter.FilterListener;
+import org.limewire.ui.swing.search.filter.FilterManager;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.VisualSearchResultTextFilterator;
@@ -60,6 +63,10 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     @Resource private Color borderColor;
     @Resource private Color dividerBackgroundColor;
     @Resource private Color dividerForegroundColor;
+    @Resource private Color moreTextColor;
+    @Resource private Font moreTextFont;
+    @Resource private Color resetTextColor;
+    @Resource private Font resetTextFont;
     
     /** Search results data model. */
     private final SearchResultsModel searchResultsModel;
@@ -356,7 +363,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     private class FilterDisplayPanel extends JPanel {
         
         private final JPanel displayPanel = new JPanel();
-        private final HyperlinkButton resetButton = new HyperlinkButton();
+        private final JButton resetButton = new JButton();
         private final JSeparator separator = new JSeparator();
         
         private final Map<Filter, JComponent> displayMap = new HashMap<Filter, JComponent>();
@@ -370,6 +377,12 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             displayPanel.setOpaque(false);
             
             resetButton.setAction(new RemoveAllAction());
+            resetButton.setBorder(BorderFactory.createEmptyBorder());
+            resetButton.setContentAreaFilled(false);
+            resetButton.setFocusPainted(false);
+            resetButton.setFont(resetTextFont);
+            resetButton.setForeground(resetTextColor);
+            resetButton.addMouseListener(new RolloverCursorListener());
             
             separator.setBackground(dividerBackgroundColor);
             separator.setForeground(dividerForegroundColor);
@@ -443,7 +456,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
      */
     private class PropertyFilterPanel extends JPanel implements FilterListener {
         
-        private final HyperlinkButton moreButton = new HyperlinkButton();
+        private final JButton moreButton = new JButton();
         
         private Filter[] filters = new Filter[0];
         private SearchCategory currentCategory;
@@ -454,6 +467,12 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             setOpaque(false);
             
             moreButton.setAction(new ShowFilterAction());
+            moreButton.setBorder(BorderFactory.createEmptyBorder());
+            moreButton.setContentAreaFilled(false);
+            moreButton.setFocusPainted(false);
+            moreButton.setFont(moreTextFont);
+            moreButton.setForeground(moreTextColor);
+            moreButton.addMouseListener(new RolloverCursorListener());
         }
 
         /**
