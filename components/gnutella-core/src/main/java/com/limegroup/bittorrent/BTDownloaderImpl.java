@@ -13,6 +13,7 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentManager;
 import org.limewire.listener.EventListener;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.DownloadManager;
@@ -22,6 +23,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMementoImpl;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
@@ -123,17 +125,20 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return getCompleteFile();
         }
 
-        // TODO add in preview capability for single file torrents.
-        // File file = new File(getIncompleteFile().getParent(),
-        // IncompleteFileManager.PREVIEW_PREFIX
-        // + torrentFileSystem.getIncompleteFile().getName());
-        // // Copy first block, returning if nothing was copied.
-        // if (FileUtils.copy(torrentFileSystem.getIncompleteFile(), size, file)
-        // <= 0)
-        // return null;
-        // return file;
+        if (torrent.isMultiFileTorrent()) {
+            return null;
+        }
 
-        return null;
+        File file = new File(getIncompleteFile().getParent(), IncompleteFileManager.PREVIEW_PREFIX
+                + getIncompleteFile().getName());
+
+        // TODO come up with correct size for preview.
+        long size = Math.min(getIncompleteFile().length(), 2 * 1024 * 1024);
+        if (FileUtils.copy(getIncompleteFile(), size, file) <= 0) {
+            return null;
+        }
+        return file;
+
     }
 
     @Override
@@ -296,7 +301,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getAmountPending() {
-        // TODO ???
+        // Unused
         return 0;
     }
 
