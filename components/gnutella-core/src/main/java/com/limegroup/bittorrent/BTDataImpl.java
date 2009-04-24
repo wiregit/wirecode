@@ -24,149 +24,159 @@ import org.limewire.util.URIUtils;
 import com.limegroup.gnutella.Constants;
 
 /**
- * Contains type safe representations of all understand information
- * in in a .torrent file.
+ * Contains type safe representations of all understand information in in a
+ * .torrent file.
  * <p>
- * This will throw a <code>ValueException</code> if the data is malformed or
- * not what we expect it to be.  UTF-8 versions of Strings are
- * preferred over ASCII versions, wherever possible.
+ * This will throw a <code>ValueException</code> if the data is malformed or not
+ * what we expect it to be. UTF-8 versions of Strings are preferred over ASCII
+ * versions, wherever possible.
  */
 public class BTDataImpl implements BTData {
-    
+
     private static final Log LOG = LogFactory.getLog(BTDataImpl.class);
-    
+
     /** The URL of the tracker. */
     // TODO: add support for UDP & multiple trackers.
     private final String announce;
-    
+
     /** The webseed addresses */
     private final URI[] webSeeds;
-    
-    /** All the pieces as one big array.  Non-final 'cause it's big & we want to clear it. */
-    private /*final*/ byte[] pieces;
-    
+
+    /**
+     * All the pieces as one big array. Non-final 'cause it's big & we want to
+     * clear it.
+     */
+    private/* final */byte[] pieces;
+
     /** The length of a single piece. */
     private final Long pieceLength;
-    
+
     /** The SHA1 of the info object. */
     private byte[] infoHash;
-    
-    /** The name of the torrent file (if one file) or parent folder (if multiple files). */
+
+    /**
+     * The name of the torrent file (if one file) or parent folder (if multiple
+     * files).
+     */
     private final String name;
-    
-    /** The length of the torrent if one file.  null if multiple. */
+
+    /** The length of the torrent if one file. null if multiple. */
     private final Long length;
-    
-    /** A list of subfiles of this torrent is multiple files.  null if a single file. */
+
+    /**
+     * A list of subfiles of this torrent is multiple files. null if a single
+     * file.
+     */
     private final List<BTData.BTFileData> files;
-    
-    /** A list of all subfolders this torrent uses.  null if a single file. */
+
+    /** A list of all subfolders this torrent uses. null if a single file. */
     private final Set<String> folders;
-    
+
     /** Whether the private flag is set */
     private final boolean isPrivate;
-    
+
     /** Constructs a new BTData out of the map of properties. */
-    //See http://wiki.theory.org/BitTorrentSpecification#Info_Dictionary
-    //for more information
+    // See http://wiki.theory.org/BitTorrentSpecification#Info_Dictionary
+    // for more information
     public BTDataImpl(Map<?, ?> torrentFileMap) throws ValueException {
         Object tmp;
-        
+
         tmp = torrentFileMap.get("announce");
-        if(tmp instanceof byte[])
-            announce = StringUtils.getASCIIString((byte[])tmp);
+        if (tmp instanceof byte[])
+            announce = StringUtils.getASCIIString((byte[]) tmp);
         else
             throw new ValueException("announce missing or invalid!");
 
         webSeeds = parseWebSeeds(torrentFileMap);
         tmp = torrentFileMap.get("info");
-        if(tmp == null || !(tmp instanceof Map))
+        if (tmp == null || !(tmp instanceof Map))
             throw new ValueException("info missing or invalid!");
-        
-        Map infoMap = (Map)tmp;
+
+        Map infoMap = (Map) tmp;
         infoHash = calculateInfoHash(infoMap);
-        
+
         tmp = infoMap.get("private");
         if (tmp instanceof Long) {
-            isPrivate = ((Long)tmp).intValue() == 1;
+            isPrivate = ((Long) tmp).intValue() == 1;
         } else
             isPrivate = false;
-        
+
         tmp = infoMap.get("pieces");
-        if(tmp instanceof byte[])
-            pieces = (byte[])tmp;
+        if (tmp instanceof byte[])
+            pieces = (byte[]) tmp;
         else
             throw new ValueException("info->piece missing!");
-        
+
         tmp = infoMap.get("piece length");
-        if(tmp instanceof Long)
-            pieceLength = (Long)tmp;
+        if (tmp instanceof Long)
+            pieceLength = (Long) tmp;
         else
             throw new ValueException("info->'piece length' missing!");
-        
+
         // get name, prefer utf8
         tmp = infoMap.get("name.utf-8");
         name = getPreferredString(infoMap, "name");
-        if(name == null || name.length() == 0)
+        if (name == null || name.length() == 0)
             throw new ValueException("no valid name!");
-        
-        if(infoMap.containsKey("length") == infoMap.containsKey("files"))
+
+        if (infoMap.containsKey("length") == infoMap.containsKey("files"))
             throw new ValueException("info->length & info.files can't both exist or not exist!");
-        
+
         tmp = infoMap.get("length");
-        if(tmp instanceof Long) {
-            length = (Long)tmp;
+        if (tmp instanceof Long) {
+            length = (Long) tmp;
             if (length < 0)
-            	throw new ValueException("invalid length value");
-        } else if(tmp != null)
+                throw new ValueException("invalid length value");
+        } else if (tmp != null)
             throw new ValueException("info->length is non-null, but not a Long!");
         else
             length = null;
-        
-        tmp = infoMap.get("files");        
-        if(tmp instanceof List) {
-            List<?> fileData = (List)tmp;
+
+        tmp = infoMap.get("files");
+        if (tmp instanceof List) {
+            List<?> fileData = (List) tmp;
             if (fileData.isEmpty())
-            	throw new ValueException("empty file list");
-            
+                throw new ValueException("empty file list");
+
             files = new ArrayList<BTData.BTFileData>(fileData.size());
             folders = new HashSet<String>();
-            
-            for(Object o : fileData) {
-                if(!(o instanceof Map))
+
+            for (Object o : fileData) {
+                if (!(o instanceof Map))
                     throw new ValueException("info->files[x] not a Map!");
-                Map<?, ?> fileMap = (Map)o;
-                
+                Map<?, ?> fileMap = (Map) o;
+
                 tmp = fileMap.get("length");
-                if(!(tmp instanceof Long))
+                if (!(tmp instanceof Long))
                     throw new ValueException("info->files[x].length not a Long!");
-                Long ln = (Long)tmp;
+                Long ln = (Long) tmp;
                 if (ln < 0)
-                	throw new ValueException("invalid length");
-                
+                    throw new ValueException("invalid length");
+
                 boolean doASCII = true;
-                
-                //Don't try ASCII if UTF-8 succeeds.
+
+                // Don't try ASCII if UTF-8 succeeds.
                 try {
-                    parseFiles(fileMap, ln, files, folders, true);                       
+                    parseFiles(fileMap, ln, files, folders, true);
                     doASCII = false;
-                } catch(ValueException ignored) {}
-                
-                if(doASCII)
-                    parseFiles(fileMap, ln, files, folders, false);                
+                } catch (ValueException ignored) {
+                }
+
+                if (doASCII)
+                    parseFiles(fileMap, ln, files, folders, false);
             }
-        } else if(tmp != null) {
+        } else if (tmp != null) {
             throw new ValueException("info->files is non-null, but not a list!");
         } else {
-            files = null;            
+            files = null;
             folders = null;
         }
     }
 
     /**
-     * Parses the webseed addresses from the torrent file. The web seed addresses
-     * should be in a parameter "url-list". url-list can either be a list or 
-     * a single webseed address.
+     * Parses the webseed addresses from the torrent file. The web seed
+     * addresses should be in a parameter "url-list". url-list can either be a
+     * list or a single webseed address.
      */
     @SuppressWarnings("unchecked")
     private URI[] parseWebSeeds(Map<?, ?> torrentFileMap) {
@@ -183,7 +193,7 @@ public class BTDataImpl implements BTData {
                     }
                 }
             } else if (tmp instanceof byte[]) {
-                String uri =  StringUtils.getASCIIString((byte[])tmp);
+                String uri = StringUtils.getASCIIString((byte[]) tmp);
                 addURI(webSeedsArray, uri);
             }
         }
@@ -202,79 +212,84 @@ public class BTDataImpl implements BTData {
 
     /** Parses the List of Maps of file data. */
     private void parseFiles(Map<?, ?> fileMap, Long ln, List<BTData.BTFileData> fileData,
-                            Set<String> folderData, boolean utf8) throws ValueException {
-        
+            Set<String> folderData, boolean utf8) throws ValueException {
+
         Object tmp = fileMap.get("path" + (utf8 ? ".utf-8" : ""));
-        if(!(tmp instanceof List))
+        if (!(tmp instanceof List))
             throw new ValueException("info->files[x].path[.utf-8] not a List!");
-        
+
         Set<String> newFolders = new HashSet<String>();
-        String path = parseFileList((List)tmp, newFolders, true);
-        if(path == null)
+        String path = parseFileList((List) tmp, newFolders, true);
+        if (path == null)
             throw new ValueException("info->files[x].path[-utf-8] not valid!");
-        
+
         folderData.addAll(newFolders);
         fileData.add(new BTData.BTFileData(ln, path));
     }
-    
+
     /**
      * Parses a list of paths into a single string, adding the intermediate
-     * folders into the Set of folders.  The paths are parsed either as
-     * UTF or ASCII.
+     * folders into the Set of folders. The paths are parsed either as UTF or
+     * ASCII.
      */
-    private String parseFileList(List<?> paths, Set<String> folders, boolean utf8) throws ValueException {
-    	if (paths.isEmpty())
-    		throw new ValueException("empty paths list");
+    private String parseFileList(List<?> paths, Set<String> folders, boolean utf8)
+            throws ValueException {
+        if (paths.isEmpty())
+            throw new ValueException("empty paths list");
         StringBuilder sb = new StringBuilder();
-        for(Iterator<?> i = paths.iterator(); i.hasNext(); ) {
+        for (Iterator<?> i = paths.iterator(); i.hasNext();) {
             Object o = i.next();
-            if(!(o instanceof byte[]))
+            if (!(o instanceof byte[]))
                 throw new ValueException("info->files[x]->path[.utf-8][x] not a byte[]!");
-            
+
             String current;
-            if(utf8)
-                current = StringUtils.getUTF8String((byte[])o);
+            if (utf8)
+                current = StringUtils.getUTF8String((byte[]) o);
             else
-                current = StringUtils.getASCIIString((byte[])o);
+                current = StringUtils.getASCIIString((byte[]) o);
 
             if (current.length() == 0)
-            	throw new ValueException("empty path element");
-            
-            //using unix path style so path can be appended to urls
+                throw new ValueException("empty path element");
+
+            // using unix path style so path can be appended to urls
             sb.append("/");
             sb.append(CommonUtils.convertFileName(current));
             // if another path, this is a subfolder, so add it to folders
-            if(i.hasNext())
+            if (i.hasNext())
                 folders.add(sb.toString());
         }
         return sb.toString();
     }
-    
-    /** Returns either the UTF-8 version (if it exists) or the ASCII version of a String. */
+
+    /**
+     * Returns either the UTF-8 version (if it exists) or the ASCII version of a
+     * String.
+     */
     private String getPreferredString(Map<?, ?> info, String key) {
         String str = null;
-        
+
         Object data = info.get(key + ".utf-8");
-        if(data instanceof byte[]) {
+        if (data instanceof byte[]) {
             try {
-                str = new String((byte[])data, Constants.UTF_8_ENCODING);
-            } catch(Throwable t) {} // could throw any error if input bytes are invalid
+                str = new String((byte[]) data, Constants.UTF_8_ENCODING);
+            } catch (Throwable t) {
+            } // could throw any error if input bytes are invalid
         }
-        
-        if(str == null) {
+
+        if (str == null) {
             data = info.get(key);
-            if(data instanceof byte[])
-                str = StringUtils.getASCIIString((byte[])data);
+            if (data instanceof byte[])
+                str = StringUtils.getASCIIString((byte[]) data);
         }
-        
+
         return str;
     }
-    
+
     /**
-     * Calculates the infoHash of the map.  Because BT maps are stored
-     * as String -> Object, and the keys are stored alphabetically, 
-     * it is guaranteed that any two maps with identical keys & values
-     * will have the same info hash when decoded & recoded.
+     * Calculates the infoHash of the map. Because BT maps are stored as String
+     * -> Object, and the keys are stored alphabetically, it is guaranteed that
+     * any two maps with identical keys & values will have the same info hash
+     * when decoded & recoded.
      * 
      * @return the infoHash of the infoMap
      */
@@ -292,87 +307,63 @@ public class BTDataImpl implements BTData {
         } catch (IOException ioe) {
             ErrorService.error(ioe);
         }
-        
+
         MessageDigest md = new SHA1();
         return md.digest(baos.toByteArray());
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#getAnnounce()
-     */
+    @Override
     public String getAnnounce() {
         return announce;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#getFiles()
-     */
+    @Override
     public List<BTData.BTFileData> getFiles() {
         return files;
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#getFolders()
-     */
+
+    @Override
     public Set<String> getFolders() {
         return folders;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#isPrivate()
-     */
+    @Override
     public boolean isPrivate() {
         return isPrivate;
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#getInfoHash()
-     */
+
+    @Override
     public byte[] getInfoHash() {
         return infoHash;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#getLength()
-     */
+    @Override
     public Long getLength() {
         return length;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#getName()
-     */
+    @Override
     public String getName() {
         return name;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#getPieceLength()
-     */
+    @Override
     public Long getPieceLength() {
         return pieceLength;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#getPieces()
-     */
+    @Override
     public byte[] getPieces() {
         return pieces;
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#clearPieces()
-     */
+
+    @Override
     public void clearPieces() {
         pieces = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTData#getWebSeeds()
-     */
+    @Override
     public URI[] getWebSeeds() {
         return webSeeds;
     }
-    
 }
