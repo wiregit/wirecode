@@ -160,6 +160,8 @@ public class Torrent {
     }
 
     private DownloadState convertState(LibTorrentState state) {
+        //TODO support error states
+        
         switch (state) {
         case downloading:
             if (isPaused()) {
