@@ -31,7 +31,7 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.filter.CategoryDetector;
 import org.limewire.ui.swing.search.filter.CategoryFilter;
 import org.limewire.ui.swing.search.filter.Filter;
-import org.limewire.ui.swing.search.filter.FilterFactory;
+import org.limewire.ui.swing.search.filter.FilterManager;
 import org.limewire.ui.swing.search.filter.FilterListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -67,10 +67,10 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     /** List of editors being used for filtering. */
     private final EventList<MatcherEditor<VisualSearchResult>> editorList;
 
-    /** Factory for creating filters. */
-    private final FilterFactory filterFactory;
+    /** Manager for search result filters. */
+    private final FilterManager filterManager;
 
-    /** Factory for creating filters. */
+    /** List of category selection listeners. */
     private final List<CategoryListener> listenerList = new ArrayList<CategoryListener>();
 
     /** Filter for file category. */
@@ -101,7 +101,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         
         this.searchResultsModel = searchResultsModel;
         this.editorList = new BasicEventList<MatcherEditor<VisualSearchResult>>();
-        this.filterFactory = new FilterFactory(searchResultsModel, iconManager);
+        this.filterManager = new FilterManager(searchResultsModel, iconManager);
         
         GuiUtils.assignResources(this);
         
@@ -117,12 +117,12 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         propertyPanel = new PropertyFilterPanel();
         
         // Create category filter and display component.
-        categoryFilter = filterFactory.getCategoryFilter();
+        categoryFilter = filterManager.getCategoryFilter();
         JComponent categoryComp = categoryFilter.getComponent();
         categoryComp.setVisible(searchResultsModel.getSearchCategory() == SearchCategory.ALL);
         
         // Create source filter and display component.
-        sourceFilter = filterFactory.getSourceFilter();
+        sourceFilter = filterManager.getSourceFilter();
         JComponent sourceComp = sourceFilter.getComponent();
         sourceComp.setVisible(friendManager.isSignedIn());
         
@@ -277,7 +277,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
 
     @Override
     public void dispose() {
-        filterFactory.dispose();
+        filterManager.dispose();
     }
     
     /**
@@ -399,8 +399,10 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             
             // Display this container.
             setVisible(true);
-            validate();
-            repaint();
+            
+            // Repaint filter display.
+            AdvancedFilterPanel.this.validate();
+            AdvancedFilterPanel.this.repaint();
         }
         
         /**
@@ -423,8 +425,10 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             if (displayMap.size() < 1) {
                 setVisible(false);
             }
-            validate();
-            repaint();
+            
+            // Repaint filter display.
+            AdvancedFilterPanel.this.validate();
+            AdvancedFilterPanel.this.repaint();
         }
         
         public Filter[] getActiveFilters() {
@@ -466,8 +470,8 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             Filter[] oldFilters = filters;
             
             // Get new property filters for category.
-            filters = filterFactory.getPropertyFilters(filterCategory);
-            int filterMin = filterFactory.getPropertyFilterMinimum(filterCategory);
+            filters = filterManager.getPropertyFilters(filterCategory);
+            int filterMin = filterManager.getPropertyFilterMinimum(filterCategory);
             List<Filter> newFilterList = Arrays.asList(filters);
             
             // Remove old filters, and deactivate if not in new list.
@@ -504,7 +508,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
          * the minimum number.  
          */
         public void setShowAllFilters(boolean showAll) {
-            int filterMin = filterFactory.getPropertyFilterMinimum(currentCategory);
+            int filterMin = filterManager.getPropertyFilterMinimum(currentCategory);
             for (int i = 0; i < filters.length; i++) {
                 JComponent component = filters[i].getComponent();
                 if (!filters[i].isActive()) {
