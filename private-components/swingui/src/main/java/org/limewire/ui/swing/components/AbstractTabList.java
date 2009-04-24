@@ -18,9 +18,14 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 
 /** 
- * A base container for {@link FancyTab FancyTabs}.  Concrete subclasses 
- * should specify their own layout managers and implement 
- * <code>layoutTabs()</code> to add visible tabs to the container.
+ * A base container for {@link FancyTab FancyTab} objects.  Each tab is
+ * represented by a {@link TabActionMap TabActionMap} that defines the actions
+ * taken when a tab is selected.  Concrete subclasses should specify their own
+ * layout managers and implement {@link #layoutTabs() layoutTabs()} to add 
+ * visible tabs to the container.
+ * 
+ * @see FancyTabList
+ * @see FlexibleTabList
  */
 public abstract class AbstractTabList extends JXPanel {
 

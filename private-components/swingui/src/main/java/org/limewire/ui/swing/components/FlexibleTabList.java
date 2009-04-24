@@ -24,12 +24,14 @@ import org.limewire.ui.swing.util.GuiUtils;
 import com.google.inject.assistedinject.AssistedInject;
 
 /** 
- * A horizontal container for {@link FancyTab FancyTabs}.  FlexibleTabList 
- * calculates the maximum number of visible tabs, and displays a "more" button 
- * when the actual tab count exceeds the maximum.  A new tab may be added to 
- * the container by calling the <code>addTabActionMapAt()</code> method.  
+ * A horizontal container for {@link FancyTab FancyTab} objects.  
+ * FlexibleTabList adjusts the number of visible tabs depending on the container
+ * size, and displays a "more" button when the actual tab count exceeds the 
+ * visible count.  New tabs may be added to the container by calling the 
+ * {@link #addTabActionMapAt(TabActionMap, int) addTabActionMapAt()} method.  
  * 
- * <p>FlexibleTabList is used to display the search tabs in the main window.</p>  
+ * <p>FlexibleTabList is used to display the search tabs at the top of the main
+ * window.</p>
  */
 public class FlexibleTabList extends AbstractTabList {
     private static final int MAX_TAB_WIDTH = 205;
