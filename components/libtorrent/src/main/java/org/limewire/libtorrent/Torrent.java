@@ -5,6 +5,7 @@ package org.limewire.libtorrent;
 
 import java.io.File;
 import java.math.BigInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.listener.EventListener;
 
@@ -14,19 +15,18 @@ public class Torrent {
 
     private final TorrentManager torrentManager;
 
-    private LibTorrentInfo info = null;
+    private final AtomicReference<LibTorrentStatus> status;
 
-    private LibTorrentStatus status = null;
+    private LibTorrentInfo info = null;
 
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
+        this.status = new AtomicReference<LibTorrentStatus>();
     }
 
     public synchronized void init(File torrent) {
         LibTorrentInfo info = torrentManager.addTorrent(torrent);
         setInfo(info);
-
-        System.out.println(info);
 
         LibTorrentStatus status = torrentManager.getStatus(info.sha1);
         setStatus(status);
@@ -48,6 +48,7 @@ public class Torrent {
     }
 
     public float getDownloadRate() {
+        LibTorrentStatus status = this.status.get();
         return status == null ? 0 : status.download_rate;
     }
 
@@ -55,15 +56,17 @@ public class Torrent {
         torrentManager.removeTorrent(getSha1());
     }
 
-    public synchronized String getSha1() {
-        return info.sha1;
+    public String getSha1() {
+        return info == null ? null : info.sha1;
     }
 
-    public synchronized boolean isPaused() {
+    public boolean isPaused() {
+        LibTorrentStatus status = this.status.get();
         return status == null ? false : status.paused;
     }
 
-    public synchronized DownloadState getState() {
+    public DownloadState getState() {
+        LibTorrentStatus status = this.status.get();
         if (status == null) {
             return DownloadState.QUEUED;
         }
@@ -71,17 +74,19 @@ public class Torrent {
         return convertState(state);
     }
 
-    public synchronized boolean isFinished() {
+    public boolean isFinished() {
+        LibTorrentStatus status = this.status.get();
         return status == null ? false : status.finished;
     }
 
-    public synchronized long getTotalSize() {
+    public long getTotalSize() {
         BigInteger size = new BigInteger(info.content_length);
 
         return size.longValue();
     }
 
-    public synchronized long getTotalDownloaded() {
+    public long getTotalDownloaded() {
+        LibTorrentStatus status = this.status.get();
         if (status == null) {
             return 0;
         } else {
@@ -90,12 +95,13 @@ public class Torrent {
         }
     }
 
-    public synchronized int getNumPeers() {
+    public int getNumPeers() {
+        LibTorrentStatus status = this.status.get();
         return status == null ? 0 : status.num_peers;
     }
 
-    public synchronized int getPieceLength() {
-        return info.piece_length;
+    public int getPieceLength() {
+        return info == null ? -1 : info.piece_length;
     }
 
     public synchronized void setInfo(LibTorrentInfo info) {
@@ -103,7 +109,7 @@ public class Torrent {
     }
 
     public synchronized void setStatus(LibTorrentStatus status) {
-        this.status = status;
+        this.status.set(status);
     }
 
     private DownloadState convertState(LibTorrentState state) {
