@@ -12,20 +12,20 @@ public class LibTorrentWrapper implements LibTorrent {
     private final LibTorrent libTorrent;
 
     public LibTorrentWrapper() {
-        if(OSUtils.isWindows()) {
+        if (OSUtils.isWindows()) {
             System.loadLibrary("mingwm10");
             System.loadLibrary("boost_system-mgw34-mt-1_38");
             System.loadLibrary("boost_date_time-mgw34-mt-1_38");
             System.loadLibrary("boost_filesystem-mgw34-mt-1_38");
             System.loadLibrary("boost_thread-mgw34-mt-1_38");
             System.loadLibrary("torrent");
-        } else if(OSUtils.isLinux()) {
-           //compile into torrent-wrapper.so
-        } else if(OSUtils.isMacOSX()) {
+        } else if (OSUtils.isLinux()) {
+            // compile into torrent-wrapper.so
+        } else if (OSUtils.isMacOSX()) {
             System.loadLibrary("torrent");
         }
-        
-        //TODO make sure right libraries are loaded on linux too.
+
+        // TODO make sure right libraries are loaded on linux too.
         this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
     }
 
@@ -98,6 +98,8 @@ public class LibTorrentWrapper implements LibTorrent {
 
     @Override
     public boolean move_torrent(String id, String absolutePath) {
+        // TODO libtorrent documentation says this method will only work if the
+        // new path is on the same device, might need a fallback plan
         return libTorrent.move_torrent(id, absolutePath);
     }
 
