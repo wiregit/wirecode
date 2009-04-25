@@ -62,8 +62,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
-        // TODO, put back in logic
         finish();
+        downloadManager.remove(this, true);
     }
 
     @Override
@@ -88,8 +88,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isLaunchable() {
-        // TODO add back in
-        return false;
+        return torrent.isSingleFileTorrent();
+        // TODO old logic would check last verified offest, but logic seems
+        // wrong, wince the pieces download randomly, there is no guarentee that
+        // the begginning of the file is ok to preview.
     }
 
     @Override
@@ -463,7 +465,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isMementoSupported() {
-        //TODO remove method after memento supported.
+        // TODO remove method after memento supported.
         return false;
     }
 
