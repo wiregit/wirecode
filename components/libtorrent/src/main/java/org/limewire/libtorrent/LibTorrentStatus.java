@@ -19,6 +19,8 @@ public class LibTorrentStatus extends Structure {
 
     public boolean finished;
 
+    public boolean valid;
+
     public long getTotalDone() {
         if (total_done == null) {
             return -1;

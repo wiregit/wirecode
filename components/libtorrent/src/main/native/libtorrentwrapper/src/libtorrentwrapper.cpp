@@ -63,6 +63,7 @@ struct torrent_s {
 	float progress;
 	int paused;
 	int finished;
+	int valid;
 };
 
 void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
@@ -76,6 +77,7 @@ void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
 	float progress = status.progress;
 	bool paused = status.paused;
 	bool finished = handle.is_finished();
+	bool valid = handle.is_valid();
 
 	stats->total_done = total_done;
 	stats->download_rate = download_rate;
@@ -84,6 +86,7 @@ void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
 	stats->progress = progress;
 	stats->paused = paused;
 	stats->finished = finished;
+	stats->valid = valid;
 
 }
 
@@ -105,9 +108,13 @@ struct info_s {
 
 extern "C" int move_torrent(const char* id, const char* path) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	std::string newPath(path);
-	h.move_storage(newPath);
-	return 0;
+	if (h.is_valid()) {
+		std::string newPath(path);
+		h.move_storage(newPath);
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 extern "C" const void* add_torrent(char* path) {
@@ -163,54 +170,85 @@ extern "C" const void* add_torrent(char* path) {
 
 extern "C" int pause_torrent(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	h.pause();
-	return 0;
+	if (h.is_valid()) {
+		h.pause();
+		return 1;
+	} else {
+		return 0;
+	}
+
 }
 
 extern "C" int remove_torrent(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	s.remove_torrent(h);
-	return 0;
+	if (h.is_valid()) {
+		s.remove_torrent(h);
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 extern "C" bool is_torrent_paused(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	return h.is_paused();
+	if (h.is_valid()) {
+		return h.is_paused();
+	} else {
+		return false;
+	}
 }
 
 extern "C" bool is_torrent_seed(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	return h.is_seed();
+	if (h.is_valid()) {
+		return h.is_seed();
+	} else {
+		return false;
+	}
 }
 
 extern "C" const char* get_torrent_name(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	return h.name().c_str();
+	if (h.is_valid()) {
+		return h.name().c_str();
+	} else {
+		return 0;
+	}
 }
 
 extern "C" bool is_torrent_finished(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	return h.is_finished();
+	if (h.is_valid()) {
+		return h.is_finished();
+	} else {
+		return 0;
+	}
 }
 
 extern "C" bool is_torrent_valid(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	std::cout << "is_torrent_valid: " << h.is_valid() << std::endl;
 	return h.is_valid();
 }
 
 extern "C" int resume_torrent(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	h.resume();
-	return 0;
+	if (h.is_valid()) {
+		h.resume();
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 extern "C" void* get_torrent_status(const char* id, void* stat) {
 	struct torrent_s* stats = (struct torrent_s *) stat;
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-
-	get_torrent_s(h, stats);
+	if (h.is_valid()) {
+		get_torrent_s(h, stats);
+	} else {
+		stats->valid = false;
+	}
 	return stats;
 }
 

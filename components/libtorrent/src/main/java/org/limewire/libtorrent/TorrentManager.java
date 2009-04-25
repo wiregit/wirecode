@@ -20,7 +20,7 @@ public class TorrentManager {
     private EventPoller eventPoller;
 
     private File torrentDownloadFolder = null;
-    
+
     // TODO use SourcedEventMulticaster
 
     public TorrentManager() {
@@ -57,6 +57,7 @@ public class TorrentManager {
             LibTorrentInfo info = libTorrent.add_torrent(torrent.getAbsolutePath());
             String id = info.sha1;
             torrents.add(id);
+            updateStatus(id);
             return info;
         }
     }
@@ -71,10 +72,12 @@ public class TorrentManager {
 
     public void pauseTorrent(String id) {
         libTorrent.pause_torrent(id);
+        updateStatus(id);
     }
 
     public void resumeTorrent(String id) {
         libTorrent.resume_torrent(id);
+        updateStatus(id);
     }
 
     public LibTorrentStatus getStatus(String id) {
@@ -83,6 +86,7 @@ public class TorrentManager {
 
     public boolean isPaused(String id) {
         return libTorrent.is_torrent_paused(id);
+
     }
 
     public boolean isFinished(String id) {
@@ -106,13 +110,17 @@ public class TorrentManager {
 
         private void pumpStatus() {
             for (String id : torrents) {
-                LibTorrentStatus torrentStatus = libTorrent.get_torrent_status(id);
-                EventListenerList<LibTorrentEvent> listenerList = listeners.get(id);
-                if (listenerList != null) {
-                    // TODO asynchronous broadcast
-                    listenerList.broadcast(new LibTorrentEvent(null, torrentStatus));
-                }
+                updateStatus(id);
             }
+        }
+    }
+
+    private void updateStatus(String id) {
+        LibTorrentStatus torrentStatus = libTorrent.get_torrent_status(id);
+        EventListenerList<LibTorrentEvent> listenerList = listeners.get(id);
+        if (listenerList != null) {
+            // TODO asynchronous broadcast
+            listenerList.broadcast(new LibTorrentEvent(null, torrentStatus));
         }
     }
 
@@ -121,6 +129,8 @@ public class TorrentManager {
     }
 
     public boolean moveTorrent(String id, File directory) {
-       return libTorrent.move_torrent(id, directory.getAbsolutePath());
+        boolean moved = libTorrent.move_torrent(id, directory.getAbsolutePath());
+        updateStatus(id);
+        return moved;
     }
 }
