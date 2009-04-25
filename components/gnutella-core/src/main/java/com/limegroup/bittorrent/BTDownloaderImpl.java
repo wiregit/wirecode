@@ -331,7 +331,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void initialize() {
         // torrentManager.get().addEventListener(this);
         // incompleteFileManager.addTorrentEntry(urn);
-        // TODO
+        // TODO what do we do with the incomplete file manager
     }
 
     @Override
@@ -340,12 +340,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // btMetaInfo);
         // TODO setup uploader
 
-        // torrent.start();
-
         torrent.start();
-
-        // TODO moving to complete folder when complete and starting to seed
-        // again
     }
 
     @Override
