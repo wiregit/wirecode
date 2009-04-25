@@ -359,8 +359,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isQueuable() {
-        return !isResumable();
-        // TODO is this logic correct?
+        return !isPaused();
     }
 
     @Override
