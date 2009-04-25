@@ -1,12 +1,11 @@
-/**
- * 
- */
 package org.limewire.libtorrent;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +15,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
+import org.limewire.util.Base32;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.bittorrent.BTData;
 import com.limegroup.bittorrent.BTDataImpl;
 import com.limegroup.bittorrent.BTData.BTFileData;
 import com.limegroup.bittorrent.bencoding.Token;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadState;
 
 public class Torrent {
@@ -41,6 +43,10 @@ public class Torrent {
 
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
+    private String sha1 = null;
+
+    private URN urn = null;
+
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
         this.status = new AtomicReference<LibTorrentStatus>();
@@ -58,7 +64,6 @@ public class Torrent {
             BTData btData = new BTDataImpl(metaInfo);
             String name = btData.getName();
 
-            // TODO pull this from somewhere
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
             incompleteFile = new File(torrentDownloadFolder, name);
             completeFile = new File(SharingSettings.getSaveDirectory(name), name);
@@ -68,20 +73,43 @@ public class Torrent {
                     paths.add(fileData.getPath());
                 }
             }
+
+            urn = URN.createSHA1UrnFromBytes(btData.getInfoHash());
+
+            String hexString = toHexString(btData.getInfoHash());
+            sha1 = hexString;
+
         } finally {
             IOUtils.close(fileChannel);
             IOUtils.close(fis);
         }
     }
 
-    public void start() {
+    private String toHexString(byte[] block) {
+        StringBuffer hexString = new StringBuffer(block.length * 2);
+        char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+                'E', 'F' };
+        int high = 0;
+        int low = 0;
+        for (int i = 0; i < block.length; i++) {
+            high = ((block[i] & 0xf0) >> 4);
+            low = (block[i] & 0x0f);
+            hexString.append(hexChars[high]);
+            hexString.append(hexChars[low]);
+        }
+        return hexString.toString().toLowerCase();
+    }
+
+    public synchronized void start() {
         LibTorrentInfo info = torrentManager.addTorrent(torrentFile);
         setInfo(info);
 
-        torrentManager.addListener(info.sha1, new EventListener<LibTorrentEvent>() {
+        assert sha1.equals(info.sha1);
+
+        torrentManager.addListener(sha1, new EventListener<LibTorrentEvent>() {
             public void handleEvent(LibTorrentEvent event) {
                 LibTorrentStatus status = event.getTorrentStatus();
-                setStatus(status);
+                updateStatus(status);
             }
         });
     }
@@ -164,12 +192,9 @@ public class Torrent {
         this.info = info;
     }
 
-    public synchronized void setStatus(LibTorrentStatus status) {
+    private synchronized void updateStatus(LibTorrentStatus status) {
         this.status.set(status);
 
-        // TODO move this logic to a more logcal spot, or rename method to know
-        // what is going on better
-        //right now complete variable only used to make sure to move the file only once
         if (status.finished && !complete.getAndSet(status.finished)) {
             File completeDir = getCompleteFile().getParentFile();
             torrentManager.moveTorrent(getSha1(), completeDir);
