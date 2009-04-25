@@ -137,7 +137,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 + getIncompleteFile().getName());
 
         // TODO come up with correct size for preview, look at old code checking
-        // last verified offsets etc.
+        // last verified offsets etc. old code looks wrong though, since the
+        // file downloads randomly, the last verified offset does not tell us
+        // much.
         long size = Math.min(getIncompleteFile().length(), 2 * 1024 * 1024);
         if (FileUtils.copy(getIncompleteFile(), size, file) <= 0) {
             return null;
