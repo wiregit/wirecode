@@ -107,6 +107,7 @@ public class TorrentManager {
 
     private void updateStatus(String id) {
         LibTorrentStatus torrentStatus = libTorrent.get_torrent_status(id);
+        //TODO broadcast asynchronously
         listeners.broadcast(new LibTorrentEvent(id, null, torrentStatus));
     }
 
