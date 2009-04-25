@@ -62,6 +62,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
+        //TODO add back in seeding logic
         finish();
         downloadManager.remove(this, true);
     }
@@ -395,8 +396,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public synchronized void finish() {
-        libTorrentManager.removeTorrent(torrent.getSha1());
-        // TODO cleanup things
+        torrent.stop();
     }
 
     @Override

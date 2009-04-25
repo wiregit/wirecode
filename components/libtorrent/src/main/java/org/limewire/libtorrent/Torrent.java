@@ -40,8 +40,10 @@ public class Torrent {
 
     private String sha1 = null;
 
-    
     private BTData btData = null;
+
+    private final AtomicBoolean started = new AtomicBoolean(false);
+
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
         this.status = new AtomicReference<LibTorrentStatus>();
@@ -78,11 +80,10 @@ public class Torrent {
         }
     }
 
-    
     public byte[] getInfoHash() {
         return btData.getInfoHash();
     }
-    
+
     private String toHexString(byte[] block) {
         StringBuffer hexString = new StringBuffer(block.length * 2);
         char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
@@ -99,17 +100,19 @@ public class Torrent {
     }
 
     public synchronized void start() {
-        LibTorrentInfo info = torrentManager.addTorrent(torrentFile);
-        setInfo(info);
+        if (!started.getAndSet(true)) {
+            LibTorrentInfo info = torrentManager.addTorrent(torrentFile);
+            setInfo(info);
 
-        assert sha1.equals(info.sha1);
+            assert sha1.equals(info.sha1);
 
-        torrentManager.addListener(sha1, new EventListener<LibTorrentEvent>() {
-            public void handleEvent(LibTorrentEvent event) {
-                LibTorrentStatus status = event.getTorrentStatus();
-                updateStatus(status);
-            }
-        });
+            torrentManager.addListener(sha1, new EventListener<LibTorrentEvent>() {
+                public void handleEvent(LibTorrentEvent event) {
+                    LibTorrentStatus status = event.getTorrentStatus();
+                    updateStatus(status);
+                }
+            });
+        }
     }
 
     public boolean moveTorrent(File directory) {
@@ -186,7 +189,7 @@ public class Torrent {
         return info == null ? -1 : info.piece_length;
     }
 
-    public synchronized void setInfo(LibTorrentInfo info) {
+    private synchronized void setInfo(LibTorrentInfo info) {
         this.info = info;
     }
 
@@ -262,5 +265,15 @@ public class Torrent {
 
     public File getCompleteFile() {
         return completeFile;
+    }
+
+    public boolean isSingleFileTorrent() {
+        return !isMultiFileTorrent();
+    }
+
+    public void stop() {
+        if (started.getAndSet(false)) {
+            torrentManager.removeTorrent(sha1);
+        }
     }
 }
