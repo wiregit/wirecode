@@ -3,9 +3,7 @@ package org.limewire.libtorrent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,14 +13,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
-import org.limewire.util.Base32;
-import org.limewire.util.StringUtils;
 
 import com.limegroup.bittorrent.BTData;
 import com.limegroup.bittorrent.BTDataImpl;
 import com.limegroup.bittorrent.BTData.BTFileData;
 import com.limegroup.bittorrent.bencoding.Token;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadState;
 
 public class Torrent {
@@ -45,8 +40,8 @@ public class Torrent {
 
     private String sha1 = null;
 
-    private URN urn = null;
-
+    
+    private BTData btData = null;
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
         this.status = new AtomicReference<LibTorrentStatus>();
@@ -61,7 +56,7 @@ public class Torrent {
             fis = new FileInputStream(torrentFile);
             fileChannel = fis.getChannel();
             Map metaInfo = (Map) Token.parse(fileChannel);
-            BTData btData = new BTDataImpl(metaInfo);
+            btData = new BTDataImpl(metaInfo);
             String name = btData.getName();
 
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
@@ -74,8 +69,6 @@ public class Torrent {
                 }
             }
 
-            urn = URN.createSHA1UrnFromBytes(btData.getInfoHash());
-
             String hexString = toHexString(btData.getInfoHash());
             sha1 = hexString;
 
@@ -85,6 +78,11 @@ public class Torrent {
         }
     }
 
+    
+    public byte[] getInfoHash() {
+        return btData.getInfoHash();
+    }
+    
     private String toHexString(byte[] block) {
         StringBuffer hexString = new StringBuffer(block.length * 2);
         char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',

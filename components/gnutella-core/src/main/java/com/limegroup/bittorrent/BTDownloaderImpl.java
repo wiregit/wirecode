@@ -39,7 +39,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final TorrentManager libTorrentManager;
 
     private final Torrent torrent;
-    
+
+    private URN urn = null;
+
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
             TorrentManager libTorrentManager) {
@@ -278,7 +280,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // // if this didn't throw target is ok.
         // torrentFileSystem.setCompleteFile(new File(saveDirectory, fileName));
 
-        // TODO support this method in future when we allow picking a new savepath for a torrent
+        // TODO support this method in future when we allow picking a new
+        // savepath for a torrent
     }
 
     @Override
@@ -293,17 +296,18 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public URN getSha1Urn() {
-        String sha1String = torrent.getSha1();
-        if (sha1String != null) {
-            try {
-                return URN.createSHA1Urn(sha1String);
-            } catch (IOException e) {
-                // TODO handle with pride, cache value? set value on init
-                return null;
+        if (urn == null) {
+            synchronized (this) {
+                if (urn == null) {
+                    try {
+                        urn = URN.createSHA1UrnFromBytes(torrent.getInfoHash());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
-        } else {
-            return null;
         }
+        return urn;
     }
 
     @Override
