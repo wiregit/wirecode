@@ -3,17 +3,14 @@ package org.limewire.libtorrent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
+import org.limewire.listener.SourcedEventMulticaster;
+import org.limewire.listener.SourcedEventMulticasterImpl;
 
 public class TorrentManager {
     private final LibTorrent libTorrent;
-
-    private final Map<String, EventListenerList<LibTorrentEvent>> listeners;
 
     private final List<String> torrents;
 
@@ -21,12 +18,12 @@ public class TorrentManager {
 
     private File torrentDownloadFolder = null;
 
-    // TODO use SourcedEventMulticaster
+    private final SourcedEventMulticaster<LibTorrentEvent, String> listeners;
 
     public TorrentManager() {
         this.libTorrent = new LibTorrentWrapper();
-        this.listeners = new ConcurrentHashMap<String, EventListenerList<LibTorrentEvent>>();
         this.torrents = new ArrayList<String>();
+        this.listeners = new SourcedEventMulticasterImpl<LibTorrentEvent, String>();
         // TODO init torrent manager elsewhere.
         libTorrent.print();
         init(SharingSettings.INCOMPLETE_DIRECTORY.getValueAsString());
@@ -42,14 +39,7 @@ public class TorrentManager {
     }
 
     public void addListener(String id, EventListener<LibTorrentEvent> listener) {
-        synchronized (listeners) {
-            EventListenerList<LibTorrentEvent> listenerList = listeners.get(id);
-            if (listenerList == null) {
-                listenerList = new EventListenerList<LibTorrentEvent>();
-                listeners.put(id, listenerList);
-            }
-            listenerList.addListener(listener);
-        }
+        listeners.addListener(id, listener);
     }
 
     public LibTorrentInfo addTorrent(File torrent) {
@@ -66,7 +56,7 @@ public class TorrentManager {
         synchronized (eventPoller) {
             torrents.remove(id);
             libTorrent.remove_torrent(id);
-            listeners.remove(id);
+            listeners.removeListeners(id);
         }
     }
 
@@ -117,11 +107,7 @@ public class TorrentManager {
 
     private void updateStatus(String id) {
         LibTorrentStatus torrentStatus = libTorrent.get_torrent_status(id);
-        EventListenerList<LibTorrentEvent> listenerList = listeners.get(id);
-        if (listenerList != null) {
-            // TODO asynchronous broadcast
-            listenerList.broadcast(new LibTorrentEvent(null, torrentStatus));
-        }
+        listeners.broadcast(new LibTorrentEvent(id, null, torrentStatus));
     }
 
     public File getTorrentDownloadFolder() {

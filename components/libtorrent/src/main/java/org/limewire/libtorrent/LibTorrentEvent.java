@@ -1,12 +1,17 @@
 package org.limewire.libtorrent;
 
-public class LibTorrentEvent {
+import org.limewire.listener.SourcedEvent;
+
+public class LibTorrentEvent implements SourcedEvent<String> {
 
     private final LibTorrentAlert alert;
 
     private final LibTorrentStatus torrentStatus;
 
-    public LibTorrentEvent(LibTorrentAlert alert, LibTorrentStatus torrentStatus) {
+    private final String source;
+
+    public LibTorrentEvent(String source, LibTorrentAlert alert, LibTorrentStatus torrentStatus) {
+        this.source = source;
         this.alert = alert;
         this.torrentStatus = torrentStatus;
     }
@@ -17,5 +22,10 @@ public class LibTorrentEvent {
 
     public LibTorrentStatus getTorrentStatus() {
         return torrentStatus;
+    }
+
+    @Override
+    public String getSource() {
+        return source;
     }
 }
