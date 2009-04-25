@@ -99,10 +99,10 @@ public class Torrent {
         return hexString.toString().toLowerCase();
     }
 
-    public synchronized void start() {
+    public void start() {
         if (!started.getAndSet(true)) {
             LibTorrentInfo info = torrentManager.addTorrent(torrentFile);
-            setInfo(info);
+            this.info = info;
 
             assert sha1.equals(info.sha1);
 
@@ -110,6 +110,15 @@ public class Torrent {
                 public void handleEvent(LibTorrentEvent event) {
                     LibTorrentStatus status = event.getTorrentStatus();
                     updateStatus(status);
+                }
+
+                private synchronized void updateStatus(LibTorrentStatus status) {
+                    Torrent.this.status.set(status);
+
+                    if (status.finished && !complete.getAndSet(status.finished)) {
+                        File completeDir = getCompleteFile().getParentFile();
+                        moveTorrent(completeDir);
+                    }
                 }
             });
         }
@@ -187,19 +196,6 @@ public class Torrent {
 
     public int getPieceLength() {
         return info == null ? -1 : info.piece_length;
-    }
-
-    private synchronized void setInfo(LibTorrentInfo info) {
-        this.info = info;
-    }
-
-    private synchronized void updateStatus(LibTorrentStatus status) {
-        this.status.set(status);
-
-        if (status.finished && !complete.getAndSet(status.finished)) {
-            File completeDir = getCompleteFile().getParentFile();
-            torrentManager.moveTorrent(getSha1(), completeDir);
-        }
     }
 
     private DownloadState convertState(LibTorrentState state) {
