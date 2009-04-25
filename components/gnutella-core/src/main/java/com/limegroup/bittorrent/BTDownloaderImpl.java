@@ -453,9 +453,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void deleteIncompleteFiles() {
         // TODO assert that complete or aborted?
-        // torrentFileSystem.deleteIncompleteFiles();
-
-        // TODO implement
+        FileUtils.deleteRecursive(getIncompleteFile());
     }
 
     @Override
@@ -465,6 +463,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isMementoSupported() {
+        //TODO remove method after memento supported.
         return false;
     }
 
