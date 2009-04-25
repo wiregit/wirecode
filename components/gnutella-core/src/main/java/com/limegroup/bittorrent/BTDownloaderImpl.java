@@ -246,13 +246,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public long getAmountLost() {
-        // Unused
+        // Unused by anything
         return 0;
     }
 
     @Override
     public void measureBandwidth() {
-        // Unused
+        // Unused, we are using the bandwidth reported by libtorrent
     }
 
     @Override
@@ -262,7 +262,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public float getAverageBandwidth() {
-        // Unused
+        // Unused by anything
         return (torrent.getDownloadRate() / 1024);
     }
 
@@ -278,7 +278,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // // if this didn't throw target is ok.
         // torrentFileSystem.setCompleteFile(new File(saveDirectory, fileName));
 
-        // TODO
+        // TODO support this method in future when we allow picking a new savepath for a torrent
     }
 
     @Override
