@@ -81,7 +81,8 @@ public class MediaType implements Serializable {
                 "xls", "xlsx", "xlsm", "xlsb",
                 "ppt", "pptx", "pptm", "ppt", "potx", "potm", "pot",
                 "pub", 
-                "fm", "toc"
+                "fm", "toc",
+                "odt", "ods", "odp"
             });
             
     /**
