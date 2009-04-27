@@ -34,7 +34,10 @@ import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.limegroup.bittorrent.bencoding.Token;
+
+import org.limewire.bittorrent.BTData;
+import org.limewire.bittorrent.BTDataImpl;
+import org.limewire.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;

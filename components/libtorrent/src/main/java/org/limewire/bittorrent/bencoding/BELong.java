@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent.bencoding;
+package org.limewire.bittorrent.bencoding;
 
 import java.io.IOException;
 import java.math.BigInteger;

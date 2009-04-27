@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package org.limewire.bittorrent;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,8 +21,6 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.URIUtils;
 
-import com.limegroup.gnutella.Constants;
-
 /**
  * Contains type safe representations of all understand information in in a
  * .torrent file.
@@ -33,6 +31,7 @@ import com.limegroup.gnutella.Constants;
  */
 public class BTDataImpl implements BTData {
 
+    public static final String UTF_8_ENCODING = "UTF-8";
     private static final Log LOG = LogFactory.getLog(BTDataImpl.class);
 
     /** The URL of the tracker. */
@@ -271,7 +270,7 @@ public class BTDataImpl implements BTData {
         Object data = info.get(key + ".utf-8");
         if (data instanceof byte[]) {
             try {
-                str = new String((byte[]) data, Constants.UTF_8_ENCODING);
+                str = new String((byte[]) data, UTF_8_ENCODING);
             } catch (Throwable t) {
             } // could throw any error if input bytes are invalid
         }

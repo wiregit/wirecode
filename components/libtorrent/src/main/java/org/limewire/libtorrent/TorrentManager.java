@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.listener.SourcedEventMulticasterImpl;
@@ -24,9 +23,7 @@ public class TorrentManager {
         this.libTorrent = new LibTorrentWrapper();
         this.torrents = new CopyOnWriteArrayList<String>();
         this.listeners = new SourcedEventMulticasterImpl<LibTorrentEvent, String>();
-        // TODO init torrent manager elsewhere.
         libTorrent.print();
-        init(SharingSettings.INCOMPLETE_DIRECTORY.getValueAsString());
     }
 
     public void init(String path) {

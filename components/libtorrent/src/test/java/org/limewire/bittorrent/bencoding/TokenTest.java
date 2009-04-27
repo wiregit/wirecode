@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent.bencoding;
+package org.limewire.bittorrent.bencoding;
 
 import java.util.List;
 import java.util.Map;

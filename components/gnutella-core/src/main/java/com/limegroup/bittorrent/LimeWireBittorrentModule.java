@@ -1,7 +1,8 @@
 package com.limegroup.bittorrent;
 
-import com.google.inject.AbstractModule;
 import com.limegroup.bittorrent.metadata.TorrentMetaReader;
+
+import com.google.inject.AbstractModule;
 
 public class LimeWireBittorrentModule extends AbstractModule {
 

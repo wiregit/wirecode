@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent.bencoding;
+package org.limewire.bittorrent.bencoding;
 
 import java.math.BigInteger;
 import java.nio.channels.ReadableByteChannel;

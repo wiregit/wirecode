@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent.bencoding;
+package org.limewire.bittorrent.bencoding;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,14 +14,14 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.util.BEncoder;
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.ReadBufferChannel;
 import org.limewire.util.StringUtils;
 
 
 @SuppressWarnings("unchecked")
-public class BEncodeTest extends LimeTestCase {
+public class BEncodeTest extends BaseTestCase {
 
     public BEncodeTest(String name) {
         super(name);

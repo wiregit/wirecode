@@ -10,18 +10,16 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.bittorrent.BTData;
+import org.limewire.bittorrent.BTDataImpl;
+import org.limewire.bittorrent.BTData.BTFileData;
+import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
-import org.limewire.util.FileUtils;
-
-import com.limegroup.bittorrent.BTData;
-import com.limegroup.bittorrent.BTDataImpl;
-import com.limegroup.bittorrent.BTData.BTFileData;
-import com.limegroup.bittorrent.bencoding.Token;
-import com.limegroup.gnutella.Downloader.DownloadState;
+import org.limewire.listener.EventListenerList;
 
 public class Torrent {
+    private final EventListenerList<TorrentEvent> listeners;
 
     private final TorrentManager torrentManager;
 
@@ -37,8 +35,6 @@ public class Torrent {
 
     private List<String> paths;
 
-    private final AtomicBoolean complete = new AtomicBoolean(false);
-
     private String sha1 = null;
 
     private BTData btData = null;
@@ -49,11 +45,20 @@ public class Torrent {
 
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
+        this.listeners = new EventListenerList<TorrentEvent>();
         this.status = new AtomicReference<LibTorrentStatus>();
         this.paths = new ArrayList<String>();
     }
 
-    public synchronized void init(File torrentFile) throws IOException {
+    public void addListener(EventListener<TorrentEvent> listener) {
+        listeners.addListener(listener);
+    }
+
+    public boolean removeListener(EventListener<TorrentEvent> listener) {
+        return listeners.removeListener(listener);
+    }
+
+    public synchronized void init(File torrentFile, File saveDir) throws IOException {
         this.torrentFile = torrentFile;
         FileInputStream fis = null;
         FileChannel fileChannel = null;
@@ -66,7 +71,7 @@ public class Torrent {
 
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
             incompleteFile = new File(torrentDownloadFolder, name);
-            completeFile = new File(SharingSettings.getSaveDirectory(name), name);
+            completeFile = new File(saveDir, name);
 
             if (btData.getFiles() != null) {
                 for (BTFileData fileData : btData.getFiles()) {
@@ -121,12 +126,7 @@ public class Torrent {
 
                 private synchronized void updateStatus(LibTorrentStatus status) {
                     Torrent.this.status.set(status);
-
-                    if (status.finished && !complete.getAndSet(status.finished)) {
-                        FileUtils.deleteRecursive(completeFile);
-                        File completeDir = getCompleteFile().getParentFile();
-                        moveTorrent(completeDir);
-                    }
+                    listeners.broadcast(new TorrentEvent());
                 }
             });
         }
@@ -162,15 +162,6 @@ public class Torrent {
         return status == null ? false : status.paused;
     }
 
-    public DownloadState getState() {
-        LibTorrentStatus status = this.status.get();
-        if (status == null) {
-            return DownloadState.QUEUED;
-        }
-        LibTorrentState state = LibTorrentState.forId(status.state);
-        return convertState(state);
-    }
-
     public boolean isFinished() {
         LibTorrentStatus status = this.status.get();
         return status == null ? false : status.finished;
@@ -204,33 +195,6 @@ public class Torrent {
 
     public int getPieceLength() {
         return info == null ? -1 : info.piece_length;
-    }
-
-    private DownloadState convertState(LibTorrentState state) {
-        // TODO support error states
-
-        switch (state) {
-        case downloading:
-            if (isPaused()) {
-                return DownloadState.PAUSED;
-            } else {
-                return DownloadState.DOWNLOADING;
-            }
-        case queued_for_checking:
-            return DownloadState.RESUMING;
-        case checking_files:
-            return DownloadState.RESUMING;
-        case seeding:
-            return DownloadState.COMPLETE;
-        case finished:
-            return DownloadState.COMPLETE;
-        case allocating:
-            return DownloadState.CONNECTING;
-        case downloading_metadata:
-            return DownloadState.CONNECTING;
-        default:
-            throw new IllegalStateException("Unknown libtorrent state: " + state);
-        }
     }
 
     public List<File> getCompleteFiles() {
@@ -303,12 +267,16 @@ public class Torrent {
         LibTorrentStatus status = this.status.get();
         return status == null ? 0 : status.upload_rate;
     }
-    
+
     public float getSeedRatio() {
         LibTorrentStatus status = this.status.get();
-        if(status != null && status.getTotalDownload() != 0) {
+        if (status != null && status.getTotalDownload() != 0) {
             return (status.getTotalUpload() / status.getTotalDownload());
         }
         return 0;
+    }
+
+    public LibTorrentStatus getStatus() {
+        return status.get();
     }
 }

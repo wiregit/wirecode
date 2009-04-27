@@ -4,13 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
+import org.limewire.libtorrent.LibTorrentState;
+import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
+import org.limewire.libtorrent.TorrentEvent;
 import org.limewire.libtorrent.TorrentManager;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
@@ -41,6 +46,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final BTUploaderFactory btUploaderFactory;
     
+    private final AtomicBoolean complete = new AtomicBoolean(false);
+
     private URN urn = null;
 
     @Inject
@@ -51,11 +58,24 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.libTorrentManager = libTorrentManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = new Torrent(libTorrentManager);
+        //TODO make libtorrent manager a singleton
+        libTorrentManager.init(SharingSettings.INCOMPLETE_DIRECTORY.getValueAsString());
+        
+        
     }
 
     @Override
     public void init(File torrentFile) throws IOException {
-        torrent.init(torrentFile);
+        torrent.addListener(new EventListener<TorrentEvent>() {
+            public void handleEvent(TorrentEvent event) {
+                if (torrent.isFinished() && !complete.getAndSet(true)) {
+                    FileUtils.deleteRecursive(torrent.getCompleteFile());
+                    File completeDir = getCompleteFile().getParentFile();
+                    torrent.moveTorrent(completeDir);
+                }
+            };
+        });
+        torrent.init(torrentFile, SharingSettings.getSaveDirectory());
     }
 
     /**
@@ -87,7 +107,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isInactive() {
-        return isResumable() || torrent.getState() == DownloadState.QUEUED;
+        return isResumable() || getState() == DownloadState.QUEUED;
     }
 
     @Override
@@ -154,7 +174,39 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public DownloadState getState() {
-        return torrent.getState();
+        LibTorrentStatus status = torrent.getStatus();
+        if (status == null) {
+            return DownloadState.QUEUED;
+        }
+        LibTorrentState state = LibTorrentState.forId(status.state);
+        return convertState(state);
+    }
+    
+    private DownloadState convertState(LibTorrentState state) {
+        // TODO support error states
+
+        switch (state) {
+        case downloading:
+            if (isPaused()) {
+                return DownloadState.PAUSED;
+            } else {
+                return DownloadState.DOWNLOADING;
+            }
+        case queued_for_checking:
+            return DownloadState.RESUMING;
+        case checking_files:
+            return DownloadState.RESUMING;
+        case seeding:
+            return DownloadState.COMPLETE;
+        case finished:
+            return DownloadState.COMPLETE;
+        case allocating:
+            return DownloadState.CONNECTING;
+        case downloading_metadata:
+            return DownloadState.CONNECTING;
+        default:
+            throw new IllegalStateException("Unknown libtorrent state: " + state);
+        }
     }
 
     @Override
@@ -236,7 +288,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean shouldBeRemoved() {
-        switch (torrent.getState()) {
+        //TODO validate
+        switch (getState()) {
         case DISK_PROBLEM:
         case COMPLETE:
             return true;

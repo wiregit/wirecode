@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package org.limewire.bittorrent;
 
 import java.io.IOException;
 
