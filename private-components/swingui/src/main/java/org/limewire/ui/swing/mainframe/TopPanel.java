@@ -22,9 +22,9 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.ui.swing.components.FlexibleTabList;
+import org.limewire.ui.swing.components.FlexibleTabListFactory;
 import org.limewire.ui.swing.components.Disposable;
-import org.limewire.ui.swing.components.FancyTabList;
-import org.limewire.ui.swing.components.FancyTabListFactory;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
@@ -60,7 +60,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     private final SearchBar searchBar;
     
-    private final FancyTabList searchList;
+    private final FlexibleTabList searchList;
     private final Navigator navigator;        
     private final NavItem homeNav;
     private final AdvancedSearchBuilder advancedSearchBuilder;
@@ -72,7 +72,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     final StorePanel storePanel,
                     final LeftPanel leftPanel,
                     SearchBar searchBar,
-                    FancyTabListFactory fancyTabListFactory,
+                    FlexibleTabListFactory tabListFactory,
                     BarPainterFactory barPainterFactory,
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryNavigator libraryNavigator,
@@ -129,10 +129,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
             }
         });
      
-        searchList = fancyTabListFactory.create();
+        searchList = tabListFactory.create();
         searchList.setName("WireframeTop.SearchList");
-        searchList.setMaxVisibleTabs(3);
-        searchList.setMaxTotalTabs(10);
         searchList.setCloseAllText(I18n.tr("Close All Searches"));
         searchList.setCloseOneText(I18n.tr("Close Search"));
         searchList.setCloseOtherText(I18n.tr("Close Other searches"));
@@ -141,12 +139,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setHighlightPainter(tabPainterFactory.createHighlightPainter());
         searchList.setTabInsets(new Insets(0,10,2,10));
 
-        setLayout(new MigLayout("gap 0, insets 0, filly, alignx leading"));        
+        setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
         add(homeButton, "gapbottom 2, gaptop 0");
         add(storeButton, "gapbottom 2, gaptop 0");
 
         add(searchBar, "gapleft 70, gapbottom 2, gaptop 0");
-        add(searchList, "gapleft 10, gaptop 3, gapbottom 1, growy");
+        add(searchList, "gapleft 10, gaptop 3, gapbottom 1, grow");
         
         // Do not show store if mozilla failed to load.
         if(!MozillaInitialization.isInitialized()) {
