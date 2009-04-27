@@ -46,7 +46,7 @@ public class Torrent {
     private final AtomicBoolean started = new AtomicBoolean(false);
 
     private String name;
-    
+
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
         this.status = new AtomicReference<LibTorrentStatus>();
@@ -63,7 +63,6 @@ public class Torrent {
             Map metaInfo = (Map) Token.parse(fileChannel);
             btData = new BTDataImpl(metaInfo);
             name = btData.getName();
-            
 
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
             incompleteFile = new File(torrentDownloadFolder, name);
@@ -88,11 +87,10 @@ public class Torrent {
         return btData.getInfoHash();
     }
 
-    
     public String getName() {
         return name;
     }
-    
+
     private String toHexString(byte[] block) {
         StringBuffer hexString = new StringBuffer(block.length * 2);
         char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
@@ -284,7 +282,33 @@ public class Torrent {
     }
 
     public long getTotalUploaded() {
-        // TODO Auto-generated method stub
+        LibTorrentStatus status = this.status.get();
+        if (status == null) {
+            return 0;
+        } else {
+            return status.getTotalUpload();
+        }
+    }
+
+    public int getNumUploads() {
+        LibTorrentStatus status = this.status.get();
+        if (status == null) {
+            return 0;
+        } else {
+            return status.num_uploads;
+        }
+    }
+
+    public float getUploadRate() {
+        LibTorrentStatus status = this.status.get();
+        return status == null ? 0 : status.upload_rate;
+    }
+    
+    public float getSeedRatio() {
+        LibTorrentStatus status = this.status.get();
+        if(status != null && status.getTotalDownload() != 0) {
+            return (status.getTotalUpload() / status.getTotalDownload());
+        }
         return 0;
     }
 }

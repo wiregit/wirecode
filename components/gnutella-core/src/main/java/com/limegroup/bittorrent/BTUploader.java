@@ -99,13 +99,12 @@ public class BTUploader implements Uploader {
     }
 
     public float getMeasuredBandwidth() throws InsufficientDataException {
-        // TODO return lbitorrent rate
-        return 0;
+        return (torrent.getUploadRate() / 1024);
     }
 
     public float getAverageBandwidth() {
-        // Unused
-        return -1;
+        //Unused
+        return (torrent.getUploadRate() / 1024);
     }
 
     public String getCustomIconDescriptor() {
@@ -163,7 +162,6 @@ public class BTUploader implements Uploader {
 
     @Override
     public int getNumUploadConnections() {
-        // TODO get number for libtorrent
-        return 0;
+        return torrent.getNumUploads();
     }
 }

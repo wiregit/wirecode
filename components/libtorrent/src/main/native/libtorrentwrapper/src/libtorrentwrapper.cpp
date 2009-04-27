@@ -57,8 +57,14 @@ sha1_hash getSha1Hash(const char* sha1String) {
 
 struct torrent_s {
 	const char* total_done;
+	const char* total_download;
+	const char* total_upload;
 	float download_rate;
+	float upload_rate;
 	int num_peers;
+	int num_uploads;
+	int num_seeds;
+	int num_connections;
 	int state;
 	float progress;
 	int paused;
@@ -70,9 +76,15 @@ void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
 	libtorrent::torrent_status status = handle.status();
 
 	float download_rate = status.download_rate;
+	float upload_rate = status.upload_rate;
 	//TODO cleanup memory
 	const char* total_done = getSizeTypeString(status.total_done)->c_str();
+	const char* total_download = getSizeTypeString(status.total_download)->c_str();
+	const char* total_upload = getSizeTypeString(status.total_upload)->c_str();
 	int num_peers = status.num_peers;
+	int num_uploads = status.num_uploads;
+	int num_seeds = status.num_seeds;
+	int num_connections = status.num_connections;
 	int state = status.state;
 	float progress = status.progress;
 	bool paused = status.paused;
@@ -80,8 +92,14 @@ void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
 	bool valid = handle.is_valid();
 
 	stats->total_done = total_done;
+	stats->total_download = total_download;
+	stats->total_upload = total_upload;
 	stats->download_rate = download_rate;
+	stats->upload_rate = upload_rate;
 	stats->num_peers = num_peers;
+	stats->num_uploads = num_uploads;
+	stats->num_seeds = num_seeds;
+	stats->num_connections = num_connections;
 	stats->state = state;
 	stats->progress = progress;
 	stats->paused = paused;
