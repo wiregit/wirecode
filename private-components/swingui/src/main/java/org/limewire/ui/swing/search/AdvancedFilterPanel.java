@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -339,20 +340,21 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     /**
      * Action to display more or less filters.
      */
-    private class ShowFilterAction extends AbstractAction {
+    private class MoreFilterAction extends AbstractAction {
         private final String MORE = I18n.tr("more filters");
         private final String LESS = I18n.tr("less filters");
-        
-        private boolean showAll = false;
 
-        public ShowFilterAction() {
+        public MoreFilterAction() {
             putValue(Action.NAME, MORE);
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            showAll = !showAll;
-            propertyPanel.setShowAllFilters(showAll);
+            propertyPanel.setShowAll(!propertyPanel.isShowAll());
+            update(propertyPanel.isShowAll());
+        }
+        
+        public void update(boolean showAll) {
             putValue(Action.NAME, (showAll ? LESS : MORE));
         }
     }
@@ -366,7 +368,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         private final JButton resetButton = new JButton();
         private final JSeparator separator = new JSeparator();
         
-        private final Map<Filter, JComponent> displayMap = new HashMap<Filter, JComponent>();
+        private final Map<Filter, ActiveFilterPanel> displayMap = new HashMap<Filter, ActiveFilterPanel>();
         
         public FilterDisplayPanel() {
             setLayout(new MigLayout("insets 0 0 0 0, gap 0!", "[grow]", ""));
@@ -401,7 +403,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             }
             
             // Create filter display and save in map.
-            JComponent activeFilterPanel = new ActiveFilterPanel(new RemoveFilterAction(filter));
+            ActiveFilterPanel activeFilterPanel = new ActiveFilterPanel(new RemoveFilterAction(filter));
             displayMap.put(filter, activeFilterPanel);
             
             // Add filter display to container.
@@ -423,7 +425,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
          */
         public void removeFilter(Filter filter) {
             // Remove filter display from container.
-            JComponent activeFilterPanel = displayMap.get(filter);
+            ActiveFilterPanel activeFilterPanel = displayMap.get(filter);
             if (activeFilterPanel != null) {
                 displayPanel.remove(activeFilterPanel);
             }
@@ -458,6 +460,13 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         
         private final JButton moreButton = new JButton();
         
+        /** Action to toggle "show-all" filters state. */
+        private final MoreFilterAction moreFilterAction = new MoreFilterAction();
+        
+        /** Map of "show-all" indicators by search category. */
+        private final Map<SearchCategory, Boolean> showAllMap = 
+            new EnumMap<SearchCategory, Boolean>(SearchCategory.class);
+        
         private Filter[] filters = new Filter[0];
         private SearchCategory currentCategory;
         
@@ -466,7 +475,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
                     "[grow]", ""));
             setOpaque(false);
             
-            moreButton.setAction(new ShowFilterAction());
+            moreButton.setAction(moreFilterAction);
             moreButton.setBorder(BorderFactory.createEmptyBorder());
             moreButton.setContentAreaFilled(false);
             moreButton.setFocusPainted(false);
@@ -493,7 +502,8 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             int filterMin = filterManager.getPropertyFilterMinimum(filterCategory);
             List<Filter> newFilterList = Arrays.asList(filters);
             
-            // Remove old filters, and deactivate if not in new list.
+            // Remove old filters, and deactivate filters that are NOT in the
+            // list of new filters.
             removeAll();
             for (Filter filter : oldFilters) {
                 filter.removeFilterListener(this);
@@ -502,12 +512,13 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
                 }
             }
             
-            // Add new filters to container.
+            // Add new filters to container, and set visibility for filters
+            // that are not active.
             for (int i = 0; i < filters.length; i++) {
                 JComponent component = filters[i].getComponent();
                 add(component, "gaptop 8, aligny top, growx, wrap");
                 if (!filters[i].isActive()) {
-                    component.setVisible((filterMin < 1) || (i < filterMin));
+                    component.setVisible(isFilterVisible(i));
                 }
                 filters[i].addFilterListener(this);
             }
@@ -517,23 +528,56 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
                 add(moreButton, "gaptop 8, aligny top");
             }
             
+            // Update more/less button.
+            moreFilterAction.update(isShowAll());
+            
             // Validate layout and repaint container.
             validate();
             repaint();
         }
         
         /**
-         * Sets an indicator to display either all property filters, or only 
-         * the minimum number.  
+         * Sets an indicator to display all property filters for the current
+         * category.  If <code>showAll</code> is false, then only the minimum 
+         * number of filters is displayed.  
          */
-        public void setShowAllFilters(boolean showAll) {
-            int filterMin = filterManager.getPropertyFilterMinimum(currentCategory);
+        public void setShowAll(boolean showAll) {
+            // Save indicator for category.
+            showAllMap.put(currentCategory, showAll);
+            
+            // Set visibility for current filters.
             for (int i = 0; i < filters.length; i++) {
                 JComponent component = filters[i].getComponent();
                 if (!filters[i].isActive()) {
-                    component.setVisible(showAll || (filterMin < 1) || (i < filterMin));
+                    component.setVisible(isFilterVisible(i));
                 }
             }
+        }
+        
+        /**
+         * Returns an indicator that determines whether all property filters 
+         * are displayed for the current category, or only the minimum number.
+         */
+        public boolean isShowAll() {
+            Boolean showAll = showAllMap.get(currentCategory);
+            return (showAll != null) ? showAll.booleanValue() : false;
+        }
+        
+        /**
+         * Returns an indicator that determines whether the filter at the 
+         * specified index is visible.
+         */
+        private boolean isFilterVisible(int index) {
+            // Get showAll indicator for category.
+            boolean visible = isShowAll();
+            
+            // If not showAll, compare index with minimum filter count.
+            if (!visible) {
+                int filterMin = filterManager.getPropertyFilterMinimum(currentCategory);
+                visible = (filterMin < 1) || (index < filterMin);
+            }
+            
+            return visible;
         }
 
         @Override
