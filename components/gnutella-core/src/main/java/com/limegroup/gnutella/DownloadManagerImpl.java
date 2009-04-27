@@ -43,6 +43,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -924,19 +925,31 @@ public class DownloadManagerImpl implements DownloadManager, Service,
             throw new SaveLocationException(
                     SaveLocationException.LocationCode.TORRENT_FILE_TOO_LARGE, torrentFile);
         }
-        // TODO checkActiveAndWaiting(info.getURN(), system);
-
-        // TODO
-        // if (!overwrite)
-        // checkTargetLocation(system, overwrite);
-        // else
-        // torrentManager.get().killTorrentForFile(system.getCompleteFile());
-        CoreDownloader ret;
+        
+        BTDownloader ret;
         try {
             ret = coreDownloaderFactory.createBTDownloader(torrentFile);
         } catch (IOException e) {
            throw new SaveLocationException(e, torrentFile);
         }
+        
+        ret.checkActiveAndWaiting();
+
+        if (overwrite) {
+            //TODO: Redo and tie into incomplete file manager...
+            Downloader downloader = getDownloaderForURN(ret.getSha1Urn());
+            if (downloader != null) {
+                downloader.stop();
+                downloader.deleteIncompleteFiles();
+            } 
+            else {
+                // Delete file?
+            }
+        }
+        else {
+            ret.checkTargetLocation();
+        }
+        
         initializeDownload(ret, true);
         return ret;
     }
@@ -952,30 +965,6 @@ public class DownloadManagerImpl implements DownloadManager, Service,
         fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
         return downloader;
     }
-
-//    private void checkTargetLocation(TorrentFileSystem info, boolean overwrite)
-//            throws SaveLocationException {
-//        for (File f : info.getFilesAndFolders()) {
-//            if (f.exists())
-//                throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, f);
-//        }
-//    }
-//
-//    private void checkActiveAndWaiting(URN urn, TorrentFileSystem system)
-//            throws SaveLocationException {
-//        for (CoreDownloader current : activeAndWaiting) {
-//            if (urn.equals(current.getSha1Urn())) {
-//                // this is the place to add new trackers eventually.
-//                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, system
-//                        .getCompleteFile());
-//            }
-//            for (File f : system.getFilesAndFolders()) {
-//                if (current.conflictsSaveFile(f)) {
-//                    throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, f);
-//                }
-//            }
-//        }
-//    }
 
     /**
      * Performs common tasks for initializing the download. 1) Initializes the

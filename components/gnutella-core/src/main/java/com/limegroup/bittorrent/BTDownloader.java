@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.limewire.core.api.download.SaveLocationException;
+
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
 /**
@@ -21,4 +23,8 @@ public interface BTDownloader extends CoreDownloader {
     List<File> getCompleteFiles();
 
     File getIncompleteFile();
+    
+    void checkTargetLocation() throws SaveLocationException;
+    
+    void checkActiveAndWaiting() throws SaveLocationException;
 }

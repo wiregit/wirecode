@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
@@ -26,6 +27,7 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
+import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -532,6 +534,48 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public List<File> getIncompleteFiles() {
         return torrent.getIncompleteFiles();
+    }
+
+    /**
+     * Ensures the eventual download location is not already taken
+     * 
+     * @throws SaveLocationException
+     */
+    @Override
+    public void checkTargetLocation()
+        throws SaveLocationException {
+       
+        if (torrent.getCompleteFile().exists()) {
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, torrent.getCompleteFile());
+        }
+        
+    }
+
+    /**
+     * Ensures the eventual download location is not already taken by the files of any 
+     *  other download.
+     * 
+     * @throws SaveLocationException
+     */
+    @Override
+    public void checkActiveAndWaiting() throws SaveLocationException {
+        
+        for (CoreDownloader current : downloadManager.getAllDownloaders()) {
+            if (urn.equals(current.getSha1Urn())) {
+                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING,
+                        torrent.getCompleteFile());
+            }
+
+            if (current.conflictsSaveFile(torrent.getCompleteFile())) {
+                throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, 
+                        torrent.getCompleteFile());
+            }
+            
+            if (current.conflictsSaveFile(torrent.getIncompleteFile())) {
+                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, 
+                        torrent.getCompleteFile());
+            }
+        }
     }
 
 }
