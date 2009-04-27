@@ -65,18 +65,23 @@ public class MediaType implements Serializable {
      */
     private static final MediaType TYPE_DOCUMENTS =
         new MediaType(SCHEMA_DOCUMENTS, DOCUMENTS,
-            new String[] {
+                new String[] {
                 "html", "htm", "xhtml", "mht", "mhtml", "xml",
                 "txt", "ans", "asc", "diz", "eml",
                 "pdf", "ps", "eps", "epsf", "dvi", 
-                "rtf", "wri", "doc", "mcw", "wps",
-                "xls", "wk1", "dif", "csv", "ppt", "tsv",
+                "rtf", "wri", "mcw", "wps",
+                "wk1", "dif", "csv", "tsv",
                 "hlp", "chm", "lit",
                 "tex", "texi", "latex", "info", "man",
                 "wp", "wpd", "wp5", "wk3", "wk4", "shw", 
                 "sdd", "sdw", "sdp", "sdc",
                 "sxd", "sxw", "sxp", "sxc",
-                "abw", "kwd"
+                "abw", "kwd", 
+                "doc", "docx", "docm", "dotx", "dotm",
+                "xls", "xlsx", "xlsm", "xlsb",
+                "ppt", "pptx", "pptm", "ppt", "potx", "potm", "pot",
+                "pub", 
+                "fm", "toc"
             });
             
     /**
