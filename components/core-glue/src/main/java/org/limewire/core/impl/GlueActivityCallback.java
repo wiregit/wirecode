@@ -23,14 +23,12 @@ import org.limewire.core.impl.upload.UploadListenerList;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.libtorrent.Torrent;
 import org.limewire.service.ErrorService;
 import org.limewire.service.MessageService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.bittorrent.ManagedTorrent;
-import com.limegroup.bittorrent.TorrentEvent;
-import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -59,16 +57,13 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     private final DownloadManager downloadManager;
     
-    private final TorrentManager torrentManager;
-    
     private GuiCallback guiCallback = null;
     
     
     
     @Inject
-    public GlueActivityCallback(DownloadManager downloadManager, TorrentManager torrentManager) {
+    public GlueActivityCallback(DownloadManager downloadManager) {
         this.downloadManager = downloadManager;
-        this.torrentManager = torrentManager;
         queryReplyListeners = new ConcurrentSkipListMap<byte[], List<QueryReplyListener>>(
                 GUID.GUID_BYTE_COMPARATOR);
     }
@@ -275,23 +270,24 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     @Override
-    public void promptTorrentUploadCancel(ManagedTorrent torrent) {
-        boolean approve = true;//default to true
-        if(guiCallback != null) {
-            if (!torrent.isActive()) {
-                return;
-            }
-            
-            if(!torrent.isComplete()) {
-                approve = guiCallback.promptUserQuestion(I18nMarker.marktr("If you stop this upload, the torrent download will stop. Are you sure you want to do this?"));
-            } else if (torrent.getRatio() < 1.0f) {
-                approve = guiCallback.promptUserQuestion(I18nMarker.marktr("This upload is a torrent and it hasn\'t seeded enough. You should let it upload some more. Are you sure you want to stop it?"));
-            }
-        } 
-        if(approve && torrent.isActive()) {
-            torrentManager
-                    .dispatchEvent(new TorrentEvent(this, TorrentEvent.Type.STOP_APPROVED, torrent));
-        }
+    public void promptTorrentUploadCancel(Torrent torrent) {
+        //TODO implement
+//        boolean approve = true;//default to true
+//        if(guiCallback != null) {
+//            if (!torrent.isActive()) {
+//                return;
+//            }
+//            
+//            if(!torrent.isComplete()) {
+//                approve = guiCallback.promptUserQuestion(I18nMarker.marktr("If you stop this upload, the torrent download will stop. Are you sure you want to do this?"));
+//            } else if (torrent.getRatio() < 1.0f) {
+//                approve = guiCallback.promptUserQuestion(I18nMarker.marktr("This upload is a torrent and it hasn\'t seeded enough. You should let it upload some more. Are you sure you want to stop it?"));
+//            }
+//        } 
+//        if(approve && torrent.isActive()) {
+//            torrentManager
+//                    .dispatchEvent(new TorrentEvent(this, TorrentEvent.Type.STOP_APPROVED, torrent));
+//        }
     }
 
 }

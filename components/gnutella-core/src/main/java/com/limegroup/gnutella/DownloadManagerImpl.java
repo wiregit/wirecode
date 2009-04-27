@@ -43,7 +43,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -168,7 +167,7 @@ public class DownloadManagerImpl implements DownloadManager, Service,
             Provider<PushDownloadManager> pushDownloadManager,
             CoreDownloaderFactory coreDownloaderFactory, DownloadSerializer downloaderSerializer,
             IncompleteFileManager incompleteFileManager,
-            RemoteFileDescFactory remoteFileDescFactory, BTMetaInfoFactory btMetaInfoFactory,
+            RemoteFileDescFactory remoteFileDescFactory,
             PushEndpointFactory pushEndpointFactory) {
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;

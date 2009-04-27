@@ -7,9 +7,9 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.libtorrent.Torrent;
 
 import com.google.inject.Singleton;
-import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -130,7 +130,7 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     }
 
     @Override
-    public void promptTorrentUploadCancel(ManagedTorrent torrent) {
+    public void promptTorrentUploadCancel(Torrent torrent) {
         
     }
 

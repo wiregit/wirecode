@@ -8,8 +8,8 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.libtorrent.Torrent;
 
-import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -111,6 +111,6 @@ public interface ActivityCallback extends DownloadCallback
      *    wish to seed to at least 100% to be a good samaritan. 
      * @param torrent 
      */
-    void promptTorrentUploadCancel(ManagedTorrent torrent);
+    void promptTorrentUploadCancel(Torrent torrent);
 
 }

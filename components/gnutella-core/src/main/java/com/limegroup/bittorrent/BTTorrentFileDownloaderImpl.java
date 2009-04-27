@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
@@ -33,6 +34,7 @@ import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
@@ -58,10 +60,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     private final HttpExecutor httpExecutor;
 
-    private final TorrentManager torrentManager;
-
-    private final BTMetaInfoFactory btMetaInfoFactory;
-
     private final EventListenerList<DownloadStateEvent> eventListenerList;
 
     private DownloadState downloadStatus = DownloadState.QUEUED;
@@ -80,13 +78,10 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     @Inject
     public BTTorrentFileDownloaderImpl(DownloadManager downloadManager,
             @Assisted SaveLocationManager saveLocationManager, HttpExecutor httpExecutor,
-            TorrentManager torrentManager, BTMetaInfoFactory btMetaInfoFactory,
             ActivityCallback activityCallback) {
         super(saveLocationManager);
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.httpExecutor = Objects.nonNull(httpExecutor, "httpExecutor");
-        this.torrentManager = Objects.nonNull(torrentManager, "torrentManager");
-        this.btMetaInfoFactory = Objects.nonNull(btMetaInfoFactory, "btMetaInfoFactory");
         this.eventListenerList = new EventListenerList<DownloadStateEvent>();
         this.incompleteTorrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), UUID
                 .randomUUID().toString()
@@ -111,7 +106,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         if (downloadStatus == DownloadState.ABORTED) {
             return false;
         }
-        BTMetaInfo m = null;
         InputStream torrentDownloadStream = null;
         FileOutputStream torrentOutputStream = null;
         FileInputStream torrentInputStream = null;
@@ -128,14 +122,13 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
                 FileUtils.write(torrentDownloadStream, torrentOutputStream);
                 torrentInputStream = new FileInputStream(incompleteTorrentFile);
                 torrentOutputStream.close();
-                m = btMetaInfoFactory.createBTMetaInfoFromBytes(torrentInputStream.getChannel());
+                Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
+                BTData btData = new BTDataImpl(torrentFileMap);
 
-                if (m == null) {
-                    downloadStatus = DownloadState.INVALID;
-                    return false;
-                }
+                // TODO share torrent via torrentMAanger logic
+                // torrentManager.shareTorrentFile(btData,
+                // incompleteTorrentFile);
 
-                torrentManager.shareTorrentFile(m, incompleteTorrentFile);
                 downloadStatus = DownloadState.COMPLETE;
 
                 torrentFile = new File("completeFile");

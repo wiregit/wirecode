@@ -1,8 +1,8 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
@@ -22,7 +22,7 @@ public class TorrentManager {
 
     public TorrentManager() {
         this.libTorrent = new LibTorrentWrapper();
-        this.torrents = new ArrayList<String>();
+        this.torrents = new CopyOnWriteArrayList<String>();
         this.listeners = new SourcedEventMulticasterImpl<LibTorrentEvent, String>();
         // TODO init torrent manager elsewhere.
         libTorrent.print();
@@ -119,5 +119,9 @@ public class TorrentManager {
         boolean moved = libTorrent.move_torrent(id, directory.getAbsolutePath());
         updateStatus(id);
         return moved;
+    }
+
+    public int getNumActiveTorrents() {
+       return torrents.size();
     }
 }
