@@ -238,6 +238,9 @@ public class AppFrame extends SingleFrameApplication {
         if (!lastOptionsDialog.isVisible()) {
             lastOptionsDialog.initOptions();
             lastOptionsDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
+            if(event.getSelectedPanel() != null){
+                lastOptionsDialog.select(event.getSelectedPanel());
+            }
             lastOptionsDialog.setVisible(true);
         }
     }

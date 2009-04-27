@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLayeredPane;
@@ -49,7 +50,7 @@ public class LimeWireSwingUI extends JPanel {
             TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel friendsPanel,
-            AudioPlayer player, //DownloadSummaryPanel downloadSummaryPanel,
+            AudioPlayer player, 
             ShapeDialog shapeDialog, ProNagController proNagController, final MainDownloadPanel mainDownloadPanel, DownloadHeaderFactory downloadHeaderFactory) {
     	GuiUtils.assignResources(this);
     	        
@@ -142,6 +143,7 @@ public class LimeWireSwingUI extends JPanel {
 
             }
         });
+        splitPane.setBorder(BorderFactory.createEmptyBorder());
 
         top.setMinimumSize(new Dimension(0, 0));
         bottom.setMinimumSize(new Dimension(0, 0));

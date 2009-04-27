@@ -58,12 +58,12 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     private Icon searchIcon;
     
     
-    private static final String LIBRARY = I18n.tr("My Library");
-    private static final String SEARCH = I18n.tr("Search");
-    private static final String DOWNLOADS = I18n.tr("Downloads");
-    private static final String SECURITY = I18n.tr("Security");
-    private static final String MISC = I18n.tr("Misc");
-    private static final String ADVANCED = I18n.tr("Advanced");
+    public static final String LIBRARY = I18n.tr("My Library");
+    public static final String SEARCH = I18n.tr("Search");
+    public static final String DOWNLOADS = I18n.tr("Downloads");
+    public static final String SECURITY = I18n.tr("Security");
+    public static final String MISC = I18n.tr("Misc");
+    public static final String ADVANCED = I18n.tr("Advanced");
     
     private Provider<LibraryOptionPanel> libraryOptionPanel;
     private Provider<SearchOptionPanel> searchOptionPanel;

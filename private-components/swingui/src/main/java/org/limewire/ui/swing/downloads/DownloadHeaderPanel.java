@@ -12,6 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -38,18 +39,19 @@ import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.DownloadMediator.SortOrder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
+import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.listener.ActionHandListener;
+import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.NotImplementedException;
-
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.AssistedInject;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
+
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.AssistedInject;
 
 public class DownloadHeaderPanel extends JXPanel {
 
@@ -81,8 +83,10 @@ public class DownloadHeaderPanel extends JXPanel {
     private LimeComboBox moreButton;
 
     private JXButton clearFinishedNowButton;
+    private JLabel clearFinishedLabel;
 
     private HyperlinkButton fixStalledButton;
+    private JLabel fixStalledLabel;
 
     private JCheckBoxMenuItem clearFinishedCheckBox;
 
@@ -204,11 +208,10 @@ public class DownloadHeaderPanel extends JXPanel {
     private final Action downloadSettingsAction = new AbstractAction(I18n.tr("Download Settings...")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            throw new NotImplementedException("Implement me, please!!!!!!");
+            new OptionsDisplayEvent(OptionsDialog.DOWNLOADS).publish();
         }
     };
-    
-    
+
     
     @AssistedInject
     public DownloadHeaderPanel(DownloadMediator downloadMediator, DockIconFactory dockIconFactory) {
@@ -221,20 +224,25 @@ public class DownloadHeaderPanel extends JXPanel {
     }
     
     private void initialize(){
-        initializeComponents();
-        
-        layoutComponents();
-        
+        initializeComponents();        
+        layoutComponents();        
         setupPainter();
     }
   
 
     private void initializeComponents(){        
-        clearFinishedNowAction.setEnabled(false);
         clearFinishedNowButton = new HyperlinkButton(clearFinishedNowAction);
+        clearFinishedNowButton.setVisible(false);
+        clearFinishedLabel = new JLabel(clearFinishedNowButton.getText());
+        clearFinishedLabel.setFont(clearFinishedNowButton.getFont());
+        clearFinishedLabel.setPreferredSize(clearFinishedNowButton.getPreferredSize());
+        clearFinishedLabel.setEnabled(false);
 
-        fixStalledAction.setEnabled(false);
         fixStalledButton = new HyperlinkButton(fixStalledAction);
+        fixStalledButton.setVisible(false);
+        fixStalledLabel = new JLabel(fixStalledButton.getText());
+        fixStalledLabel.setFont(fixStalledButton.getFont());
+        fixStalledLabel.setEnabled(false);
 
         initializeMoreButton();
         
@@ -242,16 +250,18 @@ public class DownloadHeaderPanel extends JXPanel {
     }
     
     private void layoutComponents(){
-        setLayout(new MigLayout("insets 0 0 0 0, gap 4 0 4 0, novisualpadding, fill"));
-        add(titleTextLabel, "push");   
-        add(fixStalledButton, "gapafter 5");
-        add(clearFinishedNowButton, "gapafter 5");
+        setLayout(new MigLayout("insets 4 0 4 0, gap 0 0 0 0, novisualpadding, fill"));
+        add(titleTextLabel, "gapbefore 5, push");   
+        add(fixStalledButton, "gapafter 5, hidemode 3");  
+        add(fixStalledLabel, "gapafter 5, hidemode 3");
+        add(clearFinishedNowButton, "gapafter 5, hidemode 3");
+        add(clearFinishedLabel, "gapafter 5, hidemode 3");
         add(moreButton, "gapafter 5");  
     }
     
     private void setupPainter() {
         setOpaque(false); 
-        setBackgroundPainter(new HeaderBackgroundPainter());
+        setBackgroundPainter(new DownloadHeaderBackgroundPainter());
     }
     
     @Inject
@@ -269,35 +279,33 @@ public class DownloadHeaderPanel extends JXPanel {
                 new DownloadStateMatcher(DownloadState.DONE));
         EventList<DownloadItem> stalledList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
                 new DownloadStateMatcher(DownloadState.STALLED));
+        EventList<DownloadItem> errorList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
+                new DownloadStateMatcher(DownloadState.ERROR));
         
-        pausableList.addListEventListener(new ListEventListener<DownloadItem>() {
-            @Override
-            public void listChanged(ListEvent<DownloadItem> listChanges) {
-                pauseAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
-            }
-        });
-
-        resumableList.addListEventListener(new ListEventListener<DownloadItem>() {
-            @Override
-            public void listChanged(ListEvent<DownloadItem> listChanges) {
-                resumeAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
-            }
-        });
-
+        pausableList.addListEventListener(new ActionEnablementListListener(pauseAction));
+        resumableList.addListEventListener(new ActionEnablementListListener(resumeAction));        
+        errorList.addListEventListener(new ActionEnablementListListener(cancelErrorAction));        
+        downloadMediator.getDownloadList().addListEventListener(new ActionEnablementListListener(cancelAllAction));    
+        
         doneList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                clearFinishedNowAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
+                clearFinishedNowButton.setVisible(listChanges.getSourceList().size()>0);
+                clearFinishedLabel.setVisible(!clearFinishedNowButton.isVisible());
             }
         });
         
         stalledList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                fixStalledAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
+                fixStalledButton.setVisible(listChanges.getSourceList().size() != 0);
+                fixStalledLabel.setVisible(!fixStalledButton.isVisible());
+                
+                cancelStallededAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
             }
-        });
+        });        
     }
+    
     
     private void initializeMoreButton(){
         resumeAction.setEnabled(false);
@@ -413,11 +421,11 @@ public class DownloadHeaderPanel extends JXPanel {
     /**
      * Painter for the background of the header
      */
-    private class HeaderBackgroundPainter extends AbstractPainter<JXPanel> {
+    private class DownloadHeaderBackgroundPainter extends AbstractPainter<JXPanel> {
 
         private RectanglePainter<JXPanel> painter;
 
-        public HeaderBackgroundPainter() {
+        public DownloadHeaderBackgroundPainter() {
             painter = new RectanglePainter<JXPanel>();
             painter.setFillPaint(new GradientPaint(0, 0, topGradientColor, 0, 1,
                     bottomGradientColor, false));
@@ -472,4 +480,14 @@ public class DownloadHeaderPanel extends JXPanel {
         }
     }
     
+    private static class ActionEnablementListListener implements ListEventListener<DownloadItem> {
+        private AbstractDownloadsAction action;
+        public ActionEnablementListListener(AbstractDownloadsAction action){
+            this.action = action;
+        }
+        @Override
+        public void listChanged(ListEvent<DownloadItem> listChanges) {
+            action.setEnablementFromDownloadSize(listChanges.getSourceList().size());
+        }                
+    }
 }

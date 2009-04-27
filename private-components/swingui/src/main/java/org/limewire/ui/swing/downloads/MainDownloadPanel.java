@@ -62,7 +62,13 @@ public class MainDownloadPanel extends JPanel {
 		this.saveLocationExceptionHandler = saveLocationExceptionHandler;
     }
 
+    
+    @Inject
+    public void register() {              
+        downloadMediator.getDownloadList().addListEventListener(new VisibilityListListener());
+    }
 
+    //initialize() is called when the first downloadItem is added to the list
     private void initialize() {
         isInitialized = true;
         setLayout(new BorderLayout());
@@ -78,11 +84,7 @@ public class MainDownloadPanel extends JPanel {
         // handle individual completed downloads
         initializeDownloadListeners(downloadListManager);
     }
-    
-    @Inject
-    public void register() {              
-        downloadMediator.getDownloadList().addListEventListener(new VisibilityListListener());
-    }
+
     
     private void initializeDownloadListeners(final DownloadListManager downloadListManager) {
         // handle individual completed downloads
@@ -145,7 +147,10 @@ public class MainDownloadPanel extends JPanel {
         }
     }
 
-
+/**
+ * Initializes the download panel contents the first time the list changes (when the first DownloadItem is added).  
+ * Adjusts visibility of the panel depending on whether or not the list is empty.
+ */
     private class VisibilityListListener implements ListEventListener<DownloadItem> {
       
         @Override

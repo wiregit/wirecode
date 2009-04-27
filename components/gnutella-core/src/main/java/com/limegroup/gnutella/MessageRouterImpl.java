@@ -1490,13 +1490,13 @@ public abstract class MessageRouterImpl implements MessageRouter {
 		// get the result counter so we can track the number of results
 		ResultCounter counter = 
 			_queryRouteTable.routeReply(query.getGUID(), forMeReplyHandler);
-//		if(connectionServices.isSupernode()) {
-//            QueryHandler qh =
-//                queryHandlerFactory.createHandlerForMe(query, counter);
-//			sendDynamicQuery(qh);
-//		} else {
-//            originateLeafQuery(query);
-//		} 
+		if(connectionServices.isSupernode()) {
+            QueryHandler qh =
+                queryHandlerFactory.createHandlerForMe(query, counter);
+			sendDynamicQuery(qh);
+		} else {
+            originateLeafQuery(query);
+		} 
 		
 		// always send the query to your multicast people
         originateMulticastQuery(query);

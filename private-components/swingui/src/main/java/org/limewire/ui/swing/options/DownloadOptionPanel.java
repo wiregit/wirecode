@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.iTunesSettings;
 import org.limewire.setting.FileSetting;
@@ -35,6 +36,8 @@ public class DownloadOptionPanel extends OptionPanel {
     
     private SavingPanel savingPanel;
     private JCheckBox clearDownloadsCheckBox;
+
+    private JCheckBox deleteFileOnCancelCheckBox;
     
     @Inject
     public DownloadOptionPanel(IconManager iconManager) {
@@ -47,7 +50,13 @@ public class DownloadOptionPanel extends OptionPanel {
         clearDownloadsCheckBox = new JCheckBox(I18n.tr("Clear downloads from list when finished"));
         clearDownloadsCheckBox.setContentAreaFilled(false);
         
-        add(clearDownloadsCheckBox, "gapleft 15");
+        deleteFileOnCancelCheckBox = new JCheckBox(I18n.tr("Delete the incomplete file when I cancel a download"));
+        deleteFileOnCancelCheckBox.setContentAreaFilled(false);
+        //we aren't using deleteFileOnCancelCheckBox yet
+        deleteFileOnCancelCheckBox.setVisible(false);
+        
+        add(clearDownloadsCheckBox, "gapleft 15, wrap");
+        add(deleteFileOnCancelCheckBox, "gapleft 15");
     }
     
     private OptionPanel getSavingPanel() {
@@ -60,19 +69,22 @@ public class DownloadOptionPanel extends OptionPanel {
     @Override
     boolean applyOptions() {
         SharingSettings.CLEAR_DOWNLOAD.setValue(clearDownloadsCheckBox.isSelected());
+        DownloadSettings.DELETE_CANCELED_DOWNLOADS.setValue(deleteFileOnCancelCheckBox.isSelected());
         return getSavingPanel().applyOptions();
     }
 
     @Override
     boolean hasChanged() {
         return getSavingPanel().hasChanged() 
-            || SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected();
+            || SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected() 
+            || DownloadSettings.DELETE_CANCELED_DOWNLOADS.getValue() != deleteFileOnCancelCheckBox.isSelected();
     }
 
     @Override
     public void initOptions() {
         getSavingPanel().initOptions();
         clearDownloadsCheckBox.setSelected(SharingSettings.CLEAR_DOWNLOAD.getValue());
+        deleteFileOnCancelCheckBox.setSelected(DownloadSettings.DELETE_CANCELED_DOWNLOADS.getValue());
     }
     
     /**
@@ -100,7 +112,7 @@ public class DownloadOptionPanel extends OptionPanel {
             browseSaveLocationButton = new JButton(directoryAction);
             autoRenameDuplicateFilesCheckBox = new JCheckBox(I18n.tr("If the file already exists, download it with a different name"));
             autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);
-            
+
             shareCompletedDownloadsCheckBox = new JCheckBox(I18n.tr("Share files downloaded from the P2P Network with the P2P Network"));
             shareCompletedDownloadsCheckBox.setContentAreaFilled(false);
             
