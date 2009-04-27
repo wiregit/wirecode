@@ -16,6 +16,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -39,14 +40,17 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final Torrent torrent;
 
+    private final ActivityCallback activityCallback;
+    
     private URN urn = null;
 
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
-            TorrentManager libTorrentManager) {
+            TorrentManager libTorrentManager, ActivityCallback activityCallback) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.libTorrentManager = libTorrentManager;
+        this.activityCallback = activityCallback;
         this.torrent = new Torrent(libTorrentManager);
     }
 
@@ -340,6 +344,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void startDownload() {
+        
+        BTUploader bUploader = new BTUploader(torrent);
+        activityCallback.addUpload(bUploader);
+        
         // btUploaderFactory.createBTUploader((ManagedTorrent) torrent,
         // btMetaInfo);
         // TODO setup uploader

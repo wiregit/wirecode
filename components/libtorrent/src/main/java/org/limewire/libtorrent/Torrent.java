@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.BTData;
 import com.limegroup.bittorrent.BTDataImpl;
@@ -44,6 +45,8 @@ public class Torrent {
 
     private final AtomicBoolean started = new AtomicBoolean(false);
 
+    private String name;
+    
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
         this.status = new AtomicReference<LibTorrentStatus>();
@@ -59,7 +62,8 @@ public class Torrent {
             fileChannel = fis.getChannel();
             Map metaInfo = (Map) Token.parse(fileChannel);
             btData = new BTDataImpl(metaInfo);
-            String name = btData.getName();
+            name = btData.getName();
+            
 
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
             incompleteFile = new File(torrentDownloadFolder, name);
@@ -84,6 +88,11 @@ public class Torrent {
         return btData.getInfoHash();
     }
 
+    
+    public String getName() {
+        return name;
+    }
+    
     private String toHexString(byte[] block) {
         StringBuffer hexString = new StringBuffer(block.length * 2);
         char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
@@ -116,6 +125,7 @@ public class Torrent {
                     Torrent.this.status.set(status);
 
                     if (status.finished && !complete.getAndSet(status.finished)) {
+                        FileUtils.deleteRecursive(completeFile);
                         File completeDir = getCompleteFile().getParentFile();
                         moveTorrent(completeDir);
                     }
@@ -271,5 +281,10 @@ public class Torrent {
         if (started.getAndSet(false)) {
             torrentManager.removeTorrent(sha1);
         }
+    }
+
+    public long getTotalUploaded() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 }
