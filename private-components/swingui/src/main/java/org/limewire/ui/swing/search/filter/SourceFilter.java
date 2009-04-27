@@ -58,18 +58,20 @@ class SourceFilter extends AbstractFilter {
      * Constructs a SourceFilter.
      */
     public SourceFilter() {
+        FilterResources resources = getResources();
+        
         // Set up visual components.
         panel.setLayout(new MigLayout("insets 6 0 6 0, gap 0 0", 
                 "[left,grow]", ""));
         panel.setOpaque(false);
         
-        label.setFont(getHeaderFont());
-        label.setForeground(getHeaderColor());
+        label.setFont(resources.getHeaderFont());
+        label.setForeground(resources.getHeaderColor());
         label.setText(I18n.tr("From"));
         
         list.setCellRenderer(new SourceCellRenderer());
-        list.setFont(getRowFont());
-        list.setForeground(getRowColor());
+        list.setFont(resources.getRowFont());
+        list.setForeground(resources.getRowColor());
         list.setOpaque(false);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         

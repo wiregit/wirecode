@@ -34,17 +34,19 @@ class RangeFilter extends AbstractFilter {
     public RangeFilter(RangeFilterFormat rangeFormat) {
         this.rangeFormat = rangeFormat;
         
+        FilterResources resources = getResources();
+        
         panel.setLayout(new MigLayout("insets 3 0 3 0, gap 0!", 
                 "[left]",
                 "[top][top]3[top]"));
         panel.setOpaque(false);
 
-        headerLabel.setFont(getHeaderFont());
-        headerLabel.setForeground(getHeaderColor());
+        headerLabel.setFont(resources.getHeaderFont());
+        headerLabel.setForeground(resources.getHeaderColor());
         headerLabel.setText(rangeFormat.getHeaderText());
         
-        valueLabel.setFont(getRowFont());
-        valueLabel.setForeground(getRowColor());
+        valueLabel.setFont(resources.getRowFont());
+        valueLabel.setForeground(resources.getRowColor());
         
         slider.setMinimum(0);
         slider.setMaximum(rangeFormat.getValues().length - 1);

@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.search.filter;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -61,7 +60,7 @@ class PropertyFilter extends AbstractFilter {
     private UniqueList<Object> uniqueList;
     private EventSelectionModel<Object> selectionModel;
     private EventSelectionModel<Object> popupSelectionModel;
-    private JPopupMenu morePopup;
+    private MorePopupPanel morePopupPanel;
     
     /**
      * Constructs a PropertyFilterComponent using the specified results list,
@@ -79,17 +78,19 @@ class PropertyFilter extends AbstractFilter {
         this.propertyKey = propertyKey;
         this.iconManager = iconManager;
         
+        FilterResources resources = getResources();
+        
         panel.setLayout(new MigLayout("insets 6 0 6 0, gap 0!, hidemode 2", 
                 "[left,grow]", ""));
         panel.setOpaque(false);
         
-        propertyLabel.setFont(getHeaderFont());
-        propertyLabel.setForeground(getHeaderColor());
+        propertyLabel.setFont(resources.getHeaderFont());
+        propertyLabel.setForeground(resources.getHeaderColor());
         propertyLabel.setText(getPropertyText());
 
         list.setCellRenderer(new PropertyCellRenderer());
-        list.setFont(getRowFont());
-        list.setForeground(getRowColor());
+        list.setFont(resources.getRowFont());
+        list.setForeground(resources.getRowColor());
         list.setOpaque(false);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
@@ -100,9 +101,9 @@ class PropertyFilter extends AbstractFilter {
         moreButton.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
         moreButton.setContentAreaFilled(false);
         moreButton.setFocusPainted(false);
-        moreButton.setFont(getRowFont());
+        moreButton.setFont(resources.getRowFont());
         moreButton.setHorizontalTextPosition(JButton.LEADING);
-        moreButton.setIcon(getMoreIcon());
+        moreButton.setIcon(resources.getMoreIcon());
         moreButton.setIconTextGap(2);
         
         // Add listener to show cursor on mouse over.
@@ -265,39 +266,23 @@ class PropertyFilter extends AbstractFilter {
         // Create list of unique values.
         return GlazedListsFactory.uniqueList(nonNullList, new PropertyComparator(filterType, propertyKey));
     }
-
-    /**
-     * Returns a new instance of the popup that displays all property values.
-     */
-    private JPopupMenu createMorePopup() {
-        // Create popup containing display panel.
-        JPopupMenu popup = new JPopupMenu();
-        popup.setFocusable(false);
-        popup.add(new MorePopupPanel());
-        return popup;
-    }
     
     /**
-     * Displays the "more" popup that displays all property values.
+     * Displays the "more" popup that lists all property values.
      */
     private void showMorePopup() {
-        if (morePopup == null) {
-            morePopup = createMorePopup();
+        if (morePopupPanel == null) {
+            morePopupPanel = new MorePopupPanel();
         }
-        // Limit popup width.
-        if (morePopup.getPreferredSize().width > 240) {
-            morePopup.setPreferredSize(new Dimension(240, morePopup.getPreferredSize().height));
-        }
-        // Display popup next to property label.
-        morePopup.show(moreButton, list.getWidth(), -moreButton.getY() + 3);
+        morePopupPanel.showPopup();
     }
     
     /**
-     * Hides the "more" popup that displays all property values.
+     * Hides the "more" popup that lists all property values.
      */
     private void hideMorePopup() {
-        if (morePopup != null) {
-            morePopup.setVisible(false);
+        if (morePopupPanel != null) {
+            morePopupPanel.hidePopup();
         }
     }
     
@@ -320,24 +305,29 @@ class PropertyFilter extends AbstractFilter {
      * Display panel for "more" popup component. 
      */
     private class MorePopupPanel extends JPanel {
+        private final int MAX_VISIBLE_ROWS = 18;
         
         private final JLabel titleLabel = new JLabel();
         private final JList moreList = new JList();
         private final JScrollPane scrollPane = new JScrollPane();
+        private final JPopupMenu popupMenu = new JPopupMenu();
         
         public MorePopupPanel() {
-            setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            FilterResources resources = getResources();
+            
+            setBorder(BorderFactory.createLineBorder(resources.getPopupBorderColor(), 2));
             setLayout(new BorderLayout());
             
             titleLabel.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 3));
-            titleLabel.setBackground(getPopupHeaderBackground());
-            titleLabel.setForeground(getPopupHeaderForeground());
+            titleLabel.setBackground(resources.getPopupHeaderBackground());
+            titleLabel.setForeground(resources.getPopupHeaderForeground());
+            titleLabel.setFont(resources.getPopupHeaderFont());
             titleLabel.setOpaque(true);
             titleLabel.setText(I18n.tr("All {0}", getPropertyText()));
             
             moreList.setCellRenderer(new PropertyCellRenderer());
-            moreList.setFont(getRowFont());
-            moreList.setForeground(getRowColor());
+            moreList.setFont(resources.getRowFont());
+            moreList.setForeground(resources.getRowColor());
             moreList.setOpaque(false);
             moreList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             
@@ -354,12 +344,41 @@ class PropertyFilter extends AbstractFilter {
             // Add selection listener to update filter.
             popupSelectionModel.addListSelectionListener(new SelectionListener(popupSelectionModel));
             
-            scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 0));
+            scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 0));
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setViewportView(moreList);
             
+            popupMenu.setBorder(BorderFactory.createEmptyBorder());
+            popupMenu.setFocusable(false);
+            
             add(titleLabel, BorderLayout.NORTH);
             add(scrollPane, BorderLayout.CENTER);
+            popupMenu.add(this);
+        }
+        
+        /**
+         * Displays this panel in a popup window.
+         */
+        public void showPopup() {
+            // Adjust popup list height.
+            moreList.setVisibleRowCount(Math.min(moreList.getModel().getSize(), MAX_VISIBLE_ROWS));
+            
+            // Limit popup width.
+            if (popupMenu.getPreferredSize().width > 275) {
+                popupMenu.setPreferredSize(new Dimension(275, popupMenu.getPreferredSize().height));
+            }
+            
+            // Display popup next to property label.  Coordinates are relative
+            // to the invoker, so we adjust the vertical position to align with
+            // the filter label.
+            popupMenu.show(moreButton, list.getWidth(), propertyLabel.getY() - moreButton.getY());
+        }
+        
+        /**
+         * Hides the popup window.
+         */
+        public void hidePopup() {
+            popupMenu.setVisible(false);
         }
     }
     

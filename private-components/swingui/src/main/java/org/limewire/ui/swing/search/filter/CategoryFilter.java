@@ -49,17 +49,19 @@ public class CategoryFilter extends AbstractFilter {
      * Constructs a CategoryFilter using the specified results list.
      */
     public CategoryFilter(EventList<VisualSearchResult> resultsList) {
+        FilterResources resources = getResources();
+        
         panel.setLayout(new MigLayout("insets 6 0 6 0, gap 0!", 
                 "[left,grow]", ""));
         panel.setOpaque(false);
 
-        categoryLabel.setFont(getHeaderFont());
-        categoryLabel.setForeground(getHeaderColor());
+        categoryLabel.setFont(resources.getHeaderFont());
+        categoryLabel.setForeground(resources.getHeaderColor());
         categoryLabel.setText(I18n.tr("Categories"));
         
         list.setCellRenderer(new CategoryCellRenderer());
-        list.setFont(getRowFont());
-        list.setForeground(getRowColor());
+        list.setFont(resources.getRowFont());
+        list.setForeground(resources.getRowColor());
         list.setOpaque(false);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         

@@ -125,75 +125,103 @@ abstract class AbstractFilter implements Filter {
     }
     
     /**
-     * Returns the text color for the filter header.
+     * Returns the resource container for the filter.
      */
-    protected Color getHeaderColor() {
-        return resources.headerColor;
-    }
-    
-    /**
-     * Returns the text font for the filter header.
-     */
-    protected Font getHeaderFont() {
-        return resources.headerFont;
-    }
-    
-    /**
-     * Returns the icon for the "more" button.
-     */
-    protected Icon getMoreIcon() {
-        return resources.moreIcon;
-    }
-    
-    /**
-     * Returns the header background for the filter popup.
-     */
-    protected Color getPopupHeaderBackground() {
-        return resources.popupHeaderBackground;
-    }
-    
-    /**
-     * Returns the header foreground for the filter popup.
-     */
-    protected Color getPopupHeaderForeground() {
-        return resources.popupHeaderForeground;
-    }
-    
-    /**
-     * Returns the text color for filter rows.
-     */
-    protected Color getRowColor() {
-        return resources.rowColor;
-    }
-    
-    /**
-     * Returns the text font for filter rows.
-     */
-    protected Font getRowFont() {
-        return resources.rowFont;
+    protected FilterResources getResources() {
+        return resources;
     }
     
     /**
      * Resource container for filters.
      */
-    private static class FilterResources {
+    public static class FilterResources {
         @Resource(key="AdvancedFilter.headerColor")
-        Color headerColor;
+        private Color headerColor;
         @Resource(key="AdvancedFilter.headerFont")
-        Font headerFont;
+        private Font headerFont;
         @Resource(key="AdvancedFilter.rowColor")
-        Color rowColor;
+        private Color rowColor;
         @Resource(key="AdvancedFilter.rowFont")
-        Font rowFont;
-        @Resource(key="AdvancedFilter.popupHeaderBackground")
-        Color popupHeaderBackground;
-        @Resource(key="AdvancedFilter.popupHeaderForeground")
-        Color popupHeaderForeground;
+        private Font rowFont;
         @Resource(key="AdvancedFilter.moreIcon")
-        Icon moreIcon;
+        private Icon moreIcon;
+        @Resource(key="AdvancedFilter.popupBorderColor")
+        private Color popupBorderColor;
+        @Resource(key="AdvancedFilter.popupHeaderFont")
+        private Font popupHeaderFont;
+        @Resource(key="AdvancedFilter.popupHeaderBackground")
+        private Color popupHeaderBackground;
+        @Resource(key="AdvancedFilter.popupHeaderForeground")
+        private Color popupHeaderForeground;
         
+        /**
+         * Constructs a FilterResources object. 
+         */
         FilterResources() {
             GuiUtils.assignResources(this);
+        }
+        
+        /**
+         * Returns the text color for the filter header.
+         */
+        public Color getHeaderColor() {
+            return headerColor;
+        }
+        
+        /**
+         * Returns the text font for the filter header.
+         */
+        public Font getHeaderFont() {
+            return headerFont;
+        }
+        
+        /**
+         * Returns the icon for the "more" button.
+         */
+        public Icon getMoreIcon() {
+            return moreIcon;
+        }
+        
+        /**
+         * Returns the border color for filter popup.
+         */
+        public Color getPopupBorderColor() {
+            return popupBorderColor;
+        }
+        
+        /**
+         * Returns the header font for filter popup.
+         */
+        public Font getPopupHeaderFont() {
+            return popupHeaderFont;
+        }
+        
+        /**
+         * Returns the header background for the filter popup.
+         */
+        public Color getPopupHeaderBackground() {
+            return popupHeaderBackground;
+        }
+        
+        /**
+         * Returns the header foreground for the filter popup.
+         */
+        public Color getPopupHeaderForeground() {
+            return popupHeaderForeground;
+        }
+        
+        /**
+         * Returns the text color for filter rows.
+         */
+        public Color getRowColor() {
+            return rowColor;
+        }
+        
+        /**
+         * Returns the text font for filter rows.
+         */
+        public Font getRowFont() {
+            return rowFont;
         }
     }
 }
