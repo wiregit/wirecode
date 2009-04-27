@@ -13,10 +13,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TooManyListenersException;
 
 import javax.swing.Action;
@@ -145,7 +143,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     /**
      * set of known friends helps keep correct share numbers
      */
-    private final Set<String> knownFriends = new HashSet<String>();
+//    private final Set<String> knownFriends = new HashSet<String>();
 
     private SharingFilterComboBox sharingComboBox;
     private HyperlinkButton sharingButton;
@@ -245,8 +243,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         createMyPlaylists(libraryManager.getLibraryManagedList());
         selectFirstVisible();
 
-        this.knownFriends.add(Friend.P2P_FRIEND_ID);
-        getSelectionPanel().updateCollectionShares(knownFriends);
+//        this.knownFriends.add(Friend.P2P_FRIEND_ID);
+//        getSelectionPanel().updateCollectionShares(knownFriends);
         
         shareAllComboBox = new ShareAllComboBox(xmppService, shareFactory, this, friendSignInPanel, shareListManager);
         comboDecorator.decorateDarkFullComboBox(shareAllComboBox);
@@ -317,19 +315,19 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
 
         switch (event.getType()) {
             case ADDED:
-                sharingComboBox.addFriend(event.getData());
-                knownFriends.add(friend.getId());
+                sharingComboBox.addFriend(friend);
+//                knownFriends.add(friend.getId());
                 break;
             case REMOVED:
-                sharingComboBox.removeFriend(event.getData());
+                sharingComboBox.removeFriend(friend);
                 // fallthrough...
             case DELETE:
-                knownFriends.remove(friend.getId());
+//                knownFriends.remove(friend.getId());
                 break;
             default:
                 return;
         }
-        getSelectionPanel().updateCollectionShares(knownFriends);
+//        getSelectionPanel().updateCollectionShares(knownFriends);
     }
     
     public Category getCategory() {

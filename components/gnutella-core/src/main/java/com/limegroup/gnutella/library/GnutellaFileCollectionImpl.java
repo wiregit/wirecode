@@ -9,7 +9,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.limewire.core.api.friend.Friend;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.util.FileUtils;
@@ -41,7 +40,7 @@ class GnutellaFileCollectionImpl extends SharedFileCollectionImpl implements Gnu
     public GnutellaFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, 
                                   @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory,
                                   HashTreeCache treeCache) {
-        super(data, managedList, multicasterFactory, Friend.P2P_FRIEND_ID, treeCache);
+        super(data, managedList, multicasterFactory, LibraryFileData.GNUTELLA_COLLECTION_ID, treeCache);
         this.numBytes = new AtomicLong();
     }
     
@@ -138,20 +137,19 @@ class GnutellaFileCollectionImpl extends SharedFileCollectionImpl implements Gnu
     @Override
     protected boolean isPending(File file, FileDesc fd) {
         return LibraryUtils.isForcedShareDirectory(file.getParentFile())
-            || isSmartlySharedType(file)
-            || data.isSharedWithGnutella(file) 
-            || sessionFiles.containsKey(file);
+            || sessionFiles.containsKey(file)
+            || super.isPending(file, fd);
     }
     
     @Override
     protected void saveChange(File file, boolean added) {
-        if(!sessionFiles.containsKey(file)) {
-            data.setSharedWithGnutella(file, added);
-        }        
-        
         // Make sure removed things are removed.
         if(!added) {
             sessionFiles.remove(file);
+        }
+        
+        if(!sessionFiles.containsKey(file)) {
+            super.saveChange(file, added);
         }
     }
     

@@ -2,16 +2,16 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.Category;
-import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
-import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.assistedinject.Assisted;
@@ -24,9 +24,9 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 /**
  * A collection of FileDescs containing files that may be shared with one or more people.
  */
-class SharedFileCollectionImpl extends AbstractFileCollection implements SmartFileCollection, SharedFileCollection {
+class SharedFileCollectionImpl extends AbstractFileCollection implements SharedFileCollection {
     
-    private final String collectionId;
+    private final int collectionId;
     
     private volatile boolean addNewImagesAlways = false;
     private volatile boolean addNewAudioAlways = false;
@@ -36,21 +36,44 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SmartFi
     
     private final Executor executor;
     private final HashTreeCache treeCache;
+    
+    private final CopyOnWriteArrayList<String> sharedWith = new CopyOnWriteArrayList<String>();
 
     @AssistedInject
     public SharedFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, 
                                     @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory,
-                                    @Assisted String id, HashTreeCache treeCache) {
+                                    @Assisted int id, HashTreeCache treeCache) {
         super(managedList, multicasterFactory);
-        this.collectionId = Objects.nonNull(id, "id");
+        this.collectionId = id;
         this.data = data;
         this.executor = ExecutorsHelper.newProcessingQueue("SharedCollectionAdder");
         this.treeCache = treeCache;
         
-        addNewAudioAlways = LibrarySettings.containsFriendShareNewAudio(id);
-        addNewImagesAlways = LibrarySettings.containsFriendShareNewImages(id);
-        addNewVideoAlways = LibrarySettings.containsFriendShareNewVideo(id);
-        initialize();
+        addNewAudioAlways = data.isCollectionSmartAddEnabled(id, Category.AUDIO);
+        addNewImagesAlways = data.isCollectionSmartAddEnabled(id, Category.IMAGE);
+        addNewVideoAlways = data.isCollectionSmartAddEnabled(id, Category.VIDEO);
+    }
+    
+    @Override
+    public void addPersonToShareWith(String id) {
+        sharedWith.add(id);
+    }
+    
+    @Override
+    public boolean removePersonToShareWith(String id) {
+        return sharedWith.remove(id);
+    }
+    @Override
+    public List<String> getSharedIdList() {
+        return Collections.unmodifiableList(sharedWith);
+    }
+    
+    @Override
+    public void setShareIdList(List<String> ids) {
+        // there will temporarily be a state where sharedWith will either
+        // be empty or contain just a subset of ids.
+        sharedWith.retainAll(ids);
+        sharedWith.addAllAbsent(ids);
     }
     
     @Override
@@ -156,11 +179,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SmartFi
     @Override
     public void setAddNewImageAlways(boolean value) {
         if(value != addNewImagesAlways) {
-            if(value == false) {
-                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS, collectionId);
-            } else {
-                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS, collectionId);
-            }
+            data.setCollectionSmartAddEnabled(collectionId, Category.IMAGE, value);
             fireCollectionEvent(FileViewChangeEvent.Type.IMAGE_COLLECTION, value);
             addNewImagesAlways = value;
             if(addNewImagesAlways) {
@@ -260,11 +279,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SmartFi
     @Override
     public void setAddNewAudioAlways(boolean value) {
         if(value != addNewAudioAlways) {
-            if(value == false) {
-                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS, collectionId);
-            } else {
-                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS, collectionId);
-            }
+            data.setCollectionSmartAddEnabled(collectionId, Category.AUDIO, value);
             fireCollectionEvent(FileViewChangeEvent.Type.AUDIO_COLLECTION, value);
             addNewAudioAlways = value;
             if(addNewAudioAlways) {
@@ -290,11 +305,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SmartFi
     @Override
     public void setAddNewVideoAlways(boolean value) {
         if(value != addNewVideoAlways) {
-            if(value == false) {
-                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS, collectionId);
-            } else {
-                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS, collectionId);
-            }
+            data.setCollectionSmartAddEnabled(collectionId, Category.VIDEO, value);
             fireCollectionEvent(FileViewChangeEvent.Type.VIDEO_COLLECTION, value);
             addNewVideoAlways = value;
             if(addNewVideoAlways) {
@@ -313,12 +324,12 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SmartFi
     
     @Override
     protected boolean isPending(File file, FileDesc fd) {
-        return isSmartlySharedType(file) || data.isSharedWithFriend(file, collectionId);
+        return isSmartlySharedType(file) || data.isFileInCollection(file, collectionId);
     }
     
     @Override
     protected void saveChange(File file, boolean added) {
-        data.setSharedWithFriend(file, collectionId, added);      
+        data.setFileInCollection(file, collectionId, added);      
     }
     
     @Override

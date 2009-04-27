@@ -4,24 +4,19 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
@@ -30,10 +25,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -57,149 +50,148 @@ import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.wizard.AutoDirectoryManageConfig;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 /** Library Option View */
 public class LibraryOptionPanel extends OptionPanel {
 
     private final IconManager iconManager;    
-    private final Provider<ShareListManager> shareListManager;
-    private final Collection<Friend> knownFriends;
+//    private final Provider<ShareListManager> shareListManager;
+//    private final Collection<Friend> knownFriends;
     private final LibraryManagerOptionPanel libraryManagerPanel;    
-    private final ShareCategoryPanel shareCategoryPanel;
+//    private final ShareCategoryPanel shareCategoryPanel;
     private final UsePlayerPanel playerPanel;
     private ExcludedFolderCollectionManager excludedFolders;
     
     @Inject
     public LibraryOptionPanel(LibraryManager libraryManager, 
-            Provider<ShareListManager> shareListManager,
+            /* Provider<ShareListManager> shareListManager, */
             IconManager iconManager,
             @Named("known") Collection<Friend> knownFriends) {
         this.iconManager = iconManager;
-        this.shareListManager = shareListManager;
-        this.knownFriends = knownFriends;
+//        this.shareListManager = shareListManager;
+//        this.knownFriends = knownFriends;
         this.excludedFolders = new ExcludedFolderCollectionManagerImpl();
         this.libraryManagerPanel = new LibraryManagerOptionPanel(libraryManager.getLibraryData()); 
-        this.shareCategoryPanel = new ShareCategoryPanel();
+//        this.shareCategoryPanel = new ShareCategoryPanel();
         this.playerPanel = new UsePlayerPanel();
         
         setLayout(new MigLayout("insets 15, fillx, wrap", "", ""));
         
         add(libraryManagerPanel, "pushx, growx");
-        add(shareCategoryPanel, "pushx, growx");
+//        add(shareCategoryPanel, "pushx, growx");
         add(playerPanel, "pushx, growx");
         
-        libraryManagerPanel.syncWith(shareCategoryPanel);
+//        libraryManagerPanel.syncWith(shareCategoryPanel);
     }
 
     @Override
     boolean applyOptions() {
         return libraryManagerPanel.applyOptions() ||
-               shareCategoryPanel.applyOptions() ||
+//               shareCategoryPanel.applyOptions() ||
                playerPanel.applyOptions();
     }
 
     @Override
     boolean hasChanged() {
         return libraryManagerPanel.hasChanged() ||
-               shareCategoryPanel.hasChanged() ||
+//               shareCategoryPanel.hasChanged() ||
                playerPanel.hasChanged();
     }
 
     @Override
     public void initOptions() {
         libraryManagerPanel.initOptions();
-        shareCategoryPanel.initOptions();
+//        shareCategoryPanel.initOptions();
         playerPanel.initOptions();
     }    
     
-    /**
-     * Share Category Panel
-     */
-    private class ShareCategoryPanel extends OptionPanel {
-
-        private final JRadioButton shareSnapshot;
-        private final JRadioButton shareCollection;
-        private final JPanel buttonPanel; 
-        private final ButtonGroup buttonGroup;
-
-        public ShareCategoryPanel() {
-            super(I18n.tr("Sharing Categories"));
-            setLayout(new MigLayout("gap 0, fill"));
-
-            
-            shareSnapshot = new JRadioButton(I18n.tr("Only share files in that category at that point"));
-            shareSnapshot.setContentAreaFilled(false);
-            shareCollection = new JRadioButton(I18n.tr("Share my entire collection, including new files that automatically get added to My Library"));
-            shareCollection.setContentAreaFilled(false);
-            
-            buttonGroup = new ButtonGroup();
-            buttonGroup.add(shareSnapshot);
-            buttonGroup.add(shareCollection);
-            
-            buttonPanel = new JXPanel();
-            buttonPanel.setLayout(new MigLayout("ins 0 0 0 0, gap 0! 0!, novisualpadding"));//new VerticalLayout(2));
-            buttonPanel.add(new JLabel(I18n.tr("When I share a category:")), "wrap");
-            buttonPanel.add(shareSnapshot,"gapleft 5, gaptop 8, wrap");
-            buttonPanel.add(shareCollection, "gapleft 5");
-            
-            add(new JLabel(I18n.tr("Choose what happens when I share a category")), "alignx left");
-            add(new JButton(new AbstractAction(I18n.tr("Configure...")) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    boolean snapC = shareSnapshot.isSelected();
-                    boolean collC = shareCollection.isSelected();
-                    int result = FocusJOptionPane.showConfirmDialog(ShareCategoryPanel.this,
-                            buttonPanel, I18n.tr("Sharing Categories"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-                    if(result != JOptionPane.OK_OPTION) {
-                        buttonGroup.setSelected(shareSnapshot.getModel(), snapC);
-                        buttonGroup.setSelected(shareCollection.getModel(), collC);
-                    }
-                }
-            }), "alignx right, gapbefore push, wrap");
-        }
-        
-        @Override
-        boolean applyOptions() {
-            LibrarySettings.SNAPSHOT_SHARING_ENABLED.setValue(shareSnapshot.isSelected());
-            // revert to defaults for collection sharing if true
-            if(shareSnapshot.isSelected()) {
-                ShareListManager shareManager = shareListManager.get();
-                // Set friends & gnutella explicitly, so events fire properly.
-                shareManager.getGnutellaShareList().setCategoryAutomaticallyAdded(Category.AUDIO, false);
-                shareManager.getGnutellaShareList().setCategoryAutomaticallyAdded(Category.VIDEO, false);
-                shareManager.getGnutellaShareList().setCategoryAutomaticallyAdded(Category.IMAGE, false);
-                for(Friend friend : knownFriends) {
-                    FriendFileList fileList = shareManager.getFriendShareList(friend);
-                    if(fileList != null) {                    
-                        fileList.setCategoryAutomaticallyAdded(Category.AUDIO, false);
-                        fileList.setCategoryAutomaticallyAdded(Category.VIDEO, false);
-                        fileList.setCategoryAutomaticallyAdded(Category.IMAGE, false);
-                    }
-                }
-                // clear everyone else, so if you're not signed on,
-                // when you sign on it doesn't continue auto-sharing.
-                LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.revertToDefault();
-                LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.revertToDefault();
-                LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.revertToDefault();
-            }
-            return false;
-        }
-
-        @Override
-        boolean hasChanged() {
-            return shareSnapshot.isSelected() != LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue();
-        }
-
-        @Override
-        public void initOptions() {
-            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue())
-                shareSnapshot.setSelected(true);
-            else
-                shareCollection.setSelected(true);
-        }
-    }
+//    /**
+//     * Share Category Panel
+//     */
+//    private class ShareCategoryPanel extends OptionPanel {
+//
+//        private final JRadioButton shareSnapshot;
+//        private final JRadioButton shareCollection;
+//        private final JPanel buttonPanel; 
+//        private final ButtonGroup buttonGroup;
+//
+//        public ShareCategoryPanel() {
+//            super(I18n.tr("Sharing Categories"));
+//            setLayout(new MigLayout("gap 0, fill"));
+//
+//            
+//            shareSnapshot = new JRadioButton(I18n.tr("Only share files in that category at that point"));
+//            shareSnapshot.setContentAreaFilled(false);
+//            shareCollection = new JRadioButton(I18n.tr("Share my entire collection, including new files that automatically get added to My Library"));
+//            shareCollection.setContentAreaFilled(false);
+//            
+//            buttonGroup = new ButtonGroup();
+//            buttonGroup.add(shareSnapshot);
+//            buttonGroup.add(shareCollection);
+//            
+//            buttonPanel = new JXPanel();
+//            buttonPanel.setLayout(new MigLayout("ins 0 0 0 0, gap 0! 0!, novisualpadding"));//new VerticalLayout(2));
+//            buttonPanel.add(new JLabel(I18n.tr("When I share a category:")), "wrap");
+//            buttonPanel.add(shareSnapshot,"gapleft 5, gaptop 8, wrap");
+//            buttonPanel.add(shareCollection, "gapleft 5");
+//            
+//            add(new JLabel(I18n.tr("Choose what happens when I share a category")), "alignx left");
+//            add(new JButton(new AbstractAction(I18n.tr("Configure...")) {
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    boolean snapC = shareSnapshot.isSelected();
+//                    boolean collC = shareCollection.isSelected();
+//                    int result = FocusJOptionPane.showConfirmDialog(ShareCategoryPanel.this,
+//                            buttonPanel, I18n.tr("Sharing Categories"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+//                    if(result != JOptionPane.OK_OPTION) {
+//                        buttonGroup.setSelected(shareSnapshot.getModel(), snapC);
+//                        buttonGroup.setSelected(shareCollection.getModel(), collC);
+//                    }
+//                }
+//            }), "alignx right, gapbefore push, wrap");
+//        }
+//        
+//        @Override
+//        boolean applyOptions() {
+//            LibrarySettings.SNAPSHOT_SHARING_ENABLED.setValue(shareSnapshot.isSelected());
+//            // revert to defaults for collection sharing if true
+//            if(shareSnapshot.isSelected()) {
+//                ShareListManager shareManager = shareListManager.get();
+//                // Set friends & gnutella explicitly, so events fire properly.
+//                shareManager.getGnutellaShareList().setCategoryAutomaticallyAdded(Category.AUDIO, false);
+//                shareManager.getGnutellaShareList().setCategoryAutomaticallyAdded(Category.VIDEO, false);
+//                shareManager.getGnutellaShareList().setCategoryAutomaticallyAdded(Category.IMAGE, false);
+//                for(Friend friend : knownFriends) {
+//                    FriendFileList fileList = shareManager.getFriendShareList(friend);
+//                    if(fileList != null) {                    
+//                        fileList.setCategoryAutomaticallyAdded(Category.AUDIO, false);
+//                        fileList.setCategoryAutomaticallyAdded(Category.VIDEO, false);
+//                        fileList.setCategoryAutomaticallyAdded(Category.IMAGE, false);
+//                    }
+//                }
+//                // clear everyone else, so if you're not signed on,
+//                // when you sign on it doesn't continue auto-sharing.
+//                LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.revertToDefault();
+//                LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.revertToDefault();
+//                LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.revertToDefault();
+//            }
+//            return false;
+//        }
+//
+//        @Override
+//        boolean hasChanged() {
+//            return shareSnapshot.isSelected() != LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue();
+//        }
+//
+//        @Override
+//        public void initOptions() {
+//            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue())
+//                shareSnapshot.setSelected(true);
+//            else
+//                shareCollection.setSelected(true);
+//        }
+//    }
     
     /**
      * Library Manager Panel
@@ -232,27 +224,29 @@ public class LibraryOptionPanel extends OptionPanel {
             add(manualImportPanel, "growx, hidemode 2");
         }
         
-        void syncWith(ShareCategoryPanel shareCategoryPanel) {
-            shareCategoryPanel.shareCollection.addItemListener(new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-                    if(((AbstractButton)e.getSource()).isSelected()) {
-                        treeTableContainer.setAdditionalText(I18n.tr("*Adding these folders will automatically share any collections you shared"));
-                    }
-                }
-            });
-            shareCategoryPanel.shareSnapshot.addItemListener(new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-                    if(((AbstractButton)e.getSource()).isSelected()) {
-                        treeTableContainer.setAdditionalText(I18n.tr("*Adding these folders will not automatically share your files"));
-                    }
-                }
-            });
-        }
+//        void syncWith(ShareCategoryPanel shareCategoryPanel) {
+//            shareCategoryPanel.shareCollection.addItemListener(new ItemListener() {
+//                @Override
+//                public void itemStateChanged(ItemEvent e) {
+//                    if(((AbstractButton)e.getSource()).isSelected()) {
+//                        treeTableContainer.setAdditionalText(I18n.tr("*Adding these folders will automatically share any collections you shared"));
+//                    }
+//                }
+//            });
+//            shareCategoryPanel.shareSnapshot.addItemListener(new ItemListener() {
+//                @Override
+//                public void itemStateChanged(ItemEvent e) {
+//                    if(((AbstractButton)e.getSource()).isSelected()) {
+//                        treeTableContainer.setAdditionalText(I18n.tr("*Adding these folders will not automatically share your files"));
+//                    }
+//                }
+//            });
+//        }
 
         private void createComponents() {
             treeTableContainer = new LibraryTreeTableContainer(iconManager, libraryData, excludedFolders);
+            treeTableContainer.setAdditionalText(I18n.tr("*Adding these folders will not automatically share your files"));
+            
             addFolderButton = new JButton(new AddDirectoryAction(this));
 
             checkBoxes = new HorizonalCheckBoxListPanel<Category>(Category.getCategoriesInOrder());

@@ -4,18 +4,13 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.LayoutManager;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -23,13 +18,8 @@ import org.jdesktop.application.Resource;
 import org.limewire.common.Disposable;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.settings.LibrarySettings;
-import org.limewire.setting.StringArraySetting;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -43,7 +33,7 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
     @Resource private Color backgroundColor;
     
     private Map<String, InfoPanel> categoryInfoPanels = new HashMap<String, InfoPanel>();
-    private Set<String> possibleShareValues;
+//    private Set<String> possibleShareValues;
 
     /** Map of catalog headings. */
     private final Map<Catalog.Type, JComponent> headingMap = new EnumMap<Catalog.Type, JComponent>(Catalog.Type.class);
@@ -56,25 +46,25 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
 
     public LibrarySelectionPanel() {
         super(new MigLayout("insets 0, gap 0, fill, wrap, hidemode 3", "[125!]", ""));
-        possibleShareValues = Collections.emptySet();
+//        possibleShareValues = Collections.emptySet();
         init();
     }
 
-    /**
-     * Updates each applicable (supports share new always) InfoPanel with the set
-     * of allowable names (for example, the set of friends in the user's roster)
-     *
-     * @param possibleShareValues
-     */
-    public void updateCollectionShares(Set<String> possibleShareValues) {
-        this.possibleShareValues = possibleShareValues;
-
-        for (InfoPanel infoPanel : categoryInfoPanels.values()) {
-            if (infoPanel.supportsShareNewAlways()) {
-                infoPanel.updateCategoryShareCount();
-            }
-        }
-    }
+//    /**
+//     * Updates each applicable (supports share new always) InfoPanel with the set
+//     * of allowable names (for example, the set of friends in the user's roster)
+//     *
+//     * @param possibleShareValues
+//     */
+//    public void updateCollectionShares(Set<String> possibleShareValues) {
+//        this.possibleShareValues = possibleShareValues;
+//
+//        for (InfoPanel infoPanel : categoryInfoPanels.values()) {
+//            if (infoPanel.supportsShareNewAlways()) {
+//                infoPanel.updateCategoryShareCount();
+//            }
+//        }
+//    }
     
     private void init() {
         GuiUtils.assignResources(this);
@@ -163,7 +153,7 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
      * Creates a subPanel in the inner nav. This panel displays file information 
      * about the particular category that is currently selected.
      */
-    private class InfoPanel<T extends FileItem> extends JPanel implements Disposable, ListEventListener<T>, SettingListener {
+    private class InfoPanel<T extends FileItem> extends JPanel implements Disposable, ListEventListener<T> /*, SettingListener  */ {
         @Resource
         private Color backgroundColor;
         @Resource
@@ -175,12 +165,12 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         
         private JLabel categoryLabel;
         private JLabel totalLabel;
-        private JLabel collectionLabel;
+//        private JLabel collectionLabel;
         
         private final EventList<T> fileList;
         private final Catalog catalog;
-        private StringArraySetting shareNewAlwaysSetting;
-        private SettingListener categoryCollectionListener;
+//        private StringArraySetting shareNewAlwaysSetting;
+//        private SettingListener categoryCollectionListener;
         
         public InfoPanel(Catalog catalog, EventList<T> fileList, boolean isFriendView) {
             super(new MigLayout("fillx, gap 0, insets 5 10 5 0, hidemode 3"));
@@ -199,8 +189,8 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
             add(categoryLabel, "wrap, gapbottom 2");
             
             initTotalLabel(fileList);
-            if(!isFriendView && supportsShareNewAlways())
-                initCollectionListener();
+//            if(!isFriendView && supportsShareNewAlways())
+//                initCollectionListener();
         }
         
         /** 
@@ -215,79 +205,79 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
             fileList.addListEventListener(this);
         }
         
-        /**
-         * Displays the number of collections that are shared of this category.
-         * Assumes category supports "share new always"
-         */
-        private void initCollectionListener() {
-            shareNewAlwaysSetting = getShareCategorySetting();
-
-            createCollectionLabel();
-            updateCategoryShareCount();
-
-            categoryCollectionListener = new SettingListener() {
-                @Override
-                public void settingChanged(SettingEvent evt) {
-                    updateCategoryShareCount();
-                }
-            };
-            shareNewAlwaysSetting.addSettingListener(categoryCollectionListener);
-        }
-
-
-        public boolean supportsShareNewAlways() {
-            return (getShareCategorySetting() != null);
-        }
-
-        /**
-         * @return LibrarySetting associated with the category member variable
-         *         null if not applicable (does not support share all in category)
-         */
-        private StringArraySetting getShareCategorySetting() {
-            StringArraySetting shareNewAlwaysSetting = null;
-
-            if (catalog.getCategory() != null) {
-                switch (catalog.getCategory()) {
-                case AUDIO:
-                    shareNewAlwaysSetting = LibrarySettings.SHARE_NEW_AUDIO_ALWAYS;
-                    break;
-                case VIDEO:
-                    shareNewAlwaysSetting = LibrarySettings.SHARE_NEW_VIDEO_ALWAYS;
-                    break;
-                case IMAGE:
-                    shareNewAlwaysSetting = LibrarySettings.SHARE_NEW_IMAGES_ALWAYS;
-                    break;
-                default:
-            }
-            }
-            return shareNewAlwaysSetting;
-        }
-
-        private void createCollectionLabel() {
-            collectionLabel = new JLabel();
-            collectionLabel.setFont(smallFont);
-            collectionLabel.setForeground(fontColor);
-            setCollectionLabel(0);
-            add(collectionLabel, "wrap");
-            collectionLabel.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());
-            LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
-        }
+//        /**
+//         * Displays the number of collections that are shared of this category.
+//         * Assumes category supports "share new always"
+//         */
+//        private void initCollectionListener() {
+//            shareNewAlwaysSetting = getShareCategorySetting();
+//
+//            createCollectionLabel();
+//            updateCategoryShareCount();
+//
+//            categoryCollectionListener = new SettingListener() {
+//                @Override
+//                public void settingChanged(SettingEvent evt) {
+//                    updateCategoryShareCount();
+//                }
+//            };
+//            shareNewAlwaysSetting.addSettingListener(categoryCollectionListener);
+//        }
+//
+//
+//        public boolean supportsShareNewAlways() {
+//            return (getShareCategorySetting() != null);
+//        }
+//
+//        /**
+//         * @return LibrarySetting associated with the category member variable
+//         *         null if not applicable (does not support share all in category)
+//         */
+//        private StringArraySetting getShareCategorySetting() {
+//            StringArraySetting shareNewAlwaysSetting = null;
+//
+//            if (catalog.getCategory() != null) {
+//                switch (catalog.getCategory()) {
+//                case AUDIO:
+//                    shareNewAlwaysSetting = LibrarySettings.SHARE_NEW_AUDIO_ALWAYS;
+//                    break;
+//                case VIDEO:
+//                    shareNewAlwaysSetting = LibrarySettings.SHARE_NEW_VIDEO_ALWAYS;
+//                    break;
+//                case IMAGE:
+//                    shareNewAlwaysSetting = LibrarySettings.SHARE_NEW_IMAGES_ALWAYS;
+//                    break;
+//                default:
+//            }
+//            }
+//            return shareNewAlwaysSetting;
+//        }
+//
+//        private void createCollectionLabel() {
+//            collectionLabel = new JLabel();
+//            collectionLabel.setFont(smallFont);
+//            collectionLabel.setForeground(fontColor);
+//            setCollectionLabel(0);
+//            add(collectionLabel, "wrap");
+//            collectionLabel.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());
+//            LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
+//        }
         
         private void setTotalLabel(int total) {
             totalLabel.setText(I18n.tr("Total: {0}", total));
         }
         
-        private void setCollectionLabel(int count) {
-            if(collectionLabel != null)
-                collectionLabel.setText(I18n.tr("Sharing Collection: {0}", count));
-        }   
+//        private void setCollectionLabel(int count) {
+//            if(collectionLabel != null)
+//                collectionLabel.setText(I18n.tr("Sharing Collection: {0}", count));
+//        }   
 
         @Override
         public void dispose() {
             if(fileList != null)
                 fileList.removeListEventListener(this);
-            if (categoryCollectionListener != null)
-                shareNewAlwaysSetting.removeSettingListener(categoryCollectionListener);
+//            if (categoryCollectionListener != null)
+//                shareNewAlwaysSetting.removeSettingListener(categoryCollectionListener);
         }
 
         @Override
@@ -296,28 +286,28 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
                 setTotalLabel(fileList.size());
         }
 
-        @Override
-        public void settingChanged(SettingEvent evt) {
-            SwingUtilities.invokeLater(new Runnable(){
-                public void run() {
-                    collectionLabel.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());                    
-                }
-            });
-        }
+//        @Override
+//        public void settingChanged(SettingEvent evt) {
+//            SwingUtilities.invokeLater(new Runnable(){
+//                public void run() {
+//                    collectionLabel.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());                    
+//                }
+//            });
+//        }
 
-        public void updateCategoryShareCount() {
-            Set<String> shareNewAlways = new HashSet<String>(Arrays.asList(shareNewAlwaysSetting.get()));
-            shareNewAlways.retainAll(possibleShareValues);
-            updateShareCountLabel(shareNewAlways.size());
-        }
+//        public void updateCategoryShareCount() {
+//            Set<String> shareNewAlways = new HashSet<String>(Arrays.asList(shareNewAlwaysSetting.get()));
+//            shareNewAlways.retainAll(possibleShareValues);
+//            updateShareCountLabel(shareNewAlways.size());
+//        }
 
-        private void updateShareCountLabel(final int shareCount) {
-            SwingUtils.invokeLater(new Runnable() {
-                public void run() {
-                    setCollectionLabel(shareCount);
-                }
-            });
-        }
+//        private void updateShareCountLabel(final int shareCount) {
+//            SwingUtils.invokeLater(new Runnable() {
+//                public void run() {
+//                    setCollectionLabel(shareCount);
+//                }
+//            });
+//        }
         
         public Catalog getCatalog() {
             return catalog;

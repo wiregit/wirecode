@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -23,6 +24,24 @@ public class GnutellaCollectionStub extends AbstractFileCollectionStub implement
 
     public final static FileDescStub FD_STUB_ONE = new FileDescStub();
     public final static FileDescStub FD_STUB_TWO = new FileDescStub("other.txt");
+    
+    @Override
+    public void addPersonToShareWith(String id) {
+    }
+    
+    @Override
+    public List<String> getSharedIdList() {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public boolean removePersonToShareWith(String id) {
+        return false;
+    }
+    
+    @Override
+    public void setShareIdList(List<String> ids) {
+    }
     
     @Override
     public Future<FileDesc> addForSession(File file) {
@@ -92,7 +111,5 @@ public class GnutellaCollectionStub extends AbstractFileCollectionStub implement
 
     @Override
     public void addSnapshotCategory(Category category) {
-        // TODO Auto-generated method stub
-        
     }
 }

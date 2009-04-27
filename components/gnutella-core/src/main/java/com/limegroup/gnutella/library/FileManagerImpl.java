@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.Comparators;
-import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -149,11 +148,12 @@ class FileManagerImpl implements FileManager, Service {
         return gnutellaFileView;
     }
 
+    // TODO: The places these are used are in the UI and broken and based on "views" even
+    //       though they should be based on collections.
     @Override
     public synchronized SharedFileCollection getOrCreateSharedCollection(String name) {
         SharedFileCollectionImpl fileList = sharedCollections.get(name);
         if(fileList == null) {
-            LibrarySettings.addFriendListName(name);
             fileList = sharedFileCollectionImplFactory.createSharedFileCollectionImpl(name);
             fileList.initialize();
             sharedCollections.put(name, fileList);
@@ -161,6 +161,8 @@ class FileManagerImpl implements FileManager, Service {
         return fileList;
     }
 
+    // TODO: The places these are used are in the UI and broken and based on "views"
+    //       even though they should be based on collections.
     @Override
     public synchronized void removeSharedCollection(String name) {
         // if it was a valid key, remove saved references to it
@@ -168,11 +170,11 @@ class FileManagerImpl implements FileManager, Service {
         if(removeFileList != null) {
             removeFileList.dispose();
             sharedCollections.remove(name);
-            LibrarySettings.removeFriendListName(name);
         }
     }
 
-
+    // TODO: This should be removing the FileView for the friend and have
+    //       nothing to do with collections.
     public void unloadFilesForFriend(String friendName) {
         SharedFileCollectionImpl removeFileList = null;
 
