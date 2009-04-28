@@ -127,17 +127,20 @@ public class Torrent {
     public void start() {
         if (!started.getAndSet(true)) {
             LibTorrentInfo info = null;
-            
-            //TODO clean up this logic for picking which addTorrent method to use
+
+            // TODO clean up this logic for picking which addTorrent method to
+            // use
             if (torrentFile != null) {
                 info = torrentManager.addTorrent(torrentFile);
             } else {
                 info = torrentManager.addTorrent(sha1, announce);
             }
 
+            // TODO this will be empty when initing from sha 1 and announce,
+            // need a way to update this data when it becomes available.
             this.info = info;
 
-            //assert sha1.equals(info.sha1);
+            // assert sha1.equals(info.sha1);
 
             torrentManager.addListener(sha1, new EventListener<LibTorrentEvent>() {
                 public void handleEvent(LibTorrentEvent event) {
