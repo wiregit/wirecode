@@ -3,7 +3,7 @@ CXXFLAGS =	-O2 -g -Wall -fmessage-length=0
 
 #TODO make OS variable dynamic
 
-OS = "linux"
+OS = "osx"
 
 
 ifeq ($(OS),"windows")
@@ -22,7 +22,7 @@ ifeq  ($(OS),"linux")
 endif
 
 ifeq  ($(OS),"osx")
-	LIB_DIR = ./lib/mac
+	LIB_DIR = ./lib/osx
 	LIBS = -l torrent -l boost_system-xgcc40-mt-d-1_38 -l boost_filesystem-xgcc40-mt-d-1_38 -l boost_thread-xgcc40-mt-d-1_38  
 	LIBRARY = libtorrent-wrapper.dylib
 	TARGET = libtorrent-wrapper.out
@@ -50,9 +50,10 @@ compile:    libtorrentwrapper.o
 all: library
 
 library: compile
-	$(CXX) -shared $(LINKOPTIONS) -o $(LIBRARY) $(OBJS) -L $(LIB_DIR) $(LIBS)
+	$(CXX) -shared $(LINKOPTIONS) -o $(LIBRARY) $(OBJS) -L$(LIB_DIR) $(LIBS)
 
-copylib:
+copylib: library
+#	strip $(LIBRARY)
 	cp $(LIBRARY) ../../../../../../lib/native/$(OS)/
 	
 clean:
