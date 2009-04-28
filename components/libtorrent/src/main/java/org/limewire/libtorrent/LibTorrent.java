@@ -7,6 +7,8 @@ import com.sun.jna.Memory;
 
 public interface LibTorrent extends Library {
 
+    public void initialize();
+    
     public void init(String path);
 
     public LibTorrentInfo add_torrent(String path);
@@ -14,14 +16,6 @@ public interface LibTorrent extends Library {
     public int pause_torrent(String id);
 
     public int resume_torrent(String id);
-
-    public boolean is_torrent_paused(String id);
-
-    public boolean is_torrent_seed(String id);
-
-    public boolean is_torrent_finished(String id);
-
-    public boolean is_torrent_valid(String id);
 
     public void get_alerts(AlertCallback alertCallback);
 

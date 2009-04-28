@@ -42,7 +42,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final DownloadManager downloadManager;
 
-    private final TorrentManager libTorrentManager;
+    private final TorrentManager torrentManager;
 
     private final Torrent torrent;
 
@@ -54,16 +54,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
-            TorrentManager libTorrentManager, BTUploaderFactory btUploaderFactory) {
+            TorrentManager torrentManager, BTUploaderFactory btUploaderFactory) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
-        this.libTorrentManager = libTorrentManager;
+        this.torrentManager = torrentManager;
         this.btUploaderFactory = btUploaderFactory;
-        this.torrent = new Torrent(libTorrentManager);
-        //TODO make libtorrent manager a singleton
-        libTorrentManager.init(SharingSettings.INCOMPLETE_DIRECTORY.getValueAsString());
-        
-        
+        this.torrent = new Torrent(torrentManager);
     }
 
     @Override
@@ -94,7 +90,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void pause() {
-        libTorrentManager.pauseTorrent(torrent.getSha1());
+        torrentManager.pauseTorrent(torrent.getSha1());
     }
 
     @Override
@@ -127,7 +123,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean resume() {
-        libTorrentManager.resumeTorrent(torrent.getSha1());
+        torrentManager.resumeTorrent(torrent.getSha1());
         return true;
     }
 

@@ -8,9 +8,10 @@ import com.sun.jna.Native;
 
 public class LibTorrentWrapper implements LibTorrent {
 
-    private final LibTorrent libTorrent;
+    private LibTorrent libTorrent;
 
-    public LibTorrentWrapper() {
+    @Override
+    public void initialize() {
         if (OSUtils.isWindows()) {
             System.loadLibrary("mingwm10");
             System.loadLibrary("boost_system-mgw34-mt-1_38");
@@ -71,14 +72,6 @@ public class LibTorrentWrapper implements LibTorrent {
     }
 
     @Override
-    public boolean is_torrent_paused(String id) {
-        log("before is_torrent_paused: " + id);
-        boolean ret = libTorrent.is_torrent_paused(id);
-        log("after is_torrent_paused: " + id);
-        return ret;
-    }
-
-    @Override
     public LibTorrentStatus get_torrent_status(String id) {
         log("before get_torrent_status: " + id);
         int size = new LibTorrentStatus().size();
@@ -94,30 +87,6 @@ public class LibTorrentWrapper implements LibTorrent {
         LibTorrentStatus status = libTorrent.get_torrent_status(id);
         log("after get_torrent_status: " + id);
         return status;
-    }
-
-    @Override
-    public boolean is_torrent_finished(String id) {
-        log("before is_torrent_finished: " + id);
-        boolean ret = libTorrent.is_torrent_finished(id);
-        log("after is_torrent_finished: " + id);
-        return ret;
-    }
-
-    @Override
-    public boolean is_torrent_valid(String id) {
-        log("before is_torrent_valid: " + id);
-        boolean ret = libTorrent.is_torrent_valid(id);
-        log("after is_torrent_valid: " + id);
-        return ret;
-    }
-
-    @Override
-    public boolean is_torrent_seed(String id) {
-        log("before is_torrent_seed: " + id);
-        boolean ret = libTorrent.is_torrent_seed(id);
-        log("after is_torrent_seed: " + id);
-        return ret;
     }
 
     @Override

@@ -207,47 +207,6 @@ extern "C" int remove_torrent(const char* id) {
 	}
 }
 
-extern "C" bool is_torrent_paused(const char* id) {
-	libtorrent::torrent_handle h = findTorrentHandle(id);
-	if (h.is_valid()) {
-		return h.is_paused();
-	} else {
-		return false;
-	}
-}
-
-extern "C" bool is_torrent_seed(const char* id) {
-	libtorrent::torrent_handle h = findTorrentHandle(id);
-	if (h.is_valid()) {
-		return h.is_seed();
-	} else {
-		return false;
-	}
-}
-
-extern "C" const char* get_torrent_name(const char* id) {
-	libtorrent::torrent_handle h = findTorrentHandle(id);
-	if (h.is_valid()) {
-		return h.name().c_str();
-	} else {
-		return 0;
-	}
-}
-
-extern "C" bool is_torrent_finished(const char* id) {
-	libtorrent::torrent_handle h = findTorrentHandle(id);
-	if (h.is_valid()) {
-		return h.is_finished();
-	} else {
-		return 0;
-	}
-}
-
-extern "C" bool is_torrent_valid(const char* id) {
-	libtorrent::torrent_handle h = findTorrentHandle(id);
-	return h.is_valid();
-}
-
 extern "C" int resume_torrent(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 	if (h.is_valid()) {
@@ -315,49 +274,5 @@ extern "C" void get_alerts(void(*alertCallback)(void*, void*)) {
 
 extern "C" void print() {
 	std::cout << "print called!" << std::endl;
-}
-
-void Alert(void* alert, void* stats) {
-	alert_s* a = (alert_s*) alert;
-	std::cout << a->message << std::endl;
-}
-
-int main(int argc, char* argv[]) {
-	std::cout << "starting" << std::endl;
-	try {
-		init("/home/pvertenten/Desktop");
-		info_s
-				* info =
-						(info_s*) add_torrent(
-								"/home/pvertenten/Desktop/wndw - wireless networking in the developing world.torrent");
-
-		const char* id = info->sha1;
-		int count = 1;
-		bool paused = false;
-		while (true) {
-			std::cout << "paused: " << is_torrent_paused(id) << std::endl;
-			std::cout << "finished: " << is_torrent_finished(id) << std::endl;
-			std::cout << "valid: " << is_torrent_valid(id) << std::endl;
-			if (count % 30 == 0) {
-				if (paused) {
-					resume_torrent(id);
-					paused = false;
-				} else {
-					pause_torrent(id);
-					paused = true;
-				}
-			}
-			get_alerts(Alert);
-			std::cout << "status: " << std::endl;
-			//			struct torrent_s s = get_torrent_status("id");
-			//			std::cout << "total_payload_download: " << s.total_payload_download
-			//					<< std::endl;
-			count++;
-			//sleep(1);
-		}
-	} catch (std::exception& e) {
-		std::cout << e.what() << "\n";
-	}
-	return 0;
 }
 
