@@ -11,7 +11,6 @@ import org.limewire.listener.SourcedEventMulticasterImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
@@ -26,7 +25,7 @@ public class TorrentManagerImpl implements TorrentManager {
     private EventPoller eventPoller;
 
     @Inject
-    public TorrentManagerImpl(@Named("TorrentDownloadFolder") File torrentDownloadFolder) {
+    public TorrentManagerImpl(@TorrentDownloadFolder File torrentDownloadFolder) {
         this.torrentDownloadFolder = torrentDownloadFolder;
         this.libTorrent = new LibTorrentWrapper();
         this.torrents = new CopyOnWriteArrayList<String>();
@@ -124,7 +123,14 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public void stop() {
         eventPoller.interrupt();
+        libTorrent.abort_torrents();
+        for(String id : torrents) {
+            listeners.removeListeners(id);
+        }
+        torrents.clear();
     }
+    
+    
 
     private class EventPoller extends Thread {
         @Override

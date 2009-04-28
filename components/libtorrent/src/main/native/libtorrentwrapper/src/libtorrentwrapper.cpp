@@ -26,8 +26,12 @@ extern "C" int init(const char* path) {
 	savePath = newPath;
 	s.set_alert_mask(0xffffffff);
 	s.listen_on(std::make_pair(6881, 6889));
+	return 1;
+}
 
-	return 0;
+extern "C" int abort_torrents() {
+	s.abort();
+	return 1;
 }
 
 std::string* getSizeTypeString(libtorrent::size_type size) {
@@ -79,7 +83,8 @@ void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
 	float upload_rate = status.upload_rate;
 	//TODO cleanup memory
 	const char* total_done = getSizeTypeString(status.total_done)->c_str();
-	const char* total_download = getSizeTypeString(status.total_download)->c_str();
+	const char* total_download =
+			getSizeTypeString(status.total_download)->c_str();
 	const char* total_upload = getSizeTypeString(status.total_upload)->c_str();
 	int num_peers = status.num_peers;
 	int num_uploads = status.num_uploads;

@@ -28,4 +28,6 @@ public interface LibTorrent extends Library {
     public void print();
 
     public boolean move_torrent(String id, String absolutePath);
+
+    public void abort_torrents();
 }

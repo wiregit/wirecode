@@ -114,4 +114,11 @@ public class LibTorrentWrapper implements LibTorrent {
         return ret;
     }
 
+    @Override
+    public void abort_torrents() {
+        log("before abort");
+        libTorrent.abort_torrents();
+        log("after abort");
+    }
+
 }
