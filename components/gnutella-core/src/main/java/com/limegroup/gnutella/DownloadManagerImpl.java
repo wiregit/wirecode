@@ -933,6 +933,7 @@ public class DownloadManagerImpl implements DownloadManager, Service,
            throw new SaveLocationException(e, torrentFile);
         }
         
+        //TODO will the overwrite logic below work with this check right here?
         ret.checkActiveAndWaiting();
 
         if (overwrite) {
