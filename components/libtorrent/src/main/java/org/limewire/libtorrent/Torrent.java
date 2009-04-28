@@ -3,6 +3,7 @@ package org.limewire.libtorrent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +26,6 @@ public class Torrent {
 
     private final AtomicReference<LibTorrentStatus> status;
 
-    private LibTorrentInfo info = null;
-
     private File incompleteFile = null;
 
     private File completeFile;
@@ -37,13 +36,15 @@ public class Torrent {
 
     private String sha1 = null;
 
-    private BTData btData = null;
-
     private final AtomicBoolean started = new AtomicBoolean(false);
 
     private String name;
 
     private String announce;
+
+    private long totalSize = -1;
+
+    private long pieceLength = -1;
 
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
@@ -60,13 +61,17 @@ public class Torrent {
         return listeners.removeListener(listener);
     }
 
-    public synchronized void init(String name, String sha1, String announce, File saveDir) {
+    public synchronized void init(String name, String sha1, long totalSize, long pieceLength,
+            String announce, List<String> paths, File saveDir) {
+        this.name = name;
         File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
-        incompleteFile = new File(torrentDownloadFolder, name);
-        completeFile = new File(saveDir, name);
+        this.incompleteFile = new File(torrentDownloadFolder, name);
+        this.completeFile = new File(saveDir, name);
         this.sha1 = sha1;
         this.announce = announce;
-        // TODO where to get paths to files?
+        this.paths.addAll(paths);
+        this.totalSize = totalSize;
+        this.pieceLength = pieceLength;
     }
 
     public synchronized void init(File torrentFile, File saveDir) throws IOException {
@@ -77,12 +82,14 @@ public class Torrent {
             fis = new FileInputStream(torrentFile);
             fileChannel = fis.getChannel();
             Map metaInfo = (Map) Token.parse(fileChannel);
-            btData = new BTDataImpl(metaInfo);
+            BTData btData = new BTDataImpl(metaInfo);
             name = btData.getName();
-
+            totalSize = btData.getLength();
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
             incompleteFile = new File(torrentDownloadFolder, name);
             completeFile = new File(saveDir, name);
+
+            this.pieceLength = btData.getPieceLength();
 
             if (btData.getFiles() != null) {
                 for (BTFileData fileData : btData.getFiles()) {
@@ -102,11 +109,17 @@ public class Torrent {
     }
 
     public byte[] getInfoHash() {
-        return btData.getInfoHash();
+        return fromHexString(sha1);
     }
 
     public String getName() {
         return name;
+    }
+
+    private byte[] fromHexString(String hexString) {
+        byte[] bytes = new BigInteger(hexString, 16).toByteArray();
+        return bytes;
+
     }
 
     private String toHexString(byte[] block) {
@@ -126,21 +139,13 @@ public class Torrent {
 
     public void start() {
         if (!started.getAndSet(true)) {
-            LibTorrentInfo info = null;
-
             // TODO clean up this logic for picking which addTorrent method to
             // use
             if (torrentFile != null) {
-                info = torrentManager.addTorrent(torrentFile);
+                torrentManager.addTorrent(torrentFile);
             } else {
-                info = torrentManager.addTorrent(sha1, announce);
+                torrentManager.addTorrent(sha1, announce);
             }
-
-            // TODO this will be empty when initing from sha 1 and announce,
-            // need a way to update this data when it becomes available.
-            this.info = info;
-
-            // assert sha1.equals(info.sha1);
 
             torrentManager.addListener(sha1, new EventListener<LibTorrentEvent>() {
                 public void handleEvent(LibTorrentEvent event) {
@@ -178,7 +183,7 @@ public class Torrent {
     }
 
     public String getSha1() {
-        return info == null ? null : info.sha1;
+        return sha1;
     }
 
     public boolean isPaused() {
@@ -192,11 +197,7 @@ public class Torrent {
     }
 
     public long getTotalSize() {
-        if (info == null) {
-            return -1;
-        } else {
-            return info.getContentLength();
-        }
+        return totalSize;
     }
 
     public boolean isMultiFileTorrent() {
@@ -217,8 +218,8 @@ public class Torrent {
         return status == null ? 0 : status.num_peers;
     }
 
-    public int getPieceLength() {
-        return info == null ? -1 : info.piece_length;
+    public long getPieceLength() {
+        return pieceLength;
     }
 
     public List<File> getCompleteFiles() {

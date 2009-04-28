@@ -2,6 +2,8 @@ package org.limewire.libtorrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import org.limewire.listener.EventListener;
 
@@ -32,7 +34,9 @@ public class Main {
         
         Torrent torrent = new Torrent(libTorrentManager);
 //        torrent.init(torrentFile, libTorrentManager.getTorrentDownloadFolder());
-        torrent.init(name, sha1, announce, libTorrentManager.getTorrentDownloadFolder());
+        List<String> paths = Collections.emptyList();
+        
+        torrent.init(name, sha1, 5371896, 111, announce, paths, libTorrentManager.getTorrentDownloadFolder());
         torrent.start();
 
         String id = torrent.getSha1() != null ? torrent.getSha1() :  sha1;

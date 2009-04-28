@@ -2,6 +2,8 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,7 +33,9 @@ import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMementoImpl;
+import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
 /**
@@ -47,7 +51,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final Torrent torrent;
 
     private final BTUploaderFactory btUploaderFactory;
-    
+
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
     private URN urn = null;
@@ -60,10 +64,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.torrentManager = torrentManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = new Torrent(torrentManager);
-    }
-
-    @Override
-    public void init(File torrentFile) throws IOException {
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
                 if (torrent.isFinished() && !complete.getAndSet(true)) {
@@ -73,6 +73,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 }
             };
         });
+    }
+
+    @Override
+    public void init(File torrentFile) throws IOException {
         torrent.init(torrentFile, SharingSettings.getSaveDirectory());
     }
 
@@ -83,7 +87,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
-        //TODO add back in seeding logic
+        // TODO add back in seeding logic
         finish();
         downloadManager.remove(this, true);
     }
@@ -179,7 +183,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         LibTorrentState state = LibTorrentState.forId(status.state);
         return convertState(state);
     }
-    
+
     private DownloadState convertState(LibTorrentState state) {
         // TODO support error states
 
@@ -286,7 +290,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean shouldBeRemoved() {
-        //TODO validate
+        // TODO validate
         switch (getState()) {
         case DISK_PROBLEM:
         case COMPLETE:
@@ -301,7 +305,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getChunkSize() {
-        return torrent.getPieceLength();
+        return (int) torrent.getPieceLength();
     }
 
     @Override
@@ -466,32 +470,76 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
+    public boolean isMementoSupported() {
+        // TODO remove method after memento supported.
+        return false;
+    }
+
+    @Override
     protected DownloadMemento createMemento() {
         if (torrent.isFinished()) {
             throw new IllegalStateException("creating memento for finished torrent!");
         }
 
         // TODO create a new memento type
-        return new BTDownloadMementoImpl();
+        return null;
     }
 
     @Override
     protected void fillInMemento(DownloadMemento memento) {
-        // super.fillInMemento(memento);
-        // BTDownloadMemento bmem = (BTDownloadMemento) memento;
-        // bmem.setBtMetaInfoMemento(btMetaInfo.toMemento());
+        super.fillInMemento(memento);
+        // TODO fill in additional memento details
+    }
 
-        // TODO need memento
+    public void initFromOldMemento(BTDownloadMemento bmem) {
+        BTMetaInfoMemento btmetainfo = bmem.getBtMetaInfoMemento();
+
+        List<String> paths = new ArrayList<String>();
+
+        for (TorrentFile torrentFile : btmetainfo.getFileSystem().getFiles()) {
+            paths.add(torrentFile.getTorrentPath());
+        }
+
+        URI[] trackers = btmetainfo.getTrackers();
+        URI tracker1 = trackers[0];
+
+        String name = btmetainfo.getFileSystem().getName();
+        
+        long totalSize = btmetainfo.getFileSystem().getTotalSize();
+
+        byte[] infoHash = btmetainfo.getInfoHash();
+        
+        int pieceLength = btmetainfo.getPieceLength();
+
+        String sha1 = toHexString(infoHash);
+        torrent.init(name, sha1, totalSize, pieceLength,  tracker1.toString(), paths, SharingSettings.getSaveDirectory());
     }
 
     @Override
     public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
-        // super.initFromMemento(memento);
-        // BTDownloadMemento bmem = (BTDownloadMemento) memento;
-        // initBtMetaInfo(btMetaInfoFactory.createBTMetaInfoFromMemento(bmem.
-        // getBtMetaInfoMemento()));
+        super.initFromMemento(memento);
+        if (BTDownloadMemento.class.isInstance(memento)) {
+            BTDownloadMemento bmem = (BTDownloadMemento) memento;
+            initFromOldMemento(bmem);
+        } else {
+            // TODO add code to init from new memento type.
+        }
 
-        // TODO
+    }
+
+    private String toHexString(byte[] block) {
+        StringBuffer hexString = new StringBuffer(block.length * 2);
+        char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+                'E', 'F' };
+        int high = 0;
+        int low = 0;
+        for (int i = 0; i < block.length; i++) {
+            high = ((block[i] & 0xf0) >> 4);
+            low = (block[i] & 0x0f);
+            hexString.append(hexChars[high]);
+            hexString.append(hexChars[low]);
+        }
+        return hexString.toString().toLowerCase();
     }
 
     @Override
@@ -517,12 +565,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public boolean isMementoSupported() {
-        // TODO remove method after memento supported.
-        return false;
-    }
-
-    @Override
     public List<File> getCompleteFiles() {
         return torrent.getCompleteFiles();
     }
@@ -538,38 +580,38 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * @throws SaveLocationException
      */
     @Override
-    public void checkTargetLocation()
-        throws SaveLocationException {
-       
+    public void checkTargetLocation() throws SaveLocationException {
+
         if (torrent.getCompleteFile().exists()) {
-            throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, torrent.getCompleteFile());
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, torrent
+                    .getCompleteFile());
         }
-        
+
     }
 
     /**
-     * Ensures the eventual download location is not already taken by the files of any 
-     *  other download.
+     * Ensures the eventual download location is not already taken by the files
+     * of any other download.
      * 
      * @throws SaveLocationException
      */
     @Override
     public void checkActiveAndWaiting() throws SaveLocationException {
-        
+
         for (CoreDownloader current : downloadManager.getAllDownloaders()) {
             if (urn.equals(current.getSha1Urn())) {
-                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING,
-                        torrent.getCompleteFile());
+                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, torrent
+                        .getCompleteFile());
             }
 
             if (current.conflictsSaveFile(torrent.getCompleteFile())) {
-                throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, 
-                        torrent.getCompleteFile());
+                throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, torrent
+                        .getCompleteFile());
             }
-            
+
             if (current.conflictsSaveFile(torrent.getIncompleteFile())) {
-                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, 
-                        torrent.getCompleteFile());
+                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, torrent
+                        .getCompleteFile());
             }
         }
     }
