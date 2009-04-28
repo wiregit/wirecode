@@ -27,11 +27,12 @@ public class LibTorrentInfo extends Structure {
     public void read() {
         super.read();
         
-        stringPaths = new String[num_files];
-        Pointer[] pointers = paths.getPointerArray(0, num_files);
-        for (int i = 0; i < num_files; i++) {
-            stringPaths[i] = pointers[i].getString(0);
-        }
+//TODO
+//        stringPaths = new String[num_files];
+//        Pointer[] pointers = paths.getPointerArray(0, num_files);
+//        for (int i = 0; i < num_files; i++) {
+//            stringPaths[i] = pointers[i].getString(0);
+//        }
     }
 
     public String[] getPaths() {

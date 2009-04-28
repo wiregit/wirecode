@@ -10,7 +10,7 @@ public interface TorrentManager extends Service {
     public abstract void addListener(String id, EventListener<LibTorrentEvent> listener);
 
     public abstract LibTorrentInfo addTorrent(File torrent);
-
+    
     public abstract void removeTorrent(String id);
 
     public abstract void pauseTorrent(String id);
@@ -24,4 +24,6 @@ public interface TorrentManager extends Service {
     public abstract boolean moveTorrent(String id, File directory);
 
     public abstract int getNumActiveTorrents();
+
+    public abstract LibTorrentInfo addTorrent(String sha1, String trackerURI);
 }

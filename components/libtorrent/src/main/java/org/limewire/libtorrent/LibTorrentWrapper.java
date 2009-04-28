@@ -121,4 +121,12 @@ public class LibTorrentWrapper implements LibTorrent {
         log("after abort");
     }
 
+    @Override
+    public LibTorrentInfo add_torrent_old(String sha1, String trackerURI) {
+        log("before add_torrent_old: " + sha1 + " - " + trackerURI);
+        LibTorrentInfo info = libTorrent.add_torrent_old(sha1, trackerURI);
+        log("after add_torrent_old: " + sha1 + " - " + trackerURI);
+        return info;
+    }
+
 }

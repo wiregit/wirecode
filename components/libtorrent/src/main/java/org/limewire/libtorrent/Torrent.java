@@ -43,6 +43,8 @@ public class Torrent {
 
     private String name;
 
+    private String announce;
+
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
         this.listeners = new EventListenerList<TorrentEvent>();
@@ -56,6 +58,15 @@ public class Torrent {
 
     public boolean removeListener(EventListener<TorrentEvent> listener) {
         return listeners.removeListener(listener);
+    }
+
+    public synchronized void init(String name, String sha1, String announce, File saveDir) {
+        File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
+        incompleteFile = new File(torrentDownloadFolder, name);
+        completeFile = new File(saveDir, name);
+        this.sha1 = sha1;
+        this.announce = announce;
+        // TODO where to get paths to files?
     }
 
     public synchronized void init(File torrentFile, File saveDir) throws IOException {
@@ -78,6 +89,8 @@ public class Torrent {
                     paths.add(fileData.getPath());
                 }
             }
+
+            System.out.println("announce: " + btData.getAnnounce());
 
             String hexString = toHexString(btData.getInfoHash());
             sha1 = hexString;
@@ -113,10 +126,18 @@ public class Torrent {
 
     public void start() {
         if (!started.getAndSet(true)) {
-            LibTorrentInfo info = torrentManager.addTorrent(torrentFile);
+            LibTorrentInfo info = null;
+            
+            //TODO clean up this logic for picking which addTorrent method to use
+            if (torrentFile != null) {
+                info = torrentManager.addTorrent(torrentFile);
+            } else {
+                info = torrentManager.addTorrent(sha1, announce);
+            }
+
             this.info = info;
 
-            assert sha1.equals(info.sha1);
+            //assert sha1.equals(info.sha1);
 
             torrentManager.addListener(sha1, new EventListener<LibTorrentEvent>() {
                 public void handleEvent(LibTorrentEvent event) {

@@ -140,6 +140,49 @@ extern "C" int move_torrent(const char* id, const char* path) {
 	}
 }
 
+extern "C" const void* add_torrent_old(char* sha1String, char* trackerURI) {
+	//TODO rename method
+	std::cout << "adding torrent" << std::endl;
+	std::cout << "sha1String" << sha1String << std::endl;
+	std::cout << "trackerURI" << trackerURI << std::endl;
+	sha1_hash sha1 = getSha1Hash(sha1String);
+	std::cout << "sha1_hash" << sha1 << std::endl;
+	libtorrent::add_torrent_params p;
+	p.save_path = savePath;
+	p.info_hash = sha1;
+	p.tracker_url = trackerURI;
+
+	libtorrent::torrent_handle h = s.add_torrent(p);
+//	libtorrent::torrent_info torrent_info = h.get_torrent_info();
+//	const char* name = torrent_info.name().c_str();
+//	int piece_length = torrent_info.piece_length();
+//	int num_pieces = torrent_info.num_pieces();
+//	int num_files = torrent_info.num_files();
+//	std::string* content_length = getSizeTypeString(torrent_info.total_size());
+//
+//	libtorrent::file_storage files = torrent_info.files();
+//	const char** paths = new const char*[num_files];
+//	for (int i = 0; i < num_files; i++) {
+//		libtorrent::file_entry file = files.at(i);
+//		boost::filesystem::path path = file.path;
+//		const char* p = path.string().c_str();
+//		paths[i] = p;
+//	}
+//
+//	//TODO free memory
+	info_s* info = new info_s();
+//	info->sha1 = sha1String;
+//	info->name = name;
+//	info->num_files = num_files;
+//	info->num_pieces = num_pieces;
+//	info->piece_length = piece_length;
+//	info->content_length = content_length->c_str();
+//	info->paths = paths;
+
+	return info;
+
+}
+
 extern "C" const void* add_torrent(char* path) {
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "path: " << path << std::endl;

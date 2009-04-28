@@ -52,6 +52,16 @@ public class TorrentManagerImpl implements TorrentManager {
             return info;
         }
     }
+    
+    @Override
+    public LibTorrentInfo addTorrent(String sha1, String trackerURI) {
+        synchronized (eventPoller) {
+            LibTorrentInfo info = libTorrent.add_torrent_old(sha1, trackerURI);
+            torrents.add(sha1);
+            updateStatus(sha1);
+            return info;
+        }
+    }
 
     @Override
     public void removeTorrent(String id) {

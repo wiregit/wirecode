@@ -12,7 +12,9 @@ public interface LibTorrent extends Library {
     public void init(String path);
 
     public LibTorrentInfo add_torrent(String path);
-
+    
+    public LibTorrentInfo add_torrent_old(String sha1, String trackerURI);
+    
     public int pause_torrent(String id);
 
     public int resume_torrent(String id);
