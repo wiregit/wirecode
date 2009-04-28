@@ -52,7 +52,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
     void commit() {
         committed = true;
         eventListener = newEventListener();
-        friendFileList = fileManager.getOrCreateSharedCollection(name);
+        friendFileList = fileManager.getOrCreateSharedCollectionByName(name);
         friendFileList.addFileViewListener(eventListener);
         combinedShareList.addMemberList(baseList);
 

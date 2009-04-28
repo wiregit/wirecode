@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -76,9 +78,13 @@ class LibraryFileData extends AbstractSettingsGroup {
     private final Set<File> directoriesNotToManage = new HashSet<File>();
     private final Set<File> excludedFiles = new HashSet<File>();
     private final Map<File, List<Integer>> fileData = new HashMap<File, List<Integer>>();
-    private final Map<Integer, String> collectionNames = new HashMap<Integer, String>();
+    private final SortedMap<Integer, String> collectionNames = new TreeMap<Integer, String>();
     private final Map<Integer, List<String>> collectionShareData = new HashMap<Integer, List<String>>();
     private volatile boolean dirty = false;
+    
+    private void printData() {
+        System.out.println("File Data: " + fileData + "\nCollection Names: " + collectionNames  + "\nCollection Share Data: " + collectionShareData);
+    }
     
     private final File saveFile = new File(CommonUtils.getUserSettingsDir(), "library5.dat"); 
     private final File backupFile = new File(CommonUtils.getUserSettingsDir(), "library5.bak");
@@ -200,6 +206,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                 
                 if(currentVersion instanceof Version) {
                     initializeFromVersion(((Version)currentVersion), readMap);
+                    printData();
                 } else {
                     return false;
                 }
@@ -207,6 +214,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                 return true;
             }
         } catch(Throwable throwable) {
+            throwable.printStackTrace();
             LOG.error("Error loading library", throwable);
         }
         
@@ -277,6 +285,7 @@ class LibraryFileData extends AbstractSettingsGroup {
 
     /** Converts 5.0 & 5.1 style share data into 5.2-style collections. */
     private void convertShareData(Map<File, FileProperties> oldShareData, Map<File, List<Integer>> fileData, Map<Integer, String> collectionNames, Map<Integer, List<String>> collectionShareData) {
+        System.out.println("Old Share Data: " + oldShareData);
         int currentId = MIN_COLLECTION_ID;
         Map<String, Integer> friendToCollectionMap = new HashMap<String, Integer>();
         for(Map.Entry<File, FileProperties> data : oldShareData.entrySet()) {
@@ -287,16 +296,15 @@ class LibraryFileData extends AbstractSettingsGroup {
             } else {
                 if(shareData.friends != null) {
                     for(String friend : shareData.friends) {
-                        int collectionId;
-                        if(!friendToCollectionMap.containsKey(friend)) {
-                            collectionId = friendToCollectionMap.get(friend);
+                        Integer collectionId = friendToCollectionMap.get(friend);
+                        if(collectionId == null) {
+                            collectionId = currentId;
                             friendToCollectionMap.put(friend, collectionId);
                             collectionNames.put(collectionId, friend);
                             List<String> shareList = new ArrayList<String>(1);
                             shareList.add(friend);
                             collectionShareData.put(collectionId, shareList);
-                        } else {
-                            collectionId = currentId;
+                            
                             currentId++;
                         }
                         
@@ -313,11 +321,13 @@ class LibraryFileData extends AbstractSettingsGroup {
                     List<Integer> collections = fileData.get(file);
                     if(collections == null || collections == Collections.<Integer>emptyList()) {
                         collections = new ArrayList<Integer>(1);
+                        fileData.put(file, collections);
                     }
                     collections.add(GNUTELLA_COLLECTION_ID);
                 }
             }
         }
+        System.out.println("Converted!");
     }
 
     /** Returns true if the given file should be excluded from managing. */
@@ -639,6 +649,29 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
+    String getNameForCollection(int collectionId) {
+        lock.readLock().lock();
+        try {
+            return collectionNames.get(collectionId);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    int createNewCollection(String name) {
+        lock.writeLock().lock();
+        try {
+            int nextId = MIN_COLLECTION_ID;
+            if(!collectionNames.isEmpty()) {
+                nextId = collectionNames.lastKey() + 1;
+            }
+            collectionNames.put(nextId, name);
+            return nextId;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
     boolean isProgramManagingAllowed() {
         return LibrarySettings.ALLOW_PROGRAMS.getValue();
     }
@@ -667,5 +700,10 @@ class LibraryFileData extends AbstractSettingsGroup {
         private static final long serialVersionUID = 767248414812908206L;
         private boolean gnutella;
         private Set<String> friends;
+        
+        @Override
+        public String toString() {
+            return "FileProperties: gnutella: " + gnutella + ", friends: " + friends;
+        }
     }
 }

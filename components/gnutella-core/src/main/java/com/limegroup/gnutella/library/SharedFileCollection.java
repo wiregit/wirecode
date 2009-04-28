@@ -5,6 +5,12 @@ import java.util.List;
 /** A {@link SmartFileCollection} that is shared with one of more people. */
 public interface SharedFileCollection extends SmartFileCollection {
     
+    /** Gets the current name of this collection. */
+    String getName();
+    
+    /** Returns the unique id of this collection. */
+    int getId();
+    
     /** Returns the current list of people this collection is shared with. */
     List<String> getSharedIdList();
     

@@ -40,13 +40,13 @@ public interface FileManager {
     GnutellaFileCollection getGnutellaCollection();
     
     /** Returns the {@link FileCollection} with the given id. */
-    SharedFileCollection getSharedCollection(String collectionId);
+    SharedFileCollection getSharedCollection(int collectionId);
 
     /** Returns a {@link FileCollection} with the given id, or creates one if it doesn't already exist. */
-    SharedFileCollection getOrCreateSharedCollection(String collectionId);
+    SharedFileCollection getOrCreateSharedCollection(int collectionId);
 
     /** Removes the shared collection. */
-    void removeSharedCollection(String name);
+    void removeSharedCollection(int collectionId);
 
     /** Returns the {@link FileCollection} containing Incomplete files. */
     IncompleteFileCollection getIncompleteFileCollection();
@@ -56,4 +56,8 @@ public interface FileManager {
     
     /** Returns a {@link FileView} that represents all files that the given id has access to. */
     FileView getFileViewForId(String friendId);
+
+    // TODO: REMOVE THIS!
+    SharedFileCollection getOrCreateSharedCollectionByName(String name);
+    void removeSharedCollectionByName(String name);
 }

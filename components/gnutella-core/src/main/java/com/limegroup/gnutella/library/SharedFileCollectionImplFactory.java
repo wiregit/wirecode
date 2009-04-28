@@ -2,6 +2,6 @@ package com.limegroup.gnutella.library;
 
 interface SharedFileCollectionImplFactory {
     
-    SharedFileCollectionImpl createSharedFileCollectionImpl(String collectionId);
+    SharedFileCollectionImpl createSharedFileCollectionImpl(int collectionId);
 
 }

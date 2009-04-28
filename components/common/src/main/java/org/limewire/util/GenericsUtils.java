@@ -92,8 +92,8 @@ public class GenericsUtils {
                         i.remove();
                         break;
                     }
-                } else { // V is valid, validate the entries within it.
-                    scanForCollection(v, t, mode);
+                } else { // value is valid, validate the entries within it.
+                    scanForCollection(value, t, mode);
                 }
             }
             

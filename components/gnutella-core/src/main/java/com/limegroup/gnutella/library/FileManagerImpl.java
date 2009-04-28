@@ -49,8 +49,8 @@ class FileManagerImpl implements FileManager, Service {
     
     private final GnutellaFileView gnutellaFileView;
     
-    private final Map<String, SharedFileCollectionImpl> sharedCollections =
-        new TreeMap<String,SharedFileCollectionImpl>(String.CASE_INSENSITIVE_ORDER);
+    private final Map<Integer, SharedFileCollectionImpl> sharedCollections =
+        new HashMap<Integer,SharedFileCollectionImpl>();
     
     private Saver saver;
     
@@ -134,8 +134,8 @@ class FileManagerImpl implements FileManager, Service {
     }    
     
     @Override
-    public synchronized SharedFileCollection getSharedCollection(String name) {
-        return sharedCollections.get(name);
+    public synchronized SharedFileCollection getSharedCollection(int collectionId) {
+        return sharedCollections.get(collectionId);
     }
     
     @Override
@@ -151,12 +151,12 @@ class FileManagerImpl implements FileManager, Service {
     // TODO: The places these are used are in the UI and broken and based on "views" even
     //       though they should be based on collections.
     @Override
-    public synchronized SharedFileCollection getOrCreateSharedCollection(String name) {
-        SharedFileCollectionImpl fileList = sharedCollections.get(name);
+    public synchronized SharedFileCollection getOrCreateSharedCollection(int collectionId) {
+        SharedFileCollectionImpl fileList = sharedCollections.get(collectionId);
         if(fileList == null) {
-            fileList = sharedFileCollectionImplFactory.createSharedFileCollectionImpl(name);
+            fileList = sharedFileCollectionImplFactory.createSharedFileCollectionImpl(collectionId);
             fileList.initialize();
-            sharedCollections.put(name, fileList);
+            sharedCollections.put(collectionId, fileList);
         }
         return fileList;
     }
@@ -164,12 +164,37 @@ class FileManagerImpl implements FileManager, Service {
     // TODO: The places these are used are in the UI and broken and based on "views"
     //       even though they should be based on collections.
     @Override
-    public synchronized void removeSharedCollection(String name) {
+    public synchronized void removeSharedCollection(int collectionId) {
         // if it was a valid key, remove saved references to it
-        SharedFileCollectionImpl removeFileList = sharedCollections.get(name);
+        SharedFileCollectionImpl removeFileList = sharedCollections.get(collectionId);
         if(removeFileList != null) {
             removeFileList.dispose();
-            sharedCollections.remove(name);
+            sharedCollections.remove(collectionId);
+        }
+    }
+    
+    @Override
+    public SharedFileCollection getOrCreateSharedCollectionByName(String name) {
+        for(SharedFileCollectionImpl collection : sharedCollections.values()) {
+            if(collection.getName().equals(name)) {
+                return collection;
+            }
+        }
+        
+        int newId = managedFileList.getLibraryData().createNewCollection(name);
+        SharedFileCollectionImpl fileList =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId);
+        fileList.initialize();
+        sharedCollections.put(newId, fileList);
+        return fileList;
+    }
+    
+    @Override
+    public void removeSharedCollectionByName(String name) {
+        for(Iterator<SharedFileCollectionImpl> entries = sharedCollections.values().iterator(); entries.hasNext(); ) {
+            if(entries.next().getName().equals(name)) {
+                entries.remove();
+                return;
+            }
         }
     }
 

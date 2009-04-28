@@ -35,17 +35,17 @@ public class FileManagerStub implements FileManager {
 
     
     @Override
-    public SharedFileCollection getSharedCollection(String name) {
+    public SharedFileCollection getSharedCollection(int collectionId) {
         throw new UnsupportedOperationException("not supported");
     }
     
     @Override
-    public SharedFileCollection getOrCreateSharedCollection(String name) {
+    public SharedFileCollection getOrCreateSharedCollection(int collectionId) {
         throw new UnsupportedOperationException("not supported");
     }
     
     @Override
-    public void removeSharedCollection(String name) {
+    public void removeSharedCollection(int collectionId) {
         throw new UnsupportedOperationException("not supported");
     }
     

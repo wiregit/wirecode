@@ -132,7 +132,7 @@ class ShareListManagerImpl implements ShareListManager {
     }
 
     private void deleteFriendShareList(Friend friend) {  
-        fileManager.removeSharedCollection(friend.getId());
+        fileManager.removeSharedCollectionByName(friend.getId());
         FriendFileListImpl list = friendLocalFileLists.remove(friend.getId());
         if(list != null) {
             friendShareListEventBroadcaster.broadcast(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_DELETED, list, friend));
