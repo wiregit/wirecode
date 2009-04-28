@@ -43,10 +43,10 @@ public interface FileManager {
     SharedFileCollection getSharedCollection(int collectionId);
 
     /** Returns a {@link FileCollection} with the given id, or creates one if it doesn't already exist. */
-    SharedFileCollection getOrCreateSharedCollection(int collectionId);
+    SharedFileCollection getCollectionById(int collectionId);
 
     /** Removes the shared collection. */
-    void removeSharedCollection(int collectionId);
+    void removeCollectionById(int collectionId);
 
     /** Returns the {@link FileCollection} containing Incomplete files. */
     IncompleteFileCollection getIncompleteFileCollection();

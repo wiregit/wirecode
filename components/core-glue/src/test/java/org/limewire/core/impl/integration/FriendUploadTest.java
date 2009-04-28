@@ -79,7 +79,7 @@ public class FriendUploadTest extends LimeTestCase {
     }
     
     private void loadFiles() throws Exception {
-        SharedFileCollection friendFileList = fileManager.getOrCreateSharedCollection(FRIEND_ID);
+        SharedFileCollection friendFileList = fileManager.getCollectionById(FRIEND_ID);
         File testFile = TestUtils.getResourceInPackage(FILE_NAME, getClass());
         fileDesc = friendFileList.add(testFile).get();
         relativeFileNameUrl = LimeTestUtils.getRelativeRequest(fileDesc.getSHA1Urn());

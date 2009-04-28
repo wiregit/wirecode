@@ -40,7 +40,7 @@ public class SharedFileCollectionImplTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
-        friendList = (SharedFileCollectionImpl)injector.getInstance(FileManager.class).getOrCreateSharedCollection("test");
+        friendList = (SharedFileCollectionImpl)injector.getInstance(FileManager.class).getCollectionById("test");
         managedList = (LibraryImpl)injector.getInstance(FileManager.class).getLibrary();
         injector.getInstance(ServiceRegistry.class).initialize();
     }

@@ -71,7 +71,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 one(libraryManager).getReadWriteLock();
                 will(returnValue(LockFactory.DEFAULT.createReadWriteLock()));
                 one(fileManager).getGnutellaFileView();
-                allowing(fileManager).getOrCreateSharedCollection(friendId1);
+                allowing(fileManager).getCollectionById(friendId1);
                 will(returnValue(friendFileList1));
                 allowing(friend1).getId();
                 will(returnValue(friendId1));
@@ -136,7 +136,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 one(libraryManager).getReadWriteLock();
                 will(returnValue(LockFactory.DEFAULT.createReadWriteLock()));
                 one(fileManager).getGnutellaFileView();
-                allowing(fileManager).getOrCreateSharedCollection(friendId1);
+                allowing(fileManager).getCollectionById(friendId1);
                 will(returnValue(friendFileList1));
                 allowing(friend1).getId();
                 will(returnValue(friendId1));
@@ -210,7 +210,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 one(libraryManager).getReadWriteLock();
                 will(returnValue(LockFactory.DEFAULT.createReadWriteLock()));
                 one(fileManager).getGnutellaFileView();
-                allowing(fileManager).getOrCreateSharedCollection(friendId1);
+                allowing(fileManager).getCollectionById(friendId1);
                 will(returnValue(friendFileList1));
                 allowing(friend1).getId();
                 will(returnValue(friendId1));
@@ -238,7 +238,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
 
         context.checking(new Expectations() {
             {
-                one(fileManager).removeSharedCollection(friendId1);
+                one(fileManager).removeCollectionById(friendId1);
                 one(friendShareListEventBroadcaster).broadcast(
                         with(new FriendShareListEventMatcher(new FriendShareListEvent(
                                 FriendShareListEvent.Type.FRIEND_SHARE_LIST_DELETED,
@@ -290,7 +290,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 one(libraryManager).getReadWriteLock();
                 will(returnValue(LockFactory.DEFAULT.createReadWriteLock()));
                 one(fileManager).getGnutellaFileView();
-                allowing(fileManager).getOrCreateSharedCollection(friendId1);
+                allowing(fileManager).getCollectionById(friendId1);
                 will(returnValue(friendFileList1));
                 allowing(friend1).getId();
                 will(returnValue(friendId1));
@@ -356,7 +356,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
         
         context.checking(new Expectations() {
             {
-                allowing(fileManager).getOrCreateSharedCollection(friendId2);
+                allowing(fileManager).getCollectionById(friendId2);
                 will(returnValue(friendFileList2));
                 allowing(friend2).getId();
                 will(returnValue(friendId2));

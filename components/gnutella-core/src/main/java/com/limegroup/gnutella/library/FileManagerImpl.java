@@ -100,13 +100,14 @@ class FileManagerImpl implements FileManager, Service {
 
     @Override
     public void start() {
-      //  _data.clean(); // avoid cleaning for now, too slow.
-      //  cleanIndividualFiles();
         LibraryConverter converter = new LibraryConverter();
         if(converter.isOutOfDate()) {
             managedFileList.fireLoading();
             converter.convert(managedFileList.getLibraryData());
         }
+        
+        loadStoredCollections();
+        
         managedFileList.loadManagedFiles();
         
         synchronized (this) {
@@ -114,6 +115,14 @@ class FileManagerImpl implements FileManager, Service {
                 this.saver = new Saver();
                 backgroundExecutor.scheduleWithFixedDelay(saver, 1, 1, TimeUnit.MINUTES);
             }
+        }
+    }
+    
+    private void loadStoredCollections() {
+        for(Integer id : managedFileList.getLibraryData().getStoredCollectionIds()) {
+            SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(id);
+            collection.initialize();
+            sharedCollections.put(id, collection);
         }
     }
 
@@ -148,33 +157,24 @@ class FileManagerImpl implements FileManager, Service {
         return gnutellaFileView;
     }
 
-    // TODO: The places these are used are in the UI and broken and based on "views" even
-    //       though they should be based on collections.
     @Override
-    public synchronized SharedFileCollection getOrCreateSharedCollection(int collectionId) {
-        SharedFileCollectionImpl fileList = sharedCollections.get(collectionId);
-        if(fileList == null) {
-            fileList = sharedFileCollectionImplFactory.createSharedFileCollectionImpl(collectionId);
-            fileList.initialize();
-            sharedCollections.put(collectionId, fileList);
-        }
-        return fileList;
+    public synchronized SharedFileCollection getCollectionById(int collectionId) {
+        return sharedCollections.get(collectionId);
     }
 
-    // TODO: The places these are used are in the UI and broken and based on "views"
-    //       even though they should be based on collections.
     @Override
-    public synchronized void removeSharedCollection(int collectionId) {
+    public synchronized void removeCollectionById(int collectionId) {
         // if it was a valid key, remove saved references to it
         SharedFileCollectionImpl removeFileList = sharedCollections.get(collectionId);
         if(removeFileList != null) {
             removeFileList.dispose();
             sharedCollections.remove(collectionId);
+            // TODO: remove from library data somehow?
         }
     }
     
     @Override
-    public SharedFileCollection getOrCreateSharedCollectionByName(String name) {
+    public synchronized SharedFileCollection getOrCreateSharedCollectionByName(String name) {
         for(SharedFileCollectionImpl collection : sharedCollections.values()) {
             if(collection.getName().equals(name)) {
                 return collection;
@@ -182,17 +182,18 @@ class FileManagerImpl implements FileManager, Service {
         }
         
         int newId = managedFileList.getLibraryData().createNewCollection(name);
-        SharedFileCollectionImpl fileList =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId);
-        fileList.initialize();
-        sharedCollections.put(newId, fileList);
-        return fileList;
+        SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId);
+        collection.initialize();
+        sharedCollections.put(newId, collection);
+        return collection;
     }
     
     @Override
-    public void removeSharedCollectionByName(String name) {
+    public synchronized void removeSharedCollectionByName(String name) {
         for(Iterator<SharedFileCollectionImpl> entries = sharedCollections.values().iterator(); entries.hasNext(); ) {
-            if(entries.next().getName().equals(name)) {
-                entries.remove();
+            SharedFileCollectionImpl collection = entries.next();
+            if(collection.getName().equals(name)) {
+                removeCollectionById(collection.getId());
                 return;
             }
         }

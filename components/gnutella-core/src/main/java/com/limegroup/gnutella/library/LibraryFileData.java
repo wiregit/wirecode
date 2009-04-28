@@ -597,6 +597,15 @@ class LibraryFileData extends AbstractSettingsGroup {
         return DEFAULT_MANAGED_EXTENSIONS;
     }
 
+    Collection<Integer> getStoredCollectionIds() {
+        lock.readLock().lock();
+        try {
+            return new ArrayList<Integer>(collectionNames.keySet());
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+    
     /** Marks the given file as either in the collection or not in the collection. */
     void setFileInCollection(File file, int collectionId, boolean contained) {
         lock.writeLock().lock();
@@ -666,6 +675,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                 nextId = collectionNames.lastKey() + 1;
             }
             collectionNames.put(nextId, name);
+            dirty = true;
             return nextId;
         } finally {
             lock.writeLock().unlock();

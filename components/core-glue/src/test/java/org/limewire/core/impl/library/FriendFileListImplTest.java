@@ -75,7 +75,7 @@ public class FriendFileListImplTest extends BaseTestCase {
 
         context.checking(new Expectations() {
             {
-                one(fileManager).getOrCreateSharedCollection(name);
+                one(fileManager).getCollectionById(name);
                 will(returnValue(testFileList));
                 one(testFileList).addFileViewListener(with(any(EventListener.class)));
                 will(new AssignParameterAction<EventListener<FileViewChangeEvent>>(
