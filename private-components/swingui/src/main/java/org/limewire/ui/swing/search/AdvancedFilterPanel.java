@@ -1,8 +1,11 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -17,6 +20,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 
 import net.miginfocom.swing.MigLayout;
@@ -60,6 +65,7 @@ import com.google.inject.assistedinject.AssistedInject;
  */
 public class AdvancedFilterPanel extends JPanel implements Disposable {
 
+    @Resource(key="AdvancedFilter.filterWidth") private int filterWidth;
     @Resource private Color backgroundColor;
     @Resource private Color borderColor;
     @Resource private Color dividerBackgroundColor;
@@ -87,14 +93,29 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     /** Filter for file source. */
     private final Filter sourceFilter;
     
+    /** Text field for text filter. */
     private final PromptTextField filterTextField = new PromptTextField(I18n.tr("Refine results..."));
     
+    /** Container to display active filters. */
     private final FilterDisplayPanel filterDisplayPanel;
     
+    /** Container to display filter components. */
+    private final JPanel filterPanel = new JPanel();
+    
+    private final JSeparator separator = new JSeparator();
+    private final JScrollPane filterScrollPane = new JScrollPane();
+    
+    /** Container for category-specific filters. */
     private final PropertyFilterPanel propertyPanel;
     
+    /** Default search category; determines the default table format to display. */
     private SearchCategory defaultSearchCategory;
+    
+    /** Category that determines the default filters to display. */
     private SearchCategory defaultFilterCategory;
+    
+    /** Indicator that determines whether filter layout is being adjusted. */
+    private boolean layoutAdjusting;
 
     /**
      * Constructs a FilterPanel with the specified search results data model
@@ -115,12 +136,38 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         
         setBackground(backgroundColor);
         setBorder(new SideLineBorder(borderColor, Side.RIGHT));
-        setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 3", 
-                "[grow]", ""));
+        setLayout(new MigLayout("insets 0 0 0 0, gap 0!, fill, hidemode 3", 
+                "", ""));
         
         textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.NONE);
+        filterTextField.setMinimumSize(new Dimension(filterWidth, filterTextField.getMinimumSize().height));
+        filterTextField.setPreferredSize(new Dimension(filterWidth, filterTextField.getPreferredSize().height));
         
         filterDisplayPanel = new FilterDisplayPanel();
+        
+        filterPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 3", 
+                "[grow]", ""));
+        filterPanel.setOpaque(false);
+        
+        separator.setBackground(dividerBackgroundColor);
+        separator.setForeground(dividerForegroundColor);
+        
+        filterScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        filterScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        filterScrollPane.setViewportView(filterPanel);
+        
+        // Add listener to update filter layout when scroll bar appears.
+        filterScrollPane.getVerticalScrollBar().addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                if (!layoutAdjusting) doFilterLayout();
+            }
+            
+            @Override
+            public void componentShown(ComponentEvent e) {
+                if (!layoutAdjusting) doFilterLayout();
+            }
+        });
         
         propertyPanel = new PropertyFilterPanel();
         
@@ -134,13 +181,51 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         JComponent sourceComp = sourceFilter.getComponent();
         sourceComp.setVisible(friendManager.isSignedIn());
         
+        // Layout components.
         add(filterTextField   , "gap 6 6 6 6, growx, wrap");
         add(filterDisplayPanel, "gap 0 0 2 0, growx, wrap");
-        add(categoryComp      , "gap 6 6 8 6, growx, wrap");
-        add(sourceComp        , "gap 6 6 8 6, growx, wrap");
-        add(propertyPanel     , "gap 6 6 0 0, grow");
+        add(separator         , "gap 0 0 6 0, hmin 2, growx, wrap");
+        add(filterScrollPane  , "gap 0 0 0 0, grow");
+        
+        doFilterLayout();
         
         configureFilters();
+    }
+    
+    /**
+     * Updates the layout of the filter components depending on the state of 
+     * the vertical scroll bar. 
+     */
+    private void doFilterLayout() {
+        layoutAdjusting = true;
+        
+        try {
+            // Determine max width.
+            JScrollBar scrollBar = filterScrollPane.getVerticalScrollBar();
+            int maxWidth = filterWidth - (scrollBar.isVisible() ? scrollBar.getWidth() : 0);
+            
+            // Add components using max width.
+            filterPanel.removeAll();
+            filterPanel.add(categoryFilter.getComponent(), "gap 6 6 8 6, wmax " + maxWidth + ", growx, wrap");
+            filterPanel.add(sourceFilter.getComponent()  , "gap 6 6 8 6, wmax " + maxWidth + ", growx, wrap");
+            filterPanel.add(propertyPanel                , "gap 6 6 0 0, wmax " + maxWidth + ", grow");
+            
+            // Update separator visibility.
+            updateSeparator();
+            validate();
+            repaint();
+            
+        } finally {
+            layoutAdjusting = false;
+        }
+    }
+    
+    /**
+     * Updates the visibility of the separator.
+     */
+    private void updateSeparator() {
+        separator.setVisible(filterDisplayPanel.isVisible() || 
+                filterScrollPane.getVerticalScrollBar().isVisible());
     }
 
     /**
@@ -185,7 +270,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         filterDisplayPanel.addFilter(filter);
         
         // Update display category.
-        updateCategory(filter);
+        updateCategory();
     }
 
     /**
@@ -205,29 +290,37 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         filter.reset();
         
         // Update display category.
-        updateCategory(filter);
+        updateCategory();
     }
     
     /**
-     * Updates the display category using the specified filter.  If the filter
-     * is a CategoryFilter, then the property filters are updated and a
-     * categorySelected event is fired.  (The event is used to update the 
-     * column layout in the table view.) 
+     * Updates the display category.  This method updates the displayed 
+     * property filters, and fires a <code>categorySelected</code> event.  
+     * (The event is used to update the column layout in the table view.) 
      */
-    private void updateCategory(Filter filter) {
-        if (filter instanceof CategoryFilter) {
+    private void updateCategory() {
+        if (categoryFilter.isActive()) {
             // Get selected category.
-            Category category = ((CategoryFilter) filter).getSelectedCategory();
-            if (category != null) {
-                // Category in use so apply to property filters and fire event.
-                SearchCategory searchCategory = SearchCategory.forCategory(category);
-                propertyPanel.setFilterCategory(searchCategory);
-                fireCategorySelected(searchCategory);
-            } else {
-                // Category removed so reset in property filters and fire event.
-                propertyPanel.setFilterCategory(defaultFilterCategory);
-                fireCategorySelected(defaultSearchCategory);
-            } 
+            Category category = categoryFilter.getSelectedCategory();
+            SearchCategory displayCategory = SearchCategory.forCategory(category);
+            
+            // Apply category to property filters and fire event.
+            propertyPanel.setFilterCategory(displayCategory);
+            fireCategorySelected(displayCategory);
+            
+        } else if (categoryFilter.getCategoryCount() == 1) {
+            // Get only remaining category.
+            Category category = categoryFilter.getDefaultCategory();
+            SearchCategory displayCategory = SearchCategory.forCategory(category);
+            
+            // Apply category to property filters and fire event.
+            propertyPanel.setFilterCategory(displayCategory);
+            fireCategorySelected(displayCategory);
+            
+        } else {
+            // No specific category so reapply defaults.
+            propertyPanel.setFilterCategory(defaultFilterCategory);
+            fireCategorySelected(defaultSearchCategory);
         }
     }
 
@@ -366,7 +459,6 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         
         private final JPanel displayPanel = new JPanel();
         private final JButton resetButton = new JButton();
-        private final JSeparator separator = new JSeparator();
         
         private final Map<Filter, ActiveFilterPanel> displayMap = new HashMap<Filter, ActiveFilterPanel>();
         
@@ -387,12 +479,8 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             resetButton.setForeground(resetTextColor);
             resetButton.addMouseListener(new RolloverCursorListener());
             
-            separator.setBackground(dividerBackgroundColor);
-            separator.setForeground(dividerForegroundColor);
-            
             add(displayPanel, "gap 6 6 0 0, growx, wrap");
             add(resetButton , "gap 6 6 0 0, alignx right, wrap");
-            add(separator   , "gap 0 0 6 0, growx");
         }
         
         /**
@@ -408,13 +496,14 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             displayMap.put(filter, activeFilterPanel);
             
             // Add filter display to container.
-            displayPanel.add(activeFilterPanel, "gaptop 4, wmax 150, wrap");
+            displayPanel.add(activeFilterPanel, "gaptop 4, wmax " + filterWidth + ", wrap");
             
             // Display reset button if multiple filters.
             resetButton.setVisible(displayMap.size() > 1);
             
             // Display this container.
             setVisible(true);
+            updateSeparator();
             
             // Repaint filter display.
             AdvancedFilterPanel.this.validate();
@@ -440,6 +529,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             // Hide this container if no active filters.
             if (displayMap.size() < 1) {
                 setVisible(false);
+                updateSeparator();
             }
             
             // Repaint filter display.
@@ -447,6 +537,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             AdvancedFilterPanel.this.repaint();
         }
         
+        /**
+         * Returns an array of the filters currently in use.
+         */
         public Filter[] getActiveFilters() {
             Set<Filter> filterSet = displayMap.keySet();
             return filterSet.toArray(new Filter[filterSet.size()]);
@@ -526,7 +619,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             
             // Add more/less button if needed.
             if ((filterMin > 0) && (filters.length > filterMin)) {
-                add(moreButton, "gaptop 8, aligny top");
+                add(moreButton, "gap 0 0 8 3, aligny top");
             }
             
             // Update more/less button.

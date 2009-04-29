@@ -25,6 +25,7 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 class ActiveFilterPanel extends JXPanel {
 
+    @Resource(key="AdvancedFilter.filterWidth") private int filterWidth;
     @Resource private Color backgroundColor;
     @Resource private Color borderColor;
     @Resource private Color textColor;
@@ -76,7 +77,10 @@ class ActiveFilterPanel extends JXPanel {
             }
         });
         
-        add(label       , "wmax 126");
+        // Determine max label width.
+        int maxWidth = filterWidth - removeButton.getPreferredSize().width - 6;
+        
+        add(label       , "wmax " + maxWidth);
         add(removeButton, "gap 0 0");
     }
     
