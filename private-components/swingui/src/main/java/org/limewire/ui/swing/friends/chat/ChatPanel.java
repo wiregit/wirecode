@@ -102,6 +102,70 @@ public class ChatPanel extends JXPanel implements Displayable {
         return panel;
     }
 
+//    /**
+//     * All creations of the tic tac toe frames are done in ConversationPane. We'll have a map of frames to friends
+//     * so you can properly put the moves to the actual frame.
+//     * @param event
+//     */
+//  /**
+//  * All creations of the tic tac toe frames are done in ConversationPane. We'll have a map of frames to friends
+//  * so you can properly put the moves to the actual frame.
+//  * @param event
+//  */
+// @EventSubscriber
+// public void handleCreatePane(CreateTicTacToeFrameEvent event) {        
+//     final TicTacToeMigLayout tictactoePane = event.getPane();
+//     
+//     JFrame frame = new JFrame();
+//     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//     frame.setResizable(true);
+//     frame.setTitle("Tic Tac Toe with " + event.getFriendName());            
+//     frame.getContentPane().setLayout(new BorderLayout());
+//     frame.getContentPane().add(tictactoePane, BorderLayout.CENTER);            
+//     frame.pack();
+//     frame.setLocationRelativeTo(null);
+//     frame.setVisible(true);
+//     
+//     frame.addWindowListener(new WindowAdapter() {
+//         //If I challenged a friend, but he rejected the offer, don't call exitGame
+//         public void windowClosed(WindowEvent e) {
+//             tictactoePane.exitGame();                
+//         }            
+//     });
+//        
+// }
+//
+// /**
+//  * This method is called when ChatHyperLinkListener publishes 
+//  * ChallengeToPlayTicTacToeAcceptedEvent. This method creates
+//  * the tic tac toe board
+//  */
+// @EventSubscriber
+// public void handleChallengeToPlayTicTacToeAcceptedEvent(ChallengeToPlayTicTacToeAcceptedEvent event) {        
+//     
+//     //at this point, i have two TicTacToeMigLayout objects for the friend who accepted to play the game
+//     //which is bad
+//     //TODO fix this
+//     final TicTacToeMigLayout tictactoePanel = new TicTacToeMigLayout(writer);
+//     tictactoePanel.setPlayerX(true);
+//     tictactoePanel.setWriter(writer);
+//     
+//     
+//     tictactoePanel.setFriend(chatFriend.getName());
+//     
+//     new CreateTicTacToeFrameEvent(chatFriend.getName(), tictactoePanel).publish();
+//    
+// }
+// @EventSubscriber
+// public void handleChallengeToPlayTicTacToeRejectedEvent(ChallengeToPlayTicTacToeRejectedEvent event) {        
+//     
+//     final TicTacToeMigLayout panel = new TicTacToeMigLayout(writer);
+//     panel.setWriter(writer);
+//     panel.exitGame();                
+//        
+// }
+    
+
     /**
      * A listener for hyperlink events in the chat messages pane.
      */
@@ -124,13 +188,20 @@ public class ChatPanel extends JXPanel implements Displayable {
     public void fireConversationStarted(String friendId) {
         friendsPanel.fireConversationStarted(friendId);
     }
+//    @EventSubscriber
+//    public void handleConversationMessage(String topic, MessageReceivedEvent event) {
+//        Message message = event.getMessage();
+//        System.out.println("In ChatPanel: Message: from " + message.getSenderName() + " text: " + message.toString() + " topic: " + topic);
+//    }
     
     @EventSubscriber
     public void handleSelectedConversation(ConversationSelectedEvent event) {
+//System.out.println("In ChatPanel: Message: from " + event.getFriend().getName());
         ChatFriend chatFriend = event.getFriend();
         LOG.debugf("ConversationSelectedEvent with friend: {0}", chatFriend.getName());
         ConversationPane chatPane = chats.get(chatFriend.getID());
         if (chatPane == null) {
+//System.out.println("create the conversation pane with a writer");            
             chatPane = conversationFactory.create(event.getWriter(), chatFriend, chatModel.getLoggedInId());
             chats.put(chatFriend.getID(), chatPane);
         }
@@ -138,7 +209,7 @@ public class ChatPanel extends JXPanel implements Displayable {
         if (conversationPanel.getComponent(0) != chatPane && event.isLocallyInitiated()) {
             setConversationPanel(chatPane);
         }
-        
+       
         chatPane.handleDisplay();
 
         event.unlock();
@@ -163,6 +234,8 @@ public class ChatPanel extends JXPanel implements Displayable {
         }
         setConversationPanel(new JPanel());
     }
+
+
 
     @EventSubscriber
     public void handleCloseChat(CloseChatEvent event) {

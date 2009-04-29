@@ -3,7 +3,8 @@ package org.limewire.core.api.friend;
 import java.util.Map;
 
 /** 
- * A Friend.
+ * A friend as represented over the network. The friend has an ID, a nick 
+ * name and the network which the friend is using.
  */
 // TODO: Move this out of xmpp-api and into something that different
 //       friend extensions can share.
@@ -25,10 +26,12 @@ public interface Friend {
      * */
     public String getName();
     
-    /** Returns the best possible name this can be rendered with. */
+    /** Returns the best possible name this can be rendered with. 
+     * For example, this could be the first name. */
     public String getRenderName();
     
-    /** If getRenderName returns something other than email, will return subString using the first ' ' delimeter*/
+    /** If getRenderName returns something other than email, will return 
+     * subString using the first white space, ' ', as the delimeter*/
     public String getFirstName();
 
     /** Sets a new name for this Friend. */
@@ -40,7 +43,7 @@ public interface Friend {
      * by an email address and is permanent.  A Gnutella Friend is anonymous,
      * in that their existence is temporary and no long-lasting relationship
      * exists.
-     * 
+     * <p>
      * Callers can use this to determine if data based on this friend is
      * permanent or not.
      */

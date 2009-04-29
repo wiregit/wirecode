@@ -8,13 +8,9 @@ import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
- * Defines the interface for a friend as represented in the UI for chat. The 
- * friend's ID is his full email address (for example, 'userName@host.com'), whereas
- * his name could be 'Steve', or whatever you have set for him.
- * @author Mario Aquino, Object Computing, Inc.
  *
  */
-public interface ChatFriend {
+public interface TicTacToeFriend extends ChatFriend {
 
     /**
      * @return User object used by this chat friend
@@ -23,31 +19,22 @@ public interface ChatFriend {
 
     /**
      * @return the user id corresponding to this chat friend.  This is typically the id
-     * used by this chat friend to sign on (for example 'userName@host.com').
+     * used by this chat friend to sign on.
      */
     String getID();
 
     /**
-     * This is the nick name you have set for a friend, as defined in XMPP. You 
-     * can set this either through your email account settings, or when you added
-     * the friend through LimeWire. For example, this could return 'Made Up' for 
-     * getID of 'userName@host.com'.
-     * 
      * @return The display String identifying this chat friend
      */
     String getName();
 
     /**
-     * The status message is a custom message the friend can set. For example, 
-     * the friend might set his status as 'surfing the web' in his chat program.
-     * The status might be an empty string.
-     * 
      * @return the status message
      */
     String getStatus();
 
     /**
-     * @return the presence status ("available", "do not disturb", etc)
+     * @return the presence status ("available", "away", etc)
      */
     Mode getMode();
 
@@ -55,7 +42,7 @@ public interface ChatFriend {
      * @return true if this chat has been marked as started, but has
      * not been stopped.
      */
-    boolean isChatting();
+    boolean isPlaying();
 
     /**
      * Returns true if the current chat is the active chat. An active conversation
@@ -85,12 +72,12 @@ public interface ChatFriend {
     /**
      * If not yet started, marks the current chat as started
      */
-    void startChat();
+    void startTicTacToeGame();
 
     /**
      * If chat is currently started, marks the chat as stopped
      */
-    void stopChat();
+    void stopTicTacToeGame();
 
     /**
      * Gets the time at which the chat started.
@@ -120,19 +107,19 @@ public interface ChatFriend {
      * Creates and wires together the necessary objects for
      * sending and receiving messages.
      *
-     * @param reader the chat implementation calls into the {@link MessageReader} upon
+     * @param reader The chat impl calls into the {@link MessageReader} upon
      *        receiving messages and updates in chat state
-     * @return messageWriter {@link MessageWriter} implementation on which methods are called to send messages
+     * @return messageWriter {@link MessageWriter} impl on which methods are called to send messages
      * and update chat state.
      */
-    MessageWriter createChat(MessageReader reader);
+    MessageWriter createTicTacToe(MessageReader reader);
 
     void addPropertyChangeListener(PropertyChangeListener listener);
     
     void removePropertyChangeListener(PropertyChangeListener listener);
 
     /**
-     * Updates the state of this chat friend based on its underlying attributes, for instance 
+     * updates the state of this chatFriend based on its underlying attributes, for instance 
      * the mode and status of the current active presence
      */
     void update();

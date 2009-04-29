@@ -19,7 +19,6 @@ public class ChatAction extends AbstractAction {
     ChatAction(ChatFrame chatFrame) {
         super(I18n.tr("&Chat"));
         this.chatFrame = chatFrame;
-
         setEnabled(false);
     }
 

@@ -13,4 +13,5 @@ public interface RemoteHost {
     boolean isSharingEnabled();
     
     public FriendPresence getFriendPresence();
+        
 }

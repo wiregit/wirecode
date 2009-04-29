@@ -42,7 +42,12 @@ import com.google.inject.Inject;
 
 /**
  * The top border of the chat panel, for minimizing the chat window
- * & other controls.
+ * and other controls. The top border contains the name of the friend in an 
+ * active conversation (either the ID, 'username@host.com' or the first name, 
+ * 'User'), the friend's status message (if any) and a button to hide the panel.
+ * <p>
+ * This class handles <code>ConversationSelectedEvent</code>s, though only updates
+ * this border when a conversation is selected, or the friend's status message changed.
  */
 public class ChatTopPanel extends JXPanel {
     @Resource(key="ChatTopPanel.backgroundGradientTop") private Color gradientTop; 
@@ -148,8 +153,9 @@ public class ChatTopPanel extends JXPanel {
     
     @EventSubscriber
     public void handleConversationStarted(ConversationSelectedEvent event) {
+//System.out.println("ChatTopPanel handleConversationStarted");
         ChatFriend chatFriend = event.getFriend();
-//        System.out.println("ChatFramePane ConversationSelectedEvent #3: " + chatFriend.getID());
+        
         if (event.isLocallyInitiated()) {
             update(chatFriend);
         }
@@ -186,6 +192,7 @@ public class ChatTopPanel extends JXPanel {
     
     @EventSubscriber
     public void handleConversationEnded(CloseChatEvent event) {
+        System.out.println("ChatTopPanel handleConversationEnded");
         clearFriendInfo();
         removeChatFriendStatusListener(event.getFriend());
     }

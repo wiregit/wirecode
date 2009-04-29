@@ -305,9 +305,19 @@ public class ChatFriendListPane extends JPanel {
             return false;
         }
     }
+    /**
+     * Receives events from the EDT published to indicate a message arrived. These
+     * messages are shown for a specific friend (via the friend's ID) in the UI.
+     * 
+     * @param topic not used
+     * @param event message received via the EDT that this client got a message
+     * from a friend. The event includes the sender's name to display
+     * in that friend's chat pane using the friend's ID (the full email address).
+     */
 
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
+//        System.out.println("handleMessageReceived ChatFriendListPane");
         Message message = event.getMessage();
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         ChatFriend chatFriend = chatModel.getChatFriend(message.getFriendID());
@@ -543,6 +553,9 @@ public class ChatFriendListPane extends JPanel {
         return point.x > LEFT_EDGE_PADDING_PIXELS && point.x < icons.getEndChat().getIconWidth() + LEFT_EDGE_PADDING_PIXELS;
     }
     
+    /**
+     * Flashes icons four times for 1.5 seconds for each flash. 
+     */
     private class AlternatingIconTimer {
         private WeakReference<ChatFriend> friendRef;
         private int flashCount;
@@ -603,7 +616,7 @@ public class ChatFriendListPane extends JPanel {
     }
     
     /**
-     * Figures out which row  & friend the mouse is hovering over and asks the table
+     * Figures out which row and friend the mouse is hovering over and asks the table
      * to repaint itself.  This information is needed by the cell renderer to decide
      * whether to paint a close chat icon at the right corner of the cell (if appropriate) 
      */

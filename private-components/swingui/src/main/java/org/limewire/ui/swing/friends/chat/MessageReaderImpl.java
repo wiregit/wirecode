@@ -14,7 +14,9 @@ class MessageReaderImpl implements MessageReader {
     public void readMessage(final String message) {
         if (message != null) {
             final Message msg = newMessage(message, Message.Type.Received);
+//System.out.println("MessageReaderImpl readMessage: " + message);
             new MessageReceivedEvent(msg).publish();
+//            new TicTacToeMessageReceiveEvent(msg).publish();
         }
     }
 

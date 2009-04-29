@@ -139,6 +139,7 @@ public class ChatModel {
             Map<String, FriendPresence> presences = chatFriend.getUser().getFriendPresences();
             FriendPresence fileOfferPresence = presences.get(fromJID);
             if (fileOfferPresence != null) {
+                
                 new MessageReceivedEvent(new MessageFileOfferImpl(fromFriendId, fromFriendId,
                         Type.Received, metadata, fileOfferPresence)).publish();
             }
@@ -149,6 +150,8 @@ public class ChatModel {
 	 * Updates the list of ChatFriends as presences sign on and off.
 	 */
     private void handlePresenceEvent(FriendPresenceEvent event) {
+//System.out.println("ChatModel handlePresenceEvent");
+
         final Presence presence = (Presence)event.getData();
         final User user = presence.getUser();
         ChatFriend chatFriend = idToFriendMap.get(user.getId());
@@ -174,8 +177,8 @@ public class ChatModel {
     
     /**
      * Remove from the friends list only when:
-     *
-     * 1. The user (buddy) associated with the chatfriend is no longer signed in, AND
+     * <p>
+     * 1. The user (buddy) associated with the chatfriend is no longer signed in, AND<p>
      * 2. The chat has been closed (by clicking on the "x" on the friend in the friend's list)
      *
      * @param chatFriend the ChatFriend to decide whether to remove (no null check)
@@ -189,7 +192,7 @@ public class ChatModel {
      * Adds a friend to the list of friends that can be chatted with. Also
 	 * adds a listener to this friend presence that listens for incoming messages
      * from this presence. 
-	 *
+	 * <p>
 	 * This listener ensures that the ChatPanel has been created prior to 
 	 * firing a ConversationEvent.
      */

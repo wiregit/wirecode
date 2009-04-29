@@ -13,6 +13,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -30,6 +32,8 @@ import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.BusyPainter;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.features.TicTacToeFeature;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
@@ -38,6 +42,7 @@ import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.menu.actions.ChatAction;
+import org.limewire.ui.swing.menu.actions.TicTacToeAction;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -83,12 +88,17 @@ public class NavPanel extends JXPanel {
     
     private final Provider<ChatAction> chatActionProvider;
 
+    private final Provider<TicTacToeAction> tictactoeActionProvider;
+
     @AssistedInject
     NavPanel(@Assisted Action action,
              @Assisted Friend friend,
             RemoteLibraryManager remoteLibraryManager,
             LibraryNavigator libraryNavigator,
-            Provider<ChatAction> chatActionProvider) {
+            Provider<ChatAction> chatActionProvider
+            ,
+            Provider<TicTacToeAction> tictactoeActionProvider
+            ) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         GuiUtils.assignResources(this);
@@ -96,6 +106,7 @@ public class NavPanel extends JXPanel {
         setOpaque(false);
         
         this.chatActionProvider = chatActionProvider;
+        this.tictactoeActionProvider = tictactoeActionProvider;
         this.action = action;
         this.friend = friend;           
         this.remoteLibraryManager = remoteLibraryManager;        
@@ -371,12 +382,31 @@ public class NavPanel extends JXPanel {
                     libraryNavigator.selectFriendShareList(friend);
                 }                
             }));
-            
-            
+                       
             ChatAction chatAction = chatActionProvider.get();
             chatAction.setFriend(friend);
             menu.add(new JMenuItem(chatAction));
             menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 3);
+            
+            //Check if the friend supports Tic Tac Toe, only show the ability to 
+            //challenge to Tic Tac Toe if he does support the feature.
+            Map<String, FriendPresence> feature = friend.getFriendPresences();
+        
+            Iterator it = feature.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pairs = (Map.Entry)it.next();
+                FriendPresence fp = (FriendPresence)pairs.getValue();
+                if(fp != null && fp.hasFeatures(TicTacToeFeature.ID)) {
+//                    if(remoteLibraryManager.hasFriendLibrary(friend)) {//this only checks that they have a library
+//                    TicTacToeAction tictactoeAction = new TicTacToeAction();
+                    TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
+                    tictactoeAction.setFriend(friend);
+                    menu.add(new JMenuItem(tictactoeAction));
+                    menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 13);                       
+                }
+            }
+            
+            
         }
     }
 }

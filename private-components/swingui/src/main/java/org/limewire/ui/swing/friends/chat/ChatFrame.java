@@ -20,7 +20,7 @@ public interface ChatFrame extends Resizable, VisibleComponent {
     public void setUnseenMessageListener(UnseenMessageListener unseenMessageListener);
     
     /**
-     * Returns the friendId of the converstaion that is currently being shown.
+     * Returns the friendId of the conversation that is currently being shown.
      */
     public String getLastSelectedConversationFriendId();
 }

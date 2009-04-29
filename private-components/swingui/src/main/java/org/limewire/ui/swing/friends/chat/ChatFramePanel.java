@@ -41,7 +41,7 @@ import com.google.inject.Singleton;
 /**
  * The main frame of the chat panel. This frame must be heavy weight to
  * be seen atop the store and startup page.
- * 
+ * <p>
  * This frame is a mediator between the ChatPanel and the rest of the
  * application. The ChatPanel is lazily created when the user first
  * displays the ChatFramePanel.
@@ -108,8 +108,15 @@ public class ChatFramePanel extends Panel implements ChatFrame {
         chatPanel.fireConversationStarted(friendId);
     }
     
+    /**
+     * If notifications are enabled, this method shows the slider notification 
+     * and plays a sound for each incoming message received on the EDT.
+     * @param topic not used
+     * @param event the message published onto the EDT
+     */
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
+//System.out.println("handleMessageReceived ChatFramePanel: " + event.getMessage().format());
         if (event.getMessage().getType() != Message.Type.Sent) {
             String messageFriendID = event.getMessage().getFriendID();
             mostRecentConversationFriendId = messageFriendID;
@@ -130,6 +137,8 @@ public class ChatFramePanel extends Panel implements ChatFrame {
     }
     
     private void notifyUnseenMessageListener(MessageReceivedEvent event) {
+//System.out.println("notifyUnseenMessageListener ChatFramePanel");
+
         String messageFriendID = event.getMessage().getFriendID();
         if (!messageFriendID.equals(lastSelectedConversationFriendId) || !isVisible()) {
             unseenMessageListener.messageReceivedFrom(messageFriendID, isVisible());
@@ -138,6 +147,7 @@ public class ChatFramePanel extends Panel implements ChatFrame {
     
     @EventSubscriber
     public void handleConversationSelected(ConversationSelectedEvent event) {
+//System.out.println("chatframepanel handleConversationSelected");
         if (event.isLocallyInitiated()) {
             lastSelectedConversationFriendId = event.getFriend().getID();
             unseenMessageListener.conversationSelected(lastSelectedConversationFriendId);
@@ -158,6 +168,7 @@ public class ChatFramePanel extends Panel implements ChatFrame {
     }
 
     private Notification getNoticeForMessage(MessageReceivedEvent event) {
+//        System.out.println("getNoticeForMessage ChatFramePanel");
         final Message message = event.getMessage();
         String title = tr("Chat from {0}", message.getSenderName());
         String messageString = message.toString();
@@ -242,6 +253,7 @@ public class ChatFramePanel extends Panel implements ChatFrame {
         if(chatPanel == null) {
             // create the chat panel if its the first time being visible
             chatPanel = chatPanelProvider.get();
+            
             chatPanel.setMinimizeAction(new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

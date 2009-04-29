@@ -6,6 +6,7 @@ public class CloseChatEvent extends AbstractEDTEvent {
     private final ChatFriend chatFriend;
     
     public CloseChatEvent(ChatFriend chatFriend) {
+//        System.out.println("CloseChatEvent constructor");
         this.chatFriend = chatFriend;
     }
     

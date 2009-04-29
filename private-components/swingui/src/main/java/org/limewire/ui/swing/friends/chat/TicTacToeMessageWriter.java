@@ -1,20 +1,20 @@
 package org.limewire.ui.swing.friends.chat;
 
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.util.Objects;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
 
-class MessageWriterImpl implements MessageWriter {
-    private final String localID;
-    private final ChatFriend chatFriend;
+public class TicTacToeMessageWriter implements MessageWriter {
     private final MessageWriter writer;
+    private final String localID;
+    private final ChatFriend tictactoeFriend;
 
-    MessageWriterImpl(String localID, ChatFriend chatFriend, MessageWriter writer) {
+
+    TicTacToeMessageWriter(String localID, TicTacToeFriend tictactoeFriend, MessageWriter writer) {
+        this.writer = writer;
         this.localID = localID;
-        this.chatFriend = chatFriend;
-        this.writer = Objects.nonNull(writer, "writer");
+        this.tictactoeFriend = tictactoeFriend;
     }
 
     @Override
@@ -29,18 +29,16 @@ class MessageWriterImpl implements MessageWriter {
                 }
             }
         }, "send-message");
+        System.out.println("TicTacToeMessageWriter new MessageReceivedEvent publish");
 
-//        System.out.println("MessageWriterImpl new MessageReceivedEvent publish");
         new MessageReceivedEvent(newMessage(message, Message.Type.Sent)).publish();
+
     }
 
-    private Message newMessage(String message, Message.Type type) {
-        return new MessageTextImpl(localID, chatFriend.getID(), type, message);
-    }
-
-    @Override
     public void setChatState(ChatState chatState) throws XMPPException {
         writer.setChatState(chatState);
     }
-
+    private Message newMessage(String message, Message.Type type) {
+        return new MessageTextImpl(localID, tictactoeFriend.getID(), type, message);
+    }
 }

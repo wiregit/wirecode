@@ -88,6 +88,7 @@ public class TestSearchResult implements SearchResult {
             public FriendPresence getFriendPresence() {
                 return new MockFriendPresence(new MockFriend(randomUUID.toString()));
             }
+
         });
         return sources;
     }

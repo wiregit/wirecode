@@ -20,13 +20,17 @@ import com.google.inject.Inject;
 public class FriendMenu extends MnemonicMenu {
     
     private final ChatAction chatAction;
+//    private final TicTacToeAction tttAction;
     
   
     @Inject
     public FriendMenu(SwitchUserAction switchUserAction, SignInOutAction signInOutAction, ChatAction chatAction, StatusActions statusActions) {
+//    public FriendMenu(SwitchUserAction switchUserAction, SignInOutAction signInOutAction, ChatAction chatAction, TicTacToeAction tttAction, StatusActions statusActions) {
         super(I18n.tr("F&riend"));
         this.chatAction = chatAction;
+//        this.tttAction = tttAction;
         add(chatAction);
+//        add(tttAction);
 //        add(new FriendDownloadAction());
 //        add(new FriendShareAction());
         addSeparator();
@@ -44,6 +48,9 @@ public class FriendMenu extends MnemonicMenu {
             public void itemSelected(NavCategory category, NavItem navItem,
                     NavSelectable selectable, JComponent panel) {
                 chatAction.setFriend(libraryNavigator.getSelectedFriend());
+                //
+//System.out.println("FriendMenu#register");
+//                tttAction.setFriend(libraryNavigator.getSelectedFriend());
             }
             
             @Override public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {}

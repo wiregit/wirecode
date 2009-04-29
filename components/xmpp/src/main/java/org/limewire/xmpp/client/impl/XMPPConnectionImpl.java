@@ -43,6 +43,7 @@ import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
 import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.xmpp.client.impl.features.LimewireFeatureInitializer;
+import org.limewire.xmpp.client.impl.features.TicTacToeInitializer;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;
@@ -543,6 +544,9 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             new FileOfferInitializer(connection).register(discoInfoListener);
             new LibraryChangedNotifierFeatureInitializer(connection).register(discoInfoListener);
             new LimewireFeatureInitializer().register(discoInfoListener);
+            
+            //tell that you support Tic Tac Toe
+            new TicTacToeInitializer().register(discoInfoListener);
             
             SubscriptionListener sub = new SubscriptionListener(connection,
                                                 friendRequestBroadcaster);
