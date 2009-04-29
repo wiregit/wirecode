@@ -8,11 +8,14 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.listener.EventListener;
@@ -20,9 +23,13 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.LimeSplitPane;
 import org.limewire.ui.swing.components.PanelResizer;
 import org.limewire.ui.swing.components.ShapeDialog;
-import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
+import org.limewire.ui.swing.downloads.DownloadHeaderPanel;
+import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.event.DownloadVisibilityEvent;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNagController;
@@ -33,6 +40,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class LimeWireSwingUI extends JPanel {
     
@@ -40,14 +48,16 @@ public class LimeWireSwingUI extends JPanel {
     private final TopPanel topPanel;
     private final JLayeredPane layeredPane;
     private final ProNagController proNagController;
+    private final LimeSplitPane splitPane;
     
 	@Inject
     public LimeWireSwingUI(
             TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel chatFrame,
-            AudioPlayer player, DownloadSummaryPanel downloadSummaryPanel,
-            ShapeDialog shapeDialog, ProNagController proNagController) {
+            AudioPlayer player,
+            ShapeDialog shapeDialog, ProNagController proNagController, 
+            MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;
@@ -56,6 +66,10 @@ public class LimeWireSwingUI extends JPanel {
     	this.proNagController = proNagController;
     	
     	JPanel centerPanel = new JPanel(new GridBagLayout());
+    	
+    	splitPane = createSplitPane(mainPanel, mainDownloadPanel, downloadHeaderPanelProvider.get());
+    	mainDownloadPanel.setVisible(false);
+
         setLayout(new BorderLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -84,17 +98,7 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        centerPanel.add(mainPanel, gbc);
-        
-        // The download summary panel
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.SOUTH;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.gridheight = GridBagConstraints.REMAINDER;
-
-        centerPanel.add(downloadSummaryPanel, gbc);
+        centerPanel.add(splitPane, gbc);
         
         layeredPane.addComponentListener(new MainPanelResizer(centerPanel));
         layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER);
@@ -103,6 +107,7 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
         add(layeredPane, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
+        EventAnnotationProcessor.subscribe(this);
     }
 	
 	void hideMainPanel() {
@@ -124,6 +129,33 @@ public class LimeWireSwingUI extends JPanel {
     public void focusOnSearch() {
         topPanel.requestFocusInWindow();
     }
+    
+   private LimeSplitPane createSplitPane(JComponent top, final JComponent bottom, JComponent divider) {
+        LimeSplitPane splitPane = new LimeSplitPane(JSplitPane.VERTICAL_SPLIT, true, top, bottom, divider);
+        splitPane.getDivider().setVisible(false);
+        bottom.setVisible(false);
+        splitPane.setBorder(BorderFactory.createEmptyBorder());
+
+        top.setMinimumSize(new Dimension(0, 0));
+        bottom.setMinimumSize(new Dimension(0, 0));
+
+        return splitPane;
+    }
+   
+   @EventSubscriber
+   public void handleDownloadVisibilityEvent(DownloadVisibilityEvent event){
+       setDownloadPanelVisibility(event.getVisibility());
+   }
+   
+   private void setDownloadPanelVisibility(boolean isVisible){
+       splitPane.getDivider().setVisible(isVisible);
+       splitPane.getBottomComponent().setVisible(isVisible);
+       if (isVisible) {
+            splitPane.setDividerLocation(splitPane.getSize().height - splitPane.getInsets().bottom
+                    - splitPane.getDividerSize()
+                    - splitPane.getBottomComponent().getPreferredSize().height);
+        }
+   }
     
     private static class MainPanelResizer extends ComponentAdapter {
         private final JComponent target;

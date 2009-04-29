@@ -89,7 +89,7 @@ public abstract class TableRendererEditor extends JXPanel implements TableCellRe
             int row, int column);
 
     @Override
-    public final boolean shouldSelectCell(EventObject e) {
+    public boolean shouldSelectCell(EventObject e) {
         return false;
     }
 

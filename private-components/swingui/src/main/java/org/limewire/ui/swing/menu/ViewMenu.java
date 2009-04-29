@@ -4,35 +4,26 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
 
-import org.limewire.core.api.download.DownloadItem;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.downloads.DownloadMediator;
-import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
 import org.limewire.ui.swing.mainframe.LeftPanel;
 import org.limewire.ui.swing.util.EnabledType;
-import org.limewire.ui.swing.util.ForceInvisibleComponent;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.VisibilityType;
 import org.limewire.ui.swing.util.VisibleComponent;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 
 public class ViewMenu extends MnemonicMenu {
 
     @Inject
-    public ViewMenu(final LeftPanel leftPanel, final DownloadSummaryPanel downloadSummaryPanel,
+    public ViewMenu(final LeftPanel leftPanel,
             final ChatFrame chatFrame, final DownloadMediator downloadMediator) {
         super(I18n.tr("&View"));
         add(buildShowHideAction(leftPanel, I18n.tr("Hide &Sidebar"), I18n.tr("Show &Sidebar")));
-        add(buildShowHideDownloadTrayAction(downloadSummaryPanel, downloadMediator, I18n
-                .tr("Hide &Download Tray"), I18n.tr("Show &Download Tray")));
         add(buildShowHideAction(chatFrame, I18n.tr("Hide &Chat Window"), I18n.tr("Show &Chat Window")));
     }
 
@@ -48,37 +39,6 @@ public class ViewMenu extends MnemonicMenu {
         addVisibilityListener(component, action, visibleName, notVisibleName);
         setInitialText(component, action, visibleName, notVisibleName);
         addEnabledListener(component, action);
-
-        return action;
-    }
-
-    private Action buildShowHideDownloadTrayAction(final ForceInvisibleComponent component,
-            DownloadMediator downloadMediator, final String visibleName, final String notVisibleName) {
-        final Action action = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // forcibly toggles visibility
-                component.forceInvisibility(component.isVisible());
-            }
-        };
-
-        addVisibilityListener(component, action, visibleName, notVisibleName);
-        setInitialText(component, action, visibleName, notVisibleName);
-
-        action.setEnabled(downloadMediator.getDownloadList().size() > 0);
-        downloadMediator.getDownloadList().addListEventListener(
-                new ListEventListener<DownloadItem>() {
-                    @Override
-                    public void listChanged(ListEvent<DownloadItem> listChanges) {
-                        EventList<DownloadItem> sourceList = listChanges.getSourceList();
-                        if (sourceList.size() == 0) {
-                            action.setEnabled(false);
-                        } else {
-                            action.setEnabled(true);
-                        }
-                    }
-                });
-        
 
         return action;
     }

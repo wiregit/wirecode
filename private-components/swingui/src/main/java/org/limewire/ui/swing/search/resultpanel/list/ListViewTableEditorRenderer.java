@@ -47,10 +47,9 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.event.SelectAndScrollDownloadEvent;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.listener.MousePopupListener;
-import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
@@ -496,9 +495,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                         downloadHandler.download(vsr);
                         table.editingStopped(new ChangeEvent(table));
                     } else if (e.getDescription().equals("#downloading")) {
-                        navigator.getNavItem(
-                            NavCategory.DOWNLOAD,
-                            MainDownloadPanel.NAME).select(vsr);
+                        new SelectAndScrollDownloadEvent(vsr.getUrn()).publish();
                     } else if (e.getDescription().equals("#library")) {
                         libraryNavigator.selectInLibrary(vsr.getUrn(), vsr.getCategory());
                     }

@@ -141,7 +141,7 @@ public class BaseResultPanel extends JXPanel {
         this.rowHeightRule = rowHeightRule;
         this.fromWidgetfactory = fromWidgetFactory;
         this.nameRendererFactory = nameRendererFactory;
-        this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, navigator, libraryNavigator);
+        this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, libraryNavigator);
 
         // Create tables.
         this.resultsList = createList();

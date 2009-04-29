@@ -122,5 +122,9 @@ public class DownloadSettings extends LimeProps {
     public static final FileSetSetting RECENT_DOWNLOADS =
         FACTORY.createFileSetSetting("RECENT_DOWNLOADS", new File[0]);
     
-        
+    /**
+     * Whether or not to delete incomplete files when a download is canceled.
+     */
+    public static final BooleanSetting DELETE_CANCELED_DOWNLOADS =
+        FACTORY.createBooleanSetting("DELETE_CANCELED_DOWNLOADS", true);     
 }
