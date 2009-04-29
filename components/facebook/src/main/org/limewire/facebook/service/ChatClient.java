@@ -1,25 +1,30 @@
 package org.limewire.facebook.service;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ScheduledListeningExecutorService;
+import org.limewire.concurrent.ThreadExecutor;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.name.Named;
 
 public class ChatClient {
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private final FacebookFriendConnection connection;
-    private final ExecutorService executorService;
+    private final PresenceListenerFactory presenceListenerFactory;
+    private final ScheduledListeningExecutorService executorService;
 
     @AssistedInject
-    ChatClient(@Assisted FacebookFriendConnection connection) {//,
-               //@Named("backgroundExecutor") ExecutorService executorService) {
+    ChatClient(@Assisted FacebookFriendConnection connection,
+               PresenceListenerFactory presenceListenerFactory,
+               @Named("backgroundExecutor") ScheduledListeningExecutorService executorService) {
         this.connection = connection;
-        this.executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName())); //executorService;
+        this.presenceListenerFactory = presenceListenerFactory;
+        this.executorService = executorService;//ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName())); //executorService;
     }
 
     public void start() throws IOException {
@@ -57,7 +62,8 @@ public class ChatClient {
                     formIdBeginPos + 32);
         }   
         
-        executorService.submit(new ChatListener(uid, channel));
+        ThreadExecutor.startThread(new ChatListener(uid, channel), "chat-listener-thread");
+        executorService.scheduleAtFixedRate(presenceListenerFactory.createPresenceListener(post_form_id), 0, 90, TimeUnit.SECONDS);
     }
     
     private class ChatListener implements Runnable {

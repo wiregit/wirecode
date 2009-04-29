@@ -7,15 +7,15 @@ import java.util.List;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.util.EntityUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.inject.Inject;
@@ -103,6 +103,21 @@ public class FacebookFriendConnection {
             entity.consumeContent();
         }
         return responseStr;    
+    }
+    
+    public String httpPOST(String host, String urlPostfix, List <NameValuePair> nvps) throws IOException {
+        String responseStr = null;
+        HttpPost httpost = new HttpPost(host + urlPostfix);
+        httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+
+        HttpResponse postResponse = httpClient.execute(httpost);
+        HttpEntity entity = postResponse.getEntity();
+
+        if (entity != null) {
+            responseStr = EntityUtils.toString(entity);
+            entity.consumeContent();
+        }
+        return responseStr;
     }
     
     public String getAuthToken() {

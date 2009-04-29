@@ -13,5 +13,6 @@ public class LimewireFacebookModule extends AbstractModule {
         bind(SessionFactory.class).to(LocalSessionProvider.class);
         bind(ChatClientFactory.class).toProvider(FactoryProvider.newFactory(ChatClientFactory.class, ChatClient.class));
         bind(AddressSenderFactory.class).toProvider(FactoryProvider.newFactory(AddressSenderFactory.class, AddressSender.class));
+        bind(PresenceListenerFactory.class).toProvider(FactoryProvider.newFactory(PresenceListenerFactory.class, PresenceListener.class));
     }
 }
