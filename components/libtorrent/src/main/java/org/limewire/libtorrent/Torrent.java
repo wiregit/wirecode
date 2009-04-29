@@ -46,6 +46,8 @@ public class Torrent {
 
     private long pieceLength = -1;
 
+    private LibTorrentInfo info = null;
+    
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
         this.listeners = new EventListenerList<TorrentEvent>();
@@ -84,11 +86,6 @@ public class Torrent {
             Map metaInfo = (Map) Token.parse(fileChannel);
             BTData btData = new BTDataImpl(metaInfo);
             name = btData.getName();
-            
-            Long length = btData.getLength();
-            if (length != null) {
-                totalSize = length;
-            }
             
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
             
@@ -148,7 +145,7 @@ public class Torrent {
             // TODO clean up this logic for picking which addTorrent method to
             // use
             if (torrentFile != null) {
-                torrentManager.addTorrent(torrentFile);
+                info = torrentManager.addTorrent(torrentFile);
             } else {
                 torrentManager.addTorrent(sha1, announce);
             }
@@ -207,6 +204,9 @@ public class Torrent {
     }
 
     public long getTotalSize() {
+        if (info != null)
+            return info.getContentLength(); 
+            
         return totalSize;
     }
 
