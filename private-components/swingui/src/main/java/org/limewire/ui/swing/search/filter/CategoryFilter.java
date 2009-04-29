@@ -51,7 +51,7 @@ public class CategoryFilter extends AbstractFilter {
     public CategoryFilter(EventList<VisualSearchResult> resultsList) {
         FilterResources resources = getResources();
         
-        panel.setLayout(new MigLayout("insets 6 0 6 0, gap 0!", 
+        panel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
                 "[left,grow]", ""));
         panel.setOpaque(false);
 

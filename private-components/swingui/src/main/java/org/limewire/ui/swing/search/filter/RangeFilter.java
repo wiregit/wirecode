@@ -36,7 +36,7 @@ class RangeFilter extends AbstractFilter {
         
         FilterResources resources = getResources();
         
-        panel.setLayout(new MigLayout("insets 3 0 3 0, gap 0!", 
+        panel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
                 "[left]",
                 "[top][top]3[top]"));
         panel.setOpaque(false);

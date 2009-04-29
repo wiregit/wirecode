@@ -80,7 +80,7 @@ class PropertyFilter extends AbstractFilter {
         
         FilterResources resources = getResources();
         
-        panel.setLayout(new MigLayout("insets 6 0 6 0, gap 0!, hidemode 2", 
+        panel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 3", 
                 "[left,grow]", ""));
         panel.setOpaque(false);
         

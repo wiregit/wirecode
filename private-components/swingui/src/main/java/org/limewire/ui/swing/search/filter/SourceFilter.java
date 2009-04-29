@@ -61,7 +61,7 @@ class SourceFilter extends AbstractFilter {
         FilterResources resources = getResources();
         
         // Set up visual components.
-        panel.setLayout(new MigLayout("insets 6 0 6 0, gap 0 0", 
+        panel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
                 "[left,grow]", ""));
         panel.setOpaque(false);
         
