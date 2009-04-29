@@ -115,7 +115,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         
         setBackground(backgroundColor);
         setBorder(new SideLineBorder(borderColor, Side.RIGHT));
-        setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 2", 
+        setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 3", 
                 "[grow]", ""));
         
         textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.NONE);
@@ -135,9 +135,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         sourceComp.setVisible(friendManager.isSignedIn());
         
         add(filterTextField   , "gap 6 6 6 6, growx, wrap");
-        add(filterDisplayPanel, "gap 0 0 0 0, growx, wrap");
-        add(categoryComp      , "gap 6 6 0 0, growx, wrap");
-        add(sourceComp        , "gap 6 6 0 0, growx, wrap");
+        add(filterDisplayPanel, "gap 0 0 2 0, growx, wrap");
+        add(categoryComp      , "gap 6 6 8 6, growx, wrap");
+        add(sourceComp        , "gap 6 6 8 6, growx, wrap");
         add(propertyPanel     , "gap 6 6 0 0, grow");
         
         configureFilters();
@@ -371,10 +371,11 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         private final Map<Filter, ActiveFilterPanel> displayMap = new HashMap<Filter, ActiveFilterPanel>();
         
         public FilterDisplayPanel() {
-            setLayout(new MigLayout("insets 0 0 0 0, gap 0!", "[grow]", ""));
+            setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 3", 
+                    "[grow]", ""));
             setOpaque(false);
             
-            displayPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 2", 
+            displayPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
                     "[grow]", ""));
             displayPanel.setOpaque(false);
             
@@ -389,9 +390,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             separator.setBackground(dividerBackgroundColor);
             separator.setForeground(dividerForegroundColor);
             
-            add(displayPanel, "gap 6 6 3 0, growx, wrap");
+            add(displayPanel, "gap 6 6 0 0, growx, wrap");
             add(resetButton , "gap 6 6 0 0, alignx right, wrap");
-            add(separator   , "gap 0 0 3 0, growx");
+            add(separator   , "gap 0 0 6 0, growx");
         }
         
         /**
@@ -471,7 +472,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         private SearchCategory currentCategory;
         
         public PropertyFilterPanel() {
-            setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 2", 
+            setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 3", 
                     "[grow]", ""));
             setOpaque(false);
             
@@ -516,7 +517,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             // that are not active.
             for (int i = 0; i < filters.length; i++) {
                 JComponent component = filters[i].getComponent();
-                add(component, "gaptop 8, aligny top, growx, wrap");
+                add(component, "gap 0 0 8 6, aligny top, growx, wrap");
                 if (!filters[i].isActive()) {
                     component.setVisible(isFilterVisible(i));
                 }
