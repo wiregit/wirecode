@@ -31,16 +31,12 @@ public class RemoteHostRFD implements RemoteHost {
 
     @Override
     public boolean isChatEnabled() {
-        if(!friendPresence.getFriend().isAnonymous())
-            return true;
-        return false;
+        return !friendPresence.getFriend().isAnonymous();
     }
 
     @Override
     public boolean isSharingEnabled() {
-        if(!friendPresence.getFriend().isAnonymous())
-            return true;
-        return false;
+        return !friendPresence.getFriend().isAnonymous();
     }
 
 }

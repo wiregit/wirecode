@@ -361,12 +361,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      *  no corrupt file. */
     private volatile File corruptFile;
 
-	/** The list of all browsable hosts for this <tt>ManagedDownloader</tt>
-	 *  instance.
-	 */
-    private final List<RemoteFileDesc> remoteFileDescs = new ArrayList<RemoteFileDesc>();
-
-
     /** The various states of the ManagedDownloade with respect to the 
      * corruption state of this download. 
      */
@@ -2218,16 +2212,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
         setState(DownloadState.DOWNLOADING);
         addActiveWorker(worker);
-        remoteFileDescs.add(worker.getDownloader().getRemoteFileDesc());
     }
     
     public void workerFailed(DownloadWorker failed) {
-        HTTPDownloader downloader = failed.getDownloader();
-        if (downloader != null) {
-            synchronized(this) {
-                remoteFileDescs.remove(downloader.getRemoteFileDesc());
-            }
-        }
     }
     
     synchronized void removeWorker(DownloadWorker worker) {
@@ -2737,7 +2724,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }    
 	
 	public synchronized List<RemoteFileDesc> getRemoteFileDescs() {
-	    return new ArrayList<RemoteFileDesc>(remoteFileDescs);
+	    return new ArrayList<RemoteFileDesc>(currentRFDs);
 	}
 
 	/* (non-Javadoc)
