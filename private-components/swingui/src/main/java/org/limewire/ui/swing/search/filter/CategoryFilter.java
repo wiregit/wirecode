@@ -132,6 +132,13 @@ public class CategoryFilter extends AbstractFilter {
     }
     
     /**
+     * Returns the number of unique categories.
+     */
+    public int getCategoryCount() {
+        return uniqueList.size();
+    }
+    
+    /**
      * Returns the default category.  The default category is defined as the 
      * one containing the most search results.
      */

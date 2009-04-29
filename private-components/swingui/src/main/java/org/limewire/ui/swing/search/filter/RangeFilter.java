@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.filter;
 
+import java.awt.Dimension;
+
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,7 +39,7 @@ class RangeFilter extends AbstractFilter {
         FilterResources resources = getResources();
         
         panel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
-                "[left]",
+                "[left,grow]",
                 "[top][top]3[top]"));
         panel.setOpaque(false);
 
@@ -51,6 +53,7 @@ class RangeFilter extends AbstractFilter {
         slider.setMinimum(0);
         slider.setMaximum(rangeFormat.getValues().length - 1);
         slider.setOpaque(false);
+        slider.setPreferredSize(new Dimension(resources.getFilterWidth(), slider.getPreferredSize().height));
         slider.setRequestFocusEnabled(false);
         slider.setUpperThumbEnabled(rangeFormat.isUpperLimitEnabled());
         

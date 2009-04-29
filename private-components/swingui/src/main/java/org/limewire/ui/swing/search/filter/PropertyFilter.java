@@ -87,7 +87,7 @@ class PropertyFilter extends AbstractFilter {
         propertyLabel.setFont(resources.getHeaderFont());
         propertyLabel.setForeground(resources.getHeaderColor());
         propertyLabel.setText(getPropertyText());
-
+        
         list.setCellRenderer(new PropertyCellRenderer());
         list.setFont(resources.getRowFont());
         list.setForeground(resources.getRowColor());
@@ -117,7 +117,7 @@ class PropertyFilter extends AbstractFilter {
         int listHeight = 3 * list.getFixedCellHeight();
         
         panel.add(propertyLabel, "wrap");
-        panel.add(list         , "wmax 144, hmax " + listHeight + ", grow, wrap");
+        panel.add(list         , "hmax " + listHeight + ", grow, wrap");
         panel.add(moreButton   , "");
     }
     

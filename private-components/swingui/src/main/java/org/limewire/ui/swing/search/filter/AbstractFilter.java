@@ -135,6 +135,8 @@ abstract class AbstractFilter implements Filter {
      * Resource container for filters.
      */
     public static class FilterResources {
+        @Resource(key="AdvancedFilter.filterWidth")
+        private int filterWidth;
         @Resource(key="AdvancedFilter.headerColor")
         private Color headerColor;
         @Resource(key="AdvancedFilter.headerFont")
@@ -159,6 +161,13 @@ abstract class AbstractFilter implements Filter {
          */
         FilterResources() {
             GuiUtils.assignResources(this);
+        }
+        
+        /**
+         * Returns the filter width.
+         */
+        public int getFilterWidth() {
+            return filterWidth;
         }
         
         /**
