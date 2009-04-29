@@ -34,7 +34,6 @@ import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
-import com.limegroup.gnutella.downloader.serial.BTDownloadMementoImpl;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
@@ -385,7 +384,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public List<Address> getSourcesAsAddresses() {
+        
         return Collections.emptyList();
+        
         // TODO
     }
 

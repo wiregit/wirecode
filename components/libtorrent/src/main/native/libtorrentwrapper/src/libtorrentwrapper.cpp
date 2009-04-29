@@ -3,13 +3,29 @@
 #include <iostream>
 #include <memory>
 
+#include "libtorrent/config.hpp"
 #include "libtorrent/session.hpp"
+#include "libtorrent/peer_info.hpp"
 #include  "boost/shared_ptr.hpp"
 #include "libtorrent/alert.hpp"
 #include "libtorrent/alert_types.hpp"
 #include "libtorrent/peer_id.hpp"
 #include <boost/filesystem/path.hpp>
 #include "libtorrent/size_type.hpp"
+
+#include "libtorrent/entry.hpp"
+#include "libtorrent/bencode.hpp"
+#include "libtorrent/session.hpp"
+#include "libtorrent/identify_client.hpp"
+#include "libtorrent/alert_types.hpp"
+#include "libtorrent/ip_filter.hpp"
+#include "libtorrent/magnet_uri.hpp"
+#include "libtorrent/bitfield.hpp"
+#include "libtorrent/file.hpp"
+
+
+#include "libtorrent/socket.hpp"
+using libtorrent::asio::ip::tcp;
 
 #ifdef WINDOWS
 #include <windows.h>
@@ -282,6 +298,61 @@ struct alert_s {
 	const char* message;
 	int category;
 };
+
+extern "C" int get_num_peers(const char* id) {
+
+	libtorrent::torrent_handle h = findTorrentHandle(id);
+
+	libtorrent::torrent_status s = h.status();
+
+	if (s.state == libtorrent::torrent_status::seeding)
+		return 0;
+
+	std::vector<libtorrent::peer_info> peers;
+
+	try {
+		// TODO: This is failing?  Internal libtorrent error?
+		h.get_peer_info(peers);
+	} catch (libtorrent::invalid_handle e) {
+		return 0;
+	} catch (std::exception e) {
+		return 0;
+	}
+
+	int size = peers.size();
+
+	return size;	
+}
+
+extern "C" void get_peers(const char* id, int buffer_len, char* data) {
+
+	libtorrent::torrent_handle h = findTorrentHandle(id);
+	std::vector<libtorrent::peer_info> *peers = new std::vector<libtorrent::peer_info>();
+	h.get_peer_info(*peers);
+
+	int pos = 0;
+
+	std::vector<libtorrent::peer_info>::iterator iter = peers->begin();
+	
+	while( iter != peers->end() ) {
+      
+		std::string address = iter->ip.address().to_string();
+		int len = address.length();
+      
+		std::cout << address << std::endl ;
+      
+		if (len+pos > buffer_len)  break;
+      
+		for ( int i=0 ; i<len ; i++ )
+			data[pos+i] = address[i];
+      
+		pos += len+1;
+		data[pos++] = '\;';
+		++iter;
+	}
+ 
+	delete peers;
+}
 
 extern "C" void get_alerts(void(*alertCallback)(void*, void*)) {
 

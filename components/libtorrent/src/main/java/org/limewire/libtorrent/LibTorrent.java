@@ -25,6 +25,10 @@ public interface LibTorrent extends Library {
 
     public LibTorrentStatus get_torrent_status(String id, Memory memory);
 
+    public int get_num_peers(String id);
+    
+    public void get_peers(String id, Memory memory);
+    
     public int remove_torrent(String id);
 
     public void print();

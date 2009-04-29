@@ -84,8 +84,14 @@ public class Torrent {
             Map metaInfo = (Map) Token.parse(fileChannel);
             BTData btData = new BTDataImpl(metaInfo);
             name = btData.getName();
-            totalSize = btData.getLength();
+            
+            Long length = btData.getLength();
+            if (length != null) {
+                totalSize = length;
+            }
+            
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
+            
             incompleteFile = new File(torrentDownloadFolder, name);
             completeFile = new File(saveDir, name);
 
@@ -161,6 +167,10 @@ public class Torrent {
         }
     }
 
+    public List<String> getPeers() {
+        return torrentManager.getPeers(getSha1());
+    }
+    
     public boolean moveTorrent(File directory) {
         return torrentManager.moveTorrent(getSha1(), directory);
     }

@@ -1,6 +1,8 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -11,6 +13,7 @@ import org.limewire.listener.SourcedEventMulticasterImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.sun.jna.Memory;
 
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
@@ -42,6 +45,28 @@ public class TorrentManagerImpl implements TorrentManager {
         serviceRegistry.register(this);
     }
 
+    @Override
+    public List<String> getPeers(String id) {
+        
+        int numUnfilteredPeers = libTorrent.get_num_peers(id); 
+        
+        if (numUnfilteredPeers == 0) {
+            return Collections.emptyList();
+        }
+        
+        Memory memory = new Memory(numUnfilteredPeers*16);
+        
+        libTorrent.get_peers(id, memory);
+        
+        List<String> peers =  Arrays.asList(memory.getString(0).split(";"));
+        
+        for ( String s : peers ) {
+            System.out.println(s);
+        }
+        
+        return peers;
+    }
+    
     @Override
     public LibTorrentInfo addTorrent(File torrent) {
         synchronized (eventPoller) {

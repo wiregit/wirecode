@@ -73,19 +73,19 @@ public class LibTorrentWrapper implements LibTorrent {
 
     @Override
     public LibTorrentStatus get_torrent_status(String id) {
-        log("before get_torrent_status: " + id);
+//        log("before get_torrent_status: " + id);
         int size = new LibTorrentStatus().size();
         Memory memory = new Memory(size);
         LibTorrentStatus status = libTorrent.get_torrent_status(id, memory);
-        log("after get_torrent_status: " + id);
+//        log("after get_torrent_status: " + id);
         return status;
     }
 
     @Override
     public LibTorrentStatus get_torrent_status(String id, Memory memory) {
-        log("before get_torrent_status: " + id);
+//        log("before get_torrent_status: " + id);
         LibTorrentStatus status = libTorrent.get_torrent_status(id);
-        log("after get_torrent_status: " + id);
+//        log("after get_torrent_status: " + id);
         return status;
     }
 
@@ -96,7 +96,24 @@ public class LibTorrentWrapper implements LibTorrent {
         log("after remove_torrent: " + id);
         return ret;
     }
+    
+    
+    
+    @Override
+    public void get_peers(String id, Memory memory) {
+        log("before get_peers: " + id);
+        libTorrent.get_peers(id, memory);
+        log("after get_peers: " + id);
+    }
 
+    @Override
+    public int get_num_peers(String id) {
+        log("before get_num_peers: " + id);
+        int ret = libTorrent.get_num_peers(id);
+        log("after get_num_peers: " + id);
+        return ret;
+    }
+    
     @Override
     public void print() {
         log("before print");

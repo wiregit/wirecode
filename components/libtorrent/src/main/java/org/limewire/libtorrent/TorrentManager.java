@@ -1,6 +1,7 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
+import java.util.List;
 
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
@@ -19,6 +20,8 @@ public interface TorrentManager extends Service {
 
     public abstract LibTorrentStatus getStatus(String id);
 
+    public abstract List<String> getPeers(String id);
+    
     public abstract File getTorrentDownloadFolder();
 
     public abstract boolean moveTorrent(String id, File directory);
