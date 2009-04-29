@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -79,6 +80,17 @@ class RangeSliderUI extends BasicSliderUI {
         super.installUI(c);
     }
 
+    /**
+     * Installs default UI attributes on the specified slider.
+     */
+    @Override
+    protected void installDefaults(JSlider slider) {
+        super.installDefaults(slider);
+        // Remove focus insets so that the component occupies all of its
+        // assigned space in the layout.
+        focusInsets = new Insets(0, 0, 0, 0);
+    }
+    
     /**
      * Creates a listener to handle track events in the specified slider.
      */
@@ -201,7 +213,8 @@ class RangeSliderUI extends BasicSliderUI {
     }
     
     /**
-     * Paints the track.
+     * Paints the track.  This method also highlights the selected range
+     * between the two thumbs.
      */
     @Override
     public void paintTrack(Graphics g) {
@@ -228,10 +241,12 @@ class RangeSliderUI extends BasicSliderUI {
             }
             g.drawLine(0, 1, cw - 1, 1);
             
-            // Draw selected range.
+            // Draw selected range without overwriting the track bar.
             g.setColor(rangeColor);
             for (int y = -2; y <= 3; y++) {
-                g.drawLine(lowerX - trackBounds.x, y, upperX - trackBounds.x, y);
+                if ((y < 0) || (y > 1)) {
+                    g.drawLine(lowerX - trackBounds.x, y, upperX - trackBounds.x, y);
+                }
             }
 
             // Restore position and color.
@@ -259,10 +274,12 @@ class RangeSliderUI extends BasicSliderUI {
             }
             g.drawLine(1, 0, 1, ch - 1);
             
-            // Draw selected range.
+            // Draw selected range without overwriting the track bar.
             g.setColor(rangeColor);
             for (int x = -2; x <= 3; x++) {
-                g.drawLine(x, lowerY - trackBounds.y, x, upperY - trackBounds.y);
+                if ((x < 0) || (x > 1)) {
+                    g.drawLine(x, lowerY - trackBounds.y, x, upperY - trackBounds.y);
+                }
             }
             
             // Restore position and color.
