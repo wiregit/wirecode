@@ -472,8 +472,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isMementoSupported() {
-        // TODO remove method after memento supported.
-        return false;
+        return true;
     }
 
     @Override

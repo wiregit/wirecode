@@ -89,12 +89,21 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public void removeTorrent(String id) {
+    public void removeTorrent(final String id) {
         synchronized (eventPoller) {
             torrents.remove(id);
-            libTorrent.remove_torrent(id);
-            listeners.removeListeners(id);
         }
+            
+        new Thread() {
+            @Override
+            public void run() {
+                synchronized (eventPoller) {
+                    libTorrent.remove_torrent(id);
+                    listeners.removeListeners(id);
+                }
+            }
+        }.start();
+
     }
 
     @Override
