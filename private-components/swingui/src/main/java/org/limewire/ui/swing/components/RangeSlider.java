@@ -5,7 +5,8 @@ import javax.swing.JSlider;
 /**
  * An extension of JSlider to select a range of values using two thumb controls.
  * The thumb controls are used to select the lower and upper value of a range
- * with pre-determined minimum and maximum values.
+ * with pre-determined minimum and maximum values.  Either thumb control may
+ * be disabled.
  * 
  * <p>Note that RangeSlider makes use of the default BoundedRangeModel, which 
  * supports an inner range defined by a value and an extent.  The upper value
@@ -13,6 +14,9 @@ import javax.swing.JSlider;
  */
 public class RangeSlider extends JSlider {
 
+    /** Indicator that determines whether the lower thumb is displayed. */
+    private boolean lowerThumbEnabled = true;
+    
     /** Indicator that determines whether the upper thumb is displayed. */
     private boolean upperThumbEnabled = true;
     
@@ -53,6 +57,21 @@ public class RangeSlider extends JSlider {
     }
 
     /**
+     * Returns an indicator that determines whether the lower thumb is enabled. 
+     * The default value is true.
+     */
+    public boolean isLowerThumbEnabled() {
+        return lowerThumbEnabled;
+    }
+    
+    /**
+     * Sets an indicator that determines whether the lower thumb is enabled.
+     */
+    public void setLowerThumbEnabled(boolean lowerThumbEnabled) {
+        this.lowerThumbEnabled = lowerThumbEnabled;
+    }
+    
+    /**
      * Returns an indicator that determines whether the upper thumb is enabled. 
      * The default value is true.
      */
@@ -84,21 +103,15 @@ public class RangeSlider extends JSlider {
         if (oldValue == value) {
             return;
         }
-        
-        if (!upperThumbEnabled) {
-            // Call superclass method when upper thumb not displayed.
-            super.setValue(value);
-            
-        } else {
-            // Compute new value and extent to maintain upper value.
-            int oldExtent = getExtent();
-            int newValue = Math.min(Math.max(getMinimum(), value), oldValue + oldExtent);
-            int newExtent = oldExtent + oldValue - newValue;
 
-            // Set new value and extent, and fire a single change event.
-            getModel().setRangeProperties(newValue, newExtent, getMinimum(), 
-                getMaximum(), getValueIsAdjusting());
-        }
+        // Compute new value and extent to maintain upper value.
+        int oldExtent = getExtent();
+        int newValue = Math.min(Math.max(getMinimum(), value), oldValue + oldExtent);
+        int newExtent = oldExtent + oldValue - newValue;
+
+        // Set new value and extent, and fire a single change event.
+        getModel().setRangeProperties(newValue, newExtent, getMinimum(), 
+            getMaximum(), getValueIsAdjusting());
     }
 
     /**
