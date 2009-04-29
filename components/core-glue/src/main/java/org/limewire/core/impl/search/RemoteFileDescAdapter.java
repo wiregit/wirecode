@@ -15,6 +15,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
@@ -204,7 +205,8 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
     
     /**
-     * @return the GUI relevant sources.  Includes friends plus at most two anonymous sources. 
+     * @return the sources that should be shown in the UI. Includes a limited
+     * number of alt-locs. 
      */
     @Override
     public List<RemoteHost> getSources() {
@@ -217,14 +219,13 @@ public class RemoteFileDescAdapter implements SearchResult {
         // Initialise a new list
         remoteHosts = new ArrayList<RemoteHost>();
         
-        // TODO: setting?
-        int maxAltSourcesToAdd = 1;
+        int maxAltSourcesToAdd = SearchSettings.ALT_LOCS_TO_DISPLAY.getValue();
         
         // Add the RfdRemoteHost for the FriendPresence
         remoteHosts.add(new RfdRemoteHost());
         
         // Add a specific number of the altlocs
-        for( int i=0 ; i < maxAltSourcesToAdd && i<locs.size() ; i++ ) {
+        for(int i = 0; i < maxAltSourcesToAdd && i < locs.size(); i++) {
             remoteHosts.add(new AltLocRemoteHost(locs.get(i)));
         }
     

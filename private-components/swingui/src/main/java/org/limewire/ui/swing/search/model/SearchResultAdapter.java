@@ -232,8 +232,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     }
 
     /**
-     * Readds the sources from the core search results.
-     * Only adding the filteredSources list to try and cut back on spam related results.
+     * Reloads the sources from the core search results. The number of alt-locs
+     * is limited to avoid giving high relevance to spam results.
      */
     void update() {
         relevance = null;
