@@ -21,7 +21,7 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
         DownloadItem item = (DownloadItem)value;
-        return super.getTableCellRendererComponent(table, getPercentMessage(item) + getMessage(item.getState(), item), isSelected, hasFocus, row, column);
+        return super.getTableCellRendererComponent(table, getPercentMessage(item) + getMessage(item.getState(), item), isSelected, false, row, column);
     }
     
     private String getPercentMessage(DownloadItem item){
