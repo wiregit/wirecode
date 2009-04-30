@@ -18,6 +18,7 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
+import org.json.JSONException;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.inject.Guice;
@@ -72,9 +73,10 @@ public class FacebookFriendConnectionTest extends TestCase {
                 }*/);
     }
 
-    public void testLogin() throws IOException, FacebookException {
+    public void testLogin() throws IOException, FacebookException, JSONException, InterruptedException {
         FacebookFriendService service = injector.getInstance(FacebookFriendService.class);
         service.loginImpl();
+        Thread.sleep(1000 * 60 * 5);
     }
     
     @Singleton

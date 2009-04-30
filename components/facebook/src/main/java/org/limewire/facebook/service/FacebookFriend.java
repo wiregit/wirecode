@@ -1,40 +1,52 @@
 package org.limewire.facebook.service;
 
-import java.util.Map;
-import java.util.Collection;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.Feature;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.feature.Feature;
 
 public class FacebookFriend implements Friend, FriendPresence {
+    private final String id;
     private final JSONObject friend;
 
-    public FacebookFriend(JSONObject friend) {
+    public FacebookFriend(String id, JSONObject friend) {
+        this.id = id;
         this.friend = friend;
     }
     
     @Override
     public String getId() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return id;
     }
 
     @Override
     public String getName() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        try {
+            return friend.getString("name");
+        } catch (JSONException e) {
+            return "";
+        }
     }
 
     @Override
     public String getRenderName() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return getName();
     }
 
     @Override
     public String getFirstName() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        try {
+            return friend.getString("firstName");
+        } catch (JSONException e) {
+            return "";
+        }
     }
 
     @Override
@@ -44,7 +56,7 @@ public class FacebookFriend implements Friend, FriendPresence {
 
     @Override
     public boolean isAnonymous() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
     @Override
@@ -54,22 +66,22 @@ public class FacebookFriend implements Friend, FriendPresence {
 
     @Override
     public Map<String, FriendPresence> getFriendPresences() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return Collections.singletonMap(getId(), (FriendPresence)this);
     }
 
     @Override
     public Friend getFriend() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return this;
     }
 
     @Override
     public String getPresenceId() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return getId();
     }
 
     @Override
     public Collection<Feature> getFeatures() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return Collections.emptyList();
     }
 
     @Override

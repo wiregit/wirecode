@@ -87,22 +87,33 @@ public class ChatClient {
                 e1.printStackTrace();
             }
 
+            int currentSeq = seq;
             while(true){
                 try {
                     //PostMessage("1190346972", "SEQ:"+seq);
-                    int currentSeq = getSeq();
+                    currentSeq = getSeq();
                     if(seq > currentSeq)
                         seq = currentSeq;
                     
                     while(seq <= currentSeq){
                         //get the old message between oldseq and seq
                         String msgResponseBody = connection.httpGET(getMessageRequestingUrl(seq));
-                        
-//                        try {
-//                            ResponseParser.messageRequestResultParser(msgResponseBody);
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
+                        if(msgResponseBody != null) {
+                            String prefix = "for (;;);";
+                            if(msgResponseBody.startsWith(prefix))
+                                msgResponseBody = msgResponseBody.substring(prefix.length());
+                            JSONObject response = new JSONObject(msgResponseBody);
+                            if(response.getString("t").equals("msg")) {
+        //                        try {
+        //                            ResponseParser.messageRequestResultParser(msgResponseBody);
+        //                        } catch (JSONException e) {
+        //                            e.printStackTrace();
+        //                        }
+                                //seq++;
+                            }
+                            //seq++;
+                        }
+//                        
                         seq++;
                     }
                 } catch (IOException e) {
@@ -115,7 +126,7 @@ public class ChatClient {
         
         private int getSeq() throws IOException, JSONException {
             int tempSeq = -1;
-            //while (tempSeq == -1) {
+            while (tempSeq == -1) {
                 //for (;;);{"t":"refresh", "seq":0}
                 String seqResponseBody;
 
@@ -126,13 +137,13 @@ public class ChatClient {
                     return tempSeq;
                 }
 
-//                try {
-//                    System.out.println("retrying to retrieve the seq code after 1 second...");
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-            //}
+                try {
+                    System.out.println("retrying to retrieve the seq code after 1 second...");
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             return tempSeq;
         }
         
@@ -149,7 +160,7 @@ public class ChatClient {
             
             //JSONObject body =(JSONObject) JSONValue.parse(msgResponseBody);
             JSONObject body = new JSONObject(msgResponseBody);
-            if(body != null)
+            if(body != null && body.has("seq"))
                 return body.getInt("seq");
             else
                 return -1;

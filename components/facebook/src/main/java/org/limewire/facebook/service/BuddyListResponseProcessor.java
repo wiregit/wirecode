@@ -67,9 +67,8 @@ public class BuddyListResponseProcessor {
 		Iterator<String> it = nowAvailableList.keys();
 		while(it.hasNext()){
 			String key = it.next();
-			System.out.println("userID: " + key);
 			JSONObject user = (JSONObject) userInfos.get(key);
-			FacebookFriend friend = new FacebookFriend(user);
+			FacebookFriend friend = new FacebookFriend(key, user);
 			onlineFriends.put(friend.getId(), friend);
 			//Launcher.getChatroomAnyway(key).setRoomName(fu.name);
 		}

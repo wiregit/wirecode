@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
+import org.json.JSONException;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.inject.Inject;
@@ -15,16 +16,13 @@ import com.google.inject.Singleton;
 class FacebookFriendService {
     private final ThreadPoolListeningExecutor executorService;
     private FacebookFriendConnection connection;
-    private final SessionFactory sessionFactory;
     private final ChatClientFactory chatClientFactory;
     private final AddressSenderFactory addressSenderFactory;
 
     @Inject FacebookFriendService(FacebookFriendConnection connection,
-                                  SessionFactory sessionFactory,
                                   ChatClientFactory chatClientFactory,
                                   AddressSenderFactory addressSenderFactory){
         this.connection = connection;
-        this.sessionFactory = sessionFactory;
         this.chatClientFactory = chatClientFactory;
         this.addressSenderFactory = addressSenderFactory;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
@@ -39,11 +37,11 @@ class FacebookFriendService {
         }); 
     }
     
-    FacebookFriendConnection loginImpl() throws IOException, FacebookException {
+    FacebookFriendConnection loginImpl() throws IOException, FacebookException, JSONException {
         connection.loginImpl();
         ChatClient client = chatClientFactory.createChatClient(connection);
         client.start();
-        AddressSender addressSender = addressSenderFactory.create(sessionFactory.getSecret(connection.getSession()));
+        AddressSender addressSender = null;//addressSenderFactory.create(sessionFactory.getSecret(connection.getSession()));
         return connection;
     }
 }
