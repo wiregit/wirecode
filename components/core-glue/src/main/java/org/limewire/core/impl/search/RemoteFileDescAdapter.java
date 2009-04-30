@@ -11,6 +11,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.friend.GnutellaPresence;
@@ -262,24 +263,32 @@ public class RemoteFileDescAdapter implements SearchResult {
     class RfdRemoteHost implements RelevantRemoteHost {
         @Override
         public boolean isBrowseHostEnabled() {
-            return rfd.isBrowseHostEnabled();
+            if(friendPresence.getFriend().isAnonymous()) {
+                return rfd.isBrowseHostEnabled();
+            } else {
+                //ensure friend/user still logged in through LW
+                return friendPresence.hasFeatures(LimewireFeature.ID);
+            }
         }
 
         @Override
         public boolean isChatEnabled() {
-            if (!friendPresence.getFriend().isAnonymous()) {
-                return true;
+            if(friendPresence.getFriend().isAnonymous()) {
+                return false;
+            } else {
+                //ensure friend/user still logged in through LW
+                return friendPresence.hasFeatures(LimewireFeature.ID);
             }
-            return false;
         }
 
         @Override
         public boolean isSharingEnabled() {
-            if (!friendPresence.getFriend().isAnonymous()) {
-                return true;
+            if(friendPresence.getFriend().isAnonymous()) {
+                return false;
+            } else {
+                //ensure friend/user still logged in through LW
+                return friendPresence.hasFeatures(LimewireFeature.ID);
             }
-
-            return false;
         }
 
         @Override
