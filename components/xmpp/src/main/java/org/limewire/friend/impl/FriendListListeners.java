@@ -87,6 +87,9 @@ class FriendListListeners implements FriendManager {
 
     @Override
     public FriendPresence getMostRelevantFriendPresence(String id) {
+        if(id == null)
+            return null;
+        
         Friend friend = availFriends.get(id);
         if(friend == null) {
             return null;
@@ -108,7 +111,10 @@ class FriendListListeners implements FriendManager {
     
     @Override
     public boolean containsAvailableFriend(String id) {
-        return availFriends.containsKey(id);
+        if(id == null)
+            return false;
+        else
+            return availFriends.containsKey(id);
     }
     
     private void addKnownFriend(User user) {
