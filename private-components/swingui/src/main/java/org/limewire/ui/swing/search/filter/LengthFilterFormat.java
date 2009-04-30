@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.search.filter;
 
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 
@@ -10,7 +9,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 /**
  * Range filter format for length.
  */
-class LengthFilterFormat implements RangeFilterFormat {
+class LengthFilterFormat<E extends FilterableItem> implements RangeFilterFormat<E> {
     /** Array of length options in seconds. */
     private static final long[] LENGTHS = {
         0, 
@@ -29,8 +28,8 @@ class LengthFilterFormat implements RangeFilterFormat {
     }
 
     @Override
-    public Matcher<VisualSearchResult> getMatcher(long minValue, long maxValue) {
-        return new LengthMatcher(minValue, maxValue);
+    public Matcher<E> getMatcher(long minValue, long maxValue) {
+        return new LengthMatcher<E>(minValue, maxValue);
     }
 
     @Override
@@ -49,9 +48,9 @@ class LengthFilterFormat implements RangeFilterFormat {
     }
 
     /**
-     * A matcher used to filter a search result by length.
+     * A matcher used to filter an item by length.
      */
-    private static class LengthMatcher implements Matcher<VisualSearchResult> {
+    private static class LengthMatcher<E extends FilterableItem> implements Matcher<E> {
         private final long minLength;
         private final long maxLength;
         
@@ -64,11 +63,11 @@ class LengthFilterFormat implements RangeFilterFormat {
         }
 
         /**
-         * Returns true if the specified search result is within the length range.
+         * Returns true if the specified item is within the length range.
          */
         @Override
-        public boolean matches(VisualSearchResult vsr) {
-            Object value = vsr.getProperty(FilePropertyKey.LENGTH);
+        public boolean matches(E item) {
+            Object value = item.getProperty(FilePropertyKey.LENGTH);
             
             if (value instanceof Long) {
                 long length = ((Long) value).longValue();

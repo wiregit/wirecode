@@ -18,7 +18,6 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.ui.swing.components.RolloverCursorListener;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.Objects;
 
@@ -33,14 +32,14 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 /**
  * Filter component to select search results according to their categories.
  */
-public class CategoryFilter extends AbstractFilter {
+public class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
     private final JPanel panel = new JPanel();
     private final JLabel categoryLabel = new JLabel();
     private final JList list = new JList();
     
     private Category selectedCategory;
-    private FunctionList<VisualSearchResult, Category> categoryList;
+    private FunctionList<E, Category> categoryList;
     private UniqueList<Category> uniqueList;
     private EventListModel<Category> listModel;
     private EventSelectionModel<Category> selectionModel;
@@ -48,7 +47,7 @@ public class CategoryFilter extends AbstractFilter {
     /**
      * Constructs a CategoryFilter using the specified results list.
      */
-    public CategoryFilter(EventList<VisualSearchResult> resultsList) {
+    public CategoryFilter(EventList<E> resultsList) {
         FilterResources resources = getResources();
         
         panel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
@@ -78,7 +77,7 @@ public class CategoryFilter extends AbstractFilter {
     /**
      * Initializes the filter using the specified list of search results.
      */
-    private void initialize(EventList<VisualSearchResult> resultsList) {
+    private void initialize(EventList<E> resultsList) {
         // Create list of unique category values.
         categoryList = createCategoryList(resultsList);
         uniqueList = GlazedListsFactory.uniqueList(categoryList, new CategoryComparator());
@@ -117,7 +116,7 @@ public class CategoryFilter extends AbstractFilter {
      * Activates the filter using the specified text description and matcher.
      * This method also hides the filter component.
      */
-    protected void activate(String activeText, Matcher<VisualSearchResult> matcher) {
+    protected void activate(String activeText, Matcher<E> matcher) {
         super.activate(activeText, matcher);
         getComponent().setVisible(false);
     }
@@ -170,10 +169,10 @@ public class CategoryFilter extends AbstractFilter {
      * Returns a list of category values in the specified list of search 
      * results.
      */
-    private FunctionList<VisualSearchResult, Category> createCategoryList(
-            EventList<VisualSearchResult> resultsList) {
+    private FunctionList<E, Category> createCategoryList(
+            EventList<E> resultsList) {
         // Create list of category values.
-        return GlazedListsFactory.functionList(resultsList, new CategoryFunction());
+        return GlazedListsFactory.functionList(resultsList, new CategoryFunction<E>());
     }
     
     /**
@@ -193,7 +192,7 @@ public class CategoryFilter extends AbstractFilter {
             if (selectedList.size() > 0) {
                 selectedCategory = selectedList.get(0);
                 // Create new matcher and activate.
-                Matcher<VisualSearchResult> newMatcher = new CategoryMatcher(selectedCategory);
+                Matcher<E> newMatcher = new CategoryMatcher<E>(selectedCategory);
                 activate(selectedCategory.toString(), newMatcher);
                 
             } else {
@@ -255,14 +254,14 @@ public class CategoryFilter extends AbstractFilter {
      * A function to transform a list of visual search results into a list of
      * specific category values.
      */
-    private static class CategoryFunction implements Function<VisualSearchResult, Category> {
+    private static class CategoryFunction<E extends FilterableItem> implements Function<E, Category> {
 
         public CategoryFunction() {
         }
         
         @Override
-        public Category evaluate(VisualSearchResult vsr) {
-            return vsr.getCategory();
+        public Category evaluate(E item) {
+            return item.getCategory();
         }
     }
 }

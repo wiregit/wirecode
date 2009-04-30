@@ -1,0 +1,40 @@
+package org.limewire.ui.swing.search;
+
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
+import org.limewire.ui.swing.friends.login.FriendActions;
+import org.limewire.ui.swing.search.filter.FilterableSource;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.IconManager;
+
+import com.google.inject.Inject;
+
+/**
+ * Factory implementation for creating an advanced filter panel for search
+ * results.
+ */
+public class SearchFilterPanelFactory implements AdvancedFilterPanelFactory<VisualSearchResult> {
+
+    private final TextFieldDecorator textFieldDecorator;
+    private final FriendActions friendManager;
+    private final IconManager iconManager;
+    
+    /**
+     * Constructs a SearchFilterPanelFactory with the specified UI decorators
+     * and service managers.
+     */
+    @Inject
+    public SearchFilterPanelFactory(TextFieldDecorator textFieldDecorator,
+            FriendActions friendManager,
+            IconManager iconManager) {
+        this.textFieldDecorator = textFieldDecorator;
+        this.friendManager = friendManager;
+        this.iconManager = iconManager;
+    }
+    
+    @Override
+    public AdvancedFilterPanel<VisualSearchResult> create(
+            FilterableSource<VisualSearchResult> filterableSource) {
+        return new AdvancedFilterPanel<VisualSearchResult>(filterableSource,
+                textFieldDecorator, friendManager, iconManager);
+    }
+}

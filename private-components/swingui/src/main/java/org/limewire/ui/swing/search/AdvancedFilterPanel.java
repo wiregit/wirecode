@@ -7,12 +7,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -42,9 +43,9 @@ import org.limewire.ui.swing.search.filter.CategoryFilter;
 import org.limewire.ui.swing.search.filter.Filter;
 import org.limewire.ui.swing.search.filter.FilterListener;
 import org.limewire.ui.swing.search.filter.FilterManager;
-import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.model.VisualSearchResultTextFilterator;
+import org.limewire.ui.swing.search.filter.FilterableItem;
+import org.limewire.ui.swing.search.filter.FilterableItemTextFilterator;
+import org.limewire.ui.swing.search.filter.FilterableSource;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -55,15 +56,12 @@ import ca.odell.glazedlists.matchers.CompositeMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-
 /**
- * Filter panel for search results.  AdvancedFilterPanel presents advanced 
+ * Filter panel for filterable data.  AdvancedFilterPanel presents advanced 
  * filtering options, including an input text field and category-specific 
  * property filters. 
  */
-public class AdvancedFilterPanel extends JPanel implements Disposable {
+public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implements Disposable {
 
     @Resource(key="AdvancedFilter.filterWidth") private int filterWidth;
     @Resource private Color backgroundColor;
@@ -75,23 +73,23 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     @Resource private Color resetTextColor;
     @Resource private Font resetTextFont;
     
-    /** Search results data model. */
-    private final SearchResultsModel searchResultsModel;
+    /** Filterable data source. */
+    private final FilterableSource<E> filterableSource;
 
     /** List of editors being used for filtering. */
-    private final EventList<MatcherEditor<VisualSearchResult>> editorList;
+    private final EventList<MatcherEditor<E>> editorList;
 
-    /** Manager for search result filters. */
-    private final FilterManager filterManager;
+    /** Manager for filters. */
+    private final FilterManager<E> filterManager;
 
     /** List of category selection listeners. */
     private final List<CategoryListener> listenerList = new ArrayList<CategoryListener>();
 
     /** Filter for file category. */
-    private final CategoryFilter categoryFilter;
+    private final CategoryFilter<E> categoryFilter;
     
     /** Filter for file source. */
-    private final Filter sourceFilter;
+    private final Filter<E> sourceFilter;
     
     /** Text field for text filter. */
     private final PromptTextField filterTextField = new PromptTextField(I18n.tr("Refine results..."));
@@ -108,8 +106,8 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     /** Container for category-specific filters. */
     private final PropertyFilterPanel propertyPanel;
     
-    /** Default search category; determines the default table format to display. */
-    private SearchCategory defaultSearchCategory;
+    /** Default display category; determines the default table format. */
+    private SearchCategory defaultDisplayCategory;
     
     /** Category that determines the default filters to display. */
     private SearchCategory defaultFilterCategory;
@@ -118,19 +116,17 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     private boolean layoutAdjusting;
 
     /**
-     * Constructs a FilterPanel with the specified search results data model
+     * Constructs a FilterPanel with the specified filterable data source
      * and UI decorators.
      */
-    @AssistedInject
-    public AdvancedFilterPanel(
-            @Assisted SearchResultsModel searchResultsModel,
+    public AdvancedFilterPanel(FilterableSource<E> filterableSource,
             TextFieldDecorator textFieldDecorator,
             FriendActions friendManager,
             IconManager iconManager) {
         
-        this.searchResultsModel = searchResultsModel;
-        this.editorList = new BasicEventList<MatcherEditor<VisualSearchResult>>();
-        this.filterManager = new FilterManager(searchResultsModel, iconManager);
+        this.filterableSource = filterableSource;
+        this.editorList = new BasicEventList<MatcherEditor<E>>();
+        this.filterManager = new FilterManager<E>(filterableSource, iconManager);
         
         GuiUtils.assignResources(this);
         
@@ -174,7 +170,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         // Create category filter and display component.
         categoryFilter = filterManager.getCategoryFilter();
         JComponent categoryComp = categoryFilter.getComponent();
-        categoryComp.setVisible(searchResultsModel.getSearchCategory() == SearchCategory.ALL);
+        categoryComp.setVisible(filterableSource.getFilterCategory() == SearchCategory.ALL);
         
         // Create source filter and display component.
         sourceFilter = filterManager.getSourceFilter();
@@ -229,24 +225,24 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     }
 
     /**
-     * Configures the search results filters by creating a composite filter
-     * that uses a list of MatcherEditor objects.
+     * Configures the filters by creating a composite filter that uses a list 
+     * of MatcherEditor objects.
      */
     private void configureFilters() {
         // Create text filter with "live" filtering.
-        MatcherEditor<VisualSearchResult> editor =
-            new TextComponentMatcherEditor<VisualSearchResult>(
-                filterTextField, new VisualSearchResultTextFilterator(), true);
+        MatcherEditor<E> editor =
+            new TextComponentMatcherEditor<E>(
+                filterTextField, new FilterableItemTextFilterator<E>(), true);
         
         // Add text filter to editor list. 
         editorList.add(editor);
         
         // Create CompositeMatcherEditor to combine filters.
-        CompositeMatcherEditor<VisualSearchResult> compositeEditor = new 
-                CompositeMatcherEditor<VisualSearchResult>(editorList);
+        CompositeMatcherEditor<E> compositeEditor = new 
+                CompositeMatcherEditor<E>(editorList);
         
         // Configure filter in data model.
-        searchResultsModel.setFilterEditor(compositeEditor);
+        filterableSource.setFilterEditor(compositeEditor);
         
         // Hide filter display.
         filterDisplayPanel.setVisible(false);
@@ -259,9 +255,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     /**
      * Adds the specified filter to the list of active filters.
      */
-    private void addActiveFilter(Filter filter) {
+    private void addActiveFilter(Filter<E> filter) {
         // Add matcher/editor to list.
-        MatcherEditor<VisualSearchResult> editor = filter.getMatcherEditor();
+        MatcherEditor<E> editor = filter.getMatcherEditor();
         if ((editor != null) && !editorList.contains(editor)) {
             editorList.add(editor);
         }
@@ -276,12 +272,12 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     /**
      * Removes the specified filter from the list of active filters.
      */
-    private void removeActiveFilter(Filter filter) {
+    private void removeActiveFilter(Filter<E> filter) {
         // Remove filter from display.
         filterDisplayPanel.removeFilter(filter);
         
         // Remove matcher/editor from list.
-        MatcherEditor<VisualSearchResult> editor = filter.getMatcherEditor();
+        MatcherEditor<E> editor = filter.getMatcherEditor();
         if ((editor != null) && editorList.contains(editor)) {
             editorList.remove(editor);
         }
@@ -320,7 +316,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         } else {
             // No specific category so reapply defaults.
             propertyPanel.setFilterCategory(defaultFilterCategory);
-            fireCategorySelected(defaultSearchCategory);
+            fireCategorySelected(defaultDisplayCategory);
         }
     }
 
@@ -350,16 +346,16 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     }
     
     /**
-     * Sets the default search category, and updates the available filters.
+     * Sets the default display category, and updates the available filters.
      */
     public void setSearchCategory(SearchCategory searchCategory) {
-        // Save default search category.
-        defaultSearchCategory = searchCategory;
+        // Save default display category.
+        defaultDisplayCategory = searchCategory;
         
         if (searchCategory == SearchCategory.ALL) {
             // Start detector to determine default filter category based on 
-            // actual search results.
-            CategoryDetector detector = new CategoryDetector(searchResultsModel, categoryFilter);
+            // actual list of filterable items.
+            CategoryDetector detector = new CategoryDetector<E>(filterableSource, categoryFilter);
             detector.start(new CategoryDetector.CategoryDetectorListener() {
                 @Override
                 public void categoryFound(Category category) {
@@ -384,10 +380,10 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     /**
      * Listener to apply a filter when its state changes. 
      */
-    private class AddFilterListener implements FilterListener {
+    private class AddFilterListener implements FilterListener<E> {
 
         @Override
-        public void filterChanged(Filter filter) {
+        public void filterChanged(Filter<E> filter) {
             if (filter.isActive()) {
                 addActiveFilter(filter);
             } else {
@@ -407,7 +403,8 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            for (Filter filter : filterDisplayPanel.getActiveFilters()) {
+            Set<Filter<E>> filterSet = filterDisplayPanel.getActiveFilters();
+            for (Filter<E> filter : filterSet) {
                 removeActiveFilter(filter);
             }
         }
@@ -417,9 +414,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
      * Action to remove active filter.
      */
     private class RemoveFilterAction extends AbstractAction {
-        private final Filter filter;
+        private final Filter<E> filter;
         
-        public RemoveFilterAction(Filter filter) {
+        public RemoveFilterAction(Filter<E> filter) {
             this.filter = filter;
             putValue(Action.NAME, filter.getActiveText());
         }
@@ -453,14 +450,15 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
     }
 
     /**
-     * Panel that displays the active filters applied to the search results.
+     * Panel that displays the active filters applied to the items.
      */
     private class FilterDisplayPanel extends JPanel {
         
         private final JPanel displayPanel = new JPanel();
         private final JButton resetButton = new JButton();
         
-        private final Map<Filter, ActiveFilterPanel> displayMap = new HashMap<Filter, ActiveFilterPanel>();
+        private final Map<Filter<E>, ActiveFilterPanel> displayMap = 
+            new HashMap<Filter<E>, ActiveFilterPanel>();
         
         public FilterDisplayPanel() {
             setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 3", 
@@ -486,7 +484,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         /**
          * Adds the specified filter to the display.
          */
-        public void addFilter(Filter filter) {
+        public void addFilter(Filter<E> filter) {
             if (displayMap.get(filter) != null) {
                 removeFilter(filter);
             }
@@ -513,7 +511,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         /**
          * Removes the specified filter from the display.
          */
-        public void removeFilter(Filter filter) {
+        public void removeFilter(Filter<E> filter) {
             // Remove filter display from container.
             ActiveFilterPanel activeFilterPanel = displayMap.get(filter);
             if (activeFilterPanel != null) {
@@ -538,11 +536,10 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         }
         
         /**
-         * Returns an array of the filters currently in use.
+         * Returns the set of filters currently in use.
          */
-        public Filter[] getActiveFilters() {
-            Set<Filter> filterSet = displayMap.keySet();
-            return filterSet.toArray(new Filter[filterSet.size()]);
+        public Set<Filter<E>> getActiveFilters() {
+            return new CopyOnWriteArraySet<Filter<E>>(displayMap.keySet());
         }
     }
     
@@ -550,7 +547,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
      * Panel that displays property filters associated with the current filter 
      * category. 
      */
-    private class PropertyFilterPanel extends JPanel implements FilterListener {
+    private class PropertyFilterPanel extends JPanel implements FilterListener<E> {
         
         private final JButton moreButton = new JButton();
         
@@ -561,7 +558,9 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         private final Map<SearchCategory, Boolean> showAllMap = 
             new EnumMap<SearchCategory, Boolean>(SearchCategory.class);
         
-        private Filter[] filters = new Filter[0];
+        /** List of available filters. */
+        private List<Filter<E>> filterList = Collections.emptyList();
+        
         private SearchCategory currentCategory;
         
         public PropertyFilterPanel() {
@@ -589,36 +588,36 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             currentCategory = filterCategory;
 
             // Save old property filters.
-            Filter[] oldFilters = filters;
+            List<Filter<E>> oldFilterList = filterList;
             
             // Get new property filters for category.
-            filters = filterManager.getPropertyFilters(filterCategory);
+            filterList = filterManager.getPropertyFilterList(filterCategory);
             int filterMin = filterManager.getPropertyFilterMinimum(filterCategory);
-            List<Filter> newFilterList = Arrays.asList(filters);
             
             // Remove old filters, and deactivate filters that are NOT in the
             // list of new filters.
             removeAll();
-            for (Filter filter : oldFilters) {
+            for (Filter<E> filter : oldFilterList) {
                 filter.removeFilterListener(this);
-                if (!newFilterList.contains(filter)) {
+                if (!filterList.contains(filter)) {
                     removeActiveFilter(filter);
                 }
             }
             
             // Add new filters to container, and set visibility for filters
             // that are not active.
-            for (int i = 0; i < filters.length; i++) {
-                JComponent component = filters[i].getComponent();
+            for (int i = 0, size = filterList.size(); i < size; i++) {
+                Filter<E> filter = filterList.get(i);
+                JComponent component = filter.getComponent();
                 add(component, "gap 0 0 8 6, aligny top, growx, wrap");
-                if (!filters[i].isActive()) {
+                if (!filter.isActive()) {
                     component.setVisible(isFilterVisible(i));
                 }
-                filters[i].addFilterListener(this);
+                filter.addFilterListener(this);
             }
             
             // Add more/less button if needed.
-            if ((filterMin > 0) && (filters.length > filterMin)) {
+            if ((filterMin > 0) && (filterList.size() > filterMin)) {
                 add(moreButton, "gap 0 0 8 3, aligny top");
             }
             
@@ -640,9 +639,10 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
             showAllMap.put(currentCategory, showAll);
             
             // Set visibility for current filters.
-            for (int i = 0; i < filters.length; i++) {
-                JComponent component = filters[i].getComponent();
-                if (!filters[i].isActive()) {
+            for (int i = 0, size = filterList.size(); i < size; i++) {
+                Filter<E> filter = filterList.get(i);
+                JComponent component = filter.getComponent();
+                if (!filter.isActive()) {
                     component.setVisible(isFilterVisible(i));
                 }
             }
@@ -675,7 +675,7 @@ public class AdvancedFilterPanel extends JPanel implements Disposable {
         }
 
         @Override
-        public void filterChanged(Filter filter) {
+        public void filterChanged(Filter<E> filter) {
             if (filter.isActive()) {
                 addActiveFilter(filter);
             } else {

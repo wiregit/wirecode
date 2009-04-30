@@ -17,7 +17,6 @@ import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -27,9 +26,9 @@ import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 /**
- * Filter component to select search results according to their sources.
+ * Filter component to select items according to their sources.
  */
-class SourceFilter extends AbstractFilter {
+class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     /** Source types for search results. */
     public enum SourceType {
         P2P(I18n.tr("P2P Network")), 
@@ -134,7 +133,7 @@ class SourceFilter extends AbstractFilter {
      * Activates the filter using the specified text description and matcher.
      * This method also hides the filter component.
      */
-    protected void activate(String activeText, Matcher<VisualSearchResult> matcher) {
+    protected void activate(String activeText, Matcher<E> matcher) {
         super.activate(activeText, matcher);
         getComponent().setVisible(false);
     }
@@ -165,7 +164,7 @@ class SourceFilter extends AbstractFilter {
             if (selectedList.size() > 0) {
                 SourceType value = selectedList.get(0);
                 // Create new matcher and activate.
-                Matcher<VisualSearchResult> newMatcher = new SourceMatcher(value);
+                Matcher<E> newMatcher = new SourceMatcher<E>(value);
                 activate(value.toString(), newMatcher);
                 
             } else {

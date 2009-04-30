@@ -1,16 +1,17 @@
 package org.limewire.ui.swing.search;
 
-import org.limewire.ui.swing.search.model.SearchResultsModel;
+import org.limewire.ui.swing.search.filter.FilterableItem;
+import org.limewire.ui.swing.search.filter.FilterableSource;
 
 /**
- * Defines a factory for creating the filter panel for the search results 
- * display.
+ * Defines a factory for creating the advanced filter panel.
  */
-public interface AdvancedFilterPanelFactory {
+public interface AdvancedFilterPanelFactory<E extends FilterableItem> {
 
     /**
-     * Creates a new FilterPanel using the specified search results data model.
+     * Creates a new AdvancedFilterPanel using the specified filterable data
+     * source.
      */
-    public AdvancedFilterPanel create(SearchResultsModel searchResultsModel);
+    public AdvancedFilterPanel<E> create(FilterableSource<E> filterableSource);
     
 }

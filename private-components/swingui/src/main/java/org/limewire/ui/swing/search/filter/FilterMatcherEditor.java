@@ -1,15 +1,13 @@
 package org.limewire.ui.swing.search.filter;
 
-import org.limewire.ui.swing.search.model.VisualSearchResult;
-
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
- * A MatcherEditor used to filter search results.  FilterMatcherEditor accepts
- * an arbitrary Matcher.
+ * A MatcherEditor used to filter items.  FilterMatcherEditor accepts an 
+ * arbitrary Matcher.
  */
-class FilterMatcherEditor extends AbstractMatcherEditor<VisualSearchResult> {
+class FilterMatcherEditor<E extends FilterableItem> extends AbstractMatcherEditor<E> {
     
     /**
      * Constructs a FilterMatcherEditor with the default Matcher.
@@ -22,7 +20,7 @@ class FilterMatcherEditor extends AbstractMatcherEditor<VisualSearchResult> {
      * changed.  If <code>matcher</code> is null, then the default Matcher is
      * applied.
      */
-    public void setMatcher(Matcher<VisualSearchResult> matcher) {
+    public void setMatcher(Matcher<E> matcher) {
         if (matcher != null) {
             fireChanged(matcher);
         } else {

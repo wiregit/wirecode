@@ -1,14 +1,13 @@
 package org.limewire.ui.swing.search.filter;
 
 import org.limewire.core.api.Category;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * A matcher used to filter a search result by category.
  */
-class CategoryMatcher implements Matcher<VisualSearchResult> {
+class CategoryMatcher<E extends FilterableItem> implements Matcher<E> {
     private final Category category;
     
     /**
@@ -22,7 +21,7 @@ class CategoryMatcher implements Matcher<VisualSearchResult> {
      * Returns true if the specified search result matches the category.
      */
     @Override
-    public boolean matches(VisualSearchResult vsr) {
-        return (vsr.getCategory() == category);
+    public boolean matches(E item) {
+        return (item.getCategory() == category);
     }
 }

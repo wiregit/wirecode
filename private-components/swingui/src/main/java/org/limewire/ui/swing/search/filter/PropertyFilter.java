@@ -25,7 +25,6 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.components.RolloverCursorListener;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.Objects;
@@ -42,10 +41,10 @@ import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 /**
- * Filter component to select search results according to a collection of
- * property values.
+ * Filter component to select items according to a collection of property 
+ * values.
  */
-class PropertyFilter extends AbstractFilter {
+class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
     private final FilterType filterType;
     private final FilePropertyKey propertyKey;
@@ -56,17 +55,17 @@ class PropertyFilter extends AbstractFilter {
     private final JList list = new JList();
     private final JButton moreButton = new JButton();
     
-    private FunctionList<VisualSearchResult, Object> propertyList;
+    private FunctionList<E, Object> propertyList;
     private UniqueList<Object> uniqueList;
     private EventSelectionModel<Object> selectionModel;
     private EventSelectionModel<Object> popupSelectionModel;
     private MorePopupPanel morePopupPanel;
     
     /**
-     * Constructs a PropertyFilterComponent using the specified results list,
+     * Constructs a PropertyFilter using the specified results list,
      * filter type, property key, and icon manager.
      */
-    public PropertyFilter(EventList<VisualSearchResult> resultsList,
+    public PropertyFilter(EventList<E> resultsList,
             FilterType filterType, FilePropertyKey propertyKey, 
             IconManager iconManager) {
         
@@ -122,9 +121,9 @@ class PropertyFilter extends AbstractFilter {
     }
     
     /**
-     * Initializes the filter using the specified list of search results.
+     * Initializes the filter using the specified list of items.
      */
-    private void initialize(EventList<VisualSearchResult> resultsList) {
+    private void initialize(EventList<E> resultsList) {
         // Create list of unique property values.
         propertyList = createPropertyList(resultsList);
         uniqueList = createUniqueList(propertyList);
@@ -178,7 +177,7 @@ class PropertyFilter extends AbstractFilter {
     @Override
     public void dispose() {
         // Dispose of property list.  Since all other lists are based on the
-        // property list, these should be freed for GC also.
+        // property list, these will be freed for GC also.
         propertyList.dispose();
     }
     
@@ -186,7 +185,7 @@ class PropertyFilter extends AbstractFilter {
      * Activates the filter using the specified text description and matcher.
      * This method also hides the filter component.
      */
-    protected void activate(String activeText, Matcher<VisualSearchResult> matcher) {
+    protected void activate(String activeText, Matcher<E> matcher) {
         super.activate(activeText, matcher);
         getComponent().setVisible(false);
     }
@@ -230,11 +229,9 @@ class PropertyFilter extends AbstractFilter {
     }
     
     /**
-     * Returns a list of property values in the specified list of search
-     * results.
+     * Returns a list of property values in the specified list of items.
      */
-    private FunctionList<VisualSearchResult, Object> createPropertyList(
-            EventList<VisualSearchResult> resultsList) {
+    private FunctionList<E, Object> createPropertyList(EventList<E> resultsList) {
         switch (filterType) {
         case EXTENSION:
         case PROPERTY:
@@ -403,8 +400,8 @@ class PropertyFilter extends AbstractFilter {
             EventList<Object> selectedList = selectionModel.getSelected();
             if (selectedList.size() > 0) {
                 // Create new matcher and activate.
-                Matcher<VisualSearchResult> newMatcher = 
-                    new PropertyMatcher(filterType, propertyKey, iconManager, selectedList);
+                Matcher<E> newMatcher = 
+                    new PropertyMatcher<E>(filterType, propertyKey, iconManager, selectedList);
                 activate(selectedList.get(0).toString(), newMatcher);
                 
             } else {
@@ -493,10 +490,10 @@ class PropertyFilter extends AbstractFilter {
     }
     
     /**
-     * A function to transform a list of visual search results into a list of
+     * A function to transform a list of filterable items into a list of
      * specific property values.
      */
-    private class PropertyFunction implements Function<VisualSearchResult, Object> {
+    private class PropertyFunction implements Function<E, Object> {
         private final FilterType filterType;
         private final FilePropertyKey propertyKey;
 
@@ -506,14 +503,14 @@ class PropertyFilter extends AbstractFilter {
         }
         
         @Override
-        public Object evaluate(VisualSearchResult vsr) {
+        public Object evaluate(E item) {
             switch (filterType) {
             case EXTENSION:
-                return vsr.getFileExtension().toLowerCase();
+                return item.getFileExtension().toLowerCase();
             case PROPERTY:
-                return vsr.getProperty(propertyKey);
+                return item.getProperty(propertyKey);
             case FILE_TYPE:
-                return iconManager.getMIMEDescription(vsr.getFileExtension());
+                return iconManager.getMIMEDescription(item.getFileExtension());
             default:
                 return null;
             }

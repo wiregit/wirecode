@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.search.filter;
 
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -10,7 +9,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 /**
  * Range filter format for quality.
  */
-class QualityFilterFormat implements RangeFilterFormat {
+class QualityFilterFormat<E extends FilterableItem> implements RangeFilterFormat<E> {
     /** Array of quality options. */
     private static final long[] QUALITIES = {
         0, // spam
@@ -25,8 +24,8 @@ class QualityFilterFormat implements RangeFilterFormat {
     }
 
     @Override
-    public Matcher<VisualSearchResult> getMatcher(long minValue, long maxValue) {
-        return new QualityMatcher(minValue);
+    public Matcher<E> getMatcher(long minValue, long maxValue) {
+        return new QualityMatcher<E>(minValue);
     }
 
     @Override
@@ -45,9 +44,9 @@ class QualityFilterFormat implements RangeFilterFormat {
     }
 
     /**
-     * A matcher used to filter a search result by quality.
+     * A matcher used to filter an item by quality.
      */
-    private static class QualityMatcher implements Matcher<VisualSearchResult> {
+    private static class QualityMatcher<E extends FilterableItem> implements Matcher<E> {
         private final long quality;
         
         /**
@@ -58,15 +57,14 @@ class QualityFilterFormat implements RangeFilterFormat {
         }
 
         /**
-         * Returns true if the specified search result matches or exceeds the 
-         * quality.
+         * Returns true if the specified item matches or exceeds the quality.
          */
         @Override
-        public boolean matches(VisualSearchResult vsr) {
+        public boolean matches(E item) {
             if (quality == 0) return true;
-            if (vsr.isSpam()) return false;
+            if (item.isSpam()) return false;
             
-            Object value = vsr.getProperty(FilePropertyKey.QUALITY);
+            Object value = item.getProperty(FilePropertyKey.QUALITY);
             if (value instanceof Long) {
                 return (((Long) value).longValue() >= quality);
             } else {

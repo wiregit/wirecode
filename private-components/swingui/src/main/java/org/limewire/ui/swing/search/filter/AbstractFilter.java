@@ -8,7 +8,6 @@ import java.util.List;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.matchers.Matcher;
@@ -17,13 +16,13 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
 /**
  * Base implementation of Filter that provides listener support.
  */
-abstract class AbstractFilter implements Filter {
+abstract class AbstractFilter<E extends FilterableItem> implements Filter<E> {
 
     /** List of listeners notified when filter is changed. */
-    private final List<FilterListener> listenerList = new ArrayList<FilterListener>();
+    private final List<FilterListener<E>> listenerList = new ArrayList<FilterListener<E>>();
     
-    /** Matcher/editor used to filter search results. */
-    private final FilterMatcherEditor editor;
+    /** Matcher/editor used to filter items. */
+    private final FilterMatcherEditor<E> editor;
     
     /** Resources for filters. */
     private final FilterResources resources = new FilterResources();
@@ -39,7 +38,7 @@ abstract class AbstractFilter implements Filter {
      */
     public AbstractFilter() {
         // Create matcher editor for filtering.
-        editor = new FilterMatcherEditor();
+        editor = new FilterMatcherEditor<E>();
     }
     
     /**
@@ -47,7 +46,7 @@ abstract class AbstractFilter implements Filter {
      * filter changes.
      */
     @Override
-    public void addFilterListener(FilterListener listener) {
+    public void addFilterListener(FilterListener<E> listener) {
         if (!listenerList.contains(listener)) {
             listenerList.add(listener);
         }
@@ -66,7 +65,7 @@ abstract class AbstractFilter implements Filter {
      * Notifies all registered listeners that the filter has changed for the
      * specified filter component.
      */
-    protected void fireFilterChanged(Filter filter) {
+    protected void fireFilterChanged(Filter<E> filter) {
         for (int i = 0, size = listenerList.size(); i < size; i++) {
             listenerList.get(i).filterChanged(filter);
         }
@@ -89,10 +88,10 @@ abstract class AbstractFilter implements Filter {
     }
     
     /**
-     * Returns the matcher/editor used to filter search results.
+     * Returns the matcher/editor used to filter items.
      */
     @Override
-    public MatcherEditor<VisualSearchResult> getMatcherEditor() {
+    public MatcherEditor<E> getMatcherEditor() {
         return editor;
     }
 
@@ -109,7 +108,7 @@ abstract class AbstractFilter implements Filter {
     /**
      * Activates the filter using the specified text description and matcher.
      */
-    protected void activate(String activeText, Matcher<VisualSearchResult> matcher) {
+    protected void activate(String activeText, Matcher<E> matcher) {
         this.activeText = activeText;
         editor.setMatcher(matcher);
         active = true;

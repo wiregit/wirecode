@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.filter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -10,46 +11,47 @@ import java.util.Map;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.Disposable;
-import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.IconManager;
 
 /**
- * A manager for search result filters.
+ * A manager for filters.
  */
-public class FilterManager implements Disposable {
+public class FilterManager<E extends FilterableItem> implements Disposable {
 
-    /** Search results data model. */
-    private final SearchResultsModel searchResultsModel;
+    /** Filterable data source. */
+    private final FilterableSource<E> filterableSource;
     
     /** Icon manager for determining file types. */
     private final IconManager iconManager;
     
     /** Map containing non-property filters. */
-    private final Map<FilterType, Filter> filterMap = new EnumMap<FilterType, Filter>(FilterType.class);
+    private final Map<FilterType, Filter<E>> filterMap = 
+        new EnumMap<FilterType, Filter<E>>(FilterType.class);
     
     /** Map containing property filters. */
-    private final Map<FilePropertyKey, Filter> propertyFilterMap = new HashMap<FilePropertyKey, Filter>();
+    private final Map<FilePropertyKey, Filter<E>> propertyFilterMap = 
+        new HashMap<FilePropertyKey, Filter<E>>();
     
     /**
-     * Constructs a FilterManager using the specified search results data model
+     * Constructs a FilterManager using the specified filterable data source
      * and icon manager.
      */
-    public FilterManager(SearchResultsModel searchResultsModel, IconManager iconManager) {
-        this.searchResultsModel = searchResultsModel;
+    public FilterManager(FilterableSource<E> filterableSource, IconManager iconManager) {
+        this.filterableSource = filterableSource;
         this.iconManager = iconManager;
     }
     
     @Override
     public void dispose() {
         // Dispose of all non-property filters.
-        Collection<Filter> filters = filterMap.values();
-        for (Filter filter : filters) {
+        Collection<Filter<E>> filters = filterMap.values();
+        for (Filter<E> filter : filters) {
             filter.dispose();
         }
         
         // Dispose of all property filters.
-        Collection<Filter> propertyFilters = propertyFilterMap.values();
-        for (Filter filter : propertyFilters) {
+        Collection<Filter<E>> propertyFilters = propertyFilterMap.values();
+        for (Filter<E> filter : propertyFilters) {
             filter.dispose();
         }
     }
@@ -57,14 +59,14 @@ public class FilterManager implements Disposable {
     /**
      * Returns a filter for file categories.
      */
-    public CategoryFilter getCategoryFilter() {
-        return (CategoryFilter) getFilter(FilterType.CATEGORY);
+    public CategoryFilter<E> getCategoryFilter() {
+        return (CategoryFilter<E>) getFilter(FilterType.CATEGORY);
     }
     
     /**
      * Returns a filter for file sources.
      */
-    public Filter getSourceFilter() {
+    public Filter<E> getSourceFilter() {
         return getFilter(FilterType.SOURCE);
     }
     
@@ -87,16 +89,16 @@ public class FilterManager implements Disposable {
     }
     
     /**
-     * Returns an array of filters for the specified search category.
+     * Returns a list of filters for the specified search category.
      */
-    public Filter[] getPropertyFilters(SearchCategory searchCategory) {
-        // Return empty array if null.
+    public List<Filter<E>> getPropertyFilterList(SearchCategory searchCategory) {
+        // Return empty list if null.
         if (searchCategory == null) {
-            return new Filter[0];
+            return Collections.emptyList();
         }
         
         // Create filter list.
-        List<Filter> filterList = new ArrayList<Filter>();
+        List<Filter<E>> filterList = new ArrayList<Filter<E>>();
         
         switch (searchCategory) {
         case AUDIO:
@@ -132,14 +134,14 @@ public class FilterManager implements Disposable {
             break;
         }
         
-        return filterList.toArray(new Filter[filterList.size()]);
+        return filterList;
     }
     
     /**
      * Returns the filter for the specified filter type.
      */
-    private Filter getFilter(FilterType filterType) {
-        Filter filter = filterMap.get(filterType);
+    private Filter<E> getFilter(FilterType filterType) {
+        Filter<E> filter = filterMap.get(filterType);
         if (filter == null) {
             filter = createFilter(filterType, null);
             filterMap.put(filterType, filter);
@@ -150,8 +152,8 @@ public class FilterManager implements Disposable {
     /**
      * Return the property filter for the specified property key.
      */
-    private Filter getPropertyFilter(FilePropertyKey propertyKey) {
-        Filter filter = propertyFilterMap.get(propertyKey);
+    private Filter<E> getPropertyFilter(FilePropertyKey propertyKey) {
+        Filter<E> filter = propertyFilterMap.get(propertyKey);
         if (filter == null) {
             filter = createFilter(FilterType.PROPERTY, propertyKey);
             propertyFilterMap.put(propertyKey, filter);
@@ -163,37 +165,37 @@ public class FilterManager implements Disposable {
      * Creates a new filter for the specified filter type and property key.
      * For FilterType.PROPERTY, <code>propertyKey</code> must be non-null.
      */
-    private Filter createFilter(FilterType filterType, FilePropertyKey propertyKey) {
+    private Filter<E> createFilter(FilterType filterType, FilePropertyKey propertyKey) {
         switch (filterType) {
         case BIT_RATE:
-            return new RangeFilter(new BitRateFilterFormat());
+            return new RangeFilter<E>(new BitRateFilterFormat<E>());
             
         case CATEGORY:
-            return new CategoryFilter(searchResultsModel.getFilteredSearchResults());
+            return new CategoryFilter<E>(filterableSource.getFilteredList());
             
         case EXTENSION:
-            return new PropertyFilter(searchResultsModel.getFilteredSearchResults(), 
+            return new PropertyFilter<E>(filterableSource.getFilteredList(), 
                     FilterType.EXTENSION, null, iconManager);
             
         case FILE_SIZE:
-            return new RangeFilter(new FileSizeFilterFormat());
+            return new RangeFilter<E>(new FileSizeFilterFormat<E>());
             
         case FILE_TYPE:
-            return new PropertyFilter(searchResultsModel.getFilteredSearchResults(), 
+            return new PropertyFilter<E>(filterableSource.getFilteredList(), 
                     FilterType.FILE_TYPE, null, iconManager);
             
         case LENGTH:
-            return new RangeFilter(new LengthFilterFormat());
+            return new RangeFilter<E>(new LengthFilterFormat<E>());
             
         case PROPERTY:
-            return new PropertyFilter(searchResultsModel.getFilteredSearchResults(), 
+            return new PropertyFilter<E>(filterableSource.getFilteredList(), 
                     FilterType.PROPERTY, propertyKey, iconManager);
             
         case QUALITY:
-            return new RangeFilter(new QualityFilterFormat());
+            return new RangeFilter<E>(new QualityFilterFormat<E>());
             
         case SOURCE:
-            return new SourceFilter();
+            return new SourceFilter<E>();
             
         default:
             throw new IllegalArgumentException("Invalid filter type " + filterType);

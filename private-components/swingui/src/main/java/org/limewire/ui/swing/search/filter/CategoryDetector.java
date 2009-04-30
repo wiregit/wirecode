@@ -6,8 +6,6 @@ import java.awt.event.ActionListener;
 import javax.swing.Timer;
 
 import org.limewire.core.api.Category;
-import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -15,17 +13,17 @@ import ca.odell.glazedlists.event.ListEventListener;
 /**
  * Support class to detect the category with the most search results.
  */
-public class CategoryDetector {
+public class CategoryDetector<E extends FilterableItem> {
     /** Number of results needed to trigger category detection. */
     private static final int RESULTS_COUNT = 25;
     /** Delay in milliseconds needed to trigger category detection. */
     private static final int TIMER_DELAY = 10000;
 
-    private final SearchResultsModel searchResultsModel;
+    private final FilterableSource<E> filterableSource;
     private final CategoryFilter categoryFilter;
     
     private CategoryDetectorListener detectorListener;
-    private ListEventListener<VisualSearchResult> resultsListener;
+    private ListEventListener<E> resultsListener;
     private ActionListener timerListener;
     private Timer timer;
     
@@ -33,8 +31,8 @@ public class CategoryDetector {
      * Constructs a CategoryDetector using the specified search results model
      * and category filter.
      */
-    public CategoryDetector(SearchResultsModel searchResultsModel, CategoryFilter categoryFilter) {
-        this.searchResultsModel = searchResultsModel;
+    public CategoryDetector(FilterableSource<E> filterableSource, CategoryFilter categoryFilter) {
+        this.filterableSource = filterableSource;
         this.categoryFilter = categoryFilter;
     }
     
@@ -47,16 +45,16 @@ public class CategoryDetector {
         
         // Create results listener to detect the category when enough results 
         // are received.
-        resultsListener = new ListEventListener<VisualSearchResult>() {
+        resultsListener = new ListEventListener<E>() {
             @Override
-            public void listChanged(ListEvent<VisualSearchResult> listChanges) {
+            public void listChanged(ListEvent listChanges) {
                 int size = listChanges.getSourceList().size();
                 if (size >= RESULTS_COUNT) {
                     fireCategoryFound();
                 }
             }
         };
-        searchResultsModel.getObservableSearchResults().addListEventListener(resultsListener);
+        filterableSource.getUnfilteredList().addListEventListener(resultsListener);
         
         // Create timer listener to detect the category after enough time as 
         // passed.
@@ -76,7 +74,7 @@ public class CategoryDetector {
     public void stop() {
         // Remove listener from list.
         if (resultsListener != null) {
-            searchResultsModel.getObservableSearchResults().removeListEventListener(resultsListener);
+            filterableSource.getUnfilteredList().removeListEventListener(resultsListener);
             resultsListener = null;
         }
         

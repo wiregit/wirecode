@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.filter;
 
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -9,7 +8,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 /**
  * Range filter format for file size.
  */
-class FileSizeFilterFormat implements RangeFilterFormat {
+class FileSizeFilterFormat<E extends FilterableItem> implements RangeFilterFormat<E> {
     /** Array of size options in bytes. */
     private static final long[] SIZES = {
         0, 
@@ -29,8 +28,8 @@ class FileSizeFilterFormat implements RangeFilterFormat {
     }
 
     @Override
-    public Matcher<VisualSearchResult> getMatcher(long minValue, long maxValue) {
-        return new FileSizeMatcher(minValue, maxValue);
+    public Matcher<E> getMatcher(long minValue, long maxValue) {
+        return new FileSizeMatcher<E>(minValue, maxValue);
     }
 
     @Override
@@ -49,9 +48,9 @@ class FileSizeFilterFormat implements RangeFilterFormat {
     }
 
     /**
-     * A matcher used to filter a search result by file size.
+     * A matcher used to filter an item by file size.
      */
-    private static class FileSizeMatcher implements Matcher<VisualSearchResult> {
+    private static class FileSizeMatcher<E extends FilterableItem> implements Matcher<E> {
         private final long minSize;
         private final long maxSize;
         
@@ -64,12 +63,11 @@ class FileSizeFilterFormat implements RangeFilterFormat {
         }
 
         /**
-         * Returns true if the specified search result is within the file size 
-         * range.
+         * Returns true if the specified item is within the file size range.
          */
         @Override
-        public boolean matches(VisualSearchResult vsr) {
-            long size = vsr.getSize();
+        public boolean matches(E item) {
+            long size = item.getSize();
             boolean minValid = (minSize == SIZES[0]) || (size >= minSize);
             boolean maxValid = (maxSize == SIZES[SIZES.length - 1]) || (size <= maxSize);
             return (minValid && maxValid); 

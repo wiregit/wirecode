@@ -11,29 +11,28 @@ import javax.swing.event.ChangeListener;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.components.RangeSlider;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
- * Filter to select search results according to a range of values.
+ * Filter to select items according to a range of values.
  */
-class RangeFilter extends AbstractFilter {
+class RangeFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
     private final JPanel panel = new JPanel();
     private final JLabel headerLabel = new JLabel();
     private final JLabel valueLabel = new JLabel();
     private final RangeSlider slider = new RangeSlider();
     
-    private final RangeFilterFormat rangeFormat;
+    private final RangeFilterFormat<E> rangeFormat;
     
     private boolean resetAdjusting;
     
     /**
      * Constructs a RangeFilter with the specified range format.
      */
-    public RangeFilter(RangeFilterFormat rangeFormat) {
+    public RangeFilter(RangeFilterFormat<E> rangeFormat) {
         this.rangeFormat = rangeFormat;
         
         FilterResources resources = getResources();
@@ -169,7 +168,7 @@ class RangeFilter extends AbstractFilter {
                     long maxValue = values[slider.getUpperValue()];
 
                     // Create new matcher and activate.
-                    Matcher<VisualSearchResult> newMatcher = rangeFormat.getMatcher(minValue, maxValue);
+                    Matcher<E> newMatcher = rangeFormat.getMatcher(minValue, maxValue);
                     activate(rangeText, newMatcher);
                     
                 } else {

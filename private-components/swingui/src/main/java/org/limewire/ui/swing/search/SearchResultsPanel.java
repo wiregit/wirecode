@@ -36,6 +36,7 @@ import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.search.AdvancedFilterPanel.CategoryListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
@@ -60,7 +61,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     private final JLabel searchTitleLabel = new JLabel();
     
     /** Panel containing filter components. */
-    private final AdvancedFilterPanel filterPanel;
+    private final AdvancedFilterPanel<VisualSearchResult> filterPanel;
     
     /**
      * This is the subpanel that displays the actual search results.
@@ -111,10 +112,10 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             @Assisted SearchResultsModel searchResultsModel,
             ResultsContainerFactory containerFactory,
             SortAndFilterPanelFactory sortAndFilterFactory,
-            AdvancedFilterPanelFactory filterPanelFactory,
+            AdvancedFilterPanelFactory<VisualSearchResult> filterPanelFactory,
             SearchTabItemsFactory searchTabItemsFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
-            HeaderBarDecorator headerBarDecorator) {        
+            HeaderBarDecorator headerBarDecorator) {
 
         GuiUtils.assignResources(this);
         

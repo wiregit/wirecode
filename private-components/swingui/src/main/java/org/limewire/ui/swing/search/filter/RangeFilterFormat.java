@@ -1,13 +1,11 @@
 package org.limewire.ui.swing.search.filter;
 
-import org.limewire.ui.swing.search.model.VisualSearchResult;
-
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * Defines the configuration format for a RangeFilter.
  */
-public interface RangeFilterFormat {
+interface RangeFilterFormat<E extends FilterableItem> {
 
     /**
      * Returns the header text.
@@ -16,9 +14,9 @@ public interface RangeFilterFormat {
     
     /**
      * Returns a Matcher that uses the specified minimum and maximum values 
-     * for filtering search results.
+     * for filtering items.
      */
-    Matcher<VisualSearchResult> getMatcher(long minValue, long maxValue);
+    Matcher<E> getMatcher(long minValue, long maxValue);
     
     /**
      * Returns an array of range values.

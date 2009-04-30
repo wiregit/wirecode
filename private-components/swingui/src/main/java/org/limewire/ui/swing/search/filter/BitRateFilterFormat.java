@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.search.filter;
 
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.matchers.Matcher;
@@ -9,7 +8,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 /**
  * Range filter format for bit rate.
  */
-class BitRateFilterFormat implements RangeFilterFormat {
+class BitRateFilterFormat<E extends FilterableItem> implements RangeFilterFormat<E> {
     /** Array of bit rate options. */
     private static final long[] RATES = {
         0, 
@@ -27,8 +26,8 @@ class BitRateFilterFormat implements RangeFilterFormat {
     }
 
     @Override
-    public Matcher<VisualSearchResult> getMatcher(long minValue, long maxValue) {
-        return new BitRateMatcher(minValue);
+    public Matcher<E> getMatcher(long minValue, long maxValue) {
+        return new BitRateMatcher<E>(minValue);
     }
 
     @Override
@@ -47,9 +46,9 @@ class BitRateFilterFormat implements RangeFilterFormat {
     }
 
     /**
-     * A matcher used to filter a search result by bit rate.
+     * A matcher used to filter an item by bit rate.
      */
-    private static class BitRateMatcher implements Matcher<VisualSearchResult> {
+    private static class BitRateMatcher<E extends FilterableItem> implements Matcher<E> {
         private final long bitRate;
         
         /**
@@ -60,14 +59,13 @@ class BitRateFilterFormat implements RangeFilterFormat {
         }
 
         /**
-         * Returns true if the specified search result matches or exceeds the 
-         * bit rate.
+         * Returns true if the specified item matches or exceeds the bit rate.
          */
         @Override
-        public boolean matches(VisualSearchResult vsr) {
+        public boolean matches(E item) {
             if (bitRate == 0) return true;
             
-            Object rate = vsr.getProperty(FilePropertyKey.BITRATE);
+            Object rate = item.getProperty(FilePropertyKey.BITRATE);
             if (rate instanceof Long) {
                 return (((Long) rate).longValue() >= bitRate);
             } else {
