@@ -580,26 +580,14 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
         final FriendPresence friendPresence = context.mock(FriendPresence.class);
+        final Friend friend = context.mock(Friend.class);
         
-        context.checking(new Expectations() {{
-            allowing(rfd).getClientGUID();
-            will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
-            
-            Friend friend = context.mock(Friend.class);
-            allowing(friendPresence).getFriend();
+        context.checking(new Expectations() {{           
+            exactly(3).of(friendPresence).getFriend();
             will(returnValue(friend));
-            
-            one(rfd).isBrowseHostEnabled();
+            exactly(3).of(friend).isAnonymous();
             will(returnValue(true));
-            one(rfd).isBrowseHostEnabled();
-            will(returnValue(false));
-            one(friend).isAnonymous();
-            will(returnValue(false));
-            one(friend).isAnonymous();
-            will(returnValue(true));
-            one(friend).isAnonymous();
-            will(returnValue(false));
-            one(friend).isAnonymous();
+            exactly(1).of(rfd).isBrowseHostEnabled();
             will(returnValue(true));
             
             allowing(rfd);
@@ -610,10 +598,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
                 
         assertSame(friendPresence, remoteHost.getFriendPresence());
         assertTrue(remoteHost.isBrowseHostEnabled());
-        assertFalse(remoteHost.isBrowseHostEnabled());
-        assertTrue(remoteHost.isChatEnabled());
         assertFalse(remoteHost.isChatEnabled());
-        assertTrue(remoteHost.isSharingEnabled());
         assertFalse(remoteHost.isSharingEnabled());
         
         context.assertIsSatisfied();
