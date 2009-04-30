@@ -5,6 +5,11 @@ import org.limewire.core.api.friend.Friend;
 /**
  * Manager for all share lists.
  */
+// TODO: This is going to have to change when the UI uses collections.
+//       Probably into something like
+//    EventList<FileList<LocalFileItem>> getCollections();
+//    int getSharedFileCount();
+//    void addListener(...);
 public interface ShareListManager {
     
     /**

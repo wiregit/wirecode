@@ -17,6 +17,7 @@ import ca.odell.glazedlists.BasicEventList;
 
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
@@ -47,7 +48,12 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     }
     
     @Override
-    protected FileCollection getCoreFileList() {
+    protected FileCollection getMutableCollection() {
+        return managedList;
+    }
+    
+    @Override
+    protected FileView getFileView() {
         return managedList;
     }
     

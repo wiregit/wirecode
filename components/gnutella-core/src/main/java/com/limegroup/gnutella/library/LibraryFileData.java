@@ -272,7 +272,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             this.excludedFiles.addAll(excludedFiles);
             this.fileData.putAll(fileData);
             this.collectionNames.putAll(collectionNames);
-            this.collectionShareData.putAll(this.collectionShareData);
+            this.collectionShareData.putAll(collectionShareData);
         } finally {
             lock.writeLock().unlock();
         }

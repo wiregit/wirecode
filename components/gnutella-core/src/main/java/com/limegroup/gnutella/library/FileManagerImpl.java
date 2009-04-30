@@ -149,7 +149,16 @@ class FileManagerImpl implements FileManager, Service {
     
     @Override
     public synchronized FileView getFileViewForId(String friendId) {
-        return sharedCollections.get(friendId);
+        System.out.println("Getting view for id: " + friendId);
+        
+        for(SharedFileCollectionImpl collection : sharedCollections.values()) {
+            if(collection.getName().equals(friendId)) {
+                return collection;
+            }
+        }
+        
+        System.out.println("Constructing fake view for id: " + friendId);
+        return getOrCreateSharedCollectionByName(friendId);
     }
     
     @Override
@@ -175,6 +184,7 @@ class FileManagerImpl implements FileManager, Service {
     
     @Override
     public synchronized SharedFileCollection getOrCreateSharedCollectionByName(String name) {
+        System.out.println("Getting collection by name: " + name);
         for(SharedFileCollectionImpl collection : sharedCollections.values()) {
             if(collection.getName().equals(name)) {
                 return collection;
@@ -182,6 +192,7 @@ class FileManagerImpl implements FileManager, Service {
         }
         
         int newId = managedFileList.getLibraryData().createNewCollection(name);
+        System.out.println("Creating new collection with name: " + name + ", got id: " + newId);
         SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId);
         collection.initialize();
         sharedCollections.put(newId, collection);

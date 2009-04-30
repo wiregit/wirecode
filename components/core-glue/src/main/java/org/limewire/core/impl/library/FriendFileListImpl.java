@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import org.limewire.listener.EventListener;
 
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.SharedFileCollection;
@@ -10,10 +11,14 @@ import com.limegroup.gnutella.library.SharedFileCollection;
  * Implementation of the FriendFileList interface, used to keep track of what
  * files are shared with a specific friend.
  */
+// TODO: This really should only deal with collections, but
+//       because the UI still wants to know about "shared with",
+//       we have to keep track of all the views for now.
 class FriendFileListImpl extends AbstractFriendFileList {
     private final FileManager fileManager;
 
-    private SharedFileCollection friendFileList;
+    private volatile SharedFileCollection friendCollection;
+    private volatile FileView friendView;
 
     private final String name;
 
@@ -32,8 +37,17 @@ class FriendFileListImpl extends AbstractFriendFileList {
     }
 
     @Override
-    protected SharedFileCollection getCoreFileList() {
-        return friendFileList;
+    protected SharedFileCollection getMutableCollection() {
+        if(friendCollection == null) {
+            friendCollection = fileManager.getOrCreateSharedCollectionByName(name);
+            friendCollection.addPersonToShareWith(name);
+        }
+        return friendCollection;
+    }
+    
+    @Override
+    protected FileView getFileView() {
+        return friendView;
     }
 
     @Override
@@ -41,8 +55,8 @@ class FriendFileListImpl extends AbstractFriendFileList {
         super.dispose();
         if (committed) {
             combinedShareList.removeMemberList(baseList);
-            if (friendFileList != null)
-                friendFileList.removeFileViewListener(eventListener);
+            if (friendView != null)
+                friendView.removeFileViewListener(eventListener);
         }
     }
 
@@ -52,17 +66,15 @@ class FriendFileListImpl extends AbstractFriendFileList {
     void commit() {
         committed = true;
         eventListener = newEventListener();
-        friendFileList = fileManager.getOrCreateSharedCollectionByName(name);
-        friendFileList.addFileViewListener(eventListener);
+        friendView = fileManager.getFileViewForId(name);
+        friendView.addFileViewListener(eventListener);
         combinedShareList.addMemberList(baseList);
 
-        com.limegroup.gnutella.library.FileCollection fileList = friendFileList;
-
-        fileList.getReadLock().lock();
+        friendView.getReadLock().lock();
         try {
-            addAllFileDescs(fileList);
+            addAllFileDescs(friendView);
         } finally {
-            fileList.getReadLock().unlock();
+            friendView.getReadLock().unlock();
         }
     }
 }

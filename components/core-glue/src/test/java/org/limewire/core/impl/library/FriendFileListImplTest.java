@@ -103,7 +103,7 @@ public class FriendFileListImplTest extends BaseTestCase {
     }
 
     public void testGetCoreFileList() {
-        assertEquals(testFileList, friendFileListImpl.getCoreFileList());
+        assertEquals(testFileList, friendFileListImpl.getMutableCollection());
         context.assertIsSatisfied();
     }
 

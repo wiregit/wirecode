@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import org.limewire.core.api.library.GnutellaFileList;
 
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.GnutellaFileCollection;
 
 /**
@@ -21,12 +22,17 @@ class GnutellaFileListImpl extends AbstractFriendFileList implements GnutellaFil
     }
 
     @Override
-    protected GnutellaFileCollection getCoreFileList() {
+    protected GnutellaFileCollection getMutableCollection() {
+        return shareList;
+    }
+    
+    @Override
+    protected FileView getFileView() {
         return shareList;
     }
 
     @Override
     public void removeDocuments() {
-        getCoreFileList().removeDocuments();
+        getMutableCollection().removeDocuments();
     }
 }
