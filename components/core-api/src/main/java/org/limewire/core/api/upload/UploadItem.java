@@ -55,12 +55,6 @@ public interface UploadItem extends PropertiableFile {
     public Category getCategory();
     
     /**
-     * returns the string representation of the IP Address
-     * of the host being uploaded to.
-     */
-    public String getHost();
-    
-    /**
      * Returns the source of this Upload.
      */
     public RemoteHost getRemoteHost();

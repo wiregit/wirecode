@@ -28,6 +28,8 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.DisposalListener;
+import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
+import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.nav.Navigator;
@@ -106,7 +108,7 @@ public class BaseResultPanel extends JXPanel {
     private final Navigator navigator;
     private final PropertiesFactory<VisualSearchResult> properties;
     private final ListViewRowHeightRule rowHeightRule;
-    private final SearchResultFromWidgetFactory fromWidgetfactory;
+    private final RemoteHostWidgetFactory fromWidgetfactory;
     private final NameRendererFactory nameRendererFactory;
     private final DownloadHandler downloadHandler;
     
@@ -129,7 +131,7 @@ public class BaseResultPanel extends JXPanel {
             Navigator navigator,
             PropertiesFactory<VisualSearchResult> properties, 
             ListViewRowHeightRule rowHeightRule,
-            SearchResultFromWidgetFactory fromWidgetFactory,
+            RemoteHostWidgetFactory fromWidgetFactory,
             LibraryNavigator libraryNavigator,
             NameRendererFactory nameRendererFactory) {
         
@@ -376,8 +378,8 @@ public class BaseResultPanel extends JXPanel {
                 setCellRenderer(i, nameRenderer);
                 setCellEditor(i, null);
             } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
-                setCellRenderer(i, new FromTableCellRenderer(fromWidgetfactory.create(true)));
-                setCellEditor(i, new FromTableCellRenderer(fromWidgetfactory.create(true)));
+                setCellRenderer(i, new FromTableCellRenderer(fromWidgetfactory.create(RemoteWidgetType.TABLE)));
+                setCellEditor(i, new FromTableCellRenderer(fromWidgetfactory.create(RemoteWidgetType.TABLE)));
             }
         }
         

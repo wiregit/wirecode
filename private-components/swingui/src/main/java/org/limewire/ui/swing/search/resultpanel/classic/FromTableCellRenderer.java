@@ -15,15 +15,15 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.components.RemoteHostWidget;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidget;
 
 public class FromTableCellRenderer extends JXPanel implements TableCellRenderer, TableCellEditor {
     
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
-    private final SearchResultFromWidget fromWidget;
+    private final RemoteHostWidget fromWidget;
     
-    public FromTableCellRenderer(SearchResultFromWidget fromWidget) {
+    public FromTableCellRenderer(RemoteHostWidget fromWidget) {
         super(new MigLayout("insets 0 5 0 0, aligny 50%"));
         
         this.fromWidget = fromWidget;

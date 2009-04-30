@@ -12,8 +12,6 @@ import org.limewire.ui.swing.search.resultpanel.NameRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.NameRendererFactoryImpl;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilderImpl;
-import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidget;
-import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidgetFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultPropertiesFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncatorImpl;
@@ -75,10 +73,6 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(NameRendererFactory.class).to(NameRendererFactoryImpl.class);
         
         bind(SearchHeadingDocumentBuilder.class).to(SearchHeadingDocumentBuilderImpl.class);
-        
-        bind(SearchResultFromWidgetFactory.class).toProvider(
-                FactoryProvider.newFactory(
-                        SearchResultFromWidgetFactory.class, SearchResultFromWidget.class));
         
         bind(ListViewRowHeightRule.class).to(ListViewRowHeightRuleImpl.class);
         bind(SearchResultTruncator.class).to(SearchResultTruncatorImpl.class);

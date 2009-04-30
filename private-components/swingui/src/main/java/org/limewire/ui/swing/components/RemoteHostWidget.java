@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.resultpanel;
+package org.limewire.ui.swing.components;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.ui.swing.util.I18n.trn;
@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -24,7 +23,6 @@ import javax.swing.event.PopupMenuListener;
 
 import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.util.Objects;
@@ -32,25 +30,29 @@ import org.limewire.util.Objects;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class SearchResultFromWidget extends JPanel {
+public class RemoteHostWidget extends JPanel {
 
+    public static enum RemoteWidgetType {
+        SEARCH_LIST, TABLE, UPLOAD
+    }
+    
     private final LimeComboBox comboBox;
     private final JPopupMenu comboBoxMenu;
     
     private final RemoteHostActions fromActions;
     
-    private List<RemoteHost> people = Collections.emptyList();
+    private List<RemoteHost> people = new ArrayList<RemoteHost>();
     private List<RemoteHost> poppedUpPeople = Collections.emptyList();
     
-    private final boolean isClassicView;
+    private final RemoteWidgetType type;
     
     @AssistedInject
-    SearchResultFromWidget(ComboBoxDecorator comboBoxDecorator,
+    RemoteHostWidget(ComboBoxDecorator comboBoxDecorator,
                            RemoteHostActions fromActions,
-                           @Assisted boolean isClassicView) {
+                           @Assisted RemoteWidgetType type) {
         
         this.fromActions = Objects.nonNull(fromActions, "fromActions");
-        this.isClassicView = isClassicView;
+        this.type = type;
         
         comboBox = new LimeComboBox();
         comboBoxDecorator.decorateMiniComboBox(comboBox);
@@ -133,15 +135,23 @@ public class SearchResultFromWidget extends JPanel {
         add(this.comboBox, BorderLayout.WEST);
     }
 
+    public void setPerson(RemoteHost remoteHost) {
+        this.people.clear();
+        this.people.add(remoteHost);
+        this.comboBox.setText(getFromText());
+    }
     
     public void setPeople(Collection<RemoteHost> people) {
-        this.people = new LinkedList<RemoteHost>(people);
+        this.people.clear();
+        this.people.addAll(people);
         this.comboBox.setText(getFromText());
     }
 
     private String getFromText() {
         if(people.size() == 0) {
             return tr("nobody");
+        } else if(people.size() == 1 && type == RemoteWidgetType.UPLOAD) { 
+            return people.get(0).getFriendPresence().getFriend().getRenderName();
         } else {
             boolean foundFriend = false;
             boolean foundAnon = false;
@@ -158,19 +168,19 @@ public class SearchResultFromWidget extends JPanel {
                 }
             }
             if(foundFriend && foundAnon) {
-                if(isClassicView) {
+                if(type == RemoteWidgetType.TABLE) {
                     return trn("{0} Person", "{0} People", people.size());
                 } else {
                     return trn("Person", "People", people.size());
                 }
             } else if(foundFriend) {
-                if(isClassicView) {
+                if(type == RemoteWidgetType.TABLE) {
                     return trn("{0} Friend", "{0} Friends", people.size());
                 } else {
                     return trn("Friend", "Friends", people.size());
                 }
             } else { // foundAnon
-                if(isClassicView) {
+                if(type == RemoteWidgetType.TABLE) {
                     return trn("{0} P2P User", "{0} P2P Users", people.size());
                 } else {
                     return trn("P2P User", "P2P Users", people.size());
@@ -191,73 +201,88 @@ public class SearchResultFromWidget extends JPanel {
             return; // menu has no items
         }
 
-        List<JMenuItem> friends = new ArrayList<JMenuItem>();
-        List<JMenuItem> friendsDisabled = new ArrayList<JMenuItem>();
-        List<JMenuItem> p2pUsers = new ArrayList<JMenuItem>();
-        List<JMenuItem> p2pUsersDisabled = new ArrayList<JMenuItem>();
-        for (RemoteHost person : people) {
-            JMenu submenu = new JMenu(person.getFriendPresence().getFriend().getRenderName());
-            comboBox.decorateMenuComponent(submenu);
-
+        if(people.size() == 1 && type == RemoteWidgetType.UPLOAD) {
+            RemoteHost person = people.get(0);
             if (person.isChatEnabled()) {
-                submenu.add(createItem(getChatAction(person)));
+                comboBoxMenu.add(createItem(getChatAction(person)));
             }
-            if (person.isBrowseHostEnabled()) {
-                submenu.add(createItem(getLibraryAction(person)));
-            }
+            // always show the browse host, disable if this action isn't available
+            JMenuItem item = createItem(getLibraryAction(person));
+            item.setEnabled(person.isBrowseHostEnabled());
+            comboBoxMenu.add(item);
+ 
             if (person.isSharingEnabled()) {
-                submenu.add(createItem(getSharingAction(person)));
+                comboBoxMenu.add(createItem(getSharingAction(person)));
             }
-
-            JMenuItem itemToAdd = submenu;
-            // If we only added one item, remove the parent menu and make this it.
-            if (submenu.getMenuComponentCount() == 1) {
-                itemToAdd = (JMenuItem) submenu.getMenuComponent(0);
-                Action action = itemToAdd.getAction();
-                // Replace the name with the singular name.
-                action.putValue(Action.NAME, action.getValue(SINGULAR_ACTION_NAME));
-            } else if (submenu.getMenuComponentCount() == 0) {
-                itemToAdd = new JMenuItem(submenu.getText());
-                itemToAdd.setEnabled(false);
-            }
-
-            if (person.getFriendPresence().getFriend().isAnonymous()) {
-                if (itemToAdd.isEnabled()) {
-                    p2pUsers.add(itemToAdd);
-                } else {
-                    p2pUsersDisabled.add(itemToAdd);
+        } else {
+            List<JMenuItem> friends = new ArrayList<JMenuItem>();
+            List<JMenuItem> friendsDisabled = new ArrayList<JMenuItem>();
+            List<JMenuItem> p2pUsers = new ArrayList<JMenuItem>();
+            List<JMenuItem> p2pUsersDisabled = new ArrayList<JMenuItem>();
+            for (RemoteHost person : people) {
+                JMenu submenu = new JMenu(person.getFriendPresence().getFriend().getRenderName());
+                comboBox.decorateMenuComponent(submenu);
+    
+                if (person.isChatEnabled()) {
+                    submenu.add(createItem(getChatAction(person)));
                 }
-            } else {
-                if (itemToAdd.isEnabled()) {
-                    friends.add(itemToAdd);
+                if (person.isBrowseHostEnabled()) {
+                    submenu.add(createItem(getLibraryAction(person)));
+                }
+                if (person.isSharingEnabled()) {
+                    submenu.add(createItem(getSharingAction(person)));
+                }
+    
+                JMenuItem itemToAdd = submenu;
+                // If we only added one item, remove the parent menu and make this it.
+                if (submenu.getMenuComponentCount() == 1) {
+                    itemToAdd = (JMenuItem) submenu.getMenuComponent(0);
+                    Action action = itemToAdd.getAction();
+                    // Replace the name with the singular name.
+                    action.putValue(Action.NAME, action.getValue(SINGULAR_ACTION_NAME));
+                } else if (submenu.getMenuComponentCount() == 0) {
+                    itemToAdd = new JMenuItem(submenu.getText());
+                    itemToAdd.setEnabled(false);
+                }
+    
+                if (person.getFriendPresence().getFriend().isAnonymous()) {
+                    if (itemToAdd.isEnabled()) {
+                        p2pUsers.add(itemToAdd);
+                    } else {
+                        p2pUsersDisabled.add(itemToAdd);
+                    }
                 } else {
-                    friendsDisabled.add(itemToAdd);
+                    if (itemToAdd.isEnabled()) {
+                        friends.add(itemToAdd);
+                    } else {
+                        friendsDisabled.add(itemToAdd);
+                    }
                 }
             }
-        }
-
-        // Now go back through our submenus & add them in.
-        if (friends.size() + friendsDisabled.size() > 0 &&
-                p2pUsers.size() + p2pUsersDisabled.size() > 0) {
-            JLabel label = new JLabel(tr("Friends"));
-            label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
-            comboBoxMenu.add(label);
-            for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
-                comboBoxMenu.add(friend);
-            }
-            label = new JLabel(tr("P2P Users"));
-            label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
-            comboBoxMenu.add(label);
-            for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
-                comboBoxMenu.add(p2pUser);
-            }
-        } else if (friends.size() + friendsDisabled.size() > 0) {
-            for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
-                comboBoxMenu.add(friend);
-            }
-        } else if (p2pUsers.size() + p2pUsersDisabled.size() > 0) {
-            for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
-                comboBoxMenu.add(p2pUser);
+    
+            // Now go back through our submenus & add them in.
+            if (friends.size() + friendsDisabled.size() > 0 &&
+                    p2pUsers.size() + p2pUsersDisabled.size() > 0) {
+                JLabel label = new JLabel(tr("Friends"));
+                label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
+                comboBoxMenu.add(label);
+                for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
+                    comboBoxMenu.add(friend);
+                }
+                label = new JLabel(tr("P2P Users"));
+                label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
+                comboBoxMenu.add(label);
+                for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
+                    comboBoxMenu.add(p2pUser);
+                }
+            } else if (friends.size() + friendsDisabled.size() > 0) {
+                for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
+                    comboBoxMenu.add(friend);
+                }
+            } else if (p2pUsers.size() + p2pUsersDisabled.size() > 0) {
+                for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
+                    comboBoxMenu.add(p2pUser);
+                }
             }
         }
     }

@@ -75,15 +75,10 @@ public class MockUploadItem implements UploadItem {
     public Category getCategory(){
         return category;
     }
-
-    @Override
-    public String getHost() {
-        return "Carmine";
-    }
     
     @Override
     public String toString(){
-        return "CoreUploadItem: " + getFileName() + ", " + getState() + ", " + getHost();
+        return "CoreUploadItem: " + getFileName() + ", " + getState();
     }
 
     @Override

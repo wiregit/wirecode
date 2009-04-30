@@ -28,6 +28,9 @@ import org.limewire.core.api.upload.UploadItem.BrowseType;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeProgressBar;
+import org.limewire.ui.swing.components.RemoteHostWidget;
+import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
+import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -43,6 +46,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private JLabel statusLabel;
     private JLabel nameLabel;
     private JLabel iconLabel;
+    private RemoteHostWidget browseNameLabel;
     private JXButton cancelButton;
     private JXHyperlink removeLink;
     private WeakReference<UploadItem> editItemReference;
@@ -61,12 +65,13 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     @Resource private Icon p2pBrowseHostIcon;
     
 
-    public UploadTableRendererEditor(CategoryIconManager categoryIconManager, ProgressBarDecorator progressBarFactory){
+    public UploadTableRendererEditor(CategoryIconManager categoryIconManager, ProgressBarDecorator progressBarFactory,
+            RemoteHostWidgetFactory remoteHostWidgetFactory){
         GuiUtils.assignResources(this);
-        setLayout(new MigLayout("fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
+        setLayout(new MigLayout("fill, insets 0 0 0 0 , gap 0, novisualpadding"));
         this.categoryIconManager = categoryIconManager;
         
-        initializeComponents(progressBarFactory);
+        initializeComponents(progressBarFactory, remoteHostWidgetFactory);
         
         addComponents();
     }
@@ -113,7 +118,8 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         return this;
     }
     
-    private void initializeComponents(ProgressBarDecorator progressBarDecorator){
+    private void initializeComponents(ProgressBarDecorator progressBarDecorator,
+            RemoteHostWidgetFactory remoteHostWidgetFactory){
         
       //string parameter ensures proper sizing
         nameLabel = new JLabel("NAME");
@@ -124,6 +130,8 @@ public class UploadTableRendererEditor extends TableRendererEditor {
       //string parameter ensures proper sizing
         statusLabel = new JLabel(I18n.tr("Status"));
         statusLabel.setFont(statusFont);
+        
+        browseNameLabel = remoteHostWidgetFactory.create(RemoteWidgetType.UPLOAD);
         
         cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
         
@@ -143,6 +151,8 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         progressBar.setPreferredSize(size);
         progressBar.setMinimumSize(size);
         progressBar.setMaximumSize(size);
+        
+        setOpaque(false);
     }
     
     private void addComponents() {
@@ -150,7 +160,8 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         add(nameLabel, "gapleft 10, gaptop 5, aligny bottom, hidemode 2");
         add(cancelButton, "gapright 10, alignx right, aligny 50%, spany 3, push, wrap");
         add(progressBar, "gapleft 10, , gaptop 2, hidemode 3, wrap");
-        add(statusLabel, "gapleft 10, gapbottom 5, gaptop 2, aligny top, split 3");
+        add(browseNameLabel, "split 4, gapleft 10, gapbottom 5, gaptop 2, aligny top");
+        add(statusLabel, "gapleft 10, gapbottom 5, gaptop 2, aligny top");
         add(timeLabel, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
         add(removeLink, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
     }
@@ -165,6 +176,12 @@ public class UploadTableRendererEditor extends TableRendererEditor {
             nameLabel.setText(item.getFileName());
         }
 
+        if(item.getUploadItemType() == UploadItemType.GNUTELLA) {
+            browseNameLabel.setVisible(true);
+            browseNameLabel.setPerson(item.getRemoteHost());
+        } else {
+            browseNameLabel.setVisible(false);
+        }
         statusLabel.setText(getMessage(item));
 
         if (UploadItemType.GNUTELLA == item.getUploadItemType()) {
@@ -219,7 +236,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         switch (item.getState()){
         case BROWSE_HOST:
         case BROWSE_HOST_DONE:
-            return I18n.tr("{0} browsed your library", item.getHost());
+            return I18n.tr("Library was browsed");
         case DONE:
             return I18n.tr("Done uploading");
         case UPLOADING:
@@ -235,9 +252,9 @@ public class UploadTableRendererEditor extends TableRendererEditor {
                     return I18n.tr("Seeding to {0} people at {1} - Ratio ({2})", numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
                 }
             } else {
-                return I18n.tr("Uploading - {0} of {1}({2}) to {3}", GuiUtils.toUnitbytes(item.getTotalAmountUploaded()), 
+                return I18n.tr("Uploading - {0} of {1}({2})", GuiUtils.toUnitbytes(item.getTotalAmountUploaded()), 
                         GuiUtils.toUnitbytes(item.getFileSize()), 
-                        GuiUtils.rate2speed(item.getUploadSpeed()), item.getHost());
+                        GuiUtils.rate2speed(item.getUploadSpeed()));
             }
         case QUEUED:
             // {0}: number of uploads before this upload that have to finish

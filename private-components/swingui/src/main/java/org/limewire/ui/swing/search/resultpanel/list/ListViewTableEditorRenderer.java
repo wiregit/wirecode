@@ -47,6 +47,9 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.RemoteHostWidget;
+import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
+import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.event.SelectAndScrollDownloadEvent;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.listener.MousePopupListener;
@@ -57,8 +60,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
 import org.limewire.ui.swing.search.resultpanel.SearchHeading;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
-import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidget;
-import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidgetFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
@@ -127,7 +128,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private final SearchResultTruncator truncator;
     private final HeadingFontWidthResolver headingFontWidthResolver = new HeadingFontWidthResolver();
     private final IconManager iconManager;
-    private SearchResultFromWidget fromWidget;
+    private RemoteHostWidget fromWidget;
     private JButton itemIconButton;
     private IconButton similarButton = new IconButton();
     private IconButton propertiesButton = new IconButton();
@@ -156,7 +157,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     @AssistedInject
     ListViewTableEditorRenderer(
             CategoryIconManager categoryIconManager,
-            SearchResultFromWidgetFactory fromWidgetFactory,
+            RemoteHostWidgetFactory fromWidgetFactory,
         @Assisted String searchText, 
         @Assisted Navigator navigator, 
         final @Assisted DownloadHandler downloadHandler,
@@ -180,7 +181,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         GuiUtils.assignResources(this);
 
         
-        fromWidget = fromWidgetFactory.create(false);
+        fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
        
         makePanel(navigator, libraryNavigator, propertiesFactory);       
 

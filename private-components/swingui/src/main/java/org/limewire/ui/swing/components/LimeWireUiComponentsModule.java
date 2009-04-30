@@ -17,5 +17,8 @@ public class LimeWireUiComponentsModule extends AbstractModule {
                 FactoryProvider.newFactory(FlexibleTabListFactory.class, FlexibleTabList.class));   
         
         bind(ShapeDialog.class);
+        
+        bind(RemoteHostWidgetFactory.class).toProvider(
+                FactoryProvider.newFactory(RemoteHostWidgetFactory.class, RemoteHostWidget.class)); 
     }
 }

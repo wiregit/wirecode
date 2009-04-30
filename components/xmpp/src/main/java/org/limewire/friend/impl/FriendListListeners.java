@@ -8,7 +8,10 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.FriendManager;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -23,7 +26,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 @Singleton
-class FriendListListeners {
+class FriendListListeners implements FriendManager {
     
     private final EventBroadcaster<FriendEvent> knownBroadcaster;
     private final EventBroadcaster<FriendEvent> availableBroadcaster;
@@ -80,6 +83,27 @@ class FriendListListeners {
                 }
             }
         });
+    }
+
+    @Override
+    public FriendPresence getMostRelevantFriendPresence(String id) {
+        Friend friend = availFriends.get(id);
+        if(friend == null) {
+            return null;
+        } else {
+            Collection<FriendPresence> presences = friend.getFriendPresences().values();
+            FriendPresence relavantPresence = null;
+            //TODO: this is not guarenteed to return the correct FriendPresence
+            // if the user is logged in through two LWs with the same ID
+            // Not really able to fix this without modifying the Browse/File Request
+            for(FriendPresence nextPresence : presences) {
+                relavantPresence = nextPresence;
+                if(nextPresence.hasFeatures(LimewireFeature.ID)) {
+                    break;
+                }
+            }
+            return relavantPresence;
+        }
     }
     
     private void addKnownFriend(User user) {

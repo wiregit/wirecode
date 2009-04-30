@@ -12,27 +12,27 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.URNImpl;
-import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import com.limegroup.bittorrent.BTUploader;
 import com.limegroup.gnutella.CategoryConverter;
-import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.UploadType;
 
 class CoreUploadItem implements UploadItem {
 
     private final Uploader uploader;
+    
+    private final FriendPresence friendPresence;
 
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
     
@@ -43,8 +43,9 @@ class CoreUploadItem implements UploadItem {
     private boolean isFinished = false;
     private UploadRemoteHost uploadRemoteHost;
     
-    public CoreUploadItem(Uploader uploader) {
+    public CoreUploadItem(Uploader uploader, FriendPresence friendPresence) {
         this.uploader = uploader;
+        this.friendPresence = friendPresence;
         uploadItemType = uploader instanceof BTUploader ? UploadItemType.BITTORRENT : UploadItemType.GNUTELLA;
     }
 
@@ -190,21 +191,6 @@ class CoreUploadItem implements UploadItem {
     }
 
     @Override
-    public String getHost() {
-        // TODO: this knows too much about what BrowseRequestHandler is doing
-        if (getState() == UploadState.BROWSE_HOST || getState() == UploadState.BROWSE_HOST_DONE) {
-            if (!"".equals(getFileName())) {
-                return getFileName();
-            } else if (uploader instanceof HTTPUploader) {
-                String id = uploader.getAddress() + ":" + uploader.getPort();
-                return new GnutellaPresence(uploader, id).getFriend().getRenderName();
-            }
-
-        }
-        return uploader.getHost();
-    }
-
-    @Override
     public RemoteHost getRemoteHost() {
         if(uploadRemoteHost == null)
             uploadRemoteHost = new UploadRemoteHost();
@@ -226,7 +212,7 @@ class CoreUploadItem implements UploadItem {
     
     @Override
     public String toString(){
-        return "CoreUploadItem: " + getFileName() + ", " + getState() + ", " + getHost();
+        return "CoreUploadItem: " + getFileName() + ", " + getState();
     }
 
     @Override
@@ -253,7 +239,6 @@ class CoreUploadItem implements UploadItem {
         } else {
             return UNKNOWN_TIME;
         }
-
     }
     
     @Override
@@ -365,29 +350,40 @@ class CoreUploadItem implements UploadItem {
      * person uploading this file.
      */
     private class UploadRemoteHost implements RemoteHost {
-        private GnutellaPresence gnutellaPresence;
         
         @Override
         public FriendPresence getFriendPresence() {
-            if(gnutellaPresence == null) {
-                gnutellaPresence = new GnutellaPresence(new Endpoint(uploader.getAddress()+":"+uploader.getPort()), uploader.getHost());
-            }
-            return gnutellaPresence;
+            return friendPresence;
         }
 
         @Override
         public boolean isBrowseHostEnabled() {
-            return uploader.isBrowseHostEnabled();
+            if(friendPresence.getFriend().isAnonymous()) {
+                return uploader.isBrowseHostEnabled();
+            } else {
+                //ensure friend/user still logged in through LW
+                return friendPresence.hasFeatures(LimewireFeature.ID);
+            }
         }
 
         @Override
         public boolean isChatEnabled() {
-            return false;
+            if(friendPresence.getFriend().isAnonymous()) {
+                return false;
+            }else { //TODO: this isn't entirely correct. Friend could have signed
+                // ouf of LW but still be logged in through other service allowing chat
+                return friendPresence.hasFeatures(LimewireFeature.ID);
+            }
         }
 
         @Override
         public boolean isSharingEnabled() {
-            return false;
+            if(friendPresence.getFriend().isAnonymous()) {
+                return false;
+            } else {
+                //ensure friend/user still logged in through LW
+                return friendPresence.hasFeatures(LimewireFeature.ID);
+            }
         }
     }
 }

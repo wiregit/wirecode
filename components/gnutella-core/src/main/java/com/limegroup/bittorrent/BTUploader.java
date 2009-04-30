@@ -227,4 +227,9 @@ public class BTUploader implements Uploader, TorrentEventListener {
     public int getNumUploadConnections() {
         return _torrent.getNumUploadPeers();
     }
+
+    @Override
+    public String getPresenceId() {
+        return null;
+    }
 }

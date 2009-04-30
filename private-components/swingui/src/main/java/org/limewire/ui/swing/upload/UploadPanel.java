@@ -21,6 +21,7 @@ import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.ui.swing.action.BackAction;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
@@ -54,14 +55,14 @@ public class UploadPanel extends JXPanel{
     public UploadPanel(UploadListManager listManager, HeaderBarDecorator headerBarFactory,
             ButtonDecorator buttonDecorator, CategoryIconManager categoryIconManager, ProgressBarDecorator progressBarFactory, 
             PropertiesFactory<UploadItem> propertiesFactory, LibraryNavigator libraryNavigator,
-            BackAction backAction, LibraryManager libraryManager){
+            BackAction backAction, LibraryManager libraryManager, RemoteHostWidgetFactory remoteHostWidgetFactory){
         super(new BorderLayout());
         
         this.listManager = listManager;
         this.buttonDecorator = buttonDecorator;
         this.headerBarDecorator = headerBarFactory;
 
-        UploadTable table = new UploadTable(listManager, categoryIconManager, progressBarFactory, propertiesFactory, libraryNavigator, libraryManager);
+        UploadTable table = new UploadTable(listManager, categoryIconManager, progressBarFactory, propertiesFactory, libraryNavigator, libraryManager, remoteHostWidgetFactory);
         table.setTableHeader(null);
         initHeader(backAction);
         

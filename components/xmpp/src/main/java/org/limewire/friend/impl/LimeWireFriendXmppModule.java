@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.FriendManager;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.listener.EventBroadcaster;
@@ -41,6 +42,8 @@ public class LimeWireFriendXmppModule extends AbstractModule {
 
         bind(new TypeLiteral<ListenerSupport<FeatureEvent>>(){}).toInstance(featureMulticaster);
         bind(new TypeLiteral<EventMulticaster<FeatureEvent>>(){}).toInstance(featureMulticaster);
+        
+        bind(FriendManager.class).to(FriendListListeners.class);
     }
     
     @Provides @Named("known") Collection<Friend> knownFriendsList(FriendListListeners listeners) {
