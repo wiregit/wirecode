@@ -16,8 +16,6 @@ public interface BTDownloader extends CoreDownloader {
 
     void init(File torrent) throws IOException;
 
-    File getCompleteFile();
-
     List<File> getIncompleteFiles();
 
     List<File> getCompleteFiles();

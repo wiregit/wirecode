@@ -93,7 +93,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         BTDownloaderImpl downloader = createBTDownloader(torrentFile);
 
-        File completeFile = downloader.getCompleteFile();
+        File completeFile = downloader.getSaveFile();
         try {
             completeFile.delete();
 
@@ -119,7 +119,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         BTDownloaderImpl downloader = createBTDownloader(torrentFile);
 
-        File completeFile = downloader.getCompleteFile();
+        File completeFile = downloader.getSaveFile();
         try {
             FileUtils.deleteRecursive(completeFile);
 
@@ -147,7 +147,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         File torrentFile = createFile("test-single-webseed-single-file-no-peer.torrent");
 
         BTDownloaderImpl downloader = createBTDownloader(torrentFile);
-        File completeFile = downloader.getCompleteFile();
+        File completeFile = downloader.getSaveFile();
         try {
             completeFile.delete();
 
@@ -168,7 +168,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         BTDownloaderImpl downloader = createBTDownloader(torrentFile);
 
-        File completeFile = downloader.getCompleteFile();
+        File completeFile = downloader.getSaveFile();
         try {
             completeFile.delete();
 
@@ -190,7 +190,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         BTDownloaderImpl downloader = createBTDownloader(torrentFile);
 
-        File completeFile = downloader.getCompleteFile();
+        File completeFile = downloader.getSaveFile();
         try {
             FileUtils.deleteRecursive(completeFile);
 
@@ -222,7 +222,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         BTDownloaderImpl downloader = createBTDownloader(torrentFile);
 
-        File completeFile = downloader.getCompleteFile();
+        File completeFile = downloader.getSaveFile();
         try {
             FileUtils.deleteRecursive(completeFile);
 
@@ -257,7 +257,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         BTDownloaderImpl downloader = createBTDownloader(torrentFile);
 
-        File completeFile = downloader.getCompleteFile();
+        File completeFile = downloader.getSaveFile();
         try {
             FileUtils.deleteRecursive(completeFile);
 
@@ -286,7 +286,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         BTDownloaderImpl downloader = createBTDownloader(torrentFile);
 
-        File completeFile = downloader.getCompleteFile();
+        File completeFile = downloader.getSaveFile();
         try {
             FileUtils.deleteRecursive(completeFile);
 

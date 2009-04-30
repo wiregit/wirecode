@@ -3,7 +3,6 @@ package org.limewire.libtorrent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +61,11 @@ public class Torrent {
     }
 
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File saveDir, char[] fastResumeData) {
+            List<String> paths, File saveLocation, char[] fastResumeData) {
         this.name = name;
         File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
         this.incompleteFile = new File(torrentDownloadFolder, name);
-        this.completeFile = new File(saveDir, name);
+        this.completeFile = saveLocation;
         this.sha1 = sha1;
         this.trackerURL = trackerURL;
         this.paths.addAll(paths);
@@ -95,10 +94,10 @@ public class Torrent {
                 }
             }
 
-            System.out.println("announce: " + btData.getAnnounce());
+            trackerURL = btData.getAnnounce();
+            System.out.println("announce (tracker URL): " + trackerURL);
 
-            String hexString = toHexString(btData.getInfoHash());
-            sha1 = hexString;
+            sha1 = TorrentSHA1ConversionUtils.toHexString(btData.getInfoHash());
 
         } finally {
             IOUtils.close(fileChannel);
@@ -106,33 +105,8 @@ public class Torrent {
         }
     }
 
-    public byte[] getInfoHash() {
-        return fromHexString(sha1);
-    }
-
     public String getName() {
         return name;
-    }
-
-    private byte[] fromHexString(String hexString) {
-        byte[] bytes = new BigInteger(hexString, 16).toByteArray();
-        return bytes;
-
-    }
-
-    private String toHexString(byte[] block) {
-        StringBuffer hexString = new StringBuffer(block.length * 2);
-        char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
-                'E', 'F' };
-        int high = 0;
-        int low = 0;
-        for (int i = 0; i < block.length; i++) {
-            high = ((block[i] & 0xf0) >> 4);
-            low = (block[i] & 0x0f);
-            hexString.append(hexChars[high]);
-            hexString.append(hexChars[low]);
-        }
-        return hexString.toString().toLowerCase();
     }
 
     public void start() {
@@ -204,6 +178,10 @@ public class Torrent {
             
         return totalSize;
     }
+    
+    public String getTrackerURL() {
+        return trackerURL;
+    }
 
     public boolean isMultiFileTorrent() {
         return paths.size() > 0;
@@ -223,14 +201,19 @@ public class Torrent {
         return status == null ? 0 : status.num_peers;
     }
 
+    public List<String> getPaths() {
+        return paths;
+    }
+    
     public List<File> getCompleteFiles() {
         List<File> files = new ArrayList<File>();
         File completeFile = getCompleteFile();
         if (paths.size() > 0) {
             for (String path : paths) {
-                // TODO assuming unix path??
                 File file = new File(completeFile, path);
-                files.add(file);
+                if (file.exists()) {
+                    files.add(file);
+                }
             }
         } else {
             files.add(completeFile);
@@ -243,9 +226,10 @@ public class Torrent {
         File incompleteFile = getIncompleteFile();
         if (paths.size() > 0) {
             for (String path : paths) {
-                // TODO assuming unix path??
                 File file = new File(incompleteFile, path);
-                files.add(file);
+                if (!file.exists()) {
+                    files.add(file);
+                }
             }
         } else {
             files.add(incompleteFile);

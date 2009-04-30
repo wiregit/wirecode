@@ -37,6 +37,10 @@ public class LibTorrentBTDownloadMemento implements DownloadMemento, Serializabl
         return (File) serialObjects.get("saveFile");
     }
 
+    public String getName() {
+        return (String) serialObjects.get("name");
+    }
+    
     public long getContentLength() {
         Long l = (Long) serialObjects.get("contentLength");
         if(l == null)
@@ -82,6 +86,10 @@ public class LibTorrentBTDownloadMemento implements DownloadMemento, Serializabl
         serialObjects.put("saveFile", saveFile);
     }
 
+    public void setName(String name) {
+        serialObjects.put("name", name);
+    }
+    
     public void setContentLength(long contentLength) {
         serialObjects.put("contentLength", contentLength);
     }
