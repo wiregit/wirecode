@@ -12,4 +12,10 @@ public interface FriendManager {
      * containing LW Features.
      */
     public FriendPresence getMostRelevantFriendPresence(String id);
+    
+    /**
+     * Returns true if a Friend exists for this ID and they are 
+     * available, false otherwise.
+     */
+    public boolean containsAvailableFriend(String id);
 }

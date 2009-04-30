@@ -106,6 +106,11 @@ class FriendListListeners implements FriendManager {
         }
     }
     
+    @Override
+    public boolean containsAvailableFriend(String id) {
+        return availFriends.containsKey(id);
+    }
+    
     private void addKnownFriend(User user) {
         if (knownFriends.putIfAbsent(user.getId(), user) == null) {
             user.addPresenceListener(presenceListener);
