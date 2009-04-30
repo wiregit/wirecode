@@ -40,11 +40,9 @@ public class Torrent {
 
     private String name;
 
-    private String announce;
+    private String trackerURL;
 
     private long totalSize = -1;
-
-    private long pieceLength = -1;
 
     private LibTorrentInfo info = null;
     
@@ -63,17 +61,16 @@ public class Torrent {
         return listeners.removeListener(listener);
     }
 
-    public synchronized void init(String name, String sha1, long totalSize, long pieceLength,
-            String announce, List<String> paths, File saveDir) {
+    public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
+            List<String> paths, File saveDir, char[] fastResumeData) {
         this.name = name;
         File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
         this.incompleteFile = new File(torrentDownloadFolder, name);
         this.completeFile = new File(saveDir, name);
         this.sha1 = sha1;
-        this.announce = announce;
+        this.trackerURL = trackerURL;
         this.paths.addAll(paths);
         this.totalSize = totalSize;
-        this.pieceLength = pieceLength;
     }
 
     public synchronized void init(File torrentFile, File saveDir) throws IOException {
@@ -91,8 +88,6 @@ public class Torrent {
             
             incompleteFile = new File(torrentDownloadFolder, name);
             completeFile = new File(saveDir, name);
-
-            this.pieceLength = btData.getPieceLength();
 
             if (btData.getFiles() != null) {
                 for (BTFileData fileData : btData.getFiles()) {
@@ -147,7 +142,7 @@ public class Torrent {
             if (torrentFile != null) {
                 info = torrentManager.addTorrent(torrentFile);
             } else {
-                torrentManager.addTorrent(sha1, announce);
+                torrentManager.addTorrent(sha1, trackerURL);
             }
 
             torrentManager.addListener(sha1, new EventListener<LibTorrentEvent>() {
@@ -226,10 +221,6 @@ public class Torrent {
     public int getNumPeers() {
         LibTorrentStatus status = this.status.get();
         return status == null ? 0 : status.num_peers;
-    }
-
-    public long getPieceLength() {
-        return pieceLength;
     }
 
     public List<File> getCompleteFiles() {

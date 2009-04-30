@@ -15,6 +15,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
+import org.limewire.libtorrent.LibTorrentBTDownloadMemento;
 import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
@@ -304,7 +305,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public int getChunkSize() {
-        return (int) torrent.getPieceLength();
+        throw new UnsupportedOperationException("BTDownloaderImpl.getChunkSize() not implemented");
     }
 
     @Override
@@ -491,8 +492,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // TODO fill in additional memento details
     }
 
-    public void initFromOldMemento(BTDownloadMemento bmem) {
-        BTMetaInfoMemento btmetainfo = bmem.getBtMetaInfoMemento();
+    public void initFromCurrentMemento(LibTorrentBTDownloadMemento memento) {
+
+    }
+    
+    public void initFromOldMemento(BTDownloadMemento memento) {
+        BTMetaInfoMemento btmetainfo = memento.getBtMetaInfoMemento();
 
         List<String> paths = new ArrayList<String>();
 
@@ -508,38 +513,29 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         long totalSize = btmetainfo.getFileSystem().getTotalSize();
 
         byte[] infoHash = btmetainfo.getInfoHash();
-        
-        int pieceLength = btmetainfo.getPieceLength();
 
         String sha1 = toHexString(infoHash);
-        torrent.init(name, sha1, totalSize, pieceLength,  tracker1.toString(), paths, SharingSettings.getSaveDirectory());
+        torrent.init(name, sha1, totalSize, tracker1.toString(),  paths, SharingSettings.getSaveDirectory(), null);
     }
 
     @Override
     public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
         super.initFromMemento(memento);
         if (BTDownloadMemento.class.isInstance(memento)) {
-            BTDownloadMemento bmem = (BTDownloadMemento) memento;
-            initFromOldMemento(bmem);
-        } else {
-            // TODO add code to init from new memento type.
+            initFromOldMemento((BTDownloadMemento) memento);
+        } 
+        else if (LibTorrentBTDownloadMemento.class.isInstance(memento)) {
+            initFromCurrentMemento((LibTorrentBTDownloadMemento) memento);
         }
 
     }
 
     private String toHexString(byte[] block) {
         StringBuffer hexString = new StringBuffer(block.length * 2);
-        char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
-                'E', 'F' };
-        int high = 0;
-        int low = 0;
-        for (int i = 0; i < block.length; i++) {
-            high = ((block[i] & 0xf0) >> 4);
-            low = (block[i] & 0x0f);
-            hexString.append(hexChars[high]);
-            hexString.append(hexChars[low]);
+        for ( byte b : block ) {
+            hexString.append(Integer.toHexString(b));
         }
-        return hexString.toString().toLowerCase();
+        return hexString.toString();
     }
 
     @Override
