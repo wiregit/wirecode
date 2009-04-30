@@ -15,8 +15,8 @@ import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPPresence;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
@@ -149,8 +149,8 @@ public class ChatModel {
 	 * Updates the list of ChatFriends as presences sign on and off.
 	 */
     private void handlePresenceEvent(FriendPresenceEvent event) {
-        final Presence presence = (Presence)event.getData();
-        final User user = presence.getUser();
+        final XMPPPresence presence = (XMPPPresence)event.getData();
+        final XMPPFriend user = presence.getUser();
         ChatFriend chatFriend = idToFriendMap.get(user.getId());
         switch(event.getType()) {
         case ADDED:
@@ -193,7 +193,7 @@ public class ChatModel {
 	 * This listener ensures that the ChatPanel has been created prior to 
 	 * firing a ConversationEvent.
      */
-    private void addFriend(ChatFriend chatFriend, final Presence presence) {
+    private void addFriend(ChatFriend chatFriend, final XMPPPresence presence) {
         if(chatFriend == null) {
             chatFriend = new ChatFriendImpl(presence);
             chatFriends.add(chatFriend);

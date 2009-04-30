@@ -13,7 +13,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.LibraryChanged;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -58,7 +58,7 @@ public class LibraryChangedIQListener implements PacketListener {
         if (LOG.isDebugEnabled()) {
             LOG.debug("handling library changed set " + packet.getPacketID());
         }
-        User user = connection.getUser(StringUtils.parseBareAddress(packet.getFrom()));
+        XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(packet.getFrom()));
         if (user != null) {
             FriendPresence presence = user.getFriendPresences().get(packet.getFrom());
             if(presence != null) {

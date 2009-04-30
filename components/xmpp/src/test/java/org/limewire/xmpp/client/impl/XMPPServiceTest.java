@@ -21,7 +21,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
@@ -134,11 +134,11 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         Thread.sleep(SLEEP);
 
         assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
-        Presence buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
+        XMPPPresence buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         LimewireFeature limewireFeature = (LimewireFeature)buddy2.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
-        assertEquals(Presence.Type.available, buddy2.getType());
-        assertEquals(Presence.Mode.available, buddy2.getMode());
+        assertEquals(XMPPPresence.Type.available, buddy2.getType());
+        assertEquals(XMPPPresence.Mode.available, buddy2.getMode());
         AddressFeature addressFeature = (AddressFeature)buddy2.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
         XMPPAddress xmppAddress = (XMPPAddress)addressFeature.getFeature();
@@ -151,11 +151,11 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertNotNull(authTokenFeature);
 
         assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
-        Presence buddy1 = bobRosterListener.getFirstPresence(USERNAME_1);
+        XMPPPresence buddy1 = bobRosterListener.getFirstPresence(USERNAME_1);
         limewireFeature = (LimewireFeature)buddy1.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
-        assertEquals(Presence.Type.available, buddy1.getType());
-        assertEquals(Presence.Mode.available, buddy2.getMode());
+        assertEquals(XMPPPresence.Type.available, buddy1.getType());
+        assertEquals(XMPPPresence.Mode.available, buddy2.getMode());
         addressFeature = (AddressFeature)buddy1.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
         xmppAddress = (XMPPAddress)addressFeature.getFeature();
@@ -191,21 +191,21 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(USERNAME_1, bobRosterListener.getFirstRosterEntry());
         assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
 
-        Presence buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
-        assertEquals(Presence.Type.available, buddy2.getType());
-        assertEquals(Presence.Mode.available, buddy2.getMode());
+        XMPPPresence buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
+        assertEquals(XMPPPresence.Type.available, buddy2.getType());
+        assertEquals(XMPPPresence.Mode.available, buddy2.getMode());
 
         for(XMPPConnection connection : service.getConnections()) {
             if(connection.getConfiguration().getUserInputLocalID().equals(USERNAME_2)) {
-                connection.setMode(Presence.Mode.away).get();
+                connection.setMode(XMPPPresence.Mode.away).get();
             }
         }
 
         Thread.sleep(SLEEP);
 
         buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
-        assertEquals(Presence.Type.available, buddy2.getType());
-        assertEquals(Presence.Mode.away, buddy2.getMode());
+        assertEquals(XMPPPresence.Type.available, buddy2.getType());
+        assertEquals(XMPPPresence.Mode.away, buddy2.getMode());
     }
 
     /**
@@ -213,7 +213,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
      */
     public void testChat() throws InterruptedException, XMPPException, IOException {
         MessageReaderMock reader = new MessageReaderMock();
-        Presence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
+        XMPPPresence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         MessageWriter writer = automatedtestfriend2.getUser().createChat(reader);
         writer.writeMessage("hello world");
 
@@ -243,7 +243,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
 
         Thread.sleep(SLEEP);
 
-        Presence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
+        XMPPPresence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         Map<Element, String> data = new EnumMap<Element, String>(Element.class);
         data.put(Element.id, new Random().nextInt() + "");
         data.put(Element.name, "a_cool_file.txt");
@@ -284,10 +284,10 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         Thread.sleep(SLEEP);
 
         assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
-        Presence buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
+        XMPPPresence buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         LimewireFeature limewireFeature = (LimewireFeature)buddy2.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
-        assertEquals(Presence.Type.available, buddy2.getType());
+        assertEquals(XMPPPresence.Type.available, buddy2.getType());
         AddressFeature addressFeature = (AddressFeature)buddy2.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
         XMPPAddress xmppAddress = (XMPPAddress)addressFeature.getFeature();
@@ -298,10 +298,10 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(true, address.isTLSCapable());
 
         assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
-        Presence buddy1 = bobRosterListener.getFirstPresence(USERNAME_1);
+        XMPPPresence buddy1 = bobRosterListener.getFirstPresence(USERNAME_1);
         limewireFeature = (LimewireFeature)buddy1.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
-        assertEquals(Presence.Type.available, buddy1.getType());
+        assertEquals(XMPPPresence.Type.available, buddy1.getType());
         addressFeature = (AddressFeature)buddy1.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
         xmppAddress = (XMPPAddress)addressFeature.getFeature();
@@ -320,7 +320,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         limewireFeature = (LimewireFeature)buddy2.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
-        assertEquals(Presence.Type.available, buddy2.getType());
+        assertEquals(XMPPPresence.Type.available, buddy2.getType());
         addressFeature = (AddressFeature)buddy2.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
         xmppAddress = (XMPPAddress)addressFeature.getFeature();
@@ -334,7 +334,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         buddy1 = bobRosterListener.getFirstPresence(USERNAME_1);
         limewireFeature = (LimewireFeature)buddy1.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
-        assertEquals(Presence.Type.available, buddy1.getType());
+        assertEquals(XMPPPresence.Type.available, buddy1.getType());
         addressFeature = (AddressFeature)buddy1.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
         xmppAddress = (XMPPAddress)addressFeature.getFeature();
@@ -367,7 +367,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
 
         // Simulate Alice talking to two presences of Bob
         MessageReaderMock aliceFromBob = new MessageReaderMock();
-        Presence bobPresence = aliceRosterListener.getFirstPresence(USERNAME_2);
+        XMPPPresence bobPresence = aliceRosterListener.getFirstPresence(USERNAME_2);
         MessageWriter aliceToBob = bobPresence.getUser().createChat(aliceFromBob);
 
         // Alice writes a message to Bob

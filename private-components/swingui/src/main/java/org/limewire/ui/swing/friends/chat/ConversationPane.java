@@ -82,7 +82,7 @@ import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPFriend;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -506,7 +506,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
                    // if active presence exists, send file offer to it,
                    // otherwise broadcast to every presence with FileOfferFeature.ID feature
-                   User chatUser = chatFriend.getUser();
+                   XMPPFriend chatUser = chatFriend.getUser();
                    FriendPresence activePresence = chatUser.getActivePresence();
                    if ((activePresence != null) && activePresence.hasFeatures(FileOfferFeature.ID)) {
                         sentFileOffer = performFileOffer(metadata, activePresence);

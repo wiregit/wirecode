@@ -30,9 +30,9 @@ import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.ConnectBackRequestSender;
 import org.limewire.xmpp.api.client.JabberSettings;
-import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.Presence.Mode;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPPresence;
+import org.limewire.xmpp.api.client.XMPPPresence.Mode;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
@@ -75,10 +75,10 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                 XMPPConnection connection = getActiveConnection();
                 InspectionHistogram<Integer> presencesHistogram = new InspectionHistogram<Integer>();
                 if (connection != null) {
-                    for (User user : connection.getUsers()) {
-                        Map<String, Presence> presences = user.getPresences();
+                    for (XMPPFriend user : connection.getUsers()) {
+                        Map<String, XMPPPresence> presences = user.getPresences();
                         presencesHistogram.count(presences.size());
-                        for (Presence presence : presences.values()) {
+                        for (XMPPPresence presence : presences.values()) {
                             if (presence.hasFeatures(LimewireFeature.ID)) {
                                 count++;
                                 // break from inner presence loop, count each user only once
@@ -201,7 +201,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                 connections.add(connection);
                 connection.loginImpl();
                 //maintain the last set login state available or do not disturb
-                connection.setModeImpl(jabberSettings.isDoNotDisturbSet() ? Presence.Mode.dnd : Presence.Mode.available);
+                connection.setModeImpl(jabberSettings.isDoNotDisturbSet() ? XMPPPresence.Mode.dnd : XMPPPresence.Mode.available);
                 return connection;
             } catch(XMPPException e) {
                 connections.remove(connection);
@@ -279,11 +279,11 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
         if (connection == null) {
             return false;
         }
-        User user = connection.getUser(StringUtils.parseBareAddress(userId));
+        XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(userId));
         if (user == null) {
             return false;
         }
-        Presence presence = user.getPresences().get(userId);
+        XMPPPresence presence = user.getPresences().get(userId);
         if (presence == null) {
             return false;
         }

@@ -18,10 +18,10 @@ import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
 
 /**
@@ -62,7 +62,7 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
     @Override
     public void processPacket(Packet packet) {
         DiscoverInfo discoverInfo = (DiscoverInfo)packet;
-        User user = connection.getUser(StringUtils.parseBareAddress(discoverInfo.getFrom()));
+        XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(discoverInfo.getFrom()));
         if (user != null) {
             FriendPresence presence = user.getFriendPresences().get(discoverInfo.getFrom());
             if(presence != null) {
@@ -103,7 +103,7 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
         @Override
         public void handleEvent(final PresenceEvent event) {
             if(event.getType() == PresenceEvent.Type.PRESENCE_NEW
-                    && event.getData().getType() == Presence.Type.available) {
+                    && event.getData().getType() == XMPPPresence.Type.available) {
                 Thread t = ThreadExecutor.newManagedThread(new Runnable() {
                     @Override
                     public void run() {

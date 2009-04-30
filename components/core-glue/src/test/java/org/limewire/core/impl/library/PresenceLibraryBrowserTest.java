@@ -26,7 +26,7 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
 import org.limewire.xmpp.api.client.LibraryChanged;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
-import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.XMPPPresence;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -361,7 +361,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             
             allowing(presenceLibrary).setState(with(any(LibraryState.class)));
                         
-            Presence presence = context.mock(Presence.class);
+            XMPPPresence presence = context.mock(XMPPPresence.class);
             allowing(presenceLibrary).getPresence();
             will(returnValue(presence));
             AddressFeature addressFeature = context.mock(AddressFeature.class);

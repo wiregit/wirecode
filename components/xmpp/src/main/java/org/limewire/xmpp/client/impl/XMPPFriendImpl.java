@@ -29,14 +29,14 @@ import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.PresenceEvent;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPException;
 
 
-public class UserImpl implements User {
-    private static final Log LOG = LogFactory.getLog(UserImpl.class);
+public class XMPPFriendImpl implements XMPPFriend {
+    private static final Log LOG = LogFactory.getLog(XMPPFriendImpl.class);
 
     private final String id;
     private final FeatureRegistry featureRegistry;
@@ -53,7 +53,7 @@ public class UserImpl implements User {
     private final Object presenceLock;
     
     @GuardedBy("presenceLock")
-    private final Map<String, Presence> presences;
+    private final Map<String, XMPPPresence> presences;
 
     @GuardedBy("presenceLock")
     private String activePresenceJid;
@@ -68,7 +68,7 @@ public class UserImpl implements User {
     // -----------------------------------------------------------------
 
 
-    UserImpl(String id, RosterEntry rosterEntry, Network network,
+    XMPPFriendImpl(String id, RosterEntry rosterEntry, Network network,
              org.jivesoftware.smack.XMPPConnection connection,
              FeatureRegistry featureRegistry) {
         this.id = id;
@@ -76,7 +76,7 @@ public class UserImpl implements User {
         this.idNoService = stripService(id, network.getNetworkName());
         this.network = network;
         this.rosterEntry = new AtomicReference<RosterEntry>(rosterEntry);
-        this.presences = new HashMap<String, Presence>();
+        this.presences = new HashMap<String, XMPPPresence>();
         this.presenceListeners = new EventListenerList<PresenceEvent>();
         this.activePresenceJid = null;
         this.connection = connection;
@@ -149,7 +149,7 @@ public class UserImpl implements User {
         Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
             public void run() {
                 try {
-                    UserImpl.this.rosterEntry.get().setName(name);
+                    XMPPFriendImpl.this.rosterEntry.get().setName(name);
                 } catch (org.jivesoftware.smack.XMPPException e) {
                     LOG.debugf("set name failed", e);
                 }
@@ -166,9 +166,9 @@ public class UserImpl implements User {
     }
     
     @Override
-    public Map<String, Presence> getPresences() {
+    public Map<String, XMPPPresence> getPresences() {
         synchronized (presenceLock) {
-            return Collections.unmodifiableMap(new HashMap<String, Presence>(presences));
+            return Collections.unmodifiableMap(new HashMap<String, XMPPPresence>(presences));
         }
     }
 
@@ -183,7 +183,7 @@ public class UserImpl implements User {
         }
     }
 
-    void addPresense(Presence presence) {
+    void addPresense(XMPPPresence presence) {
         if(LOG.isDebugEnabled()) {
             LOG.debugf("adding presence {0}", presence.getJID());
         }
@@ -193,7 +193,7 @@ public class UserImpl implements User {
         presenceListeners.broadcast(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_NEW));
     }
 
-    void removePresense(Presence presence) {
+    void removePresense(XMPPPresence presence) {
         if(LOG.isDebugEnabled()) {
             LOG.debugf("removing presence {0}", presence.getJID());
         }
@@ -223,7 +223,7 @@ public class UserImpl implements User {
     @Override
     public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
         presenceListeners.addListener(presenceListener);
-        for(Presence presence : getPresences().values()) {
+        for(XMPPPresence presence : getPresences().values()) {
             presenceListener.handleEvent(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_NEW));
         }
     }
@@ -233,7 +233,7 @@ public class UserImpl implements User {
         return StringUtils.toString(this, id, getName());
     }
 
-    void updatePresence(Presence updatedPresence) {
+    void updatePresence(XMPPPresence updatedPresence) {
         if(LOG.isDebugEnabled()) {
             LOG.debugf("updating presence {0}", updatedPresence.getJID());
         }
@@ -243,7 +243,7 @@ public class UserImpl implements User {
         presenceListeners.broadcast(new PresenceEvent(updatedPresence, PresenceEvent.Type.PRESENCE_UPDATE));
     }
 
-    Presence getPresence(String jid) {
+    XMPPPresence getPresence(String jid) {
         synchronized (presenceLock) {
             return presences.get(jid);
         }
@@ -267,7 +267,7 @@ public class UserImpl implements User {
     }
 
     @Override
-    public Presence getActivePresence() {
+    public XMPPPresence getActivePresence() {
         synchronized (presenceLock) {
             return presences.get(activePresenceJid);
         }

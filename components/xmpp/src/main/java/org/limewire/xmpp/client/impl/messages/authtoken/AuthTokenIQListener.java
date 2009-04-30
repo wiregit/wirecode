@@ -17,7 +17,7 @@ import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.client.impl.XMPPAuthenticator;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
@@ -51,7 +51,7 @@ public class AuthTokenIQListener implements PacketListener {
 
     private void handleAuthTokenUpdate(AuthTokenIQ iq) {
         synchronized (this) {
-            User user = connection.getUser(StringUtils.parseBareAddress(iq.getFrom()));
+            XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(iq.getFrom()));
             if (user != null) {
                 FriendPresence presence = user.getFriendPresences().get(iq.getFrom());
                 if(presence != null) {

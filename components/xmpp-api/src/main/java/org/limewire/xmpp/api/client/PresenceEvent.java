@@ -5,7 +5,7 @@ import org.limewire.listener.DefaultDataTypeEvent;
 /**
  * This event is dispatched when a chat presence is added or updated
  */
-public class PresenceEvent extends DefaultDataTypeEvent<Presence, PresenceEvent.Type> {
+public class PresenceEvent extends DefaultDataTypeEvent<XMPPPresence, PresenceEvent.Type> {
 
     public static enum Type {
         /**
@@ -20,7 +20,7 @@ public class PresenceEvent extends DefaultDataTypeEvent<Presence, PresenceEvent.
         PRESENCE_UPDATE
     }
 
-    public PresenceEvent(Presence data, Type event) {
+    public PresenceEvent(XMPPPresence data, Type event) {
         super(data, event);
     }
 }

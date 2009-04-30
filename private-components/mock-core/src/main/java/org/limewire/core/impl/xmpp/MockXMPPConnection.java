@@ -5,8 +5,8 @@ import java.util.Collection;
 
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
-import org.limewire.xmpp.api.client.Presence.Mode;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPPresence.Mode;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
@@ -59,13 +59,13 @@ public class MockXMPPConnection implements XMPPConnection {
     }
 
     @Override
-    public User getUser(String id) {
+    public XMPPFriend getUser(String id) {
         return null;
     }
 
     @Override
-    public Collection<User> getUsers() {
-        return new ArrayList<User>();
+    public Collection<XMPPFriend> getUsers() {
+        return new ArrayList<XMPPFriend>();
     }
 
 }

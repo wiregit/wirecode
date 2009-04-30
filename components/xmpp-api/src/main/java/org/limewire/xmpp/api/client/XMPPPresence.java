@@ -6,7 +6,7 @@ import org.limewire.i18n.I18nMarker;
 /**
  * Represents xmpp <code><presence></code> messages.
  */
-public interface Presence extends FriendPresence {
+public interface XMPPPresence extends FriendPresence {
 
     enum Type {
         available, unavailable, subscribe, subscribed, unsubscribe, unsubscribed, error
@@ -50,9 +50,9 @@ public interface Presence extends FriendPresence {
     public static final int MAX_PRIORITY = 127;
 
     /**
-     * @return the {@link User} associated with this presence.
+     * @return the {@link XMPPFriend} associated with this presence.
      */
-    public User getUser();
+    public XMPPFriend getUser();
 
     /**
      * the jid of the user.  jid's have the form <code>user@host.com/client</code>

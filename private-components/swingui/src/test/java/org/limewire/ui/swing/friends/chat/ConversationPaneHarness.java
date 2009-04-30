@@ -13,7 +13,7 @@ import org.limewire.ui.swing.util.IconManagerStub;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 
 /**
  *

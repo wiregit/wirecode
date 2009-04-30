@@ -8,7 +8,7 @@ import org.limewire.listener.EventListener;
 /**
  * Represents a user ("friend") in a persons roster
  */
-public interface User extends Friend {
+public interface XMPPFriend extends Friend {
 
     /**
      * Allows the xmpp service user to register a listener for presence changes of this user
@@ -44,7 +44,7 @@ public interface User extends Friend {
      *
      * @return presence the active presence.  null if 
      */
-    public Presence getActivePresence();
+    public XMPPPresence getActivePresence();
 
     /**
      * @return true if this user has an associated active presence
@@ -61,10 +61,10 @@ public interface User extends Friend {
     
     /**
      * An analague to {@link Friend#getFriendPresences()},
-     * except returns a Map of {@link Presence}, the keys being
-     * the {@link Presence#getJID()}.
+     * except returns a Map of {@link XMPPPresence}, the keys being
+     * the {@link XMPPPresence#getJID()}.
      */
-    public Map<String, Presence> getPresences();
+    public Map<String, XMPPPresence> getPresences();
 
     /**
      * Returns whether the current login is subscribed to this user.

@@ -45,7 +45,7 @@ public interface XMPPConnection {
      * The ExecutionException will be to an XMPPException
      * if there is an error sending the xmpp message
      */
-    public ListeningFuture<Void> setMode(Presence.Mode mode);
+    public ListeningFuture<Void> setMode(XMPPPresence.Mode mode);
 
     /**
      * Add a user to the friend list
@@ -76,11 +76,11 @@ public interface XMPPConnection {
      * 
      * @return null if id is not registered on this connection
      */
-    public User getUser(String id);
+    public XMPPFriend getUser(String id);
 
     /**
      * @return a copy of the current Collection of Users. Does NOT stay up to
      * date with changes.
      */
-    public Collection<User> getUsers();
+    public Collection<XMPPFriend> getUsers();
 }
