@@ -571,7 +571,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void checkActiveAndWaiting() throws SaveLocationException {
 
         for (CoreDownloader current : downloadManager.getAllDownloaders()) {
-            if (urn.equals(current.getSha1Urn())) {
+            if (getSha1Urn().equals(current.getSha1Urn())) {
                 throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, torrent
                         .getCompleteFile());
             }
