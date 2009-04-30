@@ -7,6 +7,8 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
@@ -41,15 +43,21 @@ public class DownloadActionHandler {
     private final LibraryNavigator libraryNavigator;
     private DownloadListManager downloadListManager;
     private PropertiesFactory<DownloadItem> propertiesFactory;
+    private PropertiesFactory<LocalFileItem> localItemFactory;
     private ShareWidget<File> shareWidget;
+    private LibraryManager libraryManager;
     
     @Inject
     public DownloadActionHandler(PropertiesFactory<DownloadItem> propertiesFactory, 
-            ShareWidgetFactory shareFactory, DownloadListManager downloadListManager, LibraryNavigator libraryNavigator){
+            ShareWidgetFactory shareFactory, DownloadListManager downloadListManager, 
+            LibraryNavigator libraryNavigator, PropertiesFactory<LocalFileItem> localItemFactory,
+            LibraryManager libraryManager){
         this.downloadListManager = downloadListManager;
         this.propertiesFactory = propertiesFactory;
         this.shareWidget = shareFactory.createFileShareWidget();
         this.libraryNavigator = libraryNavigator;
+        this.localItemFactory = localItemFactory;
+        this.libraryManager = libraryManager;
     }
 
     public void performAction(final String actionCommmand, final DownloadItem item){
@@ -71,7 +79,16 @@ public class DownloadActionHandler {
         } else if (actionCommmand == LOCATE_COMMAND){
             NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
         } else if (actionCommmand == PROPERTIES_COMMAND){
-            propertiesFactory.newProperties().showProperties(item);
+            if(item.getState() != DownloadState.DONE) {
+                propertiesFactory.newProperties().showProperties(item);
+            } else {
+                // if finished downloadng, try showing all the information from the localFileItem
+                LocalFileItem localItem = libraryManager.getLibraryManagedList().getFileItem(item.getLaunchableFile());
+                if(localItem != null)
+                    localItemFactory.newProperties().showProperties(localItem);
+                else  // if can't find the localFileItem, revert to the downloadItem
+                    propertiesFactory.newProperties().showProperties(item);
+            }
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadListManager.remove(item);
         } else if (actionCommmand == SHARE_COMMAND){
