@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.friends.chat;
 
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.xmpp.api.client.ChatState;
-import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.core.api.friend.client.ChatState;
+import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
 
 class MessageWriterImpl implements MessageWriter {

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
+import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.ui.swing.friends.chat.Message.Type;
-import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MockFileMetadata;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 

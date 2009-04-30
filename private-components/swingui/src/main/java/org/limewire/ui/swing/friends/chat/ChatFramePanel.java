@@ -16,6 +16,7 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.FriendPresenceEvent;
+import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
@@ -31,7 +32,6 @@ import org.limewire.ui.swing.util.EnabledType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.VisibilityType;
-import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;

@@ -7,11 +7,11 @@ import org.jivesoftware.smack.packet.IQ.Type;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.LibraryChanged;
+import org.limewire.core.api.friend.client.LibraryChangedEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.LibraryChanged;
-import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
 

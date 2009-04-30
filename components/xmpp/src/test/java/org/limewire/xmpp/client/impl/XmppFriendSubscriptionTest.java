@@ -3,11 +3,11 @@ package org.limewire.xmpp.client.impl;
 import java.util.concurrent.ExecutionException;
 
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.FriendRequestEvent;
-import org.limewire.xmpp.api.client.FriendRequest;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.core.api.friend.client.FriendRequest;
+import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.EventListener;
 import com.google.inject.TypeLiteral;

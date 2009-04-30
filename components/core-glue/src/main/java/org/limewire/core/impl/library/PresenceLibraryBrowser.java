@@ -14,6 +14,7 @@ import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.LibraryChangedEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
@@ -32,7 +33,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
-import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.XMPPAddress;
 
 import ca.odell.glazedlists.EventList;

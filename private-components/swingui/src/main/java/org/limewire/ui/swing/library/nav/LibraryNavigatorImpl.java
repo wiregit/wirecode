@@ -30,6 +30,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
@@ -58,7 +59,6 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.xmpp.api.client.FriendRequestEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import ca.odell.glazedlists.EventList;

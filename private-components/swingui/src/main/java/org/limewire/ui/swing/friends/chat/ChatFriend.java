@@ -2,8 +2,8 @@ package org.limewire.ui.swing.friends.chat;
 
 import java.beans.PropertyChangeListener;
 
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.core.api.friend.client.MessageReader;
+import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 

@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
+import org.limewire.core.api.friend.client.FileMetaData;
+import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
@@ -19,8 +21,6 @@ import org.limewire.inject.AbstractModule;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;

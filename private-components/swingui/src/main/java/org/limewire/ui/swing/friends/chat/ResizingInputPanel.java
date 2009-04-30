@@ -28,10 +28,10 @@ import org.limewire.ui.swing.action.PasteAction;
 import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.action.SelectAllAction;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.xmpp.api.client.ChatState;
-import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.collection.Periodic;
+import org.limewire.core.api.friend.client.ChatState;
+import org.limewire.core.api.friend.client.MessageWriter;
 
 class ResizingInputPanel extends JPanel implements Displayable {
     private static final Log LOG = LogFactory.getLog(ResizingInputPanel.class);

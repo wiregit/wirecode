@@ -6,12 +6,12 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.limewire.core.api.friend.client.ChatState;
+import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.IconManagerStub;
-import org.limewire.xmpp.api.client.ChatState;
-import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 

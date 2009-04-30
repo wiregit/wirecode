@@ -11,12 +11,12 @@ import java.util.Map;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.friend.client.PasswordManager;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.io.UnresolvedIpPortImpl;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.xmpp.api.client.PasswordManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

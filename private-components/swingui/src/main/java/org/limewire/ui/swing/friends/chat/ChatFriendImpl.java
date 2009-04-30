@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.jdesktop.beans.AbstractBean;
+import org.limewire.core.api.friend.client.MessageReader;
+import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 import org.limewire.xmpp.api.client.XMPPFriend;

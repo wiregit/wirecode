@@ -1,4 +1,4 @@
-package org.limewire.xmpp.api.client;
+package org.limewire.core.api.friend.client;
 
 public class FileOffer {
     private final FileMetaData file;

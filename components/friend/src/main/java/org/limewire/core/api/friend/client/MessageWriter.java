@@ -1,4 +1,6 @@
-package org.limewire.xmpp.api.client;
+package org.limewire.core.api.friend.client;
+
+import org.limewire.xmpp.api.client.XMPPException;
 
 /**
  * Called by the user of the xmpp container to send a chat message

@@ -4,8 +4,8 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.util.List;
 
+import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.ui.swing.friends.chat.Message.Type;
-import org.limewire.xmpp.api.client.ChatState;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.

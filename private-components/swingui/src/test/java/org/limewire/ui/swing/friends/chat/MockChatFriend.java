@@ -6,11 +6,11 @@ import java.util.Map;
 
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.core.api.friend.client.IncomingChatListener;
+import org.limewire.core.api.friend.client.MessageReader;
+import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 import org.limewire.listener.EventListener;
