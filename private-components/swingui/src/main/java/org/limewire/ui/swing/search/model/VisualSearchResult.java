@@ -10,13 +10,14 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.nav.NavSelectable;
+import org.limewire.ui.swing.search.filter.FilterableItem;
 
 /**
  * Defines an interface for a displayed search result.  The displayed result
  * may be supported by multiple sources, and may also contain an aggregation 
  * of similar results.   
  */
-public interface VisualSearchResult extends NavSelectable, PropertiableFile {
+public interface VisualSearchResult extends NavSelectable, PropertiableFile, FilterableItem {
 
     /**
      * Returns a list of core SearchResult values associated with this visual 

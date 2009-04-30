@@ -4,6 +4,7 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.search.filter.FilterableSource;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
 
 import ca.odell.glazedlists.EventList;
@@ -12,7 +13,7 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
 /**
  * Defines a data model containing the results of a search.
  */
-public interface SearchResultsModel extends DownloadHandler, Disposable {
+public interface SearchResultsModel extends FilterableSource<VisualSearchResult>, DownloadHandler, Disposable {
 
     /**
      * Installs the specified search listener and starts the search.  The
