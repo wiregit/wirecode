@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search;
+package org.limewire.ui.swing.search.filter;
 
 import java.awt.Color;
 import java.awt.Cursor;

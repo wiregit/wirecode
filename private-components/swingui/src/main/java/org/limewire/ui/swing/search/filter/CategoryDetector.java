@@ -13,7 +13,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 /**
  * Support class to detect the category with the most search results.
  */
-public class CategoryDetector<E extends FilterableItem> {
+class CategoryDetector<E extends FilterableItem> {
     /** Number of results needed to trigger category detection. */
     private static final int RESULTS_COUNT = 25;
     /** Delay in milliseconds needed to trigger category detection. */

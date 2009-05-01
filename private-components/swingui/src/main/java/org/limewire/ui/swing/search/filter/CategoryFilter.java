@@ -32,7 +32,7 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 /**
  * Filter component to select search results according to their categories.
  */
-public class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
+class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
     private final JPanel panel = new JPanel();
     private final JLabel categoryLabel = new JLabel();

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search;
+package org.limewire.ui.swing.search.filter;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -38,14 +38,6 @@ import org.limewire.ui.swing.components.SideLineBorder.Side;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.search.filter.CategoryDetector;
-import org.limewire.ui.swing.search.filter.CategoryFilter;
-import org.limewire.ui.swing.search.filter.Filter;
-import org.limewire.ui.swing.search.filter.FilterListener;
-import org.limewire.ui.swing.search.filter.FilterManager;
-import org.limewire.ui.swing.search.filter.FilterableItem;
-import org.limewire.ui.swing.search.filter.FilterableItemTextFilterator;
-import org.limewire.ui.swing.search.filter.FilterableSource;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;

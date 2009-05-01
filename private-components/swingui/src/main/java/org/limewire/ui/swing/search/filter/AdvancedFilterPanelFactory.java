@@ -1,7 +1,4 @@
-package org.limewire.ui.swing.search;
-
-import org.limewire.ui.swing.search.filter.FilterableItem;
-import org.limewire.ui.swing.search.filter.FilterableSource;
+package org.limewire.ui.swing.search.filter;
 
 /**
  * Defines a factory for creating the advanced filter panel.
