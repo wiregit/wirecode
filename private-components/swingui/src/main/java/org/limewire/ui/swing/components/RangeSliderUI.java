@@ -233,6 +233,12 @@ class RangeSliderUI extends BasicSliderUI {
             // Save color and shift position.
             Color oldColor = g.getColor();
             g.translate(trackBounds.x, trackBounds.y + cy);
+            
+            // Draw selected range.
+            g.setColor(rangeColor);
+            for (int y = -2; y <= 3; y++) {
+                g.drawLine(lowerX - trackBounds.x, y, upperX - trackBounds.x, y);
+            }
 
             // Draw track bar, which consists of dotted line above solid line.
             g.setColor(trackColor);
@@ -240,14 +246,6 @@ class RangeSliderUI extends BasicSliderUI {
                 g.drawLine(x, 0, x, 0);
             }
             g.drawLine(0, 1, cw - 1, 1);
-            
-            // Draw selected range without overwriting the track bar.
-            g.setColor(rangeColor);
-            for (int y = -2; y <= 3; y++) {
-                if ((y < 0) || (y > 1)) {
-                    g.drawLine(lowerX - trackBounds.x, y, upperX - trackBounds.x, y);
-                }
-            }
 
             // Restore position and color.
             g.translate(-trackBounds.x, -(trackBounds.y + cy));
@@ -266,6 +264,12 @@ class RangeSliderUI extends BasicSliderUI {
             // Save color and shift position.
             Color oldColor = g.getColor();
             g.translate(trackBounds.x + cx, trackBounds.y);
+            
+            // Draw selected range.
+            g.setColor(rangeColor);
+            for (int x = -2; x <= 3; x++) {
+                g.drawLine(x, lowerY - trackBounds.y, x, upperY - trackBounds.y);
+            }
 
             // Draw track bar, which consists of dotted line next to solid line.
             g.setColor(trackColor);
@@ -273,14 +277,6 @@ class RangeSliderUI extends BasicSliderUI {
                 g.drawLine(0, y, 0, y);
             }
             g.drawLine(1, 0, 1, ch - 1);
-            
-            // Draw selected range without overwriting the track bar.
-            g.setColor(rangeColor);
-            for (int x = -2; x <= 3; x++) {
-                if ((x < 0) || (x > 1)) {
-                    g.drawLine(x, lowerY - trackBounds.y, x, upperY - trackBounds.y);
-                }
-            }
             
             // Restore position and color.
             g.translate(-(trackBounds.x + cx), -trackBounds.y);
