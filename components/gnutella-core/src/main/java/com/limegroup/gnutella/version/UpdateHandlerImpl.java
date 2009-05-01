@@ -70,6 +70,7 @@ import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
@@ -161,6 +162,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<DownloadManager> downloadManager;
     private final Provider<FileManager> fileManager;
+    private final FileViewManager fileViewManager;
     private final ApplicationServices applicationServices;
     private final UpdateCollectionFactory updateCollectionFactory;
     private final UpdateMessageVerifier updateMessageVerifier;
@@ -198,7 +200,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             UpdateCollectionFactory updateCollectionFactory,
             Clock clock,
             UpdateMessageVerifier updateMessageVerifier, 
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory,
+            FileViewManager fileViewManager) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
@@ -213,6 +216,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
         this.clock = clock;
         this.updateMessageVerifier = updateMessageVerifier;
         this.remoteFileDescFactory = remoteFileDescFactory;
+        this.fileViewManager = fileViewManager;
         
         this.listeners = new EventListenerList<UpdateEvent>();
     }
@@ -655,7 +659,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            List<FileDesc> shared = fileManager.get().getGnutellaFileView().getFilesInDirectory(LibraryUtils.PREFERENCE_SHARE);
+            List<FileDesc> shared = fileViewManager.getGnutellaFileView().getFilesInDirectory(LibraryUtils.PREFERENCE_SHARE);
             for (FileDesc fd : shared) {
                 if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
                     fileManager.get().getLibrary().remove(fd.getFile());

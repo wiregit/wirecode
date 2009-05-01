@@ -302,13 +302,13 @@ class LibraryImpl implements Library, FileCollection {
     private FileViewChangeEvent dispatchFailure(File file, FileDesc oldFileDesc) {
         FileViewChangeEvent event;
         if(oldFileDesc != null) {
-            event = new FileViewChangeEvent(this, FileViewChangeEvent.Type.CHANGE_FAILED, oldFileDesc.getFile(), oldFileDesc, file);
+            event = new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_CHANGE_FAILED, oldFileDesc.getFile(), oldFileDesc, file);
             // First dispatch a CHANGE_FAILED for the new event
             dispatch(event);
             // Then dispatch a REMOVE for the old FD.
-            dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.REMOVED, oldFileDesc));
+            dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_REMOVED, oldFileDesc));
         } else {
-            event = new FileViewChangeEvent(this, FileViewChangeEvent.Type.ADD_FAILED, file);
+            event = new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_ADD_FAILED, file);
             // Just dispatch an ADD_FAIL for the file.
             dispatch(event);
         }
@@ -333,6 +333,11 @@ class LibraryImpl implements Library, FileCollection {
         } finally {
             rwLock.readLock().unlock();
         }
+    }
+    
+    @Override
+    public IntSet getIndexes() {
+        throw new UnsupportedOperationException();
     }
     
     @Override
@@ -409,7 +414,7 @@ class LibraryImpl implements Library, FileCollection {
         
         // If we were able to remove above, fire the events.
         for(FileDesc fd : removedFds) {
-            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.REMOVED, fd));
+            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILE_REMOVED, fd));
         }
         
         if(managed) {
@@ -491,7 +496,7 @@ class LibraryImpl implements Library, FileCollection {
         
         // Step 2: Dispatch all removed files.
         for(FileDesc fd : removedFds) {
-            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.REMOVED, fd));
+            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILE_REMOVED, fd));
         }
         
         // Step 3: Go through all newly managed dirs & manage them.
@@ -629,7 +634,7 @@ class LibraryImpl implements Library, FileCollection {
         }
         
         if(fd != null) {
-            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.ADDED, fd));
+            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILE_ADDED, fd));
         }
     }
 
@@ -1005,10 +1010,10 @@ class LibraryImpl implements Library, FileCollection {
             // prior to the future.get() returning.
             if(oldFileDesc == null) {
                 LOG.debugf("Added file: {0}", file);
-                dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.ADDED, fd));
+                dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_ADDED, fd));
             } else {
                 LOG.debugf("Changed to new file: {0}", file);
-                dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.CHANGED, oldFileDesc, fd));
+                dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_CHANGED, oldFileDesc, fd));
             }
             
             task.set(fd);
@@ -1034,7 +1039,7 @@ class LibraryImpl implements Library, FileCollection {
         file = FileUtils.canonicalize(file);
         FileDesc fd = removeInternal(file, true);        
         if(fd != null) {
-            dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.REMOVED, fd));
+            dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_REMOVED, fd));
         }
         return fd != null;
     }
@@ -1119,7 +1124,7 @@ class LibraryImpl implements Library, FileCollection {
             List<LimeXMLDocument> xmlDocs = new ArrayList<LimeXMLDocument>(fd.getLimeXMLDocuments());
             return add(newName, xmlDocs, revision.get(), fd);
         } else {
-            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(new FileViewChangeEvent(this, FileViewChangeEvent.Type.CHANGE_FAILED, oldName, null, newName), FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED));
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_CHANGE_FAILED, oldName, null, newName), FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED));
         }
     }
     
@@ -1133,7 +1138,7 @@ class LibraryImpl implements Library, FileCollection {
             urnCache.removeUrns(file); // Explicitly remove URNs to force recalculating.
             return add(file, xmlDocs, revision.get(), fd);
         } else {
-            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(new FileViewChangeEvent(this, FileViewChangeEvent.Type.CHANGE_FAILED, file, null, file), FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED));
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_CHANGE_FAILED, file, null, file), FileViewChangeFailedException.Reason.OLD_WASNT_MANAGED));
         }
     }
     
@@ -1183,7 +1188,7 @@ class LibraryImpl implements Library, FileCollection {
             future.cancel(true);
         }
         
-        dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.CLEAR));
+        dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILES_CLEARED));
         
         fireLoading();
         final List<ListeningFuture<FileDesc>> futures = loadManagedFiles(rev);

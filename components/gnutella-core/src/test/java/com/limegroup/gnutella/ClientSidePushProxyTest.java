@@ -66,8 +66,6 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
      */
     protected static int TIMEOUT = 1000; // should override super
 
-    private FileManager fileManager;
-
     private ConnectionManager connectionManager;
 
     private QueryRequestFactory queryRequestFactory;
@@ -169,7 +167,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         BlockingConnectionUtils.drain(testUP[0]);
 
         // make sure leaf is sharing
-        assertEquals(2, fileManager.getGnutellaFileView().size());
+        assertEquals(2, fileViewManager.getGnutellaFileView().size());
         assertEquals(1, connectionManager.getNumConnections());
 
         // send a query that should be answered

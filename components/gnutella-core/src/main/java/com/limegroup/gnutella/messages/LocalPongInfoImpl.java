@@ -6,17 +6,17 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 
 @Singleton
 public class LocalPongInfoImpl implements LocalPongInfo {
     
     private final Provider<ConnectionManager> connectionManager;
-    private final Provider<FileManager> fileManager;
+    private final Provider<FileViewManager> fileManager;
 
     @Inject
     public LocalPongInfoImpl(Provider<ConnectionManager> connectionManager,
-            Provider<FileManager> fileManager) {
+            Provider<FileViewManager> fileManager) {
         this.connectionManager = connectionManager;
         this.fileManager = fileManager;
     }

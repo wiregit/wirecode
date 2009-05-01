@@ -31,6 +31,8 @@ import org.limewire.swarm.http.SwarmHttpSourceDownloader;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.limegroup.bittorrent.choking.Choker;
 import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
@@ -49,7 +51,8 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -151,7 +154,8 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
 
     private final TorrentManager torrentManager;
 
-    private final FileManager fileManager;
+    private final FileCollectionManager fileManager;
+    private final Library library;
 
     private final NetworkInstanceUtils networkInstanceUtils;
 
@@ -164,13 +168,14 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      * @param networkInvoker a <tt>SchedulingThreadPool</tt> to execute network
      *        tasks on
      */
-    ManagedTorrentImpl(TorrentContext context,
+    @AssistedInject
+    ManagedTorrentImpl(@Assisted TorrentContext context,
             EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher,
             ScheduledExecutorService networkInvoker, NetworkManager networkManager,
             TrackerManagerFactory trackerManagerFactory, ChokerFactory chokerFactory,
             BTLinkManagerFactory linkManagerFactory,
             BTConnectionFetcherFactory connectionFetcherFactory, ContentManager contentManager,
-            IPFilter ipFilter, TorrentManager torrentManager, FileManager fileManager,
+            IPFilter ipFilter, TorrentManager torrentManager, FileCollectionManager fileManager, Library library,
             NetworkInstanceUtils networkInstanceUtils, LimeConnectingIOReactorFactory limeConnectingIOReactorFactory) {
         this.context = context;
         this.networkInvoker = networkInvoker;
@@ -182,6 +187,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         this.ipFilter = ipFilter;
         this.torrentManager = torrentManager;
         this.fileManager = fileManager;
+        this.library = library;
         this.networkInstanceUtils = networkInstanceUtils;
         _info = context.getMetaInfo();
         _folder = getContext().getDiskManager();
@@ -891,13 +897,13 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
             if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
                 fileManager.getGnutellaCollection().add(_completeFile);
             } else {
-                fileManager.getLibrary().add(_completeFile);
+                library.add(_completeFile);
             }
         } else if (_completeFile.isDirectory()) {
             if(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
                 fileManager.getGnutellaCollection().addFolder(_completeFile);
             } else {
-                fileManager.getLibrary().addFolder(_completeFile);
+                library.addFolder(_completeFile);
             }
         }
     }

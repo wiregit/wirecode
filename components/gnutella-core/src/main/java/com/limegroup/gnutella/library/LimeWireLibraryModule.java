@@ -8,6 +8,7 @@ import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.listener.SourcedEventMulticasterImpl;
 import org.limewire.listener.SourcedListenerSupport;
+import org.limewire.listener.EventListenerList.EventListenerListContext;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -30,9 +31,17 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(SharedFileCollectionImplFactory.class).toProvider(
                 FactoryProvider.newFactory(SharedFileCollectionImplFactory.class, SharedFileCollectionImpl.class));
         
+        EventListenerListContext context = new EventListenerListContext();
+        
         SourcedEventMulticaster<FileViewChangeEvent, FileView> allFileCollectionMulticaster =
-            new SourcedEventMulticasterImpl<FileViewChangeEvent, FileView>();
+            new SourcedEventMulticasterImpl<FileViewChangeEvent, FileView>(context);
         bind(new TypeLiteral<SourcedEventMulticasterFactory<FileViewChangeEvent, FileView>>(){}).annotatedWith(AllFileCollections.class).toInstance(allFileCollectionMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FileViewChangeEvent>>(){}).annotatedWith(AllFileCollections.class).toInstance(allFileCollectionMulticaster);
+        
+        EventMulticaster<SharedFileCollectionChangeEvent> sharedAllFileCollectionMulticaster =
+            new EventMulticasterImpl<SharedFileCollectionChangeEvent>(context);
+        bind(new TypeLiteral<EventBroadcaster<SharedFileCollectionChangeEvent>>(){}).annotatedWith(AllFileCollections.class).toInstance(sharedAllFileCollectionMulticaster);
+        bind(new TypeLiteral<ListenerSupport<SharedFileCollectionChangeEvent>>(){}).annotatedWith(AllFileCollections.class).toInstance(sharedAllFileCollectionMulticaster);
         
         EventMulticaster<ManagedListStatusEvent> managedListMulticaster =
             new EventMulticasterImpl<ManagedListStatusEvent>();

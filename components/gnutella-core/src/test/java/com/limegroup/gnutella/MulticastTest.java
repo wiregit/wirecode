@@ -27,6 +27,7 @@ import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -38,6 +39,7 @@ public class MulticastTest extends LimeTestCase {
     private  final int DELAY = 1000;
         
     private  FileManager fileManager;
+    private FileViewManager fileViewManager;
     
     private  MulticastHandler M_HANDLER;
     
@@ -109,6 +111,7 @@ public class MulticastTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         
         fileManager = injector.getInstance(FileManager.class);
+        fileViewManager = injector.getInstance(FileViewManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
         searchServices = injector.getInstance(SearchServices.class);
@@ -421,7 +424,7 @@ public class MulticastTest extends LimeTestCase {
             new File(_savedDir, "metadata.mp3").exists());
 
         // Get rid of this file, so the -Dtimes=X option works properly... =)
-        assertEquals("unexpected number of shared files", 2, fileManager.getGnutellaFileView().size());
+        assertEquals("unexpected number of shared files", 2, fileViewManager.getGnutellaFileView().size());
 
         File temp = new File(_savedDir, "metadata.mp3");
         if (temp.exists()) {
@@ -431,7 +434,7 @@ public class MulticastTest extends LimeTestCase {
         sleep(2 * DELAY);
         assertFalse("file should have been deleted", temp.exists());
 
-        assertEquals("unexpected number of shared files", 1, fileManager.getGnutellaFileView().size());
+        assertEquals("unexpected number of shared files", 1, fileViewManager.getGnutellaFileView().size());
 	}
     
     private static void wipeAddress(QueryReply qr) throws Exception {

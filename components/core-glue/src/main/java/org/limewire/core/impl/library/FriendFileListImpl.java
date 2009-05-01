@@ -2,9 +2,10 @@ package org.limewire.core.impl.library;
 
 import org.limewire.listener.EventListener;
 
+import com.limegroup.gnutella.library.FileCollectionManager;
 import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.SharedFileCollection;
 
 /**
@@ -15,7 +16,8 @@ import com.limegroup.gnutella.library.SharedFileCollection;
 //       because the UI still wants to know about "shared with",
 //       we have to keep track of all the views for now.
 class FriendFileListImpl extends AbstractFriendFileList {
-    private final FileManager fileManager;
+    private final FileCollectionManager collectionManager;
+    private final FileViewManager viewManager;
 
     private volatile SharedFileCollection friendCollection;
     private volatile FileView friendView;
@@ -28,10 +30,12 @@ class FriendFileListImpl extends AbstractFriendFileList {
 
     private final CombinedShareList combinedShareList;
 
-    FriendFileListImpl(CoreLocalFileItemFactory coreLocalFileItemFactory, FileManager fileManager,
-            String name, CombinedShareList combinedShareList) {
+    FriendFileListImpl(CoreLocalFileItemFactory coreLocalFileItemFactory,
+            FileCollectionManager collectionManager, FileViewManager viewManager, String name,
+            CombinedShareList combinedShareList) {
         super(combinedShareList.createMemberList(), coreLocalFileItemFactory);
-        this.fileManager = fileManager;
+        this.viewManager = viewManager;
+        this.collectionManager = collectionManager;
         this.name = name;
         this.combinedShareList = combinedShareList;
     }
@@ -39,7 +43,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
     @Override
     protected SharedFileCollection getMutableCollection() {
         if(friendCollection == null) {
-            friendCollection = fileManager.getOrCreateSharedCollectionByName(name);
+            friendCollection = collectionManager.getOrCreateSharedCollectionByName(name);
             friendCollection.addPersonToShareWith(name);
         }
         return friendCollection;
@@ -66,7 +70,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
     void commit() {
         committed = true;
         eventListener = newEventListener();
-        friendView = fileManager.getFileViewForId(name);
+        friendView = viewManager.getFileViewForId(name);
         friendView.addFileViewListener(eventListener);
         combinedShareList.addMemberList(baseList);
 

@@ -10,11 +10,11 @@ import org.limewire.util.StringUtils;
 public class FileViewChangeEvent implements SourcedEvent<FileView> {
     
     public static enum Type {
-        ADDED, REMOVED, CHANGED, ADD_FAILED, CHANGE_FAILED, CLEAR, AUDIO_COLLECTION, VIDEO_COLLECTION, IMAGE_COLLECTION;
+        FILE_ADDED, FILE_REMOVED, FILE_CHANGED, FILE_ADD_FAILED, FILE_CHANGE_FAILED, FILES_CLEARED, AUDIO_COLLECTION, VIDEO_COLLECTION, IMAGE_COLLECTION;
     }
     
     private final Type type;
-    private final FileCollection list;
+    private final FileView list;
     private final FileDesc newValue;
     private final FileDesc oldValue;
     private final File oldFile;
@@ -22,7 +22,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
     private boolean isShared = false;
     
     public FileViewChangeEvent(FileCollection list, Type type) {
-        assert type == Type.CLEAR;
+        assert type == Type.FILES_CLEARED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
         this.oldValue = null;
@@ -32,7 +32,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
     }
     
     public FileViewChangeEvent(FileCollection list, Type type, File file) {
-        assert type == Type.ADD_FAILED;
+        assert type == Type.FILE_ADD_FAILED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
         this.oldValue = null;
@@ -42,7 +42,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
     }
     
     public FileViewChangeEvent(FileCollection list, Type type, File oldFile, FileDesc oldValue, File newValue) {
-        assert type == Type.CHANGE_FAILED;
+        assert type == Type.FILE_CHANGE_FAILED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
         this.oldValue = oldValue; // May be null!
@@ -52,7 +52,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
     }
     
     public FileViewChangeEvent(FileCollection list, Type type, FileDesc value) {
-        assert type == Type.ADDED || type == Type.REMOVED;
+        assert type == Type.FILE_ADDED || type == Type.FILE_REMOVED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
         this.oldValue = null;
@@ -62,7 +62,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
     }
     
     public FileViewChangeEvent(FileCollection list, Type type, FileDesc oldValue, FileDesc newValue) {
-        assert type == Type.CHANGED;
+        assert type == Type.FILE_CHANGED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
         this.oldValue = Objects.nonNull(oldValue, "oldValue");
@@ -99,7 +99,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
         return type;
     }
     
-    public FileCollection getFileView() {
+    public FileView getFileView() {
         return list;
     }
     

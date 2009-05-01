@@ -11,11 +11,11 @@ import org.limewire.collection.IntSet.IntSetIterator;
  */
 class FileViewIterator implements Iterator<FileDesc> {
     
-    private final FileCollection fileList;
+    private final FileView fileList;
     private final IntSetIterator iter;
     private FileDesc preview;
     
-    public FileViewIterator(FileCollection fileList, IntSet intSet) {
+    public FileViewIterator(FileView fileList, IntSet intSet) {
         this.fileList = fileList;
         this.iter = intSet.iterator();
     }

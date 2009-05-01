@@ -14,7 +14,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.concurrent.SimpleFuture;
@@ -25,23 +24,16 @@ import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A List of FileDescs that are grouped together 
  */
-abstract class AbstractFileCollection implements FileCollection, Inspectable {
+abstract class AbstractFileCollection extends AbstractFileView implements FileCollection, Inspectable {
 
     /**  A list of listeners for this list */
     private final DisposableEventMulticaster<FileViewChangeEvent> listenerSupport;
-    
-    /** All indexes this list is holding. */
-    private final IntSet fileDescIndexes;
-    
-    /** The managed list of all FileDescs. */
-    protected final LibraryImpl managedList;
     
     /** The listener on the ManagedList, to synchronize changes. */
     private final EventListener<FileViewChangeEvent> managedListListener;
@@ -51,81 +43,24 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     
     public AbstractFileCollection(LibraryImpl managedList,
             SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory) {
-        this.managedList = managedList;
-        this.fileDescIndexes = new IntSet(); 
+        super(managedList);
         this.listenerSupport = multicasterFactory.createDisposableMulticaster(this);
         this.managedListListener = new ManagedListSynchronizer();
     }
     
     /** Initializes this list.  Until the list is initialized, it is not valid. */
     protected void initialize() {
-        managedList.addFileViewListener(managedListListener);
-    }
-    
-    @Override
-    public FileDesc getFileDescForIndex(int index) {
-        FileDesc fd = managedList.getFileDescForIndex(index);
-        if(fd != null && contains(fd)) {
-            return fd;
-        } else {
-            return null;
-        }
-    }
-    
-    @Override
-    public FileDesc getFileDesc(File f) {
-        FileDesc fd = managedList.getFileDesc(f);
-        if(fd != null && contains(fd)) {
-            return fd;
-        } else {
-            return null;
-        }
-    }
-    
-    @Override
-    public FileDesc getFileDesc(URN urn) {
-        List<FileDesc> descs = getFileDescsMatching(urn);
-        if(descs.isEmpty()) {
-            return null;
-        } else {
-            return descs.get(0);
-        }
-    }
-    
-    @Override
-    public List<FileDesc> getFileDescsMatching(URN urn) {
-        List<FileDesc> fds = null;
-        List<FileDesc> matching = managedList.getFileDescsMatching(urn);
-        
-        // Optimal case.
-        if(matching.size() == 1 && contains(matching.get(0))) {
-            return matching;
-        } else {
-            for(FileDesc fd : matching) {
-                if(contains(fd)) {
-                    if(fds == null) {
-                        fds = new ArrayList<FileDesc>(matching.size());
-                    }
-                    fds.add(fd);
-                }
-            }
-            
-            if(fds == null) {
-                return Collections.emptyList();
-            } else {
-                return fds;
-            }
-        }
+        library.addFileViewListener(managedListListener);
     }
 
     @Override
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder) {
-        managedList.addFolder(folder);
+        library.addFolder(folder);
         
-        return managedList.submit(new Callable<List<ListeningFuture<FileDesc>>>() {
+        return library.submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             @Override
             public List<ListeningFuture<FileDesc>> call() throws Exception {
-                File[] potentials = folder.listFiles(managedList.newManageableFilter());
+                File[] potentials = folder.listFiles(library.newManageableFilter());
                 List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
                 for(File file : potentials) {
                     if(!contains(file)) {
@@ -139,10 +74,10 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     
     @Override
     public ListeningFuture<FileDesc> add(File file) {
-        FileDesc fd = managedList.getFileDesc(file);
+        FileDesc fd = library.getFileDesc(file);
         if(fd == null) {
             saveChange(canonicalize(file), true); // Save early, will RM if it can't become FD.
-            return wrapFuture(managedList.add(file));
+            return wrapFuture(library.add(file));
         } else {
             add(fd);
             return futureFor(fd);
@@ -151,10 +86,10 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     
     @Override
     public ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
-        FileDesc fd = managedList.getFileDesc(file);
+        FileDesc fd = library.getFileDesc(file);
         if(fd == null) {
             saveChange(canonicalize(file), true); // Save early, will RM if it can't become FD.
-            return wrapFuture(managedList.add(file, documents));
+            return wrapFuture(library.add(file, documents));
         } else {
             add(fd);
             return futureFor(fd);
@@ -185,7 +120,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
         Objects.nonNull(fileDesc, "fileDesc");        
         rwLock.writeLock().lock();
         try {
-            if(isFileAddable(fileDesc) && fileDescIndexes.add(fileDesc.getIndex())) {
+            if(isFileAddable(fileDesc) && getIndexes().add(fileDesc.getIndex())) {
                 return true;
             } else {
                 return false;
@@ -197,7 +132,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     
     @Override
     public boolean remove(File file) {
-        FileDesc fd = managedList.getFileDesc(file);
+        FileDesc fd = library.getFileDesc(file);
         if(fd != null) {
             return remove(fd);
         } else {
@@ -226,7 +161,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
         Objects.nonNull(fileDesc, "fileDesc");        
         rwLock.writeLock().lock();
         try {
-            if(fileDescIndexes.remove(fileDesc.getIndex())) {
+            if(getIndexes().remove(fileDesc.getIndex())) {
                 return true;
             } else {
                 return false;
@@ -237,28 +172,8 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     }
     
     @Override
-    public boolean contains(File file) {
-        FileDesc fd = managedList.getFileDesc(file);
-        if(fd != null) {
-            return contains(fd);
-        } else {
-            return false;
-        }
-    }
-    
-    @Override
-    public boolean contains(FileDesc fileDesc) {
-        rwLock.readLock().lock();
-        try {
-            return fileDescIndexes.contains(fileDesc.getIndex());
-        } finally {
-            rwLock.readLock().unlock();
-        }
-    }
-    
-    @Override
     public Iterator<FileDesc> iterator() {
-        return new FileViewIterator(AbstractFileCollection.this, fileDescIndexes);
+        return new FileViewIterator(AbstractFileCollection.this, getIndexes());
     }
     
     @Override
@@ -266,19 +181,9 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {
-                return new ThreadSafeFileViewIterator(AbstractFileCollection.this, managedList);
+                return new ThreadSafeFileViewIterator(AbstractFileCollection.this, library);
             }
         };
-    }
-
-    @Override
-    public int size() {
-        rwLock.readLock().lock();
-        try {
-            return fileDescIndexes.size();
-        } finally {
-            rwLock.readLock().unlock();
-        }
     }
 
     @Override
@@ -286,8 +191,8 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
         boolean needsClearing;
         rwLock.writeLock().lock();
         try {
-            needsClearing = fileDescIndexes.size() > 0;
-            fileDescIndexes.clear();
+            needsClearing = getIndexes().size() > 0;
+            getIndexes().clear();
         } finally {
             rwLock.writeLock().unlock();
         }
@@ -325,7 +230,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
         rwLock.readLock().lock();
         try {
             Map<String,Object> inspections = new HashMap<String,Object>();
-            inspections.put("num of files", Integer.valueOf(fileDescIndexes.size()));
+            inspections.put("num of files", Integer.valueOf(getIndexes().size()));
             return inspections;
         } finally {
             rwLock.readLock().unlock();
@@ -352,7 +257,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
      * @param fileDesc that was added
      */
     protected void fireAddEvent(FileDesc fileDesc) {
-        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.ADDED, fileDesc));
+        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_ADDED, fileDesc));
     }
     
     /**
@@ -360,7 +265,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
      * @param fileDesc that was removed
      */
     protected void fireRemoveEvent(FileDesc fileDesc) {
-        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.REMOVED, fileDesc));
+        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_REMOVED, fileDesc));
     }
 
     /**
@@ -369,12 +274,12 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
      * @param newFileDesc FileDesc that replaced oldFileDesc
      */
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.CHANGED, oldFileDesc, newFileDesc));
+        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_CHANGED, oldFileDesc, newFileDesc));
     }
     
     /** Fires a clear event to all listeners. */
     protected void fireClearEvent() {
-        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.CLEAR));
+        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILES_CLEARED));
     }
     
     /** Fires an event when the state of a shared collection changes*/
@@ -425,7 +330,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     }
 
     public void dispose() {
-        managedList.removeFileViewListener(managedListListener);
+        library.removeFileViewListener(managedListListener);
         listenerSupport.dispose();
     }
     
@@ -441,7 +346,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     protected int getMaxIndex() {
         rwLock.readLock().lock();
         try {
-            return fileDescIndexes.max();
+            return getIndexes().max();
         } finally {
             rwLock.readLock().unlock();
         }
@@ -450,7 +355,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
     protected int getMinIndex() {
         rwLock.readLock().lock();
         try {
-            return fileDescIndexes.min();
+            return getIndexes().min();
         } finally {
             rwLock.readLock().unlock();
         }
@@ -469,7 +374,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
             return fd;
         } else {
             throw new ExecutionException(new FileViewChangeFailedException(
-                    new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.ADD_FAILED, fd.getFile()),
+                    new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_ADD_FAILED, fd.getFile()),
                     FileViewChangeFailedException.Reason.CANT_ADD_TO_LIST));
         }
     }
@@ -487,7 +392,7 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
                 // if that's why we failed, then we return the file anyway (because it is added.)
                 if(ee.getCause() instanceof FileViewChangeFailedException) {
                     FileViewChangeFailedException fe = (FileViewChangeFailedException)ee.getCause();
-                    if(fe.getEvent().getType() == FileViewChangeEvent.Type.ADD_FAILED) {
+                    if(fe.getEvent().getType() == FileViewChangeEvent.Type.FILE_ADD_FAILED) {
                         if(contains(fe.getEvent().getFile())) {
                             return getFileDesc(fe.getEvent().getFile());
                         }
@@ -513,25 +418,25 @@ abstract class AbstractFileCollection implements FileCollection, Inspectable {
             //       because that's the only kind that doesn't
             //       require it already exists.
             switch(event.getType()) {
-            case ADDED:
+            case FILE_ADDED:
                 if(isPending(event.getFile(), event.getFileDesc())) {
                     add(event.getFileDesc());
                 }
                 break;
-            case CHANGED:
+            case FILE_CHANGED:
                 updateFileDescs(event.getOldValue(), event.getFileDesc());
                 break;
-            case REMOVED:
+            case FILE_REMOVED:
                 remove(event.getFileDesc());
                 break;
-            case CLEAR:
+            case FILES_CLEARED:
                 clear();
                 break;
-            case CHANGE_FAILED:
-            case ADD_FAILED:
+            case FILE_CHANGE_FAILED:
+            case FILE_ADD_FAILED:
                 // This can fail for double-adds, meaning the FD really does exist.
                 // If that's why it failed, we pretend this is really an add.
-                FileDesc fd = managedList.getFileDesc(event.getFile());
+                FileDesc fd = library.getFileDesc(event.getFile());
                 if(fd == null) { // File doesn't exist, it was a real failure.
                     if(isPending(event.getFile(), null) && !contains(event.getFile())) {
                         saveChange(event.getFile(), false);

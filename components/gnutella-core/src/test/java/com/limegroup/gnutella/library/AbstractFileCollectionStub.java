@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
@@ -26,7 +27,7 @@ public class AbstractFileCollectionStub implements FileCollection {
     public boolean add(FileDesc fileDesc) {
         boolean added = fileDescList.add(fileDesc);
         if(added) {
-            listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.ADDED, fileDesc));
+            listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_ADDED, fileDesc));
         }
         return added;
     }
@@ -54,7 +55,7 @@ public class AbstractFileCollectionStub implements FileCollection {
     @Override
     public void clear() {
         fileDescList.clear();
-        listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.CLEAR));
+        listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILES_CLEARED));
     }
     
     @Override
@@ -156,7 +157,7 @@ public class AbstractFileCollectionStub implements FileCollection {
     public boolean remove(FileDesc fileDesc) {
         boolean removed = fileDescList.remove(fileDesc);
         if(removed) {
-            listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.REMOVED, fileDesc));
+            listeners.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_REMOVED, fileDesc));
         }
         return removed;
     }
@@ -169,6 +170,12 @@ public class AbstractFileCollectionStub implements FileCollection {
     @Override
     public int size() {
         return fileDescList.size();
+    }
+
+    @Override
+    public IntSet getIndexes() {
+        // TODO Auto-generated method stub
+        return null;
     }
     
 

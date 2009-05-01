@@ -338,7 +338,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
             }
         });
         fileListChangeEventListener.handleEvent(new FileViewChangeEvent(friendFileList1,
-                FileViewChangeEvent.Type.ADDED, fileDesc1));
+                FileViewChangeEvent.Type.FILE_ADDED, fileDesc1));
 
         assertEquals(1, testFriendFileList1.size());
         assertContains(testFriendFileList1.getModel(), localFileItem1);
@@ -407,7 +407,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
         fileListChangeEventListener = internalListListener
         .get();
         fileListChangeEventListener.handleEvent(new FileViewChangeEvent(friendFileList2,
-                FileViewChangeEvent.Type.ADDED, fileDesc2));
+                FileViewChangeEvent.Type.FILE_ADDED, fileDesc2));
 
         assertEquals(1, testFriendFileList2.size());
         assertContains(testFriendFileList2.getModel(), localFileItem2);

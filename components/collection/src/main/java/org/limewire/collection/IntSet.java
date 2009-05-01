@@ -180,6 +180,11 @@ public class IntSet {
     public IntSet(int expectedSize) {
         this.list=new ArrayList<Interval>(expectedSize);
     }
+    
+    public IntSet(IntSet toCopy) {
+        this(toCopy.size());
+        addAll(toCopy);
+    }
 
     public int size() {
         return this.size;
@@ -316,6 +321,15 @@ public class IntSet {
         boolean ret=false;
         for (IntSetIterator iter=s.iterator(); iter.hasNext(); ) {
             ret=(ret | this.add(iter.next()));
+        }
+        return ret;
+    }
+    
+    public boolean removeAll(IntSet s) {
+        //TODO2: implement more efficiently!
+        boolean ret=false;
+        for (IntSetIterator iter=s.iterator(); iter.hasNext(); ) {
+            ret=(ret | this.remove(iter.next()));
         }
         return ret;
     }

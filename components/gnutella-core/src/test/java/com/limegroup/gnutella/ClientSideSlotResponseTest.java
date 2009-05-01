@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -95,7 +96,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         assertNotNull(fileManager.getGnutellaCollection().add(appTorrentFile).get(1, TimeUnit.SECONDS));
         fileManager.getGnutellaCollection().remove(berkeleyFD);
         fileManager.getGnutellaCollection().remove(susheelFD);
-        assertEquals(5, fileManager.getGnutellaFileView().size());
+        assertEquals(5, fileViewManager.getGnutellaFileView().size());
         
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         uploadManagerStub = (UploadManagerStub) injector.getInstance(UploadManager.class);
@@ -130,10 +131,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
                 TcpBandwidthStatistics tcpBandwidthStatistics,
                 Provider<GnutellaUploadFileViewProvider> gnutellaUploadFileListProvider,
                 Provider<GnutellaBrowseFileViewProvider> gnutellaBrowseFileListProvider,
-                UrnValidator urnValidator) {
+                UrnValidator urnValidator,
+                FileViewManager fileViewManager) {
             super(slotManager, httpRequestHandlerFactory, httpAcceptor,
                     fileManager, activityCallback, tcpBandwidthStatistics, gnutellaUploadFileListProvider,
-                    gnutellaBrowseFileListProvider, urnValidator);
+                    gnutellaBrowseFileListProvider, urnValidator, fileViewManager);
         }
 		@Override
 		public synchronized boolean isServiceable() {

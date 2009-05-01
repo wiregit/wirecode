@@ -29,7 +29,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -58,7 +59,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
     @Inject
     public StoreDownloaderImpl(SaveLocationManager saveLocationManager,
             DownloadManager downloadManager,
-            FileManager fileManager,
+            FileCollectionManager fileManager,
             IncompleteFileManager incompleteFileManager,
             DownloadCallback downloadCallback,
             NetworkManager networkManager,
@@ -84,7 +85,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             MetaDataFactory metaDataFactory, 
             @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
-            SpamManager spamManager) {
+            SpamManager spamManager, Library library) {
         super(saveLocationManager, downloadManager, fileManager,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
@@ -94,7 +95,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
                 backgroundExecutor, messageRouter, tigerTreeCache,
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
-                dangerousFileChecker, spamManager);
+                dangerousFileChecker, spamManager, library);
         this.metaDataFactory = metaDataFactory;
     }
 
@@ -350,7 +351,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
     @Override
     protected void shareSavedFile(File saveFile) {
         // Always load the resulting file in the FileManager
-        fileManager.getLibrary().add(saveFile);
+        library.add(saveFile);
     }
 
     @Override

@@ -47,7 +47,7 @@ class PlaylistManagerImpl implements PlaylistManager {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 switch (event.getType()) {
-                case REMOVED:
+                case FILE_REMOVED:
                     removeFile(event.getFile());
                     break;
                     

@@ -20,7 +20,7 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @Singleton
-class GnutellaFileCollectionImpl extends SharedFileCollectionImpl implements GnutellaFileCollection {
+class GnutellaFileCollectionImpl extends SharedFileCollectionImpl implements GnutellaFileCollection, GnutellaFileView {
     
     /** Size of all the FileDescs in this list in bytes */
     private final AtomicLong numBytes;

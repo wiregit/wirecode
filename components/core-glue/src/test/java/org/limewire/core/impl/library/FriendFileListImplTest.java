@@ -17,8 +17,10 @@ import org.limewire.util.BaseTestCase;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
+import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.SharedFileCollection;
 
 public class FriendFileListImplTest extends BaseTestCase {
@@ -27,13 +29,15 @@ public class FriendFileListImplTest extends BaseTestCase {
 
     private CoreLocalFileItemFactory coreLocalFileItemFactory = null;
 
-    private FileManager fileManager = null;
+    private FileCollectionManager collectionManager = null;
+    private FileViewManager viewManager = null;
 
     private CombinedShareList combinedShareList = null;
 
     private FriendFileListImpl friendFileListImpl = null;
 
     private SharedFileCollection testFileList = null;
+    private FileView testFileView = null;
 
     private EventList<LocalFileItem> subList = null;
 
@@ -54,7 +58,8 @@ public class FriendFileListImplTest extends BaseTestCase {
         };
 
         coreLocalFileItemFactory = context.mock(CoreLocalFileItemFactory.class);
-        fileManager = context.mock(FileManager.class);
+        collectionManager = context.mock(FileCollectionManager.class);
+        viewManager = context.mock(FileViewManager.class);
         combinedShareList = context.mock(CombinedShareList.class);
 
         subList = new BasicEventList<LocalFileItem>();
@@ -66,23 +71,24 @@ public class FriendFileListImplTest extends BaseTestCase {
             }
         });
         final String name = "name";
-        friendFileListImpl = new FriendFileListImpl(coreLocalFileItemFactory, fileManager, name,
+        friendFileListImpl = new FriendFileListImpl(coreLocalFileItemFactory, collectionManager, viewManager, name,
                 combinedShareList);
 
         testFileList = context.mock(SharedFileCollection.class);
+        testFileView = context.mock(FileView.class);
 
         fileListChangeListener = new AtomicReference<EventListener<FileViewChangeEvent>>();
 
         context.checking(new Expectations() {
             {
-                one(fileManager).getCollectionById(name);
-                will(returnValue(testFileList));
-                one(testFileList).addFileViewListener(with(any(EventListener.class)));
+                one(viewManager).getFileViewForId(name);
+                will(returnValue(testFileView));
+                one(testFileView).addFileViewListener(with(any(EventListener.class)));
                 will(new AssignParameterAction<EventListener<FileViewChangeEvent>>(
                         fileListChangeListener, 0));
-                allowing(testFileList).getReadLock();
+                allowing(testFileView).getReadLock();
                 will(returnValue(new ReentrantLock()));
-                one(testFileList).iterator();
+                one(testFileView).iterator();
                 will(returnValue(Collections.EMPTY_LIST.iterator()));
             }
         });

@@ -30,7 +30,8 @@ import com.google.inject.name.Named;
 import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryUtils;
 
 /**
@@ -73,7 +74,8 @@ public class TorrentManagerImpl implements TorrentManager {
 		new CopyOnWriteArrayList<TorrentEventListener>();
 
     /** The File Manager */
-    private final FileManager fileManager;
+    private final FileCollectionManager collectionManager;
+    private final Library library;
     
     /** Thread pool used to dispatch file manager events. These involve disk IO 
      *  and acquiring locks in the FileManager and should therefore not be executed
@@ -101,11 +103,13 @@ public class TorrentManagerImpl implements TorrentManager {
     }
     
     @Inject
-    public TorrentManagerImpl(FileManager fileManager,
+    public TorrentManagerImpl(FileCollectionManager collectionManager,
+            Library library,
             @Named("backgroundExecutor") ScheduledExecutorService threadPool,
             IncomingConnectionHandler incomingConnectionHandler, TorrentUploadCanceller torrentUploadCanceller) {
         this.incomingConnectionHandler = incomingConnectionHandler;
-        this.fileManager = fileManager;
+        this.collectionManager = collectionManager;
+        this.library = library;
         this.threadPool = threadPool;
         // we are a torrent event listener too.
         listeners.add(this);
@@ -346,7 +350,7 @@ public class TorrentManagerImpl implements TorrentManager {
         Runnable r = new Runnable() {
             public void run() {
             	if (LibraryUtils.isFileManagable(f))
-            		fileManager.getGnutellaCollection().addForSession(f);
+            	    collectionManager.getGnutellaCollection().addForSession(f);
             }
         };
         threadPool.execute(r);
@@ -364,8 +368,7 @@ public class TorrentManagerImpl implements TorrentManager {
         final boolean fdelete = delete || t.getState().equals(TorrentState.TRACKER_FAILURE); 
         Runnable r = new Runnable() {
             public void run() {
-                if(fileManager.getLibrary().remove(f)) {
-                    fileManager.getGnutellaCollection().remove(f);      
+                if(library.remove(f)) {      
                     if(fdelete) {
                         FileUtils.delete(f, false);
                     } else {
@@ -388,7 +391,7 @@ public class TorrentManagerImpl implements TorrentManager {
     public void shareTorrentFile(BTMetaInfo m, File torrentFile) {
         if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() && !m.isPrivate()) {
             final File tFile = getSharedTorrentMetaDataFile(m);
-            fileManager.getGnutellaCollection().remove(tFile);
+            collectionManager.getGnutellaCollection().remove(tFile);
 
             File backup = null;
             if (tFile.exists()) {
@@ -396,12 +399,12 @@ public class TorrentManagerImpl implements TorrentManager {
                 FileUtils.forceRename(tFile, backup);
             }
             if(FileUtils.forceRename(torrentFile, tFile)) {
-                fileManager.getGnutellaCollection().add(tFile);
+                collectionManager.getGnutellaCollection().add(tFile);
             } else {
                 if (backup != null) {
                     // restore backup
                     if (FileUtils.forceRename(backup, tFile)) {
-                        fileManager.getGnutellaCollection().add(tFile);
+                        collectionManager.getGnutellaCollection().add(tFile);
                     }
                 }
             } 

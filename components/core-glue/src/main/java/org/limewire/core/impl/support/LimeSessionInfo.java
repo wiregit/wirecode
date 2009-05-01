@@ -21,6 +21,7 @@ import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 
@@ -43,6 +44,7 @@ class LimeSessionInfo implements SessionInfo {
     private final ConnectionCheckerManager connectionCheckerManager;
     private final NIODispatcher nioDispatcher;
     private final FileManager fileManager;
+    private final FileViewManager viewManager;
     private final SimppManager simppManager;
     private final UploadSlotManager uploadSlotManager;
     private final ConnectionServices connectionServices;
@@ -59,7 +61,8 @@ class LimeSessionInfo implements SessionInfo {
                            ConnectionCheckerManager connectionCheckerManager, NIODispatcher nioDispatcher,
                            FileManager fileManager, SimppManager simppManager,
                            UploadSlotManager uploadSlotManager, ConnectionServices connectionServices,
-                           LifecycleManager lifecycleManager, RemoteLibraryManager remoteLibraryManager) {
+                           LifecycleManager lifecycleManager, RemoteLibraryManager remoteLibraryManager,
+                           FileViewManager viewManager) {
         this.dispatcher = dispatcher;
         this.downloadManager = downloadManager;
         this.statistics = statistics;
@@ -81,6 +84,7 @@ class LimeSessionInfo implements SessionInfo {
         this.connectionServices = connectionServices;
         this.lifecycleManager = lifecycleManager;
         this.remoteLibraryManager = remoteLibraryManager;
+        this.viewManager = viewManager;
     }
 
     
@@ -238,7 +242,7 @@ class LimeSessionInfo implements SessionInfo {
 
     @Override
     public int getSharedFileListSize() {
-        return fileManager.getGnutellaFileView().size();
+        return viewManager.getGnutellaFileView().size();
     }
 
     @Override

@@ -6,12 +6,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import org.limewire.collection.IntSet;
 import org.limewire.core.api.Category;
 
 import com.limegroup.gnutella.URN;
 
 
-public class GnutellaCollectionStub extends AbstractFileCollectionStub implements GnutellaFileCollection {
+public class GnutellaCollectionStub extends AbstractFileCollectionStub implements GnutellaFileCollection, GnutellaFileView {
     
     public final static URN DEFAULT_URN;
     static {
@@ -111,5 +112,23 @@ public class GnutellaCollectionStub extends AbstractFileCollectionStub implement
 
     @Override
     public void addSnapshotCategory(Category category) {
+    }
+
+    @Override
+    public int getId() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public String getName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public IntSet getIndexes() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

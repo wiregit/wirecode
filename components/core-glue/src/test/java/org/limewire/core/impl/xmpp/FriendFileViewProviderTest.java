@@ -11,14 +11,14 @@ import org.jmock.Mockery;
 import org.limewire.http.auth.ServerAuthState;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.uploader.HttpException;
 
 public class FriendFileViewProviderTest extends BaseTestCase {
     
     private Mockery context;
-    private FileManager fileManager;
+    private FileViewManager fileManager;
     private FileViewProvider friendFileListProvider;
         
     
@@ -29,7 +29,7 @@ public class FriendFileViewProviderTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
-        fileManager = context.mock(FileManager.class);
+        fileManager = context.mock(FileViewManager.class);
         friendFileListProvider = new FileViewProvider(fileManager);
     }
     

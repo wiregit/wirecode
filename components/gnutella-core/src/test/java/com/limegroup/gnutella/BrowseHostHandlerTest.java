@@ -44,6 +44,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
@@ -53,6 +54,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
     private final int PORT = 6668;
 
     private FileManager fileManager;
+    private FileViewManager fileViewManager;
 
     private BrowseHostHandler browseHostHandler;
 
@@ -86,6 +88,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         });
 
         fileManager = injector.getInstance(FileManager.class);
+        fileViewManager = injector.getInstance(FileViewManager.class);
 
         FileManagerTestUtils.waitForLoad(fileManager, 5000);
         
@@ -162,17 +165,17 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             }
         }
 
-        assertEquals(fileManager.getGnutellaFileView().size(), files.size());
+        assertEquals(fileViewManager.getGnutellaFileView().size(), files.size());
 
-        fileManager.getGnutellaFileView().getReadLock().lock();
+        fileViewManager.getGnutellaFileView().getReadLock().lock();
         try {
-            for(FileDesc result : fileManager.getGnutellaFileView()) {
+            for(FileDesc result : fileViewManager.getGnutellaFileView()) {
                 boolean contained = files.remove(result.getFileName());
                 assertTrue("File is missing in browse response: "
                     + result.getFileName(), contained);
             }
         } finally {
-            fileManager.getGnutellaFileView().getReadLock().unlock();
+            fileViewManager.getGnutellaFileView().getReadLock().unlock();
         }
         assertTrue("Browse returned more results than shared: " + files,
                 files.isEmpty());
@@ -202,12 +205,12 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         }
 
         assertTrue(mp3Found);
-        assertEquals(fileManager.getGnutellaFileView().size(), files.size());
+        assertEquals(fileViewManager.getGnutellaFileView().size(), files.size());
 
-        fileManager.getGnutellaFileView().getReadLock().lock();
+        fileViewManager.getGnutellaFileView().getReadLock().lock();
         boolean limeXmlFound = false;
         try {
-            for(FileDesc result : fileManager.getGnutellaFileView()) {
+            for(FileDesc result : fileViewManager.getGnutellaFileView()) {
                 boolean contained = files.remove(result.getFileName());
                 assertTrue("File is missing in browse response: "
                     + result.getFileName(), contained);
@@ -218,7 +221,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             
             assertTrue(limeXmlFound);
         } finally {
-            fileManager.getGnutellaFileView().getReadLock().unlock();
+            fileViewManager.getGnutellaFileView().getReadLock().unlock();
         }
         assertTrue("Browse returned more results than shared: " + files,
                 files.isEmpty());

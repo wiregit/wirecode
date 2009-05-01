@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.FileViewManager;
 
 /**
  * Returns the file lists for public Gnutella uploads.
@@ -15,11 +16,11 @@ import com.limegroup.gnutella.library.FileView;
 @Singleton
 public class GnutellaUploadFileViewProvider implements HttpRequestFileViewProvider {
 
-    private final FileManager fileManager;
+    private final FileViewManager fileViewManager;
 
     @Inject
-    public GnutellaUploadFileViewProvider(FileManager fileManager) {
-        this.fileManager = fileManager;
+    public GnutellaUploadFileViewProvider(FileViewManager fileManager) {
+        this.fileViewManager = fileManager;
     }
 
     /**
@@ -28,6 +29,6 @@ public class GnutellaUploadFileViewProvider implements HttpRequestFileViewProvid
      */
     @Override
     public Iterable<FileView> getFileViews(String userID, HttpContext httpContext) {
-        return Arrays.asList(fileManager.getGnutellaFileView(), fileManager.getIncompleteFileCollection());
+        return Arrays.asList(fileViewManager.getGnutellaFileView(), fileViewManager.getIncompleteFileView());
     }
 }

@@ -65,7 +65,6 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
      */
     private DatagramSocket UDP_ACCESS;
     private NetworkManagerStub networkManagerStub;
-    private FileManager fileManager;
     private QueryRequestFactory queryRequestFactory;
     private ConnectionManager connectionManager;
     private ApplicationServices applicationServices;
@@ -172,7 +171,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         drainUDP();
 
         // make sure leaf is sharing
-        assertEquals(2, fileManager.getGnutellaFileView().size());
+        assertEquals(2, fileViewManager.getGnutellaFileView().size());
 
         // send a query that should be answered
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,

@@ -81,11 +81,13 @@ public class CreationTimeCache {
     private final ExecutorService deserializeQueue = ExecutorsHelper.newProcessingQueue("CreationTimeCacheDeserializer");
     
     private final FileManager fileManager;
+    private final FileViewManager fileViewManager;
     
     private final Future<Maps> deserializer;
 
     @Inject
-    CreationTimeCache(FileManager fileManager) {
+    CreationTimeCache(FileManager fileManager, FileViewManager fileViewManager) {
+        this.fileViewManager = fileViewManager;
         this.fileManager = fileManager;
         this.deserializer = deserializeQueue.submit(new Callable<Maps>() {
             public Maps call() throws Exception {
@@ -125,7 +127,7 @@ public class CreationTimeCache {
         //TODO Currently creation time cache is used to get creation times for CoreLocalFileItem. 
         //By only registering events for gnutella share list changes in CreationTimeCache, the creation time field for Non gnutella shared files is being set to -1. 
         //In the future we will probably want to register for events on the managed fileList instead
-        fileManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 handleFileListEvent(event);
@@ -221,7 +223,7 @@ public class CreationTimeCache {
                 // check to see if file still exists
                 // NOTE: technically a URN can map to multiple FDs, but I only want
                 // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-                FileDesc fd = fileManager.getGnutellaFileView().getFileDesc(currURN);
+                FileDesc fd = fileViewManager.getGnutellaFileView().getFileDesc(currURN);
                 if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
                     dirty = true;
                     iter.remove();
@@ -337,7 +339,7 @@ public class CreationTimeCache {
                     }
                     
                     // we only want shared FDs
-                    FileDesc fd = fileManager.getGnutellaFileView().getFileDesc(currURN);
+                    FileDesc fd = fileViewManager.getGnutellaFileView().getFileDesc(currURN);
                     if (fd == null) {
                         if (toRemove == null) {
                             toRemove = new ArrayList<URN>();
@@ -537,7 +539,7 @@ public class CreationTimeCache {
     
     private void handleFileListEvent(FileViewChangeEvent evt) {
         switch(evt.getType()) {
-        case ADDED:
+        case FILE_ADDED:
             // Commit the time in the CreactionTimeCache, but don't share
             // the installer.  We populate free LimeWire's with free installers
             // so we have to make sure we don't influence the what is new
@@ -546,10 +548,10 @@ public class CreationTimeCache {
                 fileAdded(evt.getFileDesc().getFile(), evt.getFileDesc().getSHA1Urn());
             }
             break;
-        case REMOVED:
+        case FILE_REMOVED:
             removeTime(evt.getFileDesc().getSHA1Urn());
             break;
-        case CHANGED:
+        case FILE_CHANGED:
             fileChanged(evt.getOldValue().getSHA1Urn(),
                         evt.getFileDesc().getSHA1Urn());
             break;

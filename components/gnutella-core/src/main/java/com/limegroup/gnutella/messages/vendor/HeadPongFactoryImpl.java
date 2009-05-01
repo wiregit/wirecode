@@ -36,6 +36,7 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -48,6 +49,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     private final NetworkManager networkManager;
     private final Provider<UploadManager> uploadManager;
     private final Provider<FileManager> fileManager;
+    private final FileViewManager fileViewManager;
     private final Provider<AltLocManager> altLocManager;
     private final PushEndpointFactory pushEndpointFactory; 
 
@@ -66,13 +68,15 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
             Provider<FileManager> fileManager,
             Provider<AltLocManager> altLocManager,
             PushEndpointFactory pushEndpointFactory,
-            Provider<DownloadManager> downloadManager) {
+            Provider<DownloadManager> downloadManager,
+            FileViewManager fileViewManager) {
         this.networkManager = networkManager;
         this.uploadManager = uploadManager;
         this.fileManager = fileManager;
         this.altLocManager = altLocManager;
         this.pushEndpointFactory = pushEndpointFactory;
         this.downloadManager = downloadManager;
+        this.fileViewManager = fileViewManager;
     }
 
     /* (non-Javadoc)
@@ -199,7 +203,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         GGEP ggep = new GGEP();
         
         URN urn = ping.getUrn();
-        FileDesc desc = fileManager.get().getGnutellaFileView().getFileDesc(urn);
+        FileDesc desc = fileViewManager.getGnutellaFileView().getFileDesc(urn);
         if(desc == null) {
             desc = fileManager.get().getIncompleteFileCollection().getFileDesc(urn);
         }
@@ -290,7 +294,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     	DataOutputStream daos = new DataOutputStream(caos);
     	byte retCode=0;
     	URN urn = ping.getUrn();
-    	FileDesc desc = fileManager.get().getGnutellaFileView().getFileDesc(urn);
+    	FileDesc desc = fileViewManager.getGnutellaFileView().getFileDesc(urn);
     	if(desc == null) {
     	    desc = fileManager.get().getIncompleteFileCollection().getFileDesc(urn);
     	}

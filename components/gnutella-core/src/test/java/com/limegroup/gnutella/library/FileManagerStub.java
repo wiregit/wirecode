@@ -8,8 +8,7 @@ public class FileManagerStub implements FileManager {
 
     private ManagedFileListStub managedStub;
     private IncompleteFileListStub incompleteStub;
-    private GnutellaCollectionStub gnutellaStub;    
-    private GnutellaViewStub gnutellaViewStub;
+    private GnutellaCollectionStub gnutellaStub; 
     
     @Inject
     public FileManagerStub() {    
@@ -40,24 +39,23 @@ public class FileManagerStub implements FileManager {
     }
     
     @Override
+    public SharedFileCollection getOrCreateSharedCollectionByName(String name) {
+        throw new UnsupportedOperationException("not supported");
+    }
+    
+    @Override
+    public void removeSharedCollectionByName(String name) {
+        throw new UnsupportedOperationException("not supported");
+    }
+    
+    @Override
     public SharedFileCollection getCollectionById(int collectionId) {
         throw new UnsupportedOperationException("not supported");
     }
     
     @Override
     public void removeCollectionById(int collectionId) {
-        throw new UnsupportedOperationException("not supported");
-    }
-    
-    @Override
-    public FileView getFileViewForId(String friendId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public GnutellaFileView getGnutellaFileView() {
-        return gnutellaViewStub;
+        throw new UnsupportedOperationException("not supported");        
     }
     
     @Override

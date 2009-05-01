@@ -568,7 +568,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null);
+                    null, null, null);
 	    managedDownloaderImpl1.addListener(downloadListener1);
         
         ManagedDownloaderImpl managedDownloaderImpl2 =
@@ -576,7 +576,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null);
+                    null, null, null);
         managedDownloaderImpl2.addListener(downloadListener2);
         
 	    context.checking(new Expectations() {{

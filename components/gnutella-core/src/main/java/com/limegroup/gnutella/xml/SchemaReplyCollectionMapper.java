@@ -101,13 +101,13 @@ public class SchemaReplyCollectionMapper {
                     @Override
                     public void handleEvent(FileViewChangeEvent event) {
                         switch(event.getType()) {
-                        case REMOVED:
+                        case FILE_REMOVED:
                             removeFileDesc(event.getFileDesc());
                             break;
-                        case CHANGED:
+                        case FILE_CHANGED:
                             removeFileDesc(event.getOldValue());
                             break; 
-                        case CLEAR:
+                        case FILES_CLEARED:
                             loadSchemas();
                             break;
                         }

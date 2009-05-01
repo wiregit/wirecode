@@ -16,6 +16,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.tigertree.HashTree;
 
@@ -162,7 +163,7 @@ public class DownloadTHEXTest extends DownloadTestCase {
 
         // there should be an entry for the sha1 urn.
         URN ttroot = tree.getTreeRootUrn();
-        FileManager fm = injector.getInstance(FileManager.class);
+        FileViewManager fm = injector.getInstance(FileViewManager.class);
         assertNotNull(fm.getGnutellaFileView().getFileDesc(TestFile.hash()));
         
         // and the filedesc should have both

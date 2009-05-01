@@ -16,9 +16,13 @@ public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implement
     
     /** A Map of listeners for each source. */
     private final Map<S, EventListenerList<E>> sourceListeners;
-    
+        
     public SourcedEventMulticasterImpl() {
-        this.listenerContext = new EventListenerListContext();
+        this(new EventListenerListContext());
+    }
+    
+    public SourcedEventMulticasterImpl(EventListenerListContext context) {
+        this.listenerContext = context;
         this.listenersForAll = new EventListenerList<E>(listenerContext);
         this.sourceListeners = new ConcurrentHashMap<S, EventListenerList<E>>();
     }

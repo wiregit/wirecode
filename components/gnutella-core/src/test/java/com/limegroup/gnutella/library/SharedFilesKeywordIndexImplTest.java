@@ -23,6 +23,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     private SharedFilesKeywordIndexImpl keywordIndex;
     private Mockery context;
     private FileManager fileManager;
+    private FileViewManager fileViewManager;
     private FileCollection sharedFileList;
     private FileCollection incompleteFileList;
     private Library managedFileList;
@@ -37,10 +38,11 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         multicaster = context.mock(SourcedEventMulticaster.class);
         registry = context.mock(ServiceRegistry.class);
         fileManager = context.mock(FileManager.class);
+        fileViewManager = context.mock(FileViewManager.class);
         managedFileList = context.mock(Library.class);
         sharedFileList = context.mock(GnutellaFileCollection.class);
         incompleteFileList = context.mock(IncompleteFileCollection.class);
-        keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null, null);
+        keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null, null, fileViewManager);
     }
     
     @SuppressWarnings("unchecked")
@@ -67,7 +69,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(originalFile);
                 will(returnValue(false));
-                atLeast(1).of(fileManager).getGnutellaFileView();
+                atLeast(1).of(fileViewManager).getGnutellaFileView();
                 will(returnValue(sharedFileList));
                 atLeast(1).of(sharedFileList).contains(originalFile);
                 will(returnValue(true));
@@ -80,7 +82,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(newFile);
                 will(returnValue(false));
-                atLeast(1).of(fileManager).getGnutellaFileView();
+                atLeast(1).of(fileViewManager).getGnutellaFileView();
                 will(returnValue(sharedFileList));
                 atLeast(1).of(sharedFileList).contains(newFile);
                 will(returnValue(true));
@@ -88,7 +90,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         });
         keywordIndex.register(registry, multicaster);
         serviceGetter.get().initialize();
-        listenerGetter.get().handleEvent(new FileViewChangeEvent(sharedFileList, FileViewChangeEvent.Type.ADDED, originalFile));
+        listenerGetter.get().handleEvent(new FileViewChangeEvent(sharedFileList, FileViewChangeEvent.Type.FILE_ADDED, originalFile));
         
         IntSet result = keywordIndex.search("world hello", null, false);
         assertNotNull(result);
@@ -98,7 +100,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         result = keywordIndex.search("goodbye world", null, false);
         assertNull(result);
 
-        listenerGetter.get().handleEvent(new FileViewChangeEvent(sharedFileList, FileViewChangeEvent.Type.CHANGED, originalFile, newFile));
+        listenerGetter.get().handleEvent(new FileViewChangeEvent(sharedFileList, FileViewChangeEvent.Type.FILE_CHANGED, originalFile, newFile));
         
         result = keywordIndex.search("world goodbye", null, false);
         assertNotNull(result);

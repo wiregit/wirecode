@@ -24,6 +24,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -38,6 +39,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 public final class LicenseSharingTest extends ClientSideTestCase {
 
     private FileManager fileManager;
+    private FileViewManager fileViewManager;
     private LimeXMLDocumentFactory limeXMLDocumentFactory;
     private Injector injector;
     private QueryRequestFactory queryRequestFactory;
@@ -72,6 +74,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	    });
         super.setUp(injector);
 	    fileManager = injector.getInstance(FileManager.class);
+	    fileViewManager = injector.getInstance(FileViewManager.class);
 	    limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
 	    queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 	    limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
@@ -93,14 +96,14 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
-	    List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaFileView());
+	    List<FileDesc> fds = CollectionUtils.listOf(fileViewManager.getGnutellaFileView());
 	    assertEquals(5, fds.size());
 	    for(FileDesc fd : fds )
 	        assertTrue(fd.toString(), fd.isLicensed());
     }
     
     public void testQRPExchange() throws Exception {
-        assertEquals(5, fileManager.getGnutellaFileView().size());
+        assertEquals(5, fileViewManager.getGnutellaFileView().size());
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());

@@ -59,7 +59,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileViewChangeEvent result = addIfShared(f1, l1);
-        assertTrue(result.toString(), result.getType() == FileViewChangeEvent.Type.ADDED);
+        assertTrue(result.toString(), result.getType() == FileViewChangeEvent.Type.FILE_ADDED);
         assertEquals(d1, result.getFileDesc().getLimeXMLDocuments().get(0));
 
         // test exact match of keywords in metadata

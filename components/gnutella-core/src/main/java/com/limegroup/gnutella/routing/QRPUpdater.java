@@ -27,6 +27,7 @@ import com.limegroup.gnutella.library.FileDescChangeEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -47,6 +48,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
     private static long QRP_DELAY = (LimeWireUtils.isBetaRelease() ? 1 : 60) * 60 * 1000;
 
     private final FileManager fileManager;
+    private final FileViewManager fileViewManager;
     private final ScheduledExecutorService backgroundExecutor;
     private final ListenerSupport<FileDescChangeEvent> fileDescListenerSupport;
    
@@ -75,10 +77,12 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
     @Inject
     public QRPUpdater(FileManager fileManager, 
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            ListenerSupport<FileDescChangeEvent> fileDescListenerSupport) {
+            ListenerSupport<FileDescChangeEvent> fileDescListenerSupport,
+            FileViewManager fileViewManager) {
         this.fileManager = fileManager;
         this.backgroundExecutor = backgroundExecutor;
         this.fileDescListenerSupport = fileDescListenerSupport;
+        this.fileViewManager = fileViewManager;
 
         for (String entry : SearchSettings.LIME_QRP_ENTRIES.get())
             qrpWords.add(entry);
@@ -144,7 +148,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
             }
         }
         
-        FileView gnutella = fileManager.getGnutellaFileView();
+        FileView gnutella = fileViewManager.getGnutellaFileView();
         gnutella.getReadLock().lock();
         try {
             for (FileDesc fd : gnutella) {
@@ -194,13 +198,13 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
     public void initialize() {
         SearchSettings.PUBLISH_LIME_KEYWORDS.addSettingListener(this);
         SearchSettings.LIME_QRP_ENTRIES.addSettingListener(this);
-        fileManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {
-                case ADDED:
-                case REMOVED:
-                case CLEAR:
+                case FILE_ADDED:
+                case FILE_REMOVED:
+                case FILES_CLEARED:
                     needRebuild = true;
 					break;
                 }
@@ -210,9 +214,9 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {
-                case ADDED:
-                case REMOVED:
-                case CLEAR:
+                case FILE_ADDED:
+                case FILE_REMOVED:
+                case FILES_CLEARED:
                     needRebuild = true;
 					break;
                 }   

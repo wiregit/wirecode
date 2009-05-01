@@ -170,16 +170,16 @@ abstract class LocalFileListImpl implements LocalFileList {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {
-                case ADDED:
+                case FILE_ADDED:
                     addFileDesc(event.getFileDesc());
                     break;
-                case CHANGED:
+                case FILE_CHANGED:
                     changeFileDesc(event.getOldValue(), event.getFileDesc());
                     break;
-                case REMOVED:
+                case FILE_REMOVED:
                     removeFileDesc(event.getFileDesc());
                     break;
-                case CLEAR:
+                case FILES_CLEARED:
                     clearFileDescs();
                     break;     
                 case AUDIO_COLLECTION:

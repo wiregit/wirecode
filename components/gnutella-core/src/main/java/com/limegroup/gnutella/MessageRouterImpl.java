@@ -60,7 +60,6 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -70,7 +69,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
@@ -112,8 +111,8 @@ import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
 import com.limegroup.gnutella.messages.vendor.UpdateRequest;
 import com.limegroup.gnutella.messages.vendor.UpdateResponse;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
-import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.PatchTableMessage;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.routing.RouteTableMessage;
@@ -307,7 +306,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected final ConnectionManager connectionManager;
     protected final ReplyHandler forMeReplyHandler;
     protected final QueryUnicaster queryUnicaster;
-    protected final FileManager fileManager;
+    protected final FileViewManager fileManager;
     protected final ContentManager contentManager;
     protected final DHTManager dhtManager;
     protected final UploadManager uploadManager;
@@ -361,7 +360,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             ConnectionManager connectionManager,
             @Named("forMeReplyHandler") ReplyHandler forMeReplyHandler,
             QueryUnicaster queryUnicaster,
-            FileManager fileManager,
+            FileViewManager fileManager,
             ContentManager contentManager,
             DHTManager dhtManager,
             UploadManager uploadManager,

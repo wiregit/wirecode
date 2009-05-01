@@ -48,7 +48,6 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 public final class ServerSideBrowseHostTest extends ServerSideTestCase {
 
     protected static int TIMEOUT = 2000;
-    private FileManager fileManager;
     private QueryRequestFactory queryRequestFactory;
     private MessageFactory messageFactory;
 
@@ -103,7 +102,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         drainAll();
 
         // make sure leaf is sharing
-        assertEquals(2, fileManager.getGnutellaFileView().size());
+        assertEquals(2, fileViewManager.getGnutellaFileView().size());
 
         // send a query that should be answered
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -137,7 +136,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
             assertNotNull(fm.getGnutellaCollection().add(f).get(1, TimeUnit.SECONDS));
         }
 
-        assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fm.getGnutellaFileView().size());
+        assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fileViewManager.getGnutellaFileView().size());
         
         String result = null;
 

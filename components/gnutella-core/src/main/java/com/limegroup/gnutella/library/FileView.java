@@ -5,12 +5,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
+import org.limewire.collection.IntSet;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.URN;
 
 public interface FileView extends Iterable<FileDesc> {
-    
+   
     /**
      * Returns the <tt>FileDesc</tt> for the specified URN. This only returns
      * one <tt>FileDesc</tt>, even though multiple indices are possible.
@@ -38,6 +39,9 @@ public interface FileView extends Iterable<FileDesc> {
      * that classes can efficiently locate matches.
      */
     FileDesc getFileDescForIndex(int index);
+
+    /** Gets all the indexes currently in this collection. */
+    IntSet getIndexes();    
 
     /** Returns true if this list contains a FileDesc for the given file. */
     boolean contains(File file);

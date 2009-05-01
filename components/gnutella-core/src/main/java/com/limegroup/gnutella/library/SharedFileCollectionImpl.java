@@ -104,7 +104,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
                 // Schedule all additions for having a hash tree root.
                 URN root = treeCache.getOrScheduleHashTreeRoot(fileDesc);
                 if(root != null) {
-                	for(FileDesc fd : managedList.getFileDescsMatching(fileDesc.getSHA1Urn())) {
+                	for(FileDesc fd : library.getFileDescsMatching(fileDesc.getSHA1Urn())) {
                 	    fd.setTTRoot(root);
                 	}
                 }
@@ -132,16 +132,16 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         // normally we would not want to lock the master list while adding
         // items internally... but it's OK here because we're guaranteed
         // that nothing is listening to this list, since this will happen
-        // in the constructor only.
-        managedList.getReadLock().lock();
+        // immediately after construction.
+        library.getReadLock().lock();
         try {
-            for (FileDesc fd : managedList) {
+            for (FileDesc fd : library) {
                 if(isPending(fd.getFile(), fd)) {
                     add(fd);
                 }
             }
         } finally {
-            managedList.getReadLock().unlock();
+            library.getReadLock().unlock();
         }
     }
 
@@ -241,7 +241,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         
         @Override
         public void run() {
-            for (FileDesc fd : managedList.pausableIterable()) {
+            for (FileDesc fd : library.pausableIterable()) {
                 // Only exit early if we're not doing a snapshot addition.
                 if(!isSnapshot) {
                     // exit early if off.
@@ -347,7 +347,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         // to stop auto sharing on remove, must be contained in this list, not an incomplete file
         // be of the type that is smartly shared and must still exist in the managed List
         // (not existing in the managed list means it was removed from LW)
-        if(contains && !(fileDesc instanceof IncompleteFileDesc) && isSmartlySharedType(fileDesc.getFile()) && managedList.contains(fileDesc)) {
+        if(contains && !(fileDesc instanceof IncompleteFileDesc) && isSmartlySharedType(fileDesc.getFile()) && library.contains(fileDesc)) {
             stopSmartSharingType(fileDesc.getFile());
         }
         return contains;

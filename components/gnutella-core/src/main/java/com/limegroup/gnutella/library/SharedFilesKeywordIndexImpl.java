@@ -78,6 +78,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private final Provider<ResponseFactory> responseFactory;
 
     private final FileManager fileManager;
+    private final FileViewManager fileViewManager;
 
     private final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
 
@@ -90,13 +91,15 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             Provider<CreationTimeCache> creationTimeCache,
             Provider<ResponseFactory> responseFactory,
             Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
-            ActivityCallback activityCallback, LimeXMLSchemaRepository schemaRepository) {
+            ActivityCallback activityCallback, LimeXMLSchemaRepository schemaRepository,
+            FileViewManager fileViewManager) {
         this.fileManager = fileManager;
         this.creationTimeCache = creationTimeCache;
         this.responseFactory = responseFactory;
         this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
         this.activityCallback = activityCallback;
         this.schemaRepository = schemaRepository;
+        this.fileViewManager = fileViewManager;
     }
     
     @Inject void register(ServiceRegistry registry, final ListenerSupport<FileDescChangeEvent> fileDescSupport) {
@@ -119,7 +122,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                         handleManagedListStatusEvent(event);
                     }
                 });
-                fileManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+                fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
                     @Override
                     public void handleEvent(FileViewChangeEvent event) {
                         handleFileListEvent(event, true);
@@ -215,7 +218,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // Iterate through our hit indices to create a list of results.
         for (IntSet.IntSetIterator iter = matches.iterator(); iter.hasNext();) {
             int i = iter.next();
-            FileDesc desc = fileManager.getGnutellaFileView().getFileDescForIndex(i);
+            FileDesc desc = fileViewManager.getGnutellaFileView().getFileDescForIndex(i);
             if(desc == null) {
                 desc = fileManager.getIncompleteFileCollection().getFileDescForIndex(i);
             }
@@ -254,7 +257,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private IntSet urnSearch(Iterable<URN> urnsIter, IntSet priors) {
         IntSet ret = priors;
         for (URN urn : urnsIter) {
-            List<FileDesc> fds = fileManager.getGnutellaFileView().getFileDescsMatching(urn);
+            List<FileDesc> fds = fileViewManager.getGnutellaFileView().getFileDescsMatching(urn);
             for(FileDesc fd : fds) {
                 if(ret == null) {
                     ret = new IntSet();
@@ -283,7 +286,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // get the appropriate responses
         Set<Response> resps = new HashSet<Response>(urnList.size());
         for (URN urn : urnList) {
-            FileDesc desc = fileManager.getGnutellaFileView().getFileDesc(urn);
+            FileDesc desc = fileViewManager.getGnutellaFileView().getFileDesc(urn);
 
             // should never happen since we don't add times for IFDs and
             // we clear removed files...
@@ -312,17 +315,17 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     
     private void handleFileListEvent(FileViewChangeEvent evt, boolean complete) {
         switch(evt.getType()) {
-        case ADDED:
+        case FILE_ADDED:
             addFileDesc(evt.getFileDesc(), complete);
             break;
-        case CHANGED:
+        case FILE_CHANGED:
             removeFileDesc(evt.getOldValue(), complete);
             addFileDesc(evt.getFileDesc(), complete);
             break;
-        case REMOVED:
+        case FILE_REMOVED:
             removeFileDesc(evt.getFileDesc(), complete);
             break;
-        case CLEAR:
+        case FILES_CLEARED:
             clear(complete);
             break;
         }
@@ -599,7 +602,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             File file = currDoc.getIdentifier();// returns null if none
             Response res = null;
             assert(file != null);
-            FileDesc fd = fileManager.getGnutellaFileView().getFileDesc(file);
+            FileDesc fd = fileViewManager.getGnutellaFileView().getFileDesc(file);
             if (fd == null) {
                 // fd == null is bad -- would mean MetaFileManager is out of
                 // sync.

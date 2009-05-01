@@ -52,7 +52,7 @@ public class FileManagerTestUtils {
             } catch (ExecutionException expected) {
                 assertInstanceof(FileViewChangeFailedException.class, expected.getCause());
                 FileViewChangeFailedException cause = (FileViewChangeFailedException) expected.getCause();
-                assertEquals(FileViewChangeEvent.Type.ADD_FAILED, cause.getEvent().getType());
+                assertEquals(FileViewChangeEvent.Type.FILE_ADD_FAILED, cause.getEvent().getType());
                 assertEquals(file, cause.getEvent().getFile());
                 assertEquals(reason, cause.getReason().toString());
             }
@@ -85,7 +85,7 @@ public class FileManagerTestUtils {
         } catch (ExecutionException expected) {
             assertInstanceof(FileViewChangeFailedException.class, expected.getCause());
             FileViewChangeFailedException cause = (FileViewChangeFailedException) expected.getCause();
-            assertEquals(FileViewChangeEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
+            assertEquals(FileViewChangeEvent.Type.FILE_CHANGE_FAILED, cause.getEvent().getType());
             assertEquals(old, cause.getEvent().getOldFile());
             assertEquals(newFile, cause.getEvent().getFile());
             assertEquals(oldFd, cause.getEvent().getOldValue());
@@ -107,7 +107,7 @@ public class FileManagerTestUtils {
         } catch (ExecutionException expected) {
             assertInstanceof(FileViewChangeFailedException.class, expected.getCause());
             FileViewChangeFailedException cause = (FileViewChangeFailedException) expected.getCause();
-            assertEquals(FileViewChangeEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
+            assertEquals(FileViewChangeEvent.Type.FILE_CHANGE_FAILED, cause.getEvent().getType());
             assertEquals(file, cause.getEvent().getOldFile());
             assertEquals(file, cause.getEvent().getFile());
             assertEquals(oldFd, cause.getEvent().getOldValue());

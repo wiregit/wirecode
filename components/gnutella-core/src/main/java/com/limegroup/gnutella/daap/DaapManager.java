@@ -40,6 +40,7 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -69,6 +70,7 @@ public class DaapManager {
     private static final Log LOG = LogFactory.getLog(DaapManager.class);
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<FileManager> fileManager;
+    private final FileViewManager fileViewManager;
     private final Provider<IPFilter> ipFilter;
     private final Provider<NetworkInstanceUtils> networkInstanceUtils;
     private final Provider<ActivityCallback> activityCallback;
@@ -101,12 +103,14 @@ public class DaapManager {
                         Provider<FileManager> fileManager,
                         Provider<IPFilter> ipFilter,
                         Provider<NetworkInstanceUtils> networkInstanceUtils,
-                        Provider<ActivityCallback> activityCallback) {
+                        Provider<ActivityCallback> activityCallback,
+                        FileViewManager fileViewManager) {
         this.backgroundExecutor = backgroundExecutor;
         this.fileManager = fileManager;
         this.ipFilter = ipFilter;
         this.networkInstanceUtils = networkInstanceUtils;
         this.activityCallback = activityCallback;
+        this.fileViewManager = fileViewManager;
     }
     
     @Inject
@@ -135,7 +139,7 @@ public class DaapManager {
                         handleManagedListStatusEvent(event);
                     }
                 });
-                fileManager.get().getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+                fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
                     @Override
                     public void handleEvent(FileViewChangeEvent event) {
                         handleFileListEvent(event);
@@ -470,7 +474,7 @@ public class DaapManager {
         int size = masterPlaylist.getSongCount();        
         Transaction txn = library.beginTransaction();    
    
-        FileView sharedFileList = fileManager.get().getGnutellaFileView();
+        FileView sharedFileList = fileViewManager.getGnutellaFileView();
         sharedFileList.getReadLock().lock();
         try {
             for(FileDesc fd : sharedFileList) {
@@ -1100,16 +1104,16 @@ public class DaapManager {
                     return;
 
                 switch (evt.getType()) {
-                case CHANGED:
+                case FILE_CHANGED:
                     handleChangeEvent(evt);
                     break;
-                case ADDED:
+                case FILE_ADDED:
                     handleAddEvent(evt);
                     break;
-                case REMOVED:
+                case FILE_REMOVED:
                     handleRemoveEvent(evt);
                     break;
-                case CLEAR:
+                case FILES_CLEARED:
                     handleClearEvent();
                     break;
                 }

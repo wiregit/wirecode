@@ -9,8 +9,8 @@ import org.limewire.http.auth.ServerAuthState;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.uploader.HttpException;
 import com.limegroup.gnutella.uploader.authentication.HttpRequestFileViewProvider;
 
@@ -27,10 +27,10 @@ import com.limegroup.gnutella.uploader.authentication.HttpRequestFileViewProvide
 @Singleton
 public class FileViewProvider implements HttpRequestFileViewProvider {
 
-    private final FileManager fileManager;
+    private final FileViewManager fileManager;
 
     @Inject
-    public FileViewProvider(FileManager fileManager) {
+    public FileViewProvider(FileViewManager fileManager) {
         this.fileManager = fileManager;
     }
     
