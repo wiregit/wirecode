@@ -7,6 +7,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -23,6 +24,7 @@ import org.limewire.ui.swing.properties.AbstractPropertiableFileDialog;
 import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -60,6 +62,7 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
         
         private final JPanel download = newPanel(new MigLayout("fill", "[]", "[]"));
         private final LibraryNavigator libraryNavigator;
+        private final CategoryIconManager categoryIconManager;
         
         /**
          * Constructs a properties dialog with the specified dialog parameters.
@@ -67,6 +70,7 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
         private DownloadItemProperties(DialogParam dialogParam) {
             super(dialogParam);
             this.libraryNavigator = dialogParam.getLibraryNavigator();
+            this.categoryIconManager = dialogParam.getCategoryIconManager();
             GuiUtils.assignResources(this);
             disableEditForAllCommonFields();
         }
@@ -74,10 +78,10 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
         @Override
         public void showProperties(final DownloadItem propertiable) {
             
+            icon.setIcon(getIcon(propertiable));
             populateCommonFields(propertiable);
             
             addDownload(propertiable);
-            
             showDialog(propertiable.getFileName(), propertiable.getCategory());
         }
 
@@ -140,6 +144,10 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
         @Override
         protected void commit() {
             //no-op... Downloads have no mutable fields
+        }
+        
+        private Icon getIcon(DownloadItem propertiable) {
+            return categoryIconManager.getIcon(propertiable.getCategory());
         }
     }
 }

@@ -204,7 +204,7 @@ public abstract class Dialog extends LimeJDialog {
     }
 
     protected void showDialog(String fileName, Category category) {
-        setTitle(tr("\"{0}\" properties", fileName));
+        setTitle(tr("{0} properties", fileName));
         
         switch(category) {
         case VIDEO:
