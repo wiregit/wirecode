@@ -23,7 +23,9 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
@@ -39,7 +41,6 @@ import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
 import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.xmpp.client.impl.features.LimewireFeatureInitializer;
@@ -69,7 +70,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster;
     private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
     private final AddressFactory addressFactory;
-    private final XMPPAuthenticator authenticator;
+    private final DefaultFriendAuthenticator authenticator;
     private final EventMulticaster<FeatureEvent> featureSupport;
     private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
@@ -94,7 +95,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                        EventBroadcaster<FriendRequestEvent> friendRequestBroadcaster,
                        EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster,
                        EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster,
-                       AddressFactory addressFactory, XMPPAuthenticator authenticator,
+                       AddressFactory addressFactory, DefaultFriendAuthenticator authenticator,
                        EventMulticaster<FeatureEvent> featureSupport,
                        EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,
                        XMPPAddressRegistry xmppAddressRegistry, 
@@ -139,13 +140,13 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         });   
     }    
 
-    void setModeImpl(XMPPPresence.Mode mode) throws XMPPException {
+    void setModeImpl(XMPPPresence.Mode mode) throws FriendException {
         synchronized (this) {
             try {
                 checkLoggedIn();
                 connection.sendPacket(getPresenceForMode(mode));
             } catch (org.jivesoftware.smack.XMPPException e) {
-                throw new XMPPException(e);
+                throw new FriendException(e);
             } 
         }
     }
@@ -172,7 +173,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         });   
     }
 
-    void loginImpl() throws XMPPException {
+    void loginImpl() throws FriendException {
         synchronized (this) {
             try {
                 connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTING));        
@@ -193,7 +194,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 }
                 org.jivesoftware.smack.XMPPConnection.removeConnectionCreationListener(smackConnectionListener);
                 connection = null;
-                throw new XMPPException(e);
+                throw new FriendException(e);
             } finally {
                 loggingIn.set(false);
             }
@@ -205,13 +206,13 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             try {
                 connectUsingFactory(factory);
                 return;
-            } catch (XMPPException e) {
+            } catch (FriendException e) {
                 LOG.debug(e.getMessage(), e);
             }
         }
     }
 
-    private void connectUsingFactory(ConnectionConfigurationFactory factory) throws XMPPException {
+    private void connectUsingFactory(ConnectionConfigurationFactory factory) throws FriendException {
         ConnectionConfigurationFactory.RequestContext requestContext = new ConnectionConfigurationFactory.RequestContext();
         while(factory.hasMore(configuration, requestContext)) {
             ConnectionConfiguration connectionConfig = factory.getConnectionConfiguration(configuration, requestContext);
@@ -226,7 +227,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 requestContext.incrementRequests();
             }            
         }
-        throw new XMPPException("couldn't connect using " + factory);
+        throw new FriendException("couldn't connect using " + factory);
     }
 
     @Override
@@ -265,10 +266,10 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         return loggedIn.get();
     }
     
-    private void checkLoggedIn() throws XMPPException {
+    private void checkLoggedIn() throws FriendException {
         synchronized (this) {
             if(!isLoggedIn()) {
-                throw new XMPPException("not connected");
+                throw new FriendException("not connected");
             }
         }
     }
@@ -294,7 +295,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 }
             } catch (org.jivesoftware.smack.XMPPException e) {
                 LOG.debugf(e, "error getting roster");    
-            } catch (XMPPException e) {
+            } catch (FriendException e) {
                 LOG.debugf(e, "error getting roster");    
             }
         }
@@ -324,7 +325,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 }
             } catch (org.jivesoftware.smack.XMPPException e) {
                 LOG.debugf(e, "error getting roster");    
-            } catch (XMPPException e) {
+            } catch (FriendException e) {
                 LOG.debugf(e, "error getting roster");    
             }
         }
@@ -345,7 +346,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             String localJID;
             try {
                 localJID = getLocalJid();
-            } catch (XMPPException e) {
+            } catch (FriendException e) {
                 localJID = null;
             }
             if(!presence.getFrom().equals(localJID)) {
@@ -405,7 +406,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         }); 
     }
 
-    void addUserImpl(String id, String name) throws XMPPException {
+    void addUserImpl(String id, String name) throws FriendException {
         synchronized (this) {
             try {
                 checkLoggedIn();
@@ -417,7 +418,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     roster.createEntry(id, name, null);
                 }
             } catch (org.jivesoftware.smack.XMPPException e) {
-                throw new XMPPException(e);
+                throw new FriendException(e);
             } 
         }
     }
@@ -433,7 +434,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         }); 
     }
 
-    private void removeUserImpl(String id) throws XMPPException {
+    private void removeUserImpl(String id) throws FriendException {
         synchronized (this) {
             try {
                 checkLoggedIn();
@@ -449,7 +450,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     }
                 }
             } catch (org.jivesoftware.smack.XMPPException e) {
-                throw new XMPPException(e);
+                throw new FriendException(e);
             }
         }
     }
@@ -468,18 +469,18 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         }
     }
 
-    public void sendPacket(Packet packet) throws XMPPException {
+    public void sendPacket(Packet packet) throws FriendException {
         synchronized (this) {
             try {
                 checkLoggedIn();
                 connection.sendPacket(packet);
             } catch (org.jivesoftware.smack.XMPPException e) {
-                throw new XMPPException(e);
+                throw new FriendException(e);
             } 
         }
     }
 
-    public String getLocalJid() throws XMPPException {
+    public String getLocalJid() throws FriendException {
         synchronized (this) {
             checkLoggedIn();
             return connection.getUser();

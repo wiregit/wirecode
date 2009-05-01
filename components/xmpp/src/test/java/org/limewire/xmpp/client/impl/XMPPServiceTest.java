@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
@@ -25,7 +26,6 @@ import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl.Element;
 import org.xmlpull.v1.XmlPullParserException;
@@ -182,7 +182,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
     /**
      * Tests that friends receive one another's status updates
      */
-    public void testStatusChanges() throws InterruptedException, UnknownHostException, XMPPException, ExecutionException {
+    public void testStatusChanges() throws InterruptedException, UnknownHostException, FriendException, ExecutionException {
         assertEquals(1, aliceRosterListener.getRosterSize());
         assertEquals(USERNAME_2, aliceRosterListener.getFirstRosterEntry());
         assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
@@ -211,7 +211,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
     /**
      * Tests that friends receive one another's chat messages
      */
-    public void testChat() throws InterruptedException, XMPPException, IOException {
+    public void testChat() throws InterruptedException, FriendException, IOException {
         MessageReaderMock reader = new MessageReaderMock();
         XMPPPresence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         MessageWriter writer = automatedtestfriend2.getUser().createChat(reader);
@@ -236,7 +236,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
     /**
      * Tests that friends receive one another's file offers
      */
-    public void testOfferFile() throws InterruptedException, IOException, XmlPullParserException, XMPPException {
+    public void testOfferFile() throws InterruptedException, IOException, XmlPullParserException, FriendException {
 
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 AddressEvent.Type.ADDRESS_CHANGED));
@@ -351,7 +351,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
      * after which they're received by whichever presence replied most recently
      */
     public void testChatWithMultiplePresencesOfSameUser()
-            throws InterruptedException, XMPPException, UnknownHostException, ExecutionException {
+            throws InterruptedException, FriendException, UnknownHostException, ExecutionException {
         // Create a second presence for Bob
         RosterListenerMock bob2RosterListener = new RosterListenerMock();
         XMPPConnectionConfiguration bob2 = 

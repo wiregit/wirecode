@@ -21,6 +21,7 @@ import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.core.api.friend.client.IncomingChatListener;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
@@ -32,7 +33,6 @@ import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPException;
 
 
 public class XMPPFriendImpl implements XMPPFriend {
@@ -363,21 +363,21 @@ public class XMPPFriendImpl implements XMPPFriend {
         }
 
         @Override
-        public void writeMessage(String message) throws XMPPException {
+        public void writeMessage(String message) throws FriendException {
             try {
                 chat.setParticipant(getChatParticipantId());
                 chat.sendMessage(message);
             } catch (org.jivesoftware.smack.XMPPException e) {
-                throw new XMPPException(e);
+                throw new FriendException(e);
             }
         }
 
         @Override
-        public void setChatState(ChatState chatState) throws XMPPException {
+        public void setChatState(ChatState chatState) throws FriendException {
             try {
                 ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
             } catch (org.jivesoftware.smack.XMPPException e) {
-                throw new XMPPException(e);
+                throw new FriendException(e);
             }
         }
     }

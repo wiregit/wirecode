@@ -51,6 +51,7 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
@@ -81,7 +82,6 @@ import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPFriend;
 
 import com.google.inject.Inject;
@@ -318,7 +318,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     public void setChatStateGone() {
         try {
             writer.setChatState(ChatState.gone);
-        } catch (XMPPException e) {
+        } catch (FriendException e) {
             LOG.error("Could not set chat state while closing the conversation", e);
         }
     }
@@ -536,7 +536,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                         FileOfferer fileOfferer = ((FileOfferFeature) fileOfferFeature).getFeature();
                         fileOfferer.offerFile(metadata);
                         fileOfferSent = true;
-                    } catch (XMPPException e) {
+                    } catch (FriendException e) {
                         LOG.debug("File offer failed", e);
                     }
                 }
