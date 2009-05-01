@@ -11,15 +11,15 @@ import ca.odell.glazedlists.matchers.Matcher;
 class FileSizeFilterFormat<E extends FilterableItem> implements RangeFilterFormat<E> {
     /** Array of size options in bytes. */
     private static final long[] SIZES = {
-        0, 
-        512,
-        1024, 
-        1024 * 512,
-        1024 * 1024, 
-        1024 * 1024 * 512,
-        1024 * 1024 * 1024, 
-        (long) 1024 * 1024 * 1024 * 512,  
-        (long) 1024 * 1024 * 1024 * 1024
+        0,
+        512,  // 512 bytes
+        1024, // 1 KB
+        1024 * 512,  // 512 KB
+        1024 * 1024, // 1 MB
+        1024 * 1024 * 512,  // 512 MB
+        1024 * 1024 * 1024, // 1 GB
+        (long) 1024 * 1024 * 1024 * 512, // 512 GB  
+        (long) 1024 * 1024 * 1024 * 1024 // 1 TB
     };
 
     @Override
