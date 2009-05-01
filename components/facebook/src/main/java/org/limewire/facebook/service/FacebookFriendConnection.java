@@ -118,8 +118,10 @@ public class FacebookFriendConnection {
     }
 
     public synchronized String httpGET(String url) throws IOException {
+        System.out.println("GET " + url);
         HttpGet loginGet = new HttpGet(url);
         loginGet.addHeader("User-Agent", USER_AGENT_HEADER);
+        loginGet.addHeader("Connection", "close");
         HttpResponse response = httpClient.execute(loginGet);
         HttpEntity entity = response.getEntity();
         
@@ -132,8 +134,10 @@ public class FacebookFriendConnection {
     }
     
     public synchronized String httpPOST(String host, String urlPostfix, List <NameValuePair> nvps) throws IOException {
+        System.out.println("GET " + host + urlPostfix);
         String responseStr = null;
         HttpPost httpost = new HttpPost(host + urlPostfix);
+        httpost.addHeader("Connection", "close");
         httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
         HttpResponse postResponse = httpClient.execute(httpost);
@@ -156,6 +160,10 @@ public class FacebookFriendConnection {
     
     public String getUID() {
         return uid;    
+    }
+    
+    public String getSecret() {
+        return secret;
     }
     
     private class AuthTokenInterceptingHttpClient extends DefaultHttpClient  {

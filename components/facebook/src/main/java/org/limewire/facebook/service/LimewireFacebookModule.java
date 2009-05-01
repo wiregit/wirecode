@@ -9,8 +9,9 @@ public class LimewireFacebookModule extends AbstractModule {
     protected void configure() {
         bind(FacebookFriendService.class);
         bind(FacebookFriendConnection.class);
+        bind(AddressSender.class);
         bind(ChatClientFactory.class).toProvider(FactoryProvider.newFactory(ChatClientFactory.class, ChatClient.class));
-        bind(AddressSenderFactory.class).toProvider(FactoryProvider.newFactory(AddressSenderFactory.class, AddressSender.class));
+        //bind(AddressSenderFactory.class).toProvider(FactoryProvider.newFactory(AddressSenderFactory.class, AddressSender.class));
         bind(PresenceListenerFactory.class).toProvider(FactoryProvider.newFactory(PresenceListenerFactory.class, PresenceListener.class));
     }
 }
