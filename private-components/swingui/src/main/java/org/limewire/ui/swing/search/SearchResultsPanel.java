@@ -169,9 +169,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         filterPanel.setSearchCategory(searchResultsModel.getSearchCategory());
         filterPanel.addCategoryListener(new CategoryListener() {
             @Override
-            public void categorySelected(SearchCategory searchCategory) {
-                sortAndFilterPanel.setSearchCategory(searchCategory);
-                resultsContainer.showCategory(searchCategory);
+            public void categorySelected(SearchCategory displayCategory) {
+                sortAndFilterPanel.setSearchCategory(displayCategory);
+                resultsContainer.showCategory(displayCategory);
                 syncScrollPieces();
             }
         });

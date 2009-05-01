@@ -291,8 +291,9 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     
     /**
      * Updates the display category.  This method updates the displayed 
-     * property filters, and fires a <code>categorySelected</code> event.  
-     * (The event is used to update the column layout in the table view.) 
+     * property filters, and fires a <code>categorySelected</code> event to
+     * update the display category.  (The event is used to update the column
+     * layout in the table view.) 
      */
     private void updateCategory() {
         if (categoryFilter.isActive()) {
@@ -322,7 +323,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
 
     /**
      * Adds the specified listener to the list that is notified when the 
-     * selected category changes.
+     * display category changes.
      */
     public void addCategoryListener(CategoryListener listener) {
         listenerList.add(listener);
@@ -330,18 +331,19 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
 
     /**
      * Removes the specified listener from the list that is notified when the 
-     * selected category changes.
+     * display category changes.
      */
     public void removeCategoryListener(CategoryListener listener) {
         listenerList.remove(listener);
     }
     
     /**
-     * Notifies registered listeners when the specified category is selected.
+     * Notifies registered listeners when the specified category should be 
+     * displayed.
      */
-    private void fireCategorySelected(SearchCategory searchCategory) {
+    private void fireCategorySelected(SearchCategory displayCategory) {
         for (int i = 0, size = listenerList.size(); i < size; i++) {
-            listenerList.get(i).categorySelected(searchCategory);
+            listenerList.get(i).categorySelected(displayCategory);
         }
     }
     
@@ -685,14 +687,14 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     }
 
     /**
-     * Defines a listener for category change events.
+     * Defines a listener to handle display category events.
      */
     public static interface CategoryListener {
         
         /**
-         * Invoked when the specified search category is selected.
+         * Invoked when the specified display category is selected.
          */
-        void categorySelected(SearchCategory searchCategory);
+        void categorySelected(SearchCategory displayCategory);
         
     }
 }
