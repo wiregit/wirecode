@@ -2070,7 +2070,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     " -> "+ saveFile);
             return DownloadState.DISK_PROBLEM;
         }
-            
+
+        // TODO: If exists & is in library, should change to fileChanged?
+        
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (saveFile.exists())
