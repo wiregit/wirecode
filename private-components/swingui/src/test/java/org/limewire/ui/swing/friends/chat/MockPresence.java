@@ -5,17 +5,17 @@ import java.util.Collection;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPPresence;
+import org.limewire.xmpp.api.client.XMPPFriend;
 
-public class MockPresence implements Presence {
+public class MockPresence implements XMPPPresence {
     private String status;
-    private final User user;
+    private final XMPPFriend user;
     private Mode mode;
     private String jid;
     private int priority;
     
-    MockPresence(User user, Mode mode, String status, String jid) {
+    MockPresence(XMPPFriend user, Mode mode, String status, String jid) {
         this.user = user;
         this.mode = mode;
         this.status = status;
@@ -23,7 +23,7 @@ public class MockPresence implements Presence {
         this.priority = 0;
     }
 
-    public User getUser() {
+    public XMPPFriend getUser() {
         return user;
     }
 

@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.friends.chat;
 
+import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-import org.limewire.xmpp.api.client.FileOfferEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

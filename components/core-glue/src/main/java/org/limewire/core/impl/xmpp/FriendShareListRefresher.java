@@ -20,7 +20,7 @@ import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
 
@@ -91,7 +91,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                 fileManagerLoaded.set(true);  
                 XMPPConnection connection = xmppService.getActiveConnection();
                 if(connection != null) {
-                    Collection<User> friends = connection.getUsers();
+                    Collection<XMPPFriend> friends = connection.getUsers();
                     for(Friend friend : friends) {
                         tracker.sentRefresh(friend.getId());
                         Map<String, FriendPresence> presences = friend.getFriendPresences();

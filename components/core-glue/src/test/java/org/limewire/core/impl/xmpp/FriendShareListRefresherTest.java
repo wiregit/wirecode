@@ -26,7 +26,7 @@ import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender.ScheduledLibraryRefreshSender;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
 
@@ -198,9 +198,9 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         
         final XMPPConnection xmppConnection = context.mock(XMPPConnection.class);
         
-        final LinkedList<User> users = new LinkedList<User>();
-        users.add(context.mock(User.class));
-        users.add(context.mock(User.class));
+        final LinkedList<XMPPFriend> users = new LinkedList<XMPPFriend>();
+        users.add(context.mock(XMPPFriend.class));
+        users.add(context.mock(XMPPFriend.class));
         
         final Map<String, FriendPresence> presences1 = new HashMap<String, FriendPresence>();
         final Map<String, FriendPresence> presences2 = new HashMap<String, FriendPresence>();
@@ -284,9 +284,9 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         
         final XMPPConnection xmppConnection = context.mock(XMPPConnection.class);
         
-        final LinkedList<User> users = new LinkedList<User>();
-        users.add(context.mock(User.class));
-        users.add(context.mock(User.class));
+        final LinkedList<XMPPFriend> users = new LinkedList<XMPPFriend>();
+        users.add(context.mock(XMPPFriend.class));
+        users.add(context.mock(XMPPFriend.class));
         
         final Map<String, FriendPresence> presences1 = new HashMap<String, FriendPresence>();
         final Map<String, FriendPresence> presences2 = new HashMap<String, FriendPresence>();

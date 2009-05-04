@@ -4,13 +4,13 @@ import org.apache.commons.logging.Log;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.IQ;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.FileMetaData;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 
 public class FileOfferInitializer implements FeatureInitializer{
@@ -47,7 +47,7 @@ public class FileOfferInitializer implements FeatureInitializer{
             this.connection = connection;
         }
 
-        public void offerFile(FileMetaData file) throws XMPPException {
+        public void offerFile(FileMetaData file) throws FriendException {
             if(LOG.isInfoEnabled()) {
                 LOG.info("offering file " + file.toString() + " to " + presenceID);
             }
@@ -58,7 +58,7 @@ public class FileOfferInitializer implements FeatureInitializer{
             try {
                 connection.sendPacket(transferIQ);
             } catch (org.jivesoftware.smack.XMPPException e) {
-                throw new XMPPException(e);
+                throw new FriendException(e);
             }
         }
     }
