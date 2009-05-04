@@ -136,6 +136,10 @@ public final class FileTypeOptionPanelManager {
         Collection<String> allExts = new TreeSet<String>();
         removableExts = new HashSet<String>();
         
+        for ( MediaType type : MediaType.getDefaultMediaTypes() ) {
+            allExts.addAll(type.getExtensions());
+        }
+        
         allExts.addAll(libraryData.getDefaultExtensions());
         allExts.addAll(selectedExts);
                         
