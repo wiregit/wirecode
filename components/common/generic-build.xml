@@ -87,7 +87,7 @@
     
     <macrodef name="do.setup-properties" description="Sets up common properties every macro uses.">
         <sequential>
-            <ivy:configure file="${limewire.ivy.home}/ivysettings.xml" override="true"/>
+            <ivy:configure file="${limewire.ivy.settings.file}" override="true"/>
         
             <property name="initialized.${component}" value="true"/>
             
