@@ -6,6 +6,9 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.ui.swing.event.AbstractEDTEvent;
 import org.limewire.xmpp.api.client.MessageWriter;
 
+/**
+ * Signals which friend you consider to be the active conversation in chat.
+ */
 public class ConversationSelectedEvent extends AbstractEDTEvent {
     private final ChatFriend chatFriend;
     private final MessageWriter writer;

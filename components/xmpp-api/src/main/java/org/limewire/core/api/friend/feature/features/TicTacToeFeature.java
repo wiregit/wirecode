@@ -5,6 +5,9 @@ import java.net.URISyntaxException;
 
 import org.limewire.core.api.friend.feature.Feature;
 
+/**
+ * Defines Tic Tac Toe support.
+ */
 public class TicTacToeFeature extends Feature<TicTacToeSupport> {
 
     public static final URI ID;

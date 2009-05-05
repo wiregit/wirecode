@@ -24,6 +24,9 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.tictactoe.ChallengeToPlayTicTacToeRejectedEvent;
+import org.limewire.ui.swing.tictactoe.CreateTicTacToeFrameEvent;
+import org.limewire.ui.swing.tictactoe.TicTacToeMessages;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -77,7 +80,9 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
                 }else {
                     //publish an event so it's created in ConversationPane
                     //cause that place is getting the messages.
-                    new ChallengeToPlayTicTacToeAcceptedEvent(conversation.getChatFriend()).publish();
+                    //If you accept to play a game, you are X and get to go first so set true for the last param.
+                    new CreateTicTacToeFrameEvent(conversation.getChatFriend().getID(), conversation.getChatFriend().getName(), true).publish();
+
                 }
             } catch(UnsupportedEncodingException uee) {
                 throw new RuntimeException(uee); // impossible
@@ -94,7 +99,7 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
     void fireChallengeToPlayTicTacToeRejected() {
         //the request to play is rejected, publish an event so we know to create the
         //dialog box in conversationPane
-        ChallengeToPlayTicTacToeRejectedEvent event = new ChallengeToPlayTicTacToeRejectedEvent(1);
+        ChallengeToPlayTicTacToeRejectedEvent event = new ChallengeToPlayTicTacToeRejectedEvent();
         event.publish();
     }
         

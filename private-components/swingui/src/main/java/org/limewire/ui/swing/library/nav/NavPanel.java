@@ -42,8 +42,8 @@ import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.menu.actions.ChatAction;
-import org.limewire.ui.swing.menu.actions.TicTacToeAction;
 import org.limewire.ui.swing.painter.GenericBarPainter;
+import org.limewire.ui.swing.tictactoe.TicTacToeAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -397,8 +397,6 @@ public class NavPanel extends JXPanel {
                 Map.Entry pairs = (Map.Entry)it.next();
                 FriendPresence fp = (FriendPresence)pairs.getValue();
                 if(fp != null && fp.hasFeatures(TicTacToeFeature.ID)) {
-//                    if(remoteLibraryManager.hasFriendLibrary(friend)) {//this only checks that they have a library
-//                    TicTacToeAction tictactoeAction = new TicTacToeAction();
                     TicTacToeAction tictactoeAction = tictactoeActionProvider.get();
                     tictactoeAction.setFriend(friend);
                     menu.add(new JMenuItem(tictactoeAction));

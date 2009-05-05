@@ -5,6 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.util.List;
 
 import org.limewire.ui.swing.friends.chat.Message.Type;
+import org.limewire.ui.swing.tictactoe.TicTacToeSignOffFriendsEvent;
 import org.limewire.xmpp.api.client.ChatState;
 
 /**
@@ -98,6 +99,11 @@ class ChatDocumentBuilder {
     private static void appendIsTypingMessage(StringBuilder builder, String senderName, ChatState chatState, boolean friendSignedOff) {
         String stateMessage = null;
         if (friendSignedOff) {
+            //Let the Tic Tac Toe UI know that you are done playing.
+            //Handled in TicTacToeMiglayout
+            //TODO: make a different event/bool to know more info
+            new TicTacToeSignOffFriendsEvent(true).publish();
+
             stateMessage = tr("{0} has signed off", senderName);
         } else if (chatState == ChatState.composing) {
             stateMessage = tr("{0} is typing...", senderName);

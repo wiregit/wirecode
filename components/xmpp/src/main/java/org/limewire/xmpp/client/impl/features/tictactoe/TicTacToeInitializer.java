@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.impl.features;
+package org.limewire.xmpp.client.impl.features.tictactoe;
 
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
@@ -6,13 +6,11 @@ import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.TicTacToeFeature;
 import org.limewire.core.api.friend.feature.features.TicTacToeSupport;
 
+/**
+ * Let's the LimeWire client know you support playing Tic Tac Toe (ttt). In LimeWire you
+ * challenge a friend to play ttt only if he supports also supports ttt.
+ */
 public class TicTacToeInitializer implements FeatureInitializer{
-//        private final XMPPConnection connection;
-
-//    public TicTacToeInitializer() {
-//        //        public TicTacToeInitializer(XMPPConnection connection) {
-////            this.connection = connection;
-//        }
 
         @Override
         public void register(FeatureRegistry registry) {
@@ -22,7 +20,6 @@ public class TicTacToeInitializer implements FeatureInitializer{
         @Override
         public void initializeFeature(FriendPresence friendPresence) {
             friendPresence.addFeature(new TicTacToeFeature(new TicTacToeSupportImpl()));
-//            friendPresence.addFeature(new TicTacToeFeature(new TicTacToeSupportImpl(friendPresence.getPresenceId(), connection)));
         }
         
 
@@ -32,13 +29,7 @@ public class TicTacToeInitializer implements FeatureInitializer{
         }
         private static class TicTacToeSupportImpl implements TicTacToeSupport {
 
-//            private String presenceID;
-//            private final XMPPConnection connection;
-
             public TicTacToeSupportImpl() {
-//            public TicTacToeSupportImpl(String presenceId, XMPPConnection connection) {
-//                this.presenceID = presenceId;
-//                this.connection = connection;
             }
 
         }

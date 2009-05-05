@@ -317,8 +317,12 @@ public class ChatFriendListPane extends JPanel {
 
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
+
 //        System.out.println("handleMessageReceived ChatFriendListPane");
         Message message = event.getMessage();
+//        if(message instanceof MessageGameOffer) {
+//            System.out.println("ChatFriendListPane: from " + message.getSenderName() + " text: " + message.toString() + " topic: " + topic);
+//        }
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         ChatFriend chatFriend = chatModel.getChatFriend(message.getFriendID());
 
@@ -397,11 +401,14 @@ public class ChatFriendListPane extends JPanel {
     }
     
     private void fireCloseChat(ChatFriend chatFriend) {
+        System.out.println("friend signed out - ChatFriendListPane#fireCloseChat");
+
         new CloseChatEvent(chatFriend).publish();
     }
     
     @EventSubscriber
     public void handleCloseChatEvent(CloseChatEvent event) {
+        System.out.println("friend signed out - ChatFriendListPane#handleCloseChatEvent");
         closeChat(event.getFriend());
     }
 
@@ -410,6 +417,8 @@ public class ChatFriendListPane extends JPanel {
 
             chatFriend.stopChat();
             if (!chatFriend.isSignedIn()) {
+                System.out.println("friend signed out - ChatFriendListPane#closeChat");
+
                 chatFriends.remove(chatModel.removeChatFriend(chatFriend.getID()));
             }
             

@@ -43,7 +43,7 @@ import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
 import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.xmpp.client.impl.features.LimewireFeatureInitializer;
-import org.limewire.xmpp.client.impl.features.TicTacToeInitializer;
+import org.limewire.xmpp.client.impl.features.tictactoe.TicTacToeInitializer;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;

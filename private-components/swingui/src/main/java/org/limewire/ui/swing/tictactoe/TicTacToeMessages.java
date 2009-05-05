@@ -1,5 +1,8 @@
-package org.limewire.ui.swing.friends.chat;
+package org.limewire.ui.swing.tictactoe;
 
+/**
+ * Various messages sent for Tic Tac Toe.
+ */
 public class TicTacToeMessages {
 
     public static String TICTACTOE = new String("tictactoe-");

@@ -358,7 +358,7 @@ public final class Initializer {
         ActiveLimeWireCheck activeLimeWireCheck = new ActiveLimeWireCheck(args, StartupSettings.ALLOW_MULTIPLE_INSTANCES.getValue());
         stopwatch.resetAndLog("Create ActiveLimeWireCheck");
         if (activeLimeWireCheck.checkForActiveLimeWire()) {
-            System.exit(0);
+           // System.exit(0); //for testing running two lw sessions on one system
         }
         stopwatch.resetAndLog("Run ActiveLimeWireCheck");
     }
@@ -468,9 +468,9 @@ public final class Initializer {
         }
     }
     
-    /**
-     * Initializes any early UI tasks, such as HTML loading & the Bug Manager.
-     */
+    /** Initializes any early UI tasks, such as HTML loading & the Bug Manager. 
+     * @param mozillaOverrides 
+     * @param mozillaOverrides */
     private void initializeEarlyUI() {
         // Load up the HTML engine.
         splashRef.get().setStatusText(I18n.tr("Muddling Mint..."));        //html engine

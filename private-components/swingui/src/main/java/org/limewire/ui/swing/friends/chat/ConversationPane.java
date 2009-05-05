@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Rectangle;
@@ -79,6 +80,14 @@ import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.painter.GenericBarPainter;
+import org.limewire.ui.swing.tictactoe.ChallengeToPlayTicTacToeRejectedEvent;
+import org.limewire.ui.swing.tictactoe.CreateTicTacToeFrameEvent;
+import org.limewire.ui.swing.tictactoe.MessageExtendTicTacToeChallenge;
+import org.limewire.ui.swing.tictactoe.MessageGameOffer;
+import org.limewire.ui.swing.tictactoe.TicTacToeMessages;
+import org.limewire.ui.swing.tictactoe.TicTacToePane;
+import org.limewire.ui.swing.tictactoe.TicTacToeSelectedFromFriendEvent;
+import org.limewire.ui.swing.tictactoe.TicTacToeSignOffFriendsEvent;
 import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
@@ -120,7 +129,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final LibraryNavigator libraryNavigator;
     private HyperlinkButton downloadlink;
     private HyperlinkButton sharelink;
-//    private HyperlinkButton tttlink;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
 
@@ -129,7 +137,12 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private EventListener<FeatureEvent> featureListener;
     private EventListener<FriendEvent> friendListener;
     
-//    private final TicTacToeMigLayout tictactoePane = null;
+    private boolean tictactoeGameStarted = false;
+    private final int TTT_WIDTH = 250;
+    private final int TTT_HEIGHT = 375;
+    private TicTacToePane tictactoePane = null;
+    private JFrame tictactoeFrame = null;
+    private boolean signedOutOfFriends = false;
 
     
     @Resource(key="ChatConversation.toolbarTopColor") private Color toolbarTopColor;
@@ -267,9 +280,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         friendSupport.addListener(friendListener);
         featureSupport.addListener(featureListener);
     }             
-////////////////////////////////////////////////////////    
-    private void tictactoeInterceptor(Message message){
-//        System.out.println("ConversationPane#tictactoeInterceptor: " + message);
+
+    private void interceptTicTacToeMessages(Message message){
         if(message.toString().indexOf(TicTacToeMessages.TICTACTOE) == -1) {
             return;
         }       
@@ -282,99 +294,109 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
             return;
         }       
         if(Message.Type.Received == message.getType()) {
-            
+            //If you're friend sent an initiate game request, the 
+            //<code>MessageGameOffer</code> constructs the request, along with
+            //the rejection to play a Tic Tac Toe game in your chat window.
             if(message.toString().indexOf(TicTacToeMessages.INITIATE_GAME) > -1) {                   
                 User chatUser = chatFriend.getUser();
-                MessageTicTacToeOffer tttOfferMessage =
-                        new MessageTicTacToeOfferImpl(loggedInID, friendId, Message.Type.Received, chatUser.getActivePresence());
-                //I need this to get the button on the chat window
-System.out.println(loggedInID + " initiate game with " + friendId);
-                new MessageReceivedEvent(tttOfferMessage).publish();            
+                MessageGameOffer extendTicTacToeChallenge =
+                        new MessageExtendTicTacToeChallenge(loggedInID, friendId, Message.Type.Received, chatUser.getActivePresence());
+
+                new MessageReceivedEvent(extendTicTacToeChallenge).publish();            
                 
             }else {
-                //TODO send the message through the event bus so it lands in miglayout?            
                 if(message.toString().indexOf(TicTacToeMessages.TICTACTOE) > -1) {
                     //Handled in TicTAcToeMigLayout
-                    new TicTacToeSelectedEventFromFriend(message).publish();
+                    new TicTacToeSelectedFromFriendEvent(message).publish();
                 }
 
             }            
         }
     }    
 
+    @EventSubscriber
+    public void handleTicTacToeSignOffFriendsEvent(TicTacToeSignOffFriendsEvent event) {
+        if(!event.getFriendSignedOff()) {
+            //You signed out of Friends, close 
+            tictactoeFrame.dispose();          
+            signedOutOfFriends = true;
+        }
+
+    }
+
     /**
-     * All creations of the tic tac toe frames are done in ConversationPane. We'll have a map of frames to friends
-     * so you can properly put the moves to the actual frame. actually right now this comment is wrong, not all
-     * done here though they probably should be.
+     * All creations of the Tic Tac Toe frame. 
      */
     @EventSubscriber
     public void handleCreatePane(CreateTicTacToeFrameEvent event) {        
 
-        
-        //compare id sent with id here, if the same, create, else ignore cause i'm handling for the wrong person
-        
-        if(!chatFriend.getID().matches(event.getFriendID())) {
+        //Because CreateTicTacToeFrameEvent could be published for a different conversation and the EDT would handle, 
+        //compare the ID sent with of the chat friend. If the IDs are the same, create a Tic Tac Toe board. Otherwise
+        //else ignore the event cause it's for a different friend
+        //Also, you, or a friend might try to initiate a game a second active game ... don't allow.
+        if(!chatFriend.getID().matches(event.getFriendID()) || tictactoeGameStarted == true) {
             return;
         }
+        tictactoeGameStarted = true;
+        signedOutOfFriends = false;
         
-        final TicTacToeMigLayout tictactoePane = new TicTacToeMigLayout(writer, chatFriend, loggedInID, event.isX());
+        tictactoePane = new TicTacToePane(writer, chatFriend, loggedInID, event.isX());
         tictactoePane.fireGameStarted();
-        
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setResizable(true);
-        frame.setTitle("Tic Tac Toe with " + event.getFriendNickName());            
-        frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane().add(tictactoePane, BorderLayout.CENTER);            
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        
-        frame.addWindowListener(new WindowAdapter() {
-            //If I challenged a friend, but he rejected the offer, don't call exitGame
+        tictactoeFrame = new JFrame();
+        tictactoeFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        tictactoeFrame.setResizable(false);
+        tictactoeFrame.setTitle("Tic Tac Toe with " + event.getFriendNickName());            
+        tictactoeFrame.getContentPane().setLayout(new BorderLayout());
+        tictactoeFrame.getContentPane().add(tictactoePane, BorderLayout.CENTER);            
+        tictactoeFrame.pack();
+        tictactoeFrame.setLocationRelativeTo(null);
+        tictactoeFrame.setVisible(true);
+        tictactoeFrame.setSize(new Dimension(TTT_WIDTH, TTT_HEIGHT));
+        tictactoeFrame.addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosed(WindowEvent e) {
-                tictactoePane.exitGame();                
+                if(!signedOutOfFriends) {
+                    exitTicTacToeGame();            
+                    tictactoeGameStarted = false;
+                }
             }            
         });
            
     }
 
     /**
-     * This method is called when ChatHyperLinkListener publishes 
-     * ChallengeToPlayTicTacToeAcceptedEvent. This method creates
-     * the tic tac toe board
+     * This event is created and published in the ChatHyperlinkListener to show you
+     * clicked to reject the game. Use the chat frame writer to send the message that
+     * you aren't interested in playing.
      */
     @EventSubscriber
-    public void handleChallengeToPlayTicTacToeAcceptedEvent(ChallengeToPlayTicTacToeAcceptedEvent event) {        
-        
-        //If you were asked to play, then you get to be X and go first
-        new CreateTicTacToeFrameEvent(chatFriend.getID(), chatFriend.getName(), true).publish();
-       
-    }
-    //this is needed just to send the reject game to the friend
-    @EventSubscriber
-    public void handleChallengeToPlayTicTacToeRejectedEvent(ChallengeToPlayTicTacToeRejectedEvent event) {        
-        
-        final TicTacToeMigLayout panel = new TicTacToeMigLayout(writer, chatFriend, loggedInID, true);
-        panel.exitGame();                
-           
-    }        
+    public void handleChallengeToPlayTicTacToeRejectedEvent(ChallengeToPlayTicTacToeRejectedEvent event) {                       
+        exitTicTacToeGame();
+    }   
     
-//  @EventSubscriber
-//  public void handleTicTacToeMessageReceiveEvent(String topic, TicTacToeMessageReceiveEvent event) {        
-//      System.out.println("got TicTacToeMessageReceiveEvent from: " + event.getMessage().getSenderName());
-//  }
-
-//////////////////////////////////////////////////////////////////////////////    
+    /**
+     * Write the 'no thanks' message using the chat frame writer.
+     */
+    private void exitTicTacToeGame() {
+        tictactoeGameStarted = false;     
+        String message = new String();
+        message = TicTacToeMessages.TICTACTOE + TicTacToeMessages.NO_THANKS_GAME;
+        try {
+            writer.writeMessage(message);
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }                
+        
+    }
+    
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
-//        System.out.println("ConversationPane Message: from " + message.getSenderName() + " text: " + message.toString() + " topic: " + topic);
         
-        //TODO: sending over the EDT handles all MessageReceivedEvents; only messages from a friend should 
+        //Sending over the EDT handles all MessageReceivedEvents; only messages from a friend should 
         //intercepted. Especially for the initiate game events.
         if(message.getFriendID().matches(chatFriend.getID())) {
-               tictactoeInterceptor(message);
+               interceptTicTacToeMessages(message);
         }
         LOG.debugf("Message: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         messages.add(message);
@@ -650,8 +672,6 @@ System.out.println(loggedInID + " initiate game with " + friendId);
                            new MessageFileOfferImpl(loggedInID, friendId, Message.Type.Sent, metadata, null);
 
                    if (sentFileOffer) {
-//                       System.out.println("conversationpane new MessageReceivedEvent publish");
-
                         new MessageReceivedEvent(fileOfferMessage).publish();
                    } else {
                        // TODO: Devise how to handle file offer sending failures, using tooltip perhaps?

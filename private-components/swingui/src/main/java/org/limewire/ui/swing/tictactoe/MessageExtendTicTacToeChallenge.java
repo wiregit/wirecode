@@ -1,32 +1,23 @@
-package org.limewire.ui.swing.friends.chat;
+package org.limewire.ui.swing.tictactoe;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.ui.swing.friends.chat.AbstractMessageImpl;
+import org.limewire.ui.swing.friends.chat.Message;
 
 /**
  * This is the offer message that is displayed in a person's chat screen when someone challenges you 
- * to a game of tic tac toe.
- * @author dsullivan
+ * to a game of Tic Tac Toe.
  *
  */
-public class MessageTicTacToeOfferImpl extends AbstractMessageImpl implements MessageTicTacToeOffer {
+public class MessageExtendTicTacToeChallenge extends AbstractMessageImpl implements MessageGameOffer {
 
     private static final String LATER_TEXT = tr("Play now, or " +
             "{0}reject{1}.","<a href=\"" + TicTacToeMessages.REJECT_GAME + "\">", "</a>");
 
-    private FriendPresence sourcePresence;
-
-
-    public MessageTicTacToeOfferImpl(String senderName, String friendId, Type type, FriendPresence sourcePresence) {
+    public MessageExtendTicTacToeChallenge(String senderName, String friendId, Type type, FriendPresence sourcePresence) {
         super(senderName, friendId, type);
-        this.sourcePresence = sourcePresence;
-    }
-
-
-    @Override
-    public FriendPresence getPresence() {
-        return sourcePresence;
     }
 
     @Override

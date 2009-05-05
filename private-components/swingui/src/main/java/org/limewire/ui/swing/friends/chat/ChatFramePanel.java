@@ -25,6 +25,7 @@ import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.sound.WavSoundPlayer;
+import org.limewire.ui.swing.tictactoe.TicTacToeSignOffFriendsEvent;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.EnabledType;
@@ -116,7 +117,6 @@ public class ChatFramePanel extends Panel implements ChatFrame {
      */
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
-//System.out.println("handleMessageReceived ChatFramePanel: " + event.getMessage().format());
         if (event.getMessage().getType() != Message.Type.Sent) {
             String messageFriendID = event.getMessage().getFriendID();
             mostRecentConversationFriendId = messageFriendID;
@@ -199,6 +199,11 @@ public class ChatFramePanel extends Panel implements ChatFrame {
         lastSelectedConversationFriendId = null;
         mostRecentConversationFriendId = null;
         unseenMessageListener.clearUnseenMessages();
+        
+        //Let the Tic Tac Toe UI know that you are done playing.
+        //Handled in TicTacToeMiglayout
+        new TicTacToeSignOffFriendsEvent(false).publish();
+        
     }
     
     public String getMessagingTopicPatternName() {

@@ -30,7 +30,6 @@ class MessageWriterImpl implements MessageWriter {
             }
         }, "send-message");
 
-//        System.out.println("MessageWriterImpl new MessageReceivedEvent publish");
         new MessageReceivedEvent(newMessage(message, Message.Type.Sent)).publish();
     }
 

@@ -45,7 +45,7 @@ public class MessageTextImpl extends AbstractMessageImpl implements MessageText 
     }
 
     /**
-     * Takes the given string creating anchor tags for whereever it finds urls,
+     * Takes the given string creating anchor tags for where ever it finds urls,
      * and creating wbr tags whenever a word over the MAX_LENGTH_PIXELS is
      * encountered.
      */
