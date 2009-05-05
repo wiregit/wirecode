@@ -26,7 +26,8 @@ public interface HTTPUploadSessionManager {
     /**
      * Returns an uploader for <code>request</code>. If the previous request
      * was for <code>filename</code> as well an existing uploader is returned;
-     * otherwise a new uploader is created.
+     * otherwise a new uploader is created. FriendID may be null if this uploader
+     * is associated with a gnutella Upload.
      */
     HTTPUploader getOrCreateUploader(HttpRequest request, HttpContext context,
             UploadType type, String filename, String friendID);

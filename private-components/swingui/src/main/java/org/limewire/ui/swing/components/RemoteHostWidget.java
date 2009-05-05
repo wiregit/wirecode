@@ -30,6 +30,12 @@ import org.limewire.util.Objects;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+/**
+ * A Widget for displaying RemoteHosts associated with a piece of data. 
+ * A drop down menu is displayed that may be actions associated with a 
+ * single RemoteHost, or a list of RemoteHosts each with an action
+ * associated with each Host.
+ */
 public class RemoteHostWidget extends JPanel {
 
     public static enum RemoteWidgetType {
