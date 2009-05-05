@@ -83,7 +83,6 @@ import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.tictactoe.ChallengeToPlayTicTacToeRejectedEvent;
 import org.limewire.ui.swing.tictactoe.CreateTicTacToeFrameEvent;
 import org.limewire.ui.swing.tictactoe.MessageExtendTicTacToeChallenge;
-import org.limewire.ui.swing.tictactoe.MessageGameOffer;
 import org.limewire.ui.swing.tictactoe.TicTacToeMessages;
 import org.limewire.ui.swing.tictactoe.TicTacToePane;
 import org.limewire.ui.swing.tictactoe.TicTacToeSelectedFromFriendEvent;

@@ -1,6 +1,5 @@
-package org.limewire.ui.swing.tictactoe;
+package org.limewire.ui.swing.friends.chat;
 
-import org.limewire.ui.swing.friends.chat.Message;
 
 /**
  * Defines an interface, like a message file offer, to notify someone that he 

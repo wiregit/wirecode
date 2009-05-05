@@ -5,6 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.ui.swing.friends.chat.AbstractMessageImpl;
 import org.limewire.ui.swing.friends.chat.Message;
+import org.limewire.ui.swing.friends.chat.MessageGameOffer;
 
 /**
  * This is the offer message that is displayed in a person's chat screen when someone challenges you 
