@@ -9,6 +9,7 @@ import java.util.Map;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.Address;
@@ -177,4 +178,8 @@ public class GnutellaPresence implements FriendPresence {
         features.remove(id);
     }
 
+    @Override
+    public <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

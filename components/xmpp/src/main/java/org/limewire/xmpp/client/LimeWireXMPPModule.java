@@ -31,9 +31,13 @@ import org.limewire.xmpp.client.impl.FallbackConnectionConfigurationFactory;
 import org.limewire.xmpp.client.impl.XMPPAddressRegistry;
 import org.limewire.xmpp.client.impl.XMPPAddressResolver;
 import org.limewire.xmpp.client.impl.XMPPAddressSerializer;
-import org.limewire.xmpp.client.impl.XMPPConnectionImplFactory;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
+import org.limewire.xmpp.client.impl.XMPPConnectionImplFactory;
 import org.limewire.xmpp.client.impl.XMPPServiceImpl;
+import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
+import org.limewire.xmpp.client.impl.messages.address.AddressIQListenerFactory;
+import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;
+import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListenerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -93,7 +97,10 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(new TypeLiteral<List<ConnectionConfigurationFactory>>(){}).toInstance(connectionConfigurationFactories);
         
         bind(XMPPConnectionImplFactory.class).toProvider(FactoryProvider.newFactory(XMPPConnectionImplFactory.class, XMPPConnectionImpl.class));
-                
+         
+        bind(AddressIQListenerFactory.class).toProvider(FactoryProvider.newFactory(AddressIQListenerFactory.class, AddressIQListener.class));
+        bind(AuthTokenIQListenerFactory.class).toProvider(FactoryProvider.newFactory(AuthTokenIQListenerFactory.class, AuthTokenIQListener.class));
+        
         // bind egearly, so it registers itself with SocketsManager
         bind(XMPPAddressResolver.class).asEagerSingleton();
         // dito

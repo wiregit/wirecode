@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 
 import org.limewire.core.api.friend.feature.Feature;
 
-public class AuthTokenFeature extends Feature<byte []> {
+public class AuthTokenFeature extends Feature<AuthToken> {
 
     public static final URI ID;
 
@@ -17,7 +17,7 @@ public class AuthTokenFeature extends Feature<byte []> {
         }
     }
 
-    public AuthTokenFeature(byte [] feature) {
+    public AuthTokenFeature(AuthToken feature) {
         super(feature, ID);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.limewire.io.Address;
 
 public class BuddyListResponseProcessor {
     public static Map<String, FacebookFriend> deserialize(String response) throws JSONException {
@@ -69,6 +70,7 @@ public class BuddyListResponseProcessor {
 			String key = it.next();
 			JSONObject user = (JSONObject) userInfos.get(key);
 			FacebookFriend friend = new FacebookFriend(key, user);
+            friend.addTransport(Address.class, new AddressLiveMessage(null, null, null));
 			onlineFriends.put(friend.getId(), friend);
 			//Launcher.getChatroomAnyway(key).setRoomName(fu.name);
 		}

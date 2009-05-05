@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.Collection;
 
 import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureTransport;
 
 /**
  * A presence for a friend. One friend can have multiple presences.
@@ -50,4 +51,6 @@ public interface FriendPresence {
      * @param id the feature to remove
      */
     void removeFeature(URI id);
+    
+    <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature);
 }

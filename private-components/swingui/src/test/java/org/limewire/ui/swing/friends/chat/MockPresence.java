@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.XMPPFriend;
 
@@ -100,5 +101,10 @@ public class MockPresence implements XMPPPresence {
     @Override
     public void removeFeature(URI id) {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

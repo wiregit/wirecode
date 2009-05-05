@@ -6,10 +6,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.lang.reflect.ParameterizedType;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.XMPPFriend;
@@ -18,6 +20,7 @@ class PresenceImpl implements XMPPPresence {
 
     private final XMPPFriend user;
     private final Map<URI, Feature> features;
+    private final Map<Class, FeatureTransport> featureTransports;
     private final EventBroadcaster<FeatureEvent> featureBroadcaster;
     private final String jid;
     
@@ -33,6 +36,7 @@ class PresenceImpl implements XMPPPresence {
                  XMPPFriend user, EventBroadcaster<FeatureEvent> featureSupport) {
         this.user = user;
         this.features = new ConcurrentHashMap<URI, Feature>();
+        this.featureTransports = new ConcurrentHashMap<Class, FeatureTransport>();
         this.featureBroadcaster = featureSupport;
         this.jid = presence.getFrom();
         update(presence);
@@ -147,5 +151,25 @@ class PresenceImpl implements XMPPPresence {
         if(feature != null) {
             featureBroadcaster.broadcast(new FeatureEvent(this, FeatureEvent.Type.REMOVED, feature));
         }
+    }
+
+    @Override
+    public <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature) {
+        java.lang.reflect.Type type = feature.getGenericSuperclass();
+        if(type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType)type;
+            java.lang.reflect.Type [] typeArgs = parameterizedType.getActualTypeArguments();
+            if(typeArgs != null && typeArgs.length > 0) {
+                java.lang.reflect.Type typeArg = typeArgs[0];
+                if(typeArg instanceof Class) {
+                    return (FeatureTransport<U>)featureTransports.get((Class) typeArg);    
+                }
+            }
+        }
+        return null;
+    }
+    
+    public <U> void addTransport(Class<U> clazz, FeatureTransport<U> transport) {
+        featureTransports.put(clazz, transport);    
     }
 }

@@ -1,5 +1,6 @@
 package org.limewire.xmpp.client.impl;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,35 +19,38 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatStateManager;
+import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.friend.client.FileOfferEvent;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
-import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
+import org.limewire.core.api.friend.feature.FeatureRegistry;
+import org.limewire.core.api.friend.feature.features.AuthToken;
+import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventRebroadcaster;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequestedEvent;
-import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
 import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.xmpp.client.impl.features.LimewireFeatureInitializer;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
+import org.limewire.xmpp.client.impl.messages.address.AddressIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;
+import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQListener;
@@ -70,13 +74,15 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster;
     private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
     private final AddressFactory addressFactory;
-    private final DefaultFriendAuthenticator authenticator;
     private final EventMulticaster<FeatureEvent> featureSupport;
     private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
-    private final XMPPAddressRegistry xmppAddressRegistry;
-    private final ListenerSupport<AddressEvent> addressListenerSupport;
     private final ListeningExecutorService executorService;
     private final List<ConnectionConfigurationFactory> connectionConfigurationFactories;
+    private final AddressIQListenerFactory addressIQListenerFactory;
+    private final AuthTokenIQListenerFactory authTokenIQListenerFactory;
+    private final FeatureRegistry featureRegistry;
+    private volatile AddressIQListener addressIQListener;
+    private volatile AuthTokenIQListener authTokenIQListener;
 
     private final EventListenerList<RosterEvent> rosterListeners;
     private final Map<String, XMPPFriendImpl> users;
@@ -95,25 +101,26 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                        EventBroadcaster<FriendRequestEvent> friendRequestBroadcaster,
                        EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster,
                        EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster,
-                       AddressFactory addressFactory, DefaultFriendAuthenticator authenticator,
+                       AddressFactory addressFactory,
                        EventMulticaster<FeatureEvent> featureSupport,
-                       EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,
-                       XMPPAddressRegistry xmppAddressRegistry, 
-                       ListenerSupport<AddressEvent> addressListenerSupport,                       
-                       List<ConnectionConfigurationFactory> connectionConfigurationFactories) {
+                       EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,                     
+                       List<ConnectionConfigurationFactory> connectionConfigurationFactories,
+                       AddressIQListenerFactory addressIQListenerFactory,
+                       AuthTokenIQListenerFactory authTokenIQListenerFactory,
+                       FeatureRegistry featureRegistry) {
         this.configuration = configuration;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.friendRequestBroadcaster = friendRequestBroadcaster;
         this.libraryChangedEventEventBroadcaster = libraryChangedEventEventBroadcaster;
         this.connectionBroadcaster = connectionBroadcaster;
         this.addressFactory = addressFactory;
-        this.authenticator = authenticator;
         this.featureSupport = featureSupport;
         this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
-        this.xmppAddressRegistry = xmppAddressRegistry;
-        this.addressListenerSupport = addressListenerSupport;
         this.executorService = executorService;
         this.connectionConfigurationFactories = connectionConfigurationFactories;
+        this.addressIQListenerFactory = addressIQListenerFactory;
+        this.authTokenIQListenerFactory = authTokenIQListenerFactory;
+        this.featureRegistry = featureRegistry;
         rosterListeners = new EventListenerList<RosterEvent>();
         // FIXME: this is only used by tests
         if(configuration.getRosterListener() != null) {
@@ -285,7 +292,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                         if(roster != null) {
                             for(String id : addedIds) {
                                 RosterEntry rosterEntry = roster.getEntry(id);
-                                XMPPFriendImpl user = new XMPPFriendImpl(id, rosterEntry, configuration, connection, discoInfoListener);
+                                XMPPFriendImpl user = new XMPPFriendImpl(id, rosterEntry, configuration, connection, featureRegistry);
                                 LOG.debugf("user {0} added", user);
                                 users.put(id, user);
                                 rosterListeners.broadcast(new RosterEvent(user, RosterEvent.Type.USER_ADDED));
@@ -312,7 +319,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                                 XMPPFriendImpl user = users.get(id);
                                 if(user == null) {
                                     // should never happen ?
-                                    user = new XMPPFriendImpl(id, rosterEntry, configuration, connection, discoInfoListener);
+                                    user = new XMPPFriendImpl(id, rosterEntry, configuration, connection, featureRegistry);
                                     users.put(id, user);
                                 } else {
                                     user.setRosterEntry(rosterEntry);
@@ -384,6 +391,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
         private void addNewPresence(final XMPPFriendImpl user, final org.jivesoftware.smack.packet.Presence presence) {
             final PresenceImpl presenceImpl = new PresenceImpl(presence, user, featureSupport);
+            presenceImpl.addTransport(Address.class, addressIQListener);
+            presenceImpl.addTransport(AuthToken.class, authTokenIQListener);
             user.addPresense(presenceImpl);
         }
 
@@ -457,6 +466,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
     @Override
     public XMPPFriend getUser(String id) {
+        id = org.jivesoftware.smack.util.StringUtils.parseBareAddress(id);
         synchronized (users) { 
             return users.get(id);
         }
@@ -488,8 +498,6 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     }
     
     private class SmackConnectionListener implements ConnectionListener, ConnectionCreationListener {
-        private volatile AddressIQListener addressIQListener;
-
         @Override
         public void connectionCreated(XMPPConnection connection) {
             if(XMPPConnectionImpl.this.connection != connection) {
@@ -521,33 +529,36 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
             ChatStateManager.getInstance(connection);
 
-            discoInfoListener = new DiscoInfoListener(XMPPConnectionImpl.this, connection);
+            discoInfoListener = new DiscoInfoListener(XMPPConnectionImpl.this, connection, featureRegistry);
             rosterListeners.addListener(discoInfoListener.getRosterListener());
             connection.addPacketListener(discoInfoListener, discoInfoListener.getPacketFilter());
 
-            addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, discoInfoListener, xmppAddressRegistry);
-            addressListenerSupport.addListener(addressIQListener);
+            addressIQListener = addressIQListenerFactory.create(XMPPConnectionImpl.this, addressFactory);
             connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
 
             FileTransferIQListener fileTransferIQListener = new FileTransferIQListener(fileOfferBroadcaster);
             connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());
 
-            AuthTokenIQListener authTokenIQListener = new AuthTokenIQListener(XMPPConnectionImpl.this, authenticator, discoInfoListener);
+            authTokenIQListener = authTokenIQListenerFactory.create(XMPPConnectionImpl.this);
             connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
 
             LibraryChangedIQListener libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventBroadcaster, XMPPConnectionImpl.this);
             connection.addPacketListener(libChangedIQListener, libChangedIQListener.getPacketFilter());
 
-            ConnectBackRequestIQListener connectRequestIQListener = new ConnectBackRequestIQListener(connectRequestEventBroadcaster, discoInfoListener);
+            ConnectBackRequestIQListener connectRequestIQListener = new ConnectBackRequestIQListener(connectRequestEventBroadcaster, featureRegistry);
             connection.addPacketListener(connectRequestIQListener, connectRequestIQListener.getPacketFilter());
             
-            new FileOfferInitializer(connection).register(discoInfoListener);
-            new LibraryChangedNotifierFeatureInitializer(connection).register(discoInfoListener);
-            new LimewireFeatureInitializer().register(discoInfoListener);
+            new FileOfferInitializer(connection).register(featureRegistry);
+            new LibraryChangedNotifierFeatureInitializer(connection).register(featureRegistry);
+            new LimewireFeatureInitializer().register(featureRegistry);
             
             SubscriptionListener sub = new SubscriptionListener(connection,
                                                 friendRequestBroadcaster);
             connection.addPacketListener(sub, sub);
+            
+            for(URI feature : featureRegistry) {
+                ServiceDiscoveryManager.getInstanceFor(connection).addFeature(feature.toASCIIString());
+            }
         }
 
         @Override
@@ -578,9 +589,6 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             ChatStateManager.remove(connection);
             if(discoInfoListener != null) {
                 rosterListeners.removeListener(discoInfoListener.getRosterListener());
-            }
-            if(addressIQListener != null) {
-                addressListenerSupport.removeListener(addressIQListener);    
             }
         }
     }

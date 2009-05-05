@@ -1,8 +1,6 @@
 package org.limewire.xmpp.client.impl.messages.discoinfo;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketFilter;
@@ -13,50 +11,39 @@ import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.xmpp.api.client.XMPPPresence;
 
 /**
  * sends disco info messages (http://jabber.org/protocol/disco#info) to newly available
  * presences and then calls the appropriate FeatureInitializer for each of the 
  * features that come back in the response.
  */
-public class DiscoInfoListener implements PacketListener, FeatureRegistry {
+public class DiscoInfoListener implements PacketListener {
     
     private static final Log LOG = LogFactory.getLog(DiscoInfoListener.class);
     
-    private final Map<URI, FeatureInitializer> featureInitializerMap;
     private final XMPPConnection connection;
     private final org.jivesoftware.smack.XMPPConnection smackConnection;
+    private final FeatureRegistry featureRegistry;
     private final RosterListener rosterListener;
     private final PresenceListener presenceListener;      
 
     public DiscoInfoListener(XMPPConnection connection,
-                             org.jivesoftware.smack.XMPPConnection smackConnection) {
+                             org.jivesoftware.smack.XMPPConnection smackConnection,
+                             FeatureRegistry featureRegistry) {
         this.connection = connection;
         this.smackConnection = smackConnection;
-        featureInitializerMap = new ConcurrentHashMap<URI, FeatureInitializer>();
+        this.featureRegistry = featureRegistry;
         rosterListener = new RosterListener();
         presenceListener = new PresenceListener();
-    }
-    
-    @Override
-    public void add(URI uri, FeatureInitializer featureInitializer) {
-        featureInitializerMap.put(uri, featureInitializer);
-        ServiceDiscoveryManager.getInstanceFor(smackConnection).addFeature(uri.toASCIIString());
-    }
-
-    @Override
-    public FeatureInitializer get(URI uri) {
-        return featureInitializerMap.get(uri);
     }
 
     @Override
@@ -66,10 +53,10 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
         if (user != null) {
             FriendPresence presence = user.getFriendPresences().get(discoverInfo.getFrom());
             if(presence != null) {
-                for(URI uri : featureInitializerMap.keySet()) {
+                for(URI uri : featureRegistry) {
                     if(discoverInfo.containsFeature(uri.toASCIIString())) {
                         LOG.debugf("initializing feature {0} for {1}", uri.toASCIIString(), presence.getPresenceId());
-                        featureInitializerMap.get(uri).initializeFeature(presence);
+                        featureRegistry.get(uri).initializeFeature(presence);
                     }
                 }
             }

@@ -8,6 +8,7 @@ import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.io.Address;
@@ -19,9 +20,9 @@ import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.BlockingAddressResolutionObserver;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPService;
 
 public class XMPPAddressResolverTest extends BaseTestCase {
@@ -59,7 +60,12 @@ public class XMPPAddressResolverTest extends BaseTestCase {
             allowing(user).getFriendPresences();
             will(returnValue(Collections.singletonMap("me@you.com/resource", friendPresence)));
             allowing(friendPresence).getFeature(AuthTokenFeature.ID);
-            will(returnValue(new AuthTokenFeature(new byte[] {})));
+            will(returnValue(new AuthTokenFeature(new AuthToken() {
+                @Override
+                public byte[] getToken() {
+                    return new byte[0];  //To change body of implemented methods use File | Settings | File Templates.
+                }
+            })));
         }});
         
         xmppAddressResolver = new XMPPAddressResolver(xmppService, null, socketsManager, addressRegistry);

@@ -9,6 +9,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.listener.EventListenerList;
 
 public class MockFriendPresence implements FriendPresence {
@@ -72,5 +73,10 @@ public class MockFriendPresence implements FriendPresence {
         if(feature != null) {
             featureListeners.broadcast(new FeatureEvent(this, FeatureEvent.Type.REMOVED, feature));
         }
+    }
+
+    @Override
+    public <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

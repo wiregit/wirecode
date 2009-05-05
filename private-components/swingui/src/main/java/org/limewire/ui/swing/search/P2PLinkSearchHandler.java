@@ -13,6 +13,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.io.Address;
@@ -113,6 +114,11 @@ class P2PLinkSearchHandler implements SearchHandler {
 
         @Override
         public void removeFeature(URI id) {
+        }
+
+        @Override
+        public <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
     }
     
