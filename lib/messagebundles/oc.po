@@ -15,8 +15,17 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
+msgid ""
+"LimeWire was unable to write a necessary file because your hard drive is "
+"full. To continue using LimeWire you must free up space on your hard drive."
+msgstr ""
+"LimeWire a pas pogut escriver un fichièr necierenc per que lo vòstre disc es "
+"plen. Entà contunhar d'emmerçar LimeWire, devètz desembarrar espaci en lo "
+"vòstre disc."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: components/common/src/main/java/org/limewire/util/MediaType.java:39
@@ -601,15 +610,6 @@ msgstr ""
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:83
 msgid "Metadata Loader"
 msgstr ""
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
-msgid ""
-"LimeWire was unable to write a necessary file because your hard drive is "
-"full. To continue using LimeWire you must free up space on your hard drive."
-msgstr ""
-"LimeWire a pas pogut escriver un fichièr necierenc per que lo vòstre disc es "
-"plen. Entà contunhar d'emmerçar LimeWire, devètz desembarrar espaci en lo "
-"vòstre disc."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""

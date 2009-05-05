@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:34+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -73,6 +73,17 @@ msgstr "სურათები"
 msgid "Other"
 msgstr "სხვა"
 
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
+msgid "The file is corrupted"
+msgstr "ფაილი დაზიანებულია"
+
+#. *
+#. * The DownloadItem is not in an error state.
+#. 
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
+msgid "No problems."
+msgstr "უპრობლემოდ."
+
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:17
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:64
@@ -97,10 +108,6 @@ msgstr ""
 msgid "There is a disk problem"
 msgstr ""
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
-msgid "The file is corrupted"
-msgstr "ფაილი დაზიანებულია"
-
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:28
 msgid "This file is not shareable"
 msgstr ""
@@ -108,13 +115,6 @@ msgstr ""
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:29
 msgid "Trouble connecting to people"
 msgstr ""
-
-#. *
-#. * The DownloadItem is not in an error state.
-#. 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
-msgid "No problems."
-msgstr "უპრობლემოდ."
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
 msgid ""

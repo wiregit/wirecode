@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:32+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -3709,10 +3709,6 @@ msgstr "Mitat"
 msgid "({0}px X {1}px)"
 msgstr "({0}px X {1}px)"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/AdvancedSearchBuilder.java:22
-msgid ":"
-msgstr ""
-
 #. text is lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:48
 msgid "close"
@@ -4581,17 +4577,6 @@ msgstr "Asetukset - vaihe {0} / {1}"
 msgid "Setup"
 msgstr "Asetus"
 
-#~ msgid "URL"
-#~ msgstr "URL"
-
-#~ msgid "Priority"
-#~ msgstr "Prioriteetti"
-
-#~ msgid "Active"
-#~ msgstr "Aktiivinen"
-
-#~ msgid "Content"
-#~ msgstr "Sisältö"
-
-#~ msgid "Restore"
-#~ msgstr "Palauta"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/AdvancedSearchBuilder.java:22
+msgid ":"
+msgstr ""

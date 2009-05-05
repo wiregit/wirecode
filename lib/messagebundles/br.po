@@ -15,13 +15,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#. These are used as resource keys to retreive descriptions in the GUI
-#: components/common/src/main/java/org/limewire/util/MediaType.java:39
-msgid "All Types"
-msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:41
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
@@ -97,17 +92,9 @@ msgstr "Roll"
 msgid "There is a disk problem"
 msgstr "Eno e oa ur gudenn kant"
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
-msgid "The file is corrupted"
-msgstr ""
-
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:28
 msgid "This file is not shareable"
 msgstr "Ar fichennaoueg ne gwarez ket"
-
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:29
-msgid "Trouble connecting to people"
-msgstr ""
 
 #. *
 #. * The DownloadItem is not in an error state.
@@ -124,6 +111,87 @@ msgid ""
 "the newest official version of LimeWire.</html>"
 msgstr "Da LimeWire kontammin gant ur viruz pe ur trojan"
 
+#: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:41
+msgid "XMPP Service"
+msgstr "XMPP Servij"
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:175
+msgid "Creative Commons"
+msgstr "Creative Commons"
+
+#. *
+#. * The copy action.
+#. 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CopyAction.java:11
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:59
+msgid "Copy"
+msgstr "Kopiañ"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:32
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:53
+msgid "Yes"
+msgstr "Ya"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:59
+msgid "No"
+msgstr "Nann"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:54
+msgid "About LimeWire"
+msgstr "War-dro Limewire"
+
+#. set up limewire version label
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:72
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:12
+msgid "LimeWire"
+msgstr "LimeWire"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:32
+msgid "&View"
+msgstr "&Gwel"
+
+#. exit
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:126
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:278
+msgid "Exit"
+msgstr "Hent er-maez"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:96
+msgid "KB"
+msgstr "KE"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:98
+msgid "MB"
+msgstr "ME"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:100
+msgid "GB"
+msgstr "GE"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:102
+msgid "TB"
+msgstr "TE"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:104
+msgid "KB/s"
+msgstr "KE/s"
+
+#. These are used as resource keys to retreive descriptions in the GUI
+#: components/common/src/main/java/org/limewire/util/MediaType.java:39
+msgid "All Types"
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
+msgid "The file is corrupted"
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:29
+msgid "Trouble connecting to people"
+msgstr ""
+
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:286
 msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
@@ -135,10 +203,6 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
-
-#: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:41
-msgid "XMPP Service"
-msgstr "XMPP Servij"
 
 #: components/gnutella-core/src/main/java/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
 msgid "DHT Peer Locator"
@@ -271,10 +335,6 @@ msgstr ""
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:174
 msgid "What's New"
 msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:175
-msgid "Creative Commons"
-msgstr "Creative Commons"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:140
 msgid "Mojito DHT"
@@ -850,14 +910,6 @@ msgstr ""
 msgid "More File Info"
 msgstr ""
 
-#. *
-#. * The copy action.
-#. 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CopyAction.java:11
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:59
-msgid "Copy"
-msgstr "Kopiañ"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CopyAllAction.java:10
 msgid "Copy All"
 msgstr ""
@@ -1273,18 +1325,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:36
 msgid "Close Other Tabs"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:32
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:53
-msgid "Yes"
-msgstr "Ya"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:40
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:59
-msgid "No"
-msgstr "Nann"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:92
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageFolderComboBox.java:97
@@ -2359,16 +2399,6 @@ msgstr ""
 msgid "Automatically Scroll"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:54
-msgid "About LimeWire"
-msgstr "War-dro Limewire"
-
-#. set up limewire version label
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:72
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:12
-msgid "LimeWire"
-msgstr "LimeWire"
-
 #. set up close button
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:102
 msgid "Close"
@@ -2541,10 +2571,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:115
 msgid "&What's New Search"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:32
-msgid "&View"
-msgstr "&Gwel"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:33
 msgid "Hide &Sidebar"
@@ -4050,12 +4076,6 @@ msgstr ""
 msgid "Exit After Transfers"
 msgstr ""
 
-#. exit
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:126
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:278
-msgid "Exit"
-msgstr "Hent er-maez"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:159
 msgid "Update Now"
 msgstr ""
@@ -4155,26 +4175,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:94
 msgid "bytes"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:96
-msgid "KB"
-msgstr "KE"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:98
-msgid "MB"
-msgstr "ME"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:100
-msgid "GB"
-msgstr "GE"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:102
-msgid "TB"
-msgstr "TE"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:104
-msgid "KB/s"
-msgstr "KE/s"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:438
 msgid "Poor Quality"
@@ -4393,30 +4393,3 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:203
 msgid "Setup"
 msgstr ""
-
-#~ msgid "&Close"
-#~ msgstr "Serriñ"
-
-#~ msgid "Next >>"
-#~ msgstr "War-lerc'h »"
-
-#~ msgid "<< Back"
-#~ msgstr "« Kent"
-
-#~ msgid "Rename"
-#~ msgstr "Adenvel"
-
-#~ msgid "&About LimeWire"
-#~ msgstr "War-dro Limewire"
-
-#~ msgid "About"
-#~ msgstr "War-dro"
-
-#~ msgid "License:"
-#~ msgstr "Aotre arverañ :"
-
-#~ msgid "V"
-#~ msgstr "G"
-
-#~ msgid "H"
-#~ msgstr "S"

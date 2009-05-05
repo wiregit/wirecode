@@ -15,29 +15,13 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:34+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: components/common/src/main/java/org/limewire/util/MediaType.java:39
 msgid "All Types"
 msgstr "সব নমুনা"
-
-#: components/common/src/main/java/org/limewire/util/MediaType.java:41
-#: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:129
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:14
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:66
-msgid "Documents"
-msgstr ""
-
-#: components/common/src/main/java/org/limewire/util/MediaType.java:42
-#: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:135
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:16
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:67
-msgid "Programs"
-msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:43
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -64,6 +48,84 @@ msgstr "সম্প্রচারিত চিত্র"
 msgid "Images"
 msgstr "ছবিসমূহ"
 
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:17
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:64
+msgid "Videos"
+msgstr "সম্প্রচারিত চিত্রসমুহ"
+
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:130
+msgid "Document"
+msgstr "নথিপত্র"
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:28
+msgid "This file is not shareable"
+msgstr "ফাইলটি কোন কিছূর অংশ নয়"
+
+#. *
+#. * The DownloadItem is not in an error state.
+#. 
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
+msgid "No problems."
+msgstr "কোনো সমস্যা নাই।"
+
+#: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:41
+msgid "XMPP Service"
+msgstr "এক্সএমপিপি সাহায্য-সেবা"
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
+msgid ""
+"LimeWire was unable to write a necessary file because your hard drive is "
+"full. To continue using LimeWire you must free up space on your hard drive."
+msgstr ""
+"হার্ড ড্রাইভ পরিপুর্নো থাকায় একটি প্রয়োজনীয় ফাইল লাইমওয়ার ড্রাইভ এ লিখতে "
+"পারেনি। লাইমওয়ার চালাতে চাইলে হার্ড ড্রাইভ এ কিছু জায়গা খালি করুন।"
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:53
+msgid ""
+"LimeWire was unable to open a necessary file because another program has "
+"locked the file. LimeWire may act unexpectedly until this file is released."
+msgstr ""
+"আরেকটি প্রোগ্রাম একটি প্রয়োজনীয় ফাইল লক করে রাখায় লাইমওয়ার ওই ফাইলটি খুলতে "
+"পারেনি। ওই ফাইলটি না ছাড়া পর্যন্ত লাইমওয়ার ঠিক মত কাজ নাও করতে পারে।"
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:55
+msgid ""
+"LimeWire was unable to write a necessary file because you do not have the "
+"necessary permissions. Your preferences may not be maintained the next time "
+"you start LimeWire, or LimeWire may behave in unexpected ways."
+msgstr ""
+"আপনার উপযুক্ত অধিকার না থাকায় লাইমওয়ার একটি প্রয়োজনীয় ফাইল লিখতে পারেনি। "
+"পরেরবার লাইম’ওয়ার চলানোর সময় আপনার প্রেফারেন্সগুলো ঠিক মত নাও থাকতে পারে, "
+"অথবা লাইম’ওয়ার ঠিক মত কাজ নাও করতে পারে।"
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:57
+msgid ""
+"LimeWire cannot open a necessary file because the filename contains "
+"characters which are not supported by your operating system. LimeWire may "
+"behave in unexpected ways."
+msgstr ""
+"লাইমওয়ার একটি প্রয়োজনীয় ফাইল খুলতে পারছে না কারন ফাইলনামে কিছু বর্ণ আছে "
+"যেগুলো আপনার অপারেটিং সিস্টেম সমর্থন করে না । লাইমওয়ার অপ্রত্যাশিত ভাবে আচরণ "
+"করতে পারে ।"
+
+#: components/common/src/main/java/org/limewire/util/MediaType.java:41
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:129
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:14
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:66
+msgid "Documents"
+msgstr ""
+
+#: components/common/src/main/java/org/limewire/util/MediaType.java:42
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:135
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:16
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:67
+msgid "Programs"
+msgstr ""
+
 #: components/common/src/main/java/org/limewire/util/MediaType.java:46
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:141
@@ -73,21 +135,10 @@ msgstr "ছবিসমূহ"
 msgid "Other"
 msgstr ""
 
-#: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:17
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:64
-msgid "Videos"
-msgstr "সম্প্রচারিত চিত্রসমুহ"
-
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 msgid "Image"
 msgstr ""
-
-#: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:130
-msgid "Document"
-msgstr "নথিপত্র"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
 msgid "Program"
@@ -101,20 +152,9 @@ msgstr ""
 msgid "The file is corrupted"
 msgstr ""
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:28
-msgid "This file is not shareable"
-msgstr "ফাইলটি কোন কিছূর অংশ নয়"
-
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:29
 msgid "Trouble connecting to people"
 msgstr ""
-
-#. *
-#. * The DownloadItem is not in an error state.
-#. 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
-msgid "No problems."
-msgstr "কোনো সমস্যা নাই।"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
 msgid ""
@@ -135,10 +175,6 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
-
-#: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:41
-msgid "XMPP Service"
-msgstr "এক্সএমপিপি সাহায্য-সেবা"
 
 #: components/gnutella-core/src/main/java/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
 msgid "DHT Peer Locator"
@@ -601,42 +637,6 @@ msgstr ""
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:83
 msgid "Metadata Loader"
 msgstr ""
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
-msgid ""
-"LimeWire was unable to write a necessary file because your hard drive is "
-"full. To continue using LimeWire you must free up space on your hard drive."
-msgstr ""
-"হার্ড ড্রাইভ পরিপুর্নো থাকায় একটি প্রয়োজনীয় ফাইল লাইমওয়ার ড্রাইভ এ লিখতে "
-"পারেনি। লাইমওয়ার চালাতে চাইলে হার্ড ড্রাইভ এ কিছু জায়গা খালি করুন।"
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:53
-msgid ""
-"LimeWire was unable to open a necessary file because another program has "
-"locked the file. LimeWire may act unexpectedly until this file is released."
-msgstr ""
-"আরেকটি প্রোগ্রাম একটি প্রয়োজনীয় ফাইল লক করে রাখায় লাইমওয়ার ওই ফাইলটি খুলতে "
-"পারেনি। ওই ফাইলটি না ছাড়া পর্যন্ত লাইমওয়ার ঠিক মত কাজ নাও করতে পারে।"
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:55
-msgid ""
-"LimeWire was unable to write a necessary file because you do not have the "
-"necessary permissions. Your preferences may not be maintained the next time "
-"you start LimeWire, or LimeWire may behave in unexpected ways."
-msgstr ""
-"আপনার উপযুক্ত অধিকার না থাকায় লাইমওয়ার একটি প্রয়োজনীয় ফাইল লিখতে পারেনি। "
-"পরেরবার লাইম’ওয়ার চলানোর সময় আপনার প্রেফারেন্সগুলো ঠিক মত নাও থাকতে পারে, "
-"অথবা লাইম’ওয়ার ঠিক মত কাজ নাও করতে পারে।"
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:57
-msgid ""
-"LimeWire cannot open a necessary file because the filename contains "
-"characters which are not supported by your operating system. LimeWire may "
-"behave in unexpected ways."
-msgstr ""
-"লাইমওয়ার একটি প্রয়োজনীয় ফাইল খুলতে পারছে না কারন ফাইলনামে কিছু বর্ণ আছে "
-"যেগুলো আপনার অপারেটিং সিস্টেম সমর্থন করে না । লাইমওয়ার অপ্রত্যাশিত ভাবে আচরণ "
-"করতে পারে ।"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:61
 msgid ""

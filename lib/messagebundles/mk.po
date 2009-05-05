@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:32+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -93,10 +93,6 @@ msgstr "Документ"
 msgid "Program"
 msgstr "Програма"
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:26
-msgid "There is a disk problem"
-msgstr ""
-
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
 msgid "The file is corrupted"
 msgstr "Документот е оштетен."
@@ -115,14 +111,6 @@ msgstr "Проблем со конектирање со луѓе"
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
 msgid "No problems."
 msgstr "Нема проблеми."
-
-#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
-msgid ""
-"<html><b>Your LimeWire may have been corrupted by a virus or "
-"trojan!</b><br><br>Please visit <a "
-"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
-"the newest official version of LimeWire.</html>"
-msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:286
 msgid ""
@@ -197,20 +185,6 @@ msgstr "Стари симнати документи"
 msgid "Download Management"
 msgstr "Download Management"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:278
-msgid ""
-"Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
-"clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
-"file, the download will pick up where it left off."
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:280
-msgid ""
-"Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
-"them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
-"for the file, the download will pick up where it left off."
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
 msgstr "HTTP Request Listening"
@@ -267,13 +241,6 @@ msgstr "Local Socket Listener"
 msgid "Magnet Processor"
 msgstr "Magnet Processor"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:120
-msgid ""
-"LimeWire was unable to start the Digital Audio Access Protocol Service (for "
-"sharing files in iTunes). This feature will be turned off. You can turn it "
-"back on in options, under Advanced -> Files -> iTunes."
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:174
 msgid "What's New"
 msgstr "Што е ново"
@@ -317,14 +284,6 @@ msgstr "RUDP Рутирање на пораки"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:99
 msgid "Spam Management"
 msgstr "Менаџмент на спам"
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:56
-msgid "Uptime Statistics"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
-msgid "Browse"
-msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:982
 msgid "Update Checks"
@@ -715,6 +674,92 @@ msgstr "Отсутен за кратко"
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
 msgid "Do not disturb"
 msgstr "Не вознемирувај"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:86
+msgid "Safe chunk verification"
+msgstr "Сигурна верификација на парче"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
+msgid "For Turbo-Charged searches get LimeWire PRO."
+msgstr "За Турбо-Брзи пребарувања земeте LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
+msgid "Support LimeWire's peer-to-peer development. Get PRO."
+msgstr "Поддржете го LimeWire-овиот peer-to-peer развиток. Земете PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
+msgid "Purchase LimeWire PRO to help us make downloads faster."
+msgstr "Купете LimeWire PRO да придонесете за побрзи симнувања."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
+msgid "For Turbo-Charged downloads get LimeWire PRO."
+msgstr "За Турбо-Брзи преземања земeте LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
+msgid "Support open networks. Get LimeWire PRO."
+msgstr "Поддржете ги отворените мрежи. Земете го LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
+msgid "Support open source and open protocols. Get LimeWire PRO."
+msgstr "Поддржете го open source и отворените протокли. Земете LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
+msgid "For Turbo-Charged performance get LimeWire PRO."
+msgstr "За Турбо-Брзи перформанси земeте LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
+msgid "Keep the Internet open. Get LimeWire PRO."
+msgstr "Држете го интернетот отворен. Земете LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
+msgid "Developing LimeWire costs real money. Get PRO."
+msgstr "Усовршувањето на LimeWire чини реални пари. Купете PRO."
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:26
+msgid "There is a disk problem"
+msgstr ""
+
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
+msgid ""
+"<html><b>Your LimeWire may have been corrupted by a virus or "
+"trojan!</b><br><br>Please visit <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
+"the newest official version of LimeWire.</html>"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:278
+msgid ""
+"Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
+"clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
+"file, the download will pick up where it left off."
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:280
+msgid ""
+"Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
+"them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
+"for the file, the download will pick up where it left off."
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:120
+msgid ""
+"LimeWire was unable to start the Digital Audio Access Protocol Service (for "
+"sharing files in iTunes). This feature will be turned off. You can turn it "
+"back on in options, under Advanced -> Files -> iTunes."
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:56
+msgid "Uptime Statistics"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
+msgid "Browse"
+msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:380
 msgid "Oops!"
@@ -2738,10 +2783,6 @@ msgstr ""
 msgid "Let me manage my BitTorrent settings"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:86
-msgid "Safe chunk verification"
-msgstr "Сигурна верификација на парче"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:88
 msgid "Experimental disk access"
 msgstr ""
@@ -3908,47 +3949,6 @@ msgstr ""
 msgid "Not showing {0} results"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
-msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "За Турбо-Брзи пребарувања земeте LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
-msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "Поддржете го LimeWire-овиот peer-to-peer развиток. Земете PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
-msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "Купете LimeWire PRO да придонесете за побрзи симнувања."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
-msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "За Турбо-Брзи преземања земeте LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
-msgid "Support open networks. Get LimeWire PRO."
-msgstr "Поддржете ги отворените мрежи. Земете го LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
-msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr "Поддржете го open source и отворените протокли. Земете LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
-msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "За Турбо-Брзи перформанси земeте LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
-msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Држете го интернетот отворен. Земете LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
-msgid "Developing LimeWire costs real money. Get PRO."
-msgstr "Усовршувањето на LimeWire чини реални пари. Купете PRO."
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:94
 msgid "\"magnet:\" links"
 msgstr ""
@@ -4423,16 +4423,3 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:203
 msgid "Setup"
 msgstr ""
-
-#~ msgid ""
-#~ "One or more URLs in the MAGNET link were invalid. Your file may not download "
-#~ "correctly."
-#~ msgstr ""
-#~ "Еден или повеќе URL-ови во МАГНЕТ линкот се невалидни. Вашите фајлови може "
-#~ "да не се симнат правилно."
-
-#~ msgid "Upgrade to PRO"
-#~ msgstr "Надгради го во ПРО"
-
-#~ msgid "Attaching LimeWire Store Listeners..."
-#~ msgstr "Закачување на LimeWire слшачи"

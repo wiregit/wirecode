@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:32+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -63,6 +63,58 @@ msgstr "Video"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:65
 msgid "Images"
 msgstr "Pictures"
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
+msgid ""
+"LimeWire was unable to write a necessary file because your hard drive is "
+"full. To continue using LimeWire you must free up space on your hard drive."
+msgstr ""
+"LimeWire was unable to write a necessary file because your hard drive is "
+"full. To continue using LimeWire you must free up space on your hard drive."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:53
+msgid ""
+"LimeWire was unable to open a necessary file because another program has "
+"locked the file. LimeWire may act unexpectedly until this file is released."
+msgstr ""
+"LimeWire was unable to open a necessary file because another program has "
+"locked the file. LimeWire may act unexpectedly until this file is released."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:55
+msgid ""
+"LimeWire was unable to write a necessary file because you do not have the "
+"necessary permissions. Your preferences may not be maintained the next time "
+"you start LimeWire, or LimeWire may behave in unexpected ways."
+msgstr ""
+"LimeWire was unable to write a necessary file because you do not have the "
+"necessary permissions. Your preferences may not be maintained the next time "
+"you start LimeWire, or LimeWire may behave in unexpected ways."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:57
+msgid ""
+"LimeWire cannot open a necessary file because the filename contains "
+"characters which are not supported by your operating system. LimeWire may "
+"behave in unexpected ways."
+msgstr ""
+"LimeWire is unable to open a necessary file because the filename contains "
+"characters which are not supported by your operating system. LimeWire may "
+"behave in unexpected ways."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:61
+msgid ""
+"LimeWire cannot download the selected file because your hard drive is full. "
+"To download more files, you must free up space on your hard drive."
+msgstr ""
+"LimeWire is unable to download the selected file because your hard drive is "
+"full. To download more files, you must free up space on your hard drive."
+
+#: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:32
+msgid "Firewall Manager"
+msgstr "Firewall Manager"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
+msgid "Support LimeWire's peer-to-peer development. Get PRO."
+msgstr "Support LimeWire's peer-to-peer development. Get PRO."
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:46
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:19
@@ -602,50 +654,6 @@ msgstr ""
 msgid "Metadata Loader"
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
-msgid ""
-"LimeWire was unable to write a necessary file because your hard drive is "
-"full. To continue using LimeWire you must free up space on your hard drive."
-msgstr ""
-"LimeWire was unable to write a necessary file because your hard drive is "
-"full. To continue using LimeWire you must free up space on your hard drive."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:53
-msgid ""
-"LimeWire was unable to open a necessary file because another program has "
-"locked the file. LimeWire may act unexpectedly until this file is released."
-msgstr ""
-"LimeWire was unable to open a necessary file because another program has "
-"locked the file. LimeWire may act unexpectedly until this file is released."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:55
-msgid ""
-"LimeWire was unable to write a necessary file because you do not have the "
-"necessary permissions. Your preferences may not be maintained the next time "
-"you start LimeWire, or LimeWire may behave in unexpected ways."
-msgstr ""
-"LimeWire was unable to write a necessary file because you do not have the "
-"necessary permissions. Your preferences may not be maintained the next time "
-"you start LimeWire, or LimeWire may behave in unexpected ways."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:57
-msgid ""
-"LimeWire cannot open a necessary file because the filename contains "
-"characters which are not supported by your operating system. LimeWire may "
-"behave in unexpected ways."
-msgstr ""
-"LimeWire is unable to open a necessary file because the filename contains "
-"characters which are not supported by your operating system. LimeWire may "
-"behave in unexpected ways."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:61
-msgid ""
-"LimeWire cannot download the selected file because your hard drive is full. "
-"To download more files, you must free up space on your hard drive."
-msgstr ""
-"LimeWire is unable to download the selected file because your hard drive is "
-"full. To download more files, you must free up space on your hard drive."
-
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:63
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
@@ -666,10 +674,6 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
-
-#: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:32
-msgid "Firewall Manager"
-msgstr "Firewall Manager"
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
 msgid "Statistic Management"
@@ -3894,10 +3898,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
 msgid "For Turbo-Charged searches get LimeWire PRO."
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
-msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "Support LimeWire's peer-to-peer development. Get PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41

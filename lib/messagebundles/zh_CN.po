@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Language: Chinese\n"
 
@@ -116,14 +116,6 @@ msgstr "无法连接到用户"
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
 msgid "No problems."
 msgstr "没有问题"
-
-#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
-msgid ""
-"<html><b>Your LimeWire may have been corrupted by a virus or "
-"trojan!</b><br><br>Please visit <a "
-"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
-"the newest official version of LimeWire.</html>"
-msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:286
 msgid ""
@@ -250,36 +242,17 @@ msgstr "远程系统"
 msgid "Directed Querier"
 msgstr "直接查寻者"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/Statistics.java:43
-msgid "Session Statistics"
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/auth/ContentManager.java:91
 msgid "Content Management"
 msgstr "内容管理"
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
-msgid "Local Socket Listener"
-msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
 msgid "Magnet Processor"
 msgstr "Magnet 链接处理器"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:120
-msgid ""
-"LimeWire was unable to start the Digital Audio Access Protocol Service (for "
-"sharing files in iTunes). This feature will be turned off. You can turn it "
-"back on in options, under Advanced -> Files -> iTunes."
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:174
 msgid "What's New"
 msgstr "新增内容"
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:175
-msgid "Creative Commons"
-msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:140
 msgid "Mojito DHT"
@@ -289,29 +262,9 @@ msgstr "Mojito DHT 网络"
 msgid "LimeWire Store Integration"
 msgstr "LimeWire 音乐店整合"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
-msgid "Download Upgrade Task"
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:78
 msgid "Shared Files"
 msgstr "共享的文件"
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
-msgid "OOB Query Handler"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
-msgid "Static Messages"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:191
-msgid "QRP Updater"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
-msgid "RUDP Message Routing"
-msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:99
 msgid "Spam Management"
@@ -781,23 +734,9 @@ msgstr "复制报告"
 msgid "OK"
 msgstr "确定"
 
-#. Load up the HTML engine.
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:476
-msgid "Muddling Mint..."
-msgstr ""
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:493
-msgid "Scouring NYC for Limes..."
-msgstr ""
-
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:527
 msgid "Squeezing Limes..."
 msgstr "挤柠檬"
-
-#. Touch the I18N stuff to ensure it loads properly.
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:563
-msgid "Prepping Mojitos..."
-msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:607
 msgid "This Alpha version has expired.  Press Ok to exit. "
@@ -1006,14 +945,6 @@ msgstr "添加"
 msgid "Remove"
 msgstr "去掉"
 
-#. * Action to view files on host.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:44
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:746
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:463
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:104
-msgid "Browse Files"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:167
 msgid "Unable to view files - not yet connected to host"
 msgstr "不能观看文件 - 因为没有连接到网点"
@@ -1046,10 +977,6 @@ msgstr "为什么"
 msgid "Connected to:"
 msgstr "已连接至："
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:58
-msgid "Show hostnames of connected peers"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:60
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:30
 msgid "Connecting"
@@ -1075,10 +1002,6 @@ msgstr "超节点"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:231
 msgid "Invalid external address"
 msgstr "无效的外部地址"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:233
-msgid "No solicited incoming messages"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:235
 msgid "Reusing status from previous session"
@@ -1249,18 +1172,6 @@ msgstr "传入搜索 — 访问 P2P 网络的人现在正在搜索..."
 msgid "Loading..."
 msgstr "正在加载..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:91
-#, java-format
-msgid ""
-"{0}\n"
-"This file may have been designed to damage your computer.\n"
-"LimeWire has cancelled the download for your protection."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:95
-msgid "Dangerous Download Cancelled"
-msgstr ""
-
 #. lower case since hyperlink
 #. lower case sinc hyperlink
 #. lower case since hyperlink
@@ -1308,33 +1219,6 @@ msgstr "是"
 msgid "No"
 msgstr "否"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:92
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageFolderComboBox.java:97
-msgid "Sign in to share with friends"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:176
-msgid "Share all with Friend..."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:179
-msgid "Share all with the P2P Network"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:224
-msgid "Unshare all with Friend..."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:227
-msgid "Unshare all with the P2P Network"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:265
-msgid ""
-"You can't share documents with the P2P Network. Enable this at Tools > "
-"Options > Security > Unsafe Categories"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:115
 msgid "Loading LimeWire..."
 msgstr "正在加载 LimeWire..."
@@ -1369,14 +1253,6 @@ msgstr "显示全部"
 msgid "Clear Finished"
 msgstr "清除已完成项目"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:323
-msgid "Download Started"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:323
-msgid "Show"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:375
 msgid "Download Complete"
 msgstr "下载完毕"
@@ -1385,11 +1261,6 @@ msgstr "下载完毕"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:177
 msgid "Launch"
 msgstr "启动"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:605
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:423
-msgid "Search Again"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:607
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:69
@@ -1408,12 +1279,6 @@ msgstr "在{0}%暂停"
 msgid "{0}% - {1} left"
 msgstr "还有{0}% - {1}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:629
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:486
-#, java-format
-msgid "Resuming at {0}%"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:638
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:489
 msgid "Cancelled"
@@ -1429,10 +1294,6 @@ msgstr "即将完成下载..."
 msgid "Done - "
 msgstr "完成 — "
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:646
-msgid "Searching..."
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:648
 #, java-format
 msgid "Stalled at {0}% - "
@@ -1441,14 +1302,6 @@ msgstr "在{0}%停住了 "
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:650
 msgid "Unable to download  - "
 msgstr "没能下载 "
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:657
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:529
-#, java-format
-msgid "Waiting - Next in line"
-msgid_plural "Waiting - {0} in line"
-msgstr[0] ""
-msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:667
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:548
@@ -1468,10 +1321,6 @@ msgstr "暂停全部"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:75
 msgid "Resume All"
 msgstr "恢复全部"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:89
-msgid "Clear When Finished"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:96
 msgid "Categorize Downloads"
@@ -1592,22 +1441,6 @@ msgstr "查看"
 msgid "{0} left"
 msgstr "还剩下{0}"
 
-#. {0}: current size
-#. {1}: total size
-#. {2}: download speed
-#. {3}: number of people
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:501
-#, java-format
-msgid "Downloading {0} of {1} ({2}) from {3} person"
-msgid_plural "Downloading {0} of {1} ({2}) from {3} people"
-msgstr[0] ""
-msgstr[1] ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:511
-#, java-format
-msgid "Stalled - {0} of {1} ({2}%). - "
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:517
 msgid "Unable to download: "
 msgstr "无法下载： "
@@ -1617,15 +1450,6 @@ msgstr "无法下载： "
 #, java-format
 msgid "Paused - {0} of {1} ({2}%)"
 msgstr "暂停 — 第 {0}，共 {1} ({2}%)"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:540
-msgid "Searching for people with this file..."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:542
-#, java-format
-msgid "Searching for people with this file... ({0} left)"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:29
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:43
@@ -1692,15 +1516,6 @@ msgstr "结束谈话"
 msgid "Open Chat"
 msgstr "打开聊天"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:779
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:474
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:226
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:242
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/NavPanel.java:368
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:117
-msgid "What I'm Sharing"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatHyperlinkListener.java:115
 msgid "Unable to access remote file"
 msgstr "不能访问远程数据"
@@ -1708,10 +1523,6 @@ msgstr "不能访问远程数据"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatHyperlinkListener.java:116
 msgid "Hyperlink"
 msgstr "超链结"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:93
-msgid "Hide"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:13
 #, java-format
@@ -1732,19 +1543,6 @@ msgstr "{0} 想要与您共享文件"
 #, java-format
 msgid "Download {0}"
 msgstr "下载 {0}"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:94
-#, java-format
-msgid "Downloading {0}"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:100
-msgid "Download cancelled.  Click button to retry"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:106
-msgid "Error downloading file.  Click button to retry"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:110
 #, java-format
@@ -1830,34 +1628,15 @@ msgstr "记住我"
 msgid "Copy Link"
 msgstr "复制链接"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileListPanel.java:97
-msgid "Find..."
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:196
 #, java-format
 msgid "{0} is offline"
 msgstr "{0} 不在线"
 
-#. {1}: number of files, {0,2}: html tags
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:198
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:207
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:231
-msgid "You're {0}sharing {1} file{2} with your friend."
-msgid_plural "You're {0}sharing {1} files{2} with your friend."
-msgstr[0] ""
-msgstr[1] ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:205
 #, java-format
 msgid "{0} isn't on LimeWire"
 msgstr "{0} 不在 LimeWire 上"
-
-#. {0}, {1}: html tags
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:209
-#, java-format
-msgid "{0}Chat{1} about signing into LimeWire 5."
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:218
 #, java-format
@@ -1873,12 +1652,6 @@ msgstr "加载文件..."
 msgid "{0} isn't sharing with you"
 msgstr "{0} 没有与你共享"
 
-#. {0}, {1}: html tags
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:233
-#, java-format
-msgid "{0}Chat{1} about LimeWire 5."
-msgstr ""
-
 #. this should never happen
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:236
 msgid "This person isn't sharing any files with you."
@@ -1892,19 +1665,6 @@ msgstr "在观看{0}的文件时，遇到了问题"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:249
 msgid "There was a problem viewing this person's files."
 msgstr "在观看这个人的文件时，遇到了问题"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:258
-msgid "There are no files to browse."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:138
-msgid "Browse Files from All Friends"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:140
-#, java-format
-msgid "Browse Files from {0}"
-msgstr ""
 
 #. {0}: category (Audio, Video, etc)
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:194
@@ -1942,21 +1702,6 @@ msgstr "共享与"
 msgid "Share"
 msgstr "共享"
 
-#. Display heading.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:417
-msgid "CATEGORIES"
-msgstr ""
-
-#. Display heading.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:558
-msgid "PLAYLISTS"
-msgstr ""
-
-#. Get playlists from manager.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:561
-msgid "Quicklist"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:843
 #, java-format
 msgid "Sharing entire {0} Collection with {1}"
@@ -1969,64 +1714,6 @@ msgid ""
 "New {0} files that are added to your Library will be automatically shared "
 "with this person"
 msgstr "被添加到你的文件库的新的{0}文件将会被自动地与此人共享。"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:867
-msgid "Now What?"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:870
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:912
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:955
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:960
-msgid "Click "
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:871
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:961
-msgid " to share or unshare with your friends"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:909
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:952
-msgid "No more shared folders"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:913
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:956
-msgid " to share or unshare with the P2P Network"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1022
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1108
-msgid "Show All Files"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1037
-msgid "No files shared with the P2P Network"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1039
-#, java-format
-msgid "No files shared with {0}"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1134
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:119
-msgid "What I'm Sharing with {0}"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingFilterComboBox.java:89
-msgid "with:"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingFilterComboBox.java:184
-msgid "<HTML>You aren't sharing<BR>with any other friends</HTML>"
-msgstr ""
-
-#. no shared friends
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingFilterComboBox.java:187
-msgid "<HTML>You aren't sharing<BR>with any friends</HTML>"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageSubPanel.java:94
 msgid "share folder"
@@ -2075,14 +1762,6 @@ msgstr "P2P网络"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/LibraryNavigatorImpl.java:163
 msgid "All Friends"
 msgstr "全部朋友"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistButtonPopupMenu.java:40
-msgid "Clear playlist"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistPopupMenu.java:94
-msgid "Remove from playlist"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:49
 msgid "#"
@@ -2197,22 +1876,6 @@ msgstr "添加另外一个朋友"
 msgid "Share with the P2P Network"
 msgstr "与P2P网络共享"
 
-#. {0} number of files, {1}: type of file (Image, Document...)
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:41
-#, java-format
-msgid "Share {0} {1} file"
-msgid_plural "Share {0} {1} files"
-msgstr[0] ""
-msgstr[1] ""
-
-#. {0}: number of files
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:43
-#, java-format
-msgid "Shared {0} file with:"
-msgid_plural "Shared {0} files with:"
-msgstr[0] ""
-msgstr[1] ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:29
 #, java-format
 msgid "All {0} files were unshared"
@@ -2308,35 +1971,6 @@ msgstr "解析度"
 msgid "This file cannot be shared."
 msgstr "这个文件不能被共享"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:113
-msgid "Sharing documents with the p2p network is disabled."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:117
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:134
-msgid "Share this file with the p2p network."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:121
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:136
-msgid "Share this file with a friend."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:141
-#, java-format
-msgid "Add to {0}"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:158
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareFriendAction.java:38
-msgid "Share with Friend"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:159
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareFriendAction.java:37
-msgid "Unshare with Friend"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/ShareLibraryPopupMenu.java:179
 msgid "Unshare"
 msgstr "取消共享"
@@ -2356,26 +1990,6 @@ msgstr "移到垃圾箱"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/RemoveAction.java:20
 msgid "Remove from Library"
 msgstr "从文件库移除"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareFriendAction.java:36
-msgid "Share folder with Friend"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareGnutellaAction.java:37
-msgid "Share folder with the P2P Network"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareFriendAction.java:35
-msgid "Unshare folder with Friend"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareGnutellaAction.java:37
-msgid "Unshare folder with the P2P Network"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareGnutellaAction.java:39
-msgid "Unshare with the P2P Network"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:40
 msgid "Automatically Scroll"
@@ -2467,20 +2081,6 @@ msgid ""
 msgstr ""
 "最后，LimeWire 想要对开发人员、用户和其他为该项目贡献想法的所有人表达诚挚的谢意。没有 LimeWire 用户，P2P 网络将不会存在。"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:321
-msgid ""
-"BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
-"Inc. Gmail is a trademark of Google Inc. Jabber and LiveJournal are the "
-"registered trademarks of the XMPP Standards Foundation and LiveJournal, "
-"Inc., d/b/a LiveJournal.com, respectively. Neither Google Inc., the XMPP "
-"Standards Foundation or LiveJournal.com are sponsors or partners of "
-"Lime&nbsp;Wire&nbsp;LLC nor do they endorse Lime&nbsp;Wire&nbsp;LLC or the "
-"LimeWire software. Use of these trademarks is merely to refer to the "
-"technology or service of the respective owner and not to confuse "
-"Lime&nbsp;Wire as the source of the respective Gmail, Jabber and/or "
-"LiveJournal service or technology."
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:152
 msgid "New Version Available!"
 msgstr "新版本已出了！"
@@ -2514,10 +2114,6 @@ msgstr "寻找更多结果"
 msgid "&File"
 msgstr "文件 (&F)"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FriendMenu.java:27
-msgid "F&riend"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:27
 msgid "&Help"
 msgstr "帮助 (&H)"
@@ -2530,14 +2126,6 @@ msgstr "使用 LimeWire (&U)"
 msgid "&FAQ"
 msgstr "常见问题解答 (&F)"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:46
-msgid "Get personalized &tech support"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:57
-msgid "&About LimeWire..."
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/PlayerMenu.java:24
 msgid "&Player"
 msgstr "播放器"
@@ -2545,30 +2133,6 @@ msgstr "播放器"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:46
 msgid "&Tools"
 msgstr "工具 (&T)"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:48
-msgid "&Downloads"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:57
-msgid "&Uploads"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:71
-msgid "Advanced &Search"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:84
-msgid "&Advanced Tools..."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:105
-msgid "&Options..."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:115
-msgid "&What's New Search"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:32
 msgid "&View"
@@ -2582,26 +2146,6 @@ msgstr "隐藏侧边栏(&S)"
 msgid "Show &Sidebar"
 msgstr "显示侧边栏(&S)"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:35
-msgid "Hide &Download Tray"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:35
-msgid "Show &Download Tray"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:36
-msgid "Hide &Chat Window"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:36
-msgid "Show &Chat Window"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:26
-msgid "Add F&ile to Library..."
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:32
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:33
 msgid "Add Files"
@@ -2610,10 +2154,6 @@ msgstr "添加文件"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:43
 msgid "Valid Files"
 msgstr "有效的文件"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:26
-msgid "Add &Folder to Library..."
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:32
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:33
@@ -2625,17 +2165,9 @@ msgstr "添加一个或多个文件夹"
 msgid "All Folders"
 msgstr "全部文件夹"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ChatAction.java:20
-msgid "&Chat"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ExitAction.java:18
 msgid "E&xit"
 msgstr "退出(&X)"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ExitAfterTransferAction.java:20
-msgid "Exit After &Transfers"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:39
 msgid "Invalid Link"
@@ -2684,21 +2216,9 @@ msgstr "打开连接 (&L)..."
 msgid "Open Link"
 msgstr "打开连接"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:65
-msgid "Magnet link is empty."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/RecentDownloadsMenu.java:40
-msgid "&Recent Downloads"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/RecentDownloadsMenu.java:41
 msgid "(empty)"
 msgstr "（空）"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/RecentDownloadsMenu.java:44
-msgid "Clear List"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/SignInOutAction.java:20
 msgid "&Sign into Friends"
@@ -2707,10 +2227,6 @@ msgstr "登录到朋友(&S)"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/SignInOutAction.java:22
 msgid "&Sign out of Friends"
 msgstr "登出朋友(&S)"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/SwitchUserAction.java:17
-msgid "Switch &User"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:43
 msgid "Files"
@@ -2883,18 +2399,6 @@ msgstr "配置不同类别下载的存储文件夹"
 msgid "Choose where specific categories are downloaded"
 msgstr "选择各个类别下载的存储文件夹"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:211
-msgid "Store File Organization"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
-msgid "Configure File Organization..."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
-msgid "Configure how files downloaded from the LimeWire Store are organized"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:214
 msgid "Save Store downloads to:"
 msgstr "存储音乐店下载到:"
@@ -3066,21 +2570,6 @@ msgstr "文件名"
 msgid "No Subfolder"
 msgstr "无子文件夹"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:128
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:154
-msgid "Sharing Categories"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:132
-msgid "Only share files in that category at that point"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:134
-msgid ""
-"Share my entire collection, including new files that automatically get added "
-"to My Library"
-msgstr ""
-
 #. new VerticalLayout(2));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:143
 msgid "When I share a category:"
@@ -3090,51 +2579,13 @@ msgstr "当我共享一类文件"
 msgid "Choose what happens when I share a category"
 msgstr "选择当我共享一类文件后会发生什么"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:228
-msgid ""
-"Automatically add the following categories from folders below to My Library:"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:240
-msgid ""
-"*Adding these folders will automatically share any collections you shared"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:339
 msgid "Add Folder..."
 msgstr "添加文件夹..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:340
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:242
-msgid "Choose a folder to automatically add to My Library"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:354
-#, java-format
-msgid ""
-"You selected: {0}\n"
-"\n"
-"LimeWire cannot manage this folder because it is either not a folder or "
-"cannot be read.\n"
-"\n"
-"Please select another folder to manage."
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:358
 msgid "Library Manager Error"
 msgstr "文件库管理器错误"
-
-#. new VerticalLayout(2));
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:389
-msgid ""
-"At some point, you manually added files from the following folders into My "
-"Library:"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:393
-msgid ""
-"At some point, you manually added files from some folders into My Library."
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:394
 msgid "View Folders..."
@@ -3148,10 +2599,6 @@ msgstr "手动添加文件夹"
 msgid "Use the LimeWire player when I play audio files"
 msgstr "使用 Limewire 播放声音文件"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:42
-msgid "Select which file extensions belong in each category"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:109
 msgid "Choose where specific file types get saved"
 msgstr "选择保存具体文件类型的位置"
@@ -3163,10 +2610,6 @@ msgstr "将目录还原为默认值"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:68
 msgid "Language:"
 msgstr "语言:"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:144
-msgid "Help translate LimeWire!"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:159
 msgid "Notifications"
@@ -3420,18 +2863,9 @@ msgstr "过滤文件扩展名"
 msgid "Filter File Extensions..."
 msgstr "正在过滤文件扩展名"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
-msgid ""
-"Restrict files with certain extensions from being displayed in search results"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:195
 msgid "In search results..."
 msgstr "在搜索结果中..."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SpamOptionPanel.java:41
-msgid "Clear Filter"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SpamOptionPanel.java:51
 msgid "Reset the Spam filter by clearing all files marked as spam"
@@ -3444,10 +2878,6 @@ msgstr "告诉我关于 Beta 更新的信息"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:118
 msgid "File Associations"
 msgstr "文件关联"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:121
-msgid "\".magnet\" files"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:138
 msgid "Warn me when other programs want to automatically open these types"
@@ -3564,18 +2994,10 @@ msgstr "保留所做的任何更改"
 msgid "Nothing selected"
 msgstr "没有已选定的"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:59
-msgid "Hash"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:207
 #, java-format
 msgid "\"{0}\" properties"
 msgstr "\"{0}\" 个属性"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:244
-msgid "Overview"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:267
 msgid "Details"
@@ -3589,10 +3011,6 @@ msgstr "维度"
 #, java-format
 msgid "({0}px X {1}px)"
 msgstr "({0}px X {1}px)"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/AdvancedSearchBuilder.java:22
-msgid ":"
-msgstr ""
 
 #. text is lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ClassicSearchWarningPanel.java:48
@@ -3635,32 +3053,10 @@ msgstr "新的文件"
 msgid "Friend Suggestions"
 msgstr "朋友的建议"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:20
-msgid "Downloading programs can result in viruses"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:25
-msgid ""
-"We recommend you don't download programs using LimeWire. However, you can "
-"enable downloading programs via Preferences > Security > Unsafe Categories."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:30
-msgid ""
-"We recommend you don't download programs using LimeWire. However, you can "
-"enable downloading programs via Tools > Options > Security > Unsafe "
-"Categories."
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:127
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:202
 msgid "Search P2P Network"
 msgstr "搜索P2P网络"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:173
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:80
-msgid "Advanced Search"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:199
 msgid "Search P2P Network and Friends"
@@ -3762,10 +3158,6 @@ msgstr "列表视图"
 msgid "Classic view"
 msgstr "经典视图"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:376
-msgid "File Extension"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:381
 msgid "Size (low to high)"
 msgstr "大小（小到大）"
@@ -3781,10 +3173,6 @@ msgstr "类别"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:385
 msgid "Relevance"
 msgstr "相关性"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:82
-msgid "Search for the following category:"
-msgstr ""
 
 #. show dialog.  if "no", don't download, just return.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:39
@@ -3817,11 +3205,6 @@ msgstr "聊天"
 #, java-format
 msgid "Chat with {0}"
 msgstr "与{0}聊天"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:106
-#, java-format
-msgid "Browse Files of {0}"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:144
 msgid "nobody"
@@ -3867,15 +3250,6 @@ msgstr "朋友"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:248
 msgid "P2P Users"
 msgstr "P2P网络用户们"
-
-#. Add Download As menu item.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:67
-msgid "Download As..."
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:80
-msgid "Download As"
-msgstr ""
 
 #. Add Mark/Unmark as Spam menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:93
@@ -3950,28 +3324,6 @@ msgstr "开发LimeWire需要钱。请买PRO。"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:94
 msgid "\"magnet:\" links"
 msgstr "\"magnet:\" 链接"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:47
-msgid "Warn me when other programs take LimeWire associations"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:77
-msgid ""
-"Torrent files and magnet links are no longer associated with LimeWire. Would "
-"you like LimeWire to re-associate them?"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:80
-msgid ""
-"Torrent files are no longer associated with LimeWire. Would you like "
-"LimeWire to re-associate them?"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:84
-msgid ""
-"Magnet links are no longer associated with LimeWire. Would you like LimeWire "
-"to re-associate them?"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:112
 msgid "No internet connection"
@@ -4051,13 +3403,6 @@ msgstr "免费的软件更新和技术支持 － LimeWire PRO"
 msgid "Sharing {0} files"
 msgstr "正在共享 {0} 文件"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:30
-#, java-format
-msgid "Sharing {0} file"
-msgid_plural "Sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/IconLabelRenderer.java:98
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/NameRenderer.java:64
 #, java-format
@@ -4121,28 +3466,10 @@ msgstr "{0}浏览了您的文件库"
 msgid "Done uploading"
 msgstr "已完成上载"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:233
-#, java-format
-msgid "Seeding to {0} person at {1} - Ratio ({2})"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:235
-#, java-format
-msgid "Seeding to {0} people at {1} - Ratio ({2})"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:238
 #, java-format
 msgid "Uploading - {0} of {1}({2}) to {3}"
 msgstr "上载 — {1}({2}) 的 {0} 到 {3}"
-
-#. {0}: number of uploads before this upload that have to finish
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:244
-#, java-format
-msgid "Waiting for {0} upload to finish"
-msgid_plural "Waiting for {0} uploads to finish"
-msgstr[0] ""
-msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:246
 msgid "Waiting for connections..."
@@ -4171,14 +3498,6 @@ msgstr "选择文件夹"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:95
 msgid "Select"
 msgstr "选择"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:476
-msgid "File already exists.  Do you want to replace it?"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:28
-msgid "Date"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:94
 msgid "bytes"
@@ -4305,13 +3624,6 @@ msgstr "覆盖"
 msgid "Some Legal Stuff"
 msgstr "一些与法律有关的"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:270
-msgid ""
-"LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
-"authorized files only. Copyright laws may forbid obtaining or distributing "
-"certain copyrighted content. Learn more about your rights below:"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:271
 msgid "Copyright Information"
 msgstr "版权信息"
@@ -4361,12 +3673,6 @@ msgstr "了解更多"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:45
 msgid "My Library is where you view, share and unshare your files."
 msgstr "我的文件库是查看，共享和停止共享文件的地方。"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:46
-msgid ""
-"My Library is where you view, share and unshare your files.  Don't worry, we "
-"will still share files from the older version."
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:47
 msgid "Automatically add files to My Library, but don't share any files"
@@ -4424,1780 +3730,696 @@ msgstr "安装 —  第 {0} 步，共 {1} 步"
 msgid "Setup"
 msgstr "安装"
 
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
+msgid ""
+"<html><b>Your LimeWire may have been corrupted by a virus or "
+"trojan!</b><br><br>Please visit <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
+"the newest official version of LimeWire.</html>"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/Statistics.java:43
+msgid "Session Statistics"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
+msgid "Local Socket Listener"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:120
+msgid ""
+"LimeWire was unable to start the Digital Audio Access Protocol Service (for "
+"sharing files in iTunes). This feature will be turned off. You can turn it "
+"back on in options, under Advanced -> Files -> iTunes."
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:175
+msgid "Creative Commons"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
+msgid "Download Upgrade Task"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
+msgid "OOB Query Handler"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
+msgid "Static Messages"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:191
+msgid "QRP Updater"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
+msgid "RUDP Message Routing"
+msgstr ""
+
+#. Load up the HTML engine.
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:476
+msgid "Muddling Mint..."
+msgstr ""
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:493
+msgid "Scouring NYC for Limes..."
+msgstr ""
+
+#. Touch the I18N stuff to ensure it loads properly.
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:563
+msgid "Prepping Mojitos..."
+msgstr ""
+
+#. * Action to view files on host.
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:44
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:746
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:463
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:104
+msgid "Browse Files"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:58
+msgid "Show hostnames of connected peers"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:233
+msgid "No solicited incoming messages"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:91
 #, java-format
-#~ msgid "You are already downloading this file to {0}"
-#~ msgstr "您已经下载此文档于{0}"
+msgid ""
+"{0}\n"
+"This file may have been designed to damage your computer.\n"
+"LimeWire has cancelled the download for your protection."
+msgstr ""
 
-#~ msgid "Loading TLS Encryption..."
-#~ msgstr "加载TLS加密程序..."
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:95
+msgid "Dangerous Download Cancelled"
+msgstr ""
 
-#~ msgid "Loading Message Router..."
-#~ msgstr "加载消息路由程序..."
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:92
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageFolderComboBox.java:97
+msgid "Sign in to share with friends"
+msgstr ""
 
-#~ msgid "Locating Peers..."
-#~ msgstr "定位节点..."
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:176
+msgid "Share all with Friend..."
+msgstr ""
 
-#~ msgid "Loading Shared Files..."
-#~ msgstr "加载共享文档"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:179
+msgid "Share all with the P2P Network"
+msgstr ""
 
-#~ msgid "Checking for Updates..."
-#~ msgstr "检查升级中"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:224
+msgid "Unshare all with Friend..."
+msgstr ""
 
-#~ msgid "Start automatically"
-#~ msgstr "自动启动"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:227
+msgid "Unshare all with the P2P Network"
+msgstr ""
 
-#~ msgid ""
-#~ "LimeWire has encountered an internal error. It is possible for LimeWire to "
-#~ "recover and continue running normally. To aid with debugging, please click "
-#~ "'Send' to notify LimeWire about the problem. If desired, you can click "
-#~ "'Review' to look at the information that will be sent. Thank you."
-#~ msgstr ""
-#~ "LimeWire 遇到内部错误。LimeWire 可以恢复并继续正常运行。为了帮助调试，请单击“发送”以将有关问题通知给 "
-#~ "LimeWire。如果想要查看要发送的信息，可单击“查看”进行查看。谢谢！"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:265
+msgid ""
+"You can't share documents with the P2P Network. Enable this at Tools > "
+"Options > Security > Unsafe Categories"
+msgstr ""
 
-#~ msgid ""
-#~ "LimeWire has encountered an internal error. It is possible for LimeWire to "
-#~ "recover and continue running normally. To continue using LimeWire, click "
-#~ "'Discard'. If desired, you can click 'Review' to look at the information "
-#~ "about the error."
-#~ msgstr ""
-#~ "LimeWire 遇到内部错误。LimeWire 可以恢复并继续正常运行。为了继续使用 "
-#~ "LimeWire，请单击“放弃”。如果想要查看错误消息，可单击“查看”进行查看。"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:323
+msgid "Download Started"
+msgstr ""
 
-#~ msgid "Send"
-#~ msgstr "发送"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:323
+msgid "Show"
+msgstr ""
 
-#~ msgid "Discard"
-#~ msgstr "放弃"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:605
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:423
+msgid "Search Again"
+msgstr ""
 
-#~ msgid "Always Send Immediately"
-#~ msgstr "总是立即发送"
-
-#~ msgid "Always Ask For Review"
-#~ msgstr "总是要求查看"
-
-#~ msgid "Always Discard All Errors"
-#~ msgstr "总是放弃全部错误"
-
-#~ msgid ""
-#~ "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
-#~ "Inc."
-#~ msgstr "BitTorrent、BitTorrent 徽标和 Torrent 是 BitTorrent, Inc. 的商标。"
-
-#~ msgid "Modem"
-#~ msgstr "调制解调器"
-
-#~ msgid "Cable/DSL"
-#~ msgstr "Cable/DSL"
-
-#~ msgid "T1"
-#~ msgstr "T1"
-
-#~ msgid "T3 or Higher"
-#~ msgstr "T3 或 更高"
-
-#~ msgid "Ethernet"
-#~ msgstr "Ethernet"
-
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:629
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:486
 #, java-format
-#~ msgid "Display the {0} Screen"
-#~ msgstr "显示{0}荧幕"
+msgid "Resuming at {0}%"
+msgstr ""
 
-#~ msgid "LimeWire: Enabling Open Information Sharing"
-#~ msgstr "LimeWire: 运行在 Gnutella 网络"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:646
+msgid "Searching..."
+msgstr ""
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:657
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:529
 #, java-format
-#~ msgid ""
-#~ "LimeWire could not locate your web browser to display the following webpage: "
-#~ "{0}."
-#~ msgstr "LimeWire无法找到您的浏览网以显示下列网页：{0}。"
+msgid "Waiting - Next in line"
+msgid_plural "Waiting - {0} in line"
+msgstr[0] ""
+msgstr[1] ""
 
-#~ msgid "LimeWire will not launch the specified file for security reasons."
-#~ msgstr "基於安全理由, LimeWire 将不会运行指定文档。"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:89
+msgid "Clear When Finished"
+msgstr ""
 
+#. {0}: current size
+#. {1}: total size
+#. {2}: download speed
+#. {3}: number of people
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:501
 #, java-format
-#~ msgid ""
-#~ "LimeWire could not launch the specified file.\n"
-#~ "\n"
-#~ "Executed command: {0}."
-#~ msgstr ""
-#~ "LimeWire无法启动指定文档。\n"
-#~ "\n"
-#~ "执行指令：{0}"
+msgid "Downloading {0} of {1} ({2}) from {3} person"
+msgid_plural "Downloading {0} of {1} ({2}) from {3} people"
+msgstr[0] ""
+msgstr[1] ""
 
-#~ msgid "Loading HTML Engine..."
-#~ msgstr "正在加载 HTML 引擎..."
-
-#~ msgid "Loading User Interface..."
-#~ msgstr "正在加载用户界面..."
-
-#~ msgid "Loading Core Components..."
-#~ msgstr "加载 核心 组件..."
-
-#~ msgid "Loading Internationalization Support..."
-#~ msgstr "正在加载国际化支持..."
-
-#~ msgid "Loading Digital Audio Access Protocol..."
-#~ msgstr "加载 Digital Audio Access Protocol..."
-
-#~ msgid "Input"
-#~ msgstr "输入"
-
-#~ msgid "Cancel Operation"
-#~ msgstr "取消 操作."
-
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:511
 #, java-format
-#~ msgid "Visit {0}"
-#~ msgstr "参观{0}"
+msgid "Stalled - {0} of {1} ({2}%). - "
+msgstr ""
 
-#~ msgid "Remind Me Later"
-#~ msgstr "稍后提醒"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:540
+msgid "Searching for people with this file..."
+msgstr ""
 
-#~ msgid "Help Translate LimeWire"
-#~ msgstr "协助翻译LimeWire"
-
-#~ msgid "Verify"
-#~ msgstr "核实"
-
-#~ msgid "LimeWire was unable to locate the details of this license."
-#~ msgstr "LimeWire无法找到此许可证的资料。"
-
-#~ msgid "View Verification Page"
-#~ msgstr "观看核实页"
-
-#~ msgid "License Details:"
-#~ msgstr "许可证资料："
-
-#~ msgid "View License Deed"
-#~ msgstr "观看许可证契约。"
-
-#~ msgid "LimeWire is currently locating the details of this license."
-#~ msgstr "LimeWire正寻找此许可证的资料。"
-
-#~ msgid "View Usage Rights"
-#~ msgstr "观看使用权。"
-
-#~ msgid "License Details"
-#~ msgstr "许可证资料"
-
-#~ msgid "File Listing for"
-#~ msgstr "登录文档于"
-
-#~ msgid "Always use this answer"
-#~ msgstr "请常用此答案"
-
-#~ msgid "Loading Monitor Window..."
-#~ msgstr "加载监控窗口..."
-
-#~ msgid "Show Incoming Searches"
-#~ msgstr "显示进来的搜索"
-
-#~ msgid ""
-#~ "Your client is a leaf node shielded by an Ultrapeer. Hence you will see few "
-#~ "or no searches in the monitor window."
-#~ msgstr "你的 客户是一 超级 节点保护的 一个 叶节点. 因此 你 将在监视 窗口中 看见很少或者 没有 搜索."
-
-#~ msgid "Searches"
-#~ msgstr "搜索"
-
-#~ msgid "Shutting down LimeWire..."
-#~ msgstr "关闭LimeWire中"
-
-#~ msgid "Add New List Item"
-#~ msgstr "添加 新的 列表 条目"
-
-#~ msgid "Remove Selected Item"
-#~ msgstr "去掉所选条目"
-
-#~ msgid "Loading Status Window..."
-#~ msgstr "加载 状态 窗口..."
-
-#~ msgid "Disconnected"
-#~ msgstr "断开的"
-
-#~ msgid "Upgrade to PRO"
-#~ msgstr "升级 到 “增强版”"
-
-#~ msgid "Upgrade to LimeWire PRO?"
-#~ msgstr "升级 到 “LimeWire 增强版”?"
-
-#~ msgid "Get LimeWire PRO Now"
-#~ msgstr "现在就要 “LimeWire 增强版”"
-
-#~ msgid "What does PRO give me?"
-#~ msgstr "“增强版” 带来什么?"
-
-#~ msgid "Get LimeWire PRO Later"
-#~ msgstr "以后 再要 “LimeWire 增强版”"
-
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:542
 #, java-format
-#~ msgid ""
-#~ "LimeWire has detected a corruption in the file {0}. Do you want to continue "
-#~ "the download?"
-#~ msgstr "LimeWire 发现文档有损毁{0}。您想继续下载吗?"
-
-#~ msgid "Lookup File with Bitzi"
-#~ msgstr "Bitzi 网 查找..."
-
-#~ msgid "C&onnect"
-#~ msgstr "连接 (&O)"
-
-#~ msgid "D&isconnect"
-#~ msgstr "断开 连接 (&I)"
-
-#~ msgid "&Close"
-#~ msgstr "&关闭"
-
-#~ msgid "Block Host"
-#~ msgstr "屏蔽 对方"
-
-#~ msgid "Send Message"
-#~ msgstr "发送通信"
-
-#~ msgid "Block Current Host"
-#~ msgstr "屏蔽 对方."
-
-#~ msgid "Send a Message to a Host"
-#~ msgstr "发送通信予主机。"
-
-#~ msgid "Host is unavailable"
-#~ msgstr "连接 不上 主机"
-
-#~ msgid "You"
-#~ msgstr "您"
-
-#~ msgid "Create a New Outgoing Connection"
-#~ msgstr "产生 一个 新的 传出 连接."
-
-#~ msgid "View All Files on the Selected Computer"
-#~ msgstr "观看所选计算机的全部文档。"
-
-#~ msgid "Loading Connections Window..."
-#~ msgstr "加载 连接 窗口..."
-
-#~ msgid "0.6"
-#~ msgstr "0.6"
-
-#~ msgid "Waiting On Busy Hosts"
-#~ msgstr "等待繁忙主机"
-
-#~ msgid "Aborted"
-#~ msgstr "放弃"
-
-#~ msgid "Awaiting Sources"
-#~ msgstr "等待资源"
-
-#~ msgid "Disk Problem"
-#~ msgstr "磁碟问题"
-
-#~ msgid "Verifying File Contents..."
-#~ msgstr "文档内容核实中..."
-
-#~ msgid "Average Bandwidth"
-#~ msgstr "宽频平均"
-
-#~ msgid "hosts"
-#~ msgstr "主机"
-
-#~ msgid "host"
-#~ msgstr "主机"
-
-#~ msgid "Launch Selected Files"
-#~ msgstr "运行所选文档"
-
-#~ msgid "Loading Download Window..."
-#~ msgstr "加载 下载 窗口..."
-
-#~ msgid "Find Sources"
-#~ msgstr "寻找资源"
-
-#~ msgid "Try to Find Additional Sources for Downloads"
-#~ msgstr "尝试为下载寻找其他资源"
-
-#~ msgid "Reattempt Selected Downloads"
-#~ msgstr "重试所选下载"
-
-#~ msgid "&Apply Skins"
-#~ msgstr "&应用皮肤"
-
-#~ msgid "Cancel Selected Downloads"
-#~ msgstr "取消所选下载"
-
-#~ msgid "Remove Inactive Downloads"
-#~ msgstr "去掉不活跃下载"
-
-#~ msgid "Active"
-#~ msgstr "活动"
-
-#~ msgid "Finish Setup"
-#~ msgstr "安装完成"
-
-#~ msgid ""
-#~ "Your LimeWire setup has successfully completed. Please press the \"Finish\" "
-#~ "button to begin using LimeWire."
-#~ msgstr "LimeWire 安装成功. 请按 “完成” 按钮, 开始 使用 LimeWire."
-
-#~ msgid ""
-#~ "Please choose a folder where you would like your files to be downloaded. "
-#~ "This folder will also be shared with other gnutella users by default."
-#~ msgstr "请 选择 你 希望 保存 下载 文件的 文件夹. 此 文件夹 缺省的 与其他 Gnutella 用户 同享."
-
-#~ msgid ""
-#~ "LimeWire was unable to use the specified folder for saving files. Please try "
-#~ "a different folder."
-#~ msgstr "LimeWire 不能 够 使用 指定的 保存 文件夹. 请 选择 另 一个 文件夹."
-
-#~ msgid "Confirm Scan"
-#~ msgstr "确认扫描"
-
-#~ msgid ""
-#~ "We identified the folders below as ones that you might like to share. If you "
-#~ "would like to share one of these folders, simply check its associated "
-#~ "checkbox. Subfolders of shared folders will also be shared."
-#~ msgstr ""
-#~ "我们鉴定那些 文件夹 下面的 东西有 共享的 可能. 如果 你 想 共享 这些 文件夹, 仅仅检查它相关的 选择 框. 共享的 文件夹的 子 文件夹 "
-#~ "目录 也将被 共享."
-
-#~ msgid ""
-#~ "Would you like LimeWire to quickly scan your hard drive for other media "
-#~ "files? You will have the opportunity to specify which folders you would like "
-#~ "to share when the scan is complete."
-#~ msgstr "你 想要 LimeWire 迅速为其他媒介 文件 扫描 你的 硬盘 吗? 你 将有机会确切说明当扫描完成时, 你 想分享哪份 文件夹."
-
-#~ msgid "Next >>"
-#~ msgstr "前进"
-
-#~ msgid "<< Back"
-#~ msgstr "<<返回"
-
-#~ msgid ""
-#~ "Please choose the speed of your Internet connection. Setting this speed "
-#~ "correctly is important for optimum network performance. If you are not sure "
-#~ "what type of Internet connection you have, or if your connection type is not "
-#~ "listed, simply select whichever one seems the most appropriate."
-#~ msgstr ""
-#~ "请 选择 你的 因特网 连接 速度. 正确的 设定此 速度 对于优化 网络 非常重要. 如果 你 不能 确认 你 是何种 网络 连接 类型或者 网络 "
-#~ "类型 没有 列出, 只 需简单地 选择 看上去最合适的 ."
-
-#~ msgid "Please wait as LimeWire scans your hard drive..."
-#~ msgstr "LimeWire 正在 扫描 你的 硬盘, 请等待..."
-
-#~ msgid "Welcome"
-#~ msgstr "欢迎"
-
-#~ msgid ""
-#~ "Welcome to the LimeWire setup wizard. LimeWire has recently added new "
-#~ "features that require your configuration. LimeWire will guide you through a "
-#~ "series of steps to configure these new features."
-#~ msgstr ""
-#~ "欢迎 使用 LimeWire 安装向导. LimeWire has recently added new features that require "
-#~ "your configuration. LimeWire will guide you through a series of steps to "
-#~ "configure these new features."
-
-#~ msgid ""
-#~ "Welcome to the LimeWire setup wizard. LimeWire will guide you through a "
-#~ "series of steps to configure LimeWire for optimum performance."
-#~ msgstr "欢迎 使用 LimeWire 安装向导. LimeWire 将指导 你 通过一系列步骤配置 LimeWire, 达到最佳性能."
-
-#~ msgid "Loading Library Window..."
-#~ msgstr "加载库藏窗口..."
-
-#~ msgid ""
-#~ "The selected folder cannot be shared.  Please select another folder to share."
-#~ msgstr "错误的 共享 文件夹. 请用 另 一个 文件夹 或者恢复到 缺省 设置."
-
-#~ msgid "Path"
-#~ msgstr "路径"
-
-#~ msgid "Are you sure you want to delete the selected file(s)?"
-#~ msgstr "你 确认要 删除 选中的 文件 吗?"
-
-#~ msgid ""
-#~ "Unable to rename the file '{0}'. It may be in use by another application."
-#~ msgstr "不能 重命名 此 文件 {0} . 它可能 正在 被别的 程序 使用."
-
-#~ msgid "Enqueue"
-#~ msgstr "添加 到 播放列表"
-
-#~ msgid "Add Selected Files to the Playlist"
-#~ msgstr "添加 选中的 文件 到 播放列表."
-
-#~ msgid "Describe..."
-#~ msgstr "注释..."
-
-#~ msgid "Add Description to Selected File"
-#~ msgstr "所 选 文件的 注释."
-
-#~ msgid "Continue Downloading Selected Incomplete File"
-#~ msgstr "重新 尝试 下载."
-
-#~ msgid "Rename"
-#~ msgstr "重命名"
-
-#~ msgid "Stop Sharing Folder"
-#~ msgstr "停止 共享"
-
-#~ msgid "Are you sure you want to stop sharing this folder?"
-#~ msgstr "你 确认要 停止 共享 此 文件夹 吗?"
-
-#~ msgid "Add Folder Contents to Playlist"
-#~ msgstr "添加到 播放列表"
-
-#~ msgid "Refresh"
-#~ msgstr "刷新"
-
-#~ msgid "Reload Shared Folders"
-#~ msgstr "刷新 共享 目录."
-
-#~ msgid ".torrent files"
-#~ msgstr ".torrent 文件"
-
-#~ msgid "Help for Using LimeWire"
-#~ msgstr "使用 LimeWire 的 帮助."
-
-#~ msgid "Frequently Asked Questions for LimeWire"
-#~ msgstr "LimeWire 常见问题解答."
-
-#~ msgid "Access the LimeWire Users' Forum"
-#~ msgstr "进入 LimeWire 用户 论坛."
-
-#~ msgid "Show the Tip of the Day Window"
-#~ msgstr "显示 Tip of the Day 窗口."
-
-#~ msgid "&About LimeWire"
-#~ msgstr "关于... (&A)"
-
-#~ msgid "Information about LimeWire"
-#~ msgstr "关于 LimeWire 的 信息."
-
-#~ msgid "&Navigation"
-#~ msgstr "导航 (&N)"
-
-#~ msgid "&Resources"
-#~ msgstr "资源 (&R)"
-
-#~ msgid "LimeWire &PRO"
-#~ msgstr "LimeWire &PRO"
-
-#~ msgid "Display the LimeWire PRO Website"
-#~ msgstr "显示 LimeWire PRO 网站."
-
-#~ msgid "&MagnetMix"
-#~ msgstr "&MagnetMix"
-
-#~ msgid "&Options"
-#~ msgstr "选项... (&O)"
-
-#~ msgid "Display the Options Screen"
-#~ msgstr "显示 选项 窗口."
-
-#~ msgid "Next"
-#~ msgstr "下一步"
-
-#~ msgid "Previous"
-#~ msgstr "上一步"
-
-#~ msgid "LimeWire Media Player"
-#~ msgstr "LimeWire 多媒体 播放器"
-
-#~ msgid "Restore"
-#~ msgstr "还原"
-
-#~ msgid "About"
-#~ msgstr "关于"
-
-#~ msgid "Exit after Transfers"
-#~ msgstr "传输后退出"
-
-#~ msgid "Slots"
-#~ msgstr "扩展槽"
-
-#~ msgid "Player"
-#~ msgstr "播放器"
-
-#~ msgid "Bug Reports"
-#~ msgstr "Bug reports"
-
-#~ msgid "Searching"
-#~ msgstr "正在搜索"
-
-#~ msgid "Hosts"
-#~ msgstr "主机"
-
-#~ msgid "Preferencing"
-#~ msgstr "优先 选择"
-
-#~ msgid "Loading Options Window..."
-#~ msgstr "加载 选项 窗口..."
-
-#~ msgid ""
-#~ "You can allow messages from specific hosts by adding their IP addresses "
-#~ "(e.g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
-#~ "\"192.168.12.16/28\") to the allow list. This list is only needed to "
-#~ "override the banned list."
-#~ msgstr ""
-#~ "通过添加 IP 地址到 许可 列表, 你 可以 允许 接受 下列 主机 发送的 消息 (例如: “18.239.0.1” 或 “18.*.*.*”). "
-#~ "许可 列表 可以 覆盖 禁止 列表."
-
-#~ msgid "Clear Completed Downloads:"
-#~ msgstr "自动 清除 已完成的 下载 条目:"
-
-#~ msgid ""
-#~ "You can choose whether or not to automatically clear uploads that have "
-#~ "completed."
-#~ msgstr "你 可以 选择 是否 自动 清除 已完成的 上载."
-
-#~ msgid "Automatically Clear Completed Uploads:"
-#~ msgstr "自动 清楚 已完成的 上载:"
-
-#~ msgid "Browser Options"
-#~ msgstr "浏览器 选项"
-
-#~ msgid "You can choose which browser to use."
-#~ msgstr "你 可以 选用 何种 浏览器."
-
-#~ msgid "Host Communication"
-#~ msgstr "主机 联系"
-
-#~ msgid "You can turn chat on or off."
-#~ msgstr "你 可以 设置 聊天为 开启 和 关闭 状态."
-
-#~ msgid "Connect on Startup"
-#~ msgstr "启动 时 连接"
-
-#~ msgid ""
-#~ "You can choose whether or not to automatically connect to the network when "
-#~ "the application starts up."
-#~ msgstr "你 可以 选择 应用 程序 启动 时 是否 自动 连接 到 网络 上."
-
-#~ msgid "Connect on Startup:"
-#~ msgstr "启动 时 连接:"
-
-#~ msgid "Connection Preferencing"
-#~ msgstr "连接 优先 选择"
-
-#~ msgid ""
-#~ "You can limit who is able to connect to you based on the number of files "
-#~ "they share."
-#~ msgstr "你 可以 根据 他们 共享 文件的 数目 来限 制谁能 连接 你."
-
-#~ msgid "Files You Must Share to Not be a Freeloader:"
-#~ msgstr "不使 你 成为 白食者 而必须 共享的 文件 数:"
-
-#~ msgid "Allow Freeloaders:"
-#~ msgstr "允许 白食者:"
-
-#~ msgid "You can set the percentage of your bandwidth devoted to downloads."
-#~ msgstr "你 可以 设置 一定比例的 下载 带宽."
-
-#~ msgid "Use Defaults"
-#~ msgstr "缺省 设置"
-
-#~ msgid ""
-#~ "You must enter a port between 1 and 65535 when manually forcing your port."
-#~ msgstr "你 必须输入 1 到 65535 之间的 数."
-
-#~ msgid "Filter Hosts"
-#~ msgstr "过滤 主机"
-
-#~ msgid ""
-#~ "You can disallow messages from specific hosts by adding their IP addresses "
-#~ "(e.g. \"192.168.0.1\", \"192.*.*.*\", \"192.168.12.16/255.255.255.240\" or "
-#~ "\"192.168.12.16/28\") to the banned list."
-#~ msgstr ""
-#~ "通过添加 IP 地址到 禁止 列表, 你 可以 不 允许 接受 下列 主机 发送的 消息 (例如: “18.239.0.1” 或 “18.*.*.*”)."
-
-#~ msgid "Filter Result Types"
-#~ msgstr "过滤 类型"
-
-#~ msgid "You can specify general types of search results to filter."
-#~ msgstr "你 可以 设置 下列 几种 过滤 类型."
-
-#~ msgid "Ignore Adult Content"
-#~ msgstr "忽略 成人 内容"
-
-#~ msgid "Ignore .htm/.html Files"
-#~ msgstr "忽略 .htm/.html 文件"
-
-#~ msgid "Ignore .vbs Files"
-#~ msgstr "忽略 .vbs 文件"
-
-#~ msgid "You can filter out search results containing specific words."
-#~ msgstr "你 可以 过滤 调包含特殊 文字的 搜索 结果."
-
-#~ msgid "Maximum Downloads"
-#~ msgstr "最多 下载 数目"
-
-#~ msgid "You can set the maximum number of simultaneous downloads."
-#~ msgstr "你 可以 设置 同时 下载的 最多的 数目."
-
-#~ msgid "Maximum Downloads:"
-#~ msgstr "最多 下载 数:"
-
-#~ msgid "Maximum Searches"
-#~ msgstr "最多 搜索 数目"
-
-#~ msgid ""
-#~ "You can set the maximum number of simultaneous searches you can perform."
-#~ msgstr "你 可以 设置 你 能 执行的 最多的 同时 搜索的 数目."
-
-#~ msgid "Maximum Searches:"
-#~ msgstr "最多 搜索 数:"
-
-#~ msgid ""
-#~ "Never allow more than this many uploads. This value will only be reached if "
-#~ "you have enough bandwidth."
-#~ msgstr "不允许 超过 此 数目的 上载. 这个值 只 有在 带宽 足够时才能 达到."
-
-#~ msgid "Max Upload Slots:"
-#~ msgstr "最大 上载 槽:"
-
-#~ msgid "Allow this many uploads per person."
-#~ msgstr "允许 每个人 这么多的 上载 数目."
-
-#~ msgid "Uploads Per Person:"
-#~ msgstr "每个人的 上载 数:"
-
-#~ msgid "Player Options"
-#~ msgstr "播放器 选项"
-
-#~ msgid ""
-#~ "You can choose to play media with LimeWire or your system's default player. "
-#~ "The media player and playlist will appear only if this option is set. A "
-#~ "restart will be required when enabling or disabling the media controls."
-#~ msgstr "你 可以 选用 内部 播放器 或者系统 缺省的 播放器."
-
-#~ msgid "Use LimeWire Media Player:"
-#~ msgstr "选用 LimeWire MP3 播放器:"
-
-#~ msgid "Port not available. Please select a different port."
-#~ msgstr "端口 不可提供. 请 选择 一个 不同的 端口."
-
-#~ msgid "Please enter a port between 1 and 65535."
-#~ msgstr "请输入 1 到 65535的 端口 号."
-
-#~ msgid "You can automatically delete old incomplete download files."
-#~ msgstr "你 可以 自动 删除 老的 不完全的 下载 文件."
-
-#~ msgid "Days to Keep Incomplete Files:"
-#~ msgstr "不完全 文件 保留天 数:"
-
-#~ msgid "You can choose the folder for saving files."
-#~ msgstr "你 可以 选择 保存 文件的 文件夹."
-
-#~ msgid ""
-#~ "Invalid folder for saving files. Please use another folder or revert to the "
-#~ "default."
-#~ msgstr "错误的 保存 文件的 文件夹. 请用 另 一个 文件夹 或者恢复到 缺省 设置."
-
-#~ msgid "Search Result Quality"
-#~ msgstr "搜索 结果 等级"
-
-#~ msgid ""
-#~ "You can select the \"quality\" of search results to display. Four star "
-#~ "results indicate that the host returning the result is not firewalled and "
-#~ "has free upload slots."
-#~ msgstr "你 可以 选择 搜索 结果中的 “等级” 进行 显示. 四星 指示 搜索 返回的 结果 没有 防火墙 并且 可以 自由 下载."
-
-#~ msgid "Show Only Four Star Results"
-#~ msgstr "只 显示 四星 级 搜索 结果"
-
-#~ msgid "Show Only Three and Four Star Results"
-#~ msgstr "只 显示 三星 和 四星 级 搜索 结果"
-
-#~ msgid "Show Only Two, Three, and Four Star Results"
-#~ msgstr "只 显示 两星, 三星 和 四星 级 搜索 结果"
-
-#~ msgid "Show All Qualities"
-#~ msgstr "显示 全部 等级的 搜索 结果"
-
-#~ msgid "Search Result Speed"
-#~ msgstr "搜索 结果 速度"
-
-#~ msgid "You can select the minimum speed of search results to display."
-#~ msgstr "你 可以 选择 搜索 结果中的 最小 速度 进行 显示."
-
-#~ msgid "Show Only Results of T3 Speed or Higher"
-#~ msgstr "只 显示 T3 或更高 速度的 搜索 结果"
-
-#~ msgid "Show Only Results of T1 Speed or Higher"
-#~ msgstr "只 显示 T1 或更高 速度的 搜索 结果"
-
-#~ msgid "Show Only Results of Cable/DSL Speed or Higher"
-#~ msgstr "只 显示 Cable/DSL 或更高 速度的 搜索 结果"
-
-#~ msgid "Show All Speeds"
-#~ msgstr "显示 全部 速度的 搜索 结果"
-
-#~ msgid ""
-#~ "You can choose the folders for sharing files. Files in these folders are "
-#~ "displayed in the library."
-#~ msgstr "你 可以 选择 共享 文件夹 共享 文件. 在这些 文件夹 种的 文件 是显示在 收藏 夹中."
-
-#~ msgid "Shutdown Behavior"
-#~ msgstr "关闭 选项"
-
-#~ msgid "You can choose the default shutdown behavior."
-#~ msgstr "你 可以 选择 缺省的 关闭 动作."
-
-#~ msgid "Shutdown Immediately"
-#~ msgstr "立即 关闭"
-
-#~ msgid "Shutdown after Transfers"
-#~ msgstr "传输 完后 关闭"
-
-#~ msgid "Start Upload Slots:"
-#~ msgstr "起始 上载 槽:"
-
-#~ msgid ""
-#~ "You can specify your connection speed so that LimeWire can optimize "
-#~ "performance."
-#~ msgstr "你 可以 指定 你的 连接 速度 从 而进行性能 优化."
-
-#~ msgid "Speed:"
-#~ msgstr "速度:"
-
-#~ msgid ""
-#~ "You can set the percentage of your bandwidth devoted to uploads. To turn off "
-#~ "uploads, reduce your upload slots to zero."
-#~ msgstr "你 可以 设置 一定比例的 上载 带宽. 关闭 上载, 减少 上载 槽至 0."
-
-#~ msgid "Upload Speed:"
-#~ msgstr "上载 带宽:"
-
-#~ msgid "Video Options"
-#~ msgstr "视频 选项"
-
-#~ msgid "Open an Existing Playlist"
-#~ msgstr "打开 一个 新的 存在的 播放列表."
-
-#~ msgid "Save the Current Playlist to a File"
-#~ msgstr "保存 当前的 播放列表."
-
-#~ msgid "MP3 Playlist"
-#~ msgstr "MP3 播放列表"
-
-#~ msgid "Loading Playlist Window..."
-#~ msgstr "加载 播放列表 窗口..."
-
-#~ msgid "Play Options:"
-#~ msgstr "播放 选项:"
-
-#~ msgid "Shuffle"
-#~ msgstr "跳跃"
-
-#~ msgid "Continuous"
-#~ msgstr "连续"
-
-#~ msgid "Open Playlist (.m3u)"
-#~ msgstr "选择 播放列表 (.m3u)"
-
-#~ msgid "Save Playlist As"
-#~ msgstr "保存 播放列表 到..."
-
-#~ msgid "Playlist Files (*.m3u)"
-#~ msgstr "播放列表 文件 (*.m3u)"
-
-#~ msgid "Option"
-#~ msgstr "选项"
-
-#~ msgid "Vendor"
-#~ msgstr "软件"
-
-#~ msgid "Download All Selected Files"
-#~ msgstr "下载 所有 选中的 文件."
-
-#~ msgid "View All Files on Selected Computer"
-#~ msgstr "浏览已 选中的 计算机上的 所有 共享 文件."
-
-#~ msgid "Stop Collecting Search Results for Selected Tab"
-#~ msgstr "终止为已选清单收集寻结果"
-
-#~ msgid "Hide Adult Content"
-#~ msgstr "隐藏色情内容"
-
-#~ msgid "Launch Action"
-#~ msgstr "运行"
-
-#~ msgid "Chat With Host"
-#~ msgstr "和对方 聊天"
-
-#~ msgid "Repeat Search"
-#~ msgstr "重新 搜索"
-
-#~ msgid "Loading Search Window..."
-#~ msgstr "加载 搜索 窗口..."
-
-#~ msgid ""
-#~ "Your search must be at least three characters to avoid congesting the "
-#~ "network."
-#~ msgstr "你 必须键入至少 3 个字符, 从 而避免阻塞 网络."
-
-#~ msgid ""
-#~ "One of the selected files is an executable program and could contain a "
-#~ "virus. Are you sure you want to download it?"
-#~ msgstr "选中的 文件中 包含可执行程序 可能 携带病毒. 你 确认要 下载 吗?"
-
+msgid "Searching for people with this file... ({0} left)"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:779
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:474
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:226
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:242
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/NavPanel.java:368
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:117
+msgid "What I'm Sharing"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:93
+msgid "Hide"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:94
 #, java-format
-#~ msgid "Could not browse host {0}."
-#~ msgstr "不能 浏览 主机 {0} ."
+msgid "Downloading {0}"
+msgstr ""
 
-#~ msgid "Created"
-#~ msgstr "创建日期"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:100
+msgid "Download cancelled.  Click button to retry"
+msgstr ""
 
-#~ msgid "You cannot turn off all columns."
-#~ msgstr "你 不能 关掉 所有 列."
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:106
+msgid "Error downloading file.  Click button to retry"
+msgstr ""
 
-#~ msgid "View Repository of Saved Files"
-#~ msgstr "查看 保存的 文件"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileListPanel.java:97
+msgid "Find..."
+msgstr ""
 
-#~ msgid "View Searches and Uploads"
-#~ msgstr "显示 搜索 和 上载"
+#. {1}: number of files, {0,2}: html tags
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:198
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:207
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:231
+msgid "You're {0}sharing {1} file{2} with your friend."
+msgid_plural "You're {0}sharing {1} files{2} with your friend."
+msgstr[0] ""
+msgstr[1] ""
 
-#~ msgid "Search and Download Files"
-#~ msgstr "搜索和下载文档"
-
-#~ msgid "To try your new skin, you must restart LimeWire."
-#~ msgstr "要尝试新貌，您必须重下次 启动 LimeWire, 皮肤 将会 改变..."
-
-#~ msgid "Get New Skins"
-#~ msgstr "选新皮肤"
-
-#~ msgid "Stop Selected Uploads"
-#~ msgstr "终止已选上载。"
-
-#~ msgid "Remove Inactive Uploads"
-#~ msgstr "清除 不活动的 上载."
-
-#~ msgid "Freeloader Uploading"
-#~ msgstr "自由加载者上载"
-
-#~ msgid "File Not Found"
-#~ msgstr "没有 找到 文件"
-
-#~ msgid "Queued at"
-#~ msgstr "等候"
-
-#~ msgid "Loading Upload Window..."
-#~ msgstr "加载 上载 窗口..."
-
-#~ msgid "More Search Options"
-#~ msgstr "更多 搜索 选项"
-
-#~ msgid "Annotating file"
-#~ msgstr "注释 文件"
-
-#~ msgid "Edit annotation of type:"
-#~ msgstr "编辑类型的 注释:"
-
-#~ msgid "Add annotation of type:"
-#~ msgstr "添加类型的 注释:"
-
-#~ msgid "Cannot remove unsaved info."
-#~ msgstr "不能 移 除 没有 保存的 信息."
-
-#~ msgid "Internal Document Error. Data could not be saved."
-#~ msgstr "内部 文档错误. 数据 不能 保存."
-
-#~ msgid "Internal Error. Data could not be saved."
-#~ msgstr "内部 错误. 数据 不能 保存."
-
-#~ msgid "File not found or corrupt file. Data could not be saved"
-#~ msgstr "文档不存在或已毁坏。数据无法储存。"
-
-#~ msgid "Read Write Error. Data could not be saved."
-#~ msgstr "读写错误。 数据无法储存。"
-
-#~ msgid "File Corrupt. Data could not be saved."
-#~ msgstr "文档毁坏。 数据无法储存。"
-
-#~ msgid "Incorrect format entered. Changes will not be saved."
-#~ msgstr "输入了 不正确的 格式. 修改 没有 保存."
-
-#~ msgid "Size:"
-#~ msgstr "大小:"
-
-#~ msgid "Title:"
-#~ msgstr "标题:"
-
-#~ msgid "Artist:"
-#~ msgstr "演艺员"
-
-#~ msgid "Type:"
-#~ msgstr "类型:"
-
-#~ msgid "SHA1:"
-#~ msgstr "SHA1:"
-
-#~ msgid "Link:"
-#~ msgstr "链接："
-
-#~ msgid "Director:"
-#~ msgstr "导演"
-
-#~ msgid "MPEG-1 Audio Layer 3"
-#~ msgstr "MPEG-1 音频 Layer 3"
-
-#~ msgid "MPEG-4 Audio"
-#~ msgstr "MPEG-4 音频"
-
-#~ msgid "Ogg Vorbis"
-#~ msgstr "Ogg Vorbis"
-
-#~ msgid "I"
-#~ msgstr "I"
-
-#~ msgid "P"
-#~ msgstr "P"
-
-#~ msgid "N"
-#~ msgstr "N"
-
-#~ msgid "V"
-#~ msgstr "V"
-
-#~ msgid "W"
-#~ msgstr "W"
-
-#~ msgid "Display the Statistics Screen"
-#~ msgstr "显示 统计 窗口."
-
-#~ msgid "U"
-#~ msgstr "U"
-
-#~ msgid "G"
-#~ msgstr "G"
-
-#~ msgid "Querying Network"
-#~ msgstr "正在 请求 网络"
-
+#. {0}, {1}: html tags
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:209
 #, java-format
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "请求 已发出, 等待 {0}秒 返回 结果"
-
-#~ msgid "Gnutella"
-#~ msgstr "Gnutella"
-
-#~ msgid "Stop Chatting with a Host"
-#~ msgstr "停止 和对方 谈话."
-
-#~ msgid "Loading Statistics Window..."
-#~ msgstr "加载 统计 窗口..."
-
-#~ msgid ""
-#~ "Could not find a port to use for incoming connections.\n"
-#~ "Please specify a port from the configuration window."
-#~ msgstr ""
-#~ "不能 找到 一个 端口 为进来的 连接 使用.\n"
-#~ "请 从 结构 窗口 指定 一个 端口."
-
-#~ msgid "QRP"
-#~ msgstr "QRP"
-
-#~ msgid "Errors"
-#~ msgstr "错误"
-
-#~ msgid "Query Replies"
-#~ msgstr "搜索 结果"
-
-#~ msgid "Ping Replies"
-#~ msgstr "Pong 结果"
-
-#~ msgid "Hit Routing Errors"
-#~ msgstr "搜索 结果 路由 错误"
-
-#~ msgid "seconds"
-#~ msgstr "秒"
-
-#~ msgid "messages"
-#~ msgstr "消息"
-
-#~ msgid "Average"
-#~ msgstr "平均 值"
-
-#~ msgid "Max"
-#~ msgstr "最大 值"
-
-#~ msgid "Total Upstream"
-#~ msgstr "传出 总价 带宽"
-
-#~ msgid "Total Downstream"
-#~ msgstr "传入 总价 带宽"
-
-#~ msgid "HTTP Total"
-#~ msgstr "HTTP 总价 值"
-
-#~ msgid "Gnutella Total"
-#~ msgstr "Gnutella 总价 值"
-
-#~ msgid "All Messages"
-#~ msgstr "全部 消息"
-
-#~ msgid "Hops 1"
-#~ msgstr "Hops 1"
-
-#~ msgid "Hops 2"
-#~ msgstr "Hops 2"
-
-#~ msgid "Hops 3"
-#~ msgstr "Hops 3"
-
-#~ msgid "Hops 4"
-#~ msgstr "Hops 4"
-
-#~ msgid "Hops 5"
-#~ msgstr "Hops 5"
-
-#~ msgid "Hops 6"
-#~ msgstr "Hops 6"
-
-#~ msgid "Hops 7"
-#~ msgstr "Hops 7"
-
-#~ msgid "Hops 8"
-#~ msgstr "Hops 8"
-
-#~ msgid "Hops 9"
-#~ msgstr "Hops 9"
-
-#~ msgid "TTL 0"
-#~ msgstr "TTL 0"
-
-#~ msgid "TTL 1"
-#~ msgstr "TTL 1"
-
-#~ msgid "TTL 2"
-#~ msgstr "TTL 2"
-
-#~ msgid "TTL 3"
-#~ msgstr "TTL 3"
-
-#~ msgid "TTL 4"
-#~ msgstr "TTL 4"
-
-#~ msgid "TTL 5"
-#~ msgstr "TTL 5"
-
-#~ msgid "TTL 6"
-#~ msgstr "TTL 6"
-
-#~ msgid "TTL 7"
-#~ msgstr "TTL 7"
-
-#~ msgid "TTL 8"
-#~ msgstr "TTL 8"
-
-#~ msgid "TTL 9"
-#~ msgstr "TTL 9"
-
-#~ msgid "All Requests"
-#~ msgstr "全部 请求"
-
-#~ msgid "HEAD Requests"
-#~ msgstr "HEAD 请求"
-
-#~ msgid "GET Requests"
-#~ msgstr "GET 请求"
-
-#~ msgid "Push Requests"
-#~ msgstr "Push 请求"
-
-#~ msgid "Gnutella Requests"
-#~ msgstr "Gnutella 请求"
-
-#~ msgid "Gnutella (LimeWire) Requests"
-#~ msgstr "Gnutella (LimeWire) 请求"
-
-#~ msgid "THEX Request"
-#~ msgstr "THEX 请求"
-
-#~ msgid "Incoming Attempts"
-#~ msgstr "传入 邻居"
-
-#~ msgid "Change Language"
-#~ msgstr "更改语言"
-
-#~ msgid "Routing Errors"
-#~ msgstr "路由 错误"
-
-#~ msgid "Store"
-#~ msgstr "储存"
-
-#~ msgid "Configure"
-#~ msgstr "配置"
-
-#~ msgid "Back"
-#~ msgstr "返回"
-
-#~ msgid "Loading BitTorrent Management..."
-#~ msgstr "加载BT管理程序..."
-
-#~ msgid ""
-#~ "Please add any comments you may have (e.g what caused the error). \n"
-#~ "Thank you and please use English."
-#~ msgstr ""
-#~ "请添加您可能有的任何说明（如导致错误的原因）。\n"
-#~ "请使用英语，谢谢！"
-
-#~ msgid "Attaching LimeWire Store Listeners..."
-#~ msgstr "载入LimWire存储监听器..."
-
-#~ msgid "Loading Browser..."
-#~ msgstr "正在加载浏览器..."
-
-#~ msgid "View Files"
-#~ msgstr "观看文件"
-
-#~ msgid "Clear finished"
-#~ msgstr "已完成清除"
-
-#~ msgid "Try again"
-#~ msgstr "请重试"
-
-#~ msgid "locate on disk"
-#~ msgstr "在磁盘上查找"
-
-#~ msgid "locate in library"
-#~ msgstr "在文件库中查找"
-
-#~ msgid "Add friend"
-#~ msgstr "添加朋友"
-
-#~ msgid "Close chat"
-#~ msgstr "结束聊天"
-
-#~ msgid "Downloading"
-#~ msgstr "正在下载"
-
-#~ msgid "Sign in"
-#~ msgstr "登录"
-
-#~ msgid "Signing in ..."
-#~ msgstr "正在登录..."
-
-#~ msgid "Search Library..."
-#~ msgstr "搜索文件库..."
-
-#~ msgid "Download from all friends"
-#~ msgstr "从所有朋友下载"
-
+msgid "{0}Chat{1} about signing into LimeWire 5."
+msgstr ""
+
+#. {0}, {1}: html tags
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:233
 #, java-format
-#~ msgid "Download from {0}"
-#~ msgstr "从 {0} 下载"
+msgid "{0}Chat{1} about LimeWire 5."
+msgstr ""
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyFriendLibraryMessagePanel.java:258
+msgid "There are no files to browse."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:138
+msgid "Browse Files from All Friends"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:140
 #, java-format
-#~ msgid "Share your files with {0}"
-#~ msgstr "和 {0} 共享你的文件"
+msgid "Browse Files from {0}"
+msgstr ""
 
-#~ msgid "1 file with your friend."
-#~ msgstr "1个文件和你的朋友"
+#. Display heading.
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:417
+msgid "CATEGORIES"
+msgstr ""
 
+#. Display heading.
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:558
+msgid "PLAYLISTS"
+msgstr ""
+
+#. Get playlists from manager.
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:561
+msgid "Quicklist"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:867
+msgid "Now What?"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:870
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:912
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:955
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:960
+msgid "Click "
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:871
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:961
+msgid " to share or unshare with your friends"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:909
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:952
+msgid "No more shared folders"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:913
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:956
+msgid " to share or unshare with the P2P Network"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1022
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1108
+msgid "Show All Files"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1037
+msgid "No files shared with the P2P Network"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1039
 #, java-format
-#~ msgid "{0} files with your friend."
-#~ msgstr "{0} 个文件和你的朋友"
+msgid "No files shared with {0}"
+msgstr ""
 
-#~ msgid "1 file with your friend. "
-#~ msgstr "1个文件和你的朋友 "
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:1134
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:119
+msgid "What I'm Sharing with {0}"
+msgstr ""
 
-#~ msgid "about using LimeWire 5."
-#~ msgstr "关于使用 LimeWire5"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingFilterComboBox.java:89
+msgid "with:"
+msgstr ""
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingFilterComboBox.java:184
+msgid "<HTML>You aren't sharing<BR>with any other friends</HTML>"
+msgstr ""
+
+#. no shared friends
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingFilterComboBox.java:187
+msgid "<HTML>You aren't sharing<BR>with any friends</HTML>"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistButtonPopupMenu.java:40
+msgid "Clear playlist"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistPopupMenu.java:94
+msgid "Remove from playlist"
+msgstr ""
+
+#. {0} number of files, {1}: type of file (Image, Document...)
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:41
 #, java-format
-#~ msgid "{0} files with your friend. "
-#~ msgstr "{0} 个文件和你的朋友 "
+msgid "Share {0} {1} file"
+msgid_plural "Share {0} {1} files"
+msgstr[0] ""
+msgstr[1] ""
 
-#~ msgid "files with your friend and"
-#~ msgstr "个文件与你的朋友和"
-
-#~ msgid "chat"
-#~ msgstr "聊天"
-
-#~ msgid "about sharing with you."
-#~ msgstr "关于与你共享"
-
+#. {0}: number of files
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:43
 #, java-format
-#~ msgid "Share with {0}"
-#~ msgstr "与 {0} 共享"
+msgid "Shared {0} file with:"
+msgid_plural "Shared {0} files with:"
+msgstr[0] ""
+msgstr[1] ""
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:113
+msgid "Sharing documents with the p2p network is disabled."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:117
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:134
+msgid "Share this file with the p2p network."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:121
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:136
+msgid "Share this file with a friend."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:141
 #, java-format
-#~ msgid "Sharing: {0}"
-#~ msgstr "共享: {0}"
+msgid "Add to {0}"
+msgstr ""
 
-#~ msgid "Sharing: all"
-#~ msgstr "共享: 全部"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:158
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareFriendAction.java:38
+msgid "Share with Friend"
+msgstr ""
 
-#~ msgid "share"
-#~ msgstr "共享"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/MyLibraryPopupMenu.java:159
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareFriendAction.java:37
+msgid "Unshare with Friend"
+msgstr ""
 
-#~ msgid "Share collection"
-#~ msgstr "共享收集项目"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareFriendAction.java:36
+msgid "Share folder with Friend"
+msgstr ""
 
-#~ msgid "Share:"
-#~ msgstr "共享"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/ShareGnutellaAction.java:37
+msgid "Share folder with the P2P Network"
+msgstr ""
 
-#~ msgid "all"
-#~ msgstr "全部"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareFriendAction.java:35
+msgid "Unshare folder with Friend"
+msgstr ""
 
-#~ msgid "Share all the files in this category."
-#~ msgstr "共享这个种类的全部文件"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareGnutellaAction.java:37
+msgid "Unshare folder with the P2P Network"
+msgstr ""
 
-#~ msgid "Unshare all the files in this category."
-#~ msgstr "取消共享这个种类的全部文件"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareGnutellaAction.java:39
+msgid "Unshare with the P2P Network"
+msgstr ""
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:321
+msgid ""
+"BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
+"Inc. Gmail is a trademark of Google Inc. Jabber and LiveJournal are the "
+"registered trademarks of the XMPP Standards Foundation and LiveJournal, "
+"Inc., d/b/a LiveJournal.com, respectively. Neither Google Inc., the XMPP "
+"Standards Foundation or LiveJournal.com are sponsors or partners of "
+"Lime&nbsp;Wire&nbsp;LLC nor do they endorse Lime&nbsp;Wire&nbsp;LLC or the "
+"LimeWire software. Use of these trademarks is merely to refer to the "
+"technology or service of the respective owner and not to confuse "
+"Lime&nbsp;Wire as the source of the respective Gmail, Jabber and/or "
+"LiveJournal service or technology."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FriendMenu.java:27
+msgid "F&riend"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:46
+msgid "Get personalized &tech support"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:57
+msgid "&About LimeWire..."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:48
+msgid "&Downloads"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:57
+msgid "&Uploads"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:71
+msgid "Advanced &Search"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:84
+msgid "&Advanced Tools..."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:105
+msgid "&Options..."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:115
+msgid "&What's New Search"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:35
+msgid "Hide &Download Tray"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:35
+msgid "Show &Download Tray"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:36
+msgid "Hide &Chat Window"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:36
+msgid "Show &Chat Window"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:26
+msgid "Add F&ile to Library..."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:26
+msgid "Add &Folder to Library..."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ChatAction.java:20
+msgid "&Chat"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ExitAfterTransferAction.java:20
+msgid "Exit After &Transfers"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:65
+msgid "Magnet link is empty."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/RecentDownloadsMenu.java:40
+msgid "&Recent Downloads"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/RecentDownloadsMenu.java:44
+msgid "Clear List"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/SwitchUserAction.java:17
+msgid "Switch &User"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:211
+msgid "Store File Organization"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
+msgid "Configure File Organization..."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
+msgid "Configure how files downloaded from the LimeWire Store are organized"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:128
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:154
+msgid "Sharing Categories"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:132
+msgid "Only share files in that category at that point"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:134
+msgid ""
+"Share my entire collection, including new files that automatically get added "
+"to My Library"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:228
+msgid ""
+"Automatically add the following categories from folders below to My Library:"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:240
+msgid ""
+"*Adding these folders will automatically share any collections you shared"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:340
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:242
+msgid "Choose a folder to automatically add to My Library"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:354
 #, java-format
-#~ msgid "Share {0} {1} files"
-#~ msgstr "共享 {0} 个文件"
+msgid ""
+"You selected: {0}\n"
+"\n"
+"LimeWire cannot manage this folder because it is either not a folder or "
+"cannot be read.\n"
+"\n"
+"Please select another folder to manage."
+msgstr ""
 
+#. new VerticalLayout(2));
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:389
+msgid ""
+"At some point, you manually added files from the following folders into My "
+"Library:"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:393
+msgid ""
+"At some point, you manually added files from some folders into My Library."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:42
+msgid "Select which file extensions belong in each category"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:144
+msgid "Help translate LimeWire!"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
+msgid ""
+"Restrict files with certain extensions from being displayed in search results"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SpamOptionPanel.java:41
+msgid "Clear Filter"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:121
+msgid "\".magnet\" files"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:59
+msgid "Hash"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:244
+msgid "Overview"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/AdvancedSearchBuilder.java:22
+msgid ":"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:20
+msgid "Downloading programs can result in viruses"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:25
+msgid ""
+"We recommend you don't download programs using LimeWire. However, you can "
+"enable downloading programs via Preferences > Security > Unsafe Categories."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:30
+msgid ""
+"We recommend you don't download programs using LimeWire. However, you can "
+"enable downloading programs via Tools > Options > Security > Unsafe "
+"Categories."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:173
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:80
+msgid "Advanced Search"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:376
+msgid "File Extension"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:82
+msgid "Search for the following category:"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:106
 #, java-format
-#~ msgid "Shared {0} files with:"
-#~ msgstr "与你共享 {0} 个文件夹"
+msgid "Browse Files of {0}"
+msgstr ""
 
-#~ msgid "download"
-#~ msgstr "下载"
+#. Add Download As menu item.
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:67
+msgid "Download As..."
+msgstr ""
 
-#~ msgid "Share this file with a friend"
-#~ msgstr "与一个朋友共享这个文件"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:80
+msgid "Download As"
+msgstr ""
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:47
+msgid "Warn me when other programs take LimeWire associations"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:77
+msgid ""
+"Torrent files and magnet links are no longer associated with LimeWire. Would "
+"you like LimeWire to re-associate them?"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:80
+msgid ""
+"Torrent files are no longer associated with LimeWire. Would you like "
+"LimeWire to re-associate them?"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:84
+msgid ""
+"Magnet links are no longer associated with LimeWire. Would you like LimeWire "
+"to re-associate them?"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:30
 #, java-format
-#~ msgid "share ({0})"
-#~ msgstr "共享 ({0})"
+msgid "Sharing {0} file"
+msgid_plural "Sharing {0} files"
+msgstr[0] ""
+msgstr[1] ""
 
-#~ msgid "File"
-#~ msgstr "文件"
-
-#~ msgid "Using LimeWire"
-#~ msgstr "使用 LimeWire"
-
-#~ msgid "FAQ"
-#~ msgstr "常见问题解答"
-
-#~ msgid "Get personalized tech support"
-#~ msgstr "获得个人化的技术支持"
-
-#~ msgid "About LimeWire..."
-#~ msgstr "关于 LimeWire"
-
-#~ msgid "Tools"
-#~ msgstr "工具"
-
-#~ msgid "Advanced Tools..."
-#~ msgstr "高级工具"
-
-#~ msgid "Options..."
-#~ msgstr "选项..."
-
-#~ msgid "What's New Search"
-#~ msgstr "新搜索新增内容"
-
-#~ msgid "Hide Download Tray"
-#~ msgstr "隐藏下载托盘"
-
-#~ msgid "Show Download Tray"
-#~ msgstr "显示下载托盘"
-
-#~ msgid "Hide Chat Window"
-#~ msgstr "隐藏聊天窗口."
-
-#~ msgid "Show Chat Window"
-#~ msgstr "显示聊天窗口"
-
-#~ msgid "Add File to Library..."
-#~ msgstr "添加文件到文件库"
-
-#~ msgid "Add File(s)"
-#~ msgstr "添加一个或多个文件"
-
-#~ msgid "Add Folder to Library..."
-#~ msgstr "添加文件夹到文件库"
-
-#~ msgid "Recent Downloads"
-#~ msgstr "最近下载的项目"
-
-#~ msgid "Clear list"
-#~ msgstr "清除列表"
-
-#~ msgid ""
-#~ "Don't let me download or upload files copyright owners request not be shared"
-#~ msgstr "不要让我下载或上传版权所有人要求不要共享的文件"
-
-#~ msgid "Clear Spam"
-#~ msgstr "清除垃圾邮件"
-
-#~ msgid ".magnet files"
-#~ msgstr ".magnet 文件"
-
-#~ msgid "Date created"
-#~ msgstr "创建日期"
-
-#~ msgid "File extension"
-#~ msgstr "文件扩展名"
-
-#~ msgid "Copy link"
-#~ msgstr "复制链接"
-
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:233
 #, java-format
-#~ msgid "View Files of {0}"
-#~ msgstr "观看 {0} 的文件"
+msgid "Seeding to {0} person at {1} - Ratio ({2})"
+msgstr ""
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:235
 #, java-format
-#~ msgid "Share With {0}"
-#~ msgstr "与 {0} 共享"
+msgid "Seeding to {0} people at {1} - Ratio ({2})"
+msgstr ""
 
-#~ msgid "Show similar files"
-#~ msgstr "显示相象的文件"
-
-#~ msgid "Hide similar files"
-#~ msgstr "隐藏相象的文件"
-
-#~ msgid "This is 'quoted'!"
-#~ msgstr "它是“引用内容”！"
-
+#. {0}: number of uploads before this upload that have to finish
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:244
 #, java-format
-#~ msgid "This is 'quoted' {0} !"
-#~ msgstr "它是“引用内容”{0}！"
-
-#~ msgid "Loading HTML engine..."
-#~ msgstr "加载 HTML 引擎..."
-
-#~ msgid "Loading browser..."
-#~ msgstr "加载浏览器"
-
-#~ msgid "Loading user interface..."
-#~ msgstr "加载用户界面..."
-
-#~ msgid "Loading other languages..."
-#~ msgstr "加载其他语言..."
-
-#~ msgid "Save Folders"
-#~ msgstr "保存文件夹"
-
-#~ msgid "More options"
-#~ msgstr "更多选项"
-
-#~ msgid "Manage Extensions"
-#~ msgstr "管理扩展名"
-
-#~ msgid "Manage Save Folders"
-#~ msgstr "管理保存文件夹"
-
-#~ msgid "Add New Folder..."
-#~ msgstr "添加新的文件夹"
-
-#~ msgid "Mark as Spam"
-#~ msgstr "标记为垃圾邮件"
-
-#~ msgid "Finished"
-#~ msgstr "已完成"
-
-#~ msgid "Inactive"
-#~ msgstr "非活动"
-
-#~ msgid "Unsuccessful"
-#~ msgstr "失败"
-
-#~ msgid "<HTML><U><B>See all</B> {0}</U></HTML>"
-#~ msgstr "<HTML><U><B>查看全部</B> {0}</U></HTML>"
-
-#~ msgid "Queued - #{0} in line"
-#~ msgstr "队列 —#{0} 在队列中"
-
-#~ msgid "Locate file"
-#~ msgstr "查找文件"
-
-#~ msgid "Queued - About {0} before download can begin"
-#~ msgstr "排队 — 在下载可以开始之前约有 {0}"
-
-#~ msgid "View Files I'm sharing with them ({0})"
-#~ msgstr "查看我要与他们共享的文件 ({0})"
-
-#~ msgid "{0} isn't using LimeWire. Tell them about it to see their Library"
-#~ msgstr "{0} 没有使用 LimeWire。告知他们以查看他们的库"
-
-#~ msgid "Close chat (closes the current chat window)"
-#~ msgstr "关闭聊天（关闭当前聊天窗口）"
-
-#~ msgid "Retry Download {0}"
-#~ msgstr "重试下载 {0}"
-
-#~ msgid "Switch user"
-#~ msgstr "切换用户"
-
-#~ msgid "Set {0} status"
-#~ msgstr "设置 {0} 状态"
-
-#~ msgid "Show files you're sharing with {0}"
-#~ msgstr "显示您正在与 {0} 共享的文件"
-
-#~ msgid "You're sharing {0} files with {1}"
-#~ msgstr "您正在与 {1} 共享 {0}"
-
-#~ msgid "{0} is on LimeWire but there were problems viewing their library"
-#~ msgstr "{0} 在 LimeWire 上，但是查看他们的文件库有问题"
-
-#~ msgid "Filter"
-#~ msgstr "过滤器"
-
-#~ msgid "Don't Scan"
-#~ msgstr "请勿扫描"
-
-#~ msgid "Scan"
-#~ msgstr "扫描"
-
-#~ msgid "Folder"
-#~ msgstr "文件夹"
-
-#~ msgid "Modified"
-#~ msgstr "修改日期"
-
-#~ msgid "Already in My Library"
-#~ msgstr "已经在我的文件库中"
-
-#~ msgid "Already downloading"
-#~ msgstr "已经在下载中"
-
-#~ msgid "Miscellaneous"
-#~ msgstr "其他"
-
-#~ msgid "Copy Link to Clipboard"
-#~ msgstr "将链接复制到剪贴板"
-
-#~ msgid "Download Selected Files"
-#~ msgstr "下载所选的文件"
-
-#~ msgid "Share with Friends"
-#~ msgstr "与朋友共享"
-
-#~ msgid "Unshare with Friends"
-#~ msgstr "不与朋友共享"
-
-#~ msgid "Remove from library"
-#~ msgstr "从文件库中移除"
-
-#~ msgid "Delete file"
-#~ msgstr "删除文件"
-
-#~ msgid "Unshare with P2P Network"
-#~ msgstr "不与 P2P 网络共享"
-
-#~ msgid "Libraries"
-#~ msgstr "库"
-
-#~ msgid "Repeat search"
-#~ msgstr "重复搜索"
-
-#~ msgid "&Open File"
-#~ msgstr "打开文件(&O)"
-
-#~ msgid "Sharing downloads"
-#~ msgstr "共享下载项目"
-
-#~ msgid "Recent downloads"
-#~ msgstr "最近下载项目"
-
-#~ msgid "Configure how files are automatically named"
-#~ msgstr "配置文件自动命名的方法"
-
-#~ msgid ""
-#~ "LimeWire will automatically scan the folders below and place files in your "
-#~ "Library."
-#~ msgstr "LimeWire 将自动扫描下面的文件夹，并将文件放到您的文件库中。"
-
-#~ msgid "Add New Folder"
-#~ msgstr "添加新文件夹"
-
-#~ msgid "Manage Library"
-#~ msgstr "管理文件库"
-
-#~ msgid "Manage what folders are loaded into your library"
-#~ msgstr "管理要加载到文件库的文件夹"
-
-#~ msgid ""
-#~ "LimeWire will scan folders and look for files to add to your Library. "
-#~ "Scanning folders into your Library will not automatically share them."
-#~ msgstr "LimeWire 将扫描文件夹，并查找要添加到您的文件库的文件。扫描到文件库的文件夹不会自动共享。"
-
-#~ msgid "Select which file extensions belong in Audio, Video, etc.."
-#~ msgstr "选择音频、视频等应包含的文件扩展名。"
-
-#~ msgid ""
-#~ "TODO get better copy... LimeWire is currently starting. When it has "
-#~ "completed, your search will continue."
-#~ msgstr "为获得更好的副本...LimeWire 当前正在启动。它完成后，您的搜索将会继续。"
-
-#~ msgid ""
-#~ "TODO get better copy... LimeWire is not fully connected. You will not "
-#~ "receive many search results until it finishes connecting."
-#~ msgstr "为获得更好的副本... LimeWire 没有完全连接。直到连接完成后，您才会获得许多搜索结果。"
-
-#~ msgid "Date created (more recent)"
-#~ msgstr "创建日期（更多最近）"
-
-#~ msgid "Copy link to clipboard"
-#~ msgstr "将链接复制到剪贴板"
-
-#~ msgid "{0} is Spam"
-#~ msgstr "{0} 是垃圾邮件"
-
-#~ msgid "View library"
-#~ msgstr "查看文件库"
-
-#~ msgid "Files I'm Sharing ({0})"
-#~ msgstr "我正在共享的文件 ({0})"
-
-#~ msgid "{0} people"
-#~ msgstr "{0} 个人"
-
-#~ msgid "People"
-#~ msgstr "人"
-
-#~ msgid "People with File"
-#~ msgstr "文件创建者"
-
-#~ msgid "not used"
-#~ msgstr "不使用"
-
-#~ msgid "also not used"
-#~ msgstr "也不使用"
-
-#~ msgid "Jump to File in Library"
-#~ msgstr "跳到文件库中的文件"
-
-#~ msgid "Cancel Upload"
-#~ msgstr "取消上载"
-
-#~ msgid "LimeWire 5 - Some legal stff"
-#~ msgstr "LimeWire 5 — 若干法律事项"
-
-#~ msgid "State your intent"
-#~ msgstr "说明您的意图"
-
-#~ msgid "A few things before we begin..."
-#~ msgstr "开始之前，需要先完成以下几件事..."
-
-#~ msgid ""
-#~ "LimeWire can filter files that copyright owners request not be shared.  By "
-#~ "checking the box below you are telling LimeWire to confirm all files you "
-#~ "download or share with a list of removed content.  You can change this later "
-#~ "in Options > Security > Filtering."
-#~ msgstr ""
-#~ "LimeWire 可以过滤版权所有者要求不能共享的文件。选中下面的方框，即表示您让 LimeWire "
-#~ "确认您下载或与已移除内容列表共享的全部文件。您可以稍后在“选项”> “安全”>“过滤”中进行更改。"
-
-#~ msgid "Filter out files LimeWire identifies as unauthorized or unlicensed"
-#~ msgstr "过滤 LimeWire 确定为未授权未经许可的文件"
-
-#~ msgid "LimeWire is ready to fill your Library"
-#~ msgstr "LimeWire 即将向您的文件库中添加文件"
-
-#~ msgid ""
-#~ "Your Library is a central location to view, share and unshare your files "
-#~ "with the P2P Network and, or your friends."
-#~ msgstr "您的文件库位于中央位置，以供您查看、与 P2P 网络和/或您的朋友共享和取消共享文件。"
-
-#~ msgid "Automatically manage My Library"
-#~ msgstr "自动管理我的文件库"
-
-#~ msgid "Manually manage My Library"
-#~ msgstr "手动管理我的文件库"
-
-#~ msgid ""
-#~ "Choose this option if you want to select which folders LimeWire scans into "
-#~ "your Library."
-#~ msgstr "如果您想选择 LimeWire 扫描入您的文件库的文件夹，请选择此选项。"
-
-#~ msgid "Show:"
-#~ msgstr "显示："
-
-#~ msgid "Choose a folder to automatically scan for changes"
-#~ msgstr "选择要自动扫描是否有更改的文件夹"
-
-#~ msgid "Do Not Disturb"
-#~ msgstr "请勿打扰"
-
-#~ msgid "View Library"
-#~ msgstr "查看文件库"
-
-#~ msgid "Queued - remaining time unknown"
-#~ msgstr "队列 — 剩余时间未知"
-
-#~ msgid "Queued - Starting in {0}"
-#~ msgstr "队列 — 将开始 {0}"
-
-#~ msgid "Categorize downloads"
-#~ msgstr "分类下载"
-
-#~ msgid "Launch file"
-#~ msgstr "启动文件"
-
-#~ msgid "Remove from list"
-#~ msgstr "从列表中移除"
-
-#~ msgid "Done"
-#~ msgstr "完成"
-
-#~ msgid "Chat from {0} - LimeWire 5"
-#~ msgstr "从 {0} 聊天 - LimeWire 5\""
-
-#~ msgid "Logging in..."
-#~ msgstr "正在登录..."
-
-#~ msgid "Offline friends"
-#~ msgstr "脱机朋友"
-
-#~ msgid "Sign out"
-#~ msgstr "注销"
-
-#~ msgid "Incorrect password."
-#~ msgstr "密码错误。"
-
-#~ msgid "Sharing with {0}"
-#~ msgstr "与 {0} 共享"
-
-#~ msgid ""
-#~ "Sharing your {0} collection automatically shares new {0} files added to your "
-#~ "Library"
-#~ msgstr "共享 {0} 收集项目，可自动共享添加到您的文件库的 {0} 个新文件"
-
-#~ msgid "Sharing collection: {0}"
-#~ msgstr "共享收集项目：{0}"
-
-#~ msgid "Returns to what's being shared with you."
-#~ msgstr "返回到与您所共享的内容。"
-
-#~ msgid ""
-#~ "Sharing your {0} collection automatically shares new {1} files added to your "
-#~ "Library"
-#~ msgstr "共享 {0} 收集项目，可自动共享添加到您的文件库的 {1} 个新文件"
-
-#~ msgid "Number of Files"
-#~ msgstr "文件数"
-
-#~ msgid "Share with P2P Network"
-#~ msgstr "与 P2P 网络共享"
-
-#~ msgid "Delete File"
-#~ msgstr "删除文件"
-
-#~ msgid "Close all searches"
-#~ msgstr "关闭全部搜索"
-
-#~ msgid "Close search"
-#~ msgstr "关闭搜索"
-
-#~ msgid "Close other searches"
-#~ msgstr "关闭其他搜索"
-
-#~ msgid "Open &Link"
-#~ msgstr "打开链接(&L)"
-
-#~ msgid "Add File To Library"
-#~ msgstr "添加文件到文件库"
-
-#~ msgid "Add Folder To Library"
-#~ msgstr "添加文件夹到文件库"
-
-#~ msgid "FAQ..."
-#~ msgstr "常见问题..."
-
-#~ msgid "Get personal tech support"
-#~ msgstr "获取个人技术支持"
-
-#~ msgid "Show current file"
-#~ msgstr "显示当前文件"
-
-#~ msgid "Hide Libraries bar"
-#~ msgstr "隐藏文件库栏"
-
-#~ msgid "Show Libraries bar"
-#~ msgstr "显示文件库栏"
-
-#~ msgid "Hide Chat window"
-#~ msgstr "隐藏聊天窗口"
-
-#~ msgid "Show Chat window"
-#~ msgstr "显示聊天窗口"
-
-#~ msgid "Invalid Link!"
-#~ msgstr "无效链接！"
-
-#~ msgid "Open magnet or torrent link."
-#~ msgstr "打开 Magnet 或 Torrent 链接。"
-
-#~ msgid "Add audio files I downloaded from LimeWire to my iTunes Library"
-#~ msgstr "把我从 LimeWire 上下载的音频文件添加到我的 iTunes 库"
-
-#~ msgid "Remember recent downloads"
-#~ msgstr "记住最近下载项目"
-
-#~ msgid "Manage"
-#~ msgstr "管理"
-
-#~ msgid "Add the following types of files to your Library:"
-#~ msgstr "将以下文件类型添加到您的文件库："
-
-#~ msgid "Library Management"
-#~ msgstr "文件库管理"
-
-#~ msgid ""
-#~ "Your Library is a central location to view, share and unshare your files "
-#~ "with the P2P Network and your friends."
-#~ msgstr "您的文件库位于中央位置，以供您查看、与 P2P 网络及您的朋友共享文件或取消共享。"
-
-#~ msgid "Sign in when LimeWire starts"
-#~ msgstr "在 LimeWire 启动时登录"
-
-#~ msgid "Settings"
-#~ msgstr "设置"
-
-#~ msgid "-Searching for and sharing Programs with anyone"
-#~ msgstr "— 搜索程序，以及与任何人共享程序"
-
-#~ msgid "-Sharing Documents with the P2P Network"
-#~ msgstr "— 与 P2P 网络共享文档"
-
-#~ msgid "Don't show adult content"
-#~ msgstr "请勿显示成人内容"
-
-#~ msgid "Warn me when other programs take these associations"
-#~ msgstr "其他程序发生这些关联时警告我"
-
-#~ msgid "Updates and Bugs"
-#~ msgstr "更新和调试"
-
-#~ msgid "Report bugs to LimeWire"
-#~ msgstr "向 LimeWire 报告错误"
-
-#~ msgid "Show me the bug report before sending it"
-#~ msgstr "发送错误报告之前，向我显示"
-
-#~ msgid ""
-#~ "Allow me to search for and share Programs with the P2P Network and my friends"
-#~ msgstr "允许我搜索并与朋友及 P2P 网络共享程序"
-
-#~ msgid "Allow me to share Documents with the P2P Network"
-#~ msgstr "允许我与 P2P 网络共享文档"
-
-#~ msgid "{0} person"
-#~ msgstr "{0} 人"
-
-#~ msgid "Upload Item"
-#~ msgstr "上载项目"
-
-#~ msgid "Play file"
-#~ msgstr "播放文件"
-
-#~ msgid ""
-#~ "By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright "
-#~ "infringement"
-#~ msgstr "单击\"我同意\"，即表示您同意不会使用 LimeWire 5 进行侵犯版权的活动"
-
-#~ msgid ""
-#~ "Choose this option to have LimeWire automatically scan files into your "
-#~ "Library from My Documents and the Desktop."
-#~ msgstr "选择此选项以使 LimeWire 自动将文件从“我的文档”和“桌面”自动扫描进您的文件库。"
-
-#~ msgid "You can change these options later from Tools > Options"
-#~ msgstr "您可以稍后从“工具”>“选项”更改这些选项"
-
-#~ msgid "<Go back"
-#~ msgstr "<返回"
+msgid "Waiting for {0} upload to finish"
+msgid_plural "Waiting for {0} uploads to finish"
+msgstr[0] ""
+msgstr[1] ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:476
+msgid "File already exists.  Do you want to replace it?"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:28
+msgid "Date"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:270
+msgid ""
+"LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
+"authorized files only. Copyright laws may forbid obtaining or distributing "
+"certain copyrighted content. Learn more about your rights below:"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:46
+msgid ""
+"My Library is where you view, share and unshare your files.  Don't worry, we "
+"will still share files from the older version."
+msgstr ""

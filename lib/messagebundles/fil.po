@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:34+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -73,12 +73,6 @@ msgstr "Mga Larawan"
 msgid "Other"
 msgstr "mga iba pa"
 
-#: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:17
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:64
-msgid "Videos"
-msgstr ""
-
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 msgid "Image"
@@ -89,21 +83,9 @@ msgstr "Larawan"
 msgid "Document"
 msgstr "Salansan"
 
-#: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
-msgid "Program"
-msgstr ""
-
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:26
-msgid "There is a disk problem"
-msgstr ""
-
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
 msgid "The file is corrupted"
 msgstr "ang file ay korupt"
-
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:28
-msgid "This file is not shareable"
-msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:29
 msgid "Trouble connecting to people"
@@ -115,14 +97,6 @@ msgstr "may problema sa pagkonekta sa mga tao"
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
 msgid "No problems."
 msgstr "walang problema"
-
-#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
-msgid ""
-"<html><b>Your LimeWire may have been corrupted by a virus or "
-"trojan!</b><br><br>Please visit <a "
-"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
-"the newest official version of LimeWire.</html>"
-msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:286
 msgid ""
@@ -145,14 +119,6 @@ msgstr ""
 msgid "XMPP Service"
 msgstr "serbisyo ng XMPP"
 
-#: components/gnutella-core/src/main/java/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
-msgid "DHT Peer Locator"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/bittorrent/dht/DHTPeerPublisherImpl.java:93
-msgid "DHT Peer Publisher"
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:304
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
 msgid ""
@@ -163,118 +129,13 @@ msgstr ""
 "May mga katangian ng LimeWire na maaring kumilos sa hindi dapat na "
 "pamamaraan."
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:402
-msgid "Connection Listener"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
-msgid "Browse Host Handler"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionAcceptorGlue.java:59
-msgid "Connection Dispatching"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:396
-msgid "Connection Management"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionWatchdog.java:66
-msgid "Stale Connection Management"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:101
-msgid "Various Core Services"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:106
-msgid "Gnutella Connections"
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:204
 msgid "Old Downloads"
 msgstr "mga lumang downloads"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:227
-msgid "Download Management"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:278
-msgid ""
-"Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
-"clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
-"file, the download will pick up where it left off."
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:280
-msgid ""
-"Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
-"them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
-"for the file, the download will pick up where it left off."
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
-msgid "HTTP Request Listening"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPUploadManager.java:232
-msgid "Upload Management"
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HostCatcher.java:375
 msgid "Peer Locator"
 msgstr "Tagahanap ng kaibigan"
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/LimeCoreGlue.java:107
-msgid "Core Glue"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/MessageRouterImpl.java:554
-msgid "Message Routing"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/NetworkManagerImpl.java:166
-msgid "Network Management"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:186
-msgid "Ultrapeer/DHT Management"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/Pinger.java:57
-msgid "Peer Listener"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/PromotionServicesImpl.java:35
-msgid "Promotion System"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/QueryUnicaster.java:223
-msgid "Directed Querier"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/Statistics.java:43
-msgid "Session Statistics"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/auth/ContentManager.java:91
-msgid "Content Management"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
-msgid "Local Socket Listener"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
-msgid "Magnet Processor"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:120
-msgid ""
-"LimeWire was unable to start the Digital Audio Access Protocol Service (for "
-"sharing files in iTunes). This feature will be turned off. You can turn it "
-"back on in options, under Advanced -> Files -> iTunes."
-msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:174
 msgid "What's New"
@@ -284,14 +145,6 @@ msgstr "Anong Bago"
 msgid "Creative Commons"
 msgstr "Creative Commons"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:140
-msgid "Mojito DHT"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:178
-msgid "LimeWire Store Integration"
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
 msgstr "i-download ang upgrade task"
@@ -299,38 +152,6 @@ msgstr "i-download ang upgrade task"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:78
 msgid "Shared Files"
 msgstr "Mga dukomentong ipinamahagi"
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
-msgid "OOB Query Handler"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
-msgid "Static Messages"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:191
-msgid "QRP Updater"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
-msgid "RUDP Message Routing"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:99
-msgid "Spam Management"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:56
-msgid "Uptime Statistics"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
-msgid "Browse"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:982
-msgid "Update Checks"
-msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:104
@@ -606,10 +427,6 @@ msgstr "Naglimbag"
 msgid "Platform"
 msgstr "Plataporma"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:83
-msgid "Metadata Loader"
-msgstr ""
-
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:51
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
@@ -707,6 +524,458 @@ msgstr "libreng mag chat"
 msgid "Available"
 msgstr "pwede"
 
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
+msgid "Do not disturb"
+msgstr "wag distorbohin"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:572
+msgid "Internal Error"
+msgstr "Kamaliang Panloob"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:581
+msgid ""
+"LimeWire was unable to connect to the bug server in order to send the below "
+"bug report. For further help and to aid with debugging, please visit "
+"www.limewire.com and click 'Support'. Thank you."
+msgstr ""
+"Hindi makakabit ang LimeWire sa bug server upang ipadala ang ulat ng bug na "
+"ito. Para sa karagdagang tulong and upang makapagbigay-tulog sa pag-debug, "
+"pumunta lamang sa www.limewire.com at pindutin ang 'Support'. Maraming "
+"salamat."
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:610
+msgid "Copy Report"
+msgstr "Kopyahin ang Ulat"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:618
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:217
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
+msgid "OK"
+msgstr "Sige"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:607
+msgid "This Alpha version has expired.  Press Ok to exit. "
+msgstr ""
+"Ang bersyon na Alpha na ito ay natapos na. Pindutin ang 'Ok' para lumabas. "
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:45
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:76
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:88
+msgid "Error"
+msgstr "Kamalian"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:56
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:66
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:99
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:112
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:137
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:57
+msgid "Message"
+msgstr "Mensahe"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:120
+msgid "Do not display this message again"
+msgstr "Huwag nang ipakitang muli ang mensaheng ito"
+
+#. *
+#. * The select all action.
+#. 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/SelectAllAction.java:10
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:641
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:86
+msgid "Select All"
+msgstr "Hiranign Lahat"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:189
+msgid "Apply"
+msgstr "Gamitin"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:196
+msgid "Clear"
+msgstr "Linisin"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:203
+msgid "Save"
+msgstr "Itago"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:644
+msgid "Save As"
+msgstr "Itago Bilang"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:643
+msgid "Marks all Items as Selected"
+msgstr "Markahan lahat ng bagay bilang Hinirang"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:661
+msgid "Deselect All"
+msgstr "Alisin sa Pagkakahirang ang Lahat"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:663
+msgid "Deselects all Items in the List"
+msgstr "Alisin sa Pagkakahirang ang lahat ng kabilang sa Listahan"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:32
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:53
+msgid "Yes"
+msgstr "Oo"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:59
+msgid "No"
+msgstr "Hindi"
+
+#. *
+#. * The undo action.
+#. 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:34
+msgid "Undo"
+msgstr "Undo"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:54
+msgid "About LimeWire"
+msgstr "Tungkol sa LimeWire"
+
+#. set up limewire version label
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:72
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:12
+msgid "LimeWire"
+msgstr "LimeWire"
+
+#. set up close button
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:102
+msgid "Close"
+msgstr "Isara"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:104
+msgid "Close This Window"
+msgstr "Isara Ang Bintanang Ito"
+
+#. business developers
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:206
+msgid ""
+"Behind the scenes business strategy and day-to-day affairs are handled by "
+"LimeWire's business developers:"
+msgstr ""
+"Ang pangangasiwa sa pangangalakal at pang araw-araw na pagnenegosyo ay "
+"isinasagawa ng mga tagapagsulong ng kalakal ng LimeWire:"
+
+#. previous developers
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:215
+msgid ""
+"In addition, the following individuals have worked on the LimeWire team in "
+"the past but have since moved on to other projects:"
+msgstr ""
+"Ang mga sumusunod ay nakasali din noon sa pangkat ng LimeWire ngunit sila'y "
+"lumipat na sa mga ibang gawain:"
+
+#. open source contributors
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:253
+msgid ""
+"LimeWire open source contributors have provided significant code and many "
+"bug fixes, ideas, research, etc. to the project as well. Those listed below "
+"have either written code that is distributed with every version of LimeWire, "
+"have identified serious bugs in the code, or both:"
+msgstr ""
+"Ang mga bukas-punong nag-aambag sa LimeWire ay nakapagbigay din ng maraming "
+"programa, pagsasaayos ng mga bug, kaisipan, pananaliksik, atbp. para sa "
+"gawaing ito. Ang mga sumusunod ay nagbigay ng mga programang isinasama sa "
+"bawat bersyon ng LimeWire, mga masusing pagsasaayos sa mga mabibigat na bug "
+"sa mga programa, o pareho:"
+
+#. internationalization contributors
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:291
+msgid ""
+"LimeWire would also like to thank the many contributors to the "
+"internationalization project, both for the application itself and for the "
+"LimeWire web site."
+msgstr ""
+"Ibig din pasalamatan ng LimeWire ang mga taong tumutulong sa gawain ng "
+"pagsasalin sa iba't-ibang wika ng mismong programang ito at ng mga nilalaman "
+"ng web site ng LimeWire."
+
+#. community VIPs
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:295
+msgid ""
+"Several colleagues in the Gnutella community merit special thanks. These "
+"include:"
+msgstr ""
+"Marapat ding pasalamatan ang ilang natatanging kasamahan sa lipunan ng "
+"Gnutella. Sila ay sina:"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:43
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:340
+msgid "All Folders"
+msgstr "Lahat ng Folder"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:86
+msgid "Safe chunk verification"
+msgstr "Ligtas na paniniguro ng mga nilalaman"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
+msgid "For Turbo-Charged searches get LimeWire PRO."
+msgstr "Para sa Napakabilis na paghahanap, kunin ang LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
+msgid "Support LimeWire's peer-to-peer development. Get PRO."
+msgstr ""
+"Tangkilikin ang pagsusulong ng LimeWire ng kaibigan-sa-kaibigan. Kunin ang "
+"PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
+msgid "Purchase LimeWire PRO to help us make downloads faster."
+msgstr ""
+"Bilihin ang LimeWire PRO upang tulungan kaming pabilisin ang mga download."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
+msgid "For Turbo-Charged downloads get LimeWire PRO."
+msgstr "Para sa mga Napakabilis na download, kunin ang LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
+msgid "Support open networks. Get LimeWire PRO."
+msgstr "Tangkilikin ang mga bukas na ugnayan. Kunin ang LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
+msgid "Support open source and open protocols. Get LimeWire PRO."
+msgstr ""
+"Tangkilikin ang bukas na puno at mga bukas na protocol. Kunin ang LimeWire "
+"PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
+msgid "For Turbo-Charged performance get LimeWire PRO."
+msgstr "Para sa Napakabilis na pagsasagawa, kunin ang LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
+msgid "Keep the Internet open. Get LimeWire PRO."
+msgstr "Panatilihing bukas ang Internet. Kunin ang LimeWire Pro."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
+msgid "Developing LimeWire costs real money. Get PRO."
+msgstr "Ang pagsusulong ng LimeWire ay magastos. Kunin ang PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:65
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:94
+msgid "Select Folder"
+msgstr "Pumili ng Folder"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:66
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:74
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:95
+msgid "Select"
+msgstr "Piliin"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:96
+msgid "KB"
+msgstr "KB"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:98
+msgid "MB"
+msgstr "MB"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:100
+msgid "GB"
+msgstr "GB"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:102
+msgid "TB"
+msgstr "TB"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:104
+msgid "KB/s"
+msgstr "KB/s"
+
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:17
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:64
+msgid "Videos"
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:18
+msgid "Program"
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:26
+msgid "There is a disk problem"
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:28
+msgid "This file is not shareable"
+msgstr ""
+
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
+msgid ""
+"<html><b>Your LimeWire may have been corrupted by a virus or "
+"trojan!</b><br><br>Please visit <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
+"the newest official version of LimeWire.</html>"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
+msgid "DHT Peer Locator"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/bittorrent/dht/DHTPeerPublisherImpl.java:93
+msgid "DHT Peer Publisher"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:402
+msgid "Connection Listener"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
+msgid "Browse Host Handler"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionAcceptorGlue.java:59
+msgid "Connection Dispatching"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:396
+msgid "Connection Management"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionWatchdog.java:66
+msgid "Stale Connection Management"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:101
+msgid "Various Core Services"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:106
+msgid "Gnutella Connections"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:227
+msgid "Download Management"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:278
+msgid ""
+"Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
+"clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
+"file, the download will pick up where it left off."
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:280
+msgid ""
+"Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
+"them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
+"for the file, the download will pick up where it left off."
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
+msgid "HTTP Request Listening"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPUploadManager.java:232
+msgid "Upload Management"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/LimeCoreGlue.java:107
+msgid "Core Glue"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/MessageRouterImpl.java:554
+msgid "Message Routing"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/NetworkManagerImpl.java:166
+msgid "Network Management"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:186
+msgid "Ultrapeer/DHT Management"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/Pinger.java:57
+msgid "Peer Listener"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/PromotionServicesImpl.java:35
+msgid "Promotion System"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/QueryUnicaster.java:223
+msgid "Directed Querier"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/Statistics.java:43
+msgid "Session Statistics"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/auth/ContentManager.java:91
+msgid "Content Management"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
+msgid "Local Socket Listener"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
+msgid "Magnet Processor"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:120
+msgid ""
+"LimeWire was unable to start the Digital Audio Access Protocol Service (for "
+"sharing files in iTunes). This feature will be turned off. You can turn it "
+"back on in options, under Advanced -> Files -> iTunes."
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:140
+msgid "Mojito DHT"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:178
+msgid "LimeWire Store Integration"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
+msgid "OOB Query Handler"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
+msgid "Static Messages"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:191
+msgid "QRP Updater"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
+msgid "RUDP Message Routing"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:99
+msgid "Spam Management"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:56
+msgid "Uptime Statistics"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
+msgid "Browse"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:982
+msgid "Update Checks"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:83
+msgid "Metadata Loader"
+msgstr ""
+
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
 msgid "Away"
 msgstr ""
@@ -715,10 +984,6 @@ msgstr ""
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:24
 msgid "Away for a while"
 msgstr ""
-
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
-msgid "Do not disturb"
-msgstr "wag distorbohin"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:380
 msgid "Oops!"
@@ -779,32 +1044,6 @@ msgstr ""
 msgid "Send Bug"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:572
-msgid "Internal Error"
-msgstr "Kamaliang Panloob"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:581
-msgid ""
-"LimeWire was unable to connect to the bug server in order to send the below "
-"bug report. For further help and to aid with debugging, please visit "
-"www.limewire.com and click 'Support'. Thank you."
-msgstr ""
-"Hindi makakabit ang LimeWire sa bug server upang ipadala ang ulat ng bug na "
-"ito. Para sa karagdagang tulong and upang makapagbigay-tulog sa pag-debug, "
-"pumunta lamang sa www.limewire.com at pindutin ang 'Support'. Maraming "
-"salamat."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:610
-msgid "Copy Report"
-msgstr "Kopyahin ang Ulat"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:618
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:217
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
-msgid "OK"
-msgstr "Sige"
-
 #. Load up the HTML engine.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:476
 msgid "Muddling Mint..."
@@ -822,11 +1061,6 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:563
 msgid "Prepping Mojitos..."
 msgstr ""
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:607
-msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr ""
-"Ang bersyon na Alpha na ito ay natapos na. Pindutin ang 'Ok' para lumabas. "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:613
 msgid ""
@@ -847,26 +1081,6 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:45
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:76
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:88
-msgid "Error"
-msgstr "Kamalian"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:56
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:66
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:99
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:112
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:137
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:57
-msgid "Message"
-msgstr "Mensahe"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:120
-msgid "Do not display this message again"
-msgstr "Huwag nang ipakitang muli ang mensaheng ito"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:20
 msgid ""
@@ -925,15 +1139,6 @@ msgstr ""
 msgid "Paste"
 msgstr ""
 
-#. *
-#. * The select all action.
-#. 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/SelectAllAction.java:10
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:641
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:86
-msgid "Select All"
-msgstr "Hiranign Lahat"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:45
 msgid "&Available"
 msgstr ""
@@ -972,27 +1177,11 @@ msgstr ""
 msgid "Advanced Tools"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:189
-msgid "Apply"
-msgstr "Gamitin"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:196
-msgid "Clear"
-msgstr "Linisin"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:203
-msgid "Save"
-msgstr "Itago"
-
 #. default the delay time to zero (ie, live
 #. updates).
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:212
 msgid "Delay: "
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:644
-msgid "Save As"
-msgstr "Itago Bilang"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:60
 msgid "Add a Connection"
@@ -1289,18 +1478,6 @@ msgstr ""
 msgid "remove"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:643
-msgid "Marks all Items as Selected"
-msgstr "Markahan lahat ng bagay bilang Hinirang"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:661
-msgid "Deselect All"
-msgstr "Alisin sa Pagkakahirang ang Lahat"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:663
-msgid "Deselects all Items in the List"
-msgstr "Alisin sa Pagkakahirang ang lahat ng kabilang sa Listahan"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:34
 msgid "Close Tab"
 msgstr ""
@@ -1312,18 +1489,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:36
 msgid "Close Other Tabs"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:32
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:53
-msgid "Yes"
-msgstr "Oo"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:40
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:59
-msgid "No"
-msgstr "Hindi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:92
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageFolderComboBox.java:97
@@ -1355,13 +1520,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:115
 msgid "Loading LimeWire..."
 msgstr ""
-
-#. *
-#. * The undo action.
-#. 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:34
-msgid "Undo"
-msgstr "Undo"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:186
 msgid "Add to My Library"
@@ -2398,25 +2556,6 @@ msgstr ""
 msgid "Automatically Scroll"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:54
-msgid "About LimeWire"
-msgstr "Tungkol sa LimeWire"
-
-#. set up limewire version label
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:72
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:12
-msgid "LimeWire"
-msgstr "LimeWire"
-
-#. set up close button
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:102
-msgid "Close"
-msgstr "Isara"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:104
-msgid "Close This Window"
-msgstr "Isara Ang Bintanang Ito"
-
 #. introduction
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:171
 msgid ""
@@ -2431,58 +2570,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:194
 msgid "Providing key support:"
 msgstr ""
-
-#. business developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:206
-msgid ""
-"Behind the scenes business strategy and day-to-day affairs are handled by "
-"LimeWire's business developers:"
-msgstr ""
-"Ang pangangasiwa sa pangangalakal at pang araw-araw na pagnenegosyo ay "
-"isinasagawa ng mga tagapagsulong ng kalakal ng LimeWire:"
-
-#. previous developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:215
-msgid ""
-"In addition, the following individuals have worked on the LimeWire team in "
-"the past but have since moved on to other projects:"
-msgstr ""
-"Ang mga sumusunod ay nakasali din noon sa pangkat ng LimeWire ngunit sila'y "
-"lumipat na sa mga ibang gawain:"
-
-#. open source contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:253
-msgid ""
-"LimeWire open source contributors have provided significant code and many "
-"bug fixes, ideas, research, etc. to the project as well. Those listed below "
-"have either written code that is distributed with every version of LimeWire, "
-"have identified serious bugs in the code, or both:"
-msgstr ""
-"Ang mga bukas-punong nag-aambag sa LimeWire ay nakapagbigay din ng maraming "
-"programa, pagsasaayos ng mga bug, kaisipan, pananaliksik, atbp. para sa "
-"gawaing ito. Ang mga sumusunod ay nagbigay ng mga programang isinasama sa "
-"bawat bersyon ng LimeWire, mga masusing pagsasaayos sa mga mabibigat na bug "
-"sa mga programa, o pareho:"
-
-#. internationalization contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:291
-msgid ""
-"LimeWire would also like to thank the many contributors to the "
-"internationalization project, both for the application itself and for the "
-"LimeWire web site."
-msgstr ""
-"Ibig din pasalamatan ng LimeWire ang mga taong tumutulong sa gawain ng "
-"pagsasalin sa iba't-ibang wika ng mismong programang ito at ng mga nilalaman "
-"ng web site ng LimeWire."
-
-#. community VIPs
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:295
-msgid ""
-"Several colleagues in the Gnutella community merit special thanks. These "
-"include:"
-msgstr ""
-"Marapat ding pasalamatan ang ilang natatanging kasamahan sa lipunan ng "
-"Gnutella. Sila ay sina:"
 
 #. conclusion
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:316
@@ -2645,11 +2732,6 @@ msgstr ""
 msgid "Add Folder(s)"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:43
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:340
-msgid "All Folders"
-msgstr "Lahat ng Folder"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ChatAction.java:20
 msgid "&Chat"
 msgstr ""
@@ -2760,10 +2842,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:64
 msgid "Let me manage my BitTorrent settings"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:86
-msgid "Safe chunk verification"
-msgstr "Ligtas na paniniguro ng mga nilalaman"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:88
 msgid "Experimental disk access"
@@ -3931,52 +4009,6 @@ msgstr ""
 msgid "Not showing {0} results"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
-msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Para sa Napakabilis na paghahanap, kunin ang LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
-msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr ""
-"Tangkilikin ang pagsusulong ng LimeWire ng kaibigan-sa-kaibigan. Kunin ang "
-"PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
-msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr ""
-"Bilihin ang LimeWire PRO upang tulungan kaming pabilisin ang mga download."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
-msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "Para sa mga Napakabilis na download, kunin ang LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
-msgid "Support open networks. Get LimeWire PRO."
-msgstr "Tangkilikin ang mga bukas na ugnayan. Kunin ang LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
-msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr ""
-"Tangkilikin ang bukas na puno at mga bukas na protocol. Kunin ang LimeWire "
-"PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
-msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Para sa Napakabilis na pagsasagawa, kunin ang LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
-msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Panatilihing bukas ang Internet. Kunin ang LimeWire Pro."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
-msgid "Developing LimeWire costs real money. Get PRO."
-msgstr "Ang pagsusulong ng LimeWire ay magastos. Kunin ang PRO."
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:94
 msgid "\"magnet:\" links"
 msgstr ""
@@ -4190,18 +4222,6 @@ msgstr ""
 msgid "Unable to upload: upload limit reached"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:65
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:73
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:94
-msgid "Select Folder"
-msgstr "Pumili ng Folder"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:66
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:74
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:95
-msgid "Select"
-msgstr "Piliin"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:476
 msgid "File already exists.  Do you want to replace it?"
 msgstr ""
@@ -4213,26 +4233,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:94
 msgid "bytes"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:96
-msgid "KB"
-msgstr "KB"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:98
-msgid "MB"
-msgstr "MB"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:100
-msgid "GB"
-msgstr "GB"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:102
-msgid "TB"
-msgstr "TB"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:104
-msgid "KB/s"
-msgstr "KB/s"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:438
 msgid "Poor Quality"
@@ -4451,364 +4451,3 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:203
 msgid "Setup"
 msgstr ""
-
-#, java-format
-#~ msgid "Could not process bad MAGNET link {0}"
-#~ msgstr "Hindi magawan ng paraan ang masamang dugtungan ng MAGNET {0}"
-
-#~ msgid ""
-#~ "One or more URLs in the MAGNET link were invalid. Your file may not download "
-#~ "correctly."
-#~ msgstr ""
-#~ "May mga hindi-makilalang URL sa dugtungan ng MAGNET. Maaaring hindi ma-"
-#~ "download ang inyong file nang tama."
-
-#, java-format
-#~ msgid "You are already downloading this file to {0}"
-#~ msgstr "Idina-download niyo na ang file na ito sa {0}"
-
-#~ msgid "Loading TLS Encryption..."
-#~ msgstr "Sinisimulan ang TLS Encryption..."
-
-#~ msgid "Loading Message Router..."
-#~ msgstr "Sinisimulan ang Tagapaglipat ng mga Mensahe..."
-
-#~ msgid "Locating Peers..."
-#~ msgstr "Naghahanap ng mga Kaibigan..."
-
-#~ msgid "Checking for Updates..."
-#~ msgstr "Nagsisiyasat ng mga Pagsusulong..."
-
-#~ msgid "The selected .torrent file may contain a security hazard."
-#~ msgstr ""
-#~ "Piliin ang .torrent file na maaaring naglalaman ng hadlang sa kasiguruhan"
-
-#~ msgid "LimeWire could not download a .torrent file from the provided URL."
-#~ msgstr ""
-#~ "Hindi ma-download ng LimeWire ang .torrent file mula sa ibinigay na URL."
-
-#~ msgid "Automatically start torrents"
-#~ msgstr "Mag-isang buksan ang lahat ng torrent"
-
-#~ msgid ""
-#~ "You can choose whether to automatically start torrents downloaded from "
-#~ "Gnutella."
-#~ msgstr ""
-#~ "Maaari ninyong piliin ang kusang pag-download ng mga torrent mula sa "
-#~ "Gnutella."
-
-#~ msgid "Start automatically"
-#~ msgstr "Magsimulang mag-isa"
-
-#~ msgid "BitTorrent Settings"
-#~ msgstr "Mga Kaayusan para sa BitTorrent"
-
-#~ msgid ""
-#~ "Invalid or inappropriate custom values may cause severe performance and/or "
-#~ "memory problems. Unless you really know what you're doing, it is highly "
-#~ "recommended that you let LimeWire manage these settings."
-#~ msgstr ""
-#~ "Ang mga hindi-kilala o hindi-takdang halaga ay maaaring magdulot ng "
-#~ "malalakig problema. Maliban kung alam ninyo ang inyong ginagawa, ipinapayong "
-#~ "hayaan ninyo ang LimeWire na mangasiwa sa mga kaayusang ito."
-
-#~ msgid ""
-#~ "LimeWire has encountered an internal error. It is possible for LimeWire to "
-#~ "recover and continue running normally. To aid with debugging, please click "
-#~ "'Send' to notify LimeWire about the problem. If desired, you can click "
-#~ "'Review' to look at the information that will be sent. Thank you."
-#~ msgstr ""
-#~ "Nakatagpo ang LimeWire ng isang kamaliang panloob. Maaaring makabawi pa rin "
-#~ "ang LimeWire at manatiling tumatakbo. Upang makatulong sa pag-debug, "
-#~ "pindutin ang 'Ipadala' para masabihan ang LimeWire tungkol sa problemang "
-#~ "ito. Kung nais ninyo, maaari ninyong tignan ang impormasyong ipadadala sa "
-#~ "pamamagitan ng pagpindot sa 'Tignang Muli'. Maraming salamat."
-
-#~ msgid "Discard"
-#~ msgstr "Itapon"
-
-#~ msgid "Always Send Immediately"
-#~ msgstr "Laging Ipadala Kaagad"
-
-#~ msgid "Always Ask For Review"
-#~ msgstr "Laging Itanong Kung Nais na Muling Makita"
-
-#~ msgid "Always Discard All Errors"
-#~ msgstr "Laging Itapon Ang Lahat Ng Kamalian"
-
-#~ msgid ""
-#~ "LimeWire is also, of course, the result of the countless hours of work by "
-#~ "LimeWire's developers:"
-#~ msgstr ""
-#~ "Ang LimeWire ay resulta din ng hindi-mabilang na oras ng pagtatrabaho ng mga "
-#~ "tagapagsulong ng LimeWire:"
-
-#~ msgid ""
-#~ "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
-#~ "graphic design are the hard work of LimeWire's web team:"
-#~ msgstr ""
-#~ "Ang <a href=\"http://www.limewire.com\">web site</a> ng LimeWire at ang mga "
-#~ "ginuhit na disenyo ng LimeWire ay mula sa pagpapagod ng pangkat pang-web ng "
-#~ "LimeWire:"
-
-#~ msgid ""
-#~ "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
-#~ msgstr ""
-#~ "Ang mga katanungan tungkol sa LimeWire PRO ay puspusang sinasagot ng mga "
-#~ "alalay-teknikal ng LimeWire:"
-
-#~ msgid ""
-#~ "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
-#~ "Inc."
-#~ msgstr ""
-#~ "BitTorrent, ang Larawan ng BitTorrent, at Torrent ay mga marka ng "
-#~ "pangangalakal ng BitTorrent, Inc."
-
-#~ msgid ""
-#~ "LimeWire encountered an error in the Digital Audio Access Protocol (for "
-#~ "sharing files in iTunes). This feature will be turned off. You can turn it "
-#~ "back on in options, under iTunes -> Sharing."
-#~ msgstr ""
-#~ "Nakatagpo ang LimeWire ng isang kamalian sa Digital Audio Access Protocol "
-#~ "(para sa pamamahagi ng mga file sa iTunes). Ang katangiang ito ay papatayin. "
-#~ "Maaari ninyo itong buksan muli sa mga mapagpipilian, sa ilalim ng iTunes -> "
-#~ "Pamamahagi."
-
-#~ msgid ""
-#~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
-#~ "files in iTunes) because a Microsoft patch is required or a firewall is "
-#~ "blocking access. LimeWire can direct you to Microsoft's page with "
-#~ "information if you want to use this feature. Click 'Yes' to go to the patch, "
-#~ "'No' to disable this feature, or 'Cancel' to decide later."
-#~ msgstr ""
-#~ "Nabigong simulan ng LimeWire ang Digital Audio Access Protocol (para sa "
-#~ "pamamahagi ng mga file sa iTunes) dahil may kinakailangang pantakip mula sa "
-#~ "Microsoft o may firewall na humaharang sa daraanan. Maaari kayong ihatid ng "
-#~ "LimeWire patungo sa isang pahina ng Microsoft na mabibigay sa inyo ng "
-#~ "impormasyon kung nais niyong gamitin ang katangiang ito. Pindutin ang 'Oo' "
-#~ "para pumunta sa pantakip na iyon, 'Hindi' para huwag nang gamitin ang "
-#~ "katangiang ito, o 'Cancel' para makapagpasya sa hinaharap."
-
-#~ msgid "T1"
-#~ msgstr "T1"
-
-#~ msgid "T3 or Higher"
-#~ msgstr "T3 o Mas Mataas"
-
-#~ msgid "Ethernet"
-#~ msgstr "Ethernet"
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. LimeWire will "
-#~ "automatically keep trying to connect you to the network unless you select "
-#~ "\"Disconnect\" from the File menu."
-#~ msgstr ""
-#~ "Mukhang walang umiiral na ugnayan sa Internet ang inyong kompyuter o may "
-#~ "firewall na humaharang sa LimeWire upang makakabit sa Internet. Kusang "
-#~ "paulit-ulit na susubukan ng LimeWire na kumabit sa ugnayan maliban lang kung "
-#~ "pipiliin ninyo ang \"Disconnect\" mula sa File menu."
-
-#~ msgid "C&onsole"
-#~ msgstr "C&onsole"
-
-#~ msgid "Lo&gging"
-#~ msgstr "Lo&gging"
-
-#, java-format
-#~ msgid "Display the {0} Screen"
-#~ msgstr "Ipakita ang {0} Screen"
-
-#~ msgid ""
-#~ "LimeWire has encountered a problem during startup and cannot proceed. You "
-#~ "may be able to fix this problem by changing LimeWire's Windows "
-#~ "Compatibility. Right-click on the LimeWire icon on your Desktop and select "
-#~ "'Properties' from the popup menu. Click the 'Compatibility' tab at the top, "
-#~ "then click the 'Run this program in compatibility mode for' check box, and "
-#~ "then select 'Windows 2000' in the box below the check box. Then click the "
-#~ "'OK' button at the bottom and restart LimeWire."
-#~ msgstr ""
-#~ "May nakaharap na problema ang LimeWire sa pagsisimula at hindi nito kayang "
-#~ "magtuloy. Maaari ninyong ayusin ang problemang ito sa pamamagitan ng "
-#~ "pagpapalit sa Windows Compatibility ng LimeWire. I-right click ang larawan "
-#~ "ng LimeWire sa inyong Desktop at piliin ang 'Properties' mula sa lalabas na "
-#~ "kahon. Pumunta sa 'Compatibility' tab sa itaas, at pindutin ang markahang-"
-#~ "kahon para sa 'Run this program in compatibility mode for', matapos ay "
-#~ "markahan ang kahon ng 'Windows 2000' sa ibaba. Pindutin ang 'OK' buton sa "
-#~ "ibaba at simulan muli ang LimeWire."
-
-#, java-format
-#~ msgid ""
-#~ "LimeWire could not locate your web browser to display the following webpage: "
-#~ "{0}."
-#~ msgstr ""
-#~ "Hindi matagpuan ng LimeWire ang inyong web browser upang maipakita ang "
-#~ "sumusunod na webpage: {0}."
-
-#~ msgid "LimeWire will not launch the specified file for security reasons."
-#~ msgstr ""
-#~ "Hindi bubuksan ng LimeWire ang nabanggit na file para sa inyong kasiguruhan."
-
-#, java-format
-#~ msgid ""
-#~ "LimeWire could not launch the specified file.\n"
-#~ "\n"
-#~ "Executed command: {0}."
-#~ msgstr ""
-#~ "Hindi mabuksan ng LimeWire ang nabanggit na file.\n"
-#~ "\n"
-#~ "Utos na isinagawa: {0}."
-
-#~ msgid "LimeWire could not launch the specified file."
-#~ msgstr "Hindi mabuksan ng LimeWire ang nabanggit na file."
-
-#~ msgid "Loading Core Components..."
-#~ msgstr "Binubuksan ang mga Punong-Bahagi..."
-
-#~ msgid "Loading Internationalization Support..."
-#~ msgstr "Sinisimulan ang Supporta para sa Internasyonalisasyon..."
-
-#~ msgid "Loading Digital Audio Access Protocol..."
-#~ msgstr "Binubuksan ang Digital Audio Access Protocol..."
-
-#~ msgid ""
-#~ "You are currently using a beta or pre-release version of Java 1.6.0. This "
-#~ "version is known to have caused problems with LimeWire. Please upgrade to "
-#~ "the final 1.6.0 release.\n"
-#~ msgstr ""
-#~ "Kayo ay sa kasalukuyang gumagamit ng isang beta o pre-release bersyon ng "
-#~ "Java 1.6.0. Ang bersyon na ito ay napag-alamang nagbibigay ng problema sa "
-#~ "LimeWire. Mag-update lamang sa kahuli-hulihang bersyon ng 1.6.0.\n"
-
-#~ msgid "Upgrade Java"
-#~ msgstr "I-update ang Java"
-
-#, java-format
-#~ msgid "Visit {0}"
-#~ msgstr "Bumisita {0}"
-
-#~ msgid "Remind Me Later"
-#~ msgstr "Paalalahanan Ako Mamaya"
-
-#~ msgid "Help Translate LimeWire"
-#~ msgstr "Tumulong sa Pagsasalin-Wika ng LimeWire"
-
-#~ msgid "Show Language Status"
-#~ msgstr "Ipakita ang Kalagayan ng Wika"
-
-#~ msgid "LimeWire must be restarted for the new language to take effect."
-#~ msgstr ""
-#~ "Kinakailangang buksang muli ang LimeWire para magamit ang bagong wikang "
-#~ "pinili."
-
-#~ msgid "LimeWire was unable to locate the details of this Weed file."
-#~ msgstr "Hindi natagpuan ng LimeWire ang mga detalye ng Weed file na ito."
-
-#~ msgid "You can try looking up the details again by clicking 'Verify'."
-#~ msgstr ""
-#~ "Maaari ninyong subukang hanapin muli ang mga detalye nito sa pagpindot ng "
-#~ "'Siguraduhun'."
-
-#~ msgid "View Weedshare Usage Rights"
-#~ msgstr "Tignan ang Karapatan ng Paggamit ng Weedshare"
-
-#~ msgid "View Usage Rights"
-#~ msgstr "Tignan ang mga Karapatan ng Paggamit"
-
-#~ msgid ""
-#~ "LimeWire is contacting www.weedshare.com for the details of this file."
-#~ msgstr ""
-#~ "Nakikipag-ugnayan ang LimeWire sa www.weedshare.com para sa mga detalye ng "
-#~ "file na ito."
-
-#~ msgid ""
-#~ "LimeWire has not yet verified this license.\n"
-#~ "Click 'verify' to locate the details of this file."
-#~ msgstr ""
-#~ "Hindi pa nasisiguro ng LimeWire ang pahintulot na ito.\n"
-#~ "Pindutin ang 'Siguraduhin' para hanapin ang mga detalye ng file."
-
-#~ msgid "Weedshare Details"
-#~ msgstr "Mga Detalye ng Weedshare"
-
-#~ msgid "This file may require a license in order to open and view."
-#~ msgstr "Maaaring nangangailangan ito ng pahintulot para mabuksan at makita."
-
-#~ msgid "License Details"
-#~ msgstr "Mga Detalye ng Pahintulot"
-
-#~ msgid "Always use this answer"
-#~ msgstr "Laging gamitin ang sagot na ito"
-
-#~ msgid "Loading Monitor Window..."
-#~ msgstr "Binubuksan ang Bintana ng Pagmamanman"
-
-#~ msgid "Show Incoming Searches"
-#~ msgstr "Ipakita ang mga Papasok na Paghahanap"
-
-#~ msgid ""
-#~ "Your client is a leaf node shielded by an Ultrapeer. Hence you will see few "
-#~ "or no searches in the monitor window."
-#~ msgstr ""
-#~ "Ang inyong programa ay isang leaf node na pinoporotektahan ng Ultrapeer. "
-#~ "Dahil dito, mas kakaunti lamang o walang mga resulta sa paghahanap ang "
-#~ "inyong makikita."
-
-#~ msgid "LimeWire has detected a firewall"
-#~ msgstr "May nakitang firewall ang LimeWire"
-
-#~ msgid "Disconnected"
-#~ msgstr "Natanggal sa Ugnayan"
-
-#~ msgid ""
-#~ "You are disconnected from the network. To connect, choose Connect from the "
-#~ "File menu."
-#~ msgstr ""
-#~ "Kayo ay natanggal sa ugnayan. Upang muling makipag-ugnay, piliin ang Makipag-"
-#~ "ugnay mula sa File menu."
-
-#~ msgid ""
-#~ "You are connected to few hosts and have an unstable connection the network"
-#~ msgstr ""
-#~ "Kakaunti lamang ang kinauugnayan ninyong host at hindi pa panatag ang inyong "
-#~ "ugnayan."
-
-#~ msgid "Fair"
-#~ msgstr "Patas"
-
-#~ msgid "Your connection to the network is getting stronger"
-#~ msgstr "Bumubuti na ang inyong pakikipag-ugnayan."
-
-#~ msgid "Show Firewall Status"
-#~ msgstr "Ipakita ang Kalagayan ng Firewall"
-
-#~ msgid "Show Bandwidth Consumption"
-#~ msgstr "Ipakita ang Nagagamit na Bandwidth"
-
-#~ msgid "Show Media Player"
-#~ msgstr "Ipakita ang Media Player"
-
-#~ msgid "Upgrade to PRO"
-#~ msgstr "I-Upgrade sa LimeWire PRO"
-
-#~ msgid ""
-#~ "For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will "
-#~ "love the improved performance of PRO. Thank you for helping keep the "
-#~ "Internet open by running LimeWire."
-#~ msgstr ""
-#~ "Para sa mabilis na downloads, kunin na ang LimeWire PRO. Garantisadong "
-#~ "magugustuhan niyo ang mas pinalakas na lakas ng PRO. Maraming salamat sa "
-#~ "pagtulong na panatilihing bukas ang Internet sa pamamagitan ng pag-open ng "
-#~ "LimeWire"
-
-#~ msgid "Upgrade to LimeWire PRO?"
-#~ msgstr "Simulan ang pag-upgrade sa LimeWire Pro?"
-
-#~ msgid "Show Language in status bar"
-#~ msgstr "Ipakita ang Wika sa status bar"
-
-#~ msgid "Do not display this message again."
-#~ msgstr "Huwag na muling ipakita ang mensaheng ito."
-
-#~ msgid "Loading BitTorrent Management..."
-#~ msgstr "Binubuksan ang Pangangasiwa ng BitTorrent..."

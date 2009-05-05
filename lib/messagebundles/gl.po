@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Language: Galician\n"
 
@@ -1483,11 +1483,6 @@ msgstr "Rematado - "
 msgid "Searching..."
 msgstr "A procurar..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:648
-#, java-format
-msgid "Stalled at {0}% - "
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:650
 msgid "Unable to download  - "
 msgstr "Incapaz de descargar "
@@ -1597,11 +1592,6 @@ msgstr "Localizar no disco"
 msgid "Locate in Library"
 msgstr "Localizar na biblioteca"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:73
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:62
-msgid "Launch File"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:77
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:70
@@ -1652,11 +1642,6 @@ msgid "Downloading {0} of {1} ({2}) from {3} person"
 msgid_plural "Downloading {0} of {1} ({2}) from {3} people"
 msgstr[0] ""
 msgstr[1] "Descargando {0} de {1} ({2}) de {3} persoas"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:511
-#, java-format
-msgid "Stalled - {0} of {1} ({2}%). - "
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:517
 msgid "Unable to download: "
@@ -1841,11 +1826,6 @@ msgstr "Cambiar de usuario"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:51
 msgid "Sign In"
 msgstr "Iniciar sesión"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:238
-#, java-format
-msgid "SET {0} STATUS"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:53
 msgid "Incorrect username or password."
@@ -2275,11 +2255,6 @@ msgstr "Os foron {0} des-compartidos"
 #, java-format
 msgid "These {0} files are not shared"
 msgstr "Estes {0} non están compartidos"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:57
-#, java-format
-msgid "Unshare {0} files"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteDocumentTableFormat.java:42
@@ -3087,10 +3062,6 @@ msgstr ""
 msgid "Listening Port"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:88
-msgid "Listen on port:"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:103
 #, java-format
 msgid "The port chosen {0}, is already in use."
@@ -3683,11 +3654,6 @@ msgstr "Non hai nada seleccionado"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:59
 msgid "Hash"
 msgstr "Hash"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:207
-#, java-format
-msgid "\"{0}\" properties"
-msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:244
 msgid "Overview"
@@ -4594,3 +4560,37 @@ msgstr "Configuración - paso {0} de {1}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:203
 msgid "Setup"
 msgstr "Configuración"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:648
+#, java-format
+msgid "Stalled at {0}% - "
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:62
+msgid "Launch File"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:511
+#, java-format
+msgid "Stalled - {0} of {1} ({2}%). - "
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:238
+#, java-format
+msgid "SET {0} STATUS"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:57
+#, java-format
+msgid "Unshare {0} files"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FirewallOptionPanel.java:88
+msgid "Listen on port:"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:207
+#, java-format
+msgid "\"{0}\" properties"
+msgstr ""

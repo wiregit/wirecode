@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -63,6 +63,145 @@ msgstr "Video"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:65
 msgid "Images"
 msgstr "Imagen"
+
+#: components/gnutella-core/src/main/java/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
+msgid "DHT Peer Locator"
+msgstr "Buscador di Peer DHT"
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:304
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
+msgid ""
+"LimeWire was unable to set up a port to listen for incoming connections. "
+"Some features of LimeWire may not work as expected."
+msgstr ""
+"LimeWire no por a traha un port pa recibi connection drentando. Algun "
+"servicionan di LimeWire no lo traha den e manera espera."
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:204
+msgid "Old Downloads"
+msgstr "Descarganan bieuw"
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
+msgid ""
+"LimeWire was unable to write a necessary file because your hard drive is "
+"full. To continue using LimeWire you must free up space on your hard drive."
+msgstr ""
+"LimeWire no por a warda e informacion necesario den bo computer paso bo Hard "
+"Disk ta full. Pa sigui usa LimeWire bo mester traha luga den bo Hard Drive."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:53
+msgid ""
+"LimeWire was unable to open a necessary file because another program has "
+"locked the file. LimeWire may act unexpectedly until this file is released."
+msgstr ""
+"LimeWire no a por a habri e file necesario paso, e file ta wordo blokea dor "
+"di un otro programa. LimeWire por actua inesperadamente te ora e programa "
+"unblock e file."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:55
+msgid ""
+"LimeWire was unable to write a necessary file because you do not have the "
+"necessary permissions. Your preferences may not be maintained the next time "
+"you start LimeWire, or LimeWire may behave in unexpected ways."
+msgstr ""
+"LimeWire no por a warda un file necesario paso bo no tin suficiente permiso "
+"pa esaki. Bo preferencianan no lo por wordo warda pa e siguiente baiha cu bo "
+"subi, of Limwire lo por actua den maneranan inespera."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:57
+msgid ""
+"LimeWire cannot open a necessary file because the filename contains "
+"characters which are not supported by your operating system. LimeWire may "
+"behave in unexpected ways."
+msgstr ""
+"LimeWire no por habri e file necesario paso e ta contene letternan of "
+"symbolonan cu no ta wordo cubri den bo systema operativo. LimeWire por actua "
+"den maneranan insespera."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:61
+msgid ""
+"LimeWire cannot download the selected file because your hard drive is full. "
+"To download more files, you must free up space on your hard drive."
+msgstr ""
+"LimeWire no por Download e file nan cu bo e selecta paso bo Hard Disk ta "
+"yen. Pa sigui hasi uso di LimeWire porfabor traha luga den bo Hard Drive."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:63
+msgid ""
+"LimeWire was unable to download the selected file because another program is "
+"using the file. Please close the other program and retry the download."
+msgstr ""
+"Limewire no por a download e file selecta paso e ta wordo usa dor di un otro "
+"programa. Porfabor sera e programa aki y purba di download atrobe."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:65
+msgid ""
+"LimeWire was unable to create or continue writing an incomplete file for the "
+"selected download because you do not have permission to write files to the "
+"incomplete folder. To continue using LimeWire, please choose a different "
+"Save Folder."
+msgstr ""
+"LimeWire no por a traha  of continua save un file incompleto pa e download "
+"cu bo a selecta paso bo no tin suficiente permiso pa save filenan den e "
+"folder ey. Porfabos selecta un otro destination pa save esakinan."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:67
+msgid ""
+"LimeWire was unable to open the incomplete file for the selected download "
+"because the filename contains characters which are not supported by your "
+"operating system."
+msgstr ""
+"LimeWire no por a habri e file incompleto cu bo a selecta paso e ta contene "
+"letternan of symbolonan cu no ta wordo cubri den bo systema operativo."
+
+#: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:32
+msgid "Firewall Manager"
+msgstr "Manehador di Firewall"
+
+#: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
+msgid "Statistic Management"
+msgstr "Maneho di stadisticanan"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
+msgid "For Turbo-Charged searches get LimeWire PRO."
+msgstr "Pa Turbo search busca LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
+msgid "Support LimeWire's peer-to-peer development. Get PRO."
+msgstr "Aporta na desaroyo di  LimeWire su peer-to-peer. Busca PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
+msgid "Purchase LimeWire PRO to help us make downloads faster."
+msgstr "Cumpra LimeWire PRO pa yuda nos hasi e download nan bai mas lihe."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
+msgid "For Turbo-Charged downloads get LimeWire PRO."
+msgstr "Pa Turbo Download busca LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
+msgid "Support open networks. Get LimeWire PRO."
+msgstr "Pa por traha cu Netwerk nan habri. Buca LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
+msgid "Support open source and open protocols. Get LimeWire PRO."
+msgstr "Pa por traha cu fuente habri y protocol nan habri. LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
+msgid "For Turbo-Charged performance get LimeWire PRO."
+msgstr "Pa pa trahamento mas lihe, busca LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
+msgid "Keep the Internet open. Get LimeWire PRO."
+msgstr "Tene Internet Habri. Busca LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
+msgid "Developing LimeWire costs real money. Get PRO."
+msgstr "Desaroya LimeWire ta costa plaka. Cumpra LimeWire PRO"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:46
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:19
@@ -140,22 +279,9 @@ msgstr ""
 msgid "XMPP Service"
 msgstr ""
 
-#: components/gnutella-core/src/main/java/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
-msgid "DHT Peer Locator"
-msgstr "Buscador di Peer DHT"
-
 #: components/gnutella-core/src/main/java/com/limegroup/bittorrent/dht/DHTPeerPublisherImpl.java:93
 msgid "DHT Peer Publisher"
 msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:304
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
-msgid ""
-"LimeWire was unable to set up a port to listen for incoming connections. "
-"Some features of LimeWire may not work as expected."
-msgstr ""
-"LimeWire no por a traha un port pa recibi connection drentando. Algun "
-"servicionan di LimeWire no lo traha den e manera espera."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:402
 msgid "Connection Listener"
@@ -184,10 +310,6 @@ msgstr ""
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:106
 msgid "Gnutella Connections"
 msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:204
-msgid "Old Downloads"
-msgstr "Descarganan bieuw"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:227
 msgid "Download Management"
@@ -603,87 +725,6 @@ msgstr ""
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:83
 msgid "Metadata Loader"
 msgstr ""
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
-msgid ""
-"LimeWire was unable to write a necessary file because your hard drive is "
-"full. To continue using LimeWire you must free up space on your hard drive."
-msgstr ""
-"LimeWire no por a warda e informacion necesario den bo computer paso bo Hard "
-"Disk ta full. Pa sigui usa LimeWire bo mester traha luga den bo Hard Drive."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:53
-msgid ""
-"LimeWire was unable to open a necessary file because another program has "
-"locked the file. LimeWire may act unexpectedly until this file is released."
-msgstr ""
-"LimeWire no a por a habri e file necesario paso, e file ta wordo blokea dor "
-"di un otro programa. LimeWire por actua inesperadamente te ora e programa "
-"unblock e file."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:55
-msgid ""
-"LimeWire was unable to write a necessary file because you do not have the "
-"necessary permissions. Your preferences may not be maintained the next time "
-"you start LimeWire, or LimeWire may behave in unexpected ways."
-msgstr ""
-"LimeWire no por a warda un file necesario paso bo no tin suficiente permiso "
-"pa esaki. Bo preferencianan no lo por wordo warda pa e siguiente baiha cu bo "
-"subi, of Limwire lo por actua den maneranan inespera."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:57
-msgid ""
-"LimeWire cannot open a necessary file because the filename contains "
-"characters which are not supported by your operating system. LimeWire may "
-"behave in unexpected ways."
-msgstr ""
-"LimeWire no por habri e file necesario paso e ta contene letternan of "
-"symbolonan cu no ta wordo cubri den bo systema operativo. LimeWire por actua "
-"den maneranan insespera."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:61
-msgid ""
-"LimeWire cannot download the selected file because your hard drive is full. "
-"To download more files, you must free up space on your hard drive."
-msgstr ""
-"LimeWire no por Download e file nan cu bo e selecta paso bo Hard Disk ta "
-"yen. Pa sigui hasi uso di LimeWire porfabor traha luga den bo Hard Drive."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:63
-msgid ""
-"LimeWire was unable to download the selected file because another program is "
-"using the file. Please close the other program and retry the download."
-msgstr ""
-"Limewire no por a download e file selecta paso e ta wordo usa dor di un otro "
-"programa. Porfabor sera e programa aki y purba di download atrobe."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:65
-msgid ""
-"LimeWire was unable to create or continue writing an incomplete file for the "
-"selected download because you do not have permission to write files to the "
-"incomplete folder. To continue using LimeWire, please choose a different "
-"Save Folder."
-msgstr ""
-"LimeWire no por a traha  of continua save un file incompleto pa e download "
-"cu bo a selecta paso bo no tin suficiente permiso pa save filenan den e "
-"folder ey. Porfabos selecta un otro destination pa save esakinan."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:67
-msgid ""
-"LimeWire was unable to open the incomplete file for the selected download "
-"because the filename contains characters which are not supported by your "
-"operating system."
-msgstr ""
-"LimeWire no por a habri e file incompleto cu bo a selecta paso e ta contene "
-"letternan of symbolonan cu no ta wordo cubri den bo systema operativo."
-
-#: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:32
-msgid "Firewall Manager"
-msgstr "Manehador di Firewall"
-
-#: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
-msgid "Statistic Management"
-msgstr "Maneho di stadisticanan"
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
@@ -3900,47 +3941,6 @@ msgstr ""
 msgid "Not showing {0} results"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
-msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Pa Turbo search busca LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
-msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "Aporta na desaroyo di  LimeWire su peer-to-peer. Busca PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
-msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "Cumpra LimeWire PRO pa yuda nos hasi e download nan bai mas lihe."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
-msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "Pa Turbo Download busca LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
-msgid "Support open networks. Get LimeWire PRO."
-msgstr "Pa por traha cu Netwerk nan habri. Buca LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
-msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr "Pa por traha cu fuente habri y protocol nan habri. LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
-msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Pa pa trahamento mas lihe, busca LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
-msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Tene Internet Habri. Busca LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
-msgid "Developing LimeWire costs real money. Get PRO."
-msgstr "Desaroya LimeWire ta costa plaka. Cumpra LimeWire PRO"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:94
 msgid "\"magnet:\" links"
 msgstr ""
@@ -4415,20 +4415,3 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:203
 msgid "Setup"
 msgstr ""
-
-#, java-format
-#~ msgid "Could not process bad MAGNET link {0}"
-#~ msgstr "No por a procesa e Magnet Linke {0} e ta malo"
-
-#~ msgid ""
-#~ "One or more URLs in the MAGNET link were invalid. Your file may not download "
-#~ "correctly."
-#~ msgstr ""
-#~ "Un of mas di e URL nan den e MAGNET link tawata invalido. Bo file porta no "
-#~ "lo download correctamente."
-
-#~ msgid "Checking for Updates..."
-#~ msgstr "Buscando Informacion pa Update"
-
-#~ msgid "Loading BitTorrent Management..."
-#~ msgstr "Preparando Meneho pa BitTorrent"

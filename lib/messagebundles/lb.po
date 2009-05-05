@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:32+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -707,6 +707,337 @@ msgstr "Firewall Manager"
 msgid "Statistic Management"
 msgstr "Statistik Manager"
 
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:572
+msgid "Internal Error"
+msgstr "Internen Fehler"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:581
+msgid ""
+"LimeWire was unable to connect to the bug server in order to send the below "
+"bug report. For further help and to aid with debugging, please visit "
+"www.limewire.com and click 'Support'. Thank you."
+msgstr ""
+"LimeWire konnt den Fehler-Server net erreschen fir dei Fehlermeldung hei "
+"drenner ze schecken. Fir mei Hellef an Hellef zum Fehler kennt dir op "
+"www.limewire.com goen an \"Support\" clicken. Merci"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:610
+msgid "Copy Report"
+msgstr "Kopeier Bericht"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:618
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:217
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
+msgid "OK"
+msgstr "OK"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:607
+msgid "This Alpha version has expired.  Press Ok to exit. "
+msgstr "Des Alpha version as ofgelaaf. Klickt Ok fir rauszegoen. "
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:613
+msgid ""
+"LimeWire was unable to initialize and start. This is usually due to a "
+"firewall program blocking LimeWire's access to the internet or loopback "
+"connections on the local machine. Please allow LimeWire access to the "
+"internet and restart LimeWire."
+msgstr ""
+"LimeWire konnt net starten. dat as normalerweis durch en Firewall verursacht "
+"deen Verbindungen zum Computer an zum Internet net zouleisst. Enert "
+"waneschglift Eren Firewall an start den LimeWire nei."
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:618
+msgid ""
+"LimeWire could not create a temporary preferences folder.\n"
+"\n"
+"This is generally caused by a lack of permissions.  Please make sure that "
+"LimeWire (and you) have access to create files/folders on your computer.  If "
+"the problem persists, please visit www.limewire.com and click the 'Support' "
+"link.\n"
+"\n"
+"LimeWire will now exit.  Thank You."
+msgstr ""
+"LimeWire konnt keen dauerthaft bervorzugten Ordener erstellen\n"
+"\n"
+"Dat as verursacht durch en fehler an den erlabnissen. Wanechglift, "
+"iwerpreift op LimeWire (an Der) d'erlabnis hud fir eng Datei oder en Ordner "
+"ze erstellen. wann den Problem weiderhin bestät besicht wanechglift "
+"www.limewire.com an klickt op den \"support\" link.\n"
+"\n"
+"LimeWire get lo zou. Merci."
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:45
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:76
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:88
+msgid "Error"
+msgstr "Feeler"
+
+#. *
+#. * The copy action.
+#. 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CopyAction.java:11
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:59
+msgid "Copy"
+msgstr "Kopéieren"
+
+#. *
+#. * The cut action
+#. 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CutAction.java:11
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:50
+msgid "Cut"
+msgstr "Schneiden"
+
+#. *
+#. * The delete action.
+#. 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/DeleteAction.java:12
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:77
+msgid "Delete"
+msgstr "Läschen"
+
+#. *
+#. * The paste action.
+#. 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/PasteAction.java:10
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:68
+msgid "Paste"
+msgstr "Assetzen"
+
+#. *
+#. * The select all action.
+#. 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/SelectAllAction.java:10
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:641
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:86
+msgid "Select All"
+msgstr "Alles auswielen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:189
+msgid "Apply"
+msgstr "Applizéieren"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:196
+msgid "Clear"
+msgstr "Ausmaachen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:203
+msgid "Save"
+msgstr "Späicheren"
+
+#. default the delay time to zero (ie, live
+#. updates).
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:212
+msgid "Delay: "
+msgstr "Laafzeit "
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:644
+msgid "Save As"
+msgstr "Späicheren Als"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:84
+msgid "Add"
+msgstr "Dobäisetzen"
+
+#. * Action to remove connection.
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:41
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:520
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:170
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:131
+msgid "Remove"
+msgstr "Ewechhuelen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:643
+msgid "Marks all Items as Selected"
+msgstr "markeiert alleguer Sachen dei rausgesicht sin"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:663
+msgid "Deselects all Items in the List"
+msgstr "alleguer Sachen an der Lescht ofwielen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:32
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:53
+msgid "Yes"
+msgstr "Jo"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:40
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:59
+msgid "No"
+msgstr "Nee"
+
+#. *
+#. * The undo action.
+#. 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:34
+msgid "Undo"
+msgstr "Annuleiren"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:71
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:78
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:220
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:25
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:288
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:58
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:78
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:199
+msgid "Cancel"
+msgstr "Ofbriechen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:40
+msgid "Automatically Scroll"
+msgstr "Automatech scrollen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:54
+msgid "About LimeWire"
+msgstr "Iwert LimeWire"
+
+#. set up limewire version label
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:72
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:12
+msgid "LimeWire"
+msgstr "LimeWire"
+
+#. set up close button
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:102
+msgid "Close"
+msgstr "Zoumaachen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:104
+msgid "Close This Window"
+msgstr "Des Fenster Zoumaachen"
+
+#. business developers
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:206
+msgid ""
+"Behind the scenes business strategy and day-to-day affairs are handled by "
+"LimeWire's business developers:"
+msgstr ""
+"Hannert  der Bünn gin Business strategy an daag-zu-daag sachen fun Business "
+"Entweckler behandelt"
+
+#. previous developers
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:215
+msgid ""
+"In addition, the following individuals have worked on the LimeWire team in "
+"the past but have since moved on to other projects:"
+msgstr ""
+"An addition, hun dei folgent personen mat am LimeWire team geschafft, mee "
+"sin inzeweschen un anneren projekter amgang:"
+
+#. internationalization contributors
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:291
+msgid ""
+"LimeWire would also like to thank the many contributors to the "
+"internationalization project, both for the application itself and for the "
+"LimeWire web site."
+msgstr ""
+"LimeWire geif och gären den Matwiekenden fum Internationalisatiouns Projet, "
+"fir d'Uwendung selwer an fir d'LimeWire Sait merci soen:"
+
+#. community VIPs
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:295
+msgid ""
+"Several colleagues in the Gnutella community merit special thanks. These "
+"include:"
+msgstr ""
+"Verschidden Mataarbeschter fun der Gnutella Gemeinschaft verdengen en "
+"extraen Merci. Dobai sin:"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:43
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:340
+msgid "All Folders"
+msgstr "alleguer d'Ordener"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:86
+msgid "Safe chunk verification"
+msgstr "Datenschutz iwerpreiwung"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:88
+msgid "Experimental disk access"
+msgstr "Versuch op den server zouzegreifen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
+msgid "For Turbo-Charged searches get LimeWire PRO."
+msgstr "Fiir Turbo-meiglech Sich huelt den LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
+msgid "Support LimeWire's peer-to-peer development. Get PRO."
+msgstr ""
+"Ennerstetzten LimeWire's Peer-to-Peer developement. Huelt den LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
+msgid "Purchase LimeWire PRO to help us make downloads faster."
+msgstr ""
+"Kaaft ierch LimeWire PRO fiir eis ze hellefen , mescht downloads schneller. "
+";)"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
+msgid "For Turbo-Charged downloads get LimeWire PRO."
+msgstr "Fiir Turbo-Meiglech Downloads huelt den LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
+msgid "Support open networks. Get LimeWire PRO."
+msgstr "Ennerstetztung fiir Offen Netzwierker. Huelt ierch LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
+msgid "Support open source and open protocols. Get LimeWire PRO."
+msgstr ""
+"Ennerstetzung fiir Open-Source an Open Protokoller. Huelt ierch den LimeWire "
+"PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
+msgid "For Turbo-Charged performance get LimeWire PRO."
+msgstr "Fiir Turbo-Meiglech Perfomance huelt ierch den LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
+msgid "Keep the Internet open. Get LimeWire PRO."
+msgstr "Haalt den Internet un, huelt ierch den LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
+msgid "Developing LimeWire costs real money. Get PRO."
+msgstr "Entweckelung vum LimeWire kascht vill Suen, huelt ierch den PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:65
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:94
+msgid "Select Folder"
+msgstr "Ordner aussichen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:66
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:74
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:95
+msgid "Select"
+msgstr "Aussichen"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:96
+msgid "KB"
+msgstr "KB"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:98
+msgid "MB"
+msgstr "MB"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:100
+msgid "GB"
+msgstr "GB"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:102
+msgid "TB"
+msgstr "TB"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:104
+msgid "KB/s"
+msgstr "KB/s"
+
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:21
@@ -789,31 +1120,6 @@ msgstr ""
 msgid "Send Bug"
 msgstr ""
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:572
-msgid "Internal Error"
-msgstr "Internen Fehler"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:581
-msgid ""
-"LimeWire was unable to connect to the bug server in order to send the below "
-"bug report. For further help and to aid with debugging, please visit "
-"www.limewire.com and click 'Support'. Thank you."
-msgstr ""
-"LimeWire konnt den Fehler-Server net erreschen fir dei Fehlermeldung hei "
-"drenner ze schecken. Fir mei Hellef an Hellef zum Fehler kennt dir op "
-"www.limewire.com goen an \"Support\" clicken. Merci"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:610
-msgid "Copy Report"
-msgstr "Kopeier Bericht"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:618
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:217
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
-msgid "OK"
-msgstr "OK"
-
 #. Load up the HTML engine.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:476
 msgid "Muddling Mint..."
@@ -831,48 +1137,6 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:563
 msgid "Prepping Mojitos..."
 msgstr ""
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:607
-msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr "Des Alpha version as ofgelaaf. Klickt Ok fir rauszegoen. "
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:613
-msgid ""
-"LimeWire was unable to initialize and start. This is usually due to a "
-"firewall program blocking LimeWire's access to the internet or loopback "
-"connections on the local machine. Please allow LimeWire access to the "
-"internet and restart LimeWire."
-msgstr ""
-"LimeWire konnt net starten. dat as normalerweis durch en Firewall verursacht "
-"deen Verbindungen zum Computer an zum Internet net zouleisst. Enert "
-"waneschglift Eren Firewall an start den LimeWire nei."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:618
-msgid ""
-"LimeWire could not create a temporary preferences folder.\n"
-"\n"
-"This is generally caused by a lack of permissions.  Please make sure that "
-"LimeWire (and you) have access to create files/folders on your computer.  If "
-"the problem persists, please visit www.limewire.com and click the 'Support' "
-"link.\n"
-"\n"
-"LimeWire will now exit.  Thank You."
-msgstr ""
-"LimeWire konnt keen dauerthaft bervorzugten Ordener erstellen\n"
-"\n"
-"Dat as verursacht durch en fehler an den erlabnissen. Wanechglift, "
-"iwerpreift op LimeWire (an Der) d'erlabnis hud fir eng Datei oder en Ordner "
-"ze erstellen. wann den Problem weiderhin bestät besicht wanechglift "
-"www.limewire.com an klickt op den \"support\" link.\n"
-"\n"
-"LimeWire get lo zou. Merci."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:45
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:76
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:88
-msgid "Error"
-msgstr "Feeler"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:56
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:66
@@ -908,50 +1172,9 @@ msgstr ""
 msgid "More File Info"
 msgstr ""
 
-#. *
-#. * The copy action.
-#. 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CopyAction.java:11
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:59
-msgid "Copy"
-msgstr "Kopéieren"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CopyAllAction.java:10
 msgid "Copy All"
 msgstr ""
-
-#. *
-#. * The cut action
-#. 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CutAction.java:11
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:50
-msgid "Cut"
-msgstr "Schneiden"
-
-#. *
-#. * The delete action.
-#. 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/DeleteAction.java:12
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:77
-msgid "Delete"
-msgstr "Läschen"
-
-#. *
-#. * The paste action.
-#. 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/PasteAction.java:10
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:68
-msgid "Paste"
-msgstr "Assetzen"
-
-#. *
-#. * The select all action.
-#. 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/SelectAllAction.java:10
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:641
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:86
-msgid "Select All"
-msgstr "Alles auswielen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:45
 msgid "&Available"
@@ -991,28 +1214,6 @@ msgstr ""
 msgid "Advanced Tools"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:189
-msgid "Apply"
-msgstr "Applizéieren"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:196
-msgid "Clear"
-msgstr "Ausmaachen"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:203
-msgid "Save"
-msgstr "Späicheren"
-
-#. default the delay time to zero (ie, live
-#. updates).
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:212
-msgid "Delay: "
-msgstr "Laafzeit "
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:644
-msgid "Save As"
-msgstr "Späicheren Als"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:60
 msgid "Add a Connection"
 msgstr ""
@@ -1029,18 +1230,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:81
 msgid "Use TLS"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:84
-msgid "Add"
-msgstr "Dobäisetzen"
-
-#. * Action to remove connection.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:41
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:520
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:170
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:131
-msgid "Remove"
-msgstr "Ewechhuelen"
 
 #. * Action to view files on host.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:44
@@ -1308,17 +1497,9 @@ msgstr ""
 msgid "remove"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:643
-msgid "Marks all Items as Selected"
-msgstr "markeiert alleguer Sachen dei rausgesicht sin"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:661
 msgid "Deselect All"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:663
-msgid "Deselects all Items in the List"
-msgstr "alleguer Sachen an der Lescht ofwielen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:34
 msgid "Close Tab"
@@ -1331,18 +1512,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:36
 msgid "Close Other Tabs"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:32
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:53
-msgid "Yes"
-msgstr "Jo"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:171
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:40
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:59
-msgid "No"
-msgstr "Nee"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/ShareAllComboBox.java:92
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageFolderComboBox.java:97
@@ -1374,13 +1543,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:115
 msgid "Loading LimeWire..."
 msgstr ""
-
-#. *
-#. * The undo action.
-#. 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:34
-msgid "Undo"
-msgstr "Annuleiren"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:186
 msgid "Add to My Library"
@@ -1678,17 +1840,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:39
 msgid "Nickname:"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:71
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:78
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:220
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:25
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:288
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:58
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:78
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:199
-msgid "Cancel"
-msgstr "Ofbriechen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:42
 msgid "wants to be your friend.  Do you accept?"
@@ -2413,29 +2564,6 @@ msgstr ""
 msgid "Unshare with the P2P Network"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:40
-msgid "Automatically Scroll"
-msgstr "Automatech scrollen"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:54
-msgid "About LimeWire"
-msgstr "Iwert LimeWire"
-
-#. set up limewire version label
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:72
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:12
-msgid "LimeWire"
-msgstr "LimeWire"
-
-#. set up close button
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:102
-msgid "Close"
-msgstr "Zoumaachen"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:104
-msgid "Close This Window"
-msgstr "Des Fenster Zoumaachen"
-
 #. introduction
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:171
 msgid ""
@@ -2451,24 +2579,6 @@ msgstr ""
 msgid "Providing key support:"
 msgstr ""
 
-#. business developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:206
-msgid ""
-"Behind the scenes business strategy and day-to-day affairs are handled by "
-"LimeWire's business developers:"
-msgstr ""
-"Hannert  der Bünn gin Business strategy an daag-zu-daag sachen fun Business "
-"Entweckler behandelt"
-
-#. previous developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:215
-msgid ""
-"In addition, the following individuals have worked on the LimeWire team in "
-"the past but have since moved on to other projects:"
-msgstr ""
-"An addition, hun dei folgent personen mat am LimeWire team geschafft, mee "
-"sin inzeweschen un anneren projekter amgang:"
-
 #. open source contributors
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:253
 msgid ""
@@ -2477,25 +2587,6 @@ msgid ""
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
-
-#. internationalization contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:291
-msgid ""
-"LimeWire would also like to thank the many contributors to the "
-"internationalization project, both for the application itself and for the "
-"LimeWire web site."
-msgstr ""
-"LimeWire geif och gären den Matwiekenden fum Internationalisatiouns Projet, "
-"fir d'Uwendung selwer an fir d'LimeWire Sait merci soen:"
-
-#. community VIPs
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:295
-msgid ""
-"Several colleagues in the Gnutella community merit special thanks. These "
-"include:"
-msgstr ""
-"Verschidden Mataarbeschter fun der Gnutella Gemeinschaft verdengen en "
-"extraen Merci. Dobai sin:"
 
 #. conclusion
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:316
@@ -2658,11 +2749,6 @@ msgstr ""
 msgid "Add Folder(s)"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:43
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:340
-msgid "All Folders"
-msgstr "alleguer d'Ordener"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ChatAction.java:20
 msgid "&Chat"
 msgstr ""
@@ -2773,14 +2859,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:64
 msgid "Let me manage my BitTorrent settings"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:86
-msgid "Safe chunk verification"
-msgstr "Datenschutz iwerpreiwung"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:88
-msgid "Experimental disk access"
-msgstr "Versuch op den server zouzegreifen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:91
 msgid "Max uploads per torrent"
@@ -3944,52 +4022,6 @@ msgstr ""
 msgid "Not showing {0} results"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
-msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Fiir Turbo-meiglech Sich huelt den LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
-msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr ""
-"Ennerstetzten LimeWire's Peer-to-Peer developement. Huelt den LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
-msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr ""
-"Kaaft ierch LimeWire PRO fiir eis ze hellefen , mescht downloads schneller. "
-";)"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
-msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "Fiir Turbo-Meiglech Downloads huelt den LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
-msgid "Support open networks. Get LimeWire PRO."
-msgstr "Ennerstetztung fiir Offen Netzwierker. Huelt ierch LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
-msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr ""
-"Ennerstetzung fiir Open-Source an Open Protokoller. Huelt ierch den LimeWire "
-"PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
-msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Fiir Turbo-Meiglech Perfomance huelt ierch den LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
-msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Haalt den Internet un, huelt ierch den LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
-msgid "Developing LimeWire costs real money. Get PRO."
-msgstr "Entweckelung vum LimeWire kascht vill Suen, huelt ierch den PRO."
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:94
 msgid "\"magnet:\" links"
 msgstr ""
@@ -4203,18 +4235,6 @@ msgstr ""
 msgid "Unable to upload: upload limit reached"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:65
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:73
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:94
-msgid "Select Folder"
-msgstr "Ordner aussichen"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:66
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:74
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:95
-msgid "Select"
-msgstr "Aussichen"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:476
 msgid "File already exists.  Do you want to replace it?"
 msgstr ""
@@ -4226,26 +4246,6 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:94
 msgid "bytes"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:96
-msgid "KB"
-msgstr "KB"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:98
-msgid "MB"
-msgstr "MB"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:100
-msgid "GB"
-msgstr "GB"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:102
-msgid "TB"
-msgstr "TB"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:104
-msgid "KB/s"
-msgstr "KB/s"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:438
 msgid "Poor Quality"
@@ -4464,394 +4464,3 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:203
 msgid "Setup"
 msgstr ""
-
-#, java-format
-#~ msgid "Could not process bad MAGNET link {0}"
-#~ msgstr "Konnt net erfolgreich sin, schlechten magnet link {0}"
-
-#~ msgid ""
-#~ "One or more URLs in the MAGNET link were invalid. Your file may not download "
-#~ "correctly."
-#~ msgstr ""
-#~ "Eng oder mei URLs am Magnet Link sin Falsch. Earen Fichier kann net richteg "
-#~ "roofgelueden gin."
-
-#, java-format
-#~ msgid "You are already downloading this file to {0}"
-#~ msgstr "Dir hudd schon daat roofgelueden no {0}"
-
-#~ msgid "Loading TLS Encryption..."
-#~ msgstr "Lueden TLS Encryption..."
-
-#~ msgid "Locating Peers..."
-#~ msgstr "Fannen Peers..."
-
-#~ msgid "Checking for Updates..."
-#~ msgstr "Sichen no Updates..."
-
-#~ msgid "The selected .torrent file may contain a security hazard."
-#~ msgstr "Dei ausgewielten .torrent Fichier kann Sécherheetslecken hun."
-
-#~ msgid "LimeWire could not download a .torrent file from the provided URL."
-#~ msgstr "LimeWire konnt net dei .Torrent Fichier vum URL rooflueden."
-
-#~ msgid "Automatically start torrents"
-#~ msgstr "Automatesch start Torrents."
-
-#~ msgid ""
-#~ "You can choose whether to automatically start torrents downloaded from "
-#~ "Gnutella."
-#~ msgstr ""
-#~ "Dir kennt wielen ob et automatesch starten soll vun Torrents roofgelueden "
-#~ "vum Gnutella."
-
-#~ msgid "Start automatically"
-#~ msgstr "Start Automatesch"
-
-#~ msgid "BitTorrent Settings"
-#~ msgstr "BitTorrents Astellungen"
-
-#~ msgid ""
-#~ "Invalid or inappropriate custom values may cause severe performance and/or "
-#~ "memory problems. Unless you really know what you're doing, it is highly "
-#~ "recommended that you let LimeWire manage these settings."
-#~ msgstr ""
-#~ "Net richteg oder onpassend Benotzer Werter  kenne schweier Leschtungs- an "
-#~ "Speicherproblemer mat sech brengen. Wann Der nt genau west wat der hei sollt "
-#~ "agin dann as et ze emfehlen LimeWire des Werter astellen ze lossen."
-
-#~ msgid ""
-#~ "LimeWire has encountered an internal error. It is possible for LimeWire to "
-#~ "recover and continue running normally. To aid with debugging, please click "
-#~ "'Send' to notify LimeWire about the problem. If desired, you can click "
-#~ "'Review' to look at the information that will be sent. Thank you."
-#~ msgstr ""
-#~ "LimeWire hud en Internen Fehler festgestallt. Et as meichlech dass LimeWire "
-#~ "normal weidaleeft. Fiir Hellef bei der Fehlersich, klickt wanechglift "
-#~ "\"senden\" fir LimeWire iwert den Problem ze informeiren. Wann gebraucht, "
-#~ "kenn Der op \"Iwerbleck\" klicken fir d'Informationen opzerufen dei gesend "
-#~ "gin. Merci."
-
-#~ msgid "Discard"
-#~ msgstr "Raushuelen"
-
-#~ msgid "Always Send Immediately"
-#~ msgstr "Emmer direkt fortschecken"
-
-#~ msgid "Always Ask For Review"
-#~ msgstr "Emmer no enger Revisioun froen"
-
-#~ msgid "Always Discard All Errors"
-#~ msgstr "D'Fehler emmer raushuelen"
-
-#~ msgid ""
-#~ "LimeWire is also, of course, the result of the countless hours of work by "
-#~ "LimeWire's developers:"
-#~ msgstr ""
-#~ "LimeWire ass natielesch och d'Ergebnis fun deenen villen Schaffstonnen fun "
-#~ "den LimeWire-entweckler:"
-
-#~ msgid ""
-#~ "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
-#~ "graphic design are the hard work of LimeWire's web team:"
-#~ msgstr ""
-#~ "D'LimeWire <a href=\"http://www.limewire.com/\">web site</a> an de "
-#~ "grafeschen obbau fun LimeWire  sin di haart Aarbescht fum LimeWire-web team:"
-
-#~ msgid ""
-#~ "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
-#~ msgstr ""
-#~ "D'LimeWire PRO Froen gin gewessenhaft fum LimeWire sengem techneschen "
-#~ "Support beäntwert:"
-
-#~ msgid ""
-#~ "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
-#~ "Inc."
-#~ msgstr ""
-#~ "BitTorrent, den BitTorrent Logo, an Torrent sin verbonnen Marken fun "
-#~ "BitTorrent, Inc."
-
-#~ msgid ""
-#~ "LimeWire encountered an error in the Digital Audio Access Protocol (for "
-#~ "sharing files in iTunes). This feature will be turned off. You can turn it "
-#~ "back on in options, under iTunes -> Sharing."
-#~ msgstr ""
-#~ "Den LimeWire hud en Fehler an  dem Digital Audio Access Protocol "
-#~ "festgestallt(fir lieder an den itunes ze importeiren). Des Astellung get "
-#~ "ausgeschalt. Der kennt et an den optionen rem un machen, enner iTunes -> "
-#~ "Scharing."
-
-#~ msgid ""
-#~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
-#~ "files in iTunes) because a Microsoft patch is required or a firewall is "
-#~ "blocking access. LimeWire can direct you to Microsoft's page with "
-#~ "information if you want to use this feature. Click 'Yes' to go to the patch, "
-#~ "'No' to disable this feature, or 'Cancel' to decide later."
-#~ msgstr ""
-#~ "LimeWire war net kapabel fir den Digital Audio Access Protocol zestarten "
-#~ "(fir lieder an den iTunes ze importeiren), well entweder en Microsoft Patch "
-#~ "muss installeiert gin oder en Firewall den Zougang blockeiert. LimeWire kann "
-#~ "Erch op Microsoft Seit brengen wann der des Fonktion an Zunkunft wellt "
-#~ "benotzen. Klickt op \"Jo\" fiir bei den Patch ze goen, \"Nee\" fiir des "
-#~ "Fonktion auszeschalten, oder \"Ofbriechen\" fiir mei speid ze décideiren."
-
-#~ msgid "T1"
-#~ msgstr "T1"
-
-#~ msgid "T3 or Higher"
-#~ msgstr "T3 oder mei heich"
-
-#~ msgid "Ethernet"
-#~ msgstr "Ethernet"
-
-#~ msgid ""
-#~ "Your machine does not appear to have an active Internet connection or a "
-#~ "firewall is blocking LimeWire from accessing the internet. LimeWire will "
-#~ "automatically keep trying to connect you to the network unless you select "
-#~ "\"Disconnect\" from the File menu."
-#~ msgstr ""
-#~ "Et schengt net wei wann Eren Computer eng aktiv Internet verbindung hud oder "
-#~ "en Firewall blockeiert d'Internet Verbindung zum LimeWire. LimeWire "
-#~ "probeiert weiderhin eng Internetverbindung hirzestellen ausser Der sicht am "
-#~ "Dateien Menu \"Trennen\" raus."
-
-#~ msgid "C&onsole"
-#~ msgstr "&Konsol&"
-
-#~ msgid "Lo&gging"
-#~ msgstr "&Loggen"
-
-#, java-format
-#~ msgid "Display the {0} Screen"
-#~ msgstr "stell den {0} Bildschrim dur"
-
-#~ msgid ""
-#~ "LimeWire has encountered a problem during startup and cannot proceed. You "
-#~ "may be able to fix this problem by changing LimeWire's Windows "
-#~ "Compatibility. Right-click on the LimeWire icon on your Desktop and select "
-#~ "'Properties' from the popup menu. Click the 'Compatibility' tab at the top, "
-#~ "then click the 'Run this program in compatibility mode for' check box, and "
-#~ "then select 'Windows 2000' in the box below the check box. Then click the "
-#~ "'OK' button at the bottom and restart LimeWire."
-#~ msgstr ""
-#~ "LimeWire hud werend dem starten en Problem endeckt an kann net ausgefeiert "
-#~ "gin. Der kennt desen Probelm villeicht behieven an deem der kompartibiliteit "
-#~ "zwechen dem Windowsan LimeWire enert. Um Desktop rietsklick op den LimeWire "
-#~ "an dann sicht Der \"Properties\" raus. Klickt op \"Compatibility\" uwen am "
-#~ "menu, dann klickt \"Run this program in compatibility mode for\" kontreilert "
-#~ "d'Kescht, an sicht der \"Windows 2000\" raus. Dann klickt  den \"OK\" "
-#~ "Knepschen an start den LimeWire nei."
-
-#, java-format
-#~ msgid ""
-#~ "LimeWire could not locate your web browser to display the following webpage: "
-#~ "{0}."
-#~ msgstr ""
-#~ "LimeWire konnt Eren Webbrowser net fannen fir dei folgend Seit opzemachen: "
-#~ "{0}."
-
-#~ msgid "LimeWire will not launch the specified file for security reasons."
-#~ msgstr "LimeWire mescht des Datei weins Secherhetts Grenn nt op."
-
-#, java-format
-#~ msgid ""
-#~ "LimeWire could not launch the specified file.\n"
-#~ "\n"
-#~ "Executed command: {0}."
-#~ msgstr ""
-#~ "LimeWire konnt des Datei nt opmachen.\n"
-#~ "\n"
-#~ "Komentar: {0}."
-
-#~ msgid "LimeWire could not launch the specified file."
-#~ msgstr "LimeWire konnt des Datei nt opmachen."
-
-#~ msgid "Loading Core Components..."
-#~ msgstr "Lued Keer Baugruppen..."
-
-#~ msgid "Loading Internationalization Support..."
-#~ msgstr "Lued International Hellef..."
-
-#~ msgid "Loading Digital Audio Access Protocol..."
-#~ msgstr "Lued Digital Audio Access Protocol..."
-
-#~ msgid "Input"
-#~ msgstr "Agang"
-
-#~ msgid "Apply Operation"
-#~ msgstr "Funktion iwerhulen"
-
-#~ msgid "Cancel Operation"
-#~ msgstr "Funktion net iwerhulen"
-
-#~ msgid ""
-#~ "You are currently using a beta or pre-release version of Java 1.6.0. This "
-#~ "version is known to have caused problems with LimeWire. Please upgrade to "
-#~ "the final 1.6.0 release.\n"
-#~ msgstr ""
-#~ "Der benozt den moment eng beta versionfun Java 1.6.0. Et as bekannt dass "
-#~ "LimeWire problemer mat desser version hud. Macht waneschglift en upgrade op "
-#~ "dei ferdech 1.6.0 version.\n"
-
-#~ msgid "Upgrade Java"
-#~ msgstr "Upgrade Java"
-
-#, java-format
-#~ msgid "Visit {0}"
-#~ msgstr "Besicht {0}"
-
-#~ msgid "Remind Me Later"
-#~ msgstr "erener mech mei speid"
-
-#~ msgid "Help Translate LimeWire"
-#~ msgstr "Hellfen LimeWire ze iwersetzen"
-
-#~ msgid "LimeWire must be restarted for the new language to take effect."
-#~ msgstr "LimeWire muss nei gestart gin fir dei nei sprooch ze iwerhulen."
-
-#~ msgid "Verify"
-#~ msgstr "Iwerpreiwen"
-
-#~ msgid "LimeWire was unable to locate the details of this license."
-#~ msgstr "LimeWire konnt keng detailer fun deser License fannen."
-
-#~ msgid "You can try validating this license again by clicking 'Verify'."
-#~ msgstr ""
-#~ "Der kennt probeiren d'License na eng keier ze valideiren wann der op "
-#~ "\"Iwerpreiwen\" klickt."
-
-#~ msgid "View Claimed License Deed"
-#~ msgstr "License weisen"
-
-#~ msgid "View Verification Page"
-#~ msgstr "Iwerpreifungsseit weisen"
-
-#~ msgid "License Details:"
-#~ msgstr "License Detailer weisen"
-
-#~ msgid "LimeWire is currently locating the details of this license."
-#~ msgstr "LimeWire sicht grad no den Detailer fiir des License."
-
-#~ msgid ""
-#~ "LimeWire has not yet verified this license.\n"
-#~ "Click 'verify' to locate the details of this Creative Commons license."
-#~ msgstr ""
-#~ "LImeWire hud dei License lo net kontrolleiert.\n"
-#~ "Klickt op  \"iwerpreiven\" fir Detailer iwert des License uzeweisen."
-
-#~ msgid "Creative Commons Details"
-#~ msgstr "Allgemeng creativ Detailer"
-
-#~ msgid "LimeWire was unable to locate the details of this Weed file."
-#~ msgstr "LimeWire konnt keng Detailer fun desem Datei fannen."
-
-#~ msgid "You can try looking up the details again by clicking 'Verify'."
-#~ msgstr ""
-#~ "Der kennt probeiren Detailer nach eng ze kucken an dem Der op "
-#~ "\"Iwerpreiwen\" klickt."
-
-#~ msgid "View Weedshare Usage Rights"
-#~ msgstr "Weis Benotzung richteg"
-
-#~ msgid ""
-#~ "LimeWire is contacting www.weedshare.com for the details of this file."
-#~ msgstr ""
-#~ "LimeWire konekteiert www.weedshare.com fiir Detailer iwert des Datei."
-
-#~ msgid ""
-#~ "LimeWire has not yet verified this license.\n"
-#~ "Click 'verify' to locate the details of this file."
-#~ msgstr ""
-#~ "LimeWire hud des License net iwerpreift.\n"
-#~ "Klcikt op \"iwerpriefen\" fiir Detailer iwert des Datei rauzefannen."
-
-#~ msgid "Weedshare Details"
-#~ msgstr "Detailer"
-
-#~ msgid "This file may require a license in order to open and view."
-#~ msgstr ""
-#~ "Des Datei brauch warscheinlech eng License fiir opgemach ze gin an ze weisen."
-
-#~ msgid "License Details"
-#~ msgstr "License Detailer"
-
-#~ msgid "Upgrade to PRO"
-#~ msgstr "Upgrade op PRO"
-
-#~ msgid ""
-#~ "For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will "
-#~ "love the improved performance of PRO. Thank you for helping keep the "
-#~ "Internet open by running LimeWire."
-#~ msgstr ""
-#~ "Fiir Turbo-Beschleunejt Downloaden, lued LimeWire PRO roof. Mir garanteiren "
-#~ "dass dei heich Leschtungsfäechkeet fun PRO sech fiirt luenen. Merci dass der "
-#~ "helleft den Internet op ze haalen an deem Der LimeWire laafen loost."
-
-#~ msgid "Upgrade to LimeWire PRO?"
-#~ msgstr "Upgraden op LimeWire PRO?"
-
-#~ msgid "Show Language in status bar"
-#~ msgstr "Sproochen an der Status bar weisen"
-
-#~ msgid ""
-#~ "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
-#~ "files in iTunes) because a firewall is blocking access. To continue using "
-#~ "this feature, click 'Yes' and change your firewall to allow 'LimeWire.exe' "
-#~ "full access to incoming and outgoing connections. To disable this feature, "
-#~ "click 'No'."
-#~ msgstr ""
-#~ "LimeWire war net kapabel fir den Digital Audio Access Protocol zestarten "
-#~ "(fir lieder an den iTunes ze importeiren) well en Firewall den Zougang "
-#~ "blockeiert. Wann der des Fonktion an Zunkunft wellt weida benotzen, klickt "
-#~ "\"Jo\" an enert Eren Firewall sou dass en \"LImeWire.exe\" vollen Zougang op "
-#~ "rankommenden an rausgoenden Verbindungen get. Fiir des Uwendung ze "
-#~ "deaktiveiren klickt \"Nee\"."
-
-#, java-format
-#~ msgid ""
-#~ "You are sharing many subfolders within your shared folder: {0}. This "
-#~ "indicates a potential security problem, so please review your \"My Shared "
-#~ "Files\" to ensure you aren't sharing any sensitive files."
-#~ msgstr ""
-#~ "Der deelt vill Ennerordneren an Eren gedelten Ordneren: {0}. Dat deit op en "
-#~ "potentielen Secherheetsfehler hin, also kuckt wanechglift Er \"Meng "
-#~ "gedeelten Dateien\" no fir secher ze sin  dass der keng heikel Dateien deelt."
-
-#, java-format
-#~ msgid ""
-#~ "You are sharing a lot of files through LimeWire, {0} files and counting. Do "
-#~ "you mean to share all these files? Please review your sharing settings and "
-#~ "which files are shared to ensure you aren't sharing any sensitive files."
-#~ msgstr ""
-#~ "Der deelt vill Dateien mat LimeWire, {0} Dateien an zillen. Wellt der "
-#~ "wicklech des Dateien allegur deelen? Kuckt Er Astellungen fiir deelen "
-#~ "waneschglift no an kuckt wei eng Dateien gedeelt gin fiir secher ze sin dass "
-#~ "keng eikel Dateien gedeelt gin."
-
-#~ msgid "Do not display this message again."
-#~ msgstr "Deesen Message nemmi uweisen."
-
-#~ msgid "Loading BitTorrent Management..."
-#~ msgstr "Lueden BitTorrent Management"
-
-#~ msgid ""
-#~ "You can choose whether or not LimeWire should manage your BitTorrent "
-#~ "protocol settings. It is highly recommended that LimeWire manage these "
-#~ "settings. Invalid or inappropriate values may cause severe performance "
-#~ "and/or memory problems."
-#~ msgstr ""
-#~ "Der kennt Enscheeden op oder nt LimeWire Er BitTorrent protocol Astellungen "
-#~ "soll verwalten. Et as firzeschloen dass Limewire des Astellungen astellt. "
-#~ "Wann des Werter net richteg oder oder onpassend sin kann dat schweier "
-#~ "Leschtungs- an Speicherproblemer mat sech brengen."
-
-#~ msgid ""
-#~ "Please add any comments you may have (e.g what caused the error). \n"
-#~ "Thank you and please use English."
-#~ msgstr ""
-#~ "Wann Der en Kommentar hud dann schreivt en waneschglift hei hinner (z.b. wat "
-#~ "hud den problem verursacht).\n"
-#~ "Merci an benotz waneschglift  Englesch."
-
-#~ msgid "Attaching LimeWire Store Listeners..."
-#~ msgstr "Den LimeWire Store hengt Nolauschterer un..."

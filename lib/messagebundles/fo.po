@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -63,6 +63,73 @@ msgstr "Sjónband"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:65
 msgid "Images"
 msgstr "Myndir"
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:55
+msgid ""
+"LimeWire was unable to write a necessary file because you do not have the "
+"necessary permissions. Your preferences may not be maintained the next time "
+"you start LimeWire, or LimeWire may behave in unexpected ways."
+msgstr ""
+"LimeWire var ikki ført fyri at skriva eina neyðvendiga fílu tí tú hevur ikki "
+"tey røttu loyvin. Tíni framíhjárættindi kunnu møguliga ikki verða goymd "
+"næstu ferð tú startar LimeWire, ella LimeWire kann skapa sær løgi."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:57
+msgid ""
+"LimeWire cannot open a necessary file because the filename contains "
+"characters which are not supported by your operating system. LimeWire may "
+"behave in unexpected ways."
+msgstr ""
+"LimeWire kann ikki opna eina neyðuga fílu tí fílnavni inniheldur stavir sum "
+"ikki eru stuðlaðir av tínari stýri skipan. LimeWire kan skapa sær løgi."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:61
+msgid ""
+"LimeWire cannot download the selected file because your hard drive is full. "
+"To download more files, you must free up space on your hard drive."
+msgstr ""
+"LimeWire kann ikki taka tað valdu fílina niður tín harðdiskur er fullur. "
+"Fyri at taka meira fílur niður, má tú fríða meira pláss á tínum harðdiski."
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:63
+msgid ""
+"LimeWire was unable to download the selected file because another program is "
+"using the file. Please close the other program and retry the download."
+msgstr ""
+"LimeWire kann ikki taka valdu fílu nður tí eitt annað forrit brúkar fíluna. "
+"Vinarligast stong hitt forritið og royn niðurtøkuna eina ferð enn."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
+msgid "For Turbo-Charged searches get LimeWire PRO."
+msgstr "Fyri Turbo-løddar leitingar fá tær LimeWire PRO."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
+msgid "Support LimeWire's peer-to-peer development. Get PRO."
+msgstr "Stuðla peer-to-peer á LimeWire. Menna til PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
+msgid "Purchase LimeWire PRO to help us make downloads faster."
+msgstr "Keyp LimeWire PROfyri at hjálpa okkum at gerða niðurtøku skjótari"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
+msgid "Support open networks. Get LimeWire PRO."
+msgstr "Stuðla opnum netverkum, Fáa tær LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
+msgid "For Turbo-Charged performance get LimeWire PRO."
+msgstr "Fyri turboløddum avrikið fá tær LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
+msgid "Keep the Internet open. Get LimeWire PRO."
+msgstr "Hald internetið opið. Fá tær  LimeWire PRO"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
+msgid "Developing LimeWire costs real money. Get PRO."
+msgstr "Menning av LimeWire kostar veruligar pengar. Fá tær PRO"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:46
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:19
@@ -613,41 +680,6 @@ msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:55
-msgid ""
-"LimeWire was unable to write a necessary file because you do not have the "
-"necessary permissions. Your preferences may not be maintained the next time "
-"you start LimeWire, or LimeWire may behave in unexpected ways."
-msgstr ""
-"LimeWire var ikki ført fyri at skriva eina neyðvendiga fílu tí tú hevur ikki "
-"tey røttu loyvin. Tíni framíhjárættindi kunnu møguliga ikki verða goymd "
-"næstu ferð tú startar LimeWire, ella LimeWire kann skapa sær løgi."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:57
-msgid ""
-"LimeWire cannot open a necessary file because the filename contains "
-"characters which are not supported by your operating system. LimeWire may "
-"behave in unexpected ways."
-msgstr ""
-"LimeWire kann ikki opna eina neyðuga fílu tí fílnavni inniheldur stavir sum "
-"ikki eru stuðlaðir av tínari stýri skipan. LimeWire kan skapa sær løgi."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:61
-msgid ""
-"LimeWire cannot download the selected file because your hard drive is full. "
-"To download more files, you must free up space on your hard drive."
-msgstr ""
-"LimeWire kann ikki taka tað valdu fílina niður tín harðdiskur er fullur. "
-"Fyri at taka meira fílur niður, má tú fríða meira pláss á tínum harðdiski."
-
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:63
-msgid ""
-"LimeWire was unable to download the selected file because another program is "
-"using the file. Please close the other program and retry the download."
-msgstr ""
-"LimeWire kann ikki taka valdu fílu nður tí eitt annað forrit brúkar fíluna. "
-"Vinarligast stong hitt forritið og royn niðurtøkuna eina ferð enn."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:65
 msgid ""
@@ -3887,46 +3919,14 @@ msgstr ""
 msgid "Not showing {0} results"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
-msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Fyri Turbo-løddar leitingar fá tær LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
-msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "Stuðla peer-to-peer á LimeWire. Menna til PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
-msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "Keyp LimeWire PROfyri at hjálpa okkum at gerða niðurtøku skjótari"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
 msgid "For Turbo-Charged downloads get LimeWire PRO."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
-msgid "Support open networks. Get LimeWire PRO."
-msgstr "Stuðla opnum netverkum, Fáa tær LimeWire PRO"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:67
 msgid "Support open source and open protocols. Get LimeWire PRO."
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:70
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
-msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Fyri turboløddum avrikið fá tær LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:73
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
-msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Hald internetið opið. Fá tær  LimeWire PRO"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
-msgid "Developing LimeWire costs real money. Get PRO."
-msgstr "Menning av LimeWire kostar veruligar pengar. Fá tær PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:94
 msgid "\"magnet:\" links"

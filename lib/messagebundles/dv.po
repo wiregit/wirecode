@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -135,12 +135,6 @@ msgid ""
 msgstr ""
 "މި އަޕްލޯޑް ހުއްޓައިފިނަމަ، ޑައުންލޯޑްވެސް ހުއްޓޭނެ، މިގޮތްތޯ ބޭނުންވަނީ؟"
 
-#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:288
-msgid ""
-"This upload is a torrent and it hasn't seeded enough. You should let it "
-"upload some more. Are you sure you want to stop it?"
-msgstr ""
-
 #: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:41
 msgid "XMPP Service"
 msgstr "ސާރވިސް XMPP"
@@ -198,13 +192,6 @@ msgstr "ކުރީގެ ޑައުންލޯޑްސް"
 msgid "Download Management"
 msgstr "ޑައުންލޯޑް މެނޭޖްމަންޓް"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:278
-msgid ""
-"Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
-"clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
-"file, the download will pick up where it left off."
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:280
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
@@ -251,10 +238,6 @@ msgstr "ޕީއަރ ލިސްނަރ"
 msgid "Promotion System"
 msgstr "ޕްރޮމޯޝަން ސިސްޓަމް"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/QueryUnicaster.java:223
-msgid "Directed Querier"
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/Statistics.java:43
 msgid "Session Statistics"
 msgstr "ސެސަންގެ ހިސާބުތައް"
@@ -271,13 +254,6 @@ msgstr "ލޯކަލް ސޮކެޓް ލިސްނާރ"
 msgid "Magnet Processor"
 msgstr "މެގްނެޓް ޕްރޮސެސަރ"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:120
-msgid ""
-"LimeWire was unable to start the Digital Audio Access Protocol Service (for "
-"sharing files in iTunes). This feature will be turned off. You can turn it "
-"back on in options, under Advanced -> Files -> iTunes."
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:174
 msgid "What's New"
 msgstr "އާކަންތައްތައް"
@@ -285,14 +261,6 @@ msgstr "އާކަންތައްތައް"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:175
 msgid "Creative Commons"
 msgstr "ކްރިއޭޓިވް ކޮމަންސް"
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:140
-msgid "Mojito DHT"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:178
-msgid "LimeWire Store Integration"
-msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
@@ -302,21 +270,9 @@ msgstr "ޑައުންލޯޑް އަޕްގްރޭޑް ޓާސްކްސް"
 msgid "Shared Files"
 msgstr "ސެއަރކޮށްފަހުރި ފއަިލްތައް"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
-msgid "OOB Query Handler"
-msgstr ""
-
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
 msgid "Static Messages"
 msgstr "ސްޓެޓިކް މެސެޖަސް"
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:191
-msgid "QRP Updater"
-msgstr ""
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
-msgid "RUDP Message Routing"
-msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:99
 msgid "Spam Management"
@@ -375,19 +331,6 @@ msgstr "އާޓިސްޓް"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:38
 msgid "Album"
 msgstr "އަލްބަމް"
-
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:91
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:54
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:53
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:48
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:51
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:45
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:51
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:30
-msgid "Genre"
-msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:58
@@ -612,6 +555,100 @@ msgstr "ޕްލެޓްފޯރމް"
 msgid "Metadata Loader"
 msgstr "މެޓަޑާޓާ ލޯޑަރ"
 
+#: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:32
+msgid "Firewall Manager"
+msgstr "ފަޔަރވޯލް މެނޭޖަރ"
+
+#: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
+msgid "Statistic Management"
+msgstr "ސްޓެޓީކް މެނޭޖްމަންޓް"
+
+#. lower case enum values to allow direct mapping from to the Mode enum
+#. defined in smack
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:21
+msgid "Free to chat"
+msgstr "ޗެޓްކުރުމަށް ފްރީ"
+
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:22
+msgid "Available"
+msgstr "އެވެއިލަބަލް"
+
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
+msgid "Do not disturb"
+msgstr "ޑިސްޓާރބް ނުކުރާތި"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:380
+msgid "Oops!"
+msgstr "އަސްތާ"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:380
+msgid "A problem occurred..."
+msgstr "މައްސަލައެއް ޖެހިއްޖެ"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:618
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:217
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
+msgid "OK"
+msgstr "OK"
+
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:288
+msgid ""
+"This upload is a torrent and it hasn't seeded enough. You should let it "
+"upload some more. Are you sure you want to stop it?"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:278
+msgid ""
+"Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
+"clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
+"file, the download will pick up where it left off."
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/QueryUnicaster.java:223
+msgid "Directed Querier"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:120
+msgid ""
+"LimeWire was unable to start the Digital Audio Access Protocol Service (for "
+"sharing files in iTunes). This feature will be turned off. You can turn it "
+"back on in options, under Advanced -> Files -> iTunes."
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:140
+msgid "Mojito DHT"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:178
+msgid "LimeWire Store Integration"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
+msgid "OOB Query Handler"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:191
+msgid "QRP Updater"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
+msgid "RUDP Message Routing"
+msgstr ""
+
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:91
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/playlist/PlaylistTableFormat.java:54
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:53
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteAudioTableFormat.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoteVideoTableFormat.java:51
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:51
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:30
+msgid "Genre"
+msgstr ""
+
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:51
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
@@ -665,24 +702,6 @@ msgid ""
 "operating system."
 msgstr ""
 
-#: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:32
-msgid "Firewall Manager"
-msgstr "ފަޔަރވޯލް މެނޭޖަރ"
-
-#: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
-msgid "Statistic Management"
-msgstr "ސްޓެޓީކް މެނޭޖްމަންޓް"
-
-#. lower case enum values to allow direct mapping from to the Mode enum
-#. defined in smack
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:21
-msgid "Free to chat"
-msgstr "ޗެޓްކުރުމަށް ފްރީ"
-
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:22
-msgid "Available"
-msgstr "އެވެއިލަބަލް"
-
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
 msgid "Away"
 msgstr ""
@@ -691,18 +710,6 @@ msgstr ""
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:24
 msgid "Away for a while"
 msgstr ""
-
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
-msgid "Do not disturb"
-msgstr "ޑިސްޓާރބް ނުކުރާތި"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:380
-msgid "Oops!"
-msgstr "އަސްތާ"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:380
-msgid "A problem occurred..."
-msgstr "މައްސަލައެއް ޖެހިއްޖެ"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:403
 msgid ""
@@ -769,13 +776,6 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:610
 msgid "Copy Report"
 msgstr ""
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:618
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:217
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:16
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:276
-msgid "OK"
-msgstr "OK"
 
 #. Load up the HTML engine.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:476

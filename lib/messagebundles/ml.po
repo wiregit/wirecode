@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:34+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -105,16 +105,36 @@ msgstr "ഫയല്‍ വികലമായതാണ്"
 msgid "This file is not shareable"
 msgstr "ഈ ഫയല്‍ പങ്കൂവെക്കപ്പെടാത്തതാണ്‌"
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:29
-msgid "Trouble connecting to people"
-msgstr ""
-
 #. *
 #. * The DownloadItem is not in an error state.
 #. 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
 msgid "No problems."
 msgstr "പ്രശ്നങ്ങളൊന്നുമില്ല"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
+msgid "For Turbo-Charged searches get LimeWire PRO."
+msgstr ""
+"ടര്‍ബോ ശക്തിയോട് കൂടിയുള്ള അന്യഷണംങള്‍ നടത്താന്‍ ലൈംവയര്‍ പ്രൊ-ലേക്ക് മാറുക"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
+msgid "Support LimeWire's peer-to-peer development. Get PRO."
+msgstr "ലൈയംവയര്‍ നിലനില്‍പ്പില്‍ സഹായിക്കാന്‍ ലൈയംവയര്‍ പ്രൊ-ലേക്ക് മാറുക"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
+msgid "Purchase LimeWire PRO to help us make downloads faster."
+msgstr "ഡൌണ്‍ലോഡ് വേഗത്തില്‍ ആക്കാന്‍ ലൈയംവയര്‍ പ്രൊ വാങ്ങുക"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
+msgid "For Turbo-Charged downloads get LimeWire PRO."
+msgstr "ടര്‍ബോ വേഗതയോടെ കൂടിയുള്ള ഡൌണ്‍ലോഡ് നടത്താന്‍ ലൈയംവയര്‍ പ്രൊ വാങ്ങുക"
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:29
+msgid "Trouble connecting to people"
+msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
 msgid ""
@@ -3877,26 +3897,6 @@ msgstr ""
 #, java-format
 msgid "Not showing {0} results"
 msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:49
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
-msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr ""
-"ടര്‍ബോ ശക്തിയോട് കൂടിയുള്ള അന്യഷണംങള്‍ നടത്താന്‍ ലൈംവയര്‍ പ്രൊ-ലേക്ക് മാറുക"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:53
-msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "ലൈയംവയര്‍ നിലനില്‍പ്പില്‍ സഹായിക്കാന്‍ ലൈയംവയര്‍ പ്രൊ-ലേക്ക് മാറുക"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
-msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "ഡൌണ്‍ലോഡ് വേഗത്തില്‍ ആക്കാന്‍ ലൈയംവയര്‍ പ്രൊ വാങ്ങുക"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:60
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
-msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "ടര്‍ബോ വേഗതയോടെ കൂടിയുള്ള ഡൌണ്‍ലോഡ് നടത്താന്‍ ലൈയംവയര്‍ പ്രൊ വാങ്ങുക"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:63
 msgid "Support open networks. Get LimeWire PRO."

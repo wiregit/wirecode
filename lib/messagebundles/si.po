@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2009-04-28 03:33+0000\n"
+"X-Launchpad-Export-Date: 2009-05-05 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -73,6 +73,33 @@ msgstr "සේයාරූ"
 msgid "Other"
 msgstr "වෙනත්"
 
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
+msgid "The file is corrupted"
+msgstr "ගොනුව විකෘතිවී ඇත"
+
+#. *
+#. * The DownloadItem is not in an error state.
+#. 
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
+msgid "No problems."
+msgstr "ගැටලු නොමැත"
+
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
+msgid ""
+"LimeWire was unable to write a necessary file because your hard drive is "
+"full. To continue using LimeWire you must free up space on your hard drive."
+msgstr ""
+"ඔබගේ දෘඩ තැටිය පිරී ඇති බැවින් අතවශ්‍ය ගොනුවක් පිටපත් කිරීමට ලයිම්වයර් "
+"අපොහොසත්ව ඇත.  තවදුරටත් ලයිම්වයර් භාවිතය සඳහා දෘඩ තැටියේ ඉඩ සාදා ගන්න"
+
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
+msgid "Away"
+msgstr "පිටතට ගොස්"
+
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
+msgid "Do not disturb"
+msgstr "බාධා නොකරන්න"
+
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:17
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:64
@@ -97,10 +124,6 @@ msgstr ""
 msgid "There is a disk problem"
 msgstr ""
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:27
-msgid "The file is corrupted"
-msgstr "ගොනුව විකෘතිවී ඇත"
-
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:28
 msgid "This file is not shareable"
 msgstr ""
@@ -108,13 +131,6 @@ msgstr ""
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:29
 msgid "Trouble connecting to people"
 msgstr ""
-
-#. *
-#. * The DownloadItem is not in an error state.
-#. 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:34
-msgid "No problems."
-msgstr "ගැටලු නොමැත"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:163
 msgid ""
@@ -602,14 +618,6 @@ msgstr ""
 msgid "Metadata Loader"
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
-msgid ""
-"LimeWire was unable to write a necessary file because your hard drive is "
-"full. To continue using LimeWire you must free up space on your hard drive."
-msgstr ""
-"ඔබගේ දෘඩ තැටිය පිරී ඇති බැවින් අතවශ්‍ය ගොනුවක් පිටපත් කිරීමට ලයිම්වයර් "
-"අපොහොසත්ව ඇත.  තවදුරටත් ලයිම්වයර් භාවිතය සඳහා දෘඩ තැටියේ ඉඩ සාදා ගන්න"
-
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
@@ -675,18 +683,10 @@ msgstr ""
 msgid "Available"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
-msgid "Away"
-msgstr "පිටතට ගොස්"
-
 #. away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:24
 msgid "Away for a while"
 msgstr ""
-
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
-msgid "Do not disturb"
-msgstr "බාධා නොකරන්න"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:380
 msgid "Oops!"
