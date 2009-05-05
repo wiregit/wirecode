@@ -250,6 +250,8 @@ public class Torrent {
     }
 
     public void stop() {
+        System.out.println("stop");
+        
         if (started.getAndSet(false)) {
             torrentManager.removeTorrent(sha1);
         }

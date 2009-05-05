@@ -10,7 +10,7 @@ import org.limewire.listener.EventListener;
 public class Main {
     public static void main(String[] args) throws InterruptedException, IOException {
         TorrentManager libTorrentManager = new TorrentManagerImpl(new File(
-                "/home/pvertenten/Desktop/"));
+                "/home/michael/Download/"),  null);
         libTorrentManager.initialize();
 
         libTorrentManager.start();

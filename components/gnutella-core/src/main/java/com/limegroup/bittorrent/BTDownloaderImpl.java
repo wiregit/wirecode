@@ -210,7 +210,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         case allocating:
             return DownloadState.CONNECTING;
         case downloading_metadata:
-            return DownloadState.CONNECTING;
+            return DownloadState.INITIALIZING;
         default:
             throw new IllegalStateException("Unknown libtorrent state: " + state);
         }
@@ -451,10 +451,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     protected DownloadMemento createMemento() {
-        if (torrent.isFinished()) {
-            throw new IllegalStateException("creating memento for finished torrent!");
-        }
-
         return new LibTorrentBTDownloadMemento();
     }
 
@@ -507,6 +503,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         torrent.init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(), null);
     }
 
+    
+    
     @Override
     public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
         super.initFromMemento(memento);

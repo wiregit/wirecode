@@ -1,6 +1,8 @@
 package org.limewire.libtorrent;
 
 import org.limewire.libtorrent.callback.AlertCallback;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.OSUtils;
 
 import com.sun.jna.Memory;
@@ -8,6 +10,8 @@ import com.sun.jna.Native;
 
 public class LibTorrentWrapper implements LibTorrent {
 
+    private static final Log LOG = LogFactory.getLog(LibTorrentWrapper.class);
+    
     private LibTorrent libTorrent;
 
     @Override
@@ -31,118 +35,119 @@ public class LibTorrentWrapper implements LibTorrent {
 
     @Override
     public LibTorrentInfo add_torrent(String path) {
-        log("before add_torrent: " + path);
+        LOG.debugf("before add_torrent: {0}", path);
         LibTorrentInfo info = libTorrent.add_torrent(path);
-        log("after add_torrent: " + path);
+        LOG.debugf("after add_torrent: {0}", path);
         return info;
-    }
-
-    private void log(String message) {
-        System.out.println(message);
     }
 
     @Override
     public void init(String path) {
-        log("before init: " + path);
+        LOG.debugf("before init: {0}", path);
         libTorrent.init(path);
-        log("after init: " + path);
+        LOG.debugf("after init: {0}", path);
     }
 
     @Override
     public void get_alerts(AlertCallback alertCallback) {
-        log("before get_alerts");
+        LOG.debug("before get_alerts");
         libTorrent.get_alerts(alertCallback);
-        log("after get_alerts");
+        LOG.debug("after get_alerts");
     }
 
     @Override
     public int pause_torrent(String id) {
-        log("before pause_torrent: " + id);
+        LOG.debugf("before pause_torrent: {0}", id);
         int ret = libTorrent.pause_torrent(id);
-        log("after pause_torrent: " + id);
+        LOG.debugf("after pause_torrent: {0}", id);
         return ret;
     }
 
     @Override
     public int resume_torrent(String id) {
-        log("before resume_torrent: " + id);
+        LOG.debugf("before resume_torrent: {0}", id);
         int ret = libTorrent.resume_torrent(id);
-        log("after resume_torrent: " + id);
+        LOG.debugf("after resume_torrent: {0}", id);
         return ret;
     }
 
     @Override
     public LibTorrentStatus get_torrent_status(String id) {
-//        log("before get_torrent_status: " + id);
+        LOG.debugf("before get_torrent_status: {0}", id);
         int size = new LibTorrentStatus().size();
         Memory memory = new Memory(size);
         LibTorrentStatus status = libTorrent.get_torrent_status(id, memory);
-//        log("after get_torrent_status: " + id);
+        LOG.debugf("after get_torrent_status: ", id);
         return status;
     }
 
     @Override
     public LibTorrentStatus get_torrent_status(String id, Memory memory) {
-//        log("before get_torrent_status: " + id);
+        LOG.debugf("before get_torrent_status: {0}", id);
         LibTorrentStatus status = libTorrent.get_torrent_status(id);
-//        log("after get_torrent_status: " + id);
+        LOG.debugf("after get_torrent_status: {0}", id);
         return status;
     }
 
     @Override
     public int remove_torrent(String id) {
-        log("before remove_torrent: " + id);
+        LOG.debugf("before remove_torrent: {0}", id);
         int ret = libTorrent.remove_torrent(id);
-        log("after remove_torrent: " + id);
+        LOG.debugf("after remove_torrent: {0}", id);
         return ret;
     }
     
-    
-    
     @Override
     public void get_peers(String id, Memory memory) {
-        log("before get_peers: " + id);
+        LOG.debugf("before get_peers: {0}", id);
         libTorrent.get_peers(id, memory);
-        log("after get_peers: " + id);
+        LOG.debugf("after get_peers: {0}", id);
     }
 
     @Override
     public int get_num_peers(String id) {
-        log("before get_num_peers: " + id);
+        LOG.debugf("before get_num_peers: {0}", id);
         int ret = libTorrent.get_num_peers(id);
-        log("after get_num_peers: " + id);
+        LOG.debugf("after get_num_peers: {0}", id);
         return ret;
+    }
+
+    @Override 
+    public void signal_fast_resume_data_request(String id) {
+        LOG.debugf("before print signal_fast_resume_data_request: {0}", id);
+        libTorrent.signal_fast_resume_data_request(id);
+        LOG.debugf("after print signal_fast_resume_data_request: {0}", id);
     }
     
     @Override
     public void print() {
-        log("before print");
+        LOG.debug("before print");
         libTorrent.print();
-        log("after print");
+        LOG.debug("after print");
     }
 
     @Override
     public boolean move_torrent(String id, String absolutePath) {
-        log("before move_torrent: " + id + " - " + absolutePath);
+        LOG.debugf("before move_torrent: {0} - {1}", id, absolutePath);
         // TODO libtorrent documentation says this method will only work if the
         // new path is on the same device, might need a fallback plan
         boolean ret = libTorrent.move_torrent(id, absolutePath);
-        log("after move_torrent: " + id + " - " + absolutePath);
+        LOG.debugf("after move_torrent: {0} - {1}", id, absolutePath);
         return ret;
     }
 
     @Override
     public void abort_torrents() {
-        log("before abort");
+        LOG.debug("before abort");
         libTorrent.abort_torrents();
-        log("after abort");
+        LOG.debug("after abort");
     }
 
     @Override
     public LibTorrentInfo add_torrent_old(String sha1, String trackerURI) {
-        log("before add_torrent_old: " + sha1 + " - " + trackerURI);
+        LOG.debugf("before add_torrent_old: {0} - {1}", sha1, trackerURI);
         LibTorrentInfo info = libTorrent.add_torrent_old(sha1, trackerURI);
-        log("after add_torrent_old: " + sha1 + " - " + trackerURI);
+        LOG.debugf("after add_torrent_old: {0} - {1}", sha1, trackerURI);
         return info;
     }
 

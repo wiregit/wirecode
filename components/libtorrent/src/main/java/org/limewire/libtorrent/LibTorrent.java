@@ -29,6 +29,8 @@ public interface LibTorrent extends Library {
     
     public void get_peers(String id, Memory memory);
     
+    public void signal_fast_resume_data_request(String id);
+    
     public int remove_torrent(String id);
 
     public void print();
@@ -36,4 +38,5 @@ public interface LibTorrent extends Library {
     public boolean move_torrent(String id, String absolutePath);
 
     public void abort_torrents();
+    
 }

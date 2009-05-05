@@ -163,40 +163,16 @@ extern "C" const void* add_torrent_old(char* sha1String, char* trackerURI) {
 	std::cout << "trackerURI" << trackerURI << std::endl;
 	sha1_hash sha1 = getSha1Hash(sha1String);
 	std::cout << "sha1_hash" << sha1 << std::endl;
+
 	libtorrent::add_torrent_params p;
 	p.save_path = savePath;
 	p.info_hash = sha1;
 	p.tracker_url = trackerURI;
 
 	libtorrent::torrent_handle h = s.add_torrent(p);
-//	libtorrent::torrent_info torrent_info = h.get_torrent_info();
-//	const char* name = torrent_info.name().c_str();
-//	int piece_length = torrent_info.piece_length();
-//	int num_pieces = torrent_info.num_pieces();
-//	int num_files = torrent_info.num_files();
-//	std::string* content_length = getSizeTypeString(torrent_info.total_size());
-//
-//	libtorrent::file_storage files = torrent_info.files();
-//	const char** paths = new const char*[num_files];
-//	for (int i = 0; i < num_files; i++) {
-//		libtorrent::file_entry file = files.at(i);
-//		boost::filesystem::path path = file.path;
-//		const char* p = path.string().c_str();
-//		paths[i] = p;
-//	}
-//
-//	//TODO free memory
-	info_s* info = new info_s();
-//	info->sha1 = sha1String;
-//	info->name = name;
-//	info->num_files = num_files;
-//	info->num_pieces = num_pieces;
-//	info->piece_length = piece_length;
-//	info->content_length = content_length->c_str();
-//	info->paths = paths;
 
-	return info;
-
+	// TODO: Memory leak
+	return new info_s();
 }
 
 extern "C" const void* add_torrent(char* path) {
@@ -293,15 +269,26 @@ extern "C" void* get_torrent_status(const char* id, void* stat) {
 	return stats;
 }
 
+extern "C" void signal_fast_resume_data_request(const char* id) {
+	libtorrent::torrent_handle h = findTorrentHandle(id);
+
+	if (h.is_valid()) {
+		h.save_resume_data();
+	}
+}
+
 struct alert_s {
 	const char* sha1;
 	const char* message;
+	const char* data;
 	int category;
 };
 
 extern "C" int get_num_peers(const char* id) {
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
+
+	if (!h.is_valid())  return 0;
 
 	libtorrent::torrent_status s = h.status();
 
@@ -327,6 +314,9 @@ extern "C" int get_num_peers(const char* id) {
 extern "C" void get_peers(const char* id, int buffer_len, char* data) {
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
+	
+	if (!h.is_valid())  return;
+	
 	std::vector<libtorrent::peer_info> *peers = new std::vector<libtorrent::peer_info>();
 	h.get_peer_info(*peers);
 
@@ -354,7 +344,45 @@ extern "C" void get_peers(const char* id, int buffer_len, char* data) {
 	delete peers;
 }
 
-extern "C" void get_alerts(void(*alertCallback)(void*, void*)) {
+void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
+	
+	alertStatus->sha1 = 0;
+	alertStatus->category = alert->category();
+	alertStatus->message = alert->message().c_str();
+	alertStatus->data = 0;
+	
+	libtorrent::torrent_alert* torrentAlert;
+	
+	if (torrentAlert = dynamic_cast<libtorrent::torrent_alert*>(alert)) {
+		
+		libtorrent::torrent_handle handle = torrentAlert->handle;
+		
+		if (handle.is_valid()) {
+			const char* sha1 = getSha1String(handle.info_hash())->c_str();
+			alertStatus->sha1 = sha1;
+			
+			libtorrent::save_resume_data_alert const* rd = dynamic_cast<libtorrent::save_resume_data_alert const*>(alert);
+
+			if (rd) {
+				std::cout << "save_resume_data_alert" << std::endl;
+				std::stringstream oss;
+				bencode(std::ostream_iterator<char>(oss), *rd->resume_data);
+				alertStatus->data = oss.str().c_str();
+			}
+			
+			libtorrent::save_resume_data_failed_alert const* rd2 = dynamic_cast<libtorrent::save_resume_data_failed_alert const*>(alert);
+			
+			if (rd2) {
+				std::cout << "save_resume_data_failed_alert (" << rd2->msg << ")" << std::endl;
+				alertStatus->message = rd2->msg.c_str();
+			}
+			
+		}
+	}
+
+}
+
+extern "C" void get_alerts(void(*alertCallback)(void*)) {
 
 	std::auto_ptr<libtorrent::alert> alerts;
 
@@ -362,30 +390,14 @@ extern "C" void get_alerts(void(*alertCallback)(void*, void*)) {
 
 	while (alerts.get()) {
 		libtorrent::alert* alert = alerts.get();
-		std::string message = alert->message();
-		int alertCategory = alert->category();
+		
+		alert_s* alertStatus = new alert_s();
 
-		alert_s* a = new alert_s();
-		a->sha1 = 0;
-		a->category = alertCategory;
-		a->message = message.c_str();
+		process_alert(alert, alertStatus); 
+		
+		alertCallback(alertStatus);
 
-		torrent_s* ts = new torrent_s();
-
-		if (libtorrent::torrent_alert * torrentAlert
-				= dynamic_cast<libtorrent::torrent_alert*> (alert)) {
-			std::cout << "torrent_alert" << std::endl;
-			libtorrent::torrent_handle handle = torrentAlert->handle;
-			if (handle.is_valid()) {
-				//some bad events can have invalid handles, i mean really....
-				const char* sha1 = getSha1String(handle.info_hash())->c_str();
-				a->sha1 = sha1;
-				get_torrent_s(handle, ts);
-			}
-		}
-		alertCallback(a, ts);
-		delete a;
-		delete ts;
+		delete alertStatus;
 
 		alerts = s.pop_alert();
 	}
