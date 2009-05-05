@@ -104,6 +104,10 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
                         .tr("Save File As..."), sle.getFile());
             } else {
                 saveFile = sle.getFile();
+                if (saveFile != null && saveFile.exists()) {
+                    createOverwriteDialogue(saveFile, downLoadAction, sle, supportNewSaveDir);
+                    return;
+                }
             }
 
             if (saveFile == null) {
@@ -111,13 +115,8 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             }
         }
 
-        // if save file already exists, prompt to overwrite
-        // otherwise download using the supplied download action
-        if (saveFile.exists()) {
-            createOverwriteDialogue(saveFile, downLoadAction, sle, supportNewSaveDir);
-        } else {
-            download(downLoadAction, supportNewSaveDir, saveFile, false);
-        }
+        // if the file already exists at this point, the user has already agreed to overwrite it
+        download(downLoadAction, supportNewSaveDir, saveFile, saveFile.exists());
     }
 
     private void showErrorMessage(final SaveLocationException sle) {
