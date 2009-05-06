@@ -142,6 +142,7 @@ abstract class LocalFileListImpl implements LocalFileList {
     protected void addAllFileDescs(Iterable<FileDesc> fileDescs) {
         List<LocalFileItem> fileItems = new ArrayList<LocalFileItem>();
         for (FileDesc fileDesc : fileDescs) {
+            System.out.println("... adding: " + fileDesc);
             fileItems.add(getOrCreateLocalFileItem(fileDesc));
         }
         threadSafeList.addAll(fileItems);
@@ -169,6 +170,8 @@ abstract class LocalFileListImpl implements LocalFileList {
         return new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
+                System.out.println("got event: " + event + ", from view: " + event.getFileView());
+                
                 switch(event.getType()) {
                 case FILE_ADDED:
                     addFileDesc(event.getFileDesc());

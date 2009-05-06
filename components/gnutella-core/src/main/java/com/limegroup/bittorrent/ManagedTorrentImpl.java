@@ -33,6 +33,7 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.name.Named;
 import com.limegroup.bittorrent.choking.Choker;
 import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
@@ -171,7 +172,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     @AssistedInject
     ManagedTorrentImpl(@Assisted TorrentContext context,
             EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher,
-            ScheduledExecutorService networkInvoker, NetworkManager networkManager,
+            @Named("nioExecutor") ScheduledExecutorService networkInvoker, NetworkManager networkManager,
             TrackerManagerFactory trackerManagerFactory, ChokerFactory chokerFactory,
             BTLinkManagerFactory linkManagerFactory,
             BTConnectionFetcherFactory connectionFetcherFactory, ContentManager contentManager,

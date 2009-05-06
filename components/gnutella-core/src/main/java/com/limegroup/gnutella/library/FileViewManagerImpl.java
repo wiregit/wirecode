@@ -27,6 +27,8 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 
+// TODO: Needs to fire events for the views.
+
 @Singleton
 class FileViewManagerImpl implements FileViewManager {
     

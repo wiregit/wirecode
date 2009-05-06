@@ -2,13 +2,12 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.Category;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
@@ -18,6 +17,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent.Type;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 
@@ -37,17 +37,19 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     private final Executor executor;
     private final HashTreeCache treeCache;
     
-    private final CopyOnWriteArrayList<String> sharedWith = new CopyOnWriteArrayList<String>();
+    private final EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster;
 
     @AssistedInject
     public SharedFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, 
                                     @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory,
+                                    @AllFileCollections EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
                                     @Assisted int id, HashTreeCache treeCache) {
         super(managedList, multicasterFactory);
         this.collectionId = id;
         this.data = data;
         this.executor = ExecutorsHelper.newProcessingQueue("SharedCollectionAdder");
         this.treeCache = treeCache;
+        this.sharedBroadcaster = sharedCollectionBroadcaster;
         
         addNewAudioAlways = data.isCollectionSmartAddEnabled(id, Category.AUDIO);
         addNewImagesAlways = data.isCollectionSmartAddEnabled(id, Category.IMAGE);
@@ -65,29 +67,35 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     
     @Override
     public void addPersonToShareWith(String id) {
-        sharedWith.add(id);
+        if(data.addShareIdToCollection(collectionId, id)) {
+            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.SHARE_ID_ADDED, this, id));
+        }
     }
     
     @Override
     public boolean removePersonToShareWith(String id) {
-        return sharedWith.remove(id);
+        if(data.removeShareIdFromCollection(collectionId, id)) {
+            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.SHARE_ID_REMOVED, this, id));
+            return true;
+        } else {
+            return false;
+        }
     }
+    
     @Override
     public List<String> getSharedIdList() {
-        return Collections.unmodifiableList(sharedWith);
+        return data.getShareIdListForCollection(collectionId);
     }
     
     @Override
     public void setShareIdList(List<String> ids) {
-        // there will temporarily be a state where sharedWith will either
-        // be empty or contain just a subset of ids.
-        sharedWith.retainAll(ids);
-        sharedWith.addAllAbsent(ids);
+        data.setShareIdListForCollection(collectionId, ids);
+        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.SHARE_IDS_CHANGED, this, ids));
     }
     
     @Override
     public String toString() {
-        return StringUtils.toString(this);
+        return StringUtils.toString(this) + ", name: " + getName();
     }
     
     // Raise access.

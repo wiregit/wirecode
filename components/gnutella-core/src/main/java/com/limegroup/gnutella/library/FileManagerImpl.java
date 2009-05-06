@@ -113,7 +113,7 @@ class FileManagerImpl implements FileManager, Service {
             synchronized(this) {
                 sharedCollections.put(id, collection);
             }
-            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection, null));
+            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));
         }
     }
 
@@ -157,7 +157,7 @@ class FileManagerImpl implements FileManager, Service {
         }
         
         if(removeFileList != null) {
-            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_REMOVED, removeFileList, null));
+            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_REMOVED, removeFileList));
         }
     }
     
@@ -179,7 +179,7 @@ class FileManagerImpl implements FileManager, Service {
             sharedCollections.put(newId, collection);
         }
         
-        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection, null));
+        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));
         return collection;
     }
     

@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.limewire.inspection.InspectionHistogram;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
@@ -39,8 +40,9 @@ class GnutellaFileCollectionImpl extends SharedFileCollectionImpl implements Gnu
     @Inject
     public GnutellaFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, 
                                   @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory,
+                                  @AllFileCollections EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
                                   HashTreeCache treeCache) {
-        super(data, managedList, multicasterFactory, LibraryFileData.GNUTELLA_COLLECTION_ID, treeCache);
+        super(data, managedList, multicasterFactory, sharedCollectionBroadcaster, LibraryFileData.GNUTELLA_COLLECTION_ID, treeCache);
         this.numBytes = new AtomicLong();
     }
     

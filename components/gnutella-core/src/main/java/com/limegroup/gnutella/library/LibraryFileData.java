@@ -682,6 +682,70 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
+    boolean addShareIdToCollection(int collectionId, String id) {
+        lock.writeLock().lock();
+        try {
+            List<String> ids = collectionShareData.get(collectionId);
+            if(ids == null) {
+                ids = new ArrayList<String>();
+                collectionShareData.put(collectionId, ids);
+            }
+            if(!ids.contains(id)) {
+                ids.add(id);
+                dirty = true;
+                return true;
+            } else {
+                return false;
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    boolean removeShareIdFromCollection(int collectionId, String id) {
+        lock.writeLock().lock();
+        try {
+            List<String> ids = collectionShareData.get(collectionId);
+            if(ids != null) {
+                return ids.remove(id);
+            } else {
+                return false;
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    List<String> getShareIdListForCollection(int collectionId) {
+        lock.readLock().lock();
+        try {
+            List<String> ids = collectionShareData.get(collectionId);
+            if(ids != null) {
+                return Collections.unmodifiableList(new ArrayList<String>(ids));
+            } else {
+                return Collections.emptyList();
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    void setShareIdListForCollection(int collectionId, List<String> newIds) {
+        lock.writeLock().lock();
+        try {
+            List<String> ids = collectionShareData.get(collectionId);
+            if(ids == null) {
+                ids = new ArrayList<String>();
+                collectionShareData.put(collectionId, ids);
+            }
+            ids.clear();
+            ids.addAll(newIds);
+            dirty = true;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
     boolean isProgramManagingAllowed() {
         return LibrarySettings.ALLOW_PROGRAMS.getValue();
     }

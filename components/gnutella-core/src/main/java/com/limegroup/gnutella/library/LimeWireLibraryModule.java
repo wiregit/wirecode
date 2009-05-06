@@ -24,6 +24,9 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(SharedFilesKeywordIndex.class).to(SharedFilesKeywordIndexImpl.class);
         bind(CreationTimeCache.class);        
         
+        bind(FileViewManager.class).to(FileViewManagerImpl.class);
+        bind(FileCollectionManager.class).to(FileManager.class);
+        
         bind(FileManager.class).to(FileManagerImpl.class);
         bind(Library.class).to(LibraryImpl.class);
         bind(GnutellaFileCollection.class).to(GnutellaFileCollectionImpl.class);
