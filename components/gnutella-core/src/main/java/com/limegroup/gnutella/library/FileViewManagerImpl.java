@@ -19,11 +19,14 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SourcedEventMulticaster;
+import org.limewire.listener.SourcedEventMulticasterImpl;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.RPNParser;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 
@@ -41,6 +44,9 @@ class FileViewManagerImpl implements FileViewManager {
     private final Map<String, SharedCollectionBackedFileViewImpl> fileViews = new HashMap<String, SharedCollectionBackedFileViewImpl>();
 
     private final Collection<SharedFileCollection> sharedCollections = new ArrayList<SharedFileCollection>();
+    
+    private final SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster =
+        new SourcedEventMulticasterImpl<FileViewChangeEvent, FileView>();
 
     @Inject
     public FileViewManagerImpl(LibraryImpl library, GnutellaFileCollectionImpl gnutellaCollection,
@@ -48,8 +54,7 @@ class FileViewManagerImpl implements FileViewManager {
         this.library = library;
         this.gnutellaView = gnutellaCollection;
         this.incompleteView = incompleteCollection;
-        this.compositeView = new SharedCollectionBackedFileViewImpl(null, rwLock.readLock(),
-                library);
+        this.compositeView = new SharedCollectionBackedFileViewImpl(rwLock.readLock(), library, multicaster);
     }
     
     @Inject void register(@AllFileCollections ListenerSupport<FileViewChangeEvent> viewListeners,
@@ -105,95 +110,185 @@ class FileViewManagerImpl implements FileViewManager {
     }
     
     private void collectionAdded(SharedFileCollection collection) {
+        Map<FileView, List<FileDesc>> addedFiles = null;
         rwLock.writeLock().lock();
         try {
             sharedCollections.add(collection);
             for(String id : collection.getSharedIdList()) {
                 SharedCollectionBackedFileViewImpl view = fileViews.get(id);
                 if(view != null) {
-                    view.addNewBackingCollection(collection);
+                    List<FileDesc> added = view.addNewBackingCollection(collection);
+                    if(!added.isEmpty()) {
+                        if(addedFiles == null) {
+                            addedFiles = new HashMap<FileView, List<FileDesc>>();
+                        }
+                        addedFiles.put(view, added);
+                    }
                 }
             }
         } finally {
             rwLock.writeLock().unlock();
+        }
+
+        if(addedFiles != null) {
+            for(Map.Entry<FileView, List<FileDesc>> entry : addedFiles.entrySet()) {
+                for(FileDesc fd : entry.getValue()) {
+                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_ADDED, fd));
+                }
+            }
         }
     }
     
     private void collectionRemoved(SharedFileCollection collection) {
+        Map<FileView, List<FileDesc>> removedFiles = null;
+        
         rwLock.writeLock().lock();
         try {
             sharedCollections.remove(collection);
             for(SharedCollectionBackedFileViewImpl view : fileViews.values()) {
-                view.removeBackingCollection(collection);
+                List<FileDesc> removed = view.removeBackingCollection(collection);
+                if(!removed.isEmpty()) {
+                    if(removedFiles == null) {
+                        removedFiles = new HashMap<FileView, List<FileDesc>>();
+                    }
+                    removedFiles.put(view, removed);
+                }
             }
         } finally {
             rwLock.writeLock().unlock();
         }   
+        
+        if(removedFiles != null) {
+            for(Map.Entry<FileView, List<FileDesc>> entry : removedFiles.entrySet()) {
+                for(FileDesc fd : entry.getValue()) {
+                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_REMOVED, fd));
+                }
+            }
+        }
     }
     
     private void shareIdAdded(SharedFileCollection collection, String id) {
+        SharedCollectionBackedFileViewImpl view = null;
+        List<FileDesc> added = null;
         rwLock.writeLock().lock();
         try {
-            SharedCollectionBackedFileViewImpl view = fileViews.get(id);
+            view = fileViews.get(id);
             if(view != null) {
-                view.addNewBackingCollection(collection);
+                added = view.addNewBackingCollection(collection);
             }
         } finally {
             rwLock.writeLock().unlock();
+        }
+        
+        if(view != null && added != null) {
+            for(FileDesc fd : added) {
+                multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_ADDED, fd));
+            }
         }
     }
     
     private void shareIdRemoved(SharedFileCollection collection, String id) {
+        SharedCollectionBackedFileViewImpl view = null;
+        List<FileDesc> removed = null;
         rwLock.writeLock().lock();
         try {
-            SharedCollectionBackedFileViewImpl view = fileViews.get(id);
+            view = fileViews.get(id);
             if(view != null) {
-                view.removeBackingCollection(collection);
+                removed = view.removeBackingCollection(collection);
             }
         } finally {
             rwLock.writeLock().unlock();
+        }
+        
+        if(view != null && removed != null) {
+            for(FileDesc fd : removed) {
+                multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_REMOVED, fd));
+            }
         }
     }
     
     private void collectionCleared(FileView fileView) {
+        Map<FileView, List<FileDesc>> removedFiles = null;
+        
         rwLock.writeLock().lock();
         try {
             for(String id : ((SharedFileCollection)fileView).getSharedIdList()) {
                 SharedCollectionBackedFileViewImpl view = fileViews.get(id);
                 if(view != null) {
-                    view.fileCollectionCleared(fileView);
+                    List<FileDesc> removed = view.fileCollectionCleared(fileView);
+                    if(!removed.isEmpty()) {
+                        if(removedFiles == null) {
+                            removedFiles = new HashMap<FileView, List<FileDesc>>();
+                        }
+                        removedFiles.put(view, removed);
+                    }
                 }
+                
             }
         } finally {
             rwLock.writeLock().unlock();
-        }   
+        }
+        
+        if(removedFiles != null) {
+            for(Map.Entry<FileView, List<FileDesc>> entry : removedFiles.entrySet()) {
+                for(FileDesc fd : entry.getValue()) {
+                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_REMOVED, fd));
+                }
+            }
+        }
     }
 
     private void fileRemoved(FileDesc fileDesc, FileView fileView) {
+        List<FileView> removedViews = null;
+        
         rwLock.writeLock().lock();
         try {
             for(String id : ((SharedFileCollection)fileView).getSharedIdList()) {
                 SharedCollectionBackedFileViewImpl view = fileViews.get(id);
                 if(view != null) {
-                    view.fileRemovedFromCollection(fileDesc, fileView);
+                    if(view.fileRemovedFromCollection(fileDesc, fileView)) {
+                        if(removedViews == null) {
+                            removedViews = new ArrayList<FileView>();
+                        }
+                        removedViews.add(view);
+                    }
                 }
             }
         } finally {
             rwLock.writeLock().unlock();
         }
+        
+        if(removedViews != null) {
+            for(FileView view : removedViews) {
+                multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_REMOVED, fileDesc));
+            }
+        }
     }
 
     private void fileAdded(FileDesc fileDesc, FileView fileView) {
+        List<FileView> addedViews = null;
+        
         rwLock.writeLock().lock();
         try {
             for(String id : ((SharedFileCollection)fileView).getSharedIdList()) {
                 SharedCollectionBackedFileViewImpl view = fileViews.get(id);
                 if(view != null) {
-                    view.fileAddedFromCollection(fileDesc, fileView);
+                    if(view.fileAddedFromCollection(fileDesc, fileView)) {
+                        if(addedViews == null) {
+                            addedViews = new ArrayList<FileView>();
+                        }
+                        addedViews.add(view);
+                    }
                 }
             }
         } finally {
             rwLock.writeLock().unlock();
+        }
+        
+        if(addedViews != null) {
+            for(FileView view : addedViews) {
+                multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_ADDED, fileDesc));
+            }
         }
     }
 
@@ -230,7 +325,7 @@ class FileViewManagerImpl implements FileViewManager {
     }
     
     private SharedCollectionBackedFileViewImpl createFileView(String id) {
-        SharedCollectionBackedFileViewImpl view = new SharedCollectionBackedFileViewImpl(id, rwLock.readLock(), library);
+        SharedCollectionBackedFileViewImpl view = new SharedCollectionBackedFileViewImpl(rwLock.readLock(), library, multicaster);
         initialize(view, id);
         return view;
     }

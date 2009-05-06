@@ -21,7 +21,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
     private final File newFile;
     private boolean isShared = false;
     
-    public FileViewChangeEvent(FileCollection list, Type type) {
+    public FileViewChangeEvent(FileView list, Type type) {
         assert type == Type.FILES_CLEARED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -31,7 +31,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
         this.newValue = null;
     }
     
-    public FileViewChangeEvent(FileCollection list, Type type, File file) {
+    public FileViewChangeEvent(FileView list, Type type, File file) {
         assert type == Type.FILE_ADD_FAILED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -41,7 +41,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
         this.newValue = null;
     }
     
-    public FileViewChangeEvent(FileCollection list, Type type, File oldFile, FileDesc oldValue, File newValue) {
+    public FileViewChangeEvent(FileView list, Type type, File oldFile, FileDesc oldValue, File newValue) {
         assert type == Type.FILE_CHANGE_FAILED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -51,7 +51,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
         this.newFile = Objects.nonNull(newValue, "file");
     }
     
-    public FileViewChangeEvent(FileCollection list, Type type, FileDesc value) {
+    public FileViewChangeEvent(FileView list, Type type, FileDesc value) {
         assert type == Type.FILE_ADDED || type == Type.FILE_REMOVED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
@@ -61,7 +61,7 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
         this.newFile = Objects.nonNull(newValue.getFile(), "value.getFile()");
     }
     
-    public FileViewChangeEvent(FileCollection list, Type type, FileDesc oldValue, FileDesc newValue) {
+    public FileViewChangeEvent(FileView list, Type type, FileDesc oldValue, FileDesc newValue) {
         assert type == Type.FILE_CHANGED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");

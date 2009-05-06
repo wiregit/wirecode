@@ -75,7 +75,6 @@ class FriendFileListImpl extends AbstractFriendFileList {
         friendView.addFileViewListener(eventListener);
         combinedShareList.addMemberList(baseList);
 
-        System.out.println("adding all FDs from: " + friendView + ", to list");
         friendView.getReadLock().lock();
         try {
             // TODO: this isn't safe because adding can trigger callbacks and we're holding friendView's lock here. 

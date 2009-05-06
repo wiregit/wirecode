@@ -9,23 +9,24 @@ import java.util.concurrent.locks.Lock;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.IntSet.IntSetIterator;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SourcedEventMulticaster;
 
 class SharedCollectionBackedFileViewImpl extends AbstractFileView {
     
     private final List<FileView> backingViews = new ArrayList<FileView>();
     private final Lock readLock;
-    private final String id;
+    private final SourcedEventMulticaster<FileViewChangeEvent, FileView> broadcaster;
 
-    public SharedCollectionBackedFileViewImpl(String id, Lock readLock, LibraryImpl library) {
+    public SharedCollectionBackedFileViewImpl(Lock readLock, LibraryImpl library,
+            SourcedEventMulticaster<FileViewChangeEvent, FileView> broadcaster) {
         super(library);
-        this.id = id;
         this.readLock = readLock;
+        this.broadcaster = broadcaster;
     }
 
     @Override
     public void addFileViewListener(EventListener<FileViewChangeEvent> listener) {
-        // TODO Auto-generated method stub
-        
+        broadcaster.addListener(this, listener);
     }
 
     @Override
@@ -55,8 +56,7 @@ class SharedCollectionBackedFileViewImpl extends AbstractFileView {
 
     @Override
     public void removeFileViewListener(EventListener<FileViewChangeEvent> listener) {
-        // TODO Auto-generated method stub
-        
+        broadcaster.removeListener(this, listener);
     }
     
     List<FileDesc> removeBackingCollection(SharedFileCollection collection) {

@@ -165,7 +165,6 @@ class FileManagerImpl implements FileManager, Service {
     public SharedFileCollection getOrCreateSharedCollectionByName(String name) {
         SharedFileCollectionImpl collection;
         synchronized(this) {
-            System.out.println("Getting collection by name: " + name);
             for(SharedFileCollectionImpl shared : sharedCollections.values()) {
                 if(shared.getName().equals(name)) {
                     return shared;
@@ -173,7 +172,6 @@ class FileManagerImpl implements FileManager, Service {
             }
             
             int newId = managedFileList.getLibraryData().createNewCollection(name);
-            System.out.println("Creating new collection with name: " + name + ", got id: " + newId);
             collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId);
             collection.initialize();
             sharedCollections.put(newId, collection);
@@ -222,8 +220,6 @@ class FileManagerImpl implements FileManager, Service {
     public IncompleteFileCollection getIncompleteFileCollection() {
         return incompleteCollection;
     }
-    
- 
     
     private class Saver implements Runnable {
         public void run() {
