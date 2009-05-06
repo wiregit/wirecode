@@ -146,7 +146,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
     private class DownloadsPanel extends OptionPanel {
 
         private static final int MIN_DOWNLOADS = 1;
-        private static final int MAX_DOWNLOADS = 10;
+        private static final int MAX_DOWNLOADS = 999;
         private static final int MIN_SLIDER = 5;
         private static final int MAX_SLIDER = 100;
         
