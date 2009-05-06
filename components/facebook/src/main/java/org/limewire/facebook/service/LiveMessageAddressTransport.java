@@ -20,25 +20,41 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 
-public class AddressLiveMessage implements FeatureTransport<Address> {
+public class LiveMessageAddressTransport implements FeatureTransport<Address>, LiveMessageHandler {
     
     private final Provider<String> apiKey;
     private final FacebookFriendConnection connection;
     private final AddressFactory addressFactory;
 
     @Inject
-    AddressLiveMessage(@Named("facebookApiKey") Provider<String> apiKey,
+    LiveMessageAddressTransport(@Named("facebookApiKey") Provider<String> apiKey,
                        FacebookFriendConnection connection,
                        AddressFactory addressFactory) {
         this.apiKey = apiKey;
         this.connection = connection;
         this.addressFactory = addressFactory;
     }
-   
-    
+
+    @Override
+    @Inject
+    public void register(LiveMessageHandlerRegistry registry) {
+        registry.register(this);
+    }
+
+    @Override
+    public String getMessageType() {
+        return "address";
+    }
+
+    @Override
+    public void handle(JSONObject message) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     @Override
     public void sendFeature(FriendPresence presence, Address localFeature) throws FriendException {
-        FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(), connection.getSecret(), connection.getSession());
+        FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
+                connection.getSecret(), connection.getSession());
         try {
             Map<String, String> message = new HashMap<String, String>();
             message.put("from", connection.getUID());

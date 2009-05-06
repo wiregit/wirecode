@@ -2,37 +2,36 @@ package org.limewire.facebook.service;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.Map;
-import java.util.HashMap;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
 
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
-import com.google.inject.Provider;
-import com.google.code.facebookapi.FacebookException;
-import com.google.code.facebookapi.FacebookJsonRestClient;
 
 public class ChatClient {
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private final Provider<String> apiKey;
     private final FacebookFriendConnection connection;
     private final PresenceListenerFactory presenceListenerFactory;
+    private final LiveMessageHandlerRegistry handlerRegistry;
     private final ScheduledListeningExecutorService executorService;
 
     @AssistedInject
     ChatClient(@Named("facebookApiKey") Provider<String> apiKey,
                @Assisted FacebookFriendConnection connection,
                PresenceListenerFactory presenceListenerFactory,
+               LiveMessageHandlerRegistry handlerRegistry,
                @Named("backgroundExecutor") ScheduledListeningExecutorService executorService) {
         this.apiKey = apiKey;
         this.connection = connection;
         this.presenceListenerFactory = presenceListenerFactory;
+        this.handlerRegistry = handlerRegistry;
         this.executorService = executorService;//ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName())); //executorService;
     }
 
@@ -149,17 +148,21 @@ public class ChatClient {
                 }
                 if(ms.getJSONObject(0).has("event_name")) {
                     String messageType = ms.getJSONObject(0).getString("event_name");
-                    if(messageType.equals("disco_info")) {
-                        FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
-                        connection.getSecret(), connection.getSession());
-                        Map<String, String> message = new HashMap<String, String>();
-                            message.put("from", connection.getUID());
-                        try {
-                            client.liveMessage_send(Long.parseLong(from), "disco_info_response", new JSONObject(message));
-                        } catch (FacebookException e) {
-                            throw new RuntimeException(e);
-                        }     
+                    LiveMessageHandler handler = handlerRegistry.getHandler(messageType);
+                    if(handler != null) {
+                        handler.handle(ms.getJSONObject(0));
                     }
+//                    if(messageType.equals("disco_info")) {
+//                        FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
+//                        connection.getSecret(), connection.getSession());
+//                        Map<String, String> message = new HashMap<String, String>();
+//                            message.put("from", connection.getUID());
+//                        try {
+//                            client.liveMessage_send(Long.parseLong(from), "disco_info_response", new JSONObject(message));
+//                        } catch (FacebookException e) {
+//                            throw new RuntimeException(e);
+//                        }     
+//                    }
                 }
             }            
         }

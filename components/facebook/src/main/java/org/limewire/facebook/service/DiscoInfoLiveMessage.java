@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
-public class DiscoInfoLiveMessage {
+public class DiscoInfoLiveMessage implements LiveMessageHandler {
     private final Provider<String> apiKey;
     private final FacebookFriendConnection connection;
     private final Map<String, String> friends = new HashMap<String, String>();
@@ -29,25 +29,43 @@ public class DiscoInfoLiveMessage {
         this.connection = connection;
     }
     
+    @Override
+    @Inject
+    public void register(LiveMessageHandlerRegistry registry) {
+        registry.register(this);
+    }
+
+    @Override
+    public String getMessageType() {
+        return "disco-info";
+    }
+
+    @Override
+    public void handle(JSONObject message) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+    
     @Inject
     public void register(@Named("available") ListenerSupport<FriendEvent> availableFriends,
                          ListenerSupport<XMPPConnectionEvent> connectionEventListenerSupport) {
         connectionEventListenerSupport.addListener(new EventListener<XMPPConnectionEvent>() {
             @Override
             public void handleEvent(XMPPConnectionEvent event) {
-                FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
-                connection.getSecret(), connection.getSession());
-                try {
-                    JSONArray friendsArray = (JSONArray)client.friends_getAppUsers();
-                    if(friendsArray != null) {
-                        for(int i = 0; i < friendsArray.length(); i++) {
-                            friends.put(friendsArray.getString(i), friendsArray.getString(i));
+                if(event.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                    FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
+                    connection.getSecret(), connection.getSession());
+                    try {
+                        JSONArray friendsArray = (JSONArray)client.friends_getAppUsers();
+                        if(friendsArray != null) {
+                            for(int i = 0; i < friendsArray.length(); i++) {
+                                friends.put(friendsArray.getString(i), friendsArray.getString(i));
+                            }
                         }
+                    } catch (FacebookException e) {
+                        throw new RuntimeException(e);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
                     }
-                } catch (FacebookException e) {
-                    throw new RuntimeException(e);
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
                 }
             }
         });

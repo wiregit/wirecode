@@ -17,14 +17,11 @@ class FacebookFriendService {
     private final ThreadPoolListeningExecutor executorService;
     private FacebookFriendConnection connection;
     private final ChatClientFactory chatClientFactory;
-    private final AddressSender addressSender;
 
     @Inject FacebookFriendService(FacebookFriendConnection connection,
-                                  ChatClientFactory chatClientFactory,
-                                  AddressSender addressSender){
+                                  ChatClientFactory chatClientFactory){
         this.connection = connection;
         this.chatClientFactory = chatClientFactory;
-        this.addressSender = addressSender;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
     }
 
@@ -41,7 +38,6 @@ class FacebookFriendService {
         connection.loginImpl();
         ChatClient client = chatClientFactory.createChatClient(connection);
         client.start();
-        addressSender.start();
         return connection;
     }
 }
