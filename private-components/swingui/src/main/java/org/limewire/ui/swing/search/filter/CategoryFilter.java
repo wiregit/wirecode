@@ -241,9 +241,6 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
      */
     private static class CategoryComparator implements Comparator<Category> {
 
-        public CategoryComparator() {
-        }
-
         @Override
         public int compare(Category cat1, Category cat2) {
             return Objects.compareToNullIgnoreCase(cat1.toString(), cat2.toString(), false);
@@ -256,9 +253,6 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
      */
     private static class CategoryFunction<E extends FilterableItem> implements Function<E, Category> {
 
-        public CategoryFunction() {
-        }
-        
         @Override
         public Category evaluate(E item) {
             return item.getCategory();
