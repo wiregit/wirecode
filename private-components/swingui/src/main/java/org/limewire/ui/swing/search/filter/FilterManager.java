@@ -2,9 +2,7 @@ package org.limewire.ui.swing.search.filter;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +12,12 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.util.IconManager;
 
 /**
- * A manager for filters.
+ * A manager for filters.  FilterManager maintains a set of filters that can be
+ * applied to a filterable data source.  A variety of filter types are
+ * supported.  Filters are internally cached within the manager for reuse by 
+ * different search categories.  When a search category is selected, the 
+ * <code>getPropertyFilterList()</code> method returns a list of the available
+ * filters for the category.
  */
 public class FilterManager<E extends FilterableItem> implements Disposable {
 
@@ -30,7 +33,7 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
     
     /** Map containing property filters. */
     private final Map<FilePropertyKey, Filter<E>> propertyFilterMap = 
-        new HashMap<FilePropertyKey, Filter<E>>();
+        new EnumMap<FilePropertyKey, Filter<E>>(FilePropertyKey.class);
     
     /**
      * Constructs a FilterManager using the specified filterable data source
@@ -76,27 +79,13 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
      * filters are displayed.
      */
     public int getPropertyFilterMinimum(SearchCategory searchCategory) {
-        if (searchCategory == null) {
-            return -1;
-        }
-        
-        switch (searchCategory) {
-        case AUDIO:
-            return 3;
-        default:
-            return -1;
-        }
+        return (searchCategory == SearchCategory.AUDIO) ? 3 : -1;
     }
     
     /**
      * Returns a list of filters for the specified search category.
      */
     public List<Filter<E>> getPropertyFilterList(SearchCategory searchCategory) {
-        // Return empty list if null.
-        if (searchCategory == null) {
-            return Collections.emptyList();
-        }
-        
         // Create filter list.
         List<Filter<E>> filterList = new ArrayList<Filter<E>>();
         
