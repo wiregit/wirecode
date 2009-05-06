@@ -17,7 +17,9 @@ class BitRateFilterFormat<E extends FilterableItem> implements RangeFilterFormat
         128, 
         160,
         192, 
-        256
+        256,
+        320,
+        512
     };
 
     @Override
