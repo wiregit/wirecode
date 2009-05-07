@@ -1,6 +1,6 @@
-package org.limewire.ui.swing.search.filter;
+package org.limewire.ui.swing.filter;
 
-import org.limewire.ui.swing.search.filter.SourceFilter.SourceType;
+import org.limewire.ui.swing.filter.SourceFilter.SourceType;
 
 import ca.odell.glazedlists.matchers.Matcher;
 

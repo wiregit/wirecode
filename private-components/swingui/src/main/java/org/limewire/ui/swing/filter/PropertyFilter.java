@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.filter;
+package org.limewire.ui.swing.filter;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

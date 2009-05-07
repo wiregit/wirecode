@@ -1,10 +1,10 @@
 package org.limewire.ui.swing.search;
 
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
+import org.limewire.ui.swing.filter.AdvancedFilterPanel;
+import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
+import org.limewire.ui.swing.filter.FilterableSource;
 import org.limewire.ui.swing.friends.login.FriendActions;
-import org.limewire.ui.swing.search.filter.AdvancedFilterPanel;
-import org.limewire.ui.swing.search.filter.AdvancedFilterPanelFactory;
-import org.limewire.ui.swing.search.filter.FilterableSource;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.IconManager;
 

@@ -1,10 +1,11 @@
-package org.limewire.ui.swing.search.filter;
+package org.limewire.ui.swing.filter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.ui.swing.filter.FilterableItemTextFilterator;
 import org.limewire.util.BaseTestCase;
 
 /**

@@ -1,7 +1,8 @@
-package org.limewire.ui.swing.search.filter;
+package org.limewire.ui.swing.filter;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.filter.FilterableSource;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;

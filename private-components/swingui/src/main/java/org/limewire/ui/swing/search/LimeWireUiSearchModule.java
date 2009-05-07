@@ -2,8 +2,8 @@ package org.limewire.ui.swing.search;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.StringTrieSet;
+import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
-import org.limewire.ui.swing.search.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactoryImpl;
 import org.limewire.ui.swing.search.model.VisualSearchResult;

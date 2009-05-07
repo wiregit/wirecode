@@ -1,8 +1,10 @@
-package org.limewire.ui.swing.search.filter;
+package org.limewire.ui.swing.filter;
 
 import java.util.List;
 
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.filter.Filter;
+import org.limewire.ui.swing.filter.FilterManager;
 import org.limewire.util.BaseTestCase;
 
 /**
@@ -42,11 +44,6 @@ public class FilterManagerTest extends BaseTestCase {
 
     /** Tests method to retrieve minimum property filters to display. */
     public void testGetPropertyFilterMinimum() {
-        // Verify value for null category.
-        int expectedReturn = -1;
-        int actualReturn = filterManager.getPropertyFilterMinimum(null);
-        assertEquals("property filter min", expectedReturn, actualReturn);
-        
         // Verify values for all categories.
         for (SearchCategory category : SearchCategory.values()) {
             int minimum = filterManager.getPropertyFilterMinimum(category);
@@ -56,13 +53,6 @@ public class FilterManagerTest extends BaseTestCase {
 
     /** Tests method to retrieve list of property filters. */
     public void testGetPropertyFilterList() {
-        // Verify list for null category.
-        List<Filter<MockFilterableItem>> list = filterManager.getPropertyFilterList(null);
-        
-        int expectedReturn = 0;
-        int actualReturn = list.size();
-        assertEquals("property filter list", expectedReturn, actualReturn);
-        
         // Verify lists for all categories.
         for (SearchCategory category : SearchCategory.values()) {
             List<Filter<MockFilterableItem>> filterList = filterManager.getPropertyFilterList(category);

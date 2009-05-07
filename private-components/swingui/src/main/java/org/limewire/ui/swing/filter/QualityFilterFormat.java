@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.filter;
+package org.limewire.ui.swing.filter;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.util.GuiUtils;

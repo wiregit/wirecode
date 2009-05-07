@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.filter;
+package org.limewire.ui.swing.filter;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ import ca.odell.glazedlists.TextFilterator;
  * all indexable keys, along with the file extension, are added to the list of 
  * strings checked by the filter.  
  */
-public class FilterableItemTextFilterator<E extends FilterableItem> implements TextFilterator<E> {
+class FilterableItemTextFilterator<E extends FilterableItem> implements TextFilterator<E> {
 
     @Override
     public void getFilterStrings(List<String> baseList, E item) {
