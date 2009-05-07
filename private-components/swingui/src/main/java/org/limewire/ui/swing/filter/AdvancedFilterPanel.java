@@ -16,7 +16,6 @@ import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
@@ -29,8 +28,8 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
-import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.components.SideLineBorder;
 import org.limewire.ui.swing.components.SideLineBorder.Side;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
@@ -58,9 +57,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     @Resource private Color borderColor;
     @Resource private Color dividerBackgroundColor;
     @Resource private Color dividerForegroundColor;
-    @Resource private Color moreTextColor;
     @Resource private Font moreTextFont;
-    @Resource private Color resetTextColor;
     @Resource private Font resetTextFont;
     
     /** Filterable data source. */
@@ -446,7 +443,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     private class FilterDisplayPanel extends JPanel {
         
         private final JPanel displayPanel = new JPanel();
-        private final JButton resetButton = new JButton();
+        private final HyperlinkButton resetButton = new HyperlinkButton();
         
         private final Map<Filter<E>, ActiveFilterPanel> displayMap = 
             new HashMap<Filter<E>, ActiveFilterPanel>();
@@ -461,12 +458,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             displayPanel.setOpaque(false);
             
             resetButton.setAction(new RemoveAllAction());
-            resetButton.setBorder(BorderFactory.createEmptyBorder());
-            resetButton.setContentAreaFilled(false);
-            resetButton.setFocusPainted(false);
             resetButton.setFont(resetTextFont);
-            resetButton.setForeground(resetTextColor);
-            resetButton.addMouseListener(new RolloverCursorListener());
             
             add(displayPanel, "gap 6 6 0 0, growx, wrap");
             add(resetButton , "gap 6 6 0 0, alignx right, wrap");
@@ -540,7 +532,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
      */
     private class PropertyFilterPanel extends JPanel implements FilterListener<E> {
         
-        private final JButton moreButton = new JButton();
+        private final HyperlinkButton moreButton = new HyperlinkButton();
         
         /** Action to toggle "show-all" filters state. */
         private final MoreFilterAction moreFilterAction = new MoreFilterAction();
@@ -560,12 +552,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             setOpaque(false);
             
             moreButton.setAction(moreFilterAction);
-            moreButton.setBorder(BorderFactory.createEmptyBorder());
-            moreButton.setContentAreaFilled(false);
-            moreButton.setFocusPainted(false);
             moreButton.setFont(moreTextFont);
-            moreButton.setForeground(moreTextColor);
-            moreButton.addMouseListener(new RolloverCursorListener());
         }
 
         /**
