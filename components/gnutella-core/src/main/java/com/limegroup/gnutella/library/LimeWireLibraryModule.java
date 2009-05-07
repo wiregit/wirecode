@@ -30,7 +30,9 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(FileManager.class).to(FileManagerImpl.class);
         bind(Library.class).to(LibraryImpl.class);
         bind(GnutellaFileCollection.class).to(GnutellaFileCollectionImpl.class);
-        bind(IncompleteFileCollection.class).to(IncompleteFileCollectionImpl.class);        
+        bind(GnutellaFileView.class).to(GnutellaFileCollectionImpl.class);
+        bind(IncompleteFileCollection.class).to(IncompleteFileCollectionImpl.class);
+        bind(FileView.class).annotatedWith(IncompleteView.class).to(IncompleteFileCollection.class);
         bind(SharedFileCollectionImplFactory.class).toProvider(
                 FactoryProvider.newFactory(SharedFileCollectionImplFactory.class, SharedFileCollectionImpl.class));
         
@@ -59,12 +61,13 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(new TypeLiteral<ListenerSupport<FileDescChangeEvent>>(){}).toInstance(fileDescMulticaster);
         bind(new TypeLiteral<SourcedEventMulticaster<FileDescChangeEvent, FileDesc>>(){}).toInstance(fileDescMulticaster);
 
-        bind(FileDescFactory.class).to(FileDescFactoryImpl.class);
-        
+        bind(FileDescFactory.class).to(FileDescFactoryImpl.class);        
     }
     
     @Provides LibraryFileData libraryFileData(LibraryImpl library) {
         return library.getLibraryData();
     }
+    
+    
 
 }

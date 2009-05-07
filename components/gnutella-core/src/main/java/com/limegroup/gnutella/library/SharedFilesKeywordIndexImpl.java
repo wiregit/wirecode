@@ -77,7 +77,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
     private final Provider<ResponseFactory> responseFactory;
 
-    private final FileManager fileManager;
+    private final Library library;
     private final FileViewManager fileViewManager;
 
     private final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
@@ -87,13 +87,13 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private final LimeXMLSchemaRepository schemaRepository;
 
     @Inject
-    public SharedFilesKeywordIndexImpl(FileManager fileManager,
+    public SharedFilesKeywordIndexImpl(Library library,
             Provider<CreationTimeCache> creationTimeCache,
             Provider<ResponseFactory> responseFactory,
             Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
             ActivityCallback activityCallback, LimeXMLSchemaRepository schemaRepository,
             FileViewManager fileViewManager) {
-        this.fileManager = fileManager;
+        this.library = library;
         this.creationTimeCache = creationTimeCache;
         this.responseFactory = responseFactory;
         this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
@@ -116,7 +116,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                         handleFileDescEvent(event);
                     }
                 });                
-                fileManager.getLibrary().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+                library.addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
                     @Override
                     public void handleEvent(ManagedListStatusEvent event) {
                         handleManagedListStatusEvent(event);
@@ -128,7 +128,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                         handleFileListEvent(event, true);
                     }
                 });
-                fileManager.getIncompleteFileCollection().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+                fileViewManager.getIncompleteFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
                     @Override
                     public void handleEvent(FileViewChangeEvent event) {
                         handleFileListEvent(event, false);
@@ -162,13 +162,11 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * @param matches set of Response objects
      */
     private void incrementHitCount(Set<Response> matches) {
-        FileCollection fileList = fileManager.getLibrary();
-
         for (Response resp : matches) {
             long index = resp.getIndex();
 
             // casting to int because Response originally created with positive int
-            FileDesc desc = fileList.getFileDescForIndex((int)index);
+            FileDesc desc = library.getFileDescForIndex((int)index);
             if(desc != null) {
                 desc.incrementHitCount();
             }
@@ -220,7 +218,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             int i = iter.next();
             FileDesc desc = fileViewManager.getGnutellaFileView().getFileDescForIndex(i);
             if(desc == null) {
-                desc = fileManager.getIncompleteFileCollection().getFileDescForIndex(i);
+                desc = fileViewManager.getIncompleteFileView().getFileDescForIndex(i);
             }
 
             if(desc != null) {

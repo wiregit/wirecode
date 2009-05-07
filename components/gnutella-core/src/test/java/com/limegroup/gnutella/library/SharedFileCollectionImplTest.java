@@ -40,7 +40,7 @@ public class SharedFileCollectionImplTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
-        friendList = (SharedFileCollectionImpl)injector.getInstance(FileManager.class).getCollectionById("test");
+        friendList = (SharedFileCollectionImpl)injector.getInstance(FileCollectionManager.class).getOrCreateSharedCollectionByName("test");
         managedList = (LibraryImpl)injector.getInstance(FileManager.class).getLibrary();
         injector.getInstance(ServiceRegistry.class).initialize();
     }
@@ -146,7 +146,7 @@ public class SharedFileCollectionImplTest extends LimeTestCase {
         assertFalse(friendList.contains(fd));
     }
     
-    public void testAddFolder() throws Exception {
+//    public void testAddFolder() throws Exception {
 //        assertEquals(friendList.size(), 0);
 //        
 //        f1 = createNewExtensionTestFile(1, "wav", _scratchDir);
@@ -160,107 +160,107 @@ public class SharedFileCollectionImplTest extends LimeTestCase {
 //        assertContainsFiles(fdList, f1, f2);
 //        assertContainsFiles(managedList, f1, f2);
 //        assertAddsFolder(friendList, _scratchDir);
-
+//
 //        assertEquals(2, friendList.size());
 //        assertEquals(f1, friendList.getFileDescForIndex(0).getFile());
 //        assertEquals(f2, friendList.getFileDescForIndex(1).getFile());
 //        assertTrue(friendList.iterator().hasNext());
 //        assertTrue(friendList.pausableIterable().iterator().hasNext());
-    }
+//    }
     
-    /**
-     * Tests that smart share categories are mutually
-     * exclusive
-     */
-    public void testSmartSharingCategories() {
-        
-        assertFalse(friendList.isAddNewAudioAlways());
-        assertFalse(friendList.isAddNewImageAlways());
-        assertFalse(friendList.isAddNewVideoAlways());
-        
-        friendList.setAddNewAudioAlways(true);
-    
-        assertTrue(friendList.isAddNewAudioAlways());
-        assertFalse(friendList.isAddNewImageAlways());
-        assertFalse(friendList.isAddNewVideoAlways());
-        
-        friendList.setAddNewImageAlways(true);
-        
-        assertTrue(friendList.isAddNewAudioAlways());
-        assertTrue(friendList.isAddNewImageAlways());
-        assertFalse(friendList.isAddNewVideoAlways());
-        
-        friendList.setAddNewVideoAlways(true);
-        
-        assertTrue(friendList.isAddNewAudioAlways());
-        assertTrue(friendList.isAddNewImageAlways());
-        assertTrue(friendList.isAddNewVideoAlways());
-    }
-    
-    /**
-     * Tests smart sharing a category
-     */
-    public void testSmartSharing() throws Exception {
-        assertEquals(friendList.size(), 0);
-        assertFalse(friendList.isAddNewAudioAlways());
-        
-        f1 = createNewExtensionTestFile(1, "wav", _scratchDir);
-        f2 = createNewExtensionTestFile(3, "txt", _scratchDir);
-        
-        assertAdds(managedList, f1);
-               
-        assertFalse(friendList.contains(f1));
-        assertEquals(0, friendList.size());
-
-        friendList.setAddNewAudioAlways(true);
-        assertTrue(friendList.isAddNewAudioAlways());
-        
-        Thread.sleep(500);
-        
-        assertEquals(1, friendList.size());
-        assertTrue(friendList.contains(f1));
-        assertFalse(friendList.contains(f2));
-        
-        f3 = createNewExtensionTestFile(5, "wav", _scratchDir);
-        assertAdds(managedList, f3);
-        
-        Thread.sleep(500);
-        
-        assertEquals(2, friendList.size());
-        assertTrue(friendList.contains(f3));
-    }
-    
-    /**
-     * Tests stopping smart sharing a category
-     */
-    public void testStopSmartSharing() throws Exception {
-        friendList.setAddNewAudioAlways(true);
-        assertTrue(friendList.isAddNewAudioAlways());
-        
-        
-        f1 = createNewExtensionTestFile(1, "wav", _scratchDir);
-        f2 = createNewExtensionTestFile(3, "txt", _scratchDir);
-        
-        assertAdds(friendList, f1);
-        assertAdds(friendList, f2);
-        
-        assertEquals(2, friendList.size());
-        
-        friendList.setAddNewAudioAlways(false);
-        assertFalse(friendList.isAddNewAudioAlways());
-        
-        Thread.sleep(500);
-        
-        assertEquals(2, friendList.size());
-        
-        f3 = createNewExtensionTestFile(5, "wav", _scratchDir);
-        assertAdds(managedList, f3);
-        
-        Thread.sleep(500);
-        
-        assertEquals(2, friendList.size());
-        assertFalse(friendList.contains(f3));
-    }
+//    /**
+//     * Tests that smart share categories are mutually
+//     * exclusive
+//     */
+//    public void testSmartSharingCategories() {
+//        
+//        assertFalse(friendList.isAddNewAudioAlways());
+//        assertFalse(friendList.isAddNewImageAlways());
+//        assertFalse(friendList.isAddNewVideoAlways());
+//        
+//        friendList.setAddNewAudioAlways(true);
+//    
+//        assertTrue(friendList.isAddNewAudioAlways());
+//        assertFalse(friendList.isAddNewImageAlways());
+//        assertFalse(friendList.isAddNewVideoAlways());
+//        
+//        friendList.setAddNewImageAlways(true);
+//        
+//        assertTrue(friendList.isAddNewAudioAlways());
+//        assertTrue(friendList.isAddNewImageAlways());
+//        assertFalse(friendList.isAddNewVideoAlways());
+//        
+//        friendList.setAddNewVideoAlways(true);
+//        
+//        assertTrue(friendList.isAddNewAudioAlways());
+//        assertTrue(friendList.isAddNewImageAlways());
+//        assertTrue(friendList.isAddNewVideoAlways());
+//    }
+//    
+//    /**
+//     * Tests smart sharing a category
+//     */
+//    public void testSmartSharing() throws Exception {
+//        assertEquals(friendList.size(), 0);
+//        assertFalse(friendList.isAddNewAudioAlways());
+//        
+//        f1 = createNewExtensionTestFile(1, "wav", _scratchDir);
+//        f2 = createNewExtensionTestFile(3, "txt", _scratchDir);
+//        
+//        assertAdds(managedList, f1);
+//               
+//        assertFalse(friendList.contains(f1));
+//        assertEquals(0, friendList.size());
+//
+//        friendList.setAddNewAudioAlways(true);
+//        assertTrue(friendList.isAddNewAudioAlways());
+//        
+//        Thread.sleep(500);
+//        
+//        assertEquals(1, friendList.size());
+//        assertTrue(friendList.contains(f1));
+//        assertFalse(friendList.contains(f2));
+//        
+//        f3 = createNewExtensionTestFile(5, "wav", _scratchDir);
+//        assertAdds(managedList, f3);
+//        
+//        Thread.sleep(500);
+//        
+//        assertEquals(2, friendList.size());
+//        assertTrue(friendList.contains(f3));
+//    }
+//    
+//    /**
+//     * Tests stopping smart sharing a category
+//     */
+//    public void testStopSmartSharing() throws Exception {
+//        friendList.setAddNewAudioAlways(true);
+//        assertTrue(friendList.isAddNewAudioAlways());
+//        
+//        
+//        f1 = createNewExtensionTestFile(1, "wav", _scratchDir);
+//        f2 = createNewExtensionTestFile(3, "txt", _scratchDir);
+//        
+//        assertAdds(friendList, f1);
+//        assertAdds(friendList, f2);
+//        
+//        assertEquals(2, friendList.size());
+//        
+//        friendList.setAddNewAudioAlways(false);
+//        assertFalse(friendList.isAddNewAudioAlways());
+//        
+//        Thread.sleep(500);
+//        
+//        assertEquals(2, friendList.size());
+//        
+//        f3 = createNewExtensionTestFile(5, "wav", _scratchDir);
+//        assertAdds(managedList, f3);
+//        
+//        Thread.sleep(500);
+//        
+//        assertEquals(2, friendList.size());
+//        assertFalse(friendList.contains(f3));
+//    }
    
     /**
      * Tests sharing a snapshot of a category

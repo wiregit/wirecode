@@ -43,7 +43,6 @@ class FriendFileListImpl extends AbstractFriendFileList {
     @Override
     protected SharedFileCollection getMutableCollection() {
         if(friendCollection == null) {
-            System.out.println("Creating collection for: " + name);
             friendCollection = collectionManager.getOrCreateSharedCollectionByName(name);
             friendCollection.addPersonToShareWith(name);
         }

@@ -20,14 +20,14 @@ public interface FileCollectionManager {
     void removeCollectionById(int collectionId);
 
     /** Returns the {@link FileCollection} containing Incomplete files. */
-    // TODO: Split read-only uses into FileView exposed from FileViewManager
     IncompleteFileCollection getIncompleteFileCollection();
+    
+    /** Returns a new collection named the given name. */
+    SharedFileCollection createNewCollection(String name);
 
     // TODO: REMOVE THIS!
     SharedFileCollection getOrCreateSharedCollectionByName(String name);
     void removeSharedCollectionByName(String name);
-    
-
 
     /**
      * Unload files in friend's file list. This has the effect of making the file sharing

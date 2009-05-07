@@ -145,7 +145,6 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     public boolean remove(FileDesc fileDesc) {
         saveChange(fileDesc.getFile(), false);
         if(removeFileDescImpl(fileDesc)) {
-            // TODO: Trigger dirty save.
             fireRemoveEvent(fileDesc);
             return true;
         } else {

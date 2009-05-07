@@ -59,7 +59,12 @@ abstract class AbstractFileView implements FileView {
 
     @Override
     public FileDesc getFileDescForIndex(int index) {
-        return library.getFileDescForIndex(index);
+        FileDesc fd = library.getFileDescForIndex(index);
+        if(fd != null && contains(fd)) {
+            return fd;
+        } else {
+            return null;
+        }
     }
 
     @Override

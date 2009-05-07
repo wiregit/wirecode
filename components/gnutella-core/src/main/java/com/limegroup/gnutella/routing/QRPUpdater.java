@@ -47,7 +47,6 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
      */
     private static long QRP_DELAY = (LimeWireUtils.isBetaRelease() ? 1 : 60) * 60 * 1000;
 
-    private final FileManager fileManager;
     private final FileViewManager fileViewManager;
     private final ScheduledExecutorService backgroundExecutor;
     private final ListenerSupport<FileDescChangeEvent> fileDescListenerSupport;
@@ -79,7 +78,6 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ListenerSupport<FileDescChangeEvent> fileDescListenerSupport,
             FileViewManager fileViewManager) {
-        this.fileManager = fileManager;
         this.backgroundExecutor = backgroundExecutor;
         this.fileDescListenerSupport = fileDescListenerSupport;
         this.fileViewManager = fileViewManager;
@@ -171,7 +169,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
         
         //if partial sharing is allowed, add incomplete file keywords also
         if(SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && SharingSettings.PUBLISH_PARTIAL_QRP.getValue()) {
-            FileView incompletes = fileManager.getIncompleteFileCollection();
+            FileView incompletes = fileViewManager.getIncompleteFileView();
             incompletes.getReadLock().lock();
             try {
                 for(FileDesc fd : incompletes) {
@@ -210,7 +208,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 }
             }
         });
-        fileManager.getIncompleteFileCollection().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getIncompleteFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {

@@ -670,7 +670,7 @@ public class ServerSideWhatIsNewTest
         final CountDownLatch incompleteLatch = new CountDownLatch(1);
         final CountDownLatch shareLatch = new CountDownLatch(1);
         
-        fileManager.getIncompleteFileCollection().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getIncompleteFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 if(event.getType() == FileViewChangeEvent.Type.FILE_ADDED) {

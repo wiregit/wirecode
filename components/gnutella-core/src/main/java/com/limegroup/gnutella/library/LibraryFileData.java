@@ -214,7 +214,6 @@ class LibraryFileData extends AbstractSettingsGroup {
                 return true;
             }
         } catch(Throwable throwable) {
-            throwable.printStackTrace();
             LOG.error("Error loading library", throwable);
         }
         

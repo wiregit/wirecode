@@ -22,11 +22,10 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     private SourcedEventMulticaster multicaster;
     private SharedFilesKeywordIndexImpl keywordIndex;
     private Mockery context;
-    private FileManager fileManager;
     private FileViewManager fileViewManager;
     private FileCollection sharedFileList;
     private FileCollection incompleteFileList;
-    private Library managedFileList;
+    private Library library;
 
     public SharedFilesKeywordIndexImplTest(String name) {
         super(name);
@@ -37,12 +36,11 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         context = new Mockery();
         multicaster = context.mock(SourcedEventMulticaster.class);
         registry = context.mock(ServiceRegistry.class);
-        fileManager = context.mock(FileManager.class);
         fileViewManager = context.mock(FileViewManager.class);
-        managedFileList = context.mock(Library.class);
+        library = context.mock(Library.class);
         sharedFileList = context.mock(GnutellaFileCollection.class);
         incompleteFileList = context.mock(IncompleteFileCollection.class);
-        keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null, null, fileViewManager);
+        keywordIndex = new SharedFilesKeywordIndexImpl(library, null, null, null, null, null, fileViewManager);
     }
     
     @SuppressWarnings("unchecked")
@@ -58,14 +56,11 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
             {
                 exactly(1).of(registry).register(with(serviceGetter));                
                 exactly(1).of(sharedFileList).addFileViewListener(with(listenerGetter));
-                exactly(1).of(managedFileList).addManagedListStatusListener(with(any(EventListener.class)));
+                exactly(1).of(library).addManagedListStatusListener(with(any(EventListener.class)));
                 exactly(1).of(incompleteFileList).addFileViewListener(with(any(EventListener.class)));
                 exactly(1).of(multicaster).addListener(with(any(EventListener.class)));
                 
-                atLeast(1).of(fileManager).getLibrary();
-                will(returnValue(managedFileList));
-                
-                atLeast(1).of(fileManager).getIncompleteFileCollection();
+                atLeast(1).of(fileViewManager).getIncompleteFileView();
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(originalFile);
                 will(returnValue(false));
@@ -74,11 +69,11 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
                 atLeast(1).of(sharedFileList).contains(originalFile);
                 will(returnValue(true));
                 
-                atLeast(1).of(fileManager).getIncompleteFileCollection();
+                atLeast(1).of(fileViewManager).getIncompleteFileView();
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(originalFile);
                 will(returnValue(false));
-                atLeast(1).of(fileManager).getIncompleteFileCollection();
+                atLeast(1).of(fileViewManager).getIncompleteFileView();
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(newFile);
                 will(returnValue(false));

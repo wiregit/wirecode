@@ -31,6 +31,11 @@ public class FileManagerStub implements FileManager {
     public ManagedFileListStub getLibrary() {
         return managedStub;
     }   
+    
+    @Override
+    public SharedFileCollection createNewCollection(String name) {
+        throw new UnsupportedOperationException("not supported");
+    }
 
     
     @Override

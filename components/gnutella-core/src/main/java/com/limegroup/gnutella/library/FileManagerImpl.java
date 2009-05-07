@@ -161,6 +161,21 @@ class FileManagerImpl implements FileManager, Service {
         }
     }
     
+    private synchronized SharedFileCollectionImpl createNewCollectionImpl(String name) {
+        int newId = managedFileList.getLibraryData().createNewCollection(name);
+        SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId);
+        collection.initialize();
+        sharedCollections.put(newId, collection);
+        return collection;
+    }
+    
+    @Override
+    public SharedFileCollection createNewCollection(String name) {
+        SharedFileCollectionImpl collection = createNewCollectionImpl(name);
+        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));
+        return collection;
+    }
+    
     @Override
     public SharedFileCollection getOrCreateSharedCollectionByName(String name) {
         SharedFileCollectionImpl collection;
@@ -171,10 +186,7 @@ class FileManagerImpl implements FileManager, Service {
                 }
             }
             
-            int newId = managedFileList.getLibraryData().createNewCollection(name);
-            collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId);
-            collection.initialize();
-            sharedCollections.put(newId, collection);
+            collection = createNewCollectionImpl(name);
         }
         
         sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));

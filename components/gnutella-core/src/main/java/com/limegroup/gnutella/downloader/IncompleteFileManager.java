@@ -28,7 +28,8 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /** 
@@ -77,15 +78,19 @@ public class IncompleteFileManager  {
      */
     private final Map<URN, File> hashes = new HashMap<URN, File>();
     
-    private final Provider<FileManager> fileManager;
+    private final Provider<Library> library;
+    private final Provider<FileCollectionManager> fileCollectionManager;
     private final Provider<HashTreeCache> tigerTreeCache;
     private final VerifyingFileFactory verifyingFileFactory;
     
     @Inject
-    public IncompleteFileManager(Provider<FileManager> fileManager,
+    public IncompleteFileManager(
+            Provider<Library> library,
+            Provider<FileCollectionManager> fileManager,
             Provider<HashTreeCache> tigerTreeCache,
             VerifyingFileFactory verifyingFileFactory) {
-        this.fileManager = fileManager;
+        this.library = library;
+        this.fileCollectionManager = fileManager;
         this.tigerTreeCache = tigerTreeCache;
         this.verifyingFileFactory = verifyingFileFactory;
     }
@@ -102,7 +107,7 @@ public class IncompleteFileManager  {
             File file = iter.next();
             if (!file.exists() ) {
                 ret=true;
-                fileManager.get().getLibrary().remove(file);
+                library.get().remove(file);
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
             }
@@ -129,7 +134,7 @@ public class IncompleteFileManager  {
             }
             if (!file.exists() || (isOld(file) && !activeFiles.contains(file))) {
                 ret=true;
-                fileManager.get().getLibrary().remove(file);
+                library.get().remove(file);
                 file.delete();
                 iter.remove();
             }
@@ -363,7 +368,7 @@ public class IncompleteFileManager  {
         }
         
         //Remove the entry from FileManager
-        fileManager.get().getLibrary().remove(incompleteFile);
+        library.get().remove(incompleteFile);
     }
     
     /**
@@ -461,7 +466,7 @@ public class IncompleteFileManager  {
         Set<URN> completeHashes = getAllCompletedHashes(incompleteFile);
         if( completeHashes.size() == 0 ) return;
         
-        fileManager.get().getIncompleteFileCollection().addIncompleteFile(
+        fileCollectionManager.get().getIncompleteFileCollection().addIncompleteFile(
             incompleteFile,
             completeHashes,
             getCompletedName(incompleteFile),
