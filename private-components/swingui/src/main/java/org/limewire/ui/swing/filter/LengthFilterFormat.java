@@ -13,13 +13,15 @@ class LengthFilterFormat<E extends FilterableItem> implements RangeFilterFormat<
     /** Array of length options in seconds. */
     private static final long[] LENGTHS = {
         0, 
-        10,          // 10 sec
         30,          // 30 sec
         60,          // 1 min
+        60 * 5,      // 5 min
         60 * 10,     // 10 min
+        60 * 15,     // 15 min
         60 * 30,     // 30 min
         60 * 60,     // 1 hr
-        60 * 60 * 24 // 24 hrs
+        60 * 60 * 2, // 2 hrs
+        60 * 60 * 4  // 4 hrs
     };
 
     @Override
