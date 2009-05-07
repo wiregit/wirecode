@@ -12,8 +12,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -124,8 +122,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         setBackground(backgroundColor);
         setBorder(new SideLineBorder(borderColor, Side.RIGHT));
-        setLayout(new MigLayout("insets 0 0 0 0, gap 0!, fill, hidemode 3", 
-                "", ""));
+        setLayout(new MigLayout("insets 0 0 0 0, gap 0!, fill, hidemode 3"));
         
         textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.NONE);
         filterTextField.setMinimumSize(new Dimension(filterWidth, filterTextField.getMinimumSize().height));
@@ -343,8 +340,9 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
      * Sets the default display category, and updates the available filters.
      */
     public void setSearchCategory(SearchCategory searchCategory) {
-        // Save default display category.
+        // Save default display and filter categories.
         defaultDisplayCategory = searchCategory;
+        defaultFilterCategory = searchCategory;
         
         if (searchCategory == SearchCategory.ALL) {
             // Start detector to determine default filter category based on 
@@ -360,9 +358,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             });
             
         } else {
-            // Save default filter category and update filters.
-            defaultFilterCategory = searchCategory;
-            propertyPanel.setFilterCategory(searchCategory);
+            // Update filters using default filter category.
+            propertyPanel.setFilterCategory(defaultFilterCategory);
         }
     }
 
@@ -397,8 +394,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            Set<Filter<E>> filterSet = filterDisplayPanel.getActiveFilters();
-            for (Filter<E> filter : filterSet) {
+            List<Filter<E>> filterList = filterDisplayPanel.getActiveFilters();
+            for (Filter<E> filter : filterList) {
                 removeActiveFilter(filter);
             }
         }
@@ -530,10 +527,10 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         }
         
         /**
-         * Returns the set of filters currently in use.
+         * Returns a list of filters currently in use.
          */
-        public Set<Filter<E>> getActiveFilters() {
-            return new CopyOnWriteArraySet<Filter<E>>(displayMap.keySet());
+        public List<Filter<E>> getActiveFilters() {
+            return new ArrayList<Filter<E>>(displayMap.keySet());
         }
     }
     
