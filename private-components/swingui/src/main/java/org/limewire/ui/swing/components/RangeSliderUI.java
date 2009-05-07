@@ -177,7 +177,7 @@ class RangeSliderUI extends BasicSliderUI {
         if (thumbImage != null) {
             return new Dimension(thumbImage.getWidth(), thumbImage.getHeight());
         } else {
-            return new Dimension(12, 12);
+            return super.getThumbSize();
         }
     }
 
@@ -389,6 +389,48 @@ class RangeSliderUI extends BasicSliderUI {
     }
     
     /**
+     * Moves the selected thumb in the specified direction by a block increment.
+     * This method is called when the user presses the Page Up or Down keys.
+     */
+    @Override
+    public void scrollByBlock(int direction) {
+        synchronized (slider) {
+            int blockIncrement = (slider.getMaximum() - slider.getMinimum()) / 10;
+            if (blockIncrement <= 0 && slider.getMaximum() > slider.getMinimum()) {
+                blockIncrement = 1;
+            }
+            int delta = blockIncrement * ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+            
+            if (upperThumbSelected) {
+                int oldValue = ((RangeSlider) slider).getUpperValue();
+                ((RangeSlider) slider).setUpperValue(oldValue + delta);
+            } else {
+                int oldValue = slider.getValue();
+                slider.setValue(oldValue + delta);
+            }
+        }
+    }
+    
+    /**
+     * Moves the selected thumb in the specified direction by a unit increment.
+     * This method is called when the user presses one of the arrow keys.
+     */
+    @Override
+    public void scrollByUnit(int direction) {
+        synchronized (slider) {
+            int delta = 1 * ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+            
+            if (upperThumbSelected) {
+                int oldValue = ((RangeSlider) slider).getUpperValue();
+                ((RangeSlider) slider).setUpperValue(oldValue + delta);
+            } else {
+                int oldValue = slider.getValue();
+                slider.setValue(oldValue + delta);
+            }
+        }       
+    }
+    
+    /**
      * Listener to handle model change events.  This calculates the thumb 
      * locations and repaints the slider if the value change is not caused by
      * dragging a thumb.
@@ -450,6 +492,7 @@ class RangeSliderUI extends BasicSliderUI {
                     offset = currentMouseX - thumbRect.x;
                     break;
                 }
+                upperThumbSelected = false;
                 lowerDragging = true;
                 return;
             }
@@ -466,6 +509,7 @@ class RangeSliderUI extends BasicSliderUI {
                     offset = currentMouseX - upperThumbRect.x;
                     break;
                 }
+                upperThumbSelected = true;
                 upperDragging = true;
                 return;
             }
@@ -490,12 +534,10 @@ class RangeSliderUI extends BasicSliderUI {
             currentMouseY = e.getY();
 
             if (lowerDragging) {
-                upperThumbSelected = false;
                 slider.setValueIsAdjusting(true);
                 moveLowerThumb();
                 
             } else if (upperDragging) {
-                upperThumbSelected = true;
                 slider.setValueIsAdjusting(true);
                 moveUpperThumb();
             }
