@@ -99,8 +99,10 @@ class RangeFilter<E extends FilterableItem> extends AbstractFilter<E> {
             String maxText = rangeFormat.getValueText(slider.getUpperValue());
             
             if (slider.getUpperValue() == slider.getMaximum()) {
+                // {0}: lower bound of open-ended numeric range
                 return I18n.tr("{0} or above", minText);
             } else {
+                // {0}: lower bound of numeric range, {1}: upper bound of numeric range
                 return I18n.tr("{0} to {1}", minText, maxText);
             }
 
