@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.StringTrieSet;
+import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactoryImpl;
@@ -52,6 +53,9 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(SortAndFilterPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
                 SortAndFilterPanelFactory.class, SortAndFilterPanel.class));
+        
+        bind(new TypeLiteral<AdvancedFilterPanelFactory<VisualSearchResult>>(){}).to(
+                SearchFilterPanelFactory.class);
         
         bind(BaseResultPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
