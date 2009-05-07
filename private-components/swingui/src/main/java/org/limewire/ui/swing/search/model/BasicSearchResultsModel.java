@@ -173,6 +173,21 @@ class BasicSearchResultsModel implements SearchResultsModel {
     }
     
     @Override
+    public SearchCategory getFilterCategory() {
+        return searchInfo.getSearchCategory();
+    }
+    
+    @Override
+    public EventList<VisualSearchResult> getUnfilteredList() {
+        return observableList;
+    }
+    
+    @Override
+    public EventList<VisualSearchResult> getFilteredList() {
+        return filteredResultList;
+    }
+    
+    @Override
     public SearchCategory getSearchCategory() {
         return searchInfo.getSearchCategory();
     }
@@ -180,6 +195,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
     @Override
     public String getSearchQuery() {
         return searchInfo.getSearchQuery();
+    }
+    
+    @Override
+    public String getSearchTitle() {
+        return searchInfo.getTitle();
     }
     
     @Override
