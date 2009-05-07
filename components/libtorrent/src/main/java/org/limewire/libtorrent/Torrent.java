@@ -18,6 +18,8 @@ import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
+import com.google.inject.Inject;
+
 public class Torrent {
     private final EventListenerList<TorrentEvent> listeners;
 
@@ -45,6 +47,9 @@ public class Torrent {
 
     private LibTorrentInfo info = null;
     
+    private String fastResumeData = null;
+    
+    @Inject
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
         this.listeners = new EventListenerList<TorrentEvent>();
@@ -61,7 +66,7 @@ public class Torrent {
     }
 
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File saveLocation, char[] fastResumeData) {
+            List<String> paths, File saveLocation, String fastResumeData) {
         this.name = name;
         File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
         this.incompleteFile = new File(torrentDownloadFolder, name);
@@ -70,6 +75,9 @@ public class Torrent {
         this.trackerURL = trackerURL;
         this.paths.addAll(paths);
         this.totalSize = totalSize;
+        this.fastResumeData = fastResumeData;
+        
+        System.out.println("TEST:|"+fastResumeData+"|");
     }
 
     public synchronized void init(File torrentFile, File saveDir) throws IOException {
@@ -116,11 +124,11 @@ public class Torrent {
             if (torrentFile != null) {
                 info = torrentManager.addTorrent(torrentFile);
             } else {
-                torrentManager.addTorrent(sha1, trackerURL);
+                torrentManager.addTorrent(sha1, trackerURL, fastResumeData);
             }
 
-            torrentManager.addListener(sha1, new EventListener<LibTorrentEvent>() {
-                public void handleEvent(LibTorrentEvent event) {
+            torrentManager.addStatusListener(sha1, new EventListener<LibTorrentStatusEvent>() {
+                public void handleEvent(LibTorrentStatusEvent event) {
                     LibTorrentStatus status = event.getTorrentStatus();
                     updateStatus(status);
                 }
@@ -129,6 +137,18 @@ public class Torrent {
                     Torrent.this.status.set(status);
                     listeners.broadcast(new TorrentEvent());
                 }
+            });
+            
+            // Add the listener for collecting fast resume data
+            torrentManager.addAlertListener(sha1, new EventListener<LibTorrentAlertEvent>() {
+                @Override
+                public void handleEvent(LibTorrentAlertEvent event) {
+                    
+                    if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && event.getAlert().data != null) {
+                        fastResumeData = event.getAlert().data;
+                        System.out.println("[" + fastResumeData.charAt(0) + "]");
+                    }                    
+                } 
             });
         }
     }
@@ -290,5 +310,9 @@ public class Torrent {
 
     public LibTorrentStatus getStatus() {
         return status.get();
+    }
+
+    public String getFastResumeData() {
+        return fastResumeData;
     }
 }

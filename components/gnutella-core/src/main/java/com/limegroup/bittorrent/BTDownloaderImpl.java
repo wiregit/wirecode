@@ -20,12 +20,12 @@ import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentEvent;
-import org.limewire.libtorrent.TorrentManager;
 import org.limewire.libtorrent.TorrentSHA1ConversionUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -47,8 +47,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final DownloadManager downloadManager;
 
-    private final TorrentManager torrentManager;
-
     private final Torrent torrent;
 
     private final BTUploaderFactory btUploaderFactory;
@@ -61,13 +59,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private URN urn = null;
 
     @Inject
-    BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
-            TorrentManager torrentManager, BTUploaderFactory btUploaderFactory) {
+    BTDownloaderImpl(SaveLocationManager saveLocationManager, 
+            DownloadManager downloadManager, BTUploaderFactory btUploaderFactory,
+            Provider<Torrent> torrentProvider) {
         super(saveLocationManager);
+        
         this.downloadManager = downloadManager;
-        this.torrentManager = torrentManager;
         this.btUploaderFactory = btUploaderFactory;
-        this.torrent = new Torrent(torrentManager);
+        this.torrent = torrentProvider.get();
+        
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
                 if (torrent.isFinished() && !complete.getAndSet(true)) {
@@ -99,7 +99,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void pause() {
-        torrentManager.pauseTorrent(torrent.getSha1());
+        torrent.pause();
     }
 
     @Override
@@ -132,7 +132,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean resume() {
-        torrentManager.resumeTorrent(torrent.getSha1());
+        torrent.resume();
         return true;
     }
 
@@ -465,7 +465,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         btMemento.setContentLength(getContentLength());
         btMemento.setTrackerURL(torrent.getTrackerURL());
         btMemento.setPaths(torrent.getPaths());
-        btMemento.setFastResumeData(null); // TODO
+        btMemento.setFastResumeData(torrent.getFastResumeData());
     }
 
     public void initFromCurrentMemento(LibTorrentBTDownloadMemento memento) throws InvalidDataException {

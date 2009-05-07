@@ -13,7 +13,7 @@ public interface LibTorrent extends Library {
 
     public LibTorrentInfo add_torrent(String path);
     
-    public LibTorrentInfo add_torrent_old(String sha1, String trackerURI);
+    public void add_torrent_existing(String sha1, String trackerURI, String fastResumeData);
     
     public int pause_torrent(String id);
 
@@ -29,7 +29,7 @@ public interface LibTorrent extends Library {
     
     public void get_peers(String id, Memory memory);
     
-    public void signal_fast_resume_data_request(String id);
+    public boolean signal_fast_resume_data_request(String id);
     
     public int remove_torrent(String id);
 

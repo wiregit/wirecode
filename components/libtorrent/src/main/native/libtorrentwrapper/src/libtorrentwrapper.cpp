@@ -156,8 +156,8 @@ extern "C" int move_torrent(const char* id, const char* path) {
 	}
 }
 
-extern "C" const void* add_torrent_old(char* sha1String, char* trackerURI) {
-	//TODO rename method
+extern "C" const void* add_torrent_existing(char* sha1String, char* trackerURI, char* fastResumeData) {
+
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "sha1String" << sha1String << std::endl;
 	std::cout << "trackerURI" << trackerURI << std::endl;
@@ -168,11 +168,17 @@ extern "C" const void* add_torrent_old(char* sha1String, char* trackerURI) {
 	p.save_path = savePath;
 	p.info_hash = sha1;
 	p.tracker_url = trackerURI;
-
+	
+	std::vector<char> resume_buf;
+	if (fastResumeData)
+	{	for ( int i=0 ; fastResumeData[i] != 1 ; i++ ) {
+			resume_buf.push_back(fastResumeData[i] - 1);
+		}
+        }
+	
+	p.resume_data = &resume_buf;
+	
 	libtorrent::torrent_handle h = s.add_torrent(p);
-
-	// TODO: Memory leak
-	return new info_s();
 }
 
 extern "C" const void* add_torrent(char* path) {
@@ -269,19 +275,29 @@ extern "C" void* get_torrent_status(const char* id, void* stat) {
 	return stats;
 }
 
-extern "C" void signal_fast_resume_data_request(const char* id) {
+extern "C" bool signal_fast_resume_data_request(const char* id) {
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 
-	if (h.is_valid()) {
+	if (h.is_valid() && h.has_metadata()) {
 		h.save_resume_data();
+		return 1;
+	} else {
+		return 0;
 	}
 }
 
 struct alert_s {
+	int category;
 	const char* sha1;
 	const char* message;
 	const char* data;
-	int category;
+	
+	alert_s() {
+		sha1 = 0;
+		category = 0;
+		message = 0;
+		data = 0;
+	}
 };
 
 extern "C" int get_num_peers(const char* id) {
@@ -346,10 +362,8 @@ extern "C" void get_peers(const char* id, int buffer_len, char* data) {
 
 void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
 	
-	alertStatus->sha1 = 0;
 	alertStatus->category = alert->category();
 	alertStatus->message = alert->message().c_str();
-	alertStatus->data = 0;
 	
 	libtorrent::torrent_alert* torrentAlert;
 	
@@ -365,9 +379,19 @@ void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
 
 			if (rd) {
 				std::cout << "save_resume_data_alert" << std::endl;
-				std::stringstream oss;
-				bencode(std::ostream_iterator<char>(oss), *rd->resume_data);
-				alertStatus->data = oss.str().c_str();
+				std::vector<char> buf;
+				bencode(std::back_inserter(buf), *rd->resume_data);
+				
+				char resume_data[buf.size()];
+				
+				for ( int i=0 ; i<buf.size() ; i++ ) {
+					resume_data[i] = buf[i] + 1;
+				}
+					
+				alertStatus->data = resume_data;
+				
+				std::cout << '{' << alertStatus->data << '}' << std::endl;
+				return;
 			}
 			
 			libtorrent::save_resume_data_failed_alert const* rd2 = dynamic_cast<libtorrent::save_resume_data_failed_alert const*>(alert);
@@ -375,6 +399,15 @@ void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
 			if (rd2) {
 				std::cout << "save_resume_data_failed_alert (" << rd2->msg << ")" << std::endl;
 				alertStatus->message = rd2->msg.c_str();
+				return;
+			}
+			
+			libtorrent::fastresume_rejected_alert const* rd3 = dynamic_cast<libtorrent::fastresume_rejected_alert const*>(alert);
+			
+			if (rd3) {
+				std::cout << "fastresume_rejected_alert (" << rd3->msg << ")" << std::endl;
+				alertStatus->message = rd3->msg.c_str();
+				return;
 			}
 			
 		}

@@ -8,25 +8,27 @@ import org.limewire.listener.EventListener;
 
 public interface TorrentManager extends Service {
 
-    public abstract void addListener(String id, EventListener<LibTorrentEvent> listener);
-
-    public abstract LibTorrentInfo addTorrent(File torrent);
+    public void addStatusListener(String id, EventListener<LibTorrentStatusEvent> listener);
     
-    public abstract void removeTorrent(String id);
+    public void addAlertListener(String id, EventListener<LibTorrentAlertEvent> listener);
 
-    public abstract void pauseTorrent(String id);
-
-    public abstract void resumeTorrent(String id);
-
-    public abstract LibTorrentStatus getStatus(String id);
-
-    public abstract List<String> getPeers(String id);
+    public LibTorrentInfo addTorrent(File torrent);
     
-    public abstract File getTorrentDownloadFolder();
+    public void removeTorrent(String id);
 
-    public abstract boolean moveTorrent(String id, File directory);
+    public void pauseTorrent(String id);
 
-    public abstract int getNumActiveTorrents();
+    public void resumeTorrent(String id);
 
-    public abstract LibTorrentInfo addTorrent(String sha1, String trackerURI);
+    public LibTorrentStatus getStatus(String id);
+
+    public List<String> getPeers(String id);
+    
+    public File getTorrentDownloadFolder();
+
+    public boolean moveTorrent(String id, File directory);
+
+    public int getNumActiveTorrents();
+
+    public void addTorrent(String sha1, String trackerURI, String fastResumeData);
 }

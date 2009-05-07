@@ -108,15 +108,16 @@ public class LibTorrentWrapper implements LibTorrent {
     public int get_num_peers(String id) {
         LOG.debugf("before get_num_peers: {0}", id);
         int ret = libTorrent.get_num_peers(id);
-        LOG.debugf("after get_num_peers: {0}", id);
+        LOG.debugf("after get_num_peers: {0} - {1}", id, ret);
         return ret;
     }
 
     @Override 
-    public void signal_fast_resume_data_request(String id) {
+    public boolean signal_fast_resume_data_request(String id) {
         LOG.debugf("before print signal_fast_resume_data_request: {0}", id);
-        libTorrent.signal_fast_resume_data_request(id);
-        LOG.debugf("after print signal_fast_resume_data_request: {0}", id);
+        boolean ret = libTorrent.signal_fast_resume_data_request(id);
+        LOG.debugf("after print signal_fast_resume_data_request: {0} - {1}", id, ret);
+        return ret;
     }
     
     @Override
@@ -144,11 +145,10 @@ public class LibTorrentWrapper implements LibTorrent {
     }
 
     @Override
-    public LibTorrentInfo add_torrent_old(String sha1, String trackerURI) {
+    public void add_torrent_existing(String sha1, String trackerURI, String fastResumeData) {
         LOG.debugf("before add_torrent_old: {0} - {1}", sha1, trackerURI);
-        LibTorrentInfo info = libTorrent.add_torrent_old(sha1, trackerURI);
+        libTorrent.add_torrent_existing(sha1, trackerURI, fastResumeData);
         LOG.debugf("after add_torrent_old: {0} - {1}", sha1, trackerURI);
-        return info;
     }
 
 }

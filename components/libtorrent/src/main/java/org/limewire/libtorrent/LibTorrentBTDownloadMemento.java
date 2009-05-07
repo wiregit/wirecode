@@ -62,8 +62,8 @@ public class LibTorrentBTDownloadMemento implements DownloadMemento, Serializabl
         return (List<String>) serialObjects.get("paths");
     }
 
-    public char[] getFastResumeData() {
-        return (char[]) serialObjects.get("fastResumeData");
+    public String getFastResumeData() {
+        return (String) serialObjects.get("fastResumeData");
     }
     
     @Override
@@ -106,7 +106,7 @@ public class LibTorrentBTDownloadMemento implements DownloadMemento, Serializabl
         serialObjects.put("trackerURL", url);
     }
     
-    public void setFastResumeData(char[] data) {
+    public void setFastResumeData(String data) {
         serialObjects.put("fastResumeData", data);
     }
     

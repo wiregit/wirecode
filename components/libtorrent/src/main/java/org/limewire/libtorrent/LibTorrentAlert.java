@@ -4,18 +4,15 @@ import com.sun.jna.Structure;
 
 public class LibTorrentAlert extends Structure {
     
-    public final static int SAVE_RESUME_DATA_ALERT = 8;
-    
+    public int category;
     public String sha1;
-
     public String message;
-    
     public String data;
 
-    public int category;
+    public final static int SAVE_RESUME_DATA_ALERT = 8;
     
     @Override
     public String toString() {
-        return sha1 + " " + message  + " [" + category + "] " + data; 
+        return sha1 + " " + message  + " [" + category + "] "; 
     }
 }

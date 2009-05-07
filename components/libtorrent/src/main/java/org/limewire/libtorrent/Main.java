@@ -43,9 +43,9 @@ public class Main {
 
         System.out.println("sha1_java: " + id);
 
-        libTorrentManager.addListener(id, new EventListener<LibTorrentEvent>() {
+        libTorrentManager.addStatusListener(id, new EventListener<LibTorrentStatusEvent>() {
             @Override
-            public void handleEvent(LibTorrentEvent event) {
+            public void handleEvent(LibTorrentStatusEvent event) {
 
                 LibTorrentStatus torrentStatus = event.getTorrentStatus();
 

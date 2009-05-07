@@ -35,7 +35,8 @@ public class TorrentManagerImpl implements TorrentManager {
     
     private final List<String> torrents;
 
-    private final SourcedEventMulticaster<LibTorrentEvent, String> listeners;
+    private final SourcedEventMulticaster<LibTorrentStatusEvent, String> statusListeners;
+    private final SourcedEventMulticaster<LibTorrentAlertEvent, String> alertListeners;
 
     private EventPoller eventPoller;
     
@@ -48,12 +49,18 @@ public class TorrentManagerImpl implements TorrentManager {
         
         this.libTorrent = new LibTorrentWrapper();
         this.torrents = new CopyOnWriteArrayList<String>();
-        this.listeners = new SourcedEventMulticasterImpl<LibTorrentEvent, String>();
+        this.statusListeners = new SourcedEventMulticasterImpl<LibTorrentStatusEvent, String>();
+        this.alertListeners = new SourcedEventMulticasterImpl<LibTorrentAlertEvent, String>();
     }
 
     @Override
-    public void addListener(String id, EventListener<LibTorrentEvent> listener) {
-        listeners.addListener(id, listener);
+    public void addStatusListener(String id, EventListener<LibTorrentStatusEvent> listener) {
+        statusListeners.addListener(id, listener);
+    }
+    
+    @Override
+    public void addAlertListener(String id, EventListener<LibTorrentAlertEvent> listener) {
+        alertListeners.addListener(id, listener);
     }
     
     @Inject
@@ -91,12 +98,11 @@ public class TorrentManagerImpl implements TorrentManager {
     }
     
     @Override
-    public LibTorrentInfo addTorrent(String sha1, String trackerURI) {
+    public void addTorrent(String sha1, String trackerURI, String fastResumeData) {
         synchronized (eventPoller) {
-            LibTorrentInfo info = libTorrent.add_torrent_old(sha1, trackerURI);
+            libTorrent.add_torrent_existing(sha1, trackerURI, fastResumeData);
             torrents.add(sha1);
             updateStatus(sha1);
-            return info;
         }
     }
 
@@ -111,7 +117,7 @@ public class TorrentManagerImpl implements TorrentManager {
             public void run() {
                 synchronized (eventPoller) {
                     libTorrent.remove_torrent(id);
-                    listeners.removeListeners(id);
+                    statusListeners.removeListeners(id);
                 }
             }
         }.start();
@@ -138,7 +144,7 @@ public class TorrentManagerImpl implements TorrentManager {
     private void updateStatus(String id) {
         LibTorrentStatus torrentStatus = libTorrent.get_torrent_status(id);
         // TODO broadcast asynchronously
-        listeners.broadcast(new LibTorrentEvent(id, null, torrentStatus));
+        statusListeners.broadcast(new LibTorrentStatusEvent(id, torrentStatus));
     }
 
     @Override
@@ -173,7 +179,7 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public void start() {
         backgroundExecutor.scheduleAtFixedRate(eventPoller, 1000, 500, TimeUnit.MILLISECONDS);
-        backgroundExecutor.scheduleAtFixedRate(new ResumeDataSaver(), 5000, 5000, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleAtFixedRate(new ResumeDataSaver(), 6000, 6000, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -183,17 +189,30 @@ public class TorrentManagerImpl implements TorrentManager {
         
         libTorrent.abort_torrents();
         for(String id : torrents) {
-            listeners.removeListeners(id);
+            statusListeners.removeListeners(id);
         }
         torrents.clear();
     }
     
 
     private class EventPoller implements Runnable  {
+        
+        private final AlertCallback alertCallback = new AlertCallback() {
+            @Override
+            public void callback(LibTorrentAlert alert) {
+                LOG.debug(alert.toString());
+                if (alert.sha1 != null) {
+                    alertListeners.broadcast(new LibTorrentAlertEvent(alert.sha1, alert));
+                }
+            }
+        };
+        
         @Override
         public void run() {
             synchronized (this) {
                 pumpStatus();
+                
+                libTorrent.get_alerts(alertCallback);
             }
         }
 
@@ -201,19 +220,6 @@ public class TorrentManagerImpl implements TorrentManager {
             for (String id : torrents) {
                 updateStatus(id);
             }
-            
-            libTorrent.get_alerts(new AlertCallback() {
-                @Override
-                public void callback(LibTorrentAlert alert) {
-                    
-                    LOG.debug(alert.toString());
-                    
-                    if (alert.category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && alert.data != null) {
-                        // TODO: get matching Torrent instance and save fast resume data in it so
-                        //        it can be saved in the memento.
-                    }
-                }
-            });
         }
     }
     
@@ -230,7 +236,7 @@ public class TorrentManagerImpl implements TorrentManager {
                         return;
                     }
                 }
-
+                
                 libTorrent.signal_fast_resume_data_request(torrentIterator.next());
             }
         }
