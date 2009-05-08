@@ -70,6 +70,22 @@ class LibraryFileData extends AbstractSettingsGroup {
         FIVE_TWO; // the current version
     }
     
+    private static final String CURRENT_VERSION_KEY = "CURRENT_VERSION";
+    private static final String USER_EXTENSIONS_KEY = "USER_EXTENSIONS";
+    private static final String USER_REMOVED_KEY = "USER_REMOVED";
+    private static final String MANAGED_DIRECTORIES_KEY = "MANAGED_DIRECTORIES";
+    private static final String DO_NOT_MANAGE_KEY = "DO_NOT_MANAGE";
+    private static final String EXCLUDE_FILES_KEY = "EXCLUDE_FILES";
+    private static final String SHARE_DATA_KEY = "SHARE_DATA";
+    private static final String FILE_DATA_KEY = "FILE_DATA";
+    private static final String COLLECTION_NAME_KEY = "COLLECTION_NAMES";
+    private static final String COLLECTION_SHARE_DATA_KEY = "COLLECTION_SHARE_DATA";
+    
+    static final Integer GNUTELLA_COLLECTION_ID = 0;
+    static final Integer ALL_FRIENDS_COLLECTION_ID = 1;
+    private static final Integer MIN_COLLECTION_ID = 2;
+    
+    
     private final Version CURRENT_VERSION = Version.FIVE_TWO;
     
     private final Set<String> userExtensions = new HashSet<String>();
@@ -81,10 +97,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     private final SortedMap<Integer, String> collectionNames = new TreeMap<Integer, String>();
     private final Map<Integer, List<String>> collectionShareData = new HashMap<Integer, List<String>>();
     private volatile boolean dirty = false;
-    
-    private void printData() {
-        System.out.println("File Data: " + fileData + "\nCollection Names: " + collectionNames  + "\nCollection Share Data: " + collectionShareData);
-    }
     
     private final File saveFile = new File(CommonUtils.getUserSettingsDir(), "library5.dat"); 
     private final File backupFile = new File(CommonUtils.getUserSettingsDir(), "library5.bak");
@@ -124,21 +136,6 @@ class LibraryFileData extends AbstractSettingsGroup {
             lock.writeLock().unlock();
         }
     }
-    
-    private static final String CURRENT_VERSION_KEY = "CURRENT_VERSION";
-    private static final String USER_EXTENSIONS_KEY = "USER_EXTENSIONS";
-    private static final String USER_REMOVED_KEY = "USER_REMOVED";
-    private static final String MANAGED_DIRECTORIES_KEY = "MANAGED_DIRECTORIES";
-    private static final String DO_NOT_MANAGE_KEY = "DO_NOT_MANAGE";
-    private static final String EXCLUDE_FILES_KEY = "EXCLUDE_FILES";
-    private static final String SHARE_DATA_KEY = "SHARE_DATA";
-    private static final String FILE_DATA_KEY = "FILE_DATA";
-    private static final String COLLECTION_NAME_KEY = "COLLECTION_NAMES";
-    private static final String COLLECTION_SHARE_DATA_KEY = "COLLECTION_SHARE_DATA";
-    
-    static final Integer GNUTELLA_COLLECTION_ID = 0;
-    static final Integer ALL_FRIENDS_COLLECTION_ID = 1;
-    private static final Integer MIN_COLLECTION_ID = 2;
 
     public boolean save() {
         if(!loaded || !dirty) {
@@ -206,7 +203,6 @@ class LibraryFileData extends AbstractSettingsGroup {
                 
                 if(currentVersion instanceof Version) {
                     initializeFromVersion(((Version)currentVersion), readMap);
-                    printData();
                 } else {
                     return false;
                 }
@@ -284,7 +280,6 @@ class LibraryFileData extends AbstractSettingsGroup {
 
     /** Converts 5.0 & 5.1 style share data into 5.2-style collections. */
     private void convertShareData(Map<File, FileProperties> oldShareData, Map<File, List<Integer>> fileData, Map<Integer, String> collectionNames, Map<Integer, List<String>> collectionShareData) {
-        System.out.println("Old Share Data: " + oldShareData);
         int currentId = MIN_COLLECTION_ID;
         Map<String, Integer> friendToCollectionMap = new HashMap<String, Integer>();
         for(Map.Entry<File, FileProperties> data : oldShareData.entrySet()) {
@@ -326,7 +321,6 @@ class LibraryFileData extends AbstractSettingsGroup {
                 }
             }
         }
-        System.out.println("Converted!");
     }
 
     /** Returns true if the given file should be excluded from managing. */
@@ -596,6 +590,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         return DEFAULT_MANAGED_EXTENSIONS;
     }
 
+    /** Returns the IDs of all collections. */
     Collection<Integer> getStoredCollectionIds() {
         lock.readLock().lock();
         try {
@@ -657,6 +652,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
+    /** Returns the name of the given collection's id. */
     String getNameForCollection(int collectionId) {
         lock.readLock().lock();
         try {
@@ -666,6 +662,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
+    /** Returns an ID that will be used for a new collection with the given name. */
     int createNewCollection(String name) {
         lock.writeLock().lock();
         try {
@@ -681,6 +678,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
+    /** Adds a new shareId to the given collection's Id. */
     boolean addShareIdToCollection(int collectionId, String id) {
         lock.writeLock().lock();
         try {
@@ -701,6 +699,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
+    /** Removes a particular shareId from the given collection's Id. */
     boolean removeShareIdFromCollection(int collectionId, String id) {
         lock.writeLock().lock();
         try {
@@ -715,6 +714,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
+    /** Returns all shareIds for the given collection id. */
     List<String> getShareIdListForCollection(int collectionId) {
         lock.readLock().lock();
         try {
@@ -729,6 +729,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
+    /** Sets a new share id list for the given collection id. */
     void setShareIdListForCollection(int collectionId, List<String> newIds) {
         lock.writeLock().lock();
         try {

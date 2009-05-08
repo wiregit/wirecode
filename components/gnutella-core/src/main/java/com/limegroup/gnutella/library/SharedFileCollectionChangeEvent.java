@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.limewire.listener.SourcedEvent;
 
+/** A change event for a {@link SharedFileCollection}. */
 public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileCollection> {
     
     public static enum Type {

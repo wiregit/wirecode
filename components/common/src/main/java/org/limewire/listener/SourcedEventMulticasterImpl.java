@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.listener.EventListenerList.EventListenerListContext;
 
+/** A default implementation of {@link SourcedEventMulticaster}. */
 public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implements
         SourcedEventMulticaster<E, S> {
     

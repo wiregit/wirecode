@@ -2,10 +2,9 @@ package com.limegroup.gnutella.library;
 
 import org.limewire.core.api.Category;
 
+/** An extension to {@link FileCollection} that allows files to be 'smart added' or removed. */
 public interface SmartFileCollection extends FileCollection {    
-    
-    //// REMOVE BELOW -- IT EXISTS FOR TRANSITION...
-    
+   
     /**
      * Changes the smart sharing value for images. If true, all new images added to
      * the library will be shared with this list, if false, new images added to 

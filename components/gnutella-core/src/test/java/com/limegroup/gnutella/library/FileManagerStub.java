@@ -65,10 +65,6 @@ public class FileManagerStub implements FileManager, FileViewManager {
 
     public void unloadCollectionByName(String name) { }
 
-    @Override
-    public FileView getCompositeSharedView() {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public FileView getFileViewForId(String id) {

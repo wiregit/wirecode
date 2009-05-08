@@ -10,6 +10,7 @@ import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.URN;
 
+/** A read-only view of a collection of files. */
 public interface FileView extends Iterable<FileDesc> {
    
     /**
@@ -40,7 +41,12 @@ public interface FileView extends Iterable<FileDesc> {
      */
     FileDesc getFileDescForIndex(int index);
 
-    /** Gets all the indexes currently in this collection. */
+    /**
+     * Gets all the indexes currently in this collection.
+     * 
+     * Note: This should only be used while the readLock is held.
+     *       The contents should also not be modified.
+     */
     IntSet getIndexes();    
 
     /** Returns true if this list contains a FileDesc for the given file. */

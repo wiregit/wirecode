@@ -30,15 +30,13 @@ import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 
-// TODO: Needs to fire events for the views.
-
+/** The default implementation of {@link FileViewManager}. */
 @Singleton
 class FileViewManagerImpl implements FileViewManager {
     
     private final LibraryImpl library;
     private final GnutellaFileCollectionImpl gnutellaView;
     private final IncompleteFileCollectionImpl incompleteView;
-    private final SharedCollectionBackedFileViewImpl compositeView;
     
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final Map<String, SharedCollectionBackedFileViewImpl> fileViews = new HashMap<String, SharedCollectionBackedFileViewImpl>();
@@ -54,7 +52,6 @@ class FileViewManagerImpl implements FileViewManager {
         this.library = library;
         this.gnutellaView = gnutellaCollection;
         this.incompleteView = incompleteCollection;
-        this.compositeView = new SharedCollectionBackedFileViewImpl(rwLock.readLock(), library, multicaster);
     }
     
     @Inject void register(@AllFileCollections ListenerSupport<FileViewChangeEvent> viewListeners,
@@ -290,11 +287,6 @@ class FileViewManagerImpl implements FileViewManager {
                 multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_ADDED, fileDesc));
             }
         }
-    }
-
-    @Override
-    public FileView getCompositeSharedView() {
-        return compositeView;
     }
     
     @Override

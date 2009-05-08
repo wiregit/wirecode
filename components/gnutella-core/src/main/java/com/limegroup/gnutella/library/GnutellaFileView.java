@@ -3,7 +3,7 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.List;
 
-
+/** A read-only view of files that are shared with Gnutella. */
 public interface GnutellaFileView extends FileView {
 
     /** Returns the size of all files within this list, in <b>bytes</b>. */

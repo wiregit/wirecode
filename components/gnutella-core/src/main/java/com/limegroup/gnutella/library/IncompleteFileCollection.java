@@ -6,6 +6,7 @@ import java.util.Set;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 
+/** A collection of {@link IncompleteFileDesc}s */
 public interface IncompleteFileCollection extends FileCollection {
     
     /**

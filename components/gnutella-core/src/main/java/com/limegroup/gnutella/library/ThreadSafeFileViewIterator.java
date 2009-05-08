@@ -3,6 +3,7 @@ package com.limegroup.gnutella.library;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/** An iterator over a FileView that does not need locks held while iterating. */
 class ThreadSafeFileViewIterator implements Iterator<FileDesc> {
     
     private final AbstractFileCollection fileList;

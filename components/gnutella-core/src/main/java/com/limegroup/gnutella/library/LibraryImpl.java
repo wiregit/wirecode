@@ -707,7 +707,7 @@ class LibraryImpl implements Library, FileCollection {
             public Iterator<FileDesc> iterator() {
                 rwLock.readLock().lock();
                 try {
-                    return new ThreadSafeManagedListIterator();
+                    return new ThreadSafeLibraryIterator();
                 } finally {
                     rwLock.readLock().unlock();
                 }
@@ -1443,7 +1443,7 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     /** An iterator that works over changes to the list. */
-    private class ThreadSafeManagedListIterator implements Iterator<FileDesc> {        
+    private class ThreadSafeLibraryIterator implements Iterator<FileDesc> {        
         /** Points to the index that is to be examined next. */
         private int startRevision = revision.get();
         private int index = 0;

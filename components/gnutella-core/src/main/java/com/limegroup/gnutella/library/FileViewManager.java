@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.library;
 
+/** A manager for retrieving named file views. */
 public interface FileViewManager {
 
     /** Returns the gnutella-specific FileView. */
@@ -13,8 +14,5 @@ public interface FileViewManager {
      * id.
      */
     public FileView getFileViewForId(String id);
-    
-    /** Returns a FileView that contains every possible shared file. */
-    public FileView getCompositeSharedView();
 
 }

@@ -11,6 +11,7 @@ import org.limewire.collection.IntSet.IntSetIterator;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SourcedEventMulticaster;
 
+/** A default implementation of a {@link FileView} that is backed by some number of other file views. */
 class SharedCollectionBackedFileViewImpl extends AbstractFileView {
     
     private final List<FileView> backingViews = new ArrayList<FileView>();

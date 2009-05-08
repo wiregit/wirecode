@@ -43,7 +43,7 @@ import com.limegroup.gnutella.messages.vendor.ContentResponse;
 public class GnutellaFileCollectionImplTest extends LimeTestCase {
 
     private LibraryImpl managedList;
-    private GnutellaFileCollection fileList;
+    private GnutellaFileCollectionImpl fileList;
     private UrnValidator urnValidator;
     private Injector injector;
 
@@ -62,7 +62,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         managedList = (LibraryImpl)injector.getInstance(FileManager.class).getLibrary();
-        fileList = injector.getInstance(FileManager.class).getGnutellaCollection();
+        fileList = (GnutellaFileCollectionImpl)injector.getInstance(FileManager.class).getGnutellaCollection();
         urnValidator = injector.getInstance(UrnValidator.class);
         injector.getInstance(ServiceRegistry.class).initialize();
     }
