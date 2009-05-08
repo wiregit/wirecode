@@ -27,7 +27,8 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
-import com.limegroup.gnutella.library.GnutellaCollectionStub;
+import com.limegroup.gnutella.library.GnutellaFileCollectionStub;
+import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileViewProvider;
 
@@ -61,10 +62,9 @@ public class FileRequestHandlerTest extends LimeTestCase {
             protected void configure() {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
                 bind(HTTPUploadSessionManager.class).toInstance(sessionManager);
-                bind(FileManager.class).to(FileManagerStub.class);
                 bind(NetworkManager.class).to(NetworkManagerStub.class);
             }
-        });
+        }, new LibraryStubModule());
 
         ConnectionManagerStub connectionManager = (ConnectionManagerStub) injector
                 .getInstance(ConnectionManager.class);
@@ -72,7 +72,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
                 9999, false)));
 
         fileManager = (FileManagerStub) injector.getInstance(FileManager.class);
-        GnutellaCollectionStub sharedList = fileManager.getGnutellaCollection();
+        GnutellaFileCollectionStub sharedList = fileManager.getGnutellaCollection();
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
         FileDesc fd1 = new FileDescStub("abc1.txt", urn1, 0);
         sharedList.add(fd1);

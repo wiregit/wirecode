@@ -80,15 +80,15 @@ public class CreationTimeCache {
     
     private final ExecutorService deserializeQueue = ExecutorsHelper.newProcessingQueue("CreationTimeCacheDeserializer");
     
-    private final FileManager fileManager;
-    private final FileViewManager fileViewManager;
+    private final Library library;
+    private final GnutellaFileView gnutellaFileView;
     
     private final Future<Maps> deserializer;
 
     @Inject
-    CreationTimeCache(FileManager fileManager, FileViewManager fileViewManager) {
-        this.fileViewManager = fileViewManager;
-        this.fileManager = fileManager;
+    CreationTimeCache(Library library, GnutellaFileView gnutellaFileView) {
+        this.gnutellaFileView = gnutellaFileView;
+        this.library = library;
         this.deserializer = deserializeQueue.submit(new Callable<Maps>() {
             public Maps call() throws Exception {
                 Map<URN, Long> urnToTime = createMap();
@@ -118,7 +118,7 @@ public class CreationTimeCache {
     }
     
     void initialize() {
-        fileManager.getLibrary().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+        library.addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
             @Override
             public void handleEvent(ManagedListStatusEvent event) {
                 handleManagedListStatusEvent(event);
@@ -127,7 +127,7 @@ public class CreationTimeCache {
         //TODO Currently creation time cache is used to get creation times for CoreLocalFileItem. 
         //By only registering events for gnutella share list changes in CreationTimeCache, the creation time field for Non gnutella shared files is being set to -1. 
         //In the future we will probably want to register for events on the managed fileList instead
-        fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        gnutellaFileView.addFileViewListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 handleFileListEvent(event);
@@ -223,7 +223,7 @@ public class CreationTimeCache {
                 // check to see if file still exists
                 // NOTE: technically a URN can map to multiple FDs, but I only want
                 // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-                FileDesc fd = fileViewManager.getGnutellaFileView().getFileDesc(currURN);
+                FileDesc fd = gnutellaFileView.getFileDesc(currURN);
                 if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
                     dirty = true;
                     iter.remove();
@@ -339,7 +339,7 @@ public class CreationTimeCache {
                     }
                     
                     // we only want shared FDs
-                    FileDesc fd = fileViewManager.getGnutellaFileView().getFileDesc(currURN);
+                    FileDesc fd = gnutellaFileView.getFileDesc(currURN);
                     if (fd == null) {
                         if (toRemove == null) {
                             toRemove = new ArrayList<URN>();

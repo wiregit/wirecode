@@ -13,9 +13,11 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.Category;
 import org.limewire.listener.EventListener;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public class ManagedFileListStub extends AbstractFileCollectionStub implements Library {
+@Singleton
+public class LibraryStub extends AbstractFileCollectionStub implements Library {
 
     @Override
     public Collection<File> getDirectoriesWithImportedFiles() {

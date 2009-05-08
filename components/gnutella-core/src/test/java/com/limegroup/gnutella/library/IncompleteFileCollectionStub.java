@@ -6,7 +6,7 @@ import java.util.Set;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 
-public class IncompleteFileListStub extends AbstractFileCollectionStub implements IncompleteFileCollection {
+public class IncompleteFileCollectionStub extends AbstractFileCollectionStub implements IncompleteFileCollection {
 
     @Override
     public void addIncompleteFile(File incompleteFile, Set<? extends URN> urns, String name,

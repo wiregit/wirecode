@@ -14,7 +14,7 @@ import junit.framework.Test;
  */
 public class FileViewIteratorTest extends BaseTestCase {
 
-    private ManagedFileListStub managedList;
+    private LibraryStub managedList;
     private IntSet indices;
 
     private URN hash1, hash2, hash3, hash4;
@@ -22,7 +22,7 @@ public class FileViewIteratorTest extends BaseTestCase {
 
     public FileViewIteratorTest(String name) {
         super(name);
-        this.managedList = new ManagedFileListStub();
+        this.managedList = new LibraryStub();
         this.indices = new IntSet();
     }
 

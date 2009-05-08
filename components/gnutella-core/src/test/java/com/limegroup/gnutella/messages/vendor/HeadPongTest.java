@@ -47,8 +47,9 @@ import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
-import com.limegroup.gnutella.library.GnutellaCollectionStub;
+import com.limegroup.gnutella.library.GnutellaFileCollectionStub;
 import com.limegroup.gnutella.library.IncompleteFileDescStub;
+import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.UploadManagerStub;
@@ -82,12 +83,11 @@ public class HeadPongTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(FileManager.class).to(FileManagerStub.class);
                 bind(UploadManager.class).to(UploadManagerStub.class);
                 bind(NetworkManager.class).to(NetworkManagerStub.class);
                 bind(DownloadManager.class).toInstance(downloadManager);
             }
-        });
+        }, new LibraryStubModule());
         
         headPongFactory = injector.getInstance(HeadPongFactory.class);       
         fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
@@ -641,7 +641,7 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(GnutellaCollectionStub.DEFAULT_URN);
+        req.setUrn(GnutellaFileCollectionStub.DEFAULT_URN);
         req.setGuid(guid);
                 
         HeadPong pong = headPongFactory.create(req);

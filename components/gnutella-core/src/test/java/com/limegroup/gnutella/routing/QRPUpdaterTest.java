@@ -1,22 +1,18 @@
 package com.limegroup.gnutella.routing;
 
 
-import java.util.LinkedList;
-import java.util.List;
-
 import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lifecycle.ServiceRegistry;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
+import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.stubs.QueryRequestStub;
 
 public class QRPUpdaterTest extends LimeTestCase {
@@ -35,15 +31,7 @@ public class QRPUpdaterTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        
-        List<Module> allModules = new LinkedList<Module>();
-        allModules.add(new AbstractModule() {
-            @Override
-             protected void configure() {
-                bind(FileManager.class).to(FileManagerStub.class);
-             } 
-         });
-        injector = LimeTestUtils.createInjector(allModules.toArray(new Module[0]));
+        injector = LimeTestUtils.createInjector(new LibraryStubModule());
         
         qrpUpdater = injector.getInstance(QRPUpdater.class);
         fileManagerStub = (FileManagerStub)injector.getInstance(FileManager.class);

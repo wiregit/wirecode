@@ -9,11 +9,8 @@ public interface FileCollectionManager {
      * the p2p network.  For that, use {@link #getGnutellaFileView()}. 
      */
     GnutellaFileCollection getGnutellaCollection();
-    
-    /** Returns the {@link FileCollection} with the given id. */
-    SharedFileCollection getSharedCollection(int collectionId);
 
-    /** Returns a {@link FileCollection} with the given id, or creates one if it doesn't already exist. */
+    /** Returns a {@link SharedFileCollection} with the given id. */
     SharedFileCollection getCollectionById(int collectionId);
 
     /** Removes the shared collection. */
@@ -25,16 +22,9 @@ public interface FileCollectionManager {
     /** Returns a new collection named the given name. */
     SharedFileCollection createNewCollection(String name);
 
-    // TODO: REMOVE THIS!
-    SharedFileCollection getOrCreateSharedCollectionByName(String name);
-    void removeSharedCollectionByName(String name);
-
-    /**
-     * Unload files in friend's file list. This has the effect of making the file sharing
-     * characteristics invisible externally.
-     *
-     * @param id friend id
-     */
-    public void unloadFilesForFriend(String friendId);
+    // TODO: These methods are leftover because the UI is not fully updated.
+    SharedFileCollection getOrCreateCollectionByName(String name);
+    void removeCollectionByName(String name);
+    void unloadCollectionByName(String friendId);
 
 }

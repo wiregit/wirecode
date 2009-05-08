@@ -24,7 +24,6 @@ import org.limewire.nio.NIOTestUtils;
 import org.limewire.nio.timeout.StalledUploadWatchdog;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.ActivityCallback;
@@ -51,6 +50,7 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
+import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.tigertree.HashTree;
@@ -107,13 +107,7 @@ public class UploadQueueingTest extends LimeTestCase {
         savedNIOWatchdogDelay = (int) StalledUploadWatchdog.DELAY_TIME;
         StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
 
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivitCallback.class,
-                new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bind(FileManager.class).to(FileManagerStub.class);
-                    }
-                });
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivitCallback.class, new LibraryStubModule());
         
         remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
 

@@ -131,11 +131,6 @@ class FileManagerImpl implements FileManager, Service {
     @Override
     public GnutellaFileCollection getGnutellaCollection() {
         return gnutellaCollection;
-    }    
-    
-    @Override
-    public synchronized SharedFileCollection getSharedCollection(int collectionId) {
-        return sharedCollections.get(collectionId);
     }
 
     @Override
@@ -177,7 +172,7 @@ class FileManagerImpl implements FileManager, Service {
     }
     
     @Override
-    public SharedFileCollection getOrCreateSharedCollectionByName(String name) {
+    public SharedFileCollection getOrCreateCollectionByName(String name) {
         SharedFileCollectionImpl collection;
         synchronized(this) {
             for(SharedFileCollectionImpl shared : sharedCollections.values()) {
@@ -194,7 +189,7 @@ class FileManagerImpl implements FileManager, Service {
     }
     
     @Override
-    public void removeSharedCollectionByName(String name) {
+    public void removeCollectionByName(String name) {
         Integer idToRemove = null;
         synchronized(this) {
             for(Iterator<SharedFileCollectionImpl> entries = sharedCollections.values().iterator(); entries.hasNext(); ) {
@@ -211,20 +206,18 @@ class FileManagerImpl implements FileManager, Service {
         }
     }
 
-    // TODO: This should be removing the FileView for the friend and have
-    //       nothing to do with collections.
-    public void unloadFilesForFriend(String friendName) {
+    public void unloadCollectionByName(String friendName) {
         SharedFileCollectionImpl removeFileList = null;
-
         synchronized (this) {
             removeFileList = sharedCollections.get(friendName);
-
-            if (removeFileList == null) {
-                return;
+            if (removeFileList != null) {
+                sharedCollections.remove(friendName);
             }
-            sharedCollections.remove(friendName);
         }
-        removeFileList.unload();
+        
+        if(removeFileList != null) {
+            removeFileList.unload();
+        }
 
     }
 

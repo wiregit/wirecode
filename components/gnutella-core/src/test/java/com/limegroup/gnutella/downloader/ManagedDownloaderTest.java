@@ -74,6 +74,7 @@ import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.library.IncompleteFileDescStub;
+import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -119,11 +120,11 @@ public class ManagedDownloaderTest extends LimeTestCase {
             protected void configure() {
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
-               bind(FileManager.class).to(FileManagerStub.class);
                bind(NetworkManager.class).to(NetworkManagerStub.class);
                bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProvider);
             } 
         });
+        allModules.add(new LibraryStubModule());
         allModules.addAll(Arrays.asList(modules));
         injector = LimeTestUtils.createInjector(allModules.toArray(new Module[allModules.size()]));
         ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
