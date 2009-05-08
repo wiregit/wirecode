@@ -134,6 +134,7 @@ public class MouseableTable extends StripedJXTable {
 	    setTableHeaderRenderer();
 	    setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 	    setFont(colors.getTableFont());
+	    getActionMap().remove("find");
 		// See http://sites.google.com/site/glazedlists/documentation/swingx		
 		getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
 		//Default java behavior for the enter key is the same as the down arrow.  We don't want this.
