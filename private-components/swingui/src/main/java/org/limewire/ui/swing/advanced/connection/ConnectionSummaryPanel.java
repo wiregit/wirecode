@@ -122,8 +122,10 @@ public class ConnectionSummaryPanel extends JPanel {
         summaryLabel.setText(CONNECTED_TO);
 
         summaryTable.setModel(summaryTableModel);
+        summaryTable.setSelectionForeground(Color.BLACK);
         summaryTable.setPreferredSize(new Dimension(120, 120));
         summaryTable.setShowGrid(false);
+        summaryTable.setFocusable(false);
 
         // Set column widths.
         summaryTable.getColumnModel().getColumn(0).setPreferredWidth(24);
@@ -155,6 +157,7 @@ public class ConnectionSummaryPanel extends JPanel {
         super.setBackground(bgColor);
         if (summaryTable != null) {
             summaryTable.setBackground(bgColor);
+            summaryTable.setSelectionBackground(bgColor);
         }
     }
     
