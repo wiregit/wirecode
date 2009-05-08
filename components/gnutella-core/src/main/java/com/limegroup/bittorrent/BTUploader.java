@@ -1,9 +1,15 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import org.limewire.libtorrent.LibTorrentState;
+import org.limewire.libtorrent.Torrent;
+import org.limewire.libtorrent.TorrentSHA1ConversionUtils;
+
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
@@ -16,14 +22,20 @@ import com.limegroup.gnutella.uploader.UploadType;
  */
 public class BTUploader implements Uploader {
 
-    private final org.limewire.libtorrent.Torrent torrent;
+    private final ActivityCallback activityCallback;
+    private final Torrent torrent;
+    private URN urn = null;
 
-    public BTUploader(org.limewire.libtorrent.Torrent torrent) {
+    private boolean cancelled = false;
+    
+    public BTUploader(Torrent torrent, ActivityCallback activityCallback) {
         this.torrent = torrent;
+        this.activityCallback = activityCallback;
     }
 
     public void stop() {
-
+        activityCallback.promptTorrentUploadCancel(torrent);
+        cancelled = true;
     }
 
     public String getFileName() {
@@ -56,7 +68,24 @@ public class BTUploader implements Uploader {
     }
 
     public UploadStatus getState() {
-        // TODO update this method
+        if (cancelled) {
+            return UploadStatus.CANCELLED;
+        }
+         
+        if (torrent.getStatus().paused) {
+            return UploadStatus.UPLOADING;
+        } else {
+            LibTorrentState state = LibTorrentState.forId(torrent.getStatus().state);
+            
+            switch (state) {
+                case queued_for_checking : 
+                case checking_files :
+                case downloading_metadata :
+                case allocating :
+                    return UploadStatus.CONNECTING;
+            }
+        }
+        
         return UploadStatus.UPLOADING;
     }
 
@@ -81,17 +110,12 @@ public class BTUploader implements Uploader {
     }
 
     public boolean isInactive() {
-        //        
-        // switch (_torrent.getState()) {
-        // case PAUSED:
-        // case STOPPED:
-        // return true;
-        // }
-        // return false;
-
-        // TODO implement
+                
+        if (torrent.getStatus().paused || torrent.getStatus().finished) {
+            return true;
+        }
+        
         return false;
-
     }
 
     public void measureBandwidth() {
@@ -152,14 +176,21 @@ public class BTUploader implements Uploader {
         }
     }
 
-    @Override
     public URN getUrn() {
-        // torrent.getSha1()
-
-        // TODO return urn
-        return null;
+        if (urn == null) {
+            synchronized (this) {
+                if (urn == null) {
+                    try {
+                        urn = URN.createSHA1UrnFromBytes(TorrentSHA1ConversionUtils.fromHexString(torrent.getSha1()));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return urn;
     }
-
+    
     @Override
     public int getNumUploadConnections() {
         return torrent.getNumUploads();

@@ -25,6 +25,8 @@ import com.sun.jna.Memory;
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
     
+    private static final boolean SAVE_FAST_RESUME_DATA = false;
+    
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
     
     private final File torrentDownloadFolder;
@@ -179,11 +181,16 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public void start() {
         backgroundExecutor.scheduleAtFixedRate(eventPoller, 1000, 500, TimeUnit.MILLISECONDS);
-        backgroundExecutor.scheduleAtFixedRate(new ResumeDataSaver(), 6000, 6000, TimeUnit.MILLISECONDS);
+        
+        if (SAVE_FAST_RESUME_DATA) {
+            backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 6000, 6000, TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override
     public void stop() {
+        
+        new Exception("torrent manager stop").printStackTrace();
         
         // TODO: pause then save fast return data?  would need to yield for all to be saved.
         
@@ -223,7 +230,7 @@ public class TorrentManagerImpl implements TorrentManager {
         }
     }
     
-    private class ResumeDataSaver implements Runnable {
+    private class ResumeDataScheduler implements Runnable {
         
         private Iterator<String> torrentIterator = torrents.iterator(); 
         

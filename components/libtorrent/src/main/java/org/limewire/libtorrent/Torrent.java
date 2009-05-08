@@ -48,6 +48,8 @@ public class Torrent {
     private LibTorrentInfo info = null;
     
     private String fastResumeData = null;
+
+    private boolean cancelled = false;
     
     @Inject
     public Torrent(TorrentManager torrentManager) {
@@ -76,8 +78,6 @@ public class Torrent {
         this.paths.addAll(paths);
         this.totalSize = totalSize;
         this.fastResumeData = fastResumeData;
-        
-        System.out.println("TEST:|"+fastResumeData+"|");
     }
 
     public synchronized void init(File torrentFile, File saveDir) throws IOException {
@@ -146,7 +146,6 @@ public class Torrent {
                     
                     if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && event.getAlert().data != null) {
                         fastResumeData = event.getAlert().data;
-                        System.out.println("[" + fastResumeData.charAt(0) + "]");
                     }                    
                 } 
             });
@@ -172,10 +171,6 @@ public class Torrent {
     public float getDownloadRate() {
         LibTorrentStatus status = this.status.get();
         return status == null ? 0 : status.download_rate;
-    }
-
-    public void cancel() {
-        torrentManager.removeTorrent(getSha1());
     }
 
     public String getSha1() {
@@ -270,11 +265,10 @@ public class Torrent {
     }
 
     public void stop() {
-        System.out.println("stop");
-        
         if (started.getAndSet(false)) {
             torrentManager.removeTorrent(sha1);
         }
+        cancelled = true;
     }
 
     public long getTotalUploaded() {
@@ -308,6 +302,10 @@ public class Torrent {
         return 0;
     }
 
+    public boolean isCancelled() {
+        return cancelled ;
+    }
+    
     public LibTorrentStatus getStatus() {
         return status.get();
     }

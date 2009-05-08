@@ -2,6 +2,7 @@ package org.limewire.ui.swing.upload.table;
 
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
+import org.limewire.core.api.upload.UploadState;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
@@ -30,9 +31,11 @@ public class UploadActionHandler {
 
     public void performAction(final String actionCommmand, final UploadItem item){
         if (actionCommmand == CANCEL_COMMAND) {
-            //canceled upload items end up in the DONE state so they need to be manually removed.
-            uploadListManager.remove(item);
             item.cancel();
+            //canceled upload items end up in the DONE state so they need to be manually removed.
+            if (item.getState() == UploadState.CANCELED || item.getState() == UploadState.DONE) {
+                uploadListManager.remove(item);
+            }
         } else if (actionCommmand == LOCATE_ON_DISK_COMMAND){
             NativeLaunchUtils.launchExplorer(item.getFile());
         } else if (actionCommmand == PROPERTIES_COMMAND){

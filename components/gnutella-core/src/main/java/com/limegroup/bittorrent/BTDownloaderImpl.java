@@ -3,8 +3,9 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -13,6 +14,7 @@ import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.libtorrent.LibTorrentBTDownloadMemento;
@@ -92,7 +94,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
-        // TODO add back in seeding logic
+        
         finish();
         downloadManager.remove(this, true);
     }
@@ -181,6 +183,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public DownloadState getState() {
+        
+        if (torrent.isCancelled()) {
+            return DownloadState.ABORTED;
+        }
+        
         LibTorrentStatus status = torrent.getStatus();
         if (status == null) {
             return DownloadState.QUEUED;
@@ -304,6 +311,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         return false;
     }
 
+    @Override
     public long getAmountVerified() {
         return torrent.getTotalDownloaded();
     }
@@ -371,7 +379,17 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         
         // TODO: use torrent.getPeers() ... currently a strange internal libtorrent error retrieving peers.
         
-        return Collections.emptyList();
+        torrent.getPeers();
+        
+        List<Address> list = new LinkedList<Address>();
+        
+        try {
+            list.add(new ConnectableImpl("test.com", false));
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        
+        return list;
     }
 
     @Override

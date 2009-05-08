@@ -19,7 +19,7 @@ public class BTUploaderFactoryImpl implements BTUploaderFactory {
 
     @Override
     public BTUploader createBTUploader(Torrent torrent) {
-        BTUploader btUploader = new BTUploader(torrent);
+        BTUploader btUploader = new BTUploader(torrent, activityCallback.get());
         activityCallback.get().addUpload(btUploader);
         return btUploader;
     }
