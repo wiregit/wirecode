@@ -292,8 +292,8 @@ public class Main {
         }
 
         @Override
-        public void promptTorrentUploadCancel(Torrent torrent) {
-            
+        public boolean promptTorrentUploadCancel(Torrent torrent) {
+            return true;
         }
 
         @Override

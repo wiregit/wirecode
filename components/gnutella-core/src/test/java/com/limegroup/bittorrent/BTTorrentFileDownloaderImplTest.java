@@ -436,8 +436,8 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public void promptTorrentUploadCancel(Torrent torrent) {
-                
+            public boolean promptTorrentUploadCancel(Torrent torrent) {
+                return true;
             }
 
             @Override

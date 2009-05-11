@@ -40,7 +40,7 @@ public class TorrentManagerImpl implements TorrentManager {
     private final SourcedEventMulticaster<LibTorrentStatusEvent, String> statusListeners;
     private final SourcedEventMulticaster<LibTorrentAlertEvent, String> alertListeners;
 
-    private EventPoller eventPoller;
+    private final EventPoller eventPoller;
     
     @Inject
     public TorrentManagerImpl(@TorrentDownloadFolder File torrentDownloadFolder,
@@ -53,6 +53,7 @@ public class TorrentManagerImpl implements TorrentManager {
         this.torrents = new CopyOnWriteArrayList<String>();
         this.statusListeners = new SourcedEventMulticasterImpl<LibTorrentStatusEvent, String>();
         this.alertListeners = new SourcedEventMulticasterImpl<LibTorrentAlertEvent, String>();
+        this.eventPoller = new EventPoller();
     }
 
     @Override
@@ -175,7 +176,6 @@ public class TorrentManagerImpl implements TorrentManager {
     public void initialize() {
         libTorrent.initialize();
         libTorrent.init(torrentDownloadFolder.getAbsolutePath());
-        this.eventPoller = new EventPoller();
     }
 
     @Override
@@ -189,9 +189,6 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void stop() {
-        
-        new Exception("torrent manager stop").printStackTrace();
-        
         // TODO: pause then save fast return data?  would need to yield for all to be saved.
         
         libTorrent.abort_torrents();

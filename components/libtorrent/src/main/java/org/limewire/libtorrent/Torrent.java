@@ -46,11 +46,11 @@ public class Torrent {
     private long totalSize = -1;
 
     private LibTorrentInfo info = null;
-    
+
     private String fastResumeData = null;
 
     private boolean cancelled = false;
-    
+
     @Inject
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
@@ -90,9 +90,9 @@ public class Torrent {
             Map metaInfo = (Map) Token.parse(fileChannel);
             BTData btData = new BTDataImpl(metaInfo);
             name = btData.getName();
-            
+
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
-            
+
             incompleteFile = new File(torrentDownloadFolder, name);
             completeFile = new File(saveDir, name);
 
@@ -135,19 +135,20 @@ public class Torrent {
 
                 private synchronized void updateStatus(LibTorrentStatus status) {
                     Torrent.this.status.set(status);
-                    listeners.broadcast(new TorrentEvent());
+                    listeners.broadcast(TorrentEvent.STATUS_CHANGED);
                 }
             });
-            
+
             // Add the listener for collecting fast resume data
             torrentManager.addAlertListener(sha1, new EventListener<LibTorrentAlertEvent>() {
                 @Override
                 public void handleEvent(LibTorrentAlertEvent event) {
-                    
-                    if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && event.getAlert().data != null) {
+
+                    if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT
+                            && event.getAlert().data != null) {
                         fastResumeData = event.getAlert().data;
-                    }                    
-                } 
+                    }
+                }
             });
         }
     }
@@ -155,7 +156,7 @@ public class Torrent {
     public List<String> getPeers() {
         return torrentManager.getPeers(getSha1());
     }
-    
+
     public boolean moveTorrent(File directory) {
         return torrentManager.moveTorrent(getSha1(), directory);
     }
@@ -189,11 +190,11 @@ public class Torrent {
 
     public long getTotalSize() {
         if (info != null)
-            return info.getContentLength(); 
-            
+            return info.getContentLength();
+
         return totalSize;
     }
-    
+
     public String getTrackerURL() {
         return trackerURL;
     }
@@ -219,7 +220,7 @@ public class Torrent {
     public List<String> getPaths() {
         return paths;
     }
-    
+
     public List<File> getCompleteFiles() {
         List<File> files = new ArrayList<File>();
         File completeFile = getCompleteFile();
@@ -265,10 +266,13 @@ public class Torrent {
     }
 
     public void stop() {
-        if (started.getAndSet(false)) {
-            torrentManager.removeTorrent(sha1);
+        if (!cancelled) {
+            if (started.getAndSet(false)) {
+                torrentManager.removeTorrent(sha1);
+            }
+            cancelled = true;
+            listeners.broadcast(TorrentEvent.STOPPED);
         }
-        cancelled = true;
     }
 
     public long getTotalUploaded() {
@@ -303,9 +307,9 @@ public class Torrent {
     }
 
     public boolean isCancelled() {
-        return cancelled ;
+        return cancelled;
     }
-    
+
     public LibTorrentStatus getStatus() {
         return status.get();
     }

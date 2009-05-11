@@ -268,7 +268,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     @Override
-    public void promptTorrentUploadCancel(Torrent torrent) {
+    public boolean promptTorrentUploadCancel(Torrent torrent) {
         boolean approve = true;//default to true
         if(guiCallback != null) {
             //if (!torrent.isActive()) {
@@ -284,6 +284,8 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         if(approve) { //  && torrent.isActive()) {
             torrent.stop();
         }
+        
+        return approve;
     }
 
 }

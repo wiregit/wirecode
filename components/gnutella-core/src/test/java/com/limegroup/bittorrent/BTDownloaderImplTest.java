@@ -8,6 +8,7 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.libtorrent.TorrentManager;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -319,6 +320,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         CoreDownloaderFactory coreDownloaderFactory = injector
                 .getInstance(CoreDownloaderFactory.class);
+        TorrentManager torrentManager = injector.getInstance(TorrentManager.class);
+        torrentManager.initialize();
         BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory
                 .createBTDownloader(torrentFile);
         return downloader;

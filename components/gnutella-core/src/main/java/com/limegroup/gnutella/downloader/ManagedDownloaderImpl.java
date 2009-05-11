@@ -1899,7 +1899,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Verifies the completed file against the SHA1 hash, checks that it's not
      * dangerous, and saves it. 
-     * @return {@link DownloadStatus#COMPLETE} if all went fine,
+     * @return {@link DownloadStatus#STATUS_CHANGED} if all went fine,
      * {@link DownloadStatus#CORRUPT_FILE} if the hash does not match,
      * {@link DownloadStatus#INFECTED_FILE} if a virus is detected, or 
      * {@link DownloadStatus#DISK_PROBLEM} if there's a problem saving the file.

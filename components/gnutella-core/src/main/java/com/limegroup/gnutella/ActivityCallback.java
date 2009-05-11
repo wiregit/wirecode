@@ -111,6 +111,6 @@ public interface ActivityCallback extends DownloadCallback
      *    wish to seed to at least 100% to be a good samaritan. 
      * @param torrent 
      */
-    void promptTorrentUploadCancel(Torrent torrent);
+    boolean promptTorrentUploadCancel(Torrent torrent);
 
 }

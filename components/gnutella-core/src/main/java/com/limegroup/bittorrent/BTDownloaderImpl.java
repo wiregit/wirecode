@@ -61,21 +61,24 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private URN urn = null;
 
     @Inject
-    BTDownloaderImpl(SaveLocationManager saveLocationManager, 
-            DownloadManager downloadManager, BTUploaderFactory btUploaderFactory,
-            Provider<Torrent> torrentProvider) {
+    BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
+            BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider) {
         super(saveLocationManager);
-        
+
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
-        
+
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
                 if (torrent.isFinished() && !complete.getAndSet(true)) {
                     FileUtils.deleteRecursive(torrent.getCompleteFile());
                     File completeDir = getSaveFile().getParentFile();
                     torrent.moveTorrent(completeDir);
+                }
+
+                if (TorrentEvent.STOPPED == event) {
+                    stop();
                 }
             };
         });
@@ -94,7 +97,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
-        
+
         finish();
         downloadManager.remove(this, true);
     }
@@ -183,11 +186,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public DownloadState getState() {
-        
+
         if (torrent.isCancelled()) {
             return DownloadState.ABORTED;
         }
-        
+
         LibTorrentStatus status = torrent.getStatus();
         if (status == null) {
             return DownloadState.QUEUED;
@@ -246,7 +249,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void discardCorruptDownload(boolean delete) {
-        // we never give up because of corruption (because this can never be called)
+        // we never give up because of corruption (because this can never be
+        // called)
     }
 
     @Override
@@ -359,7 +363,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             synchronized (this) {
                 if (urn == null) {
                     try {
-                        urn = URN.createSHA1UrnFromBytes(TorrentSHA1ConversionUtils.fromHexString(torrent.getSha1()));
+                        urn = URN.createSHA1UrnFromBytes(TorrentSHA1ConversionUtils
+                                .fromHexString(torrent.getSha1()));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -376,18 +381,20 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public List<Address> getSourcesAsAddresses() {
-        
-        // TODO: use torrent.getPeers() ... currently a strange internal libtorrent error retrieving peers.
-        // torrent.getPeers();
-        
+
+        // TODO: use torrent.getPeers() ... currently a strange internal
+        // libtorrent error retrieving peers.
+
+        //torrent.getPeers();
+
         List<Address> list = new LinkedList<Address>();
-        
+
         try {
             list.add(new ConnectableImpl("test.com", false));
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        
+
         return list;
     }
 
@@ -476,7 +483,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         super.fillInMemento(memento);
 
         LibTorrentBTDownloadMemento btMemento = (LibTorrentBTDownloadMemento) memento;
-        
+
         btMemento.setName(torrent.getName());
         btMemento.setSha1Urn(getSha1Urn());
         btMemento.setContentLength(getContentLength());
@@ -485,18 +492,20 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         btMemento.setFastResumeData(torrent.getFastResumeData());
     }
 
-    public void initFromCurrentMemento(LibTorrentBTDownloadMemento memento) throws InvalidDataException {
+    public void initFromCurrentMemento(LibTorrentBTDownloadMemento memento)
+            throws InvalidDataException {
         urn = memento.getSha1Urn();
-        
+
         if (!urn.isSHA1()) {
-            throw new InvalidDataException("Non SHA1 URN retrieved from LibTorrent torrent momento.");
+            throw new InvalidDataException(
+                    "Non SHA1 URN retrieved from LibTorrent torrent momento.");
         }
-        
-        torrent.init(memento.getName(), TorrentSHA1ConversionUtils.toHexString(urn.getBytes()), memento.getContentLength(),
-                memento.getTrackerURL(), memento.getPaths(), 
-                memento.getSaveFile(), memento.getFastResumeData());
+
+        torrent.init(memento.getName(), TorrentSHA1ConversionUtils.toHexString(urn.getBytes()),
+                memento.getContentLength(), memento.getTrackerURL(), memento.getPaths(), memento
+                        .getSaveFile(), memento.getFastResumeData());
     }
-    
+
     public void initFromOldMemento(BTDownloadMemento memento) throws InvalidDataException {
         BTMetaInfoMemento btmetainfo = memento.getBtMetaInfoMemento();
 
@@ -510,25 +519,24 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         URI tracker1 = trackers[0];
 
         String name = btmetainfo.getFileSystem().getName();
-        
+
         long totalSize = btmetainfo.getFileSystem().getTotalSize();
 
         byte[] infoHash = btmetainfo.getInfoHash();
-        
+
         String sha1 = TorrentSHA1ConversionUtils.toHexString(infoHash);
-        
-        torrent.init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(), null);
+
+        torrent
+                .init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(),
+                        null);
     }
 
-    
-    
     @Override
     public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
         super.initFromMemento(memento);
         if (BTDownloadMemento.class.isInstance(memento)) {
             initFromOldMemento((BTDownloadMemento) memento);
-        } 
-        else if (LibTorrentBTDownloadMemento.class.isInstance(memento)) {
+        } else if (LibTorrentBTDownloadMemento.class.isInstance(memento)) {
             initFromCurrentMemento((LibTorrentBTDownloadMemento) memento);
         }
 
@@ -619,13 +627,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         throw new UnsupportedOperationException("BTDownloaderImpl.getAmountLost() not implemented");
     }
 
-    
     /**
      * No longer relevant in any Downloader.
      */
     @Override
     public int getAmountPending() {
-        throw new UnsupportedOperationException("BTDownloaderImpl.getAmountPending() not implemented");
+        throw new UnsupportedOperationException(
+                "BTDownloaderImpl.getAmountPending() not implemented");
     }
 
     /**
@@ -633,6 +641,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public int getTriedHostCount() {
-        throw new UnsupportedOperationException("BTDownloaderImpl.getTriedHostCount() not implemented");
+        throw new UnsupportedOperationException(
+                "BTDownloaderImpl.getTriedHostCount() not implemented");
     }
 }
