@@ -31,6 +31,8 @@ using libtorrent::asio::ip::tcp;
 #include <windows.h>
 #endif
 
+#define LIMEDEBUG
+
 libtorrent::session s;
 std::string savePath;
 typedef libtorrent::big_number sha1_hash;
@@ -175,16 +177,18 @@ extern "C" const void* add_torrent_existing(char* sha1String, char* trackerURI, 
 	p.auto_managed = false;
 
 	std::vector<char> resume_buf;
-		
-	boost::filesystem::ifstream resume_file(fastResumePath, std::ios_base::binary);
-	resume_file.unsetf(std::ios_base::skipws);
+
+	if (fastResumePath) 
+	{	boost::filesystem::ifstream resume_file(fastResumePath, std::ios_base::binary);
+		resume_file.unsetf(std::ios_base::skipws);
 	
-	std::istream_iterator<char> ios_iter;
-	std::istream_iterator<char> iter(resume_file);
+		std::istream_iterator<char> ios_iter;
+		std::istream_iterator<char> iter(resume_file);
 	
-	std::copy(iter, ios_iter,std::back_inserter(resume_buf));
+		std::copy(iter, ios_iter,std::back_inserter(resume_buf));
 	
-	p.resume_data = &resume_buf;
+		p.resume_data = &resume_buf;
+	}
 
 	libtorrent::torrent_handle h = s.add_torrent(p);
 	h.resume();
@@ -385,20 +389,22 @@ extern "C" void get_peers(const char* id, int buffer_len, char* data) {
 void process_save_resume_data_alert(libtorrent::torrent_handle handle, 
 				     libtorrent::save_resume_data_alert const* alert, 
 				     alert_s* alertStatus) 
-{	
+{
 	#ifdef LIMEDEBUG
-	std::cout << "save_resume_data_alert" << std::endl;
+	std::cout << "save_resume_data_alert";
 	#endif
 	
 	std::string resume_data_file = handle.get_torrent_info().name() + ".fastresume";
-	
 	boost::filesystem::path path(handle.save_path() / resume_data_file);
+	alertStatus->data = path.file_string().c_str();
+	
+	#ifdef LIMEDEBUG
+	std::cout << "(to " << alertStatus->data << ')' << std::endl;
+	#endif
 	
 	boost::filesystem::ofstream out(path, std::ios_base::binary);
         out.unsetf(std::ios_base::skipws);
         libtorrent::bencode(std::ostream_iterator<char>(out), *alert->resume_data);
-			
-	alertStatus->data = path.file_string().c_str();
 }
 
 void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
