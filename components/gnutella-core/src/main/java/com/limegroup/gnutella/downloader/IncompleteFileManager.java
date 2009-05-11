@@ -634,6 +634,11 @@ public class IncompleteFileManager  {
                 }
                 
                 String name = incompleteFile.getName();
+                
+                if(!name.startsWith("T-")) {
+                    return false;
+                }
+                
                 int i = name.indexOf(SEPARATOR);
                 if (i < 0 || i == name.length() - 1) {
                     return false;
