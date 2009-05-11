@@ -27,7 +27,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 /**
  * UI delegate for the RangeSlider component.  RangeSliderUI paints two thumbs,
  * one for the lower value and one for the upper value.  At present, it does
- * not support ticks marks, labels, or snap-to-ticks behavior.
+ * not support tick marks or labels.
  */
 class RangeSliderUI extends BasicSliderUI {
 
@@ -35,16 +35,18 @@ class RangeSliderUI extends BasicSliderUI {
     @Resource private Color trackColor;
     @Resource private Icon thumbIcon;
     
-    /** Thumb image. */
-    private BufferedImage thumbImage;
+    /** Thumb image for horizontal orientation. */
+    private BufferedImage horizontalThumbImage;
+    /** Thumb image for vertical orientation. */
+    private BufferedImage verticalThumbImage;
     /** Location and size of thumb for upper value. */
     private Rectangle upperThumbRect;
     /** Indicator that determines whether upper thumb is selected. */
     private boolean upperThumbSelected;
     
-    /** Indicator that determines whether lower thumb is being dragged. */
+    /** Indicator set when lower thumb is being dragged. */
     private transient boolean lowerDragging;
-    /** Indicator that determines whether upper thumb is being dragged. */
+    /** Indicator set when upper thumb is being dragged. */
     private transient boolean upperDragging;
     
     /**
@@ -60,12 +62,23 @@ class RangeSliderUI extends BasicSliderUI {
      * Initializes UI resources.
      */
     private void initResources() {
-        // Convert thumb icon to image if possible.
+        // Convert thumb icon to images if possible.
         if (thumbIcon instanceof ImageIcon) {
-            thumbImage = new BufferedImage(thumbIcon.getIconWidth(), 
+            // Create horizontal thumb image.
+            horizontalThumbImage = new BufferedImage(thumbIcon.getIconWidth(), 
                 thumbIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-               
-            Graphics2D g2d = thumbImage.createGraphics();
+            
+            Graphics2D g2d = horizontalThumbImage.createGraphics();
+            g2d.drawImage(((ImageIcon) thumbIcon).getImage(), 0, 0, null);
+            g2d.dispose();
+            
+            // Create vertical thumb image.
+            verticalThumbImage = new BufferedImage(thumbIcon.getIconHeight(), 
+                    thumbIcon.getIconWidth(), BufferedImage.TYPE_INT_ARGB);
+            
+            g2d = verticalThumbImage.createGraphics();
+            g2d.translate(0, thumbIcon.getIconWidth());
+            g2d.rotate(-Math.PI / 2);
             g2d.drawImage(((ImageIcon) thumbIcon).getImage(), 0, 0, null);
             g2d.dispose();
         }
@@ -174,8 +187,12 @@ class RangeSliderUI extends BasicSliderUI {
      */
     @Override
     protected Dimension getThumbSize() {
-        if (thumbImage != null) {
-            return new Dimension(thumbImage.getWidth(), thumbImage.getHeight());
+        if ((slider.getOrientation() == JSlider.HORIZONTAL) && (horizontalThumbImage != null)) {
+            return new Dimension(horizontalThumbImage.getWidth(), horizontalThumbImage.getHeight());
+            
+        } else if ((slider.getOrientation() == JSlider.VERTICAL) && (verticalThumbImage != null)) {
+            return new Dimension(verticalThumbImage.getWidth(), verticalThumbImage.getHeight());
+            
         } else {
             return super.getThumbSize();
         }
@@ -254,8 +271,8 @@ class RangeSliderUI extends BasicSliderUI {
         } else {
             // Determine position of selected range by moving from the middle
             // of one thumb to the other.
-            int lowerY = thumbRect.x + (thumbRect.width / 2);
-            int upperY = upperThumbRect.x + (upperThumbRect.width / 2);
+            int lowerY = thumbRect.y + (thumbRect.height / 2);
+            int upperY = upperThumbRect.y + (upperThumbRect.height / 2);
             
             // Determine track position.
             int cx = trackBounds.width / 2;
@@ -304,6 +321,10 @@ class RangeSliderUI extends BasicSliderUI {
         // Create graphics copy.
         Graphics2D g2d = (Graphics2D) g.create();
         
+        // Get thumb image.
+        BufferedImage thumbImage = (slider.getOrientation() == JSlider.HORIZONTAL) ? 
+                horizontalThumbImage : verticalThumbImage;
+        
         if (thumbImage != null) {
             // Draw thumb using image.
             g2d.drawImage(thumbImage, knobBounds.x, knobBounds.y, null);
@@ -338,6 +359,10 @@ class RangeSliderUI extends BasicSliderUI {
         
         // Create graphics copy.
         Graphics2D g2d = (Graphics2D) g.create();
+        
+        // Get thumb image.
+        BufferedImage thumbImage = (slider.getOrientation() == JSlider.HORIZONTAL) ? 
+                horizontalThumbImage : verticalThumbImage;
         
         if (thumbImage != null) {
             // Draw thumb using image.
