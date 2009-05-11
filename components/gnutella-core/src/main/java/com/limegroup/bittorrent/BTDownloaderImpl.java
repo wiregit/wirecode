@@ -378,8 +378,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public List<Address> getSourcesAsAddresses() {
         
         // TODO: use torrent.getPeers() ... currently a strange internal libtorrent error retrieving peers.
-        
-        torrent.getPeers();
+        // torrent.getPeers();
         
         List<Address> list = new LinkedList<Address>();
         
