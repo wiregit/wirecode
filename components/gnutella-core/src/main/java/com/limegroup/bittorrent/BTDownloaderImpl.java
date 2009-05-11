@@ -97,9 +97,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
-
-        finish();
-        downloadManager.remove(this, true);
+        if (!isInactive() && !torrent.isFinished()) {
+            finish();
+            downloadManager.remove(this, true);
+        } else {
+            downloadManager.remove(this, true);
+        }
     }
 
     @Override
@@ -385,7 +388,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // TODO: use torrent.getPeers() ... currently a strange internal
         // libtorrent error retrieving peers.
 
-        //torrent.getPeers();
+        // torrent.getPeers();
 
         List<Address> list = new LinkedList<Address>();
 
