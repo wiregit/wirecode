@@ -46,8 +46,8 @@ public class Torrent {
     private long totalSize = -1;
 
     private LibTorrentInfo info = null;
-
-    private String fastResumeData = null;
+    
+    private String fastResumePath = null;
 
     private boolean cancelled = false;
 
@@ -77,7 +77,7 @@ public class Torrent {
         this.trackerURL = trackerURL;
         this.paths.addAll(paths);
         this.totalSize = totalSize;
-        this.fastResumeData = fastResumeData;
+        this.fastResumePath = fastResumeData;
     }
 
     public synchronized void init(File torrentFile, File saveDir) throws IOException {
@@ -124,7 +124,7 @@ public class Torrent {
             if (torrentFile != null) {
                 info = torrentManager.addTorrent(torrentFile);
             } else {
-                torrentManager.addTorrent(sha1, trackerURL, fastResumeData);
+                torrentManager.addTorrent(sha1, trackerURL, fastResumePath);
             }
 
             torrentManager.addStatusListener(sha1, new EventListener<LibTorrentStatusEvent>() {
@@ -143,12 +143,11 @@ public class Torrent {
             torrentManager.addAlertListener(sha1, new EventListener<LibTorrentAlertEvent>() {
                 @Override
                 public void handleEvent(LibTorrentAlertEvent event) {
-
-                    if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT
-                            && event.getAlert().data != null) {
-                        fastResumeData = event.getAlert().data;
-                    }
-                }
+                    
+                    if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && event.getAlert().data != null) {
+                        fastResumePath = event.getAlert().data;
+                    }                    
+                } 
             });
         }
     }
@@ -314,7 +313,7 @@ public class Torrent {
         return status.get();
     }
 
-    public String getFastResumeData() {
-        return fastResumeData;
+    public String getFastResumePath() {
+        return fastResumePath;
     }
 }

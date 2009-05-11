@@ -106,8 +106,8 @@ public class LibTorrentBTDownloadMemento implements DownloadMemento, Serializabl
         serialObjects.put("trackerURL", url);
     }
     
-    public void setFastResumeData(String data) {
-        serialObjects.put("fastResumeData", data);
+    public void setFastResumePath(String data) {
+        serialObjects.put("fastResumePath", data);
     }
     
 }

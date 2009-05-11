@@ -492,7 +492,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         btMemento.setContentLength(getContentLength());
         btMemento.setTrackerURL(torrent.getTrackerURL());
         btMemento.setPaths(torrent.getPaths());
-        btMemento.setFastResumeData(torrent.getFastResumeData());
+        btMemento.setFastResumePath(torrent.getFastResumePath());
     }
 
     public void initFromCurrentMemento(LibTorrentBTDownloadMemento memento)

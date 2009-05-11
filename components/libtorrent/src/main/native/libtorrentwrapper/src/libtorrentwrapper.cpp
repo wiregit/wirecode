@@ -156,7 +156,7 @@ extern "C" int move_torrent(const char* id, const char* path) {
 	}
 }
 
-extern "C" const void* add_torrent_existing(char* sha1String, char* trackerURI, char* fastResumeData) {
+extern "C" const void* add_torrent_existing(char* sha1String, char* trackerURI, char* fastResumePath) {
 
 	#ifdef LIMEDEBUG
 	std::cout << "adding torrent" << std::endl;
@@ -175,12 +175,16 @@ extern "C" const void* add_torrent_existing(char* sha1String, char* trackerURI, 
 	p.auto_managed = false;
 
 	std::vector<char> resume_buf;
-	if (fastResumeData)
-	{	for ( int i=0 ; fastResumeData[i] != 1 ; i++ ) {
-			resume_buf.push_back(fastResumeData[i] - 1);
-		}
-        }
-
+	
+	
+	boost::filesystem::ifstream resume_file(fastResumePath, std::ios_base::binary);
+	resume_file.unsetf(std::ios_base::skipws);
+	
+	std::istream_iterator<char> ios_iter;
+	std::istream_iterator<char> iter(resume_file);
+	
+	std::copy(iter, ios_iter,std::back_inserter(resume_buf));
+	
 	p.resume_data = &resume_buf;
 
 	libtorrent::torrent_handle h = s.add_torrent(p);
@@ -372,11 +376,29 @@ extern "C" void get_peers(const char* id, int buffer_len, char* data) {
 			data[pos+i] = address[i];
 
 		pos += len+1;
-		data[pos++] = '\;';
+		data[pos++] = ';';
 		++iter;
 	}
 
 	delete peers;
+}
+
+void process_save_resume_data_alert(libtorrent::torrent_handle handle, 
+				     libtorrent::save_resume_data_alert const* alert, 
+				     alert_s* alertStatus) 
+{	#ifdef LIMEDEBUG
+	std::cout << "save_resume_data_alert" << std::endl;
+	#endif
+	
+	std::string resume_data_file = handle.get_torrent_info().name() + ".fastresume";
+	
+	boost::filesystem::path path(handle.save_path() / resume_data_file);
+	
+	boost::filesystem::ofstream out(path, std::ios_base::binary);
+        out.unsetf(std::ios_base::skipws);
+        libtorrent::bencode(std::ostream_iterator<char>(out), *alert->resume_data);
+			
+	alertStatus->data = path.file_string().c_str();
 }
 
 void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
@@ -397,24 +419,7 @@ void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
 			libtorrent::save_resume_data_alert const* rd = dynamic_cast<libtorrent::save_resume_data_alert const*>(alert);
 
 			if (rd) {
-				#ifdef LIMEDEBUG
-				std::cout << "save_resume_data_alert" << std::endl;
-				#endif
-
-				std::vector<char> buf;
-				bencode(std::back_inserter(buf), *rd->resume_data);
-
-				char resume_data[buf.size()];
-
-				for ( int i=0 ; i<buf.size() ; i++ ) {
-					resume_data[i] = buf[i] + 1;
-				}
-
-				alertStatus->data = resume_data;
-
-				#ifdef LIMEDEBUG
-				std::cout << '{' << alertStatus->data << '}' << std::endl;
-				#endif
+				process_save_resume_data_alert(handle, rd, alertStatus);
 				return;
 			}
 
