@@ -7,7 +7,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
@@ -53,8 +52,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final BTUploaderFactory btUploaderFactory;
 
-    private final AtomicBoolean complete = new AtomicBoolean(false);
-
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
      */
@@ -71,14 +68,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
-                if (torrent.isFinished() && !complete.getAndSet(true)) {
+                if (TorrentEvent.COMPLETED == event) {
                     FileUtils.deleteRecursive(torrent.getCompleteFile());
                     File completeDir = getSaveFile().getParentFile();
                     torrent.moveTorrent(completeDir);
-                }
-
-                if (TorrentEvent.STOPPED == event) {
-                    stop();
+                    BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
+                } else if (TorrentEvent.STOPPED == event) {
+                    BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                 }
             };
         });
@@ -98,7 +94,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void stop() {
         if (!isInactive() && !torrent.isFinished()) {
-            finish();
+            torrent.stop();
             downloadManager.remove(this, true);
         } else {
             downloadManager.remove(this, true);
@@ -192,6 +188,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         if (torrent.isCancelled()) {
             return DownloadState.ABORTED;
+        }
+
+        if (torrent.isFinished()) {
+            return DownloadState.COMPLETE;
         }
 
         LibTorrentStatus status = torrent.getStatus();
@@ -463,7 +463,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public synchronized void finish() {
-        torrent.stop();
+        // TODO cleanup any memory needed
     }
 
     @Override

@@ -46,10 +46,12 @@ public class Torrent {
     private long totalSize = -1;
 
     private LibTorrentInfo info = null;
-    
+
     private String fastResumePath = null;
 
     private boolean cancelled = false;
+
+    private boolean complete = false;
 
     @Inject
     public Torrent(TorrentManager torrentManager) {
@@ -135,7 +137,15 @@ public class Torrent {
 
                 private synchronized void updateStatus(LibTorrentStatus status) {
                     Torrent.this.status.set(status);
-                    listeners.broadcast(TorrentEvent.STATUS_CHANGED);
+                    boolean newlyfinished = complete != status.finished && status.finished;
+                    complete = status.finished;
+
+                    if (newlyfinished) {
+                        listeners.broadcast(TorrentEvent.COMPLETED);
+                    } else {
+                        listeners.broadcast(TorrentEvent.STATUS_CHANGED);
+                    }
+
                 }
             });
 
@@ -143,14 +153,15 @@ public class Torrent {
             torrentManager.addAlertListener(sha1, new EventListener<LibTorrentAlertEvent>() {
                 @Override
                 public void handleEvent(LibTorrentAlertEvent event) {
-                    
-                    if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && event.getAlert().data != null) {
+
+                    if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT
+                            && event.getAlert().data != null) {
                         fastResumePath = event.getAlert().data;
-                        
-                      //  System.out.println(fastResumePath);
-                        
+
+                        // System.out.println(fastResumePath);
+
                     }
-                } 
+                }
             });
         }
     }
@@ -186,8 +197,7 @@ public class Torrent {
     }
 
     public boolean isFinished() {
-        LibTorrentStatus status = this.status.get();
-        return status == null ? false : status.finished;
+        return complete;
     }
 
     public long getTotalSize() {
