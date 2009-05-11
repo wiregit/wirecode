@@ -175,8 +175,7 @@ extern "C" const void* add_torrent_existing(char* sha1String, char* trackerURI, 
 	p.auto_managed = false;
 
 	std::vector<char> resume_buf;
-	
-	
+		
 	boost::filesystem::ifstream resume_file(fastResumePath, std::ios_base::binary);
 	resume_file.unsetf(std::ios_base::skipws);
 	
@@ -386,7 +385,8 @@ extern "C" void get_peers(const char* id, int buffer_len, char* data) {
 void process_save_resume_data_alert(libtorrent::torrent_handle handle, 
 				     libtorrent::save_resume_data_alert const* alert, 
 				     alert_s* alertStatus) 
-{	#ifdef LIMEDEBUG
+{	
+	#ifdef LIMEDEBUG
 	std::cout << "save_resume_data_alert" << std::endl;
 	#endif
 	

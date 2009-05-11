@@ -25,7 +25,7 @@ import com.sun.jna.Memory;
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
     
-    private static final boolean SAVE_FAST_RESUME_DATA = false;
+    private static final boolean SAVE_FAST_RESUME_DATA = true;
     
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
     

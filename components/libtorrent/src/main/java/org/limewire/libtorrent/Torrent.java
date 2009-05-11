@@ -146,7 +146,10 @@ public class Torrent {
                     
                     if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && event.getAlert().data != null) {
                         fastResumePath = event.getAlert().data;
-                    }                    
+                        
+                      //  System.out.println(fastResumePath);
+                        
+                    }
                 } 
             });
         }
