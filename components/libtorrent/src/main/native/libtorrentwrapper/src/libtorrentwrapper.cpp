@@ -31,8 +31,6 @@ using libtorrent::asio::ip::tcp;
 #include <windows.h>
 #endif
 
-#define LIMEDEBUG
-
 libtorrent::session s;
 std::string savePath;
 typedef libtorrent::big_number sha1_hash;
@@ -180,14 +178,18 @@ extern "C" const void* add_torrent_existing(char* sha1String, char* trackerURI, 
 
 	if (fastResumePath) 
 	{	boost::filesystem::ifstream resume_file(fastResumePath, std::ios_base::binary);
-		resume_file.unsetf(std::ios_base::skipws);
 	
-		std::istream_iterator<char> ios_iter;
-		std::istream_iterator<char> iter(resume_file);
+		if (!resume_file.fail()) 
+		{
+			resume_file.unsetf(std::ios_base::skipws);
 	
-		std::copy(iter, ios_iter,std::back_inserter(resume_buf));
+			std::istream_iterator<char> ios_iter;
+			std::istream_iterator<char> iter(resume_file);
 	
-		p.resume_data = &resume_buf;
+			std::copy(iter, ios_iter,std::back_inserter(resume_buf));
+	
+			p.resume_data = &resume_buf;
+		}
 	}
 
 	libtorrent::torrent_handle h = s.add_torrent(p);
@@ -390,7 +392,7 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 				     libtorrent::save_resume_data_alert const* alert, 
 				     alert_s* alertStatus) 
 {
-	#ifdef LIMEDEBUG
+	#ifdef LIMEDEBUG_RESUME
 	std::cout << "save_resume_data_alert";
 	#endif
 	
@@ -398,7 +400,7 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 	boost::filesystem::path path(handle.save_path() / resume_data_file);
 	alertStatus->data = path.file_string().c_str();
 	
-	#ifdef LIMEDEBUG
+	#ifdef LIMEDEBUG_RESUME
 	std::cout << "(to " << alertStatus->data << ')' << std::endl;
 	#endif
 	
@@ -432,7 +434,7 @@ void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
 			libtorrent::save_resume_data_failed_alert const* rd2 = dynamic_cast<libtorrent::save_resume_data_failed_alert const*>(alert);
 
 			if (rd2) {
-				#ifdef LIMEDEBUG
+				#ifdef LIMEDEBUG_RESUME
 				std::cout << "save_resume_data_failed_alert (" << rd2->msg << ")" << std::endl;
 				#endif
 				alertStatus->message = rd2->msg.c_str();
@@ -442,7 +444,7 @@ void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
 			libtorrent::fastresume_rejected_alert const* rd3 = dynamic_cast<libtorrent::fastresume_rejected_alert const*>(alert);
 
 			if (rd3) {
-				#ifdef LIMEDEBUG
+				#ifdef LIMEDEBUG_RESUME
 				std::cout << "fastresume_rejected_alert (" << rd3->msg << ")" << std::endl;
 				#endif
 				alertStatus->message = rd3->msg.c_str();
