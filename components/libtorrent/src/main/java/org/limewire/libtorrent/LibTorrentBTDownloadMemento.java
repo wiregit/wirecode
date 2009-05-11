@@ -62,8 +62,8 @@ public class LibTorrentBTDownloadMemento implements DownloadMemento, Serializabl
         return (List<String>) serialObjects.get("paths");
     }
 
-    public String getFastResumeData() {
-        return (String) serialObjects.get("fastResumeData");
+    public String getFastResumePath() {
+        return (String) serialObjects.get("fastResumePath");
     }
     
     @Override

@@ -506,7 +506,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         torrent.init(memento.getName(), TorrentSHA1ConversionUtils.toHexString(urn.getBytes()),
                 memento.getContentLength(), memento.getTrackerURL(), memento.getPaths(), memento
-                        .getSaveFile(), memento.getFastResumeData());
+                        .getSaveFile(), memento.getFastResumePath());
     }
 
     public void initFromOldMemento(BTDownloadMemento memento) throws InvalidDataException {
