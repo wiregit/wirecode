@@ -322,6 +322,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
                 .getInstance(CoreDownloaderFactory.class);
         TorrentManager torrentManager = injector.getInstance(TorrentManager.class);
         torrentManager.initialize();
+        torrentManager.start();
         BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory
                 .createBTDownloader(torrentFile);
         return downloader;
@@ -346,8 +347,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
      */
     private void assertDownload(String md5, File file, long fileSize) throws InterruptedException,
             NoSuchAlgorithmException, IOException {
-        long sleepTime = (long) ((fileSize * 0.0001) + 3000);
-        Thread.sleep(sleepTime);
         AssertComparisons.assertTrue(file.exists());
         AssertComparisons.assertEquals(fileSize, file.length());
         String testmd5 = FileUtils.getMD5(file);

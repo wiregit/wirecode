@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
@@ -52,6 +53,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final BTUploaderFactory btUploaderFactory;
 
+    private volatile AtomicBoolean complete = new AtomicBoolean(false);
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
      */
@@ -73,6 +75,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     File completeDir = getSaveFile().getParentFile();
                     torrent.moveTorrent(completeDir);
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
+                    complete.set(true);
                 } else if (TorrentEvent.STOPPED == event) {
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                 }
@@ -304,7 +307,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean isCompleted() {
-        return torrent.isFinished();
+        return complete.get();
     }
 
     @Override

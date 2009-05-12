@@ -239,9 +239,7 @@ public class Torrent {
         if (paths.size() > 0) {
             for (String path : paths) {
                 File file = new File(completeFile, path);
-                if (file.exists()) {
-                    files.add(file);
-                }
+                files.add(file);
             }
         } else {
             files.add(completeFile);
@@ -255,9 +253,7 @@ public class Torrent {
         if (paths.size() > 0) {
             for (String path : paths) {
                 File file = new File(incompleteFile, path);
-                if (!file.exists()) {
-                    files.add(file);
-                }
+                files.add(file);
             }
         } else {
             files.add(incompleteFile);
