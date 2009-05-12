@@ -31,8 +31,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
@@ -44,6 +42,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryFileList;
@@ -61,9 +60,9 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.ShareAllComboBox;
-import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
@@ -96,17 +95,17 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.name.Named;
+import net.miginfocom.swing.MigLayout;
 
 public class MyLibraryPanel extends AbstractFileListPanel implements EventListener<FriendEvent> {
     
@@ -159,7 +158,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     
     private ShareAllComboBox shareAllComboBox;
     private GhostDropTargetListener ghostDropTargetListener;
-    private XMPPService xmppService;
+    private FriendService friendService;
     
     /**
      * Set to true if the current message overlay has a clickable feature to hide it.
@@ -196,7 +195,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
                           TextFieldDecorator textFieldDecorator,
                           ComboBoxDecorator comboDecorator,
                           ButtonDecorator buttonDecorator,
-                          XMPPService xmppService,
+                          FriendService friendService,
                           FriendsSignInPanel friendSignInPanel,
                           PlaylistManager playlistManager) {
         
@@ -212,7 +211,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         this.playerProvider = playerProvider;
         this.selectableMap = new HashMap<Catalog, LibraryOperable<? extends LocalFileItem>>();
         this.connectionListeners = connectionListeners;
-        this.xmppService = xmppService;
+        this.friendService = friendService;
         this.playlistManager = playlistManager;
         this.shareListManager = shareListManager;
         
@@ -260,7 +259,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         this.knownFriends.add(Friend.P2P_FRIEND_ID);
         getSelectionPanel().updateCollectionShares(knownFriends);
         
-        shareAllComboBox = new ShareAllComboBox(xmppService, shareFactory, this, friendSignInPanel, shareListManager);
+        shareAllComboBox = new ShareAllComboBox(friendService, shareFactory, this, friendSignInPanel, shareListManager);
         comboDecorator.decorateDarkFullComboBox(shareAllComboBox);
         shareAllComboBox.setText(I18n.tr("Share"));
         
@@ -378,7 +377,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         // im logged in and its the first time logging in. Do hide the overlay if one of the above is true
         // but the program changed the message to a notcloseable message.
         if(!isClickMessageView || !(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true ||
-                (xmppService.isLoggedIn() && SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true)))
+                (friendService.isLoggedIn() && SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true)))
             hideEmptyFriend();
         //reselect the current category in case we filtered on a friend that wasn't 
         //sharing anything
@@ -432,7 +431,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
 
     private void showCorrectButton(){
-        if(xmppService.isLoggedIn()){
+        if(friendService.isLoggedIn()){
             sharingButton.setVisible(false);
             sharingComboBox.setVisible(true);
         } else {

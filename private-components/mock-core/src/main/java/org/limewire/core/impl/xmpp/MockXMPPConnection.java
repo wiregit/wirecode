@@ -8,17 +8,17 @@ import org.limewire.concurrent.SimpleFuture;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 
 public class MockXMPPConnection implements XMPPConnection {
-    private XMPPConnectionConfiguration config;
+    private FriendConnectionConfiguration config;
     
-    public MockXMPPConnection(XMPPConnectionConfiguration config) {
+    public MockXMPPConnection(FriendConnectionConfiguration config) {
         this.config = config;
     }
 
     @Override
-    public XMPPConnectionConfiguration getConfiguration() {
+    public FriendConnectionConfiguration getConfiguration() {
         return config;
     }
 

@@ -14,7 +14,7 @@ import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.core.api.friend.client.FriendService;
 
 public class MyImageLibraryPopupHandler implements TablePopupHandler {
     private LibraryImageSubPanel imagePanel;
@@ -23,12 +23,12 @@ public class MyImageLibraryPopupHandler implements TablePopupHandler {
 
     public MyImageLibraryPopupHandler(LibraryImageSubPanel imagePanel,
             SharingActionFactory sharingActionFactory, LibraryManager libraryManager, 
-            PropertiesFactory<LocalFileItem> localFilePropFactory, XMPPService xmppService,
+            PropertiesFactory<LocalFileItem> localFilePropFactory, FriendService friendService,
             LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.imagePanel = imagePanel;
         this.popupMenu = new MyLibraryPopupMenu(Category.IMAGE,
-                libraryManager, sharingActionFactory, localFilePropFactory, 
-                xmppService, libraryNavigator, playlistManager);
+                libraryManager, sharingActionFactory, localFilePropFactory,
+                friendService, libraryNavigator, playlistManager);
 
     }
 

@@ -26,6 +26,7 @@ import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.AuthToken;
@@ -39,7 +40,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPPresence;
@@ -68,7 +68,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
 
-    private final XMPPConnectionConfiguration configuration;
+    private final FriendConnectionConfiguration configuration;
     private final EventBroadcaster<FileOfferEvent> fileOfferBroadcaster;
     private final EventBroadcaster<FriendRequestEvent> friendRequestBroadcaster;
     private final EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster;
@@ -94,7 +94,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private volatile DiscoInfoListener discoInfoListener;
 
     @AssistedInject
-    public XMPPConnectionImpl(@Assisted XMPPConnectionConfiguration configuration,
+    public XMPPConnectionImpl(@Assisted FriendConnectionConfiguration configuration,
                        @Assisted ListeningExecutorService executorService,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
                        EventBroadcaster<FileOfferEvent> fileOfferBroadcaster,
@@ -165,7 +165,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         return presence;
     }
 
-    public XMPPConnectionConfiguration getConfiguration() {
+    public FriendConnectionConfiguration getConfiguration() {
         return configuration;
     }
 

@@ -4,13 +4,13 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendService;
 
-class MockXmppService implements XMPPService {
+class MockXmppService implements FriendService {
 
     @Override
-    public ListeningFuture<XMPPConnection> login(XMPPConnectionConfiguration configuration) {
+    public ListeningFuture<XMPPConnection> login(FriendConnectionConfiguration configuration) {
         return new SimpleFuture<XMPPConnection>((XMPPConnection)null);    
     }
 

@@ -9,6 +9,7 @@ import org.limewire.core.api.friend.client.ConnectBackRequestSender;
 import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
 import org.limewire.friend.impl.LimeWireFriendXmppModule;
 import org.limewire.listener.AsynchronousMulticaster;
@@ -24,7 +25,6 @@ import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.impl.ConnectionConfigurationFactory;
 import org.limewire.xmpp.client.impl.DNSConnectionConfigurationFactory;
 import org.limewire.xmpp.client.impl.FallbackConnectionConfigurationFactory;
@@ -57,7 +57,7 @@ public class LimeWireXMPPModule extends AbstractModule {
         if(jabberSettingsClass != null) {
             bind(JabberSettings.class).to(jabberSettingsClass);
         }
-        bind(XMPPService.class).to(XMPPServiceImpl.class);
+        bind(FriendService.class).to(XMPPServiceImpl.class);
         bind(ConnectBackRequestSender.class).to(XMPPServiceImpl.class);
 
         Executor executor = ExecutorsHelper.newProcessingQueue("XMPPEventThread");

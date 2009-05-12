@@ -9,7 +9,7 @@ import org.jmock.Mockery;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.io.UnresolvedIpPortImpl;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 
 public class FallbackConnectionConfigurationFactoryTest extends BaseTestCase {
     public FallbackConnectionConfigurationFactoryTest(String name) {
@@ -19,7 +19,7 @@ public class FallbackConnectionConfigurationFactoryTest extends BaseTestCase {
     public void testHasMoreNoFallbacks() {
         FallbackConnectionConfigurationFactory factory = new FallbackConnectionConfigurationFactory();
         Mockery mockery = new Mockery();
-        final XMPPConnectionConfiguration connectionConfiguration = mockery.mock(XMPPConnectionConfiguration.class);
+        final FriendConnectionConfiguration connectionConfiguration = mockery.mock(FriendConnectionConfiguration.class);
         ConnectionConfigurationFactory.RequestContext requestContext = new ConnectionConfigurationFactory.RequestContext();
         final List<UnresolvedIpPort> fallbackServers = new ArrayList<UnresolvedIpPort>();
         mockery.checking(new Expectations() {{
@@ -33,7 +33,7 @@ public class FallbackConnectionConfigurationFactoryTest extends BaseTestCase {
     public void testHasMoreWithFallbacks() {
         FallbackConnectionConfigurationFactory factory = new FallbackConnectionConfigurationFactory();
         Mockery mockery = new Mockery();
-        final XMPPConnectionConfiguration connectionConfiguration = mockery.mock(XMPPConnectionConfiguration.class);
+        final FriendConnectionConfiguration connectionConfiguration = mockery.mock(FriendConnectionConfiguration.class);
         ConnectionConfigurationFactory.RequestContext requestContext = new ConnectionConfigurationFactory.RequestContext();
         final List<UnresolvedIpPort> fallbackServers = new ArrayList<UnresolvedIpPort>();
         fallbackServers.add(new UnresolvedIpPortImpl("foo.com", 1234));
@@ -53,7 +53,7 @@ public class FallbackConnectionConfigurationFactoryTest extends BaseTestCase {
     public void testGetConnectionConfigurationNoConfigs() {
         FallbackConnectionConfigurationFactory factory = new FallbackConnectionConfigurationFactory();
         Mockery mockery = new Mockery();
-        final XMPPConnectionConfiguration connectionConfiguration = mockery.mock(XMPPConnectionConfiguration.class);
+        final FriendConnectionConfiguration connectionConfiguration = mockery.mock(FriendConnectionConfiguration.class);
         ConnectionConfigurationFactory.RequestContext requestContext = new ConnectionConfigurationFactory.RequestContext();
         final List<UnresolvedIpPort> fallbackServers = new ArrayList<UnresolvedIpPort>();
         mockery.checking(new Expectations() {{
@@ -71,7 +71,7 @@ public class FallbackConnectionConfigurationFactoryTest extends BaseTestCase {
     public void testGetConnectionConfiguration() {
         FallbackConnectionConfigurationFactory factory = new FallbackConnectionConfigurationFactory();
         Mockery mockery = new Mockery();
-        final XMPPConnectionConfiguration connectionConfiguration = mockery.mock(XMPPConnectionConfiguration.class);
+        final FriendConnectionConfiguration connectionConfiguration = mockery.mock(FriendConnectionConfiguration.class);
         ConnectionConfigurationFactory.RequestContext requestContext = new ConnectionConfigurationFactory.RequestContext();
         final List<UnresolvedIpPort> fallbackServers = new ArrayList<UnresolvedIpPort>();
         fallbackServers.add(new UnresolvedIpPortImpl("foo.com", 1234));

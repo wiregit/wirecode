@@ -25,10 +25,10 @@ import com.google.inject.Singleton;
 public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigurationManager {
     
     private final PasswordManager passwordManager;
-    private final Map<String,XMPPAccountConfiguration> configs; // Indexed by label
+    private final Map<String, FriendAccountConfiguration> configs; // Indexed by label
     private final String resource;
     
-    private XMPPAccountConfiguration autoLoginConfig = null;
+    private FriendAccountConfiguration autoLoginConfig = null;
     
     /**
      * If the login configs have been loaded yet.
@@ -44,7 +44,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
         
         GuiUtils.assignResources(this);
         this.passwordManager = passwordManager;
-        configs = new HashMap<String,XMPPAccountConfiguration>();
+        configs = new HashMap<String, FriendAccountConfiguration>();
         resource = xmppResourceFactory.getResource();
     }
 
@@ -59,7 +59,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     /**
      * Used to get the config map, loading it if necessary.
      */
-    private Map<String,XMPPAccountConfiguration> getRawConfigs() {
+    private Map<String, FriendAccountConfiguration> getRawConfigs() {
         if (!loaded) {
             init();
         }
@@ -69,8 +69,8 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     
     private void loadCustomServer() {
         String custom = SwingUiSettings.USER_DEFINED_JABBER_SERVICENAME.get();
-        XMPPAccountConfigurationImpl customConfig =
-            new XMPPAccountConfigurationImpl(custom, "Jabber", resource);
+        FriendAccountConfigurationImpl customConfig =
+            new FriendAccountConfigurationImpl(custom, "Jabber", resource);
         configs.put(customConfig.getLabel(), customConfig);
         String autoLogin = SwingUiSettings.XMPP_AUTO_LOGIN.get();
         if(!autoLogin.equals("")) {
@@ -79,7 +79,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
                 String label = autoLogin.substring(0, comma);
                 String username = autoLogin.substring(comma + 1);
                 String password = passwordManager.loadPassword(username);
-                XMPPAccountConfiguration config = configs.get(label);
+                FriendAccountConfiguration config = configs.get(label);
                 if(config != null) {
                     config.setUsername(username);
                     config.setPassword(password);
@@ -96,10 +96,10 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     }
 
     private void loadWellKnownServers() {
-        XMPPAccountConfiguration gmail =
-            new XMPPAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, resource, getGTalkServers());
-        XMPPAccountConfiguration livejournal =
-            new XMPPAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, resource, getLiveJournalServers());
+        FriendAccountConfiguration gmail =
+            new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, resource, getGTalkServers());
+        FriendAccountConfiguration livejournal =
+            new FriendAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, resource, getLiveJournalServers());
 
         configs.put(gmail.getLabel(), gmail);
         configs.put(livejournal.getLabel(), livejournal);
@@ -122,16 +122,16 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     }
 
     @Override
-    public XMPPAccountConfiguration getConfig(String label) {
+    public FriendAccountConfiguration getConfig(String label) {
         return getRawConfigs().get(label);
     }
     
     @Override
-    public List<XMPPAccountConfiguration> getConfigurations() {
-        ArrayList<XMPPAccountConfiguration> configurations = new ArrayList<XMPPAccountConfiguration>(getRawConfigs().values());
-        Collections.sort(configurations, new Comparator<XMPPAccountConfiguration>() {
+    public List<FriendAccountConfiguration> getConfigurations() {
+        ArrayList<FriendAccountConfiguration> configurations = new ArrayList<FriendAccountConfiguration>(getRawConfigs().values());
+        Collections.sort(configurations, new Comparator<FriendAccountConfiguration>() {
             @Override
-            public int compare(XMPPAccountConfiguration o1, XMPPAccountConfiguration o2) {
+            public int compare(FriendAccountConfiguration o1, FriendAccountConfiguration o2) {
                 return o1.getLabel().compareToIgnoreCase(o2.getLabel());
             }
         });
@@ -141,14 +141,14 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     @Override
     public List<String> getLabels() {
         ArrayList<String> labels = new ArrayList<String>();
-        for(XMPPAccountConfiguration config : getRawConfigs().values())
+        for(FriendAccountConfiguration config : getRawConfigs().values())
             labels.add(config.getLabel());
         Collections.sort(labels);
         return labels;
     }
     
     @Override
-    public XMPPAccountConfiguration getAutoLoginConfig() {
+    public FriendAccountConfiguration getAutoLoginConfig() {
         if (!loaded) {
             init();
         }
@@ -157,7 +157,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     }
     
     @Override
-    public void setAutoLoginConfig(XMPPAccountConfiguration config) {
+    public void setAutoLoginConfig(FriendAccountConfiguration config) {
         // Remove the old configuration, if there is one
         if(autoLoginConfig != null) {
             passwordManager.removePassword(autoLoginConfig.getUserInputLocalID());

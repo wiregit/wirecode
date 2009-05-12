@@ -13,6 +13,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
@@ -21,8 +22,8 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.player.api.AudioPlayer;
-import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
+import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
@@ -53,14 +54,13 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.xmpp.api.client.XMPPService;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 @Singleton
 public class LibraryTableFactoryImpl implements LibraryTableFactory {
@@ -98,7 +98,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
     private final SharingActionFactory sharingActionFactory;
-    private final XMPPService xmppService;
+    private final FriendService friendService;
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
 
@@ -120,7 +120,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             CategoryIconManager categoryIconManager,
             RemoteHostWidgetFactory fromWidgetfactory,
             SharingActionFactory sharingActionFactory,
-            XMPPService xmppService,
+            FriendService friendService,
             LibraryNavigator libraryNavigator,
             PlaylistManager playlistManager) {
         this.iconManager = iconManager;
@@ -137,7 +137,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.ghostPane = ghostPane;
         this.fromWidgetFactory = fromWidgetfactory;
         this.sharingActionFactory = sharingActionFactory;
-        this.xmppService = xmppService;
+        this.friendService = friendService;
         this.libraryNavigator = libraryNavigator;
         this.playlistManager = playlistManager;
         
@@ -190,7 +190,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList(), shareListManager, listChanger));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                 category, libraryManager, shareListManager, magnetLinkFactory,
-                localItemPropFactory, sharingActionFactory, xmppService, 
+                localItemPropFactory, sharingActionFactory, friendService, 
                 libraryNavigator, playlistManager));
         
         try {

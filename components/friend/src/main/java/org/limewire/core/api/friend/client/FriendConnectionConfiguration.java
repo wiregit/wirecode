@@ -1,15 +1,16 @@
-package org.limewire.xmpp.api.client;
+package org.limewire.core.api.friend.client;
 
 import java.util.List;
 
 import org.limewire.core.api.friend.Network;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.listener.EventListener;
+import org.limewire.xmpp.api.client.RosterEvent;
 
 /**
  * Allows the xmpp service user to provide configuration for xmpp login.
  */
-public interface XMPPConnectionConfiguration extends Network {
+public interface FriendConnectionConfiguration extends Network {
     
     /**
      * Returns true if the account should enable debugging.

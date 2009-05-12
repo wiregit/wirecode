@@ -1,6 +1,7 @@
-package org.limewire.xmpp.api.client;
+package org.limewire.core.api.friend.client;
 
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 
 
@@ -8,7 +9,7 @@ import org.limewire.xmpp.api.client.XMPPPresence.Mode;
  * Describes an interface for managing XMPP connections. Only one connection
  * can be logged in at a time.
  */
-public interface XMPPService {
+public interface FriendService {
 
     /**
      * Attempts to log in a connection using the specified configuration.
@@ -16,11 +17,11 @@ public interface XMPPService {
      * 
      * @param configuration the XMPPConnectionConfiguration to use; can not be null
      *
-     * @return a {@link ListeningFuture} of {@link XMPPConnection}
+     * @return a {@link ListeningFuture} of {@link org.limewire.xmpp.api.client.XMPPConnection}
      * 
      * The ExecutionException will be to an XMPPException if an error occurs
      */
-    public ListeningFuture<XMPPConnection> login(XMPPConnectionConfiguration configuration);
+    public ListeningFuture<XMPPConnection> login(FriendConnectionConfiguration configuration);
 
     /**
      * Logs out any existing connections.

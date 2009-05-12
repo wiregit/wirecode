@@ -3,10 +3,11 @@ package org.limewire.xmpp.api.client;
 import java.util.Collection;
 
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 
 public interface XMPPConnection {
     
-    public XMPPConnectionConfiguration getConfiguration();
+    public FriendConnectionConfiguration getConfiguration();
 
     /**
      * logs a user into the xmpp server.

@@ -30,7 +30,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.core.api.friend.client.FriendService;
 
 /**
  * Popup menu implementation for MyLibrary
@@ -40,7 +40,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private final LibraryManager libraryManager;
     private final Category category;
     private final PropertiesFactory<LocalFileItem> propertiesFactory;
-    private final XMPPService xmppService;
+    private final FriendService friendService;
     private final SharingActionFactory sharingActionFactory;   
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
@@ -52,12 +52,12 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
             SharingActionFactory sharingActionFactory, PropertiesFactory<LocalFileItem> propertiesFactory,
-            XMPPService xmppService, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
+            FriendService friendService, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.libraryManager = libraryManager;
         this.sharingActionFactory = sharingActionFactory;
         this.category = category;
         this.propertiesFactory = propertiesFactory;
-        this.xmppService = xmppService;
+        this.friendService = friendService;
         this.libraryNavigator = libraryNavigator;
         this.playlistManager = playlistManager;
         
@@ -151,7 +151,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         
         addSeparator();
         
-        if(xmppService.isLoggedIn()) {
+        if(friendService.isLoggedIn()) {
             add(sharingActionFactory.createShareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
             add(sharingActionFactory.createUnshareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
         } else {

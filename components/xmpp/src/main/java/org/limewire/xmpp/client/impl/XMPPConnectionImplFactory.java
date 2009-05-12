@@ -1,13 +1,13 @@
 package org.limewire.xmpp.client.impl;
 
 import org.limewire.concurrent.ListeningExecutorService;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 
 /**
  * Creates XMPPConnectionImpls.  Used i conjunction with @AssistedInject
  */
 public interface XMPPConnectionImplFactory {
-    XMPPConnectionImpl createConnection(XMPPConnectionConfiguration configuration,
+    XMPPConnectionImpl createConnection(FriendConnectionConfiguration configuration,
                                         ListeningExecutorService executorService);
         
 }

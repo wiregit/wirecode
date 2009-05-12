@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
@@ -25,7 +26,6 @@ import org.limewire.net.address.AddressEvent;
 import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl.Element;
 import org.xmlpull.v1.XmlPullParserException;
@@ -54,9 +54,9 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         addressRegistry = injector.getInstance(XMPPAddressRegistry.class);
         aliceRosterListener = new RosterListenerMock();
         bobRosterListener = new RosterListenerMock();
-        XMPPConnectionConfiguration alice = new XMPPConnectionConfigurationMock(USERNAME_1, PASSWORD_1,
+        FriendConnectionConfiguration alice = new FriendConnectionConfigurationMock(USERNAME_1, PASSWORD_1,
                 SERVICE, aliceRosterListener);
-        XMPPConnectionConfiguration bob = new XMPPConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
+        FriendConnectionConfiguration bob = new FriendConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
                 SERVICE, bobRosterListener);
         service.login(alice).get();
         service.login(bob).get();
@@ -354,8 +354,8 @@ public class XMPPServiceTest extends XmppBaseTestCase {
             throws InterruptedException, FriendException, UnknownHostException, ExecutionException {
         // Create a second presence for Bob
         RosterListenerMock bob2RosterListener = new RosterListenerMock();
-        XMPPConnectionConfiguration bob2 = 
-            new XMPPConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
+        FriendConnectionConfiguration bob2 = 
+            new FriendConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
                     SERVICE, bob2RosterListener);
         service.login(bob2).get();
         Thread.sleep(SLEEP);

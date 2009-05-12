@@ -9,6 +9,7 @@ import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.PasswordManager;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
@@ -18,7 +19,6 @@ import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -28,7 +28,7 @@ public class MockXmppModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(XMPPService.class).to(MockXmppService.class);
+        bind(FriendService.class).to(MockXmppService.class);
         
         EventMulticaster<RosterEvent> rosterMulticaster = new EventMulticasterImpl<RosterEvent>(); 
         bind(new TypeLiteral<EventBroadcaster<RosterEvent>>(){}).toInstance(rosterMulticaster);

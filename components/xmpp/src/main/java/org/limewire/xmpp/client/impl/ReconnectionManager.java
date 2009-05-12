@@ -10,7 +10,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 /**
@@ -41,7 +41,7 @@ class ReconnectionManager implements EventListener<XMPPConnectionEvent> {
         } else if(event.getType() == XMPPConnectionEvent.Type.DISCONNECTED) {
             if(event.getException() != null && connected) {
                 XMPPConnection connection = event.getSource();
-                final XMPPConnectionConfiguration configuration = connection.getConfiguration();
+                final FriendConnectionConfiguration configuration = connection.getConfiguration();
                 synchronized (this.serviceImpl) {
                     this.serviceImpl.connections.remove(connection);
                 }

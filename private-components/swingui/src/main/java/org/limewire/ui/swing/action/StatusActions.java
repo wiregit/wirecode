@@ -20,7 +20,7 @@ import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 
 import com.google.inject.Inject;
@@ -36,11 +36,11 @@ public class StatusActions {
     private final Set<JCheckBoxMenuItem> availableItems = new HashSet<JCheckBoxMenuItem>();
     private final Set<JCheckBoxMenuItem> doNotDisturbItems = new HashSet<JCheckBoxMenuItem>();
     
-    private final XMPPService xmppService;
+    private final FriendService friendService;
 
     @Inject
-    public StatusActions(final XMPPService xmppService, final IconLibrary iconLibrary) {
-        this.xmppService = xmppService;
+    public StatusActions(final FriendService friendService, final IconLibrary iconLibrary) {
+        this.friendService = friendService;
         
         availableAction = new AbstractAction(I18n.tr("&Available")) {
             { 
@@ -49,7 +49,7 @@ public class StatusActions {
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                xmppService.setMode(Mode.available).addFutureListener(new EventListener<FutureEvent<Void>>() {
+                friendService.setMode(Mode.available).addFutureListener(new EventListener<FutureEvent<Void>>() {
                     @Override
                     public void handleEvent(FutureEvent<Void> event) {
                         if(event.getType() == FutureEvent.Type.SUCCESS) {
@@ -68,7 +68,7 @@ public class StatusActions {
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                xmppService.setMode(Mode.dnd).addFutureListener(new EventListener<FutureEvent<Void>>() {
+                friendService.setMode(Mode.dnd).addFutureListener(new EventListener<FutureEvent<Void>>() {
                     @Override
                     public void handleEvent(FutureEvent<Void> event) {
                         if(event.getType() == FutureEvent.Type.SUCCESS) {
@@ -95,7 +95,7 @@ public class StatusActions {
     }
 
     private void updateSelections() {
-        if(xmppService.isLoggedIn()) {
+        if(friendService.isLoggedIn()) {
             boolean dndBool = XMPPSettings.XMPP_DO_NOT_DISTURB.getValue();
             for ( JCheckBoxMenuItem item : availableItems ) {
                 item.setSelected(!dndBool);

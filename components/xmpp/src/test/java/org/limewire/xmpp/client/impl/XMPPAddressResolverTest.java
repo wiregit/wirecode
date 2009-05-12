@@ -8,6 +8,7 @@ import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
@@ -23,12 +24,11 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPService;
 
 public class XMPPAddressResolverTest extends BaseTestCase {
 
     private Mockery context;
-    private XMPPService xmppService;
+    private FriendService friendService;
     private XMPPConnection connection;
     private SocketsManager socketsManager;
     private XMPPAddressRegistry addressRegistry;
@@ -43,7 +43,7 @@ public class XMPPAddressResolverTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
-        xmppService = context.mock(XMPPService.class);
+        friendService = context.mock(FriendService.class);
         connection = context.mock(XMPPConnection.class);  
         socketsManager = context.mock(SocketsManager.class);
         addressRegistry = new XMPPAddressRegistry();
@@ -51,7 +51,7 @@ public class XMPPAddressResolverTest extends BaseTestCase {
         friendPresence = context.mock(FriendPresence.class);
         
         context.checking(new Expectations() {{
-            allowing(xmppService).getActiveConnection();
+            allowing(friendService).getActiveConnection();
             will(returnValue(connection));
             allowing(connection).getUser("me@you.com");
             will(returnValue(user));
@@ -68,7 +68,7 @@ public class XMPPAddressResolverTest extends BaseTestCase {
             })));
         }});
         
-        xmppAddressResolver = new XMPPAddressResolver(xmppService, null, socketsManager, addressRegistry);
+        xmppAddressResolver = new XMPPAddressResolver(friendService, null, socketsManager, addressRegistry);
     }
 
     public void testSuccessfulGetPresence() {

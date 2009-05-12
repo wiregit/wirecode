@@ -29,7 +29,7 @@ import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
@@ -37,8 +37,8 @@ import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.ResizeUtils;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -63,12 +63,12 @@ class LoginPanel extends JXPanel implements SettingListener {
     private JLabel authFailedLabel;
     private JXButton signInButton;
     private final XMPPAccountConfigurationManager accountManager;
-    private final XMPPService xmppService;
+    private final FriendService friendService;
     private final SignInAction signinAction = new SignInAction();
-    
+
     @Inject
     LoginPanel(XMPPAccountConfigurationManager accountManager,
-            XMPPService xmppService,
+            FriendService friendService,
             ComboBoxDecorator comboFactory,
             ButtonDecorator buttonDecorator,
             BarPainterFactory barPainterFactory,
@@ -77,13 +77,13 @@ class LoginPanel extends JXPanel implements SettingListener {
         GuiUtils.assignResources(this);
         
         this.accountManager = accountManager;
-        this.xmppService = xmppService;
+        this.friendService = friendService;
 
         SwingUiSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
         initComponents(comboFactory, buttonDecorator, textFieldDecorator, barPainterFactory);
     }
     
-    private Action getActionForConfig(XMPPAccountConfiguration config) {
+    private Action getActionForConfig(FriendAccountConfiguration config) {
         for(Action action : serviceComboBox.getActions()) {
             if(action.getValue(CONFIG).equals(config)) {
                 return action;
@@ -94,14 +94,14 @@ class LoginPanel extends JXPanel implements SettingListener {
     
     private Action getActionForLabel(String label) {
         for(Action action : serviceComboBox.getActions()) {
-            if(((XMPPAccountConfiguration)action.getValue(CONFIG)).getLabel().equals(label)) {
+            if(((FriendAccountConfiguration)action.getValue(CONFIG)).getLabel().equals(label)) {
                 return action;
             }
         }
         return null;
     }
 
-    void autoLogin(XMPPAccountConfiguration auto) {
+    void autoLogin(FriendAccountConfiguration auto) {
         serviceComboBox.setSelectedAction(getActionForConfig(auto));
         login(auto);
     }    
@@ -130,7 +130,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         titleLabel.setName("LoginPanel.titleLabel");
         
         List<Action> actions = new ArrayList<Action>();
-        for (XMPPAccountConfiguration config : accountManager.getConfigurations()) {
+        for (FriendAccountConfiguration config : accountManager.getConfigurations()) {
             Action action = new AbstractAction(config.getLabel(), config.getIcon()) {            
                 @Override
                 public void actionPerformed(ActionEvent e) {}
@@ -214,7 +214,7 @@ class LoginPanel extends JXPanel implements SettingListener {
     }
 
     private void populateInputs() {
-        XMPPAccountConfiguration config = (XMPPAccountConfiguration)serviceComboBox.getSelectedAction().getValue(CONFIG);
+        FriendAccountConfiguration config = (FriendAccountConfiguration)serviceComboBox.getSelectedAction().getValue(CONFIG);
         if(config.getLabel().equals("Jabber")) {
             serviceField.setVisible(true);
         } else {
@@ -261,16 +261,16 @@ class LoginPanel extends JXPanel implements SettingListener {
         serviceComboBox.setEnabled(isEnabled);
     }
 
-    void connected(XMPPConnectionConfiguration config) {
+    void connected(FriendConnectionConfiguration config) {
         setSignInComponentsEnabled(true);
     }
 
-    private void login(final XMPPAccountConfiguration config) {
+    private void login(final FriendAccountConfiguration config) {
         setSignInComponentsEnabled(false);
         authFailedLabel.setVisible(false);
         validate();
         repaint();
-        xmppService.login(config);         
+        friendService.login(config);         
     }
 
     @Override
@@ -293,7 +293,7 @@ class LoginPanel extends JXPanel implements SettingListener {
             if(user.equals("") || password.equals("")) {
                 return;
             }            
-            XMPPAccountConfiguration config = (XMPPAccountConfiguration)serviceComboBox.getSelectedAction().getValue(CONFIG);
+            FriendAccountConfiguration config = (FriendAccountConfiguration)serviceComboBox.getSelectedAction().getValue(CONFIG);
             if(config.getLabel().equals("Jabber")) {
                 String service = serviceField.getText().trim();
                 if(service.equals(""))
@@ -313,7 +313,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         }
     }
 
-    public void connecting(XMPPConnectionConfiguration config) {
+    public void connecting(FriendConnectionConfiguration config) {
         setSignInComponentsEnabled(false);
     }
 }

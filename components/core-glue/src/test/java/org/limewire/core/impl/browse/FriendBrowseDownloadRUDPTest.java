@@ -41,8 +41,8 @@ import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendService;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -71,7 +71,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
 
     private XMPPConnection conn;
     private ServiceRegistry registry;
-    protected XMPPService service;
+    protected FriendService service;
     protected Injector injector;
 
     public FriendBrowseDownloadRUDPTest(String name) {
@@ -85,8 +85,8 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
         registry = injector.getInstance(ServiceRegistry.class);
         registry.initialize();                                                                                
         registry.start();
-        service = injector.getInstance(XMPPService.class);
-        XMPPConnectionConfiguration config = getDefaultXmppConnectionConfig(USERNAME_1, PASSWORD_1, SERVICE);
+        service = injector.getInstance(FriendService.class);
+        FriendConnectionConfiguration config = getDefaultXmppConnectionConfig(USERNAME_1, PASSWORD_1, SERVICE);
 
         ListeningFuture<XMPPConnection> loginTask = service.login(config);
         conn = loginTask.get(SECONDS_TO_WAIT, TimeUnit.SECONDS);
@@ -102,9 +102,9 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
         return Guice.createInjector(Stage.PRODUCTION, modules);
     }
 
-    private XMPPConnectionConfiguration getDefaultXmppConnectionConfig(final String userName, final String passwd,
+    private FriendConnectionConfiguration getDefaultXmppConnectionConfig(final String userName, final String passwd,
                                                                        final String serviceName) {
-        return new XMPPConnectionConfiguration() {
+        return new FriendConnectionConfiguration() {
             @Override public boolean isDebugEnabled() { return true; }
             @Override public String getUserInputLocalID() { return userName; }
             @Override public String getPassword() { return passwd; }

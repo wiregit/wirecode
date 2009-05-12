@@ -25,7 +25,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -249,7 +249,7 @@ public class MiscOptionPanel extends OptionPanel {
                 serviceLabel.setVisible(false);
                 serviceField.setVisible(false);
             }
-            XMPPAccountConfiguration config = accountManager.getConfig(label);
+            FriendAccountConfiguration config = accountManager.getConfig(label);
             if(config == accountManager.getAutoLoginConfig()) {
                 serviceField.setText(config.getServiceName());
                 usernameField.setText(config.getUserInputLocalID());
@@ -285,7 +285,7 @@ public class MiscOptionPanel extends OptionPanel {
                         return false;
                     }            
                     String label = (String)serviceComboBox.getSelectedItem();
-                    XMPPAccountConfiguration config = accountManager.getConfig(label);
+                    FriendAccountConfiguration config = accountManager.getConfig(label);
                     if(label.equals("Jabber")) {
                         String service = serviceField.getText().trim();
                         if(service.equals(""))
@@ -304,7 +304,7 @@ public class MiscOptionPanel extends OptionPanel {
 
         @Override
         boolean hasChanged() {
-            XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
+            FriendAccountConfiguration auto = accountManager.getAutoLoginConfig();
             if(auto == null) {
                 return autoLoginCheckBox.isSelected();
             } else {
@@ -328,7 +328,7 @@ public class MiscOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
+            FriendAccountConfiguration auto = accountManager.getAutoLoginConfig();
             if(auto == null) {
                 serviceComboBox.setSelectedItem("Gmail");
                 setComponentsEnabled(false);
@@ -358,7 +358,7 @@ public class MiscOptionPanel extends OptionPanel {
                 int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
-            XMPPAccountConfiguration config = accountManager.getConfig(value.toString());
+            FriendAccountConfiguration config = accountManager.getConfig(value.toString());
             if(config != null) {
                 setIcon(config.getIcon());
             } else {

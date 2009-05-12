@@ -11,7 +11,7 @@ public interface XMPPAccountConfigurationManager {
      * Returns the account configuration associated with the specified label,
      * or null if there is no such configuration.
      */
-    public XMPPAccountConfiguration getConfig(String label);
+    public FriendAccountConfiguration getConfig(String label);
 
     /**
      * Returns the labels of all known account configurations in alphabetical
@@ -22,17 +22,17 @@ public interface XMPPAccountConfigurationManager {
     /**
      * Returns all configurations.
      */
-    public List<XMPPAccountConfiguration> getConfigurations();    
+    public List<FriendAccountConfiguration> getConfigurations();    
 
     /**
      * Returns the account configuration that should log in automatically when
      * LimeWire starts, or null if auto-login is disabled.
      */
-    public XMPPAccountConfiguration getAutoLoginConfig();
+    public FriendAccountConfiguration getAutoLoginConfig();
 
     /**
      * Sets the account configuration that should log in automatically when
      * LimeWire starts; use null to disable auto-login.
      */
-    public void setAutoLoginConfig(XMPPAccountConfiguration config);
+    public void setAutoLoginConfig(FriendAccountConfiguration config);
 }

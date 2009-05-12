@@ -14,6 +14,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.playlist.PlaylistManager;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
@@ -31,7 +32,6 @@ import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
@@ -54,16 +54,16 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     private final SharingActionFactory sharingActionFactory;
     private final FriendsSignInPanel friendSignInPanel;
     private final ShareListManager shareListManager;
-    private final XMPPService xmppService;
+    private final FriendService friendService;
     private final ComboBoxDecorator comboDecorator;
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
-    
+
     @Inject
     public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager, 
             ShareTableRendererEditorFactory shareTableRendererEditorFactory, SharingActionFactory sharingActionFactory, 
             PropertiesFactory<LocalFileItem> localFilePropFactory, ShareListManager shareListManager,
-            XMPPService xmppService, FriendsSignInPanel friendSignInPanel,
+            FriendService friendService, FriendsSignInPanel friendSignInPanel,
             ComboBoxDecorator comboDecorator, 
             LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.thumbnailManager = thumbnailManager;
@@ -72,7 +72,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         this.sharingActionFactory = sharingActionFactory;
         this.localFilePropFactory = localFilePropFactory;
         this.shareListManager = shareListManager;
-        this.xmppService = xmppService;
+        this.friendService = friendService;
         this.friendSignInPanel = friendSignInPanel;
         this.comboDecorator = comboDecorator;
         this.libraryNavigator = libraryNavigator;
@@ -84,11 +84,11 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
             EventList<LocalFileItem> eventList, LocalFileList fileList,
             ShareWidget<File> shareWidget, LibraryListSourceChanger listChanger) {
 
-        LibraryImageFolderComboBox comboBox = new LibraryImageFolderComboBox(xmppService, sharingActionFactory, friendSignInPanel);
+        LibraryImageFolderComboBox comboBox = new LibraryImageFolderComboBox(friendService, sharingActionFactory, friendSignInPanel);
         comboDecorator.decorateLinkComboBox(comboBox);
         
         LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList, comboBox);
-        panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, sharingActionFactory, libraryManager, localFilePropFactory, xmppService, libraryNavigator, playlistManager));
+        panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, sharingActionFactory, libraryManager, localFilePropFactory, friendService, libraryNavigator, playlistManager));
         comboBox.setSelectAllable(panel);
 
         ImageList list = panel.getImageList();

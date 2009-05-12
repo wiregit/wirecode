@@ -14,13 +14,13 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.I18n;
 import static org.limewire.ui.swing.util.I18n.tr;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,17 +33,17 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     private final HyperlinkButton shareLabel;
     private final LoginPanel loginPanel;
     private final LoggedInPanel loggedInPanel;
-    private final XMPPService xmppService;
+    private final FriendService friendService;
     private final XMPPAccountConfigurationManager accountManager;
-    
+
     @Inject
     FriendsSignInPanel(LoginPanel loginPanel,
                        LoggedInPanel loggedInPanel,
-                       XMPPService xmppService,
+                       FriendService friendService,
                        XMPPAccountConfigurationManager accountManager) {
         this.loggedInPanel = loggedInPanel;
         this.loginPanel = loginPanel;
-        this.xmppService = xmppService;
+        this.friendService = friendService;
         this.accountManager = accountManager;
         setLayout(new MigLayout("fill, flowy, gap 0, insets 0, hidemode 3, nogrid"));
         setOpaque(false);
@@ -62,7 +62,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         add(loggedInPanel, "growx, gaptop 4");
         
         // Presetup the UI so that it looks correct until services start.
-        XMPPConnectionConfiguration config = accountManager.getAutoLoginConfig();
+        FriendConnectionConfiguration config = accountManager.getAutoLoginConfig();
         if(config != null) {
             loggedInPanel.autoLogin(config);
             shareLabel.setVisible(false);
@@ -86,13 +86,13 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
     @Override
     public boolean isSignedIn() {
-        return xmppService.isLoggedIn();
+        return friendService.isLoggedIn();
     }
     
     @Override
     public void signIn() {        
-        if(!xmppService.isLoggedIn() && !xmppService.isLoggingIn()) {
-            XMPPAccountConfiguration config = accountManager.getAutoLoginConfig();
+        if(!friendService.isLoggedIn() && !friendService.isLoggingIn()) {
+            FriendAccountConfiguration config = accountManager.getAutoLoginConfig();
             if(config == null) {
                 shareLabel.setVisible(false);
                 loginPanel.setVisible(true);
@@ -105,7 +105,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
     @Override
     public void signOut(final boolean switchUser) {
-        xmppService.logout();
+        friendService.logout();
         if(switchUser) {
             // 'Switch User' trumps 'Remember Me'
             accountManager.setAutoLoginConfig(null);
@@ -113,7 +113,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
             loginPanel.setVisible(true);
             loggedInPanel.setVisible(false);
         } else {
-            XMPPAccountConfiguration auto =
+            FriendAccountConfiguration auto =
                 accountManager.getAutoLoginConfig();
             if(auto == null) {
                 shareLabel.setVisible(true);
@@ -128,12 +128,12 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         }
     }
     
-    private void connecting(XMPPConnectionConfiguration config) {
+    private void connecting(FriendConnectionConfiguration config) {
         loginPanel.connecting(config);
         loggedInPanel.connecting(config);
     }
     
-    private void connected(XMPPConnectionConfiguration config) {
+    private void connected(FriendConnectionConfiguration config) {
         shareLabel.setVisible(false);
         loginPanel.setVisible(false);
         loggedInPanel.setVisible(true);
@@ -149,7 +149,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         loggedInPanel.setVisible(false);
     }
     
-    private void autoLogin(XMPPAccountConfiguration config) {
+    private void autoLogin(FriendAccountConfiguration config) {
         shareLabel.setVisible(false);
         loginPanel.setVisible(false);
         loggedInPanel.setVisible(true);
@@ -175,7 +175,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        XMPPAccountConfiguration auto =
+                        FriendAccountConfiguration auto =
                             accountManager.getAutoLoginConfig();
                         if(auto != null) {
                             autoLogin(auto);

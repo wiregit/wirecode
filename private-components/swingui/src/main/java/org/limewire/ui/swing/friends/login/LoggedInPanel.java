@@ -19,6 +19,8 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.settings.XMPPSettings;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -37,9 +39,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.activity.XmppActivityEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 
@@ -67,7 +67,7 @@ class LoggedInPanel extends JXPanel {
     LoggedInPanel(ComboBoxDecorator comboDecorator,
             FriendActions friendActions, BarPainterFactory barPainterFactory,
             ButtonDecorator buttonDecorator,
-            StatusActions statusActions, XMPPService xmppService, IconLibrary iconLibrary) {
+            StatusActions statusActions, FriendService friendService, IconLibrary iconLibrary) {
         GuiUtils.assignResources(this);
         setLayout(new MigLayout("insets 0, gapx 8:8:8, hidemode 3, fill"));
 
@@ -86,18 +86,18 @@ class LoggedInPanel extends JXPanel {
         buttonDecorator.decorateMiniButton(switchUserButton);
         setBackgroundPainter(barPainterFactory.createFriendsBarPainter()); 
 
-        initComponents(statusActions, xmppService);
+        initComponents(statusActions, friendService);
     }
 
     private void initComponents(final StatusActions statusActions,
-                                final XMPPService xmppService) {
+                                final FriendService friendService) {
         JPopupMenu optionsMenu = new JPopupMenu(); 
         optionsMenu.setLayout(new VerticalLayout());
         optionsMenu.add(decorateItem(optionsBox.createMenuItem(new AbstractAction(I18n.tr("Add Friend")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new AddFriendDialog(LoggedInPanel.this,
-                        xmppService.getActiveConnection());
+                        friendService.getActiveConnection());
             }
         })));
         
@@ -232,14 +232,14 @@ class LoggedInPanel extends JXPanel {
         });
     }
 
-    private void setConfig(XMPPConnectionConfiguration config) {
+    private void setConfig(FriendConnectionConfiguration config) {
         if(config != null) {
             currentUser.setText(config.getUserInputLocalID());
             statusMenuLabel.setText(I18n.tr("SET {0} STATUS", config.getLabel().toUpperCase(LanguageUtils.getCurrentLocale())));
         }
     }
 
-    void autoLogin(XMPPConnectionConfiguration config) {
+    void autoLogin(FriendConnectionConfiguration config) {
         setConfig(config);
         optionsBox.setVisible(false);
         signoutBox.setVisible(false);
@@ -248,7 +248,7 @@ class LoggedInPanel extends JXPanel {
         loggingInLabel.setVisible(true);
     }
 
-    void connected(XMPPConnectionConfiguration config) {
+    void connected(FriendConnectionConfiguration config) {
         setConfig(config);
         optionsBox.setVisible(true);
         signoutBox.setVisible(true);
@@ -257,7 +257,7 @@ class LoggedInPanel extends JXPanel {
         loggingInLabel.setVisible(false);
     }
 
-    void disconnected(XMPPConnectionConfiguration config) {
+    void disconnected(FriendConnectionConfiguration config) {
         setConfig(config);
         optionsBox.setVisible(false);
         signoutBox.setVisible(false);
@@ -266,7 +266,7 @@ class LoggedInPanel extends JXPanel {
         loggingInLabel.setVisible(false);
     }
 
-    void connecting(XMPPConnectionConfiguration config) {
+    void connecting(FriendConnectionConfiguration config) {
         autoLogin(config);
     }
 

@@ -14,6 +14,8 @@ import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.friend.client.ConnectBackRequestSender;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.inspection.Inspectable;
@@ -35,9 +37,7 @@ import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
 
 import com.google.inject.Inject;
@@ -45,7 +45,7 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequestSender {
+public class XMPPServiceImpl implements Service, FriendService, ConnectBackRequestSender {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
 
@@ -165,7 +165,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
     }
 
     @Override
-    public ListeningFuture<XMPPConnection> login(final XMPPConnectionConfiguration configuration) {
+    public ListeningFuture<XMPPConnection> login(final FriendConnectionConfiguration configuration) {
         return executorService.submit(new Callable<XMPPConnection>() {
             @Override
             public XMPPConnection call() throws Exception {
@@ -174,11 +174,11 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
         }); 
     }
 
-    XMPPConnection loginImpl(XMPPConnectionConfiguration configuration) throws FriendException {
+    XMPPConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
         return loginImpl(configuration, false);
     }
 
-    XMPPConnection loginImpl(XMPPConnectionConfiguration configuration, boolean isReconnect) throws FriendException {
+    XMPPConnection loginImpl(FriendConnectionConfiguration configuration, boolean isReconnect) throws FriendException {
         synchronized (this) {
             if(!multipleConnectionsAllowed) {
                 XMPPConnection activeConnection = getActiveConnection();

@@ -5,16 +5,16 @@ import java.util.Collections;
 
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.io.UnresolvedIpPort;
 
-public class MockXMPPConnectionConfiguration implements XMPPConnectionConfiguration {
+public class MockFriendConnectionConfiguration implements FriendConnectionConfiguration {
     private final String username;
     private final String password;
     private final String serviceName;
     private final EventListener<RosterEvent> rosterListener;
 
-    public MockXMPPConnectionConfiguration(String username, String password,
+    public MockFriendConnectionConfiguration(String username, String password,
             String serviceName, EventListener<RosterEvent> rosterListener) {
         this.username = username;
         this.password = password;

@@ -22,7 +22,7 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.core.api.friend.client.FriendService;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -43,16 +43,16 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     private IconButton friendsButton;
     private LocalFileItem fileItem;
     
-    private final XMPPService xmppService;
+    private final FriendService friendService;
     
     private final ToolTipMouseListener p2pTooltipListener;
     private final ToolTipMouseListener friendsTooltipListener;
-    
+
     @AssistedInject
-    public ShareTableRendererEditor(@Assisted Action shareAction, XMPPService xmppService){
+    public ShareTableRendererEditor(@Assisted Action shareAction, FriendService friendService){
         GuiUtils.assignResources(this);
         
-        this.xmppService = xmppService;
+        this.friendService = friendService;
         
         p2pButton = new IconButton(p2pNotSharedIcon);
         friendsButton = new IconButton(friendsNotSharedIcon);
@@ -90,7 +90,7 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     
     @Override
     public void configure(LocalFileItem item, boolean isRowSelected) {
-        friendsButton.setVisible(xmppService.isLoggedIn()); // don't show if not logged in
+        friendsButton.setVisible(friendService.isLoggedIn()); // don't show if not logged in
         
         fileItem = item;
         

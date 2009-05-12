@@ -11,6 +11,7 @@ import org.limewire.collection.Periodic;
 import org.limewire.core.api.browse.server.BrowseTracker;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
@@ -22,7 +23,6 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -44,7 +44,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 class FriendShareListRefresher implements RegisteringEventListener<FriendShareListEvent> {
 
     private final BrowseTracker tracker;
-    private final XMPPService xmppService;
+    private final FriendService friendService;
     private final ScheduledExecutorService scheduledExecutorService;
 
     private final Map<String, LibraryChangedSender> listeners;
@@ -54,10 +54,10 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
 
     @Inject
     FriendShareListRefresher(BrowseTracker tracker,
-                             XMPPService xmppService,
+                             FriendService friendService,
                              @Named("backgroundExecutor")ScheduledExecutorService scheduledExecutorService) {
         this.tracker = tracker;
-        this.xmppService = xmppService;
+        this.friendService = friendService;
         this.scheduledExecutorService = scheduledExecutorService;
         listeners = new ConcurrentHashMap<String, LibraryChangedSender>();
     }
@@ -89,7 +89,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
         public void handleEvent(ManagedListStatusEvent evt) {
             if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
                 fileManagerLoaded.set(true);  
-                XMPPConnection connection = xmppService.getActiveConnection();
+                XMPPConnection connection = friendService.getActiveConnection();
                 if(connection != null) {
                     Collection<XMPPFriend> friends = connection.getUsers();
                     for(Friend friend : friends) {

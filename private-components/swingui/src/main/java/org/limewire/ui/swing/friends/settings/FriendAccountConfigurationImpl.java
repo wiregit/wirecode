@@ -15,7 +15,7 @@ import org.limewire.xmpp.api.client.RosterEvent;
  * Stores all the information required to log into an XMPP server and
  * describe the server in the UI.
  */
-class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
+class FriendAccountConfigurationImpl implements FriendAccountConfiguration {
 
     private final String resource;
     private final boolean isDebugEnabled;
@@ -30,16 +30,16 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     private final List<UnresolvedIpPort> defaultServers;
     
     /** Constructs an XMPPAccountConfiguration with the following parameters. */
-    public XMPPAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers) {
+    public FriendAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers) {
         this(requireDomain, serviceName, label, icon, resource, defaultServers, true);
     }
     
     /** Constructs a basic XMPPAccountConfiguration that cannot modify the serviceName. */
-    public XMPPAccountConfigurationImpl(String serviceName, String label, String resource) {
+    public FriendAccountConfigurationImpl(String serviceName, String label, String resource) {
         this(false, serviceName, label, null, resource, UnresolvedIpPort.EMPTY_LIST, false);
     }
     
-    private XMPPAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers, boolean modifyUser) {
+    private FriendAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers, boolean modifyUser) {
         this.resource = resource;
         this.modifyUser = modifyUser;
         this.isDebugEnabled = false;
@@ -58,7 +58,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
 
     @Override
     public boolean isDebugEnabled() {
-        return true;
+        return isDebugEnabled;
     }
 
     @Override

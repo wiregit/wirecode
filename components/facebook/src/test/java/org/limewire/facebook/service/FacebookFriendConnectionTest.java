@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.TestCase;
 
+import org.json.JSONException;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
@@ -18,7 +19,8 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
-import org.json.JSONException;
+import org.limewire.net.address.AddressFactory;
+import org.limewire.net.address.AddressFactoryImpl;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.inject.Guice;
@@ -57,6 +59,8 @@ public class FacebookFriendConnectionTest extends TestCase {
                     
                         bind(new TypeLiteral<ListenerSupport<FeatureEvent>>(){}).toInstance(featureMulticaster);
                         bind(new TypeLiteral<EventMulticaster<FeatureEvent>>(){}).toInstance(featureMulticaster);
+                        
+                        bind(AddressFactory.class).to(AddressFactoryImpl.class);
                         
                         bindAll(Names.named("backgroundExecutor"), ScheduledListeningExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class, ScheduledExecutorService.class);
                                         
