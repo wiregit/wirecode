@@ -31,13 +31,11 @@ public class SetupWizard {
     }
     
     public void showDialogIfNeeded(Frame owner) {
-        if (shouldShowWizard()) {
-            wizard.showDialogIfNeeded(owner);
-            
-            // Sets the upgraded flag after the setup wizard
-            //  completes
-            InstallSettings.UPGRADED_TO_5.setValue(true);
-        }
+        wizard.showDialogIfNeeded(owner);
+        
+        // Sets the upgraded flag after the setup wizard
+        //  completes
+        InstallSettings.UPGRADED_TO_5.setValue(true);
     }
         
     private void createWizard(SetupComponentDecoratorFactory decoratorFactory, 
@@ -65,6 +63,12 @@ public class SetupWizard {
     }
     
     private boolean needsPage1() {
+        if (!InstallSettings.AUTO_SHARING_OPTION.getValue()) {
+            return true;
+        }
+        if (!InstallSettings.ANONYMOUS_DATA_COLLECTION.getValue()) {
+            return true;
+        }
         if (!InstallSettings.FILTER_OPTION.getValue()) {
             return true;
         }

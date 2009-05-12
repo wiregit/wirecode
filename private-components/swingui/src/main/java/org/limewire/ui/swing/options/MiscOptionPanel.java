@@ -10,7 +10,6 @@ import java.awt.event.ItemListener;
 import java.util.Locale;
 
 import javax.swing.AbstractAction;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -25,6 +24,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.LanguageComboBox;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -49,7 +49,6 @@ public class MiscOptionPanel extends OptionPanel {
     private FriendsChatPanel friendsChatPanel;
     
     //Language components, does not exist in its own subcomponent
-    @Resource private Font font;
     @Resource private Font linkFont;
     
     private Locale currentLanguage;
@@ -66,8 +65,7 @@ public class MiscOptionPanel extends OptionPanel {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
 
         comboLabel = new JLabel(I18n.tr("Language:"));
-        languageDropDown = new JComboBox();
-        createLanguageComboBox();
+        languageDropDown = new LanguageComboBox();
         
         translateButton = new HyperlinkButton(new TranslateLinkAction());
         translateButton.setFont(linkFont);
@@ -92,14 +90,6 @@ public class MiscOptionPanel extends OptionPanel {
             friendsChatPanel = new FriendsChatPanel();
         }
         return friendsChatPanel;
-    }
-    
-    private void createLanguageComboBox() {
-        languageDropDown.setRenderer(new LocaleRenderer());
-        languageDropDown.setFont(font);
-        
-        Locale[] locales = LanguageUtils.getLocales(font);
-        languageDropDown.setModel(new DefaultComboBoxModel(locales));
     }
 
     @Override
@@ -364,22 +354,6 @@ public class MiscOptionPanel extends OptionPanel {
             } else {
                 setIcon(null);
             }
-            return this;
-        }
-    }
-    
-    private static class LocaleRenderer extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
-            
-            if (value instanceof Locale) {
-                Locale locale = (Locale) value;
-                setText(locale.getDisplayName(locale));
-            } else {
-                setIcon(null);
-            }
-            
             return this;
         }
     }
