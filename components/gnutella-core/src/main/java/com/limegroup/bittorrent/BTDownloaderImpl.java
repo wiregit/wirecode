@@ -17,7 +17,6 @@ import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
-import org.limewire.libtorrent.LibTorrentBTDownloadMemento;
 import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
@@ -40,6 +39,8 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
+import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMementoImpl;
 
 /**
  * This class enables the rest of LimeWire to treat a BitTorrent as a regular
@@ -458,7 +459,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     protected DownloadMemento createMemento() {
-        return new LibTorrentBTDownloadMemento();
+        return new LibTorrentBTDownloadMementoImpl();
     }
 
     @Override
