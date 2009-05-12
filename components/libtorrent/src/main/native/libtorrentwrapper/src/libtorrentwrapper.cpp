@@ -50,21 +50,31 @@ extern "C" int abort_torrents() {
 	return 1;
 }
 
-std::string* getSizeTypeString(libtorrent::size_type size) {
+void getSizeTypeString(libtorrent::size_type size, char* heap) {
 	std::stringstream oss;
 	oss << size;
-	std::string* sizeString = new std::string(oss.str().c_str());
-	//TODO clean memory
-	return sizeString;
+	std::string str = oss.str();
+	const char* chars = str.c_str();
+	
+	//memcpy(&heap, &chars, str.length()+1);
+	for ( int i=0 ; i<str.length()+1 ; i++ ) {
+		heap[i] = chars[i];
+	}
+	heap[str.length()] = '\0';
 }
 
-std::string* getSha1String(sha1_hash sha1) {
+void getSha1String(sha1_hash sha1, char* heap) {
 	std::stringstream oss;
 	oss << sha1;
+	std::string str = oss.str();
+	const char* chars = str.c_str();
+	//memcpy(&heap, &chars, str.length());
+		//memcpy(&heap, &chars, str.length()+1);
+	for ( int i=0 ; i<str.length()+1 ; i++ ) {
+		heap[i] = chars[i];
+	}
+	heap[str.length()] = '\0';
 
-	std::string* sha1String = new std::string(oss.str().c_str());
-	//TODO clean memory
-	return sha1String;
 }
 
 sha1_hash getSha1Hash(const char* sha1String) {
@@ -92,16 +102,21 @@ struct torrent_s {
 	int valid;
 };
 
-void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats) {
+// heap is split into three 17 byte slots for each size field
+void get_torrent_s(libtorrent::torrent_handle handle, torrent_s* stats, char* heap) {
 	libtorrent::torrent_status status = handle.status();
 
 	float download_rate = status.download_rate;
 	float upload_rate = status.upload_rate;
-	//TODO cleanup memory
-	const char* total_done = getSizeTypeString(status.total_done)->c_str();
-	const char* total_download =
-			getSizeTypeString(status.total_download)->c_str();
-	const char* total_upload = getSizeTypeString(status.total_upload)->c_str();
+	
+	char* total_done     = heap+0;
+	char* total_download = heap+20;
+	char* total_upload   = heap+40;
+		
+	getSizeTypeString(status.total_done, total_done);
+	getSizeTypeString(status.total_download, total_download);
+	getSizeTypeString(status.total_upload, total_upload);
+
 	int num_peers = status.num_peers;
 	int num_uploads = status.num_uploads;
 	int num_seeds = status.num_seeds;
@@ -156,7 +171,7 @@ extern "C" int move_torrent(const char* id, const char* path) {
 	}
 }
 
-extern "C" const void* add_torrent_existing(char* sha1String, char* trackerURI, char* fastResumePath) {
+extern "C" const void add_torrent_existing(char* sha1String, char* trackerURI, char* fastResumePath) {
 
 	#ifdef LIMEDEBUG
 	std::cout << "adding torrent" << std::endl;
@@ -215,8 +230,8 @@ extern "C" const void* add_torrent(char* path) {
 	int num_pieces = torrent_info.num_pieces();
 	int num_files = torrent_info.num_files();
 
-	//TODO cleanup memory
-	std::string* content_length = getSizeTypeString(torrent_info.total_size());
+	char *content_length = new char[20];
+	getSizeTypeString(torrent_info.total_size(), content_length);
 
 	#ifdef LIMEDEBUG
 	std::cout << "total_size_unknown: " << torrent_info.total_size()
@@ -235,11 +250,8 @@ extern "C" const void* add_torrent(char* path) {
 	}
 
 	sha1_hash sha1 = torrent_info.info_hash();
-	#ifdef LIMEDEBUG
-	std::cout << "sha1: " << sha1 << std::endl;
-	#endif
-
-	const char* sha1String = getSha1String(sha1)->c_str();
+	char *sha1String = new char[41];
+	getSha1String(sha1, sha1String);
 
 	#ifdef LIMEDEBUG
 	std::cout << "sha1String: " << sha1String << std::endl;
@@ -252,7 +264,7 @@ extern "C" const void* add_torrent(char* path) {
 	info->num_files = num_files;
 	info->num_pieces = num_pieces;
 	info->piece_length = piece_length;
-	info->content_length = content_length->c_str();
+	info->content_length = content_length;
 	info->paths = paths;
 
 	return info;
@@ -294,7 +306,7 @@ extern "C" void* get_torrent_status(const char* id, void* stat) {
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 	if (h.is_valid()) {
-		get_torrent_s(h, stats);
+		get_torrent_s(h, stats, new char[60]);
 	} else {
 		stats->valid = false;
 	}
@@ -314,15 +326,20 @@ extern "C" bool signal_fast_resume_data_request(const char* id) {
 
 struct alert_s {
 	int category;
-	const char* sha1;
+	char* sha1;
 	const char* message;
 	const char* data;
 
 	alert_s() {
-		sha1 = 0;
+		sha1 = new char[41];
+		sha1[0] = 0;
 		category = 0;
 		message = 0;
 		data = 0;
+	}
+	
+	~alert_s() {
+		delete sha1;
 	}
 };
 
@@ -421,8 +438,8 @@ void process_alert(libtorrent::alert* alert, alert_s* alertStatus) {
 		libtorrent::torrent_handle handle = torrentAlert->handle;
 
 		if (handle.is_valid()) {
-			const char* sha1 = getSha1String(handle.info_hash())->c_str();
-			alertStatus->sha1 = sha1;
+			
+			getSha1String(handle.info_hash(), alertStatus->sha1);
 
 			libtorrent::save_resume_data_alert const* rd = dynamic_cast<libtorrent::save_resume_data_alert const*>(alert);
 
@@ -466,7 +483,7 @@ extern "C" void get_alerts(void(*alertCallback)(void*)) {
 		libtorrent::alert* alert = alerts.get();
 
 		alert_s* alertStatus = new alert_s();
-
+		
 		process_alert(alert, alertStatus);
 
 		alertCallback(alertStatus);
