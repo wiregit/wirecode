@@ -54,6 +54,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final BTUploaderFactory btUploaderFactory;
 
     private volatile AtomicBoolean complete = new AtomicBoolean(false);
+
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
      */
@@ -368,11 +369,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         if (urn == null) {
             synchronized (this) {
                 if (urn == null) {
-                    try {
-                        urn = URN.createSHA1UrnFromBytes(TorrentSHA1ConversionUtils
-                                .fromHexString(torrent.getSha1()));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                    String sha1 = torrent.getSha1();
+                    if (sha1 != null) {
+                        try {
+                            urn = URN.createSHA1UrnFromBytes(TorrentSHA1ConversionUtils
+                                    .fromHexString(sha1));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }
@@ -435,33 +439,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public boolean isQueuable() {
         return !isPaused();
-    }
-
-    @Override
-    public boolean conflicts(URN urn, long fileSize, File... file) {
-        // if (this.urn.equals(urn))
-        // return true;
-        // for (File f : file) {
-        // if (conflictsSaveFile(f))
-        // return true;
-        // }
-
-        // TODO TODO TODO
-        return false;
-    }
-
-    @Override
-    public boolean conflictsSaveFile(File candidate) {
-        // return torrentFileSystem.conflicts(candidate);
-        // TODO
-        return false;
-    }
-
-    @Override
-    public boolean conflictsWithIncompleteFile(File incomplete) {
-        // return torrentFileSystem.conflictsIncomplete(incomplete);
-        return false;
-        // TODO
     }
 
     @Override
@@ -573,6 +550,31 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public List<File> getIncompleteFiles() {
         return torrent.getIncompleteFiles();
+    }
+
+    @Override
+    public boolean conflicts(URN urn, long fileSize, File... file) {
+        if (getSha1Urn().equals(urn)) {
+            return true;
+        }
+
+        for (File f : file) {
+            if (conflictsSaveFile(f)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean conflictsSaveFile(File complete) {
+        return complete.equals(getSaveFile());
+    }
+
+    @Override
+    public boolean conflictsWithIncompleteFile(File incomplete) {
+        return incomplete.equals(getIncompleteFile());
     }
 
     /**
