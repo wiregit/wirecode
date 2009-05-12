@@ -92,7 +92,10 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public LibTorrentInfo addTorrent(File torrent) {
         synchronized (eventPoller) {
-            LibTorrentInfo info = libTorrent.add_torrent(torrent.getAbsolutePath());
+            LibTorrentInfo info = new LibTorrentInfo(); 
+                
+            libTorrent.add_torrent(info, torrent.getAbsolutePath(), new LongHeap(),
+                    new Sha1Heap(), new PointerHeap());
             String id = info.sha1;
             torrents.add(id);
             updateStatus(id);
@@ -141,11 +144,15 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public LibTorrentStatus getStatus(String id) {
-        return libTorrent.get_torrent_status(id);
+        LibTorrentStatus status = new LibTorrentStatus();
+        libTorrent.get_torrent_status(id, status, new LongHeap(), new LongHeap(), new LongHeap());
+        return status;
     }
 
     private void updateStatus(String id) {
-        LibTorrentStatus torrentStatus = libTorrent.get_torrent_status(id);
+        LibTorrentStatus torrentStatus = new LibTorrentStatus(); 
+            libTorrent.get_torrent_status(id, torrentStatus,
+                new LongHeap(), new LongHeap(), new LongHeap());
         // TODO broadcast asynchronously
         statusListeners.broadcast(new LibTorrentStatusEvent(id, torrentStatus));
     }

@@ -7,6 +7,7 @@ import org.limewire.util.OSUtils;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 
 public class LibTorrentWrapper implements LibTorrent {
 
@@ -34,11 +35,11 @@ public class LibTorrentWrapper implements LibTorrent {
     }
 
     @Override
-    public LibTorrentInfo add_torrent(String path) {
+    public void add_torrent(LibTorrentInfo info, String path, 
+            LongHeap longHeap, Sha1Heap sha1Heap, Pointer ptr) {
         LOG.debugf("before add_torrent: {0}", path);
-        LibTorrentInfo info = libTorrent.add_torrent(path);
+        libTorrent.add_torrent(info, path, longHeap, sha1Heap, ptr);
         LOG.debugf("after add_torrent: {0}", path);
-        return info;
     }
 
     @Override
@@ -72,21 +73,11 @@ public class LibTorrentWrapper implements LibTorrent {
     }
 
     @Override
-    public LibTorrentStatus get_torrent_status(String id) {
+    public void get_torrent_status(String id, LibTorrentStatus status, 
+            LongHeap longHeap1, LongHeap longHeap2, LongHeap longHeap3) {
         LOG.debugf("before get_torrent_status: {0}", id);
-        int size = new LibTorrentStatus().size();
-        Memory memory = new Memory(size);
-        LibTorrentStatus status = libTorrent.get_torrent_status(id, memory);
-        LOG.debugf("after get_torrent_status: ", id);
-        return status;
-    }
-
-    @Override
-    public LibTorrentStatus get_torrent_status(String id, Memory memory) {
-        LOG.debugf("before get_torrent_status: {0}", id);
-        LibTorrentStatus status = libTorrent.get_torrent_status(id);
+        libTorrent.get_torrent_status(id, status, longHeap1, longHeap2, longHeap3);
         LOG.debugf("after get_torrent_status: {0}", id);
-        return status;
     }
 
     @Override
@@ -118,13 +109,6 @@ public class LibTorrentWrapper implements LibTorrent {
         boolean ret = libTorrent.signal_fast_resume_data_request(id);
         LOG.debugf("after print signal_fast_resume_data_request: {0} - {1}", id, ret);
         return ret;
-    }
-    
-    @Override
-    public void print() {
-        LOG.debug("before print");
-        libTorrent.print();
-        LOG.debug("after print");
     }
 
     @Override
