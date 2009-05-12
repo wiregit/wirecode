@@ -6,36 +6,90 @@ import com.sun.jna.Library;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
+/**
+ * Interface definition for accession the C LibTorrentWrapper library. 
+ */
 interface LibTorrent extends Library {
 
+    /**
+     * Initializes the LibTorrent library. Finding necessary dependencies first,
+     * then loading the libtorrent library as a jna lib.
+     */
     public void initialize();
-    
+
+    /**
+     * Inititalizes the libtorrent session to use the given path as the default
+     * download location.
+     */
     public void init(String path);
 
-    public void add_torrent(LibTorrentInfo info, String path, 
-            LongHeap longHeap, Sha1Heap sha1Heap, Pointer ptr);
-    
+    /**
+     * Adds the torrent to the libtorrent session. Takes a path to a torrent
+     * file and fills in the LibtorrentInfo struct with the torrent data upon
+     * completion.
+     */
+    public void add_torrent(LibTorrentInfo info, String path, LongHeap longHeap, Sha1Heap sha1Heap,
+            Pointer ptr);
+
+    /**
+     * Adds a torrent to the libtorrent session. This can be done with only a
+     * sha1 and trackerURI. optionally a path to a fast Resume data file can be
+     * included to enable starting the torrent faster.
+     */
     public void add_torrent_existing(String sha1, String trackerURI, String fastResumeData);
-    
+
+    /**
+     * Pauses the torrent with the given sha1
+     */
     public int pause_torrent(String id);
 
+    /**
+     * Resumes the torrent with the given sha1
+     */
     public int resume_torrent(String id);
 
+    /**
+     * Reads any stored alerts in the session, having there data coming in
+     * through the callback.
+     */
     public void get_alerts(AlertCallback alertCallback);
 
-    public void get_torrent_status(String id, LibTorrentStatus status,
-            LongHeap longHeap1, LongHeap longHeap2, LongHeap longHeap3);
+    /**
+     * Fills in the Libtorrent status struct for the torrent with the given sha1
+     */
+    public void get_torrent_status(String id, LibTorrentStatus status, LongHeap longHeap1,
+            LongHeap longHeap2, LongHeap longHeap3);
 
+    /**
+     * Returns the number of peers for the torrent with the given sha1
+     */
     public int get_num_peers(String id);
-    
+
+    /**
+     * Retrieves the peers for the torrent with the given sha1
+     */
     public void get_peers(String id, Memory memory);
-    
+
+    /**
+     * Tells the session to save the fast resume data for the torrent with the
+     * given sha1.
+     */
     public boolean signal_fast_resume_data_request(String id);
-    
+
+    /**
+     * Removes the torrent with the given sha1 from the session.
+     */
     public int remove_torrent(String id);
 
+    /**
+     * Moves the torrent with the given sha1 from its current location to the
+     * location defined in absolutePath.
+     */
     public boolean move_torrent(String id, String absolutePath);
 
+    /**
+     * Aborts all of the torrents in the session.
+     */
     public void abort_torrents();
-    
+
 }
