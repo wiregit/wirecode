@@ -357,7 +357,11 @@ public class UPnPManager  {
 		if (LOG.isDebugEnabled())
 			LOG.debug("adding "+m);
 		
-		Action add = getActionFromService(_service, "AddPortMapping");		    
+		Action add = getActionFromService(_service, "AddPortMapping");
+		
+		if(add == null) {
+		    return false;
+		}
 		
 		add.setArgumentValue("NewRemoteHost",m._externalAddress);
 		add.setArgumentValue("NewExternalPort",m._externalPort);
