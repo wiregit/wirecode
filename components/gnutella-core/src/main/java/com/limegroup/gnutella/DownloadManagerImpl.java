@@ -933,21 +933,22 @@ public class DownloadManagerImpl implements DownloadManager, Service,
            throw new SaveLocationException(e, torrentFile);
         }
         
-        //TODO will the overwrite logic below work with this check right here?
-        ret.checkActiveAndWaiting();
-
         if (overwrite) {
             //TODO: Redo and tie into incomplete file manager...
             Downloader downloader = getDownloaderForURN(ret.getSha1Urn());
             if (downloader != null) {
                 downloader.stop();
                 downloader.deleteIncompleteFiles();
-            } 
-            else {
-                // Delete file?
+            }
+            
+            downloader = getDownloaderForIncompleteFile(ret.getIncompleteFile());
+            if (downloader != null) {
+                downloader.stop();
+                downloader.deleteIncompleteFiles();
             }
         }
         else {
+            ret.checkActiveAndWaiting();
             ret.checkTargetLocation();
         }
         
