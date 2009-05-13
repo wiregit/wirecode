@@ -29,7 +29,7 @@ public class BTUploader implements Uploader {
 
     private final Torrent torrent;
 
-    private URN urn = null;
+    private volatile URN urn = null;
 
     private boolean cancelled = false;
 
