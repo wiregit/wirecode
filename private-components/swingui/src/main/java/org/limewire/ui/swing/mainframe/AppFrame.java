@@ -44,6 +44,7 @@ import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.event.RestoreViewEvent;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.options.OptionsDialog;
+import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.shell.ShellAssociationManager;
 import org.limewire.ui.swing.tray.TrayExitListener;
@@ -210,6 +211,8 @@ public class AppFrame extends SingleFrameApplication {
             glassPane.setVisible(false);
             ui.showMainPanel();
         }
+        // Make absolutely positively certain that we've set this to true.
+        InstallSettings.UPGRADED_TO_5.setValue(true);
         
         validateSaveDirectory();
 
