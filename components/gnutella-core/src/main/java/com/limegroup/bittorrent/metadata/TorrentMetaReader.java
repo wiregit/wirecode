@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.BTDataImpl;
-import org.limewire.bittorrent.ValueException;
+import org.limewire.bittorrent.BTDataValueException;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.io.IOUtils;
 
@@ -30,7 +30,7 @@ public class TorrentMetaReader implements MetaReader {
             torrentInputStream = new FileInputStream(torrentFile);
             Object obj = Token.parse(torrentInputStream.getChannel());
             if (!(obj instanceof Map)) {
-                throw new ValueException("expected map");
+                throw new BTDataValueException("expected map");
             }
             
             BTData btData = new BTDataImpl((Map)obj);

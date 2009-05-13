@@ -77,19 +77,19 @@ public class BTDataImpl implements BTData {
     /** Constructs a new BTData out of the map of properties. */
     // See http://wiki.theory.org/BitTorrentSpecification#Info_Dictionary
     // for more information
-    public BTDataImpl(Map<?, ?> torrentFileMap) throws ValueException {
+    public BTDataImpl(Map<?, ?> torrentFileMap) throws BTDataValueException {
         Object tmp;
 
         tmp = torrentFileMap.get("announce");
         if (tmp instanceof byte[])
             announce = StringUtils.getASCIIString((byte[]) tmp);
         else
-            throw new ValueException("announce missing or invalid!");
+            throw new BTDataValueException("announce missing or invalid!");
 
         webSeeds = parseWebSeeds(torrentFileMap);
         tmp = torrentFileMap.get("info");
         if (tmp == null || !(tmp instanceof Map))
-            throw new ValueException("info missing or invalid!");
+            throw new BTDataValueException("info missing or invalid!");
 
         Map infoMap = (Map) tmp;
         infoHash = calculateInfoHash(infoMap);
@@ -104,30 +104,30 @@ public class BTDataImpl implements BTData {
         if (tmp instanceof byte[])
             pieces = (byte[]) tmp;
         else
-            throw new ValueException("info->piece missing!");
+            throw new BTDataValueException("info->piece missing!");
 
         tmp = infoMap.get("piece length");
         if (tmp instanceof Long)
             pieceLength = (Long) tmp;
         else
-            throw new ValueException("info->'piece length' missing!");
+            throw new BTDataValueException("info->'piece length' missing!");
 
         // get name, prefer utf8
         tmp = infoMap.get("name.utf-8");
         name = getPreferredString(infoMap, "name");
         if (name == null || name.length() == 0)
-            throw new ValueException("no valid name!");
+            throw new BTDataValueException("no valid name!");
 
         if (infoMap.containsKey("length") == infoMap.containsKey("files"))
-            throw new ValueException("info->length & info.files can't both exist or not exist!");
+            throw new BTDataValueException("info->length & info.files can't both exist or not exist!");
 
         tmp = infoMap.get("length");
         if (tmp instanceof Long) {
             length = (Long) tmp;
             if (length < 0)
-                throw new ValueException("invalid length value");
+                throw new BTDataValueException("invalid length value");
         } else if (tmp != null)
-            throw new ValueException("info->length is non-null, but not a Long!");
+            throw new BTDataValueException("info->length is non-null, but not a Long!");
         else
             length = null;
 
@@ -135,22 +135,22 @@ public class BTDataImpl implements BTData {
         if (tmp instanceof List) {
             List<?> fileData = (List) tmp;
             if (fileData.isEmpty())
-                throw new ValueException("empty file list");
+                throw new BTDataValueException("empty file list");
 
             files = new ArrayList<BTData.BTFileData>(fileData.size());
             folders = new HashSet<String>();
 
             for (Object o : fileData) {
                 if (!(o instanceof Map))
-                    throw new ValueException("info->files[x] not a Map!");
+                    throw new BTDataValueException("info->files[x] not a Map!");
                 Map<?, ?> fileMap = (Map) o;
 
                 tmp = fileMap.get("length");
                 if (!(tmp instanceof Long))
-                    throw new ValueException("info->files[x].length not a Long!");
+                    throw new BTDataValueException("info->files[x].length not a Long!");
                 Long ln = (Long) tmp;
                 if (ln < 0)
-                    throw new ValueException("invalid length");
+                    throw new BTDataValueException("invalid length");
 
                 boolean doASCII = true;
 
@@ -158,14 +158,14 @@ public class BTDataImpl implements BTData {
                 try {
                     parseFiles(fileMap, ln, files, folders, true);
                     doASCII = false;
-                } catch (ValueException ignored) {
+                } catch (BTDataValueException ignored) {
                 }
 
                 if (doASCII)
                     parseFiles(fileMap, ln, files, folders, false);
             }
         } else if (tmp != null) {
-            throw new ValueException("info->files is non-null, but not a list!");
+            throw new BTDataValueException("info->files is non-null, but not a list!");
         } else {
             files = null;
             folders = null;
@@ -211,16 +211,16 @@ public class BTDataImpl implements BTData {
 
     /** Parses the List of Maps of file data. */
     private void parseFiles(Map<?, ?> fileMap, Long ln, List<BTData.BTFileData> fileData,
-            Set<String> folderData, boolean utf8) throws ValueException {
+            Set<String> folderData, boolean utf8) throws BTDataValueException {
 
         Object tmp = fileMap.get("path" + (utf8 ? ".utf-8" : ""));
         if (!(tmp instanceof List))
-            throw new ValueException("info->files[x].path[.utf-8] not a List!");
+            throw new BTDataValueException("info->files[x].path[.utf-8] not a List!");
 
         Set<String> newFolders = new HashSet<String>();
         String path = parseFileList((List) tmp, newFolders, true);
         if (path == null)
-            throw new ValueException("info->files[x].path[-utf-8] not valid!");
+            throw new BTDataValueException("info->files[x].path[-utf-8] not valid!");
 
         folderData.addAll(newFolders);
         fileData.add(new BTData.BTFileData(ln, path));
@@ -232,14 +232,14 @@ public class BTDataImpl implements BTData {
      * ASCII.
      */
     private String parseFileList(List<?> paths, Set<String> folders, boolean utf8)
-            throws ValueException {
+            throws BTDataValueException {
         if (paths.isEmpty())
-            throw new ValueException("empty paths list");
+            throw new BTDataValueException("empty paths list");
         StringBuilder sb = new StringBuilder();
         for (Iterator<?> i = paths.iterator(); i.hasNext();) {
             Object o = i.next();
             if (!(o instanceof byte[]))
-                throw new ValueException("info->files[x]->path[.utf-8][x] not a byte[]!");
+                throw new BTDataValueException("info->files[x]->path[.utf-8][x] not a byte[]!");
 
             String current;
             if (utf8)
@@ -248,7 +248,7 @@ public class BTDataImpl implements BTData {
                 current = StringUtils.getASCIIString((byte[]) o);
 
             if (current.length() == 0)
-                throw new ValueException("empty path element");
+                throw new BTDataValueException("empty path element");
 
             // using unix path style so path can be appended to urls
             sb.append("/");
