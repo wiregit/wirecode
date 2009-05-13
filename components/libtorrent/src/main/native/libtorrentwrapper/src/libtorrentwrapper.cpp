@@ -401,8 +401,7 @@ extern "C" RET resume_torrent(const char* id) {
 	wTHROW(new wrapper_status());
 }
 
-extern "C" RET get_torrent_status(const char* id, void* stat,
-		char* long_heap_1, char* long_heap_2, char* long_heap_3) {
+extern "C" RET get_torrent_status(const char* id, void* stat) {
 
 	struct wrapper_torrent_status* stats =
 			(struct wrapper_torrent_status *) stat;
