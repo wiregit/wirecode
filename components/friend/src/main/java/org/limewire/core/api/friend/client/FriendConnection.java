@@ -1,11 +1,12 @@
-package org.limewire.xmpp.api.client;
+package org.limewire.core.api.friend.client;
 
 import java.util.Collection;
 
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.xmpp.api.client.XMPPPresence;
 
-public interface XMPPConnection {
+public interface FriendConnection {
     
     public FriendConnectionConfiguration getConfiguration();
 

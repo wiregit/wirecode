@@ -17,7 +17,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPPresence;
 
@@ -30,13 +30,13 @@ public class DiscoInfoListener implements PacketListener {
     
     private static final Log LOG = LogFactory.getLog(DiscoInfoListener.class);
     
-    private final XMPPConnection connection;
+    private final FriendConnection connection;
     private final org.jivesoftware.smack.XMPPConnection smackConnection;
     private final FeatureRegistry featureRegistry;
     private final RosterListener rosterListener;
     private final PresenceListener presenceListener;      
 
-    public DiscoInfoListener(XMPPConnection connection,
+    public DiscoInfoListener(FriendConnection connection,
                              org.jivesoftware.smack.XMPPConnection smackConnection,
                              FeatureRegistry featureRegistry) {
         this.connection = connection;

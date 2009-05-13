@@ -9,7 +9,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
@@ -40,7 +40,7 @@ class ReconnectionManager implements EventListener<XMPPConnectionEvent> {
             connected = true;   
         } else if(event.getType() == XMPPConnectionEvent.Type.DISCONNECTED) {
             if(event.getException() != null && connected) {
-                XMPPConnection connection = event.getSource();
+                FriendConnection connection = event.getSource();
                 final FriendConnectionConfiguration configuration = connection.getConfiguration();
                 synchronized (this.serviceImpl) {
                     this.serviceImpl.connections.remove(connection);
@@ -49,7 +49,7 @@ class ReconnectionManager implements EventListener<XMPPConnectionEvent> {
                     @Override
                     public void run() {
                         long sleepTime = 10000;
-                        XMPPConnection newConnection = null;
+                        FriendConnection newConnection = null;
                         for(int i = 0; i < MAX_RECONNECTION_ATTEMPTS &&
                                 newConnection == null; i++) {
                             try {

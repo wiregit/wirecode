@@ -43,6 +43,7 @@ import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPPresence;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
 import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.xmpp.client.impl.features.LimewireFeatureInitializer;
@@ -64,9 +65,9 @@ import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection {
+public class XMPPFriendConnectionImpl implements FriendConnection {
 
-    private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
+    private static final Log LOG = LogFactory.getLog(XMPPFriendConnectionImpl.class);
 
     private final FriendConnectionConfiguration configuration;
     private final EventBroadcaster<FileOfferEvent> fileOfferBroadcaster;
@@ -94,7 +95,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private volatile DiscoInfoListener discoInfoListener;
 
     @AssistedInject
-    public XMPPConnectionImpl(@Assisted FriendConnectionConfiguration configuration,
+    public XMPPFriendConnectionImpl(@Assisted FriendConnectionConfiguration configuration,
                        @Assisted ListeningExecutorService executorService,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
                        EventBroadcaster<FileOfferEvent> fileOfferBroadcaster,
@@ -285,7 +286,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
         public void entriesAdded(Collection<String> addedIds) {
             try {
-                synchronized (XMPPConnectionImpl.this) {
+                synchronized (XMPPFriendConnectionImpl.this) {
                     checkLoggedIn();
                     synchronized (users) {
                         Roster roster = connection.getRoster();
@@ -309,7 +310,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
         public void entriesUpdated(Collection<String> updatedIds) {
             try {
-                synchronized (XMPPConnectionImpl.this) {
+                synchronized (XMPPFriendConnectionImpl.this) {
                     checkLoggedIn();
                     synchronized (users) {                 
                         Roster roster = connection.getRoster();
@@ -500,7 +501,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private class SmackConnectionListener implements ConnectionListener, ConnectionCreationListener {
         @Override
         public void connectionCreated(XMPPConnection connection) {
-            if(XMPPConnectionImpl.this.connection != connection) {
+            if(XMPPFriendConnectionImpl.this.connection != connection) {
                 return;
             }
 
@@ -529,20 +530,20 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
             ChatStateManager.getInstance(connection);
 
-            discoInfoListener = new DiscoInfoListener(XMPPConnectionImpl.this, connection, featureRegistry);
+            discoInfoListener = new DiscoInfoListener(XMPPFriendConnectionImpl.this, connection, featureRegistry);
             rosterListeners.addListener(discoInfoListener.getRosterListener());
             connection.addPacketListener(discoInfoListener, discoInfoListener.getPacketFilter());
 
-            addressIQListener = addressIQListenerFactory.create(XMPPConnectionImpl.this, addressFactory);
+            addressIQListener = addressIQListenerFactory.create(XMPPFriendConnectionImpl.this, addressFactory);
             connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
 
             FileTransferIQListener fileTransferIQListener = new FileTransferIQListener(fileOfferBroadcaster);
             connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());
 
-            authTokenIQListener = authTokenIQListenerFactory.create(XMPPConnectionImpl.this);
+            authTokenIQListener = authTokenIQListenerFactory.create(XMPPFriendConnectionImpl.this);
             connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
 
-            LibraryChangedIQListener libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventBroadcaster, XMPPConnectionImpl.this);
+            LibraryChangedIQListener libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventBroadcaster, XMPPFriendConnectionImpl.this);
             connection.addPacketListener(libChangedIQListener, libChangedIQListener.getPacketFilter());
 
             ConnectBackRequestIQListener connectRequestIQListener = new ConnectBackRequestIQListener(connectRequestEventBroadcaster, featureRegistry);
@@ -563,13 +564,13 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
         @Override
         public void connectionClosed() {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED));
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPFriendConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED));
             cleanup();
         }
 
         @Override
         public void connectionClosedOnError(Exception e) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED, e));
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPFriendConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED, e));
             cleanup();
         }
 

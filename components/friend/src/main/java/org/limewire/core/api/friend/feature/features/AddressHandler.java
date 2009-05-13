@@ -9,6 +9,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
@@ -19,7 +20,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.client.impl.XMPPAddressRegistry;
 
@@ -32,14 +32,14 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
     private final XMPPAddressRegistry addressRegistry;
     private final Map<String, Address> pendingAddresses;
     private Address address;
-    private final Set<XMPPConnection> connections;
+    private final Set<FriendConnection> connections;
 
     @Inject
     public AddressHandler(XMPPAddressRegistry addressRegistry,
                           FeatureRegistry featureRegistry) {
         this.addressRegistry = addressRegistry;
         this.pendingAddresses = new HashMap<String, Address>();
-        connections = new HashSet<XMPPConnection>();
+        connections = new HashSet<FriendConnection>();
         new AddressIQFeatureInitializer().register(featureRegistry);
     }
                                                       
@@ -62,7 +62,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
     }
 
     public void featureReceived(String from, Address address) {
-        for(XMPPConnection connection : connections) {
+        for(FriendConnection connection : connections) {
             Friend friend = connection.getUser(StringUtils.parseBareAddress(from));
             if (friend != null) {
                 FriendPresence presence = friend.getFriendPresences().get(from);
@@ -84,7 +84,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
             // TODO async?
             LOG.debugf("new address to publish: {0}", event);
             synchronized (AddressHandler.this) {
-                for(XMPPConnection connection : connections) {
+                for(FriendConnection connection : connections) {
                     address = event.getData();
                     for(Friend user : connection.getUsers()) {
                         for(Map.Entry<String, FriendPresence> presenceEntry : user.getFriendPresences().entrySet()) {

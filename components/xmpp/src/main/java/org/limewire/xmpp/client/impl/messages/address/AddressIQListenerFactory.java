@@ -1,8 +1,8 @@
 package org.limewire.xmpp.client.impl.messages.address;
 
-import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
+import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
 import org.limewire.net.address.AddressFactory;
 
 public interface AddressIQListenerFactory {
-    AddressIQListener create(XMPPConnectionImpl connection, AddressFactory factory);
+    AddressIQListener create(XMPPFriendConnectionImpl connection, AddressFactory factory);
 }

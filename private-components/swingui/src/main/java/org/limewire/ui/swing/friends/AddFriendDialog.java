@@ -16,7 +16,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeJDialog;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.util.Objects;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -25,7 +25,7 @@ import net.miginfocom.swing.MigLayout;
  */
 public class AddFriendDialog extends LimeJDialog {
 
-    public AddFriendDialog(JComponent parent, final XMPPConnection connection) {
+    public AddFriendDialog(JComponent parent, final FriendConnection connection) {
         super(SwingUtilities.getWindowAncestor(parent), tr("Add Friend"));
         setLocationRelativeTo(parent);
         // The dialog can only be popped up when the user is signed in, so

@@ -3,7 +3,7 @@ package org.limewire.xmpp.client.impl;
 import java.util.concurrent.ExecutionException;
 
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.core.api.friend.client.FriendRequest;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
@@ -26,8 +26,8 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
     private RosterListenerMock autoFiveRosterListener;
     private RosterListenerMock autoSixRosterListener;
     private EventListener<FriendRequestEvent> acceptFriendListener;
-    private XMPPConnectionImpl connectionFive;
-    private XMPPConnectionImpl connectionSix;
+    private XMPPFriendConnectionImpl connectionFive;
+    private XMPPFriendConnectionImpl connectionSix;
 
     public XmppFriendSubscriptionTest(String name) {
         super(name);
@@ -45,8 +45,8 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         FriendConnectionConfiguration configSix = new FriendConnectionConfigurationMock(USERNAME_6, PASSWORD_56,
                 SERVICE, autoSixRosterListener);
 
-        connectionFive = (XMPPConnectionImpl)service.login(configFive).get();
-        connectionSix = (XMPPConnectionImpl)service.login(configSix).get();
+        connectionFive = (XMPPFriendConnectionImpl)service.login(configFive).get();
+        connectionSix = (XMPPFriendConnectionImpl)service.login(configSix).get();
 
         // Allow login, roster, presence, library messages to be sent, received
         Thread.sleep(SLEEP);
@@ -142,8 +142,8 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         FriendConnectionConfiguration configSix = new FriendConnectionConfigurationMock(USERNAME_6, PASSWORD_56,
                 SERVICE, autoSixRosterListener);
 
-        connectionFive = (XMPPConnectionImpl) service.login(configFive).get();
-        connectionSix = (XMPPConnectionImpl) service.login(configSix).get();
+        connectionFive = (XMPPFriendConnectionImpl) service.login(configFive).get();
+        connectionSix = (XMPPFriendConnectionImpl) service.login(configSix).get();
 
         Thread.sleep(SLEEP);
 
@@ -196,8 +196,8 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         FriendConnectionConfiguration configSix = new FriendConnectionConfigurationMock(USERNAME_6, PASSWORD_56,
                 SERVICE, autoSixRosterListener);
 
-        connectionFive = (XMPPConnectionImpl) service.login(configFive).get();
-        connectionSix = (XMPPConnectionImpl) service.login(configSix).get();
+        connectionFive = (XMPPFriendConnectionImpl) service.login(configFive).get();
+        connectionSix = (XMPPFriendConnectionImpl) service.login(configSix).get();
 
         Thread.sleep(SLEEP);
         
@@ -208,7 +208,7 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         assertNull(autoSixRosterListener.getFirstPresence(USERNAME_5));
     }
 
-    private void removeAllUsersFromRoster(XMPPConnection conn) throws FriendException, ExecutionException, InterruptedException {
+    private void removeAllUsersFromRoster(FriendConnection conn) throws FriendException, ExecutionException, InterruptedException {
         for (XMPPFriend user : conn.getUsers()) {
             conn.removeUser(user.getId()).get();
         }

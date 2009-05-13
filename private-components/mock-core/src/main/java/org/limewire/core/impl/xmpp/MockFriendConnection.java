@@ -7,13 +7,13 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 
-public class MockXMPPConnection implements XMPPConnection {
+public class MockFriendConnection implements FriendConnection {
     private FriendConnectionConfiguration config;
     
-    public MockXMPPConnection(FriendConnectionConfiguration config) {
+    public MockFriendConnection(FriendConnectionConfiguration config) {
         this.config = config;
     }
 

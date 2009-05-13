@@ -8,7 +8,7 @@ import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 
 import com.google.inject.Singleton;
 
@@ -23,7 +23,7 @@ public class FriendConnectionFactoryRegistryImpl implements FriendConnectionFact
     }
 
     @Override
-    public ListeningFuture<XMPPConnection> login(FriendConnectionConfiguration configuration) {
+    public ListeningFuture<FriendConnection> login(FriendConnectionConfiguration configuration) {
         FriendConnectionFactory factory = factories.get(configuration.getType());
         if(factory != null) {
             return factory.login(configuration);

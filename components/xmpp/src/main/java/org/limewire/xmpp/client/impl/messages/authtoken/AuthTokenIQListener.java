@@ -8,7 +8,7 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.AuthToken;
-import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
+import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
 
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
@@ -17,11 +17,11 @@ import com.google.inject.assistedinject.AssistedInject;
 @Singleton
 public class AuthTokenIQListener implements PacketListener, FeatureTransport<AuthToken> {
 
-    private final XMPPConnectionImpl connection;
+    private final XMPPFriendConnectionImpl connection;
     private final FeatureTransport.Handler<AuthToken> handler;
 
     @AssistedInject
-    public AuthTokenIQListener(@Assisted XMPPConnectionImpl connection,
+    public AuthTokenIQListener(@Assisted XMPPFriendConnectionImpl connection,
                                FeatureTransport.Handler<AuthToken> handler) {
         this.connection = connection;
         this.handler = handler;

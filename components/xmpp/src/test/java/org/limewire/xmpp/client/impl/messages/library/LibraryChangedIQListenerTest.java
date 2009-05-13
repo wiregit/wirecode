@@ -13,13 +13,13 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 
 public class LibraryChangedIQListenerTest extends BaseTestCase {
 
     private Mockery context;
     private EventBroadcaster eventBroadcaster;
-    private XMPPConnection connection;
+    private FriendConnection connection;
     private LibraryChangedIQListener libraryChangedIQListener;
 
     public LibraryChangedIQListenerTest(String name) {
@@ -31,7 +31,7 @@ public class LibraryChangedIQListenerTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
         eventBroadcaster = context.mock(EventBroadcaster.class);
-        connection = context.mock(XMPPConnection.class);
+        connection = context.mock(FriendConnection.class);
         libraryChangedIQListener = new LibraryChangedIQListener(eventBroadcaster, connection); 
     }
     

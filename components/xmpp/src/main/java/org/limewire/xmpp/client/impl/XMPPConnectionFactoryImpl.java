@@ -18,6 +18,7 @@ import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.inspection.Inspectable;
@@ -35,7 +36,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
-import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPPresence;
@@ -56,7 +56,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     private final ListeningExecutorService executorService;
 
     // Connections that are logged in or logging in
-    final List<XMPPConnectionImpl> connections;
+    final List<XMPPFriendConnectionImpl> connections;
     private boolean multipleConnectionsAllowed;
 
     @SuppressWarnings("unused")
@@ -74,7 +74,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
             
             private void collectFriendStatistics(Map<Object, Object> data) {
                 int count = 0;
-                XMPPConnection connection = getActiveConnection();
+                FriendConnection connection = getActiveConnection();
                 InspectionHistogram<Integer> presencesHistogram = new InspectionHistogram<Integer>();
                 if (connection != null) {
                     for (XMPPFriend user : connection.getUsers()) {
@@ -102,7 +102,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
         this.connectionImplFactory = connectionImplFactory;
         this.jabberSettings = jabberSettings;
 
-        connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
+        connections = new CopyOnWriteArrayList<XMPPFriendConnectionImpl>();
         multipleConnectionsAllowed = false;
         connectionBroadcaster.addListener(new ReconnectionManager(this));
         // We'll install our own subscription listeners
@@ -167,10 +167,10 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     }
 
     @Override
-    public ListeningFuture<XMPPConnection> login(final FriendConnectionConfiguration configuration) {
-        return executorService.submit(new Callable<XMPPConnection>() {
+    public ListeningFuture<FriendConnection> login(final FriendConnectionConfiguration configuration) {
+        return executorService.submit(new Callable<FriendConnection>() {
             @Override
-            public XMPPConnection call() throws Exception {
+            public FriendConnection call() throws Exception {
                 return loginImpl(configuration);
             }
         }); 
@@ -182,14 +182,14 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
         registry.register(Network.Type.XMPP, this);
     }
 
-    XMPPConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
+    FriendConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
         return loginImpl(configuration, false);
     }
 
-    XMPPConnection loginImpl(FriendConnectionConfiguration configuration, boolean isReconnect) throws FriendException {
+    FriendConnection loginImpl(FriendConnectionConfiguration configuration, boolean isReconnect) throws FriendException {
         synchronized (this) {
             if(!multipleConnectionsAllowed) {
-                XMPPConnection activeConnection = getActiveConnection();
+                FriendConnection activeConnection = getActiveConnection();
                 if(isReconnect) {
                     if(activeConnection != null) {
                         return activeConnection;
@@ -203,7 +203,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
                 }                
             }
             
-            XMPPConnectionImpl connection = connectionImplFactory.createConnection(
+            XMPPFriendConnectionImpl connection = connectionImplFactory.createConnection(
                     configuration, executorService);
             try {
                 connections.add(connection);
@@ -220,7 +220,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     }
 
     private boolean isLoggedIn() {
-        for(XMPPConnectionImpl connection : connections) {
+        for(XMPPFriendConnectionImpl connection : connections) {
             if(connection.isLoggedIn()) {
                 return true;
             }
@@ -229,13 +229,13 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     }
 
     private void logoutImpl() {
-        for(XMPPConnectionImpl connection : connections) {
+        for(XMPPFriendConnectionImpl connection : connections) {
             connection.logoutImpl();
         }
         connections.clear();
     }
 
-    private XMPPConnectionImpl getActiveConnection() {
+    private XMPPFriendConnectionImpl getActiveConnection() {
         if(connections.isEmpty()) {
             return null;
         } else {
@@ -253,14 +253,14 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     }
 
     // Only for testing
-    List<? extends XMPPConnection> getConnections() {
+    List<? extends FriendConnection> getConnections() {
         return Collections.unmodifiableList(connections);
     } 
     
     @Override
     public boolean send(String userId, Connectable address, GUID clientGuid, int supportedFWTVersion) {
         LOG.debug("send connect request");
-        XMPPConnectionImpl connection = getActiveConnection();
+        XMPPFriendConnectionImpl connection = getActiveConnection();
         if (connection == null) {
             return false;
         }
@@ -289,7 +289,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     }
 
     private void setModeImpl(Mode mode) throws FriendException {
-        for(XMPPConnectionImpl connection : connections) {
+        for(XMPPFriendConnectionImpl connection : connections) {
             connection.setModeImpl(mode);
         }
     }

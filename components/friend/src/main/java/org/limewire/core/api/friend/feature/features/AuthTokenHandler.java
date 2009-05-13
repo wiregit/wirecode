@@ -11,6 +11,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
@@ -19,7 +20,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 
@@ -33,13 +33,13 @@ public class AuthTokenHandler implements FeatureTransport.Handler<AuthToken>{
     
     private final Map<String, AuthToken> pendingAuthTokens;
     private final DefaultFriendAuthenticator authenticator;
-    private final Set<XMPPConnection> connections;
+    private final Set<FriendConnection> connections;
     
     @Inject
     AuthTokenHandler(DefaultFriendAuthenticator authenticator,
                      FeatureRegistry featureRegistry) {
         this.authenticator = authenticator;
-        this.connections = new HashSet<XMPPConnection>();
+        this.connections = new HashSet<FriendConnection>();
         this.pendingAuthTokens = new HashMap<String, AuthToken>();
         new AuthTokenFeatureInitializer().register(featureRegistry);
     }
@@ -62,7 +62,7 @@ public class AuthTokenHandler implements FeatureTransport.Handler<AuthToken>{
     
     @Override
     public void featureReceived(String from, final AuthToken feature) {
-        for(XMPPConnection connection : connections) {
+        for(FriendConnection connection : connections) {
             synchronized (this) {
                 XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(from));
                 if (user != null) {

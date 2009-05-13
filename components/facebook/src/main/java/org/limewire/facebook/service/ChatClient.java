@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.friend.client.FriendException;
 
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
@@ -35,43 +36,47 @@ public class ChatClient {
         this.executorService = executorService;//ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName())); //executorService;
     }
 
-    public void start() throws IOException {
-        String homePage = connection.httpGET(HOME_PAGE);
+    public void start() throws FriendException {
+        try {
+            String homePage = connection.httpGET(HOME_PAGE);
 
-        if(homePage == null){
-            throw new IOException("no response");
+            if(homePage == null){
+                throw new IOException("no response");
+            }
+            String uid = connection.getUID();
+            if(uid == null){
+                throw new IOException("no uid");
+            }
+
+            String channel;
+            String channelPrefix = " \"channel";
+            int channelBeginPos = homePage.indexOf(channelPrefix)
+                    + channelPrefix.length();
+            if (channelBeginPos < channelPrefix.length()){
+                throw new IOException("can't find channel");
+            }
+            else {
+                channel = homePage.substring(channelBeginPos,
+                        channelBeginPos + 2);
+            }
+
+            String post_form_id;
+            String postFormIDPrefix = "<input type=\"hidden\" id=\"post_form_id\" name=\"post_form_id\" value=\"";
+            int formIdBeginPos = homePage.indexOf(postFormIDPrefix)
+                    + postFormIDPrefix.length();
+            if (formIdBeginPos < postFormIDPrefix.length()){
+                throw new IOException("can't find post form id");
+            }
+            else {
+                post_form_id = homePage.substring(formIdBeginPos,
+                        formIdBeginPos + 32);
+            }
+
+            ThreadExecutor.startThread(new ChatListener(uid, channel), "chat-listener-thread");
+            executorService.scheduleAtFixedRate(presenceListenerFactory.createPresenceListener(post_form_id), 0, 90, TimeUnit.SECONDS);
+        } catch (IOException ioe)  {
+            throw new FriendException(ioe);
         }
-        String uid = connection.getUID();
-        if(uid == null){
-            throw new IOException("no uid");
-        }
-        
-        String channel;
-        String channelPrefix = " \"channel";
-        int channelBeginPos = homePage.indexOf(channelPrefix)
-                + channelPrefix.length();
-        if (channelBeginPos < channelPrefix.length()){
-            throw new IOException("can't find channel");
-        }
-        else {
-            channel = homePage.substring(channelBeginPos,
-                    channelBeginPos + 2);
-        }
-        
-        String post_form_id;
-        String postFormIDPrefix = "<input type=\"hidden\" id=\"post_form_id\" name=\"post_form_id\" value=\"";
-        int formIdBeginPos = homePage.indexOf(postFormIDPrefix)
-                + postFormIDPrefix.length();
-        if (formIdBeginPos < postFormIDPrefix.length()){
-            throw new IOException("can't find post form id");
-        }
-        else {
-            post_form_id = homePage.substring(formIdBeginPos,
-                    formIdBeginPos + 32);
-        }   
-        
-        ThreadExecutor.startThread(new ChatListener(uid, channel), "chat-listener-thread");
-        executorService.scheduleAtFixedRate(presenceListenerFactory.createPresenceListener(post_form_id), 0, 90, TimeUnit.SECONDS);
     }
     
     private class ChatListener implements Runnable {

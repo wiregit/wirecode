@@ -8,6 +8,7 @@ import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
@@ -23,14 +24,13 @@ import org.limewire.net.address.BlockingAddressResolutionObserver;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 
 public class XMPPAddressResolverTest extends BaseTestCase {
 
     private Mockery context;
-    private XMPPConnection connection;
+    private FriendConnection connection;
     private SocketsManager socketsManager;
     private XMPPAddressRegistry addressRegistry;
     private XMPPFriend user;
@@ -44,7 +44,7 @@ public class XMPPAddressResolverTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
-        connection = context.mock(XMPPConnection.class);  
+        connection = context.mock(FriendConnection.class);
         socketsManager = context.mock(SocketsManager.class);
         addressRegistry = new XMPPAddressRegistry();
         user = context.mock(XMPPFriend.class);

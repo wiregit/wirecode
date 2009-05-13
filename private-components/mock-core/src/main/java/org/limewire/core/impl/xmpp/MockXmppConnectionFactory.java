@@ -6,13 +6,13 @@ import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 
 class MockXmppConnectionFactory implements FriendConnectionFactory {
 
     @Override
-    public ListeningFuture<XMPPConnection> login(FriendConnectionConfiguration configuration) {
-        return new SimpleFuture<XMPPConnection>((XMPPConnection)null);    
+    public ListeningFuture<FriendConnection> login(FriendConnectionConfiguration configuration) {
+        return new SimpleFuture<FriendConnection>((FriendConnection)null);
     }
 
     @Override

@@ -14,6 +14,7 @@ import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
@@ -25,7 +26,6 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl.Element;
 import org.xmlpull.v1.XmlPullParserException;
@@ -173,7 +173,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
      * list of connections
      */
     public void testUserLogout() throws InterruptedException, ExecutionException {
-        List<? extends XMPPConnection> connections = service.getConnections();
+        List<? extends FriendConnection> connections = service.getConnections();
         assertTrue(connections.get(0).isLoggedIn());
         connections.get(0).logout().get();
         assertFalse(connections.get(0).isLoggedIn());
@@ -195,7 +195,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         assertEquals(XMPPPresence.Type.available, buddy2.getType());
         assertEquals(XMPPPresence.Mode.available, buddy2.getMode());
 
-        for(XMPPConnection connection : service.getConnections()) {
+        for(FriendConnection connection : service.getConnections()) {
             if(connection.getConfiguration().getUserInputLocalID().equals(USERNAME_2)) {
                 connection.setMode(XMPPPresence.Mode.away).get();
             }

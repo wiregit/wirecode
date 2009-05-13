@@ -1,7 +1,7 @@
 package org.limewire.core.api.friend.client;
 
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 
 
 /**
@@ -16,11 +16,11 @@ public interface FriendConnectionFactory {
      * 
      * @param configuration the XMPPConnectionConfiguration to use; can not be null
      *
-     * @return a {@link ListeningFuture} of {@link org.limewire.xmpp.api.client.XMPPConnection}
+     * @return a {@link ListeningFuture} of {@link FriendConnection}
      * 
      * The ExecutionException will be to an XMPPException if an error occurs
      */
-    public ListeningFuture<XMPPConnection> login(FriendConnectionConfiguration configuration);
+    public ListeningFuture<FriendConnection> login(FriendConnectionConfiguration configuration);
 
     public void register(FriendConnectionFactoryRegistry registry);
 }

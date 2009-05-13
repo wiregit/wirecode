@@ -5,14 +5,13 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
-import junit.framework.TestCase;
-
 import org.json.JSONException;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresenceEvent;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.inject.AbstractModule;
 import org.limewire.listener.EventBroadcaster;
@@ -29,6 +28,8 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+
+import junit.framework.TestCase;
 
 public class FacebookFriendConnectionTest extends TestCase {
     private Injector injector;
@@ -77,9 +78,9 @@ public class FacebookFriendConnectionTest extends TestCase {
                 }*/);
     }
 
-    public void testLogin() throws IOException, FacebookException, JSONException, InterruptedException {
+    public void testLogin() throws IOException, FacebookException, JSONException, InterruptedException, FriendException {
         FacebookFriendService service = injector.getInstance(FacebookFriendService.class);
-        service.loginImpl();
+        service.loginImpl(null);
         Thread.sleep(1000 * 60 * 5);
     }
     

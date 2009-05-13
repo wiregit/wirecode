@@ -3,7 +3,10 @@ package org.limewire.facebook.service;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -22,17 +25,26 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.ThreadPoolListeningExecutor;
+import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.listener.EventBroadcaster;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.xmpp.api.client.XMPPPresence;
 
-import com.google.code.facebookapi.FacebookException;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
 @Singleton
-public class FacebookFriendConnection {
-    private final Provider<String> email;
-    private final Provider<String> password;
+public class FacebookFriendConnection implements FriendConnection {
+    private final FriendConnectionConfiguration configuration;
     private final Provider<String> apiKey;
     private static final String DUMMY_SECRET = "__";
     private static final String FACEBOOK_LOGIN_GET_URL = "http://coelacanth:5555/getlogin/";
@@ -44,20 +56,66 @@ public class FacebookFriendConnection {
     private String uid;
     private String secret;
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.8) Gecko/2009032609 Firefox/3.0.8";
+    private ThreadPoolListeningExecutor executorService;
+    private final AtomicBoolean loggedIn = new AtomicBoolean(false);
+    private final AtomicBoolean loggingIn = new AtomicBoolean(false);
+    private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
 
-    @Inject
-    public FacebookFriendConnection(@Named("facebookApiKey") Provider<String> apiKey,
-                                    @Named("facebookEmail")Provider<String> email,
-                                    @Named("facebookPassword") Provider<String> password) {
-        this.email = email;
-        this.password = password;
+    @AssistedInject
+    public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
+                                    @Named("facebookApiKey") Provider<String> apiKey,
+                                    EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster) {
+        this.configuration = configuration;
         this.apiKey = apiKey;
+        this.connectionBroadcaster = connectionBroadcaster;
         httpClient = new AuthTokenInterceptingHttpClient();
+        executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));
     }
-    
-    synchronized void loginImpl() throws FacebookException, IOException, JSONException {
-        loginToFacebook();
-        requestSession();
+
+    @Override
+    public ListeningFuture<Void> login() {
+        return executorService.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                loginImpl();
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public ListeningFuture<Void> logout() {
+        loggedIn.set(false);
+        return null;
+    }
+
+    @Override
+    public boolean isLoggedIn() {
+        return loggedIn.get();
+    }
+
+    @Override
+    public boolean isLoggingIn() {
+        return loggingIn.get();
+    }
+
+    synchronized void loginImpl() throws FriendException {
+      try {
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTING));
+            loggingIn.set(true);
+            loginToFacebook();
+            requestSession();
+            loggedIn.set(true);
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTED));
+        } catch (IOException e) {
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
+            throw new FriendException(e);
+        } catch (JSONException e) {
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
+            throw new FriendException(e);
+        } finally {
+            loggingIn.set(false);
+        }
     }
 
     private void loginToFacebook() throws IOException {        
@@ -75,8 +133,8 @@ public class FacebookFriendConnection {
 
         httpost.addHeader("User-Agent", USER_AGENT_HEADER);
         List <NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair("email", email.get()));
-        nvps.add(new BasicNameValuePair("pass", password.get()));
+        nvps.add(new BasicNameValuePair("email", configuration.getUserInputLocalID()));
+        nvps.add(new BasicNameValuePair("pass", configuration.getPassword()));
 
         httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
@@ -149,7 +207,37 @@ public class FacebookFriendConnection {
         }
         return responseStr;
     }
-    
+
+    @Override
+    public FriendConnectionConfiguration getConfiguration() {
+        return null;
+    }
+
+    @Override
+    public ListeningFuture<Void> setMode(XMPPPresence.Mode mode) {
+        return null;
+    }
+
+    @Override
+    public ListeningFuture<Void> addUser(String id, String name) {
+        return null;
+    }
+
+    @Override
+    public ListeningFuture<Void> removeUser(String id) {
+        return null;
+    }
+
+    @Override
+    public XMPPFriend getUser(String id) {
+        return null;
+    }
+
+    @Override
+    public Collection<XMPPFriend> getUsers() {
+        return null;
+    }
+
     public String getAuthToken() {
         return authToken;
     }

@@ -14,7 +14,7 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class LibraryChangedIQListener implements PacketListener {
@@ -22,10 +22,10 @@ public class LibraryChangedIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(LibraryChangedIQListener.class);
 
     private final EventBroadcaster<LibraryChangedEvent> libChangedBroadcaster;
-    private final XMPPConnection connection;
+    private final FriendConnection connection;
 
     public LibraryChangedIQListener(EventBroadcaster<LibraryChangedEvent> libChangedListeners,
-                                    XMPPConnection connection) {
+                                    FriendConnection connection) {
         this.libChangedBroadcaster = libChangedListeners;
         this.connection = connection;
     }

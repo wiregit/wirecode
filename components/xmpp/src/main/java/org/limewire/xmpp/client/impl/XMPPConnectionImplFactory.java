@@ -7,7 +7,7 @@ import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
  * Creates XMPPConnectionImpls.  Used i conjunction with @AssistedInject
  */
 public interface XMPPConnectionImplFactory {
-    XMPPConnectionImpl createConnection(FriendConnectionConfiguration configuration,
+    XMPPFriendConnectionImpl createConnection(FriendConnectionConfiguration configuration,
                                         ListeningExecutorService executorService);
         
 }
