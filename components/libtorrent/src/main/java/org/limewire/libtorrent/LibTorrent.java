@@ -4,7 +4,6 @@ import org.limewire.libtorrent.callback.AlertCallback;
 
 import com.sun.jna.Library;
 import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
 
 /**
  * Interface definition for accession the C LibTorrentWrapper library. 
@@ -29,7 +28,7 @@ interface LibTorrent extends Library {
      * completion.
      */
     public WrapperStatus add_torrent(LibTorrentInfo info, String path, LongHeap longHeap, Sha1Heap sha1Heap,
-            Pointer ptr);
+             PointerHeap ptr);
 
     /**
      * Adds a torrent to the libtorrent session. This can be done with only a
