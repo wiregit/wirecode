@@ -162,6 +162,7 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public void initialize() {
         libTorrent.initialize(torrentDownloadFolder.getAbsolutePath());
+        //TODO what if path changes.
     }
 
     @Override
