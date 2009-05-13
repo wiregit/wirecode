@@ -484,8 +484,9 @@ extern "C" void get_peers(const char* id, int buffer_len, char* data) {
 		if (len + pos > buffer_len)
 			break;
 
-		for (int i = 0; i < len; i++)
+		for (int i = 0; i < len; i++) {
 			data[pos + i] = address[i];
+		}
 
 		pos += len + 1;
 		data[pos++] = ';';
