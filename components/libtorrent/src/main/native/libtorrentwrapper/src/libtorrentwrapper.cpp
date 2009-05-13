@@ -354,7 +354,7 @@ extern "C" RET add_torrent(wrapper_torrent_info* info, char* path) {
 #endif
 
 	sha1_hash sha1 = torrent_info.info_hash();
-	char *sha1String = new char[20];
+	char *sha1String = new char[41];
 	getSha1String(sha1, sha1String);
 
 #ifdef LIMEDEBUG
