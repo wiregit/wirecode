@@ -105,7 +105,6 @@ public class Torrent {
             }
 
             trackerURL = btData.getAnnounce();
-            System.out.println("announce (tracker URL): " + trackerURL);
 
             sha1 = TorrentSHA1ConversionUtils.toHexString(btData.getInfoHash());
 
