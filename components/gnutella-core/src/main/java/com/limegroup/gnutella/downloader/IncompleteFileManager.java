@@ -46,6 +46,7 @@ public class IncompleteFileManager  {
     static final String SEPARATOR="-";
     /** The prefix added to preview copies of incomplete files. */
     public static final String PREVIEW_PREFIX="Preview-";
+    public static final String INCOMPLETE_PREFIX="T-";
     
     /**
      * A mapping from incomplete files (File) to the blocks of the file stored
@@ -332,17 +333,17 @@ public class IncompleteFileManager  {
     private static String tempName(String filename, long size, int suffix) {
         if (suffix<=1) {
             //a) No suffix
-            return "T-"+size+"-"+filename;
+            return INCOMPLETE_PREFIX+size+"-"+filename;
         }
         int i=filename.lastIndexOf('.');
         if (i<0) {
             //b) Suffix, no extension
-            return "T-"+size+"-"+filename+" ("+suffix+")";
+            return INCOMPLETE_PREFIX+size+"-"+filename+" ("+suffix+")";
         } else {
             //c) Suffix, file extension
             String noExtension=filename.substring(0,i);
             String extension=filename.substring(i); //e.g., ".txt"
-            return "T-"+size+"-"+noExtension+" ("+suffix+")"+extension;
+            return INCOMPLETE_PREFIX+size+"-"+noExtension+" ("+suffix+")"+extension;
         }            
     }
 
@@ -635,7 +636,7 @@ public class IncompleteFileManager  {
                 
                 String name = incompleteFile.getName();
                 
-                if(!name.startsWith("T-")) {
+                if(!name.startsWith(INCOMPLETE_PREFIX)) {
                     return false;
                 }
                 
