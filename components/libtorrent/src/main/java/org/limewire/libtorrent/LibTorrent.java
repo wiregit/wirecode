@@ -22,7 +22,7 @@ interface LibTorrent extends Library {
      * file and fills in the LibtorrentInfo struct with the torrent data upon
      * completion.
      */
-    public WrapperStatus add_torrent(LibTorrentInfo info, String path);
+    public WrapperStatus add_torrent(String path);
 
     /**
      * Adds a torrent to the libtorrent session. This can be done with only a

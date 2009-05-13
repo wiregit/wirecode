@@ -75,15 +75,6 @@ struct wrapper_torrent_status {
 	int valid;
 };
 
-struct wrapper_torrent_info {
-	const char* sha1;
-	const char* name;
-	int piece_length;
-	int num_pieces;
-	int num_files;
-	const char* content_length;
-};
-
 struct wrapper_alert_info {
 	int category;
 	char* sha1;
@@ -322,7 +313,7 @@ extern "C" RET add_torrent_existing(char* sha1String, char* trackerURI,
 	return 0;
 }
 
-extern "C" RET add_torrent(wrapper_torrent_info* info, char* path) {
+extern "C" RET add_torrent(char* path) {
 #ifdef LIMEDEBUG
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "path: " << path << std::endl;
@@ -336,38 +327,6 @@ extern "C" RET add_torrent(wrapper_torrent_info* info, char* path) {
 
 	// TODO: ?
 	// delete p.ti;
-
-	libtorrent::torrent_info torrent_info = h.get_torrent_info();
-
-	const char* name = torrent_info.name().c_str();
-	int piece_length = torrent_info.piece_length();
-	int num_pieces = torrent_info.num_pieces();
-	int num_files = torrent_info.num_files();
-
-	char* content_length = new char[20];
-	getSizeTypeString(torrent_info.total_size(), content_length);
-
-#ifdef LIMEDEBUG
-	std::cout << "total_size_unknown: " << torrent_info.total_size()
-	<< std::endl;
-	std::cout << "total_size_long: " << content_length << std::endl;
-#endif
-
-	sha1_hash sha1 = torrent_info.info_hash();
-	char *sha1String = new char[41];
-	getSha1String(sha1, sha1String);
-
-#ifdef LIMEDEBUG
-	std::cout << "sha1String: " << sha1String << std::endl;
-#endif
-
-	info->sha1 = sha1String;
-	info->name = name;
-	info->num_files = num_files;
-	info->num_pieces = num_pieces;
-	info->piece_length = piece_length;
-	info->content_length = content_length;
-
 	return 0;
 }
 

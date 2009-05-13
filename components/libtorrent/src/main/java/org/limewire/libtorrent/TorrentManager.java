@@ -12,7 +12,7 @@ public interface TorrentManager extends Service {
     
     public void addAlertListener(String id, EventListener<LibTorrentAlertEvent> listener);
 
-    public LibTorrentInfo addTorrent(File torrent);
+    public void addTorrent(String sha1, File torrent);
     
     public void removeTorrent(String id);
 

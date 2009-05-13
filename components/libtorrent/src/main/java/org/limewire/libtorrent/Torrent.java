@@ -46,8 +46,6 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     private long totalSize = -1;
 
-    private LibTorrentInfo info = null;
-
     private String fastResumePath = null;
 
     private boolean cancelled = false;
@@ -134,7 +132,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             // TODO clean up this logic for picking which addTorrent method to
             // use
             if (torrentFile != null) {
-                info = torrentManager.addTorrent(torrentFile);
+                torrentManager.addTorrent(sha1, torrentFile);
             } else {
                 torrentManager.addTorrent(sha1, trackerURL, fastResumePath);
             }

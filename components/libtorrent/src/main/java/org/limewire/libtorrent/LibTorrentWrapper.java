@@ -42,9 +42,9 @@ public class LibTorrentWrapper {
         init(path);
     }
 
-    public void add_torrent(LibTorrentInfo info, String path) {
+    public void add_torrent(String path) {
         LOG.debugf("before add_torrent: {0}", path);
-        catchWrapperException(libTorrent.add_torrent(info, path));
+        catchWrapperException(libTorrent.add_torrent(path));
         LOG.debugf("after add_torrent: {0}", path);
     }
 

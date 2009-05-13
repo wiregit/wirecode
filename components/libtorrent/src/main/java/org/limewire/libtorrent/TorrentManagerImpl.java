@@ -74,15 +74,11 @@ public class TorrentManagerImpl implements TorrentManager {
     }
     
     @Override
-    public LibTorrentInfo addTorrent(File torrent) {
+    public void addTorrent(String sha1, File torrent) {
         synchronized (eventPoller) {
-            LibTorrentInfo info = new LibTorrentInfo(); 
-                
-            libTorrent.add_torrent(info, torrent.getAbsolutePath());
-            String id = info.sha1;
-            torrents.add(id);
-            updateStatus(id);
-            return info;
+            libTorrent.add_torrent(torrent.getAbsolutePath());
+            torrents.add(sha1);
+            updateStatus(sha1);
         }
     }
     
@@ -107,6 +103,7 @@ public class TorrentManagerImpl implements TorrentManager {
                 synchronized (eventPoller) {
                     libTorrent.remove_torrent(id);
                     statusListeners.removeListeners(id);
+                    alertListeners.removeListeners(id);
                 }
             }
         }.start();
