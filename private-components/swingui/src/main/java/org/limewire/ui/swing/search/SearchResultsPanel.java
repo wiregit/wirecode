@@ -270,6 +270,13 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         }
         
         scrollPane.validate();
+        
+        // Resize and repaint table header.  This eliminates visual issues due
+        // to a change in the table format, which can result in an incorrect
+        // header height or header flickering when a category is selected.
+        if (resultHeader instanceof JTableHeader) {
+            ((JTableHeader) resultHeader).resizeAndRepaint();
+        }
     }
     
     /**
