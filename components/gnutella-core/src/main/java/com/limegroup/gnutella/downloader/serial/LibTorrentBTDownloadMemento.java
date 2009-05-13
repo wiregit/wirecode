@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.downloader.serial;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.limegroup.gnutella.URN;
 
-public interface LibTorrentBTDownloadMemento extends DownloadMemento, Serializable {
+public interface LibTorrentBTDownloadMemento extends DownloadMemento {
 
     public String getName();
 
