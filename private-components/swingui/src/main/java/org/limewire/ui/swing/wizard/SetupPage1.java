@@ -2,6 +2,7 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.Action;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
@@ -205,6 +206,10 @@ public class SetupPage1 extends WizardPage {
     
     private HyperlinkButton createAndDecorateHyperlink(final String url) {
         HyperlinkButton learnMoreButton = new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
+            {
+                putValue(Action.SHORT_DESCRIPTION, url);
+            }
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils.openURL(url);
