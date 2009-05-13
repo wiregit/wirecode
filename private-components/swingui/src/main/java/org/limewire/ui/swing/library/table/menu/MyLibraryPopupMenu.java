@@ -15,6 +15,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.Catalog;
 import org.limewire.ui.swing.library.SelectAllable;
@@ -30,7 +31,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.core.api.friend.client.FriendService;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 /**
  * Popup menu implementation for MyLibrary
@@ -40,7 +41,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private final LibraryManager libraryManager;
     private final Category category;
     private final PropertiesFactory<LocalFileItem> propertiesFactory;
-    private final FriendService friendService;
+    private final EventBean<XMPPConnectionEvent> connectionEventBean;
     private final SharingActionFactory sharingActionFactory;   
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
@@ -52,12 +53,12 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
             SharingActionFactory sharingActionFactory, PropertiesFactory<LocalFileItem> propertiesFactory,
-            FriendService friendService, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
+            EventBean<XMPPConnectionEvent> connectionEventBean, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.libraryManager = libraryManager;
         this.sharingActionFactory = sharingActionFactory;
         this.category = category;
         this.propertiesFactory = propertiesFactory;
-        this.friendService = friendService;
+        this.connectionEventBean = connectionEventBean;
         this.libraryNavigator = libraryNavigator;
         this.playlistManager = playlistManager;
         
@@ -150,22 +151,23 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         add(sharingActionFactory.createUnshareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
         
         addSeparator();
-        
-        if(friendService.isLoggedIn()) {
+
+        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        if(connection != null && connection.getSource().isLoggedIn()) {
             add(sharingActionFactory.createShareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
             add(sharingActionFactory.createUnshareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
         } else {
             add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Share with Friend"))));
             add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Unshare with Friend"))));
         }
-        
+
         addSeparator();
         if (category != Category.PROGRAM && category != Category.OTHER) {
             add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
         }
 
         add(new RemoveAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(removeActionEnabled);
-        
+
         add(new DeleteAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(deleteActionEnabled);
 
         addSeparator();

@@ -13,14 +13,13 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
+import org.limewire.listener.EventBean;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
@@ -36,7 +35,6 @@ import org.limewire.ui.swing.library.playlist.PlaylistPopupHandler;
 import org.limewire.ui.swing.library.playlist.PlaylistTableFormat;
 import org.limewire.ui.swing.library.playlist.PlaylistTransferHandler;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
-import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
@@ -54,6 +52,7 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -72,8 +71,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private AudioPlayer player;
 
     private DownloadListManager downloadListManager;
-
-    private MagnetLinkFactory magnetLinkFactory;
 
     private PropertiesFactory<LocalFileItem> localItemPropFactory;
 
@@ -98,7 +95,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
     private final SharingActionFactory sharingActionFactory;
-    private final FriendService friendService;
+    private final EventBean<XMPPConnectionEvent> connectionEventBean;
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
 
@@ -108,19 +105,17 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             ShareListManager shareListManager, 
             AudioPlayer player,
             DownloadListManager downloadListManager, 
-            MagnetLinkFactory magnetLinkFactory,
             PropertiesFactory<LocalFileItem> localItemPropFactory,
             PropertiesFactory<RemoteFileItem> remoteItemPropFactory,
             PropertiesFactory<DownloadItem> downloadItemPropFactory,
             LibraryImageSubPanelFactory factory, 
             SaveLocationExceptionHandler saveLocationExceptionHandler,
-            ShareTableRendererEditorFactory shareTableRendererEditorFactory, 
-            ShareWidgetFactory shareFactory,
+            ShareTableRendererEditorFactory shareTableRendererEditorFactory,
             GhostDragGlassPane ghostPane, 
             CategoryIconManager categoryIconManager,
             RemoteHostWidgetFactory fromWidgetfactory,
             SharingActionFactory sharingActionFactory,
-            FriendService friendService,
+            EventBean<XMPPConnectionEvent> connectionEventBean,
             LibraryNavigator libraryNavigator,
             PlaylistManager playlistManager) {
         this.iconManager = iconManager;
@@ -128,7 +123,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.shareListManager = shareListManager;
         this.player = player;
         this.downloadListManager = downloadListManager;
-        this.magnetLinkFactory = magnetLinkFactory;
         this.localItemPropFactory = localItemPropFactory;
         this.remoteItemPropFactory = remoteItemPropFactory;
         this.downloadItemPropFactory = downloadItemPropFactory;
@@ -137,7 +131,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.ghostPane = ghostPane;
         this.fromWidgetFactory = fromWidgetfactory;
         this.sharingActionFactory = sharingActionFactory;
-        this.friendService = friendService;
+        this.connectionEventBean = connectionEventBean;
         this.libraryNavigator = libraryNavigator;
         this.playlistManager = playlistManager;
         
@@ -189,8 +183,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList(), shareListManager, listChanger));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
-                category, libraryManager, shareListManager, magnetLinkFactory,
-                localItemPropFactory, sharingActionFactory, friendService, 
+                category, libraryManager,
+                localItemPropFactory, sharingActionFactory, connectionEventBean,
                 libraryNavigator, playlistManager));
         
         try {

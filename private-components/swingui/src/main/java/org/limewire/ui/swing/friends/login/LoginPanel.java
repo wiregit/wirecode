@@ -38,7 +38,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.core.api.friend.client.FriendService;
+import org.limewire.core.api.friend.client.FriendConnectionFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -63,12 +63,12 @@ class LoginPanel extends JXPanel implements SettingListener {
     private JLabel authFailedLabel;
     private JXButton signInButton;
     private final XMPPAccountConfigurationManager accountManager;
-    private final FriendService friendService;
+    private final FriendConnectionFactory friendConnectionFactory;
     private final SignInAction signinAction = new SignInAction();
 
     @Inject
     LoginPanel(XMPPAccountConfigurationManager accountManager,
-            FriendService friendService,
+            FriendConnectionFactory friendConnectionFactory,
             ComboBoxDecorator comboFactory,
             ButtonDecorator buttonDecorator,
             BarPainterFactory barPainterFactory,
@@ -77,7 +77,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         GuiUtils.assignResources(this);
         
         this.accountManager = accountManager;
-        this.friendService = friendService;
+        this.friendConnectionFactory = friendConnectionFactory;
 
         SwingUiSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
         initComponents(comboFactory, buttonDecorator, textFieldDecorator, barPainterFactory);
@@ -270,7 +270,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         authFailedLabel.setVisible(false);
         validate();
         repaint();
-        friendService.login(config);         
+        friendConnectionFactory.login(config);
     }
 
     @Override

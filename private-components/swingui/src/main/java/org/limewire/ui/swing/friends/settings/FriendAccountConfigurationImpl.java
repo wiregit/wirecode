@@ -28,20 +28,22 @@ class FriendAccountConfigurationImpl implements FriendAccountConfiguration {
     private volatile String username;
     private volatile String password;
     private final List<UnresolvedIpPort> defaultServers;
-    
+    private final Type type;
+
     /** Constructs an XMPPAccountConfiguration with the following parameters. */
-    public FriendAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers) {
-        this(requireDomain, serviceName, label, icon, resource, defaultServers, true);
+    public FriendAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers, Type type) {
+        this(requireDomain, serviceName, label, icon, resource, defaultServers, true, type);
     }
     
     /** Constructs a basic XMPPAccountConfiguration that cannot modify the serviceName. */
-    public FriendAccountConfigurationImpl(String serviceName, String label, String resource) {
-        this(false, serviceName, label, null, resource, UnresolvedIpPort.EMPTY_LIST, false);
+    public FriendAccountConfigurationImpl(String serviceName, String label, String resource, Type type) {
+        this(false, serviceName, label, null, resource, UnresolvedIpPort.EMPTY_LIST, false, type);
     }
     
-    private FriendAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers, boolean modifyUser) {
+    private FriendAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers, boolean modifyUser, Type type) {
         this.resource = resource;
         this.modifyUser = modifyUser;
+        this.type = type;
         this.isDebugEnabled = false;
         this.requiresDomain = requireDomain;
         this.serviceName = serviceName;
@@ -129,6 +131,11 @@ class FriendAccountConfigurationImpl implements FriendAccountConfiguration {
     @Override
     public String getNetworkName() {
         return serviceName;
+    }
+
+    @Override
+    public Type getType() {
+        return type;
     }
 
     @Override

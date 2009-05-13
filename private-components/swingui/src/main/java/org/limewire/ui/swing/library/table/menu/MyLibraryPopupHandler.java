@@ -6,17 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.MagnetLinkFactory;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.playlist.PlaylistManager;
+import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 public class MyLibraryPopupHandler implements TablePopupHandler {
     private LibraryTable<LocalFileItem> table;
@@ -24,12 +23,11 @@ public class MyLibraryPopupHandler implements TablePopupHandler {
     private MyLibraryPopupMenu popupMenu;
 
     public MyLibraryPopupHandler(LibraryTable<LocalFileItem> table, Category category, LibraryManager libraryManager,
-            ShareListManager shareListManager, MagnetLinkFactory magnetFactory,
             PropertiesFactory<LocalFileItem> propertiesFactory, SharingActionFactory sharingActionFactory,
-            FriendService friendService, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
+            EventBean<XMPPConnectionEvent> connectionEventBean, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.table = table;
         this.popupMenu = new MyLibraryPopupMenu(category, libraryManager, sharingActionFactory, 
-                propertiesFactory, friendService, libraryNavigator, playlistManager);
+                propertiesFactory, connectionEventBean, libraryNavigator, playlistManager);
     }
 
     @Override

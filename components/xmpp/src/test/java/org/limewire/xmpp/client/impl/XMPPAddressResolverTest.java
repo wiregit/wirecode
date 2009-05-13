@@ -8,7 +8,6 @@ import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
@@ -16,6 +15,8 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
+import org.limewire.listener.CachingEventMulticaster;
+import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.BlockingAddressResolutionObserver;
@@ -23,12 +24,12 @@ import org.limewire.net.address.FirewalledAddress;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 
 public class XMPPAddressResolverTest extends BaseTestCase {
 
     private Mockery context;
-    private FriendService friendService;
     private XMPPConnection connection;
     private SocketsManager socketsManager;
     private XMPPAddressRegistry addressRegistry;
@@ -43,7 +44,6 @@ public class XMPPAddressResolverTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
-        friendService = context.mock(FriendService.class);
         connection = context.mock(XMPPConnection.class);  
         socketsManager = context.mock(SocketsManager.class);
         addressRegistry = new XMPPAddressRegistry();
@@ -51,8 +51,6 @@ public class XMPPAddressResolverTest extends BaseTestCase {
         friendPresence = context.mock(FriendPresence.class);
         
         context.checking(new Expectations() {{
-            allowing(friendService).getActiveConnection();
-            will(returnValue(connection));
             allowing(connection).getUser("me@you.com");
             will(returnValue(user));
             allowing(connection).getUser(with(any(String.class)));
@@ -67,8 +65,10 @@ public class XMPPAddressResolverTest extends BaseTestCase {
                 }
             })));
         }});
-        
-        xmppAddressResolver = new XMPPAddressResolver(friendService, null, socketsManager, addressRegistry);
+
+        CachingEventMulticaster<XMPPConnectionEvent> multicaster = new CachingEventMulticasterImpl<XMPPConnectionEvent>();
+        multicaster.broadcast(new XMPPConnectionEvent(connection, XMPPConnectionEvent.Type.CONNECTED));
+        xmppAddressResolver = new XMPPAddressResolver(multicaster, null, socketsManager, addressRegistry);
     }
 
     public void testSuccessfulGetPresence() {

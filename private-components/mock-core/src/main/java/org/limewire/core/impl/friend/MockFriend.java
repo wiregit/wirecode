@@ -61,6 +61,11 @@ public class MockFriend implements Friend {
             public String getNetworkName() {
                 return "";
             }
+
+            @Override
+            public Type getType() {
+                return Type.XMPP;
+            }
         };
     }
 

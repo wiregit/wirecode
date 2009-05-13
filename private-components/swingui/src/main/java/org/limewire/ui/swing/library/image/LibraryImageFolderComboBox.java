@@ -10,7 +10,7 @@ import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.friend.client.FriendService;
+import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
@@ -19,6 +19,7 @@ import org.limewire.ui.swing.library.table.menu.actions.DisabledFriendLoginActio
 import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 public class LibraryImageFolderComboBox extends LimeComboBox {
 
@@ -29,7 +30,7 @@ public class LibraryImageFolderComboBox extends LimeComboBox {
     @Resource
     private Color disabledColor;
     
-    private final FriendService friendService;
+    private final EventBean<XMPPConnectionEvent> connectionEventBean;
     private final FriendsSignInPanel friendsSignInPanel;
     private final SharingActionFactory sharingActionFactory;
     
@@ -37,9 +38,9 @@ public class LibraryImageFolderComboBox extends LimeComboBox {
     
     private SelectAllable<LocalFileItem> selectAllable;
 
-    public LibraryImageFolderComboBox(FriendService friendService, SharingActionFactory sharingActionFactory,
+    public LibraryImageFolderComboBox(EventBean<XMPPConnectionEvent> connectionEventBean, SharingActionFactory sharingActionFactory,
             FriendsSignInPanel friendsSignInPanel) {
-        this.friendService = friendService;
+        this.connectionEventBean = connectionEventBean;
         this.friendsSignInPanel = friendsSignInPanel;
         this.sharingActionFactory = sharingActionFactory;
                 
@@ -88,7 +89,8 @@ public class LibraryImageFolderComboBox extends LimeComboBox {
                 return;
             
             // if not logged in don't show options for friends.
-            if(!friendService.isLoggedIn()) {
+            XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+            if(connection != null && !connection.getSource().isLoggedIn()) {
                 menu.add(decorateItem(sharingActionFactory.createShareGnutellaAction(true, selectAllable)));
                 menu.add(decorateItem(sharingActionFactory.createUnshareGnutellaAction(true, selectAllable)));
                 

@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.PasswordManager;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.io.UnresolvedIpPort;
@@ -70,7 +71,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     private void loadCustomServer() {
         String custom = SwingUiSettings.USER_DEFINED_JABBER_SERVICENAME.get();
         FriendAccountConfigurationImpl customConfig =
-            new FriendAccountConfigurationImpl(custom, "Jabber", resource);
+            new FriendAccountConfigurationImpl(custom, "Jabber", resource, Network.Type.XMPP);
         configs.put(customConfig.getLabel(), customConfig);
         String autoLogin = SwingUiSettings.XMPP_AUTO_LOGIN.get();
         if(!autoLogin.equals("")) {
@@ -97,9 +98,9 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
 
     private void loadWellKnownServers() {
         FriendAccountConfiguration gmail =
-            new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, resource, getGTalkServers());
+            new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, resource, getGTalkServers(), Network.Type.XMPP);
         FriendAccountConfiguration livejournal =
-            new FriendAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, resource, getLiveJournalServers());
+            new FriendAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, resource, getLiveJournalServers(), Network.Type.XMPP);
 
         configs.put(gmail.getLabel(), gmail);
         configs.put(livejournal.getLabel(), livejournal);

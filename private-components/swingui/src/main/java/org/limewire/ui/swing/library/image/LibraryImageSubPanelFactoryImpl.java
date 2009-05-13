@@ -14,7 +14,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.playlist.PlaylistManager;
-import org.limewire.core.api.friend.client.FriendService;
+import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
@@ -32,12 +32,13 @@ import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.I18n;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.swing.EventSelectionModel;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
 @Singleton
 public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFactory {
@@ -54,7 +55,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     private final SharingActionFactory sharingActionFactory;
     private final FriendsSignInPanel friendSignInPanel;
     private final ShareListManager shareListManager;
-    private final FriendService friendService;
+    private final EventBean<XMPPConnectionEvent> connectionEventBean;
     private final ComboBoxDecorator comboDecorator;
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
@@ -63,7 +64,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager, 
             ShareTableRendererEditorFactory shareTableRendererEditorFactory, SharingActionFactory sharingActionFactory, 
             PropertiesFactory<LocalFileItem> localFilePropFactory, ShareListManager shareListManager,
-            FriendService friendService, FriendsSignInPanel friendSignInPanel,
+            EventBean<XMPPConnectionEvent> connectionEventBean, FriendsSignInPanel friendSignInPanel,
             ComboBoxDecorator comboDecorator, 
             LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.thumbnailManager = thumbnailManager;
@@ -72,7 +73,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         this.sharingActionFactory = sharingActionFactory;
         this.localFilePropFactory = localFilePropFactory;
         this.shareListManager = shareListManager;
-        this.friendService = friendService;
+        this.connectionEventBean = connectionEventBean;
         this.friendSignInPanel = friendSignInPanel;
         this.comboDecorator = comboDecorator;
         this.libraryNavigator = libraryNavigator;
@@ -84,11 +85,11 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
             EventList<LocalFileItem> eventList, LocalFileList fileList,
             ShareWidget<File> shareWidget, LibraryListSourceChanger listChanger) {
 
-        LibraryImageFolderComboBox comboBox = new LibraryImageFolderComboBox(friendService, sharingActionFactory, friendSignInPanel);
+        LibraryImageFolderComboBox comboBox = new LibraryImageFolderComboBox(connectionEventBean, sharingActionFactory, friendSignInPanel);
         comboDecorator.decorateLinkComboBox(comboBox);
         
         LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList, comboBox);
-        panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, sharingActionFactory, libraryManager, localFilePropFactory, friendService, libraryNavigator, playlistManager));
+        panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, sharingActionFactory, libraryManager, localFilePropFactory, connectionEventBean, libraryNavigator, playlistManager));
         comboBox.setSelectAllable(panel);
 
         ImageList list = panel.getImageList();

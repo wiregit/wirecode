@@ -12,20 +12,21 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.core.api.friend.client.FriendService;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+
+import net.miginfocom.swing.MigLayout;
 
 public class ShareTableRendererEditor extends TableRendererEditor implements Configurable{
     @Resource private Font shareButtonFont;    
@@ -43,16 +44,16 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     private IconButton friendsButton;
     private LocalFileItem fileItem;
     
-    private final FriendService friendService;
+    private final EventBean<XMPPConnectionEvent> connectionEventBean;
     
     private final ToolTipMouseListener p2pTooltipListener;
     private final ToolTipMouseListener friendsTooltipListener;
 
     @AssistedInject
-    public ShareTableRendererEditor(@Assisted Action shareAction, FriendService friendService){
+    public ShareTableRendererEditor(@Assisted Action shareAction, EventBean<XMPPConnectionEvent> connectionEventBean){
         GuiUtils.assignResources(this);
         
-        this.friendService = friendService;
+        this.connectionEventBean = connectionEventBean;
         
         p2pButton = new IconButton(p2pNotSharedIcon);
         friendsButton = new IconButton(friendsNotSharedIcon);
@@ -90,7 +91,8 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     
     @Override
     public void configure(LocalFileItem item, boolean isRowSelected) {
-        friendsButton.setVisible(friendService.isLoggedIn()); // don't show if not logged in
+        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        friendsButton.setVisible(connection != null &&connection.getSource().isLoggedIn()); // don't show if not logged in
         
         fileItem = item;
         

@@ -56,6 +56,11 @@ public class FriendConnectionConfigurationMock implements FriendConnectionConfig
     public String getNetworkName() {
         return getServiceName();
     }
+    
+    @Override
+    public Type getType() {
+        return Type.XMPP;
+    }
 
     @Override
     public String getResource() {

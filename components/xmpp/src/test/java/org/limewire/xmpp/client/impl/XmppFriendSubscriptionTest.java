@@ -131,7 +131,8 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         // sleep to wait for friend6 to deny
         Thread.sleep(SLEEP);
 
-        service.logout().get();
+        connectionFive.logout().get();
+        connectionSix.logout().get();
 
         autoFiveRosterListener = new RosterListenerMock();
         autoSixRosterListener = new RosterListenerMock();
@@ -184,7 +185,8 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         connectionFive.removeUser(USERNAME_6).get();
         Thread.sleep(SLEEP);
 
-        service.logout();
+        connectionFive.logout().get();
+        connectionSix.logout().get();
         
         autoFiveRosterListener = new RosterListenerMock();
         autoSixRosterListener = new RosterListenerMock();

@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.Map.Entry;
 
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent.Type;
@@ -13,6 +12,7 @@ import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.io.Address;
+import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -23,9 +23,9 @@ import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
 import org.limewire.net.address.FirewalledAddress;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPFriend;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,7 +39,7 @@ public class XMPPAddressResolver implements AddressResolver {
 
     private final static Log LOG = LogFactory.getLog(XMPPAddressResolver.class, LOGGING_CATEGORY);
     
-    private final FriendService friendService;
+    private final EventBean<XMPPConnectionEvent> connectionEventBean;
 
     private final EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster;
     
@@ -49,9 +49,9 @@ public class XMPPAddressResolver implements AddressResolver {
     private final XMPPAddressRegistry addressRegistry;
 
     @Inject
-    public XMPPAddressResolver(FriendService friendService, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster,
+    public XMPPAddressResolver(EventBean<XMPPConnectionEvent> connectionEventBean, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster,
             SocketsManager socketsManager, XMPPAddressRegistry addressRegistry) {
-        this.friendService = friendService;
+        this.connectionEventBean = connectionEventBean;
         this.connectivityEventBroadcaster = connectivityEventBroadcaster;
         this.socketsManager = socketsManager;
         this.addressRegistry = addressRegistry;
@@ -86,10 +86,10 @@ public class XMPPAddressResolver implements AddressResolver {
      */
     public FriendPresence getPresence(XMPPAddress address) {
         String id = address.getId();
-        XMPPConnection connection = friendService.getActiveConnection();
-        if(connection == null)
+        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        if(connection == null || connection.getType() != XMPPConnectionEvent.Type.CONNECTED)
             return null;
-        XMPPFriend user = connection.getUser(id);
+        XMPPFriend user = connection.getSource().getUser(id);
         if(user != null) {
             for(Entry<String, FriendPresence> entry : user.getFriendPresences().entrySet()) {
                 FriendPresence resolvedPresence =

@@ -17,6 +17,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.MyLibraryPanel;
@@ -29,7 +30,7 @@ import org.limewire.ui.swing.library.sharing.model.MultiFileUnshareModel;
 import org.limewire.ui.swing.library.table.menu.actions.DisabledFriendLoginAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.core.api.friend.client.FriendService;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 /**
  * Share All combo Box. In My Library view allows the user
@@ -52,7 +53,7 @@ public class ShareAllComboBox extends LimeComboBox {
     @Resource
     private Icon friendUnshareIcon;
     
-    private final FriendService friendService;
+    private final EventBean<XMPPConnectionEvent> connectionEventBean;
     private final FriendsSignInPanel friendsSignInPanel;
     private final ShareWidgetFactory shareWidgetFactory;
     private final MyLibraryPanel myLibraryPanel;
@@ -66,9 +67,9 @@ public class ShareAllComboBox extends LimeComboBox {
     private AbstractAction unshareAllFriendAction;
     private AbstractAction signedOutAction;
 
-    public ShareAllComboBox(FriendService friendService, ShareWidgetFactory shareWidgetFactory,
+    public ShareAllComboBox(EventBean<XMPPConnectionEvent> connectionEventBean, ShareWidgetFactory shareWidgetFactory,
             MyLibraryPanel myLibraryPanel, FriendsSignInPanel friendsSignInPanel, ShareListManager shareListManager) {
-        this.friendService = friendService;
+        this.connectionEventBean = connectionEventBean;
         this.friendsSignInPanel = friendsSignInPanel;
         this.shareWidgetFactory = shareWidgetFactory;
         this.myLibraryPanel = myLibraryPanel;
@@ -124,39 +125,45 @@ public class ShareAllComboBox extends LimeComboBox {
             // if document category is selected and document sharing with p2p is disabled
             if(myLibraryPanel.getCategory() == Category.DOCUMENT && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
                 // if not logged in
-                if(!friendService.isLoggedIn()) {
-                    menu.add(decorateDisabledItem(new DisabledDocumentAction()));
-                } else {                   
-                    menu.add(decorateItem(shareAllFriendAction));
-                    menu.add(decorateItem(unshareAllFriendAction));
-                    
-                    menu.addSeparator();
-                    
-                    menu.add(decorateDisabledItem(new DisabledDocumentAction()));
+                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                    if(!connection.getSource().isLoggedIn()) {
+                        menu.add(decorateDisabledItem(new DisabledDocumentAction()));
+                    } else {
+                        menu.add(decorateItem(shareAllFriendAction));
+                        menu.add(decorateItem(unshareAllFriendAction));
+
+                        menu.addSeparator();
+
+                        menu.add(decorateDisabledItem(new DisabledDocumentAction()));
+                    }
                 }
             } else {
                 // if not logged in don't show options for friends.
-                if(!friendService.isLoggedIn()) { 
-                    if(myLibraryPanel.getCurrentFriend() != null && myLibraryPanel.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
-                        menu.add(decorateDisabledItem(shareAllGnutellaAction));
-                    else
-                        menu.add(decorateItem(shareAllGnutellaAction));
-                    menu.add(decorateItem(unshareAllGnutellaAction));
-                    
-                    menu.addSeparator();
-                    
-                    menu.add(decorateDisabledItem(signedOutAction));
-                } else {
-                    if(myLibraryPanel.getCurrentFriend() != null && myLibraryPanel.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
-                        menu.add(decorateDisabledItem(shareAllGnutellaAction));
-                    else
-                        menu.add(decorateItem(shareAllGnutellaAction));
-                    menu.add(decorateItem(shareAllFriendAction));
-                    
-                    menu.addSeparator();
-                    
-                    menu.add(decorateItem(unshareAllGnutellaAction));
-                    menu.add(decorateItem(unshareAllFriendAction));
+                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                    if(!connection.getSource().isLoggedIn()) { 
+                        if(myLibraryPanel.getCurrentFriend() != null && myLibraryPanel.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                            menu.add(decorateDisabledItem(shareAllGnutellaAction));
+                        else
+                            menu.add(decorateItem(shareAllGnutellaAction));
+                        menu.add(decorateItem(unshareAllGnutellaAction));
+
+                        menu.addSeparator();
+
+                        menu.add(decorateDisabledItem(signedOutAction));
+                    } else {
+                        if(myLibraryPanel.getCurrentFriend() != null && myLibraryPanel.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+                            menu.add(decorateDisabledItem(shareAllGnutellaAction));
+                        else
+                            menu.add(decorateItem(shareAllGnutellaAction));
+                        menu.add(decorateItem(shareAllFriendAction));
+
+                        menu.addSeparator();
+
+                        menu.add(decorateItem(unshareAllGnutellaAction));
+                        menu.add(decorateItem(unshareAllFriendAction));
+                    }
                 }
             }
         }

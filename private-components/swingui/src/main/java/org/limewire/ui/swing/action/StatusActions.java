@@ -10,6 +10,7 @@ import javax.swing.JMenuItem;
 
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.settings.XMPPSettings;
+import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -20,7 +21,6 @@ import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.core.api.friend.client.FriendService;
 import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 
 import com.google.inject.Inject;
@@ -36,11 +36,11 @@ public class StatusActions {
     private final Set<JCheckBoxMenuItem> availableItems = new HashSet<JCheckBoxMenuItem>();
     private final Set<JCheckBoxMenuItem> doNotDisturbItems = new HashSet<JCheckBoxMenuItem>();
     
-    private final FriendService friendService;
+    private final EventBean<XMPPConnectionEvent> connectionEventBean;
 
     @Inject
-    public StatusActions(final FriendService friendService, final IconLibrary iconLibrary) {
-        this.friendService = friendService;
+    public StatusActions(final EventBean<XMPPConnectionEvent> connectionEventBean, final IconLibrary iconLibrary) {
+        this.connectionEventBean = connectionEventBean;
         
         availableAction = new AbstractAction(I18n.tr("&Available")) {
             { 
@@ -49,14 +49,17 @@ public class StatusActions {
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                friendService.setMode(Mode.available).addFutureListener(new EventListener<FutureEvent<Void>>() {
-                    @Override
-                    public void handleEvent(FutureEvent<Void> event) {
-                        if(event.getType() == FutureEvent.Type.SUCCESS) {
-                            XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(false);    
+                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                    connection.getSource().setMode(Mode.available).addFutureListener(new EventListener<FutureEvent<Void>>() {
+                        @Override
+                        public void handleEvent(FutureEvent<Void> event) {
+                            if(event.getType() == FutureEvent.Type.SUCCESS) {
+                                XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(false);
+                            }
                         }
-                    }
-                });                      
+                    });
+                }
             }
         };
 
@@ -68,14 +71,17 @@ public class StatusActions {
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                friendService.setMode(Mode.dnd).addFutureListener(new EventListener<FutureEvent<Void>>() {
-                    @Override
-                    public void handleEvent(FutureEvent<Void> event) {
-                        if(event.getType() == FutureEvent.Type.SUCCESS) {
-                            XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(true);    
+                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                    connection.getSource().setMode(Mode.dnd).addFutureListener(new EventListener<FutureEvent<Void>>() {
+                        @Override
+                        public void handleEvent(FutureEvent<Void> event) {
+                            if(event.getType() == FutureEvent.Type.SUCCESS) {
+                                XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(true);
+                            }
                         }
-                    }
-                });      
+                    });
+                }
             }
         };
         
@@ -95,24 +101,27 @@ public class StatusActions {
     }
 
     private void updateSelections() {
-        if(friendService.isLoggedIn()) {
-            boolean dndBool = XMPPSettings.XMPP_DO_NOT_DISTURB.getValue();
-            for ( JCheckBoxMenuItem item : availableItems ) {
-                item.setSelected(!dndBool);
-            }
-            
-            for ( JCheckBoxMenuItem item : doNotDisturbItems ) {
-                item.setSelected(dndBool);
-            }
-        } else {
-            //do not show selections when logged out
+        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+            if(connection.getSource().isLoggedIn()) {
+                boolean dndBool = XMPPSettings.XMPP_DO_NOT_DISTURB.getValue();
+                for ( JCheckBoxMenuItem item : availableItems ) {
+                    item.setSelected(!dndBool);
+                }
 
-            for ( JCheckBoxMenuItem item : availableItems ) {
-                item.setSelected(false);
-            }
-            
-            for ( JCheckBoxMenuItem item : doNotDisturbItems ) {
-                item.setSelected(false);
+                for ( JCheckBoxMenuItem item : doNotDisturbItems ) {
+                    item.setSelected(dndBool);
+                }
+            } else {
+                //do not show selections when logged out
+
+                for ( JCheckBoxMenuItem item : availableItems ) {
+                    item.setSelected(false);
+                }
+
+                for ( JCheckBoxMenuItem item : doNotDisturbItems ) {
+                    item.setSelected(false);
+                }
             }
         }
     }

@@ -12,10 +12,12 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.ConnectBackRequestSender;
-import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.core.api.friend.client.FriendService;
+import org.limewire.core.api.friend.client.FriendConnectionFactory;
+import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.inspection.Inspectable;
@@ -33,11 +35,11 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.xmpp.api.client.XMPPPresence;
+import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
 
 import com.google.inject.Inject;
@@ -45,9 +47,9 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class XMPPServiceImpl implements Service, FriendService, ConnectBackRequestSender {
+public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFactory, ConnectBackRequestSender {
 
-    private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(XMPPConnectionFactoryImpl.class);
 
     private final XMPPConnectionImplFactory connectionImplFactory;
     private final JabberSettings jabberSettings;
@@ -94,7 +96,7 @@ public class XMPPServiceImpl implements Service, FriendService, ConnectBackReque
     }
 
     @Inject
-    public XMPPServiceImpl(XMPPConnectionImplFactory connectionImplFactory,
+    public XMPPConnectionFactoryImpl(XMPPConnectionImplFactory connectionImplFactory,
                            EventMulticaster<XMPPConnectionEvent> connectionBroadcaster,
             JabberSettings jabberSettings) {
         this.connectionImplFactory = connectionImplFactory;
@@ -174,6 +176,12 @@ public class XMPPServiceImpl implements Service, FriendService, ConnectBackReque
         }); 
     }
 
+    @Override
+    @Inject
+    public void register(FriendConnectionFactoryRegistry registry) {
+        registry.register(Network.Type.XMPP, this);
+    }
+
     XMPPConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
         return loginImpl(configuration, false);
     }
@@ -211,8 +219,7 @@ public class XMPPServiceImpl implements Service, FriendService, ConnectBackReque
         }
     }
 
-    @Override
-    public boolean isLoggedIn() {
+    private boolean isLoggedIn() {
         for(XMPPConnectionImpl connection : connections) {
             if(connection.isLoggedIn()) {
                 return true;
@@ -220,37 +227,15 @@ public class XMPPServiceImpl implements Service, FriendService, ConnectBackReque
         }
         return false;
     }
-    
-    @Override
-    public boolean isLoggingIn() {
-        for(XMPPConnection connection : connections) {
-            if(connection.isLoggingIn()) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    @Override
-    public ListeningFuture<Void> logout() {
-        return executorService.submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                logoutImpl();
-                return null;
-            }
-        }); 
-    }
-
-    void logoutImpl() {
+    private void logoutImpl() {
         for(XMPPConnectionImpl connection : connections) {
             connection.logoutImpl();
         }
         connections.clear();
     }
 
-    @Override
-    public XMPPConnectionImpl getActiveConnection() {
+    private XMPPConnectionImpl getActiveConnection() {
         if(connections.isEmpty()) {
             return null;
         } else {
@@ -301,17 +286,6 @@ public class XMPPServiceImpl implements Service, FriendService, ConnectBackReque
             return false;
         }
         return true;
-    }
-    
-    @Override
-    public ListeningFuture<Void> setMode(final Mode mode) {
-        return executorService.submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                setModeImpl(mode);
-                return null;
-            }
-        }); 
     }
 
     private void setModeImpl(Mode mode) throws FriendException {

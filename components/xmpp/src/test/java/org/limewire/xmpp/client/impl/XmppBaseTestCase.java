@@ -28,7 +28,7 @@ public abstract class XmppBaseTestCase extends BaseTestCase {
     protected static final int SLEEP = 5000; // Milliseconds
 
     private ServiceRegistry registry;
-    protected XMPPServiceImpl service;
+    protected XMPPConnectionFactoryImpl service;
     protected Injector injector;
 
     protected AddressEventTestBroadcaster addressEventBroadcaster;
@@ -45,7 +45,7 @@ public abstract class XmppBaseTestCase extends BaseTestCase {
         registry = injector.getInstance(ServiceRegistry.class);
         registry.initialize();
         registry.start();
-        service = injector.getInstance(XMPPServiceImpl.class);
+        service = injector.getInstance(XMPPConnectionFactoryImpl.class);
         service.setMultipleConnectionsAllowed(true);
     }
 

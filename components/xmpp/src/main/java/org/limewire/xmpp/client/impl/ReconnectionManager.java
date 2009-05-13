@@ -23,12 +23,12 @@ class ReconnectionManager implements EventListener<XMPPConnectionEvent> {
     
     private static final Log LOG = LogFactory.getLog(ReconnectionManager.class);
     
-    private final XMPPServiceImpl serviceImpl;
+    private final XMPPConnectionFactoryImpl serviceImpl;
 
     /**
      * @param serviceImpl
      */
-    ReconnectionManager(XMPPServiceImpl serviceImpl) {
+    ReconnectionManager(XMPPConnectionFactoryImpl serviceImpl) {
         this.serviceImpl = serviceImpl;
     }
 
