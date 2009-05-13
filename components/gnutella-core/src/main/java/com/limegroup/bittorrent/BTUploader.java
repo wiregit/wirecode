@@ -48,7 +48,6 @@ public class BTUploader implements Uploader {
     }
 
     public void stop() {
-        // TODO do in another thread
         cancelled = activityCallback.promptTorrentUploadCancel(torrent);
         if (cancelled) {
             torrent.stop();
