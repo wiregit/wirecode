@@ -128,13 +128,15 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public LibTorrentStatus getStatus(String id) {
         LibTorrentStatus status = new LibTorrentStatus();
+        
         libTorrent.get_torrent_status(id, status);
-        return status;
+        LibTorrentStatus statusCopy = new LibTorrentStatus(status);
+        libTorrent.free_torrent_status(status);
+        return statusCopy;
     }
 
     private void updateStatus(String id) {
-        LibTorrentStatus torrentStatus = new LibTorrentStatus(); 
-            libTorrent.get_torrent_status(id, torrentStatus);
+        LibTorrentStatus torrentStatus = getStatus(id);
         // TODO broadcast asynchronously
         statusListeners.broadcast(new LibTorrentStatusEvent(id, torrentStatus));
     }
@@ -167,7 +169,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void start() {
-        backgroundExecutor.scheduleAtFixedRate(eventPoller, 1000, 500, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleAtFixedRate(eventPoller, 1000, 50, TimeUnit.MILLISECONDS);
 
         if (SAVE_FAST_RESUME_DATA) {
             backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 6000, 6000,

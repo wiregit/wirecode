@@ -146,9 +146,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
                 }
 
                 private synchronized void updateStatus(LibTorrentStatus status) {
-                    LibTorrentStatus oldStatus = Torrent.this.status.get();
                     Torrent.this.status.set(status);
-                    torrentManager.free(oldStatus);
                     boolean newlyfinished = complete != status.isFinished() && status.isFinished();
                     complete = status.isFinished();
 

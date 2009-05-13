@@ -39,7 +39,7 @@ typedef libtorrent::big_number sha1_hash;
 #define wTHROW(x) if (x) return 1; else return 0;
 #else
 #define RET wrapper_status*
-#define wTHROW(x) delete last_error; last_error = x; return last_error;
+#define wTHROW(x) if (last_error) { delete last_error; last_error=0;} last_error = x; return last_error;
 #endif
 
 struct wrapper_status {
@@ -517,6 +517,8 @@ extern "C" RET get_alerts(void(*alertCallback)(void*)) {
 	return 0;
 }
 
-extern "C" void free_torrent_status(wrapper_torrent_info* info) {
-	//delete[] info->content_length;
+extern "C" void free_torrent_status(wrapper_torrent_status* info) {
+	delete[] info->total_done;
+	delete[] info->total_download;
+	delete[] info->total_upload;
 }

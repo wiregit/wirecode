@@ -4,6 +4,7 @@ import org.limewire.libtorrent.callback.AlertCallback;
 
 import com.sun.jna.Library;
 import com.sun.jna.Memory;
+import com.sun.jna.Pointer;
 
 /**
  * Interface definition for accession the C LibTorrentWrapper library. 
@@ -83,6 +84,6 @@ interface LibTorrent extends Library {
      */
     public WrapperStatus abort_torrents();
 
-    public void free_torrent_status(LibTorrentStatus oldStatus);
+    public void free_torrent_status(Pointer ptr);
 
 }

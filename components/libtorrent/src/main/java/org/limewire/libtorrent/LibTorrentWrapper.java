@@ -145,7 +145,7 @@ public class LibTorrentWrapper {
 
     public void free_torrent_status(LibTorrentStatus oldStatus) {
         LOG.debugf("before free_torrent_status: {0}", oldStatus);
-        libTorrent.free_torrent_status(oldStatus);
+        libTorrent.free_torrent_status(oldStatus.getPointer());
         LOG.debugf("after free_torrent_status: {0}", oldStatus);
     }
 }
