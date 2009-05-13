@@ -54,7 +54,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final BTUploaderFactory btUploaderFactory;
 
-    private volatile AtomicBoolean complete = new AtomicBoolean(false);
+    private AtomicBoolean complete = new AtomicBoolean(false);
 
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
