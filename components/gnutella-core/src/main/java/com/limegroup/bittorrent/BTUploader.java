@@ -96,7 +96,7 @@ public class BTUploader implements Uploader {
             return UploadStatus.CANCELLED;
         }
 
-        if (status.paused) {
+        if (status.isPaused()) {
             return UploadStatus.UPLOADING;
         } else {
             LibTorrentState state = LibTorrentState.forId(status.state);
@@ -139,7 +139,7 @@ public class BTUploader implements Uploader {
 
     public boolean isInactive() {
 
-        if (torrent.getStatus().paused || torrent.getStatus().finished) {
+        if (torrent.getStatus().isPaused() || torrent.getStatus().isFinished()) {
             return true;
         }
 

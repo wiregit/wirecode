@@ -2,7 +2,6 @@ package org.limewire.libtorrent;
 
 import java.math.BigInteger;
 
-import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 public class LibTorrentInfo extends Structure {
@@ -19,24 +18,20 @@ public class LibTorrentInfo extends Structure {
     
     public String content_length;
 
-    public Pointer paths;
-
-    private String[] stringPaths;
+    public LibTorrentInfo() {}
+    
+    public LibTorrentInfo(LibTorrentInfo copy) {
+        this.sha1 = copy.sha1;
+        this.name = copy.name;
+        this.piece_length = copy.piece_length;
+        this.num_pieces = copy.num_pieces;
+        this.num_files = copy.num_files;
+        this.content_length = copy.content_length;
+    }
 
     @Override
     public void read() {
         super.read();
-        
-//TODO
-//        stringPaths = new String[num_files];
-//        Pointer[] pointers = paths.getPointerArray(0, num_files);
-//        for (int i = 0; i < num_files; i++) {
-//            stringPaths[i] = pointers[i].getString(0);
-//        }
-    }
-
-    public String[] getPaths() {
-        return stringPaths;
     }
 
     public long getContentLength() {
@@ -47,5 +42,4 @@ public class LibTorrentInfo extends Structure {
             return contentLength.longValue();
         }
     }
-
 }

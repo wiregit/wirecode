@@ -13,7 +13,7 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
 
     private static final long serialVersionUID = 1160492348504657012L;
 
-    private Map<String, Object> serialObjects = new HashMap<String, Object>();
+    private final Map<String, Object> serialObjects = new HashMap<String, Object>();
 
     @Override
     @SuppressWarnings("unchecked")

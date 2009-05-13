@@ -9,7 +9,7 @@ public class LibTorrentStatus extends Structure {
     public String total_done;
 
     public String total_download;
-    
+
     public String total_upload;
 
     public float download_rate;
@@ -28,11 +28,32 @@ public class LibTorrentStatus extends Structure {
 
     public float progress;
 
-    public boolean paused;
+    public int paused;
 
-    public boolean finished;
+    public int finished;
 
-    public boolean valid;
+    public int valid;
+
+    public LibTorrentStatus() {
+
+    }
+
+    public LibTorrentStatus(LibTorrentStatus copy) {
+        this.total_done = new String(copy.total_done);
+        this.total_download = new String(copy.total_download);
+        this.total_upload = new String(copy.total_upload);
+        this.download_rate = copy.download_rate;
+        this.upload_rate = copy.upload_rate;
+        this.num_peers = copy.num_peers;
+        this.num_uploads = copy.num_uploads;
+        this.num_seeds = copy.num_seeds;
+        this.num_connections = copy.num_connections;
+        this.state = copy.state;
+        this.progress = copy.progress;
+        this.paused = copy.paused;
+        this.finished = copy.finished;
+        this.valid = copy.valid;
+    }
 
     public long getTotalDone() {
         if (total_done == null) {
@@ -42,7 +63,7 @@ public class LibTorrentStatus extends Structure {
             return total.longValue();
         }
     }
-    
+
     public long getTotalDownload() {
         if (total_download == null) {
             return -1;
@@ -59,5 +80,13 @@ public class LibTorrentStatus extends Structure {
             BigInteger total = new BigInteger(total_upload);
             return total.longValue();
         }
+    }
+
+    public boolean isPaused() {
+        return paused != 0;
+    }
+
+    public boolean isFinished() {
+        return finished != 0;
     }
 }

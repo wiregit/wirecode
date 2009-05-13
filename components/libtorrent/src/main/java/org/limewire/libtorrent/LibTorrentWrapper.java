@@ -44,8 +44,7 @@ public class LibTorrentWrapper {
 
     public void add_torrent(LibTorrentInfo info, String path) {
         LOG.debugf("before add_torrent: {0}", path);
-        catchWrapperException(libTorrent.add_torrent(info, path, new LongHeap(),
-                new Sha1Heap(), new PointerHeap()));
+        catchWrapperException(libTorrent.add_torrent(info, path));
         LOG.debugf("after add_torrent: {0}", path);
     }
 
@@ -77,7 +76,7 @@ public class LibTorrentWrapper {
 
     public void get_torrent_status(String id, LibTorrentStatus status) {
         LOG.debugf("before get_torrent_status: {0}", id);
-        catchWrapperException(libTorrent.get_torrent_status(id, status, new LongHeap(), new LongHeap(), new LongHeap()));
+        catchWrapperException(libTorrent.get_torrent_status(id, status));
         LOG.debugf("after get_torrent_status: {0}", id);
     }
 
@@ -142,5 +141,11 @@ public class LibTorrentWrapper {
         if (status != null) {
             throw new LibTorrentException(status);
         }
+    }
+
+    public void free_torrent_status(LibTorrentStatus oldStatus) {
+        LOG.debugf("before free_torrent_status: {0}", oldStatus);
+        libTorrent.free_torrent_status(oldStatus);
+        LOG.debugf("after free_torrent_status: {0}", oldStatus);
     }
 }

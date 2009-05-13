@@ -62,7 +62,7 @@ public class TorrentManagerImpl implements TorrentManager {
     public void addAlertListener(String id, EventListener<LibTorrentAlertEvent> listener) {
         alertListeners.addListener(id, listener);
     }
-    
+
     @Inject
     public void register(ServiceRegistry serviceRegistry) {
         serviceRegistry.register(this);
@@ -100,7 +100,7 @@ public class TorrentManagerImpl implements TorrentManager {
         synchronized (eventPoller) {
             torrents.remove(id);
         }
-            
+
         new Thread() {
             @Override
             public void run() {
@@ -168,26 +168,27 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public void start() {
         backgroundExecutor.scheduleAtFixedRate(eventPoller, 1000, 500, TimeUnit.MILLISECONDS);
-        
+
         if (SAVE_FAST_RESUME_DATA) {
-            backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 6000, 6000, TimeUnit.MILLISECONDS);
+            backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 6000, 6000,
+                    TimeUnit.MILLISECONDS);
         }
     }
 
     @Override
     public void stop() {
-        // TODO: pause then save fast return data?  would need to yield for all to be saved.
-        
+        // TODO: pause then save fast return data? would need to yield for all
+        // to be saved.
+
         libTorrent.abort_torrents();
-        for(String id : torrents) {
+        for (String id : torrents) {
             statusListeners.removeListeners(id);
         }
         torrents.clear();
     }
-    
 
-    private class EventPoller implements Runnable  {
-        
+    private class EventPoller implements Runnable {
+
         private final AlertCallback alertCallback = new AlertCallback() {
             @Override
             public void callback(LibTorrentAlert alert) {
@@ -197,12 +198,12 @@ public class TorrentManagerImpl implements TorrentManager {
                 }
             }
         };
-        
+
         @Override
         public void run() {
             synchronized (this) {
                 pumpStatus();
-                
+
                 libTorrent.get_alerts(alertCallback);
             }
         }
@@ -213,11 +214,11 @@ public class TorrentManagerImpl implements TorrentManager {
             }
         }
     }
-    
+
     private class ResumeDataScheduler implements Runnable {
-        
-        private Iterator<String> torrentIterator = torrents.iterator(); 
-        
+
+        private Iterator<String> torrentIterator = torrents.iterator();
+
         @Override
         public void run() {
             synchronized (eventPoller) {
@@ -227,9 +228,16 @@ public class TorrentManagerImpl implements TorrentManager {
                         return;
                     }
                 }
-                
+
                 libTorrent.signal_fast_resume_data_request(torrentIterator.next());
             }
+        }
+    }
+
+    @Override
+    public void free(LibTorrentStatus oldStatus) {
+        if (oldStatus != null) {
+            libTorrent.free_torrent_status(oldStatus);
         }
     }
 }

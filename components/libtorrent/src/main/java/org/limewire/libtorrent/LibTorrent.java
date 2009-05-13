@@ -21,8 +21,7 @@ interface LibTorrent extends Library {
      * file and fills in the LibtorrentInfo struct with the torrent data upon
      * completion.
      */
-    public WrapperStatus add_torrent(LibTorrentInfo info, String path, LongHeap longHeap, Sha1Heap sha1Heap,
-             PointerHeap ptr);
+    public WrapperStatus add_torrent(LibTorrentInfo info, String path);
 
     /**
      * Adds a torrent to the libtorrent session. This can be done with only a
@@ -50,8 +49,7 @@ interface LibTorrent extends Library {
     /**
      * Fills in the Libtorrent status struct for the torrent with the given sha1
      */
-    public WrapperStatus get_torrent_status(String id, LibTorrentStatus status, LongHeap longHeap1,
-            LongHeap longHeap2, LongHeap longHeap3);
+    public WrapperStatus get_torrent_status(String id, LibTorrentStatus status);
 
     /**
      * Returns the number of peers for the torrent with the given sha1
@@ -84,5 +82,7 @@ interface LibTorrent extends Library {
      * Aborts all of the torrents in the session.
      */
     public WrapperStatus abort_torrents();
+
+    public void free_torrent_status(LibTorrentStatus oldStatus);
 
 }
