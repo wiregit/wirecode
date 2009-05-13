@@ -1,8 +1,6 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -20,7 +18,6 @@ import org.limewire.logging.LogFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.sun.jna.Memory;
 
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
@@ -73,20 +70,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public List<String> getPeers(String id) {
-        
-        int numUnfilteredPeers = libTorrent.get_num_peers(id); 
-        
-        if (numUnfilteredPeers == 0) {
-            return Collections.emptyList();
-        }
-        
-        Memory memory = new Memory(numUnfilteredPeers*16);
-        
-        libTorrent.get_peers(id, memory);
-        
-        List<String> peers =  Arrays.asList(memory.getString(0).split(";"));
-                
-        return peers;
+        return libTorrent.get_peers(id);
     }
     
     @Override
@@ -94,8 +78,7 @@ public class TorrentManagerImpl implements TorrentManager {
         synchronized (eventPoller) {
             LibTorrentInfo info = new LibTorrentInfo(); 
                 
-            libTorrent.add_torrent(info, torrent.getAbsolutePath(), new LongHeap(),
-                    new Sha1Heap(), new PointerHeap());
+            libTorrent.add_torrent(info, torrent.getAbsolutePath());
             String id = info.sha1;
             torrents.add(id);
             updateStatus(id);
@@ -145,14 +128,13 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public LibTorrentStatus getStatus(String id) {
         LibTorrentStatus status = new LibTorrentStatus();
-        libTorrent.get_torrent_status(id, status, new LongHeap(), new LongHeap(), new LongHeap());
+        libTorrent.get_torrent_status(id, status);
         return status;
     }
 
     private void updateStatus(String id) {
         LibTorrentStatus torrentStatus = new LibTorrentStatus(); 
-            libTorrent.get_torrent_status(id, torrentStatus,
-                new LongHeap(), new LongHeap(), new LongHeap());
+            libTorrent.get_torrent_status(id, torrentStatus);
         // TODO broadcast asynchronously
         statusListeners.broadcast(new LibTorrentStatusEvent(id, torrentStatus));
     }
