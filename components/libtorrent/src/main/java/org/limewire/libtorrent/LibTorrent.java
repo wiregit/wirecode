@@ -11,12 +11,6 @@ import com.sun.jna.Memory;
 interface LibTorrent extends Library {
 
     /**
-     * Initializes the LibTorrent library. Finding necessary dependencies first,
-     * then loading the libtorrent library as a jna lib.
-     */
-    public void initialize();
-
-    /**
      * Inititalizes the libtorrent session to use the given path as the default
      * download location.
      */

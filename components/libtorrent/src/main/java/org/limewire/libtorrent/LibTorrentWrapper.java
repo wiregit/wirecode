@@ -18,7 +18,11 @@ public class LibTorrentWrapper {
     
     private LibTorrent libTorrent;
 
-    public void initialize() {
+    /**
+     * Initializes the LibTorrent library. Finding necessary dependencies first,
+     * then loading the libtorrent library as a jna lib.
+     */
+    public void initialize(String path) {
         if (OSUtils.isWindows()) {
             System.loadLibrary("mingwm10");
             System.loadLibrary("boost_system-mgw34-mt-1_38");
@@ -34,6 +38,8 @@ public class LibTorrentWrapper {
 
         // TODO make sure right libraries are loaded on linux too.
         this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
+        
+        init(path);
     }
 
     public void add_torrent(LibTorrentInfo info, String path) {
@@ -43,7 +49,7 @@ public class LibTorrentWrapper {
         LOG.debugf("after add_torrent: {0}", path);
     }
 
-    public void init(String path) {
+    private void init(String path) {
         LOG.debugf("before init: {0}", path);
         catchWrapperException(libTorrent.init(path));
         LOG.debugf("after init: {0}", path);
