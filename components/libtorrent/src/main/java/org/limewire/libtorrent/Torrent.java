@@ -92,6 +92,16 @@ public class Torrent {
             Map metaInfo = (Map) Token.parse(fileChannel);
             BTData btData = new BTDataImpl(metaInfo);
             name = btData.getName();
+            if (btData.getLength() == null) {
+                this.totalSize = 0;
+                if (btData.getFiles() != null) {
+                    for (BTFileData file : btData.getFiles()) {
+                        this.totalSize += file.getLength();
+                    }
+                }
+            } else {
+                this.totalSize = btData.getLength();
+            }
 
             File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
 
@@ -200,9 +210,6 @@ public class Torrent {
     }
 
     public long getTotalSize() {
-        if (info != null)
-            return info.getContentLength();
-
         return totalSize;
     }
 
