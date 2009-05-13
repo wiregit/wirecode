@@ -38,8 +38,6 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     private String sha1 = null;
 
-    private final AtomicBoolean started = new AtomicBoolean(false);
-
     private String name;
 
     private String trackerURL;
@@ -48,9 +46,11 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     private String fastResumePath = null;
 
-    private boolean cancelled = false;
+    private final AtomicBoolean started = new AtomicBoolean(false);
 
-    private boolean complete = false;
+    private final AtomicBoolean cancelled = new AtomicBoolean(false);
+
+    private final AtomicBoolean complete = new AtomicBoolean(false);
 
     @Inject
     public Torrent(TorrentManager torrentManager) {
@@ -145,8 +145,9 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
                 private synchronized void updateStatus(LibTorrentStatus status) {
                     Torrent.this.status.set(status);
-                    boolean newlyfinished = complete != status.isFinished() && status.isFinished();
-                    complete = status.isFinished();
+                    boolean newlyfinished = complete.get() != status.isFinished()
+                            && status.isFinished();
+                    complete.set(status.isFinished());
 
                     if (newlyfinished) {
                         listeners.broadcast(TorrentEvent.COMPLETED);
@@ -205,7 +206,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     }
 
     public boolean isFinished() {
-        return complete;
+        return complete.get();
     }
 
     public long getTotalSize() {
@@ -279,11 +280,10 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     }
 
     public void stop() {
-        if (!cancelled) {
+        if (!cancelled.getAndSet(true)) {
             if (started.getAndSet(false)) {
                 torrentManager.removeTorrent(sha1);
             }
-            cancelled = true;
             listeners.broadcast(TorrentEvent.STOPPED);
         }
     }
@@ -320,7 +320,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return cancelled.get();
     }
 
     public LibTorrentStatus getStatus() {
