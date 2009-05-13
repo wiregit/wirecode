@@ -17,10 +17,11 @@ import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.listener.ListenerSupport;
 
 import com.google.inject.Inject;
 
-public class Torrent {
+public class Torrent implements ListenerSupport<TorrentEvent> {
     private final EventListenerList<TorrentEvent> listeners;
 
     private final TorrentManager torrentManager;

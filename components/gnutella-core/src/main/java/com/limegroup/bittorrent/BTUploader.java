@@ -102,14 +102,14 @@ public class BTUploader implements Uploader {
             LibTorrentState state = LibTorrentState.forId(status.state);
 
             switch (state) {
-            case downloading:
-            case finished:
-            case seeding:
+            case DOWNLOADING:
+            case FINISHED:
+            case SEEDING:
                 return UploadStatus.UPLOADING;
-            case queued_for_checking:
-            case checking_files:
-            case downloading_metadata:
-            case allocating:
+            case QUEUED_FOR_CHECKING:
+            case CHECKING_FILES:
+            case DOWNLOADING_METADATA:
+            case ALLOCATING:
                 return UploadStatus.CONNECTING;
             default:
                 throw new UnsupportedOperationException("Unknown state: " + state);

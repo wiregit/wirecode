@@ -211,23 +211,23 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // TODO support error states
 
         switch (state) {
-        case downloading:
+        case DOWNLOADING:
             if (isPaused()) {
                 return DownloadState.PAUSED;
             } else {
                 return DownloadState.DOWNLOADING;
             }
-        case queued_for_checking:
+        case QUEUED_FOR_CHECKING:
             return DownloadState.RESUMING;
-        case checking_files:
+        case CHECKING_FILES:
             return DownloadState.RESUMING;
-        case seeding:
+        case SEEDING:
             return DownloadState.COMPLETE;
-        case finished:
+        case FINISHED:
             return DownloadState.COMPLETE;
-        case allocating:
+        case ALLOCATING:
             return DownloadState.CONNECTING;
-        case downloading_metadata:
+        case DOWNLOADING_METADATA:
             return DownloadState.INITIALIZING;
         default:
             throw new IllegalStateException("Unknown libtorrent state: " + state);
