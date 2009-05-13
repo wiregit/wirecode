@@ -69,7 +69,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
-
+    }
+    
+    @Inject
+    public void registerTorrent() {
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
                 if (TorrentEvent.COMPLETED == event) {
