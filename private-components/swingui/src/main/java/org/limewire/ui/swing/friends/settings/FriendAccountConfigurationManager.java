@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Loads and manages XMPP account settings.
  */
-public interface XMPPAccountConfigurationManager {
+public interface FriendAccountConfigurationManager {
 
     /**
      * Returns the account configuration associated with the specified label,

@@ -17,7 +17,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.util.I18n;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
@@ -34,13 +34,13 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     private final LoginPanel loginPanel;
     private final LoggedInPanel loggedInPanel;
     private final EventBean<XMPPConnectionEvent> connectionEventBean;
-    private final XMPPAccountConfigurationManager accountManager;
+    private final FriendAccountConfigurationManager accountManager;
 
     @Inject
     FriendsSignInPanel(LoginPanel loginPanel,
                        LoggedInPanel loggedInPanel,
                        EventBean<XMPPConnectionEvent> connectionEventBean,
-                       XMPPAccountConfigurationManager accountManager) {
+                       FriendAccountConfigurationManager accountManager) {
         this.loggedInPanel = loggedInPanel;
         this.loginPanel = loginPanel;
         this.connectionEventBean = connectionEventBean;

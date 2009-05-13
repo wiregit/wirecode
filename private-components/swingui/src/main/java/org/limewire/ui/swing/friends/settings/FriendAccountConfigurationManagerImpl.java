@@ -23,7 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigurationManager {
+public class FriendAccountConfigurationManagerImpl implements FriendAccountConfigurationManager {
     
     private final PasswordManager passwordManager;
     private final Map<String, FriendAccountConfiguration> configs; // Indexed by label
@@ -38,9 +38,10 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     
     @Resource private Icon gmailIcon;
     @Resource private Icon ljIcon;
+    @Resource private Icon facebookIcon;
     
     @Inject
-    public XMPPAccountConfigurationManagerImpl(PasswordManager passwordManager,
+    public FriendAccountConfigurationManagerImpl(PasswordManager passwordManager,
             XMPPResourceFactory xmppResourceFactory) {
         
         GuiUtils.assignResources(this);
@@ -101,7 +102,10 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
             new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, resource, getGTalkServers(), Network.Type.XMPP);
         FriendAccountConfiguration livejournal =
             new FriendAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, resource, getLiveJournalServers(), Network.Type.XMPP);
+        FriendAccountConfiguration facebook =
+            new FriendAccountConfigurationImpl(false, "facebook.com", "Facebook", facebookIcon, resource, getGTalkServers(), Network.Type.FACEBOOK);
 
+        configs.put(facebook.getLabel(), facebook);
         configs.put(gmail.getLabel(), gmail);
         configs.put(livejournal.getLabel(), livejournal);
     }

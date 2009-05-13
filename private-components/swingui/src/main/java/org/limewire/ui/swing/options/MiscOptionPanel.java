@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.options;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -19,22 +17,23 @@ import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.LanguageUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Misc Option View
@@ -43,7 +42,7 @@ public class MiscOptionPanel extends OptionPanel {
 
     private static final String TRANSLATE_URL = "http://wiki.limewire.org/index.php?title=Translate";
     
-    private final XMPPAccountConfigurationManager accountManager;
+    private final FriendAccountConfigurationManager accountManager;
 
     private NotificationsPanel notificationsPanel;
     private FriendsChatPanel friendsChatPanel;
@@ -58,7 +57,7 @@ public class MiscOptionPanel extends OptionPanel {
     private HyperlinkButton translateButton;
 
     @Inject
-    public MiscOptionPanel(XMPPAccountConfigurationManager accountManager) {
+    public MiscOptionPanel(FriendAccountConfigurationManager accountManager) {
         this.accountManager = accountManager;
         
         GuiUtils.assignResources(this);

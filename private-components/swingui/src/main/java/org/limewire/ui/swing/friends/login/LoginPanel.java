@@ -30,7 +30,7 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
-import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -62,12 +62,12 @@ class LoginPanel extends JXPanel implements SettingListener {
     private JCheckBox autoLoginCheckBox;
     private JLabel authFailedLabel;
     private JXButton signInButton;
-    private final XMPPAccountConfigurationManager accountManager;
+    private final FriendAccountConfigurationManager accountManager;
     private final FriendConnectionFactory friendConnectionFactory;
     private final SignInAction signinAction = new SignInAction();
 
     @Inject
-    LoginPanel(XMPPAccountConfigurationManager accountManager,
+    LoginPanel(FriendAccountConfigurationManager accountManager,
             FriendConnectionFactory friendConnectionFactory,
             ComboBoxDecorator comboFactory,
             ButtonDecorator buttonDecorator,
@@ -209,7 +209,7 @@ class LoginPanel extends JXPanel implements SettingListener {
 
         setBackgroundPainter(barPainterFactory.createFriendsBarPainter());
 
-        serviceComboBox.setSelectedAction(getActionForLabel("GMail"));
+        serviceComboBox.setSelectedAction(getActionForLabel("Facebook"));
         setSignInComponentsEnabled(true);
     }
 
