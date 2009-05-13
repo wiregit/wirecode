@@ -59,7 +59,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
      */
-    private URN urn = null;
+    private volatile URN urn = null;
 
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
@@ -145,6 +145,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public boolean resume() {
         torrent.resume();
+        //TODO tie in a return value
         return true;
     }
 
