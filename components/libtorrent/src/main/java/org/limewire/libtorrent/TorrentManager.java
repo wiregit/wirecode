@@ -26,7 +26,7 @@ public interface TorrentManager extends Service {
     
     public File getTorrentDownloadFolder();
 
-    public boolean moveTorrent(String id, File directory);
+    public void moveTorrent(String id, File directory);
 
     public int getNumActiveTorrents();
 

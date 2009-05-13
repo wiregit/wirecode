@@ -33,7 +33,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private final ScheduledExecutorService backgroundExecutor;
     
-    private final LibTorrent libTorrent;
+    private final LibTorrentWrapper libTorrent;
     
     private final List<String> torrents;
 
@@ -163,10 +163,9 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public boolean moveTorrent(String id, File directory) {
-        boolean moved = libTorrent.move_torrent(id, directory.getAbsolutePath());
+    public void moveTorrent(String id, File directory) {
+        libTorrent.move_torrent(id, directory.getAbsolutePath());
         updateStatus(id);
-        return moved;
     }
 
     @Override

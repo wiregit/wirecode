@@ -170,8 +170,8 @@ public class Torrent {
         return torrentManager.getPeers(getSha1());
     }
 
-    public boolean moveTorrent(File directory) {
-        return torrentManager.moveTorrent(getSha1(), directory);
+    public void moveTorrent(File directory) {
+        torrentManager.moveTorrent(getSha1(), directory);
     }
 
     public void pause() {

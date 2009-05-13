@@ -21,14 +21,14 @@ interface LibTorrent extends Library {
      * Inititalizes the libtorrent session to use the given path as the default
      * download location.
      */
-    public void init(String path);
+    public WrapperStatus init(String path);
 
     /**
      * Adds the torrent to the libtorrent session. Takes a path to a torrent
      * file and fills in the LibtorrentInfo struct with the torrent data upon
      * completion.
      */
-    public void add_torrent(LibTorrentInfo info, String path, LongHeap longHeap, Sha1Heap sha1Heap,
+    public WrapperStatus add_torrent(LibTorrentInfo info, String path, LongHeap longHeap, Sha1Heap sha1Heap,
             Pointer ptr);
 
     /**
@@ -36,28 +36,28 @@ interface LibTorrent extends Library {
      * sha1 and trackerURI. optionally a path to a fast Resume data file can be
      * included to enable starting the torrent faster.
      */
-    public void add_torrent_existing(String sha1, String trackerURI, String fastResumeData);
+    public WrapperStatus add_torrent_existing(String sha1, String trackerURI, String fastResumeData);
 
     /**
      * Pauses the torrent with the given sha1
      */
-    public int pause_torrent(String id);
+    public WrapperStatus pause_torrent(String id);
 
     /**
      * Resumes the torrent with the given sha1
      */
-    public int resume_torrent(String id);
+    public WrapperStatus resume_torrent(String id);
 
     /**
      * Reads any stored alerts in the session, having there data coming in
      * through the callback.
      */
-    public void get_alerts(AlertCallback alertCallback);
+    public WrapperStatus get_alerts(AlertCallback alertCallback);
 
     /**
      * Fills in the Libtorrent status struct for the torrent with the given sha1
      */
-    public void get_torrent_status(String id, LibTorrentStatus status, LongHeap longHeap1,
+    public WrapperStatus get_torrent_status(String id, LibTorrentStatus status, LongHeap longHeap1,
             LongHeap longHeap2, LongHeap longHeap3);
 
     /**
@@ -79,17 +79,17 @@ interface LibTorrent extends Library {
     /**
      * Removes the torrent with the given sha1 from the session.
      */
-    public int remove_torrent(String id);
+    public WrapperStatus remove_torrent(String id);
 
     /**
      * Moves the torrent with the given sha1 from its current location to the
      * location defined in absolutePath.
      */
-    public boolean move_torrent(String id, String absolutePath);
+    public WrapperStatus move_torrent(String id, String absolutePath);
 
     /**
      * Aborts all of the torrents in the session.
      */
-    public void abort_torrents();
+    public WrapperStatus abort_torrents();
 
 }
