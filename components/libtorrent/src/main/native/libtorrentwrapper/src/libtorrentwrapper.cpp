@@ -88,7 +88,7 @@ void getSizeTypeString(libtorrent::size_type size, char* heap) {
 	const char* chars = str.c_str();
 	
 	//memcpy(&heap, &chars, str.length()+1);
-	for ( int i=0 ; i<str.length()+1 ; i++ ) {
+	for ( int i=0 ; i<str.length() ; i++ ) {
 		heap[i] = chars[i];
 	}
 	heap[str.length()] = '\0';
@@ -101,11 +101,10 @@ void getSha1String(sha1_hash sha1, char* heap) {
 	const char* chars = str.c_str();
 
 	//memcpy(&heap, &chars, str.length()+1);
-	for ( int i=0 ; i<str.length()+1 ; i++ ) {
+	for ( int i=0 ; i<str.length() ; i++ ) {
 		heap[i] = chars[i];
 	}
 	heap[str.length()] = '\0';
-
 }
 
 sha1_hash getSha1Hash(const char* sha1String) {
