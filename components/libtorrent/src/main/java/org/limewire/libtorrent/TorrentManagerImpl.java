@@ -191,7 +191,9 @@ public class TorrentManagerImpl implements TorrentManager {
         private final AlertCallback alertCallback = new AlertCallback() {
             @Override
             public void callback(LibTorrentAlert alert) {
-                LOG.debug(alert.toString());
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug(alert.toString());
+                }
                 if (alert.sha1 != null) {
                     alertListeners.broadcast(new LibTorrentAlertEvent(alert.sha1, alert));
                 }
