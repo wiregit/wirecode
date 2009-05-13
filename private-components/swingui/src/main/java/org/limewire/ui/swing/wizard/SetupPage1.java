@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.wizard;
 
 import java.awt.event.ActionEvent;
-import java.util.Locale;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -13,7 +12,6 @@ import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.components.LanguageComboBox;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.settings.StartupSettings;
@@ -21,7 +19,6 @@ import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.LanguageUtils;
 import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.WindowsUtils;
@@ -42,7 +39,6 @@ public class SetupPage1 extends WizardPage {
     private final JCheckBox shareDownloadedFilesCheckBox;
     private final JCheckBox shareUsageDataCheckBox;
     private final JCheckBox contentFilterCheckBox;
-    private final LanguageComboBox languageDropDown;
     
     public SetupPage1(SetupComponentDecorator decorator){
         this.decorator = decorator;
@@ -55,8 +51,6 @@ public class SetupPage1 extends WizardPage {
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
         shareUsageDataCheckBox = createAndDecorateCheckBox(true);
         contentFilterCheckBox = createAndDecorateCheckBox(false);  
-        languageDropDown = new LanguageComboBox();
-        languageDropDown.setSelectedItem(LanguageUtils.getCurrentLocale());
 
         //File Associations
         addFileAssociations();        
@@ -66,8 +60,6 @@ public class SetupPage1 extends WizardPage {
         addImproving();
         //Content Filters
         addContentFilters();
-        //Language
-        addLanguage();
         
         initSettings();
     }
@@ -124,21 +116,12 @@ public class SetupPage1 extends WizardPage {
         add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=contentFiltering"), "gapleft 10, wrap");
     }
     
-    /**
-     * Adds header for language selection, and combo box
-     */
-    private void addLanguage() {
-        add(createAndDecorateHeader(I18n.tr("Language")), "gaptop 15, span, wrap");
-        add(languageDropDown, "gaptop 8, gapleft 26, span, wrap");
-    }
-    
     private void initSettings() {
         associationFileTypeCheckBox.setSelected(SwingUiSettings.HANDLE_MAGNETS.getValue());
         launchAtStartupCheckBox.setSelected(StartupSettings.RUN_ON_STARTUP.getValue());
         shareDownloadedFilesCheckBox.setSelected(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());
         shareUsageDataCheckBox.setSelected(ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.getValue());
         contentFilterCheckBox.setSelected(ContentSettings.USER_WANTS_MANAGEMENTS.getValue());  
-        languageDropDown.setSelectedItem(LanguageUtils.getCurrentLocale());
     }
 
     @Override
@@ -191,19 +174,13 @@ public class SetupPage1 extends WizardPage {
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareDownloadedFilesCheckBox.isSelected());
         InstallSettings.AUTO_SHARING_OPTION.setValue(true);
         
-        //Anonymouse Usage statics
+        //Anonymous Usage statics
         ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.setValue(shareUsageDataCheckBox.isSelected());
         InstallSettings.ANONYMOUS_DATA_COLLECTION.setValue(true);
         
         //Content Filters
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(contentFilterCheckBox.isSelected());
         InstallSettings.FILTER_OPTION.setValue(true);
-        
-        //Language selected
-        Locale selectedLocale = (Locale) languageDropDown.getSelectedItem();
-        if(!selectedLocale.equals(LanguageUtils.getCurrentLocale())) {
-            LanguageUtils.setLocale(selectedLocale);
-        }
     }
     
     private JLabel createAndDecorateHeader(String text) {
