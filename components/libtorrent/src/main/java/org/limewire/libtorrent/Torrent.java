@@ -239,32 +239,25 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         return paths;
     }
 
-    public List<File> getCompleteFiles() {
+    private List<File> collectFiles(File rootFile) {
         List<File> files = new ArrayList<File>();
-        File completeFile = getCompleteFile();
         if (paths.size() > 0) {
             for (String path : paths) {
-                File file = new File(completeFile, path);
+                File file = new File(rootFile, path);
                 files.add(file);
             }
         } else {
-            files.add(completeFile);
+            files.add(rootFile);
         }
         return files;
     }
 
+    public List<File> getCompleteFiles() {
+        return collectFiles(getCompleteFile());
+    }
+
     public List<File> getIncompleteFiles() {
-        List<File> files = new ArrayList<File>();
-        File incompleteFile = getIncompleteFile();
-        if (paths.size() > 0) {
-            for (String path : paths) {
-                File file = new File(incompleteFile, path);
-                files.add(file);
-            }
-        } else {
-            files.add(incompleteFile);
-        }
-        return files;
+        return collectFiles(getIncompleteFile());
     }
 
     public File getIncompleteFile() {
