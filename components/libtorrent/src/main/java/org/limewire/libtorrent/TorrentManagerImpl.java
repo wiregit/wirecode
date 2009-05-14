@@ -236,13 +236,6 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public void free(LibTorrentStatus oldStatus) {
-        if (oldStatus != null) {
-            libTorrent.free_torrent_status(oldStatus);
-        }
-    }
-
-    @Override
     public boolean isDownloading(File torrentFile) {
         FileInputStream fis = null;
         FileChannel fileChannel = null;
