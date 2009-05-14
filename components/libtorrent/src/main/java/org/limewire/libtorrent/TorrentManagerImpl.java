@@ -1,13 +1,21 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.ManagedThread;
+import org.limewire.bittorrent.BTData;
+import org.limewire.bittorrent.BTDataImpl;
+import org.limewire.bittorrent.bencoding.Token;
+import org.limewire.io.IOUtils;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -22,35 +30,39 @@ import com.google.inject.name.Named;
 
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
-    
-    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = true;
+
+    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = false;
     
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
-    
+
     private final File torrentDownloadFolder;
 
     private final ScheduledExecutorService backgroundExecutor;
-    
+
     private final LibTorrentWrapper libTorrent;
-    
-    private final List<String> torrents;
+
+    private final Set<String> torrents;
 
     private final SourcedEventMulticaster<LibTorrentStatusEvent, String> statusListeners;
+
     private final SourcedEventMulticaster<LibTorrentAlertEvent, String> alertListeners;
 
     private final EventPoller eventPoller;
+
+    private final Object lock = new Object();
+
 
     private final AlertCallback alertCallback = new FastResumeAlertCallback();
     
     @Inject
     public TorrentManagerImpl(@TorrentDownloadFolder File torrentDownloadFolder,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
-        
+
         this.torrentDownloadFolder = torrentDownloadFolder;
         this.backgroundExecutor = backgroundExecutor;
-        
+
         this.libTorrent = new LibTorrentWrapper();
-        this.torrents = new CopyOnWriteArrayList<String>();
+        this.torrents = new CopyOnWriteArraySet<String>();
         this.statusListeners = new SourcedEventMulticasterImpl<LibTorrentStatusEvent, String>();
         this.alertListeners = new SourcedEventMulticasterImpl<LibTorrentAlertEvent, String>();
         this.eventPoller = new EventPoller();
@@ -60,7 +72,7 @@ public class TorrentManagerImpl implements TorrentManager {
     public void addStatusListener(String id, EventListener<LibTorrentStatusEvent> listener) {
         statusListeners.addListener(id, listener);
     }
-    
+
     @Override
     public void addAlertListener(String id, EventListener<LibTorrentAlertEvent> listener) {
         alertListeners.addListener(id, listener);
@@ -75,21 +87,21 @@ public class TorrentManagerImpl implements TorrentManager {
     public List<String> getPeers(String id) {
         return libTorrent.get_peers(id);
     }
-    
+
     @Override
     public void addTorrent(String sha1, File torrent, File fastResumeFile) {
         String fastResumePath = fastResumeFile != null ? fastResumeFile.getAbsolutePath() : null;
-        synchronized (eventPoller) {
+        synchronized (lock) {
             libTorrent.add_torrent(torrent.getAbsolutePath(), fastResumePath);
             torrents.add(sha1);
             updateStatus(sha1);
         }
     }
-    
+
     @Override
     public void addTorrent(String sha1, String trackerURI, File fastResumeFile) {
         String fastResumePath = fastResumeFile != null ? fastResumeFile.getAbsolutePath() : null;
-        synchronized (eventPoller) {
+        synchronized (lock) {
             libTorrent.add_torrent_existing(sha1, trackerURI, fastResumePath);
             torrents.add(sha1);
             updateStatus(sha1);
@@ -98,21 +110,12 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void removeTorrent(final String id) {
-        synchronized (eventPoller) {
+        synchronized (lock) {
             torrents.remove(id);
+            libTorrent.remove_torrent(id);
+            statusListeners.removeListeners(id);
+            alertListeners.removeListeners(id);
         }
-
-        new ManagedThread("TorrentManagerImpl.removeTorrent : " + id) {
-            @Override
-            public void run() {
-                synchronized (eventPoller) {
-                    libTorrent.remove_torrent(id);
-                    statusListeners.removeListeners(id);
-                    alertListeners.removeListeners(id);
-                }
-            }
-        }.start();
-
     }
 
     @Override
@@ -130,7 +133,7 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public LibTorrentStatus getStatus(String id) {
         LibTorrentStatus status = new LibTorrentStatus();
-        
+
         libTorrent.get_torrent_status(id, status);
         LibTorrentStatus statusCopy = new LibTorrentStatus(status);
         libTorrent.free_torrent_status(status);
@@ -167,7 +170,7 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public void initialize() {
         libTorrent.initialize(torrentDownloadFolder.getAbsolutePath());
-        //TODO what if path changes.
+        // TODO what if path changes.
     }
 
     @Override
@@ -182,21 +185,21 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void stop() {
-        libTorrent.freeze_and_save_all_fast_resume_data(alertCallback);
-
-        libTorrent.abort_torrents();
-        for (String id : torrents) {
-            statusListeners.removeListeners(id);
+        synchronized (lock) {
+         libTorrent.freeze_and_save_all_fast_resume_data(alertCallback);
+            libTorrent.abort_torrents();
+            for (String id : torrents) {
+                statusListeners.removeListeners(id);
+            }
+            torrents.clear();
         }
-        
-        torrents.clear();
     }
 
     private class EventPoller implements Runnable {
 
         @Override
         public void run() {
-            synchronized (this) {
+            synchronized (lock) {
                 pumpStatus();
 
                 libTorrent.get_alerts(alertCallback);
@@ -216,7 +219,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
         @Override
         public void run() {
-            synchronized (eventPoller) {
+            synchronized (lock) {
                 if (!torrentIterator.hasNext()) {
                     torrentIterator = torrents.iterator();
                     if (!torrentIterator.hasNext()) {
@@ -224,7 +227,10 @@ public class TorrentManagerImpl implements TorrentManager {
                     }
                 }
 
-                libTorrent.signal_fast_resume_data_request(torrentIterator.next());
+                String sha1 = torrentIterator.next();
+                if (torrents.contains(sha1)) {
+                    libTorrent.signal_fast_resume_data_request(sha1);
+                }
             }
         }
     }
@@ -234,6 +240,35 @@ public class TorrentManagerImpl implements TorrentManager {
         if (oldStatus != null) {
             libTorrent.free_torrent_status(oldStatus);
         }
+    }
+
+    @Override
+    public boolean isDownloading(File torrentFile) {
+        FileInputStream fis = null;
+        FileChannel fileChannel = null;
+        try {
+            fis = new FileInputStream(torrentFile);
+
+            fileChannel = fis.getChannel();
+            Map metaInfo = (Map) Token.parse(fileChannel);
+            BTData btData = new BTDataImpl(metaInfo);
+
+            String sha1 = TorrentSHA1ConversionUtils.toHexString(btData.getInfoHash());
+            for (String sha : torrents) {
+                if (sha.equals(sha1)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            // TODO do somthing intelligent here. Returning true will make hte
+            // file not try to resume, maybe a better method name would be
+            // fine.
+            throw new RuntimeException(e);
+        } finally {
+            IOUtils.close(fileChannel);
+            IOUtils.close(fis);
+        }
+        return false;
     }
     
     private class FastResumeAlertCallback implements AlertCallback {  

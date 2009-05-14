@@ -17,6 +17,7 @@ import org.limewire.collection.Comparators;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.InvalidDataException;
+import org.limewire.libtorrent.TorrentManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
@@ -80,14 +81,16 @@ public class IncompleteFileManager  {
     private final Provider<FileManager> fileManager;
     private final Provider<HashTreeCache> tigerTreeCache;
     private final VerifyingFileFactory verifyingFileFactory;
+    private final Provider<TorrentManager> torrentManager;
     
     @Inject
     public IncompleteFileManager(Provider<FileManager> fileManager,
             Provider<HashTreeCache> tigerTreeCache,
-            VerifyingFileFactory verifyingFileFactory) {
+            VerifyingFileFactory verifyingFileFactory, Provider<TorrentManager> torrentManager) {
         this.fileManager = fileManager;
         this.tigerTreeCache = tigerTreeCache;
         this.verifyingFileFactory = verifyingFileFactory;
+        this.torrentManager = torrentManager;
     }
     
     /**
@@ -587,10 +590,8 @@ public class IncompleteFileManager  {
                 
                 String name = incompleteFile.getName();
                 
-                if("torrent".equals(FileUtils.getFileExtension(name))) {
-                    //TODO no return, need to update BTDownloaderImpl to add the incomplete file though.
-                    return false;
-                    //pass through
+                if(isTorrentFile(incompleteFile)) {
+                    return !torrentManager.get().isDownloading(incompleteFile);
                 } else {
                     if(!name.startsWith(INCOMPLETE_PREFIX)) {
                         return false;
@@ -625,7 +626,6 @@ public class IncompleteFileManager  {
     }
 
     public static boolean isTorrentFile(File incompleteFile) {
-        return "fastresume".equals(FileUtils.getFileExtension(incompleteFile));
+        return "torrent".equals(FileUtils.getFileExtension(incompleteFile));
     }
-    
 }

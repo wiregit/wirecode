@@ -53,7 +53,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final Torrent torrent;
 
     private final BTUploaderFactory btUploaderFactory;
-    
+
     private AtomicBoolean complete = new AtomicBoolean(false);
 
     /**
@@ -70,7 +70,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
     }
-    
+
     @Inject
     public void registerTorrent() {
         torrent.addListener(new EventListener<TorrentEvent>() {
@@ -81,6 +81,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     torrent.moveTorrent(completeDir);
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                     complete.set(true);
+                    deleteIncompleteFiles();
                 } else if (TorrentEvent.STOPPED == event) {
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                 }
@@ -91,6 +92,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void init(File torrentFile) throws IOException {
         torrent.init(torrentFile, SharingSettings.getSaveDirectory());
+        // TODO fix this logic. Should not be using protected access, should be
+        // hidden
         saveFile = torrent.getCompleteFile();
     }
 
@@ -145,7 +148,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public boolean resume() {
         torrent.resume();
-        //TODO tie in a return value
+        // TODO tie in a return value
         return true;
     }
 
@@ -476,10 +479,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         btMemento.setTrackerURL(torrent.getTrackerURL());
         btMemento.setPaths(torrent.getPaths());
         File fastResumeFile = torrent.getFastResumeFile();
-        String fastResumePath = fastResumeFile  != null && fastResumeFile.exists() ? fastResumeFile.getAbsolutePath() : null;
+        String fastResumePath = fastResumeFile != null && fastResumeFile.exists() ? fastResumeFile
+                .getAbsolutePath() : null;
         btMemento.setFastResumePath(fastResumePath);
         File torrentFile = torrent.getTorrentFile();
-        String torrentPath = torrentFile  != null && torrentFile.exists() ? torrentFile.getAbsolutePath() : null;
+        String torrentPath = torrentFile != null && torrentFile.exists() ? torrentFile
+                .getAbsolutePath() : null;
         btMemento.setTorrentPath(torrentPath);
     }
 
@@ -494,7 +499,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         String fastResumePath = memento.getFastResumePath();
         File fastResumeFile = fastResumePath != null ? new File(fastResumePath) : null;
-        
+
         String torrentPath = memento.getTorrentPath();
         File torrentFile = torrentPath != null ? new File(torrentPath) : null;
         torrent.init(memento.getName(), TorrentSHA1ConversionUtils.toHexString(urn.getBytes()),
@@ -522,9 +527,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         String sha1 = TorrentSHA1ConversionUtils.toHexString(infoHash);
 
-        torrent
-                .init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(),
-                        null, null);
+        torrent.init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(),
+                null, null);
     }
 
     @Override
@@ -553,6 +557,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void deleteIncompleteFiles() {
         // TODO assert that complete or aborted?
         FileUtils.deleteRecursive(getIncompleteFile());
+        File torrentFile = torrent.getTorrentFile();
+        if (torrentFile != null) {
+            FileUtils.delete(torrentFile, false);
+        }
+
+        File fastResumeFile = torrent.getFastResumeFile();
+        if (fastResumeFile != null) {
+            FileUtils.delete(fastResumeFile, false);
+        }
     }
 
     @Override

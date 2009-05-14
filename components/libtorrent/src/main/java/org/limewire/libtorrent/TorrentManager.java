@@ -33,4 +33,6 @@ public interface TorrentManager extends Service {
     public void addTorrent(String sha1, String trackerURI, File fastResumeData);
 
     public void free(LibTorrentStatus oldStatus);
+
+    public boolean isDownloading(File torrentFile);
 }

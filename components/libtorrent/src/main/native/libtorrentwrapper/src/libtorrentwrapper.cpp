@@ -359,7 +359,6 @@ extern "C" EXTERN_RET add_torrent_existing(char* sha1String, char* trackerURI,
 	}
 
 	libtorrent::torrent_handle h = s.add_torrent(p);
-	h.resume();
 
 	EXTERN_BOTTOM;
 }
@@ -396,7 +395,6 @@ extern "C" EXTERN_RET add_torrent(char* path, char* fastResumePath) {
 
 
 	libtorrent::torrent_handle h = s.add_torrent(p);
-	h.resume();
 
 	// TODO: ?
 	// delete p.ti;
@@ -438,11 +436,7 @@ extern "C" EXTERN_RET get_torrent_status(const char* id, void* stat) {
 			(struct wrapper_torrent_status *) stat;
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	if (h.is_valid()) {
-		get_wrapper_torrent_status(h, stats);
-	} else {
-		stats->valid = false;
-	}
+	get_wrapper_torrent_status(h, stats);
 
 	EXTERN_BOTTOM;
 }

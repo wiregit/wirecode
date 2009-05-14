@@ -805,7 +805,6 @@ public class DownloadManagerImpl implements DownloadManager, Service,
             throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, incompleteFile);
         }
 
-        //TODO tie up BTDownloaderImpl with the incomplete file manager, and keep a copy of the torrent around
         if (IncompleteFileManager.isTorrentFile(incompleteFile)) {
             return resumeTorrentDownload(incompleteFile);
         }
@@ -850,42 +849,9 @@ public class DownloadManagerImpl implements DownloadManager, Service,
         return downloader;
     }
 
-    private Downloader resumeTorrentDownload(File torrentFolder) throws CantResumeException,
+    private Downloader resumeTorrentDownload(File torrentFile) throws CantResumeException,
             SaveLocationException {
-//        File infohash = null;
-//        for (File f : torrentFolder.listFiles()) {
-//            if (f.getName().startsWith(".dat")) {
-//                infohash = f;
-//                break;
-//            }
-//        }
-//
-//        String name = IncompleteFileManager.getCompletedName(torrentFolder);
-//        if (infohash == null)
-//            throw new CantResumeException(name);
-//
-//        BTMetaInfoMemento memento = null;
-//        try {
-//            Object infoObj = FileUtils.readObject(infohash.getAbsolutePath());
-//            memento = (BTMetaInfoMemento) infoObj;
-//        } catch (Throwable bad) {
-//            throw new CantResumeException(name);
-//        }
-//
-//        BTMetaInfo info;
-//        try {
-//            info = btMetaInfoFactory.createBTMetaInfoFromMemento(memento);
-//        } catch (InvalidDataException ide) {
-//            throw new CantResumeException(name);
-//        }
-//
-//        Downloader ret = downloadTorrent(info, false);
-//        if (ret.isResumable())
-//            ret.resume();
-//        return ret;
-        
-        //TODO
-        return null;
+        return downloadTorrent(torrentFile, false);
     }
 
     /*

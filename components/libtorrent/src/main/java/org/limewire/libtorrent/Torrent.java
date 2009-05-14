@@ -81,7 +81,23 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         this.paths.addAll(paths);
         this.totalSize = totalSize;
         this.fastResumeFile = fastResumeFile;
-        this.torrentFile = torrentFile;
+
+        if (torrentFile != null && torrentFile.exists()) {
+            this.torrentFile = torrentFile;
+        }
+        addTorrent();
+    }
+
+    private void addTorrent() {
+        // TODO clean up this logic for picking which addTorrent method to
+        // use
+
+        if (torrentFile != null) {
+            torrentManager.addTorrent(sha1, torrentFile, fastResumeFile);
+        } else {
+            torrentManager.addTorrent(sha1, trackerURL, fastResumeFile);
+        }
+
     }
 
     public synchronized void init(File torrentFile, File saveDir) throws IOException {
@@ -123,10 +139,15 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             IOUtils.close(fileChannel);
             IOUtils.close(fis);
         }
-        
-        File torrentFileCopy = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), getName() + ".torrent");
-        FileUtils.copy(torrentFile, torrentFileCopy);
+
+        File torrentFileCopy = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), getName()
+                + ".torrent");
+        if (!torrentFile.equals(torrentFileCopy)) {
+            FileUtils.copy(torrentFile, torrentFileCopy);
+        }
         this.torrentFile = torrentFileCopy;
+
+        addTorrent();
     }
 
     public String getName() {
@@ -135,33 +156,27 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     public void start() {
         if (!started.getAndSet(true)) {
-            // TODO clean up this logic for picking which addTorrent method to
-            // use
-
-            if (torrentFile != null) {
-                torrentManager.addTorrent(sha1, torrentFile, fastResumeFile);
-            } else {
-                torrentManager.addTorrent(sha1, trackerURL, fastResumeFile);
-            }
-
             torrentManager.addStatusListener(sha1, new EventListener<LibTorrentStatusEvent>() {
                 public void handleEvent(LibTorrentStatusEvent event) {
                     LibTorrentStatus status = event.getTorrentStatus();
                     updateStatus(status);
                 }
 
-                private synchronized void updateStatus(LibTorrentStatus status) {
-                    Torrent.this.status.set(status);
-                    boolean newlyfinished = complete.get() != status.isFinished()
-                            && status.isFinished();
-                    complete.set(status.isFinished());
+                private void updateStatus(LibTorrentStatus status) {
+                    if (!cancelled.get()) {
+                        synchronized (Torrent.this) {
+                            Torrent.this.status.set(status);
+                            boolean newlyfinished = complete.get() != status.isFinished()
+                                    && status.isFinished();
+                            complete.set(status.isFinished());
 
-                    if (newlyfinished) {
-                        listeners.broadcast(TorrentEvent.COMPLETED);
-                    } else {
-                        listeners.broadcast(TorrentEvent.STATUS_CHANGED);
+                            if (newlyfinished) {
+                                listeners.broadcast(TorrentEvent.COMPLETED);
+                            } else {
+                                listeners.broadcast(TorrentEvent.STATUS_CHANGED);
+                            }
+                        }
                     }
-
                 }
             });
 
@@ -176,6 +191,8 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
                     }
                 }
             });
+
+            resume();
         }
     }
 
