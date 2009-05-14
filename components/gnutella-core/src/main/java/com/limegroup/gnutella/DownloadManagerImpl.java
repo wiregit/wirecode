@@ -805,8 +805,10 @@ public class DownloadManagerImpl implements DownloadManager, Service,
             throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, incompleteFile);
         }
 
-        if (IncompleteFileManager.isTorrentFolder(incompleteFile))
+        //TODO tie up BTDownloaderImpl with the incomplete file manager, and keep a copy of the torrent around
+        if (IncompleteFileManager.isTorrentFile(incompleteFile)) {
             return resumeTorrentDownload(incompleteFile);
+        }
 
         // Check if file exists. TODO3: ideally we'd pass ALL conflicting files
         // to the GUI, so they know what they're overwriting.

@@ -53,7 +53,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final Torrent torrent;
 
     private final BTUploaderFactory btUploaderFactory;
-
+    
     private AtomicBoolean complete = new AtomicBoolean(false);
 
     /**
@@ -415,8 +415,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void initialize() {
-        // torrentManager.get().addEventListener(this);
-        // incompleteFileManager.addTorrentEntry(urn);
         // TODO what do we do with the incomplete file manager
     }
 
@@ -477,7 +475,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         btMemento.setContentLength(getContentLength());
         btMemento.setTrackerURL(torrent.getTrackerURL());
         btMemento.setPaths(torrent.getPaths());
-        btMemento.setFastResumePath(torrent.getFastResumePath());
+        File fastResumeFile = torrent.getFastResumeFile();
+        String fastResumePath = fastResumeFile  != null && fastResumeFile.exists() ? fastResumeFile.getAbsolutePath() : null;
+        btMemento.setFastResumePath(fastResumePath);
+        File torrentFile = torrent.getTorrentFile();
+        String torrentPath = torrentFile  != null && torrentFile.exists() ? torrentFile.getAbsolutePath() : null;
+        btMemento.setTorrentPath(torrentPath);
     }
 
     public void initFromCurrentMemento(LibTorrentBTDownloadMemento memento)
@@ -489,9 +492,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     "Non SHA1 URN retrieved from LibTorrent torrent momento.");
         }
 
+        String fastResumePath = memento.getFastResumePath();
+        File fastResumeFile = fastResumePath != null ? new File(fastResumePath) : null;
+        
+        String torrentPath = memento.getTorrentPath();
+        File torrentFile = torrentPath != null ? new File(torrentPath) : null;
         torrent.init(memento.getName(), TorrentSHA1ConversionUtils.toHexString(urn.getBytes()),
                 memento.getContentLength(), memento.getTrackerURL(), memento.getPaths(), memento
-                        .getSaveFile(), memento.getFastResumePath());
+                        .getSaveFile(), fastResumeFile, torrentFile);
     }
 
     public void initFromOldMemento(BTDownloadMemento memento) throws InvalidDataException {
@@ -516,7 +524,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         torrent
                 .init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(),
-                        null);
+                        null, null);
     }
 
     @Override

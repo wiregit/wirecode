@@ -30,4 +30,8 @@ public interface LibTorrentBTDownloadMemento extends DownloadMemento {
 
     public void setFastResumePath(String data);
 
+    public void setTorrentPath(String torrentPath);
+
+    public String getTorrentPath();
+
 }

@@ -21,8 +21,9 @@ interface LibTorrent extends Library {
      * Adds the torrent to the libtorrent session. Takes a path to a torrent
      * file and fills in the LibtorrentInfo struct with the torrent data upon
      * completion.
+     * @param fastResumePath 
      */
-    public WrapperStatus add_torrent(String path);
+    public WrapperStatus add_torrent(String path, String fastResumePath);
 
     /**
      * Adds a torrent to the libtorrent session. This can be done with only a

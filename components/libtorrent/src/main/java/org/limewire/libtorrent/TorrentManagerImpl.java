@@ -75,18 +75,20 @@ public class TorrentManagerImpl implements TorrentManager {
     }
     
     @Override
-    public void addTorrent(String sha1, File torrent) {
+    public void addTorrent(String sha1, File torrent, File fastResumeFile) {
+        String fastResumePath = fastResumeFile != null ? fastResumeFile.getAbsolutePath() : null;
         synchronized (eventPoller) {
-            libTorrent.add_torrent(torrent.getAbsolutePath());
+            libTorrent.add_torrent(torrent.getAbsolutePath(), fastResumePath);
             torrents.add(sha1);
             updateStatus(sha1);
         }
     }
     
     @Override
-    public void addTorrent(String sha1, String trackerURI, String fastResumeData) {
+    public void addTorrent(String sha1, String trackerURI, File fastResumeFile) {
+        String fastResumePath = fastResumeFile != null ? fastResumeFile.getAbsolutePath() : null;
         synchronized (eventPoller) {
-            libTorrent.add_torrent_existing(sha1, trackerURI, fastResumeData);
+            libTorrent.add_torrent_existing(sha1, trackerURI, fastResumePath);
             torrents.add(sha1);
             updateStatus(sha1);
         }

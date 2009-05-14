@@ -72,6 +72,11 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
     }
 
     @Override
+    public String getTorrentPath() {
+        return (String) serialObjects.get("torrentPath");
+    }
+    
+    @Override
     public void setAttributes(Map<String, Object> attributes) {
         serialObjects.put("attributes", attributes);
     }
@@ -121,4 +126,8 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
         serialObjects.put("fastResumePath", data);
     }
 
+    @Override
+    public void setTorrentPath(String torrentPath) {
+        serialObjects.put("torrentPath", torrentPath);
+    }
 }

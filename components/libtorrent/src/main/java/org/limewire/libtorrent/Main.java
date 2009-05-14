@@ -36,7 +36,7 @@ public class Main {
 //        torrent.init(torrentFile, libTorrentManager.getTorrentDownloadFolder());
         List<String> paths = Collections.emptyList();
         
-        torrent.init(name, sha1, 5371896, announce, paths, libTorrentManager.getTorrentDownloadFolder(), null);
+        torrent.init(name, sha1, 5371896, announce, paths, libTorrentManager.getTorrentDownloadFolder(), null, null);
         torrent.start();
 
         String id = torrent.getSha1() != null ? torrent.getSha1() :  sha1;

@@ -14,10 +14,12 @@ import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 
@@ -34,6 +36,8 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     private File torrentFile = null;
 
+    private File fastResumeFile = null;
+
     private List<String> paths;
 
     private String sha1 = null;
@@ -43,8 +47,6 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     private String trackerURL;
 
     private long totalSize = -1;
-
-    private String fastResumePath = null;
 
     private final AtomicBoolean started = new AtomicBoolean(false);
 
@@ -69,7 +71,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     }
 
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File saveLocation, String fastResumeData) {
+            List<String> paths, File saveLocation, File fastResumeFile, File torrentFile) {
         this.name = name;
         File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
         this.incompleteFile = new File(torrentDownloadFolder, name);
@@ -78,11 +80,11 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         this.trackerURL = trackerURL;
         this.paths.addAll(paths);
         this.totalSize = totalSize;
-        this.fastResumePath = fastResumeData;
+        this.fastResumeFile = fastResumeFile;
+        this.torrentFile = torrentFile;
     }
 
     public synchronized void init(File torrentFile, File saveDir) throws IOException {
-        this.torrentFile = torrentFile;
         FileInputStream fis = null;
         FileChannel fileChannel = null;
         try {
@@ -121,6 +123,10 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             IOUtils.close(fileChannel);
             IOUtils.close(fis);
         }
+        
+        File torrentFileCopy = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), getName() + ".torrent");
+        FileUtils.copy(torrentFile, torrentFileCopy);
+        this.torrentFile = torrentFileCopy;
     }
 
     public String getName() {
@@ -131,10 +137,11 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         if (!started.getAndSet(true)) {
             // TODO clean up this logic for picking which addTorrent method to
             // use
+
             if (torrentFile != null) {
-                torrentManager.addTorrent(sha1, torrentFile);
+                torrentManager.addTorrent(sha1, torrentFile, fastResumeFile);
             } else {
-                torrentManager.addTorrent(sha1, trackerURL, fastResumePath);
+                torrentManager.addTorrent(sha1, trackerURL, fastResumeFile);
             }
 
             torrentManager.addStatusListener(sha1, new EventListener<LibTorrentStatusEvent>() {
@@ -162,17 +169,22 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             torrentManager.addAlertListener(sha1, new EventListener<LibTorrentAlertEvent>() {
                 @Override
                 public void handleEvent(LibTorrentAlertEvent event) {
-
                     if (event.getAlert().category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT
                             && event.getAlert().data != null) {
-                        fastResumePath = event.getAlert().data;
-
-                        // System.out.println(fastResumePath);
-
+                        String fastResumePath = event.getAlert().data;
+                        fastResumeFile = new File(fastResumePath);
                     }
                 }
             });
         }
+    }
+
+    public File getTorrentFile() {
+        return torrentFile;
+    }
+
+    public File getFastResumeFile() {
+        return fastResumeFile;
     }
 
     public List<String> getPeers() {
@@ -318,9 +330,5 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     public LibTorrentStatus getStatus() {
         return status.get();
-    }
-
-    public String getFastResumePath() {
-        return fastResumePath;
     }
 }

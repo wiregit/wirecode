@@ -313,7 +313,7 @@ extern "C" RET add_torrent_existing(char* sha1String, char* trackerURI,
 	return 0;
 }
 
-extern "C" RET add_torrent(char* path) {
+extern "C" RET add_torrent(char* path, char* fastResumePath) {
 #ifdef LIMEDEBUG
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "path: " << path << std::endl;
@@ -322,6 +322,26 @@ extern "C" RET add_torrent(char* path) {
 	p.save_path = savePath;
 	p.ti = new libtorrent::torrent_info(path);
 	p.auto_managed = false;
+
+	std::vector<char> resume_buf;
+
+	if (fastResumePath) {
+		boost::filesystem::ifstream resume_file(fastResumePath,
+				std::ios_base::binary);
+
+		if (!resume_file.fail()) {
+			resume_file.unsetf(std::ios_base::skipws);
+
+			std::istream_iterator<char> ios_iter;
+			std::istream_iterator<char> iter(resume_file);
+
+			std::copy(iter, ios_iter, std::back_inserter(resume_buf));
+
+			p.resume_data = &resume_buf;
+		}
+	}
+
+
 	libtorrent::torrent_handle h = s.add_torrent(p);
 	h.resume();
 
