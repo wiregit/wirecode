@@ -131,6 +131,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
                 "[grow]", ""));
         filterPanel.setOpaque(false);
         
+        // Set empty border on separator to ensure all insets are zero.
+        separator.setBorder(BorderFactory.createEmptyBorder());
         separator.setBackground(dividerBackgroundColor);
         separator.setForeground(dividerForegroundColor);
         
@@ -479,8 +481,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             // Add filter display to container.
             displayPanel.add(activeFilterPanel, "gaptop 4, wmax " + filterWidth + ", wrap");
             
-            // Display reset button if multiple filters.
-            resetButton.setVisible(displayMap.size() > 1);
+            // Display reset button if multiple filters. TODO REMOVE OR UNCOMMENT
+            //resetButton.setVisible(displayMap.size() > 1);
             
             // Display this container.
             setVisible(true);
@@ -504,8 +506,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             // Remove filter display from map.
             displayMap.remove(filter);
             
-            // Hide reset button if not multiple filters.
-            resetButton.setVisible(displayMap.size() > 1);
+            // Hide reset button if not multiple filters. TODO REMOVE OR UNCOMMENT
+            //resetButton.setVisible(displayMap.size() > 1);
 
             // Hide this container if no active filters.
             if (displayMap.size() < 1) {
