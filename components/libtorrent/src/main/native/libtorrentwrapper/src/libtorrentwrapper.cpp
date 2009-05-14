@@ -35,28 +35,38 @@ std::string savePath;
 typedef libtorrent::big_number sha1_hash;
 
 #ifdef NO_ERROR
-#define RET int
-#define wTHROW(x) if (x) return 1; else return 0;
+#define EXTERN_RET int
+#define wTHROW(x) return 0;
 #else
-#define RET wrapper_status*
+#define EXTERN_RET wrapper_exception*
 #define wTHROW(x) if (last_error) { delete last_error; last_error=0;} last_error = x; return last_error;
 #endif
 
-struct wrapper_status {
+#define EXTERN_TOP try {
+	
+#define EXTERN_BOTTOM \
+} catch (std::exception e) \
+{	wTHROW(new wrapper_exception(1, e.what())); \
+} catch (...) \
+{	wTHROW(new wrapper_exception()); \
+} \
+return 0;
+
+struct wrapper_exception {
 	int type;
 	const char* message;
 
-	wrapper_status(int type, const char* message) {
+	wrapper_exception(int type, const char* message) {
 		this->type = type;
 		this->message = message;
 	}
 
-	wrapper_status() {
+	wrapper_exception() {
 		this->type = -1;
 		this->message = "unfilled";
 	}
 };
-wrapper_status* last_error = 0;
+wrapper_exception* last_error = 0;
 
 struct wrapper_torrent_status {
 	const char* total_done;
@@ -245,34 +255,39 @@ void process_alert(libtorrent::alert* alert, wrapper_alert_info* alertInfo) {
 	}
 }
 
-extern "C" RET init(const char* path) {
+extern "C" EXTERN_RET init(const char* path) {
+	EXTERN_TOP;
+	
 	std::string newPath(path);
 	savePath = newPath;
 	s.set_alert_mask(0xffffffff);
 	s.listen_on(std::make_pair(6881, 6889));
 
-	return 0;
+	EXTERN_BOTTOM;
 }
 
-extern "C" RET abort_torrents() {
+extern "C" EXTERN_RET abort_torrents() {
+	EXTERN_TOP;
+	
 	s.abort();
-	return 0;
+	
+	EXTERN_BOTTOM;
 }
 
-extern "C" RET move_torrent(const char* id, const char* path) {
+extern "C" EXTERN_RET move_torrent(const char* id, const char* path) {
+	EXTERN_TOP;
+	
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	if (h.is_valid()) {
-		std::string newPath(path);
-		h.move_storage(newPath);
-		return 0;
-	}
+	std::string newPath(path);
+	h.move_storage(newPath);
 
-	wTHROW(new wrapper_status());
+	EXTERN_BOTTOM;
 }
 
-extern "C" RET add_torrent_existing(char* sha1String, char* trackerURI,
+extern "C" EXTERN_RET add_torrent_existing(char* sha1String, char* trackerURI,
 		char* fastResumePath) {
-
+	EXTERN_TOP;
+	
 #ifdef LIMEDEBUG
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "sha1String" << sha1String << std::endl;
@@ -310,10 +325,12 @@ extern "C" RET add_torrent_existing(char* sha1String, char* trackerURI,
 	libtorrent::torrent_handle h = s.add_torrent(p);
 	h.resume();
 
-	return 0;
+	EXTERN_BOTTOM;
 }
 
-extern "C" RET add_torrent(char* path, char* fastResumePath) {
+extern "C" EXTERN_RET add_torrent(char* path, char* fastResumePath) {
+	EXTERN_TOP;
+	
 #ifdef LIMEDEBUG
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "path: " << path << std::endl;
@@ -347,41 +364,40 @@ extern "C" RET add_torrent(char* path, char* fastResumePath) {
 
 	// TODO: ?
 	// delete p.ti;
-	return 0;
+	
+	EXTERN_BOTTOM;
 }
 
-extern "C" RET pause_torrent(const char* id) {
+extern "C" EXTERN_RET pause_torrent(const char* id) {
+	EXTERN_TOP;
+	
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	if (h.is_valid()) {
-		h.pause();
-		return 0;
-	}
+	h.pause();
 
-	wTHROW(new wrapper_status());
+	EXTERN_BOTTOM;
 }
 
-extern "C" RET remove_torrent(const char* id) {
+extern "C" EXTERN_RET remove_torrent(const char* id) {
+	EXTERN_TOP;
+	
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	if (h.is_valid()) {
-		s.remove_torrent(h);
-		return 0;
-	}
-
-	wTHROW(new wrapper_status());
+	s.remove_torrent(h);
+	
+	EXTERN_BOTTOM;
 }
 
-extern "C" RET resume_torrent(const char* id) {
+extern "C" EXTERN_RET resume_torrent(const char* id) {
+	EXTERN_TOP;
+	
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	if (h.is_valid()) {
-		h.resume();
-		return 0;
-	}
-
-	wTHROW(new wrapper_status());
+	h.resume();
+	
+	EXTERN_BOTTOM;
 }
 
-extern "C" RET get_torrent_status(const char* id, void* stat) {
-
+extern "C" EXTERN_RET get_torrent_status(const char* id, void* stat) {
+	EXTERN_TOP;
+	
 	struct wrapper_torrent_status* stats =
 			(struct wrapper_torrent_status *) stat;
 
@@ -392,27 +408,24 @@ extern "C" RET get_torrent_status(const char* id, void* stat) {
 		stats->valid = false;
 	}
 
-	return 0;
+	EXTERN_BOTTOM;
 }
 
-extern "C" bool signal_fast_resume_data_request(const char* id) {
+extern "C" EXTERN_RET signal_fast_resume_data_request(const char* id) {
+	EXTERN_TOP;
+	
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-
-	if (h.is_valid() && h.has_metadata()) {
+	if (h.has_metadata()) {
 		h.save_resume_data();
-		return 1;
-	} else {
-		return 0;
 	}
+	
+	EXTERN_BOTTOM;
 }
 
-extern "C" int get_num_peers(const char* id) {
+extern "C" EXTERN_RET get_num_peers(const char* id, int *num_peers) {
+	EXTERN_TOP;	
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-
-	if (!h.is_valid()) {
-		return 0;
-	}
 
 	libtorrent::torrent_status s = h.status();
 
@@ -430,27 +443,24 @@ extern "C" int get_num_peers(const char* id) {
 		return 0;
 	}
 
-	int size = peers.size();
+	*num_peers = peers.size();
 
-	return size;
+	EXTERN_BOTTOM;
 }
 
-extern "C" void get_peers(const char* id, int buffer_len, char* data) {
+extern "C" EXTERN_RET get_peers(const char* id, int buffer_len, char* data) {
+	EXTERN_TOP;
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 
-	if (!h.is_valid())
-		return;
-
-	std::vector<libtorrent::peer_info> *peers = new std::vector<
-			libtorrent::peer_info>();
-	h.get_peer_info(*peers);
+	std::vector<libtorrent::peer_info> peers;
+	h.get_peer_info(peers);
 
 	int pos = 0;
 
-	std::vector<libtorrent::peer_info>::iterator iter = peers->begin();
+	std::vector<libtorrent::peer_info>::iterator iter = peers.begin();
 
-	while (iter != peers->end()) {
+	while (iter != peers.end()) {
 
 		std::string address = iter->ip.address().to_string();
 		int len = address.length();
@@ -471,10 +481,11 @@ extern "C" void get_peers(const char* id, int buffer_len, char* data) {
 		++iter;
 	}
 
-	delete peers;
+	EXTERN_BOTTOM;
 }
 
-extern "C" RET get_alerts(void(*alertCallback)(void*)) {
+extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
+	EXTERN_TOP;
 
 	std::auto_ptr<libtorrent::alert> alerts;
 
@@ -493,11 +504,15 @@ extern "C" RET get_alerts(void(*alertCallback)(void*)) {
 		alerts = s.pop_alert();
 	}
 
-	return 0;
+	EXTERN_BOTTOM;
 }
 
-extern "C" void free_torrent_status(wrapper_torrent_status* info) {
+extern "C" EXTERN_RET free_torrent_status(wrapper_torrent_status* info) {
+	EXTERN_TOP;
+	
 	delete[] info->total_done;
 	delete[] info->total_download;
 	delete[] info->total_upload;
+	
+	EXTERN_BOTTOM;
 }

@@ -11,6 +11,7 @@ import org.limewire.util.OSUtils;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
+import com.sun.jna.ptr.PointerByReference;
 
 public class LibTorrentWrapper {
 
@@ -87,10 +88,14 @@ public class LibTorrentWrapper {
     }
     
     public List<String> get_peers(String id) {
+        
+        Memory numPeersMemory = new Memory(8);
+        
         LOG.debugf("before get_num_peers: {0}", id);
-        int numUnfilteredPeers = libTorrent.get_num_peers(id);
+        libTorrent.get_num_peers(id, numPeersMemory);
         LOG.debugf("before get_num_peers: {0}", id);
         
+        int numUnfilteredPeers = numPeersMemory.getInt(0);
         
         if (numUnfilteredPeers == 0) {
             return Collections.emptyList();
@@ -109,11 +114,10 @@ public class LibTorrentWrapper {
 
     
 
-    public boolean signal_fast_resume_data_request(String id) {
+    public void signal_fast_resume_data_request(String id) {
         LOG.debugf("before print signal_fast_resume_data_request: {0}", id);
-        boolean ret = libTorrent.signal_fast_resume_data_request(id);
-        LOG.debugf("after print signal_fast_resume_data_request: {0} - {1}", id, ret);
-        return ret;
+        catchWrapperException(libTorrent.signal_fast_resume_data_request(id));
+        LOG.debugf("after print signal_fast_resume_data_request: {0} - {1}", id);
     }
 
     public void move_torrent(String id, String absolutePath) {
@@ -136,16 +140,15 @@ public class LibTorrentWrapper {
         LOG.debugf("after add_torrent_old: {0} - {1}", sha1, trackerURI);
     }
 
+    public void free_torrent_status(LibTorrentStatus oldStatus) {
+        LOG.debugf("before free_torrent_status: {0}", oldStatus);
+        libTorrent.free_torrent_status(oldStatus.getPointer());
+        LOG.debugf("after free_torrent_status: {0}", oldStatus);
+    }    
     
     private void catchWrapperException(WrapperStatus status) {
         if (status != null) {
             throw new LibTorrentException(status);
         }
-    }
-
-    public void free_torrent_status(LibTorrentStatus oldStatus) {
-        LOG.debugf("before free_torrent_status: {0}", oldStatus);
-        libTorrent.free_torrent_status(oldStatus.getPointer());
-        LOG.debugf("after free_torrent_status: {0}", oldStatus);
     }
 }

@@ -56,18 +56,18 @@ interface LibTorrent extends Library {
     /**
      * Returns the number of peers for the torrent with the given sha1
      */
-    public int get_num_peers(String id);
+    public WrapperStatus get_num_peers(String id, Pointer num_peers);
 
     /**
      * Retrieves the peers for the torrent with the given sha1
      */
-    public void get_peers(String id, Memory memory);
+    public WrapperStatus get_peers(String id, Memory memory);
 
     /**
      * Tells the session to save the fast resume data for the torrent with the
      * given sha1.
      */
-    public boolean signal_fast_resume_data_request(String id);
+    public WrapperStatus signal_fast_resume_data_request(String id);
 
     /**
      * Removes the torrent with the given sha1 from the session.
