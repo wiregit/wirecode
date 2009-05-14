@@ -207,14 +207,14 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 	libtorrent::bencode(std::ostream_iterator<char>(out), *alert->resume_data);
 }
 
-void process_alert(libtorrent::alert* alert, wrapper_alert_info* alertInfo) {
+void process_alert(libtorrent::alert const* alert, wrapper_alert_info* alertInfo) {
 
 	alertInfo->category = alert->category();
 	alertInfo->message = alert->message().c_str();
 
-	libtorrent::torrent_alert* torrentAlert;
+	libtorrent::torrent_alert const* torrentAlert;
 
-	if (torrentAlert = dynamic_cast<libtorrent::torrent_alert*> (alert)) {
+	if (torrentAlert = dynamic_cast<libtorrent::torrent_alert const*> (alert)) {
 
 		libtorrent::torrent_handle handle = torrentAlert->handle;
 
@@ -223,16 +223,14 @@ void process_alert(libtorrent::alert* alert, wrapper_alert_info* alertInfo) {
 			getSha1String(handle.info_hash(), alertInfo->sha1);
 
 			libtorrent::save_resume_data_alert const
-					* srd_alert =
-							dynamic_cast<libtorrent::save_resume_data_alert const*> (alert);
+					* srd_alert = dynamic_cast<libtorrent::save_resume_data_alert const*> (alert);
 			if (srd_alert) {
 				process_save_resume_data_alert(handle, srd_alert, alertInfo);
 				return;
 			}
 
 			libtorrent::save_resume_data_failed_alert const
-					* srdf_alert =
-							dynamic_cast<libtorrent::save_resume_data_failed_alert const*> (alert);
+					* srdf_alert = dynamic_cast<libtorrent::save_resume_data_failed_alert const*> (alert);
 			if (srdf_alert) {
 #ifdef LIMEDEBUG_RESUME
 				std::cout << "save_resume_data_failed_alert (" << srdf_alert->msg << ")" << std::endl;
@@ -242,8 +240,7 @@ void process_alert(libtorrent::alert* alert, wrapper_alert_info* alertInfo) {
 			}
 
 			libtorrent::fastresume_rejected_alert const
-					* fra_alert =
-							dynamic_cast<libtorrent::fastresume_rejected_alert const*> (alert);
+					* fra_alert = dynamic_cast<libtorrent::fastresume_rejected_alert const*> (alert);
 			if (fra_alert) {
 #ifdef LIMEDEBUG_RESUME
 				std::cout << "fastresume_rejected_alert (" << fra_alert->msg << ")" << std::endl;
@@ -253,6 +250,40 @@ void process_alert(libtorrent::alert* alert, wrapper_alert_info* alertInfo) {
 			}
 		}
 	}
+}
+
+// Ported from http://www.rasterbar.com/products/libtorrent/manual.html#save-resume-data
+extern "C" EXTERN_RET block_to_save_all(void(*alertCallback)(void*)) {
+	EXTERN_TOP;
+	
+	int num_resume_data = 0;
+
+	std::vector<libtorrent::torrent_handle> handles = s.get_torrents();
+	s.pause();
+	
+	for ( std::vector<libtorrent::torrent_handle>::iterator i = handles.begin(); i != handles.end(); ++i )
+	{	libtorrent::torrent_handle& h = *i;
+		if (!h.has_metadata()) continue;
+		if (!h.is_valid()) continue;
+
+		h.save_resume_data();
+		++num_resume_data;
+	}
+
+	while (num_resume_data > 0)
+	{	libtorrent::alert const* alert = s.wait_for_alert(libtorrent::seconds(10));
+
+		// if we don't get an alert within 10 seconds, abort
+		if (alert == 0)  break;
+
+		std::auto_ptr<libtorrent::alert> holder = s.pop_alert();
+		
+		wrapper_alert_info* alertInfo = new wrapper_alert_info();
+		process_alert(alert, alertInfo);
+		alertCallback(alertInfo);
+	}
+	
+	EXTERN_BOTTOM;
 }
 
 extern "C" EXTERN_RET init(const char* path) {
