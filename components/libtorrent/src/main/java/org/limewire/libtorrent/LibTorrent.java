@@ -85,6 +85,6 @@ interface LibTorrent extends Library {
      */
     public WrapperStatus abort_torrents();
 
-    public void free_torrent_status(Pointer ptr);
+    public WrapperStatus free_torrent_status(Pointer ptr);
 
 }
