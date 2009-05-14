@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -97,7 +98,7 @@ public class TorrentManagerImpl implements TorrentManager {
             torrents.remove(id);
         }
 
-        new Thread() {
+        new ManagedThread("TorrentManagerImpl.removeTorrent : " + id) {
             @Override
             public void run() {
                 synchronized (eventPoller) {
