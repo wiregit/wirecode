@@ -23,7 +23,7 @@ import com.google.inject.name.Named;
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
     
-    private static final boolean SAVE_FAST_RESUME_DATA = true;
+    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = true;
     
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
     
@@ -39,6 +39,8 @@ public class TorrentManagerImpl implements TorrentManager {
     private final SourcedEventMulticaster<LibTorrentAlertEvent, String> alertListeners;
 
     private final EventPoller eventPoller;
+
+    private final AlertCallback alertCallback = new FastResumeAlertCallback();
     
     @Inject
     public TorrentManagerImpl(@TorrentDownloadFolder File torrentDownloadFolder,
@@ -172,7 +174,7 @@ public class TorrentManagerImpl implements TorrentManager {
     public void start() {
         backgroundExecutor.scheduleAtFixedRate(eventPoller, 1000, 50, TimeUnit.MILLISECONDS);
 
-        if (SAVE_FAST_RESUME_DATA) {
+        if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
             backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 6000, 6000,
                     TimeUnit.MILLISECONDS);
         }
@@ -180,29 +182,17 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void stop() {
-        // TODO: pause then save fast return data? would need to yield for all
-        // to be saved.
+        libTorrent.freeze_and_save_all_fast_resume_data(alertCallback);
 
         libTorrent.abort_torrents();
         for (String id : torrents) {
             statusListeners.removeListeners(id);
         }
+        
         torrents.clear();
     }
 
     private class EventPoller implements Runnable {
-
-        private final AlertCallback alertCallback = new AlertCallback() {
-            @Override
-            public void callback(LibTorrentAlert alert) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug(alert.toString());
-                }
-                if (alert.sha1 != null) {
-                    alertListeners.broadcast(new LibTorrentAlertEvent(alert.sha1, alert));
-                }
-            }
-        };
 
         @Override
         public void run() {
@@ -243,6 +233,19 @@ public class TorrentManagerImpl implements TorrentManager {
     public void free(LibTorrentStatus oldStatus) {
         if (oldStatus != null) {
             libTorrent.free_torrent_status(oldStatus);
+        }
+    }
+    
+    private class FastResumeAlertCallback implements AlertCallback {  
+    
+        @Override
+        public void callback(LibTorrentAlert alert) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(alert.toString());
+            }
+            if (alert.sha1 != null) {
+                alertListeners.broadcast(new LibTorrentAlertEvent(alert.sha1, alert));
+            }
         }
     }
 }

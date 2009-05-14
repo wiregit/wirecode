@@ -43,6 +43,11 @@ interface LibTorrent extends Library {
     public WrapperStatus resume_torrent(String id);
 
     /**
+     * Used on shutdown to freeze all torrents and wait while saving fast resume data for each.
+     */
+    public WrapperStatus freeze_and_save_all_fast_resume_data(AlertCallback alertCallback);
+    
+    /**
      * Reads any stored alerts in the session, having there data coming in
      * through the callback.
      */

@@ -253,7 +253,8 @@ void process_alert(libtorrent::alert const* alert, wrapper_alert_info* alertInfo
 }
 
 // Ported from http://www.rasterbar.com/products/libtorrent/manual.html#save-resume-data
-extern "C" EXTERN_RET block_to_save_all(void(*alertCallback)(void*)) {
+extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(void(*alertCallback)(void*)) 
+{
 	EXTERN_TOP;
 	
 	int num_resume_data = 0;
@@ -281,6 +282,10 @@ extern "C" EXTERN_RET block_to_save_all(void(*alertCallback)(void*)) {
 		wrapper_alert_info* alertInfo = new wrapper_alert_info();
 		process_alert(alert, alertInfo);
 		alertCallback(alertInfo);
+		
+		if (alertInfo->sha1[0])
+		{	--num_resume_data;
+		}
 	}
 	
 	EXTERN_BOTTOM;
