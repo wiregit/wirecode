@@ -16,8 +16,8 @@ public class Main {
         libTorrentManager.start();
 
         
-        File torrentFile = new File(
-                "/home/pvertenten/Desktop/wndw - wireless networking in the developing world.torrent");
+//        File torrentFile = new File(
+//                "/home/pvertenten/Desktop/wndw - wireless networking in the developing world.torrent");
         // File torrentFile = new File(
         // "C:\\Documents and Settings\\pvertenten\\Desktop\\wndw - wireless networking in the developing world.torrent"
         // );

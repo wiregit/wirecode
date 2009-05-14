@@ -3,6 +3,7 @@ package org.limewire.libtorrent;
 import java.io.File;
 import java.util.List;
 
+import org.limewire.bittorrent.BTData;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
 
