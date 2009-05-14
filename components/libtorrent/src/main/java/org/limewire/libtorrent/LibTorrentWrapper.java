@@ -11,7 +11,6 @@ import org.limewire.util.OSUtils;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
-import com.sun.jna.ptr.PointerByReference;
 
 public class LibTorrentWrapper {
 
