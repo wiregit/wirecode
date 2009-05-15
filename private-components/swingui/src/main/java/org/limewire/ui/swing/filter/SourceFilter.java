@@ -89,7 +89,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         });
         
         panel.add(label, "wrap");
-        panel.add(list , "gap 6 6, grow");
+        panel.add(list , "grow");
         
         initialize();
     }
