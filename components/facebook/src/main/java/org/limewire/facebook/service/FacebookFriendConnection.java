@@ -40,6 +40,8 @@ import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
+import com.google.code.facebookapi.FacebookException;
+import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
@@ -65,6 +67,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
     private final Map<String, FacebookFriend> friends;
     private List<Cookie> finalCookies;
+    private volatile FacebookJsonRestClient facebookClient;
 
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
@@ -181,6 +184,7 @@ public class FacebookFriendConnection implements FriendConnection {
             session = json.getString("session_key");
             secret = json.getString("secret");
             uid = json.getString("uid");
+            facebookClient = new FacebookJsonRestClient(apiKey.get(), secret, session);
 		}
     }
 
@@ -320,6 +324,15 @@ public class FacebookFriendConnection implements FriendConnection {
         @Override
         public URI getLocationURI(HttpResponse response, HttpContext context) throws ProtocolException {
             return parent.getLocationURI(response, context);
+        }
+    }
+
+    public void sendLiveMessage(FriendPresence presence, String type, JSONObject message) throws FriendException {
+        try {
+            facebookClient.liveMessage_send(Long.parseLong(presence.getFriend().getId()), type,
+                    message);
+        } catch (FacebookException e) {
+            throw new FriendException(e);
         }
     }
 }

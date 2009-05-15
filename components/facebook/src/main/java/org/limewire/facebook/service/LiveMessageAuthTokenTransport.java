@@ -49,16 +49,9 @@ public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken
     
     @Override
     public void sendFeature(FriendPresence presence, AuthToken localFeature) throws FriendException {
-        FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
-                connection.getSecret(), connection.getSession());
-        try {
-            Map<String, String> message = new HashMap<String, String>();
-            message.put("from", connection.getUID());
-            message.put("auth-token", StringUtils.toUTF8String(Base64.encodeBase64(localFeature.getToken())));
-            client.liveMessage_send(Long.parseLong(presence.getFriend().getId()), "auth-token",
-                    new JSONObject(message));
-        } catch (FacebookException e) {
-            throw new FriendException(e);
-        }
+        Map<String, String> message = new HashMap<String, String>();
+        message.put("from", connection.getUID());
+        message.put("auth-token", StringUtils.toUTF8String(Base64.encodeBase64(localFeature.getToken())));
+        connection.sendLiveMessage(presence, getMessageType(), new JSONObject(message));
     }
 }

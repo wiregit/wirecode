@@ -10,29 +10,28 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.io.Address;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.StringUtils;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.google.inject.name.Named;
 
 
 public class LiveMessageAddressTransport implements FeatureTransport<Address>, LiveMessageHandler {
     
-    private final Provider<String> apiKey;
+    private static final Log LOG = LogFactory.getLog(LiveMessageAddressTransport.class);
+    
     private final FacebookFriendConnection connection;
     private final AddressFactory addressFactory;
 
     @AssistedInject
     LiveMessageAddressTransport(@Assisted FacebookFriendConnection connection,
-                                @Named("facebookApiKey") Provider<String> apiKey,
-                       AddressFactory addressFactory) {
-        this.apiKey = apiKey;
+            AddressFactory addressFactory) {
         this.connection = connection;
         this.addressFactory = addressFactory;
     }
@@ -50,23 +49,18 @@ public class LiveMessageAddressTransport implements FeatureTransport<Address>, L
 
     @Override
     public void handle(JSONObject message) {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     @Override
     public void sendFeature(FriendPresence presence, Address localFeature) throws FriendException {
-        FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
-                connection.getSecret(), connection.getSession());
+        Map<String, String> message = new HashMap<String, String>();
+        message.put("from", connection.getUID());
         try {
-            Map<String, String> message = new HashMap<String, String>();
-            message.put("from", connection.getUID());
             message.put("address", StringUtils.toUTF8String(Base64.encodeBase64(addressFactory.getSerializer(localFeature.getClass()).serialize(localFeature))));
-            client.liveMessage_send(Long.parseLong(presence.getFriend().getId()), "address",
-                    new JSONObject(message));
-        } catch (FacebookException e) {
-            throw new FriendException(e);
         } catch (IOException e) {
-            throw new FriendException(e);
+            throw new RuntimeException(e);
         }
+        connection.sendLiveMessage(presence, getMessageType(), new JSONObject(message));
     }
 }
