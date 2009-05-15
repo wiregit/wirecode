@@ -422,7 +422,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void initialize() {
-        // TODO what do we do with the incomplete file manager
     }
 
     @Override
@@ -453,7 +452,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public synchronized void finish() {
-        // TODO cleanup any memory needed
     }
 
     @Override
