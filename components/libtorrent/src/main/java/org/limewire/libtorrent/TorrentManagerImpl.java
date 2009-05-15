@@ -42,8 +42,6 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private final Map<String, Torrent> torrents;
 
-    private final EventPoller eventPoller;
-
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private final AlertCallback alertCallback = new FastResumeAlertCallback();
@@ -53,12 +51,11 @@ public class TorrentManagerImpl implements TorrentManager {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
 
         this.torrentDownloadFolder = torrentDownloadFolder;
-        //TODO move back to background executor?
+        // TODO move back to background executor?
         this.backgroundExecutor = new ScheduledThreadPoolExecutor(1);
 
         this.libTorrent = new LibTorrentWrapper();
         this.torrents = new ConcurrentHashMap<String, Torrent>();
-        this.eventPoller = new EventPoller();
     }
 
     @Override
@@ -200,7 +197,8 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void start() {
-        backgroundExecutor.scheduleAtFixedRate(eventPoller, 1000, 250, TimeUnit.MILLISECONDS);
+        backgroundExecutor
+                .scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
 
         if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
             backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 6000, 6000,
@@ -224,14 +222,8 @@ public class TorrentManagerImpl implements TorrentManager {
 
         @Override
         public void run() {
-            try {
-                lock.readLock().lock();
-                pumpStatus();
-
-                libTorrent.get_alerts(alertCallback);
-            } finally {
-                lock.readLock().unlock();
-            }
+            pumpStatus();
+            //libTorrent.get_alerts(alertCallback);
         }
 
         private void pumpStatus() {
