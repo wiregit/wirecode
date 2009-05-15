@@ -248,7 +248,9 @@ public class TorrentManagerImpl implements TorrentManager {
                 }
 
                 String sha1 = torrentIterator.next();
-                if (torrents.get(sha1) != null) {
+                Torrent torrent = torrents.get(sha1);
+                
+                if (torrent != null && !torrent.isFinished()) {
                     libTorrent.signal_fast_resume_data_request(sha1);
                 }
             } finally {
