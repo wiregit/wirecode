@@ -15,7 +15,7 @@ guice.version=snapshot20090512
 guice-assistedinject.version=snapshot20090512
 hamcrest-core.version
 hamcrest-library.version=
-hsqldb.version=
+hsqldb.version=1.8.0.10
 httpclient.version=4.0-beta2
 httpcore.version=4.0
 httpcore-nio.version=4.0
