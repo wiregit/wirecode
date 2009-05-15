@@ -331,9 +331,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean shouldBeRemoved() {
-        // TODO validate
         switch (getState()) {
-        case DISK_PROBLEM:
+        case ABORTED:
         case COMPLETE:
             return true;
         }
