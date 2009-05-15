@@ -57,9 +57,6 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     private void addTorrent(Torrent torrent) {
-        // TODO clean up this logic for picking which addTorrent method to
-        // use
-
         torrents.put(torrent.getSha1(), torrent);
         File torrentFile = torrent.getTorrentFile();
         String sha1 = torrent.getSha1();
