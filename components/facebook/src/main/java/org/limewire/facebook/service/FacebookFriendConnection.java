@@ -42,6 +42,7 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
+import com.google.code.facebookapi.ExtensibleClient;
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Provider;
@@ -258,7 +259,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     @Override
-    public Friend getUser(String id) {
+    public FacebookFriend getUser(String id) {
         return friends.get(id);
     }
 
@@ -340,5 +341,9 @@ public class FacebookFriendConnection implements FriendConnection {
         } catch (FacebookException e) {
             throw new FriendException(e);
         }
+    }
+
+    public FacebookJsonRestClient getClient() {
+        return facebookClient;
     }
 }

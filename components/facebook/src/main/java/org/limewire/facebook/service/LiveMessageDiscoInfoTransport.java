@@ -12,30 +12,27 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 
 import com.google.code.facebookapi.FacebookException;
-import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
 public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
-    private final Provider<String> apiKey;
+
     private final FacebookFriendConnection connection;
     private final FeatureRegistry featureRegistry;
     private final Map<String, String> friends = new HashMap<String, String>();
 
     @AssistedInject
     LiveMessageDiscoInfoTransport(@Assisted FacebookFriendConnection connection,
-                                  @Named("facebookApiKey") Provider<String> apiKey,
-                                  FeatureRegistry featureRegistry) {
-        this.apiKey = apiKey;
+            FeatureRegistry featureRegistry) {
         this.connection = connection;
         this.featureRegistry = featureRegistry; // TODO FeatureRegistry is a global
         // TODO singleton, needs ot be per FriendConnection
@@ -56,9 +53,9 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     public void handle(JSONObject message) throws JSONException {  
         try {
             if(message.getString("event_name").equals("disco_info_response")) {
-                String from  = message.getString("from");
+                String from = message.getString("from");
                 if(from != null) {
-                    FacebookFriend friend = (FacebookFriend)connection.getUser(from);
+                    FacebookFriend friend = connection.getUser(from);
                     if(friend != null) {
                         JSONArray features = message.getJSONArray("features");     
                         for(int i = 0; i < features.length(); i++) {
@@ -70,30 +67,27 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                         }
                     }
                 }                           
-            } else if(message.getString("event_name").equals("disco_info")) {
+            } else if(message.getString("event_name").equals(getMessageType())) {
                 String from  = message.getString("from");
                 if(from != null) {
-                    FacebookFriend friend = (FacebookFriend)connection.getUser(from);
+                    FacebookFriend friend = connection.getUser(from);
                     if(friend != null) {
                         // TODO replace with ServiceDiscoveryManager like thing
                         List<String> supported = new ArrayList<String>();
                         for(URI feature : featureRegistry) {
                             supported.add(feature.toASCIIString());
                         }
-                        FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
-                            connection.getSecret(), connection.getSession());
                         JSONObject response = new JSONObject("response");
-                        Map<String, String> responseMap = new HashMap<String, String>();
                         response.put("from", connection.getUID());
                         response.put("features", supported);
-                        client.liveMessage_send(Long.parseLong(from), "disco_info_response",
+                        connection.sendLiveMessage(friend.getActivePresence(), "disco_info_response",
                                         response);
                     }
                 }
             }
         } catch (URISyntaxException e) {
             throw new JSONException(e);
-        } catch (FacebookException e) {
+        } catch (FriendException e) {
             throw new JSONException(e);
         }
     }
@@ -105,10 +99,8 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
             @Override
             public void handleEvent(FriendConnectionEvent event) {
                 if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
-                    FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
-                    connection.getSecret(), connection.getSession());
                     try {
-                        JSONArray friendsArray = (JSONArray)client.friends_getAppUsers();
+                        JSONArray friendsArray = (JSONArray)connection.getClient().friends_getAppUsers();
                         if(friendsArray != null) {
                             for(int i = 0; i < friendsArray.length(); i++) {
                                 friends.put(friendsArray.getString(i), friendsArray.getString(i));
@@ -127,16 +119,15 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
             @Override
             public void handleEvent(FriendEvent event) {                
                 if(event.getType() == FriendEvent.Type.ADDED) {
-                    FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(), connection.getSecret(), connection.getSession());
                     if(friends.containsKey(event.getData().getId())) {
                         //FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
                         //connection.getSecret(), connection.getSession());
                         try {
                             Map<String, String> message = new HashMap<String, String>();
                             message.put("from", connection.getUID());
-                            client.liveMessage_send(Long.parseLong(event.getData().getId()), "disco_info",
+                            connection.sendLiveMessage(event.getData().getActivePresence(), getMessageType(),
                                     new JSONObject(message));
-                        } catch (FacebookException e) {
+                        } catch (FriendException e) {
                             throw new RuntimeException(e);
                         }  
                     }
