@@ -13,6 +13,8 @@ import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
@@ -21,6 +23,9 @@ import com.google.inject.name.Named;
 
 @Singleton
 public class PresenceListener implements Runnable {
+    
+    private static final Log LOG = LogFactory.getLog(PresenceListener.class);
+    
     private final EventBroadcaster<FriendEvent> knownBroadcaster;
     private final EventBroadcaster<FriendEvent> availableBroadcaster;
     private final EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster;
@@ -50,13 +55,20 @@ public class PresenceListener implements Runnable {
         nvps.add(new BasicNameValuePair("buddy_list", "1"));
         nvps.add(new BasicNameValuePair("notifications", "1"));
         nvps.add(new BasicNameValuePair("force_render", "true"));
-        nvps.add(new BasicNameValuePair("post_form_id", postFormID));
+        // not sent in pidgin
+//        nvps.add(new BasicNameValuePair("post_form_id", postFormID));
         nvps.add(new BasicNameValuePair("user", connection.getUID()));
+        nvps.add(new BasicNameValuePair("popped_out", "true"));
         
         try{
+            LOG.debugf("posting buddy list request: {0}", nvps);
             String responseStr = connection.httpPOST("http://www.facebook.com", "/ajax/presence/update.php", nvps);
-            //for (;;);{"error":0,"errorSummary":"","errorDescription":"No error.","payload":{"buddy_list":{"listChanged":true,"availableCount":1,"nowAvailableList":{"UID1":{"i":false}},"wasAvailableIDs":[],"userInfos":{"UID1":{"name":"Buddy 1","firstName":"Buddy","thumbSrc":"http:\/\/static.ak.fbcdn.net\/pics\/q_default.gif","status":null,"statusTime":0,"statusTimeRel":""},"UID2":{"name":"Buddi 2","firstName":"Buddi","thumbSrc":"http:\/\/static.ak.fbcdn.net\/pics\/q_default.gif","status":null,"statusTime":0,"statusTimeRel":""}},"forcedRender":true},"time":1209560380000}}  
-            //for (;;);{"error":0,"errorSummary":"","errorDescription":"No error.","payload":{"time":1214626375000,"buddy_list":{"listChanged":true,"availableCount":1,"nowAvailableList":{},"wasAvailableIDs":[],"userInfos":{"1386786477":{"name":"\u5341\u4e00","firstName":"\u4e00","thumbSrc":"http:\/\/static.ak.fbcdn.net\/pics\/q_silhouette.gif","status":null,"statusTime":0,"statusTimeRel":""}},"forcedRender":null,"flMode":false,"flData":{}},"notifications":{"countNew":0,"count":1,"app_names":{"2356318349":"\u670b\u53cb"},"latest_notif":1214502420,"latest_read_notif":1214502420,"markup":"<div id=\"presence_no_notifications\" style=\"display:none\" class=\"no_notifications\">\u65e0\u65b0\u901a\u77e5\u3002<\/div><div class=\"notification clearfix notif_2356318349\" onmouseover=\"CSS.addClass(this, 'hover');\" onmouseout=\"CSS.removeClass(this, 'hover');\"><div class=\"icon\"><img src=\"http:\/\/static.ak.fbcdn.net\/images\/icons\/friend.gif?0:41046\" alt=\"\" \/><\/div><div class=\"notif_del\" onclick=\"return presenceNotifications.showHideDialog(this, 2356318349)\"><\/div><div class=\"body\"><a href=\"http:\/\/www.facebook.com\/profile.php?id=1190346972\"   >David Willer<\/a>\u63a5\u53d7\u4e86\u60a8\u7684\u670b\u53cb\u8bf7\u6c42\u3002 <span class=\"time\">\u661f\u671f\u56db<\/span><\/div><\/div>","inboxCount":"0"}},"bootload":[{"name":"js\/common.js.pkg.php","type":"js","src":"http:\/\/static.ak.fbcdn.net\/rsrc.php\/pkg\/60\/106715\/js\/common.js.pkg.php"}]}
+            if (responseStr == null) {
+                LOG.debug("no response for buddy list post");
+                return;
+            } 
+            LOG.debugf("buddy list response: {0}", responseStr);
+                
             BuddyListResponseDeserializer deserializer = buddyListResponseDeserializerFactory.create(connection);
             Map<String, FacebookFriend> onlineFriends = deserializer.deserialize(responseStr);
             for(Friend friend : connection.getUsers()) {
