@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
 import javax.swing.AbstractAction;
@@ -19,11 +22,14 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -53,7 +59,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private final JPanel panel = new JPanel();
     private final JLabel propertyLabel = new JLabel();
     private final JList list = new JList();
-    private final JButton moreButton = new JButton();
+    private final HyperlinkButton moreButton = new HyperlinkButton();
     
     private FunctionList<E, Object> propertyList;
     private UniqueList<Object> uniqueList;
@@ -97,16 +103,28 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         list.addMouseListener(new RolloverCursorListener());
         
         moreButton.setAction(new MoreAction());
-        moreButton.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        moreButton.setBorder(BorderFactory.createEmptyBorder(0, 1, 1, 1));
         moreButton.setContentAreaFilled(false);
         moreButton.setFocusPainted(false);
         moreButton.setFont(resources.getRowFont());
         moreButton.setHorizontalTextPosition(JButton.LEADING);
-        moreButton.setIcon(resources.getMoreIcon());
-        moreButton.setIconTextGap(2);
         
-        // Add listener to show cursor on mouse over.
-        moreButton.addMouseListener(new RolloverCursorListener());
+        // Add listener to set popup trigger indicator.  This activates logic
+        // so that pressing "more" a second time closes an open popup.
+        moreButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (morePopupPanel != null) {
+                    morePopupPanel.setPopupTriggered(true);
+                }
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (morePopupPanel != null) {
+                    morePopupPanel.setPopupTriggered(false);
+                }
+            }
+        });
         
         // Apply results list to filter.
         initialize(resultsList);
@@ -286,7 +304,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     }
     
     /**
-     * Action to display list of all property values.
+     * Action to display list of all property values in popup window.
      */
     private class MoreAction extends AbstractAction {
 
@@ -296,7 +314,13 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            showMorePopup();
+            if (morePopupPanel == null) {
+                showMorePopup();
+            } else if (morePopupPanel.isPopupReady()) {
+                showMorePopup();
+            } else {
+                morePopupPanel.setPopupReady(true);
+            }
         }
     }
     
@@ -306,10 +330,15 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private class MorePopupPanel extends JPanel {
         private final int MAX_VISIBLE_ROWS = 18;
         
+        private final JPanel titlePanel = new JPanel();
         private final JLabel titleLabel = new JLabel();
+        private final JButton closeButton = new JButton();
         private final JList moreList = new JList();
         private final JScrollPane scrollPane = new JScrollPane();
         private final JPopupMenu popupMenu = new JPopupMenu();
+        
+        private boolean popupReady;
+        private boolean popupTriggered;
         
         public MorePopupPanel() {
             FilterResources resources = getResources();
@@ -317,12 +346,25 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
             setBorder(BorderFactory.createLineBorder(resources.getPopupBorderColor(), 2));
             setLayout(new BorderLayout());
             
-            titleLabel.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 3));
-            titleLabel.setBackground(resources.getPopupHeaderBackground());
+            titlePanel.setBackground(resources.getPopupHeaderBackground());
+            titlePanel.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 1));
+            titlePanel.setLayout(new BorderLayout());
+            
             titleLabel.setForeground(resources.getPopupHeaderForeground());
             titleLabel.setFont(resources.getPopupHeaderFont());
-            titleLabel.setOpaque(true);
             titleLabel.setText(I18n.tr("All {0}", getPropertyText()));
+            
+            closeButton.setBorder(BorderFactory.createEmptyBorder(0, 3, 3, 3));
+            closeButton.setContentAreaFilled(false);
+            closeButton.setForeground(resources.getPopupHeaderForeground());
+            closeButton.setIcon(resources.getPopupCloseIcon());
+            closeButton.addMouseListener(new RolloverCursorListener());
+            closeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    hidePopup();
+                }
+            });
             
             moreList.setCellRenderer(new PropertyCellRenderer());
             moreList.setFont(resources.getRowFont());
@@ -349,10 +391,56 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
             
             popupMenu.setBorder(BorderFactory.createEmptyBorder());
             popupMenu.setFocusable(false);
+            popupMenu.addPopupMenuListener(new PopupMenuListener() {
+                @Override
+                public void popupMenuCanceled(PopupMenuEvent e) {
+                }
+
+                @Override
+                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                    if (popupTriggered) {
+                        popupReady = false;
+                    } else {
+                        popupReady = true;
+                    }
+                }
+
+                @Override
+                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                    popupTriggered = true;
+                }
+            });
             
-            add(titleLabel, BorderLayout.NORTH);
+            add(titlePanel, BorderLayout.NORTH);
             add(scrollPane, BorderLayout.CENTER);
+            titlePanel.add(titleLabel, BorderLayout.CENTER);
+            titlePanel.add(closeButton, BorderLayout.EAST);
             popupMenu.add(this);
+        }
+        
+        /**
+         * Returns true if the popup is ready to be displayed.  The return 
+         * value will be false if the popup is about to be hidden due to a 
+         * triggering event.  
+         */
+        public boolean isPopupReady() {
+            return popupReady;
+        }
+        
+        /**
+         * Sets an indicator that determines whether the popup is ready to be 
+         * displayed.
+         */
+        public void setPopupReady(boolean popupReady) {
+            this.popupReady = popupReady;
+        }
+        
+        /**
+         * Sets an indicator that determines whether a triggering event is
+         * about to occur that affects popup visibility.
+         */
+        public void setPopupTriggered(boolean popupTriggered) {
+            this.popupTriggered = popupTriggered;
         }
         
         /**
