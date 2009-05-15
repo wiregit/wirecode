@@ -43,13 +43,14 @@ class ActiveFilterPanel extends JXPanel {
         
         GuiUtils.assignResources(this);
         
-        setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
         setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
                 "[left][right]", "[center]"));
         setPreferredSize(new Dimension(0, 18));
         setBackgroundPainter(new RectanglePainter(0, 0, 0, 0, 16, 16, true,
                 backgroundColor, 1.0f, borderColor));
         
+        label.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
         label.setFont(textFont);
         label.setForeground(textColor);
         label.setHorizontalAlignment(JLabel.LEADING);
@@ -80,8 +81,8 @@ class ActiveFilterPanel extends JXPanel {
         // Determine max label width.
         int maxWidth = filterWidth - removeButton.getPreferredSize().width - 6;
         
-        add(label       , "wmax " + maxWidth);
         add(removeButton, "gap 0 0");
+        add(label       , "wmax " + maxWidth);
     }
     
 }
