@@ -920,6 +920,7 @@ public class DownloadManagerImpl implements DownloadManager, Service,
             ret.checkTargetLocation();
         }
         
+        ret.register();
         initializeDownload(ret, true);
         return ret;
     }

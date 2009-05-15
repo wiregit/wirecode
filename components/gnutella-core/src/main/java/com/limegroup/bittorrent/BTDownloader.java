@@ -25,4 +25,6 @@ public interface BTDownloader extends CoreDownloader {
     void checkTargetLocation() throws SaveLocationException;
     
     void checkActiveAndWaiting() throws SaveLocationException;
+
+    void register();
 }

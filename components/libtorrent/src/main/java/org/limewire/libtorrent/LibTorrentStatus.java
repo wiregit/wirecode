@@ -2,6 +2,8 @@ package org.limewire.libtorrent;
 
 import java.math.BigInteger;
 
+import org.limewire.util.StringUtils;
+
 import com.sun.jna.Structure;
 
 public class LibTorrentStatus extends Structure {
@@ -34,6 +36,8 @@ public class LibTorrentStatus extends Structure {
 
     public int valid;
 
+    public String error;
+
     public LibTorrentStatus() {
 
     }
@@ -53,6 +57,7 @@ public class LibTorrentStatus extends Structure {
         this.paused = copy.paused;
         this.finished = copy.finished;
         this.valid = copy.valid;
+        this.error = new String(copy.error);
     }
 
     public long getTotalDone() {
@@ -88,5 +93,9 @@ public class LibTorrentStatus extends Structure {
 
     public boolean isFinished() {
         return finished != 0;
+    }
+
+    public boolean isError() {
+        return error != null && !StringUtils.isEmpty(error);
     }
 }

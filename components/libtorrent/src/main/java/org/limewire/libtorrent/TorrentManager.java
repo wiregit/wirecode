@@ -24,4 +24,6 @@ public interface TorrentManager extends Service {
     public boolean isDownloading(File torrentFile);
 
     void registerTorrent(Torrent torrent);
+
+    public boolean isDownloading(String sha1);
 }

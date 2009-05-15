@@ -294,4 +294,9 @@ public class TorrentManagerImpl implements TorrentManager {
             }
         }
     }
+
+    @Override
+    public boolean isDownloading(String sha1) {
+        return torrents.containsKey(sha1);
+    }
 }

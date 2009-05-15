@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <memory>
+#include <string.h>
 
 #include "libtorrent/config.hpp"
 #include "libtorrent/session.hpp"
@@ -45,7 +46,7 @@ typedef libtorrent::big_number sha1_hash;
 #endif
 
 #define EXTERN_TOP try {
-	
+
 #define EXTERN_BOTTOM \
 } catch (std::exception e) \
 {	wTHROW(new wrapper_exception(1, e.what())); \
@@ -85,6 +86,7 @@ struct wrapper_torrent_status {
 	int paused;
 	int finished;
 	int valid;
+	const char* error;
 };
 
 struct wrapper_alert_info {
@@ -147,6 +149,7 @@ void get_wrapper_torrent_status(libtorrent::torrent_handle handle,
 	char* total_done = new char[20];
 	char* total_download = new char[20];
 	char* total_upload = new char[20];
+	char* error = strdup(status.error.c_str());
 
 	float download_rate = status.download_rate;
 	float upload_rate = status.upload_rate;
@@ -179,6 +182,7 @@ void get_wrapper_torrent_status(libtorrent::torrent_handle handle,
 	stats->paused = paused;
 	stats->finished = finished;
 	stats->valid = valid;
+	stats->error = error;
 
 }
 
@@ -255,15 +259,15 @@ void process_alert(libtorrent::alert const* alert, wrapper_alert_info* alertInfo
 }
 
 // Ported from http://www.rasterbar.com/products/libtorrent/manual.html#save-resume-data
-extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(void(*alertCallback)(void*)) 
+extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(void(*alertCallback)(void*))
 {
 	EXTERN_TOP;
-	
+
 	int num_resume_data = 0;
 
 	std::vector<libtorrent::torrent_handle> handles = s.get_torrents();
 	s.pause();
-	
+
 	for ( std::vector<libtorrent::torrent_handle>::iterator i = handles.begin(); i != handles.end(); ++i )
 	{	libtorrent::torrent_handle& h = *i;
 		if (!h.has_metadata()) continue;
@@ -280,22 +284,22 @@ extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(void(*alertCallback)(
 		if (alert == 0)  break;
 
 		std::auto_ptr<libtorrent::alert> holder = s.pop_alert();
-		
+
 		wrapper_alert_info* alertInfo = new wrapper_alert_info();
 		process_alert(alert, alertInfo);
 		alertCallback(alertInfo);
-		
+
 		if (alertInfo->sha1[0])
 		{	--num_resume_data;
 		}
 	}
-	
+
 	EXTERN_BOTTOM;
 }
 
 extern "C" EXTERN_RET init(const char* path) {
 	EXTERN_TOP;
-	
+
 	std::string newPath(path);
 	savePath = newPath;
 	s.set_alert_mask(0xffffffff);
@@ -306,15 +310,15 @@ extern "C" EXTERN_RET init(const char* path) {
 
 extern "C" EXTERN_RET abort_torrents() {
 	EXTERN_TOP;
-	
+
 	s.abort();
-	
+
 	EXTERN_BOTTOM;
 }
 
 extern "C" EXTERN_RET move_torrent(const char* id, const char* path) {
 	EXTERN_TOP;
-	
+
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 	std::string newPath(path);
 	h.move_storage(newPath);
@@ -325,7 +329,7 @@ extern "C" EXTERN_RET move_torrent(const char* id, const char* path) {
 extern "C" EXTERN_RET add_torrent_existing(char* sha1String, char* trackerURI,
 		char* fastResumePath) {
 	EXTERN_TOP;
-	
+
 #ifdef LIMEDEBUG
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "sha1String" << sha1String << std::endl;
@@ -367,7 +371,7 @@ extern "C" EXTERN_RET add_torrent_existing(char* sha1String, char* trackerURI,
 
 extern "C" EXTERN_RET add_torrent(char* path, char* fastResumePath) {
 	EXTERN_TOP;
-	
+
 #ifdef LIMEDEBUG
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "path: " << path << std::endl;
@@ -400,13 +404,13 @@ extern "C" EXTERN_RET add_torrent(char* path, char* fastResumePath) {
 
 	// TODO: ?
 	// delete p.ti;
-	
+
 	EXTERN_BOTTOM;
 }
 
 extern "C" EXTERN_RET pause_torrent(const char* id) {
 	EXTERN_TOP;
-	
+
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 	h.pause();
 
@@ -415,25 +419,25 @@ extern "C" EXTERN_RET pause_torrent(const char* id) {
 
 extern "C" EXTERN_RET remove_torrent(const char* id) {
 	EXTERN_TOP;
-	
+
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 	s.remove_torrent(h);
-	
+
 	EXTERN_BOTTOM;
 }
 
 extern "C" EXTERN_RET resume_torrent(const char* id) {
 	EXTERN_TOP;
-	
+
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 	h.resume();
-	
+
 	EXTERN_BOTTOM;
 }
 
 extern "C" EXTERN_RET get_torrent_status(const char* id, void* stat) {
 	EXTERN_TOP;
-	
+
 	struct wrapper_torrent_status* stats =
 			(struct wrapper_torrent_status *) stat;
 
@@ -445,17 +449,17 @@ extern "C" EXTERN_RET get_torrent_status(const char* id, void* stat) {
 
 extern "C" EXTERN_RET signal_fast_resume_data_request(const char* id) {
 	EXTERN_TOP;
-	
+
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 	if (h.has_metadata()) {
 		h.save_resume_data();
 	}
-	
+
 	EXTERN_BOTTOM;
 }
 
 extern "C" EXTERN_RET get_num_peers(const char* id, int *num_peers) {
-	EXTERN_TOP;	
+	EXTERN_TOP;
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
 
@@ -484,7 +488,7 @@ extern "C" EXTERN_RET get_peers(const char* id, int buffer_len, char* data) {
 	EXTERN_TOP;
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-	
+
 	std::vector<libtorrent::peer_info> peers;
 	h.get_peer_info(peers);
 
@@ -524,9 +528,9 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 	#ifdef IGNORE_NON_FAST_RESUME_ALERTS
 	s.set_alert_mask(libtorrent::alert::storage_notification);
 	#endif
-	
+
 	alerts = s.pop_alert();
-	
+
 	#ifdef IGNORE_NON_FAST_RESUME_ALERTS
 	s.set_alert_mask(libtorrent::alert::all_categories);
 	#endif
@@ -537,12 +541,12 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 		wrapper_alert_info* alertInfo = new wrapper_alert_info();
 
 		process_alert(alert, alertInfo);
-		
+
 		#ifdef IGNORE_NON_FAST_RESUME_ALERTS
 		if (alertInfo->data)
 		#endif
 		alertCallback(alertInfo);
-	
+
 		delete alertInfo;
 
 		alerts = s.pop_alert();
@@ -553,10 +557,11 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 
 extern "C" EXTERN_RET free_torrent_status(wrapper_torrent_status* info) {
 	EXTERN_TOP;
-	
+
 	delete[] info->total_done;
 	delete[] info->total_download;
 	delete[] info->total_upload;
-	
+	delete[] info->error;
+
 	EXTERN_BOTTOM;
 }

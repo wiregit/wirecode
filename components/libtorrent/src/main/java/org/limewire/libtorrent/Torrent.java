@@ -196,6 +196,10 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     public long getTotalSize() {
         return totalSize;
     }
+    
+    public boolean isStarted() {
+        return started.get();
+    }
 
     public String getTrackerURL() {
         return trackerURL;

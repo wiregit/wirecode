@@ -94,10 +94,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void init(File torrentFile) throws IOException {
         torrent.init(torrentFile, SharingSettings.getSaveDirectory());
-        torrentManager.get().registerTorrent(torrent);
         // TODO fix this logic. Should not be using protected access, should be
         // hidden
         saveFile = torrent.getCompleteFile();
+    }
+
+    @Override
+    public void register() {
+        torrentManager.get().registerTorrent(torrent);
     }
 
     /**
@@ -210,16 +214,19 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
 
         LibTorrentStatus status = torrent.getStatus();
-        if (status == null) {
+        if(!torrent.isStarted() || status == null) {
             return DownloadState.QUEUED;
         }
+        
+        if(status.isError()) {
+            return DownloadState.INVALID;
+        }
+       
         LibTorrentState state = LibTorrentState.forId(status.state);
         return convertState(state);
     }
 
     private DownloadState convertState(LibTorrentState state) {
-        // TODO support error states
-
         switch (state) {
         case DOWNLOADING:
             if (isPaused()) {
@@ -362,8 +369,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void setSaveFile(File saveDirectory, String fileName, boolean overwrite)
             throws SaveLocationException {
-    //    throw new UnsupportedOperationException(
-      //          "Currently should not be called for torrents, come back later.");
+        // throw new UnsupportedOperationException(
+        // "Currently should not be called for torrents, come back later.");
         // super.setSaveFile(saveDirectory, fileName, overwrite);
         // // if this didn't throw target is ok.
         // torrentFileSystem.setCompleteFile(new File(saveDirectory, fileName));
@@ -385,8 +392,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     String sha1 = torrent.getSha1();
                     if (sha1 != null) {
                         try {
-                            urn = URN.createSHA1UrnFromBytes(StringUtils
-                                    .fromHexString(sha1));
+                            urn = URN.createSHA1UrnFromBytes(StringUtils.fromHexString(sha1));
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -500,10 +506,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         String torrentPath = memento.getTorrentPath();
         File torrentFile = torrentPath != null ? new File(torrentPath) : null;
-        torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()),
-                memento.getContentLength(), memento.getTrackerURL(), memento.getPaths(), memento
-                        .getSaveFile(), fastResumeFile, torrentFile);
-        torrentManager.get().registerTorrent(torrent);
+        torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
+                .getContentLength(), memento.getTrackerURL(), memento.getPaths(), memento
+                .getSaveFile(), fastResumeFile, torrentFile);
+        register();
     }
 
     public void initFromOldMemento(BTDownloadMemento memento) throws InvalidDataException {
@@ -528,7 +534,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         torrent.init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(),
                 null, null);
-        torrentManager.get().registerTorrent(torrent);
+        register();
     }
 
     @Override
@@ -626,6 +632,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void checkActiveAndWaiting() throws SaveLocationException {
+
+        if (torrentManager.get().isDownloading(torrent.getTorrentFile())) {
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, torrent
+                    .getCompleteFile());
+        } else if (torrentManager.get().isDownloading(torrent.getSha1())) {
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, torrent
+                    .getCompleteFile());
+        }
 
         for (CoreDownloader current : downloadManager.getAllDownloaders()) {
             if (getSha1Urn().equals(current.getSha1Urn())) {
