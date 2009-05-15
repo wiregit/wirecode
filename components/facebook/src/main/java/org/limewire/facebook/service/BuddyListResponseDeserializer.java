@@ -25,9 +25,9 @@ public class BuddyListResponseDeserializer {
     private static final Log LOG = LogFactory.getLog(BuddyListResponseDeserializer.class);
     
     private final FacebookFriendConnection connection;
-    private final LiveMessageAddressTransportFactory addressTransportFactory;
-    private final LiveMessageAuthTokenTransportFactory authTokenTransportFactory;
     private final EventBroadcaster<FeatureEvent> featureBroadcaster;
+    private final LiveMessageAddressTransport addressTransport;
+    private final LiveMessageAuthTokenTransport authTokenTransport;
 
     @AssistedInject
     BuddyListResponseDeserializer(@Assisted FacebookFriendConnection connection,
@@ -35,9 +35,9 @@ public class BuddyListResponseDeserializer {
                                   LiveMessageAuthTokenTransportFactory authTokenTransportFactory,
                                   EventMulticaster<FeatureEvent> featureBroadcaster) {
         this.connection = connection;
-        this.addressTransportFactory = addressTransportFactory;
-        this.authTokenTransportFactory = authTokenTransportFactory;
         this.featureBroadcaster = featureBroadcaster;
+        addressTransport = addressTransportFactory.create(this.connection);
+        authTokenTransport = authTokenTransportFactory.create(this.connection);
     }
     
     /**
@@ -94,8 +94,8 @@ public class BuddyListResponseDeserializer {
 			String key = it.next();
 			JSONObject user = (JSONObject) userInfos.get(key);
 			FacebookFriend friend = new FacebookFriend(key, user, connection.getConfiguration(), featureBroadcaster);
-            friend.addTransport(Address.class, addressTransportFactory.create(connection));
-            friend.addTransport(AuthToken.class, authTokenTransportFactory.create(connection));
+            friend.addTransport(Address.class, addressTransport);
+            friend.addTransport(AuthToken.class, authTokenTransport);
 			onlineFriends.put(friend.getId(), friend);
 		}
         return onlineFriends;

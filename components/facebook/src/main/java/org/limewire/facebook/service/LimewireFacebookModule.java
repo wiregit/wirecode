@@ -22,5 +22,6 @@ public class LimewireFacebookModule extends AbstractModule {
         bind(FacebookFriendConnectionFactory.class).toProvider(FactoryProvider.newFactory(FacebookFriendConnectionFactory.class, FacebookFriendConnection.class));
         bind(LiveMessageAddressTransportFactory.class).toProvider(FactoryProvider.newFactory(LiveMessageAddressTransportFactory.class, LiveMessageAddressTransport.class));
         bind(LiveMessageAuthTokenTransportFactory.class).toProvider(FactoryProvider.newFactory(LiveMessageAuthTokenTransportFactory.class, LiveMessageAuthTokenTransport.class));
+        bind(LiveMessageDiscoInfoTransportFactory.class).toProvider(FactoryProvider.newFactory(LiveMessageDiscoInfoTransportFactory.class, LiveMessageDiscoInfoTransport.class));
     }
 }

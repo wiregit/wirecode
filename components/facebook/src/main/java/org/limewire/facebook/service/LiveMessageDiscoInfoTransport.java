@@ -15,20 +15,22 @@ import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
-public class DiscoInfoLiveMessage implements LiveMessageHandler {
+public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     private final Provider<String> apiKey;
     private final FacebookFriendConnection connection;
     private final Map<String, String> friends = new HashMap<String, String>();
 
-    @Inject
-    DiscoInfoLiveMessage(@Named("facebookApiKey") Provider<String> apiKey,
-                       FacebookFriendConnection connection) {
+    @AssistedInject
+    LiveMessageDiscoInfoTransport(@Assisted FacebookFriendConnection connection,
+                         @Named("facebookApiKey") Provider<String> apiKey) {
         this.apiKey = apiKey;
         this.connection = connection;
     }
-    
+
     @Override
     @Inject
     public void register(LiveMessageHandlerRegistry registry) {
