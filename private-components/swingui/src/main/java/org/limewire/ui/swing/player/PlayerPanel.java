@@ -422,7 +422,7 @@ public class PlayerPanel extends JXPanel {
         @Override
         public void progressChange(int bytesread) {
             // if we know the length of the song, update the progress bar
-            if (audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
+            if (audioProperties != null && audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
                 int byteslength = ((Integer) audioProperties.get(AUDIO_LENGTH_BYTES))
                         .intValue();
 
