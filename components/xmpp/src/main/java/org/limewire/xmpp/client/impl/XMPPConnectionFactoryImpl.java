@@ -21,6 +21,7 @@ import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.inspection.Inspectable;
@@ -38,7 +39,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
 
 import com.google.inject.Inject;
@@ -96,7 +96,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
 
     @Inject
     public XMPPConnectionFactoryImpl(XMPPConnectionImplFactory connectionImplFactory,
-                           EventMulticaster<XMPPConnectionEvent> connectionBroadcaster,
+                           EventMulticaster<FriendConnectionEvent> connectionBroadcaster,
             JabberSettings jabberSettings) {
         this.connectionImplFactory = connectionImplFactory;
         this.jabberSettings = jabberSettings;

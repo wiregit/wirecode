@@ -9,6 +9,7 @@ import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventBean;
@@ -20,7 +21,6 @@ import org.limewire.ui.swing.friends.settings.FriendAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.FriendAccountConfigurationManager;
 import org.limewire.ui.swing.util.I18n;
 import static org.limewire.ui.swing.util.I18n.tr;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,13 +33,13 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     private final HyperlinkButton shareLabel;
     private final LoginPanel loginPanel;
     private final LoggedInPanel loggedInPanel;
-    private final EventBean<XMPPConnectionEvent> connectionEventBean;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final FriendAccountConfigurationManager accountManager;
 
     @Inject
     FriendsSignInPanel(LoginPanel loginPanel,
                        LoggedInPanel loggedInPanel,
-                       EventBean<XMPPConnectionEvent> connectionEventBean,
+                       EventBean<FriendConnectionEvent> connectionEventBean,
                        FriendAccountConfigurationManager accountManager) {
         this.loggedInPanel = loggedInPanel;
         this.loginPanel = loginPanel;
@@ -86,7 +86,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
     @Override
     public boolean isSignedIn() {
-        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        FriendConnectionEvent connection = connectionEventBean.getLastEvent();
         if(connection != null) {
             return connection.getSource().isLoggedIn();
         } else {
@@ -96,7 +96,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
     @Override
     public void signIn() {
-        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        FriendConnectionEvent connection = connectionEventBean.getLastEvent();
         if(connection != null) {
             if(!connection.getSource().isLoggedIn() && !connection.getSource().isLoggingIn()) {
                 FriendAccountConfiguration config = accountManager.getAutoLoginConfig();
@@ -113,7 +113,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
     @Override
     public void signOut(final boolean switchUser) {
-        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        FriendConnectionEvent connection = connectionEventBean.getLastEvent();
         if(connection != null) {
             connection.getSource().logout();
             if(switchUser) {
@@ -202,11 +202,11 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     }
     
     @Inject
-    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
-        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+    void register(ListenerSupport<FriendConnectionEvent> connectionSupport) {
+        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECTING:
                     connecting(event.getSource().getConfiguration());

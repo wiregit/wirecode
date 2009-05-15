@@ -13,6 +13,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -52,7 +53,6 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -95,7 +95,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
     private final SharingActionFactory sharingActionFactory;
-    private final EventBean<XMPPConnectionEvent> connectionEventBean;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
 
@@ -115,7 +115,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             CategoryIconManager categoryIconManager,
             RemoteHostWidgetFactory fromWidgetfactory,
             SharingActionFactory sharingActionFactory,
-            EventBean<XMPPConnectionEvent> connectionEventBean,
+            EventBean<FriendConnectionEvent> connectionEventBean,
             LibraryNavigator libraryNavigator,
             PlaylistManager playlistManager) {
         this.iconManager = iconManager;

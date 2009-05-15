@@ -13,6 +13,8 @@ import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,6 +23,8 @@ import com.google.inject.name.Named;
 @Singleton
 public class MutableFriendManagerImpl implements MutableFriendManager {
 
+    private static final Log LOG = LogFactory.getLog(MutableFriendManagerImpl.class);
+    
     private final EventBroadcaster<FriendEvent> knownBroadcaster;
     private final EventBroadcaster<FriendEvent> availableBroadcaster;
     private final ConcurrentMap<String, Friend> knownFriends = new ConcurrentHashMap<String, Friend>();
@@ -37,7 +41,10 @@ public class MutableFriendManagerImpl implements MutableFriendManager {
     @Override
     public void addKnownFriend(Friend friend) {
         if (knownFriends.putIfAbsent(friend.getId(), friend) == null) {
+            LOG.debugf("adding known friend: {0}", friend);
             knownBroadcaster.broadcast(new FriendEvent(friend, FriendEvent.Type.ADDED));
+        } else {
+            LOG.debugf("not adding known friend: {0}", friend);
         }
     }
     
@@ -90,7 +97,10 @@ public class MutableFriendManagerImpl implements MutableFriendManager {
     @Override
     public void addAvailableFriend(Friend friend) {
         if (availFriends.putIfAbsent(friend.getId(), friend) == null) {
+            LOG.debugf("adding avail friend: {0}", friend);
             availableBroadcaster.broadcast(new FriendEvent(friend, FriendEvent.Type.ADDED));
+        } else {
+            LOG.debugf("not adding avail friend: {0}", friend);
         }
     }
 

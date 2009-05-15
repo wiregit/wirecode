@@ -10,6 +10,7 @@ import javax.swing.JPopupMenu;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.Playlist;
@@ -31,7 +32,6 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 /**
  * Popup menu implementation for MyLibrary
@@ -41,7 +41,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private final LibraryManager libraryManager;
     private final Category category;
     private final PropertiesFactory<LocalFileItem> propertiesFactory;
-    private final EventBean<XMPPConnectionEvent> connectionEventBean;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final SharingActionFactory sharingActionFactory;   
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
@@ -53,7 +53,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
             SharingActionFactory sharingActionFactory, PropertiesFactory<LocalFileItem> propertiesFactory,
-            EventBean<XMPPConnectionEvent> connectionEventBean, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
+            EventBean<FriendConnectionEvent> connectionEventBean, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.libraryManager = libraryManager;
         this.sharingActionFactory = sharingActionFactory;
         this.category = category;
@@ -152,7 +152,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         
         addSeparator();
 
-        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        FriendConnectionEvent connection = connectionEventBean.getLastEvent();
         if(connection != null && connection.getSource().isLoggedIn()) {
             add(sharingActionFactory.createShareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
             add(sharingActionFactory.createUnshareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);

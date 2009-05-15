@@ -26,6 +26,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -33,7 +34,6 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.GuiUtils;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.util.Objects;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 
@@ -116,12 +116,12 @@ public class ChatTopPanel extends JXPanel {
     }
 
     @Inject
-    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
-        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+    void register(ListenerSupport<FriendConnectionEvent> connectionSupport) {
+        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
-                if (event.getType() == XMPPConnectionEvent.Type.DISCONNECTED) {
+            public void handleEvent(FriendConnectionEvent event) {
+                if (event.getType() == FriendConnectionEvent.Type.DISCONNECTED) {
                     // when signed off, erase info about who LW was chatting with
                     clearFriendInfo();
                 }

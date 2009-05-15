@@ -12,11 +12,11 @@ import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.IncomingChatListener;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.chat.Message.Type;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -77,15 +77,15 @@ public class ChatModel {
     }
     
     @Inject 
-    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport,
+    void register(ListenerSupport<FriendConnectionEvent> connectionSupport,
             ListenerSupport<FriendPresenceEvent> presenceSupport,
             ListenerSupport<FileOfferEvent> fileOfferEventListenerSupport) {
         
         // listen for user login changes
-        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECTED:
                     myId = formatLoggedInName(event.getSource().getConfiguration().getCanonicalizedLocalID());

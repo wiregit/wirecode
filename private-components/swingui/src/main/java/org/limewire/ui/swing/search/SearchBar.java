@@ -19,6 +19,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.AutoCompleteDictionary;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
@@ -46,7 +47,6 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.I18NConvert;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -189,11 +189,11 @@ public class SearchBar extends JXPanel {
      * to handle XMPP connection events.
      */
     @Inject
-    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
-        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+    void register(ListenerSupport<FriendConnectionEvent> connectionSupport) {
+        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch (event.getType()) {
                 case CONNECTED:
                     searchButton.setToolTipText(I18n.tr("Search P2P Network and Friends"));

@@ -11,6 +11,7 @@ import org.limewire.collection.Periodic;
 import org.limewire.core.api.browse.server.BrowseTracker;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
@@ -21,7 +22,6 @@ import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -43,7 +43,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 class FriendShareListRefresher implements RegisteringEventListener<FriendShareListEvent> {
 
     private final BrowseTracker tracker;
-    private final EventBean<XMPPConnectionEvent> connectionEventBean;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final ScheduledExecutorService scheduledExecutorService;
 
     private final Map<String, LibraryChangedSender> listeners;
@@ -53,7 +53,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
 
     @Inject
     FriendShareListRefresher(BrowseTracker tracker,
-                             EventBean<XMPPConnectionEvent> connectionEventBean,
+                             EventBean<FriendConnectionEvent> connectionEventBean,
                              @Named("backgroundExecutor")ScheduledExecutorService scheduledExecutorService) {
         this.tracker = tracker;
         this.connectionEventBean = connectionEventBean;
@@ -88,8 +88,8 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
         public void handleEvent(ManagedListStatusEvent evt) {
             if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
                 fileManagerLoaded.set(true);
-                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
-                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                FriendConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
                     Collection<Friend> friends = connection.getSource().getUsers();
                     for(Friend friend : friends) {
                         tracker.sentRefresh(friend.getId());

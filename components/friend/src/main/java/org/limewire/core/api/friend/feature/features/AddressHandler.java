@@ -10,6 +10,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
@@ -20,7 +21,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.client.impl.XMPPAddressRegistry;
 
 import com.google.inject.Inject;
@@ -44,11 +44,11 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
     }
                                                       
     @Inject
-    void register(ListenerSupport<XMPPConnectionEvent> connectionEventListenerSupport,
+    void register(ListenerSupport<FriendConnectionEvent> connectionEventListenerSupport,
                   ListenerSupport<AddressEvent> addressEventListenerSupport) {
-        connectionEventListenerSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+        connectionEventListenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch (event.getType()) {
                     case CONNECTED:
                         connections.add(event.getSource()); 

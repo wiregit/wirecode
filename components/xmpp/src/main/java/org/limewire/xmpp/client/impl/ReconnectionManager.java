@@ -11,13 +11,13 @@ import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 
 /**
  * Different implementation from {@link org.jivesoftware.smack.ReconnectionManager}
  * to ensure thread safe behavior.
  */
-class ReconnectionManager implements EventListener<XMPPConnectionEvent> {
+class ReconnectionManager implements EventListener<FriendConnectionEvent> {
 
     private static final int MAX_RECONNECTION_ATTEMPTS = 10;
     
@@ -35,10 +35,10 @@ class ReconnectionManager implements EventListener<XMPPConnectionEvent> {
     private volatile boolean connected;
     
     @Override
-    public void handleEvent(XMPPConnectionEvent event) {
-        if(event.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+    public void handleEvent(FriendConnectionEvent event) {
+        if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
             connected = true;   
-        } else if(event.getType() == XMPPConnectionEvent.Type.DISCONNECTED) {
+        } else if(event.getType() == FriendConnectionEvent.Type.DISCONNECTED) {
             if(event.getException() != null && connected) {
                 FriendConnection connection = event.getSource();
                 final FriendConnectionConfiguration configuration = connection.getConfiguration();

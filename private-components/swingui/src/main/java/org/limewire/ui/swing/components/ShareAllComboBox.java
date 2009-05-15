@@ -14,6 +14,7 @@ import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
@@ -30,7 +31,6 @@ import org.limewire.ui.swing.library.sharing.model.MultiFileUnshareModel;
 import org.limewire.ui.swing.library.table.menu.actions.DisabledFriendLoginAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 /**
  * Share All combo Box. In My Library view allows the user
@@ -53,7 +53,7 @@ public class ShareAllComboBox extends LimeComboBox {
     @Resource
     private Icon friendUnshareIcon;
     
-    private final EventBean<XMPPConnectionEvent> connectionEventBean;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final FriendsSignInPanel friendsSignInPanel;
     private final ShareWidgetFactory shareWidgetFactory;
     private final MyLibraryPanel myLibraryPanel;
@@ -67,7 +67,7 @@ public class ShareAllComboBox extends LimeComboBox {
     private AbstractAction unshareAllFriendAction;
     private AbstractAction signedOutAction;
 
-    public ShareAllComboBox(EventBean<XMPPConnectionEvent> connectionEventBean, ShareWidgetFactory shareWidgetFactory,
+    public ShareAllComboBox(EventBean<FriendConnectionEvent> connectionEventBean, ShareWidgetFactory shareWidgetFactory,
             MyLibraryPanel myLibraryPanel, FriendsSignInPanel friendsSignInPanel, ShareListManager shareListManager) {
         this.connectionEventBean = connectionEventBean;
         this.friendsSignInPanel = friendsSignInPanel;
@@ -125,8 +125,8 @@ public class ShareAllComboBox extends LimeComboBox {
             // if document category is selected and document sharing with p2p is disabled
             if(myLibraryPanel.getCategory() == Category.DOCUMENT && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
                 // if not logged in
-                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
-                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                FriendConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
                     if(!connection.getSource().isLoggedIn()) {
                         menu.add(decorateDisabledItem(new DisabledDocumentAction()));
                     } else {
@@ -140,8 +140,8 @@ public class ShareAllComboBox extends LimeComboBox {
                 }
             } else {
                 // if not logged in don't show options for friends.
-                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
-                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                FriendConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
                     if(!connection.getSource().isLoggedIn()) { 
                         if(myLibraryPanel.getCurrentFriend() != null && myLibraryPanel.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
                             menu.add(decorateDisabledItem(shareAllGnutellaAction));

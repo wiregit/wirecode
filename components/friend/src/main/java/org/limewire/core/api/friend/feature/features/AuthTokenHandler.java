@@ -13,6 +13,7 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
@@ -21,7 +22,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -45,10 +45,10 @@ public class AuthTokenHandler implements FeatureTransport.Handler<AuthToken>{
     }
     
     @Inject
-    void register(ListenerSupport<XMPPConnectionEvent> connectionEventListenerSupport) {
-        connectionEventListenerSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+    void register(ListenerSupport<FriendConnectionEvent> connectionEventListenerSupport) {
+        connectionEventListenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch (event.getType()) {
                     case CONNECTED:
                         connections.add(event.getSource()); 

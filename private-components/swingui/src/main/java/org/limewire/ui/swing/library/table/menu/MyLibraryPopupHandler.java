@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.PlaylistManager;
@@ -15,7 +16,6 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 public class MyLibraryPopupHandler implements TablePopupHandler {
     private LibraryTable<LocalFileItem> table;
@@ -24,7 +24,7 @@ public class MyLibraryPopupHandler implements TablePopupHandler {
 
     public MyLibraryPopupHandler(LibraryTable<LocalFileItem> table, Category category, LibraryManager libraryManager,
             PropertiesFactory<LocalFileItem> propertiesFactory, SharingActionFactory sharingActionFactory,
-            EventBean<XMPPConnectionEvent> connectionEventBean, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
+            EventBean<FriendConnectionEvent> connectionEventBean, LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.table = table;
         this.popupMenu = new MyLibraryPopupMenu(category, libraryManager, sharingActionFactory, 
                 propertiesFactory, connectionEventBean, libraryNavigator, playlistManager);

@@ -1,9 +1,8 @@
-package org.limewire.xmpp.api.client;
+package org.limewire.core.api.friend.client;
 
 import org.limewire.listener.DefaultSourceTypeEvent;
-import org.limewire.core.api.friend.client.FriendConnection;
 
-public class XMPPConnectionEvent extends DefaultSourceTypeEvent<FriendConnection, XMPPConnectionEvent.Type> {
+public class FriendConnectionEvent extends DefaultSourceTypeEvent<FriendConnection, FriendConnectionEvent.Type> {
 
     public static enum Type {
         CONNECTING, CONNECTED, CONNECT_FAILED, DISCONNECTED
@@ -11,11 +10,11 @@ public class XMPPConnectionEvent extends DefaultSourceTypeEvent<FriendConnection
     
     private final Exception exception;
     
-    public XMPPConnectionEvent(FriendConnection source, XMPPConnectionEvent.Type event) {
+    public FriendConnectionEvent(FriendConnection source, FriendConnectionEvent.Type event) {
         this(source, event, null);
     }
 
-    public XMPPConnectionEvent(FriendConnection source, XMPPConnectionEvent.Type event, Exception exception) {
+    public FriendConnectionEvent(FriendConnection source, FriendConnectionEvent.Type event, Exception exception) {
         super(source, event);
         this.exception = exception;
     }

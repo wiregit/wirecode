@@ -10,6 +10,7 @@ import javax.swing.JMenuItem;
 
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
@@ -21,7 +22,6 @@ import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 
@@ -36,10 +36,10 @@ public class StatusActions {
     private final Set<JCheckBoxMenuItem> availableItems = new HashSet<JCheckBoxMenuItem>();
     private final Set<JCheckBoxMenuItem> doNotDisturbItems = new HashSet<JCheckBoxMenuItem>();
     
-    private final EventBean<XMPPConnectionEvent> connectionEventBean;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
 
     @Inject
-    public StatusActions(final EventBean<XMPPConnectionEvent> connectionEventBean, final IconLibrary iconLibrary) {
+    public StatusActions(final EventBean<FriendConnectionEvent> connectionEventBean, final IconLibrary iconLibrary) {
         this.connectionEventBean = connectionEventBean;
         
         availableAction = new AbstractAction(I18n.tr("&Available")) {
@@ -49,8 +49,8 @@ public class StatusActions {
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
-                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                FriendConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
                     connection.getSource().setMode(FriendPresence.Mode.available).addFutureListener(new EventListener<FutureEvent<Void>>() {
                         @Override
                         public void handleEvent(FutureEvent<Void> event) {
@@ -71,8 +71,8 @@ public class StatusActions {
             }
             @Override
             public void actionPerformed(ActionEvent e) {
-                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
-                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                FriendConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
                     connection.getSource().setMode(FriendPresence.Mode.dnd).addFutureListener(new EventListener<FutureEvent<Void>>() {
                         @Override
                         public void handleEvent(FutureEvent<Void> event) {
@@ -101,8 +101,8 @@ public class StatusActions {
     }
 
     private void updateSelections() {
-        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
-        if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+        FriendConnectionEvent connection = connectionEventBean.getLastEvent();
+        if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
             if(connection.getSource().isLoggedIn()) {
                 boolean dndBool = XMPPSettings.XMPP_DO_NOT_DISTURB.getValue();
                 for ( JCheckBoxMenuItem item : availableItems ) {
@@ -127,11 +127,11 @@ public class StatusActions {
     }
 
     @Inject
-    void register(FriendActions actions, ListenerSupport<XMPPConnectionEvent> event) {
-        event.addListener(new EventListener<XMPPConnectionEvent>() {
+    void register(FriendActions actions, ListenerSupport<FriendConnectionEvent> event) {
+        event.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch (event.getType()) {
                 case CONNECTED:
                 case CONNECTING:

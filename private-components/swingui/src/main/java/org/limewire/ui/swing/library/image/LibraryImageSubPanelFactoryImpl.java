@@ -9,6 +9,7 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -32,7 +33,6 @@ import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -55,7 +55,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     private final SharingActionFactory sharingActionFactory;
     private final FriendsSignInPanel friendSignInPanel;
     private final ShareListManager shareListManager;
-    private final EventBean<XMPPConnectionEvent> connectionEventBean;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final ComboBoxDecorator comboDecorator;
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
@@ -64,7 +64,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager, 
             ShareTableRendererEditorFactory shareTableRendererEditorFactory, SharingActionFactory sharingActionFactory, 
             PropertiesFactory<LocalFileItem> localFilePropFactory, ShareListManager shareListManager,
-            EventBean<XMPPConnectionEvent> connectionEventBean, FriendsSignInPanel friendSignInPanel,
+            EventBean<FriendConnectionEvent> connectionEventBean, FriendsSignInPanel friendSignInPanel,
             ComboBoxDecorator comboDecorator, 
             LibraryNavigator libraryNavigator, PlaylistManager playlistManager) {
         this.thumbnailManager = thumbnailManager;

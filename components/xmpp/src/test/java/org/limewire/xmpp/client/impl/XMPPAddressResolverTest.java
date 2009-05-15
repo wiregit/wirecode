@@ -10,6 +10,7 @@ import org.jmock.lib.action.CustomAction;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
@@ -25,7 +26,6 @@ import org.limewire.net.address.BlockingAddressResolutionObserver;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 public class XMPPAddressResolverTest extends BaseTestCase {
 
@@ -66,8 +66,8 @@ public class XMPPAddressResolverTest extends BaseTestCase {
             })));
         }});
 
-        CachingEventMulticaster<XMPPConnectionEvent> multicaster = new CachingEventMulticasterImpl<XMPPConnectionEvent>();
-        multicaster.broadcast(new XMPPConnectionEvent(connection, XMPPConnectionEvent.Type.CONNECTED));
+        CachingEventMulticaster<FriendConnectionEvent> multicaster = new CachingEventMulticasterImpl<FriendConnectionEvent>();
+        multicaster.broadcast(new FriendConnectionEvent(connection, FriendConnectionEvent.Type.CONNECTED));
         xmppAddressResolver = new XMPPAddressResolver(multicaster, null, socketsManager, addressRegistry);
     }
 

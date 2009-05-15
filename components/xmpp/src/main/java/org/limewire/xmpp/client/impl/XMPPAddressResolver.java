@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent.Type;
@@ -25,7 +26,6 @@ import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,7 +39,7 @@ public class XMPPAddressResolver implements AddressResolver {
 
     private final static Log LOG = LogFactory.getLog(XMPPAddressResolver.class, LOGGING_CATEGORY);
     
-    private final EventBean<XMPPConnectionEvent> connectionEventBean;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
 
     private final EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster;
     
@@ -49,7 +49,7 @@ public class XMPPAddressResolver implements AddressResolver {
     private final XMPPAddressRegistry addressRegistry;
 
     @Inject
-    public XMPPAddressResolver(EventBean<XMPPConnectionEvent> connectionEventBean, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster,
+    public XMPPAddressResolver(EventBean<FriendConnectionEvent> connectionEventBean, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster,
             SocketsManager socketsManager, XMPPAddressRegistry addressRegistry) {
         this.connectionEventBean = connectionEventBean;
         this.connectivityEventBroadcaster = connectivityEventBroadcaster;
@@ -86,8 +86,8 @@ public class XMPPAddressResolver implements AddressResolver {
      */
     public FriendPresence getPresence(XMPPAddress address) {
         String id = address.getId();
-        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
-        if(connection == null || connection.getType() != XMPPConnectionEvent.Type.CONNECTED)
+        FriendConnectionEvent connection = connectionEventBean.getLastEvent();
+        if(connection == null || connection.getType() != FriendConnectionEvent.Type.CONNECTED)
             return null;
         Friend user = connection.getSource().getUser(id);
         if(user != null) {

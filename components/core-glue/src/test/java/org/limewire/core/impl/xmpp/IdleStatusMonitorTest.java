@@ -11,14 +11,14 @@ import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.core.api.friend.client.FriendConnection;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 
 public class IdleStatusMonitorTest extends TestCase {
     
     private Mockery context;
     private IdleTime idleTime;
     private Runnable monitorRunnable;
-    private CachingEventMulticasterImpl<XMPPConnectionEvent> connectionSupport;
+    private CachingEventMulticasterImpl<FriendConnectionEvent> connectionSupport;
     private TestXmppActivityListener listener;
 
     @Override
@@ -33,7 +33,7 @@ public class IdleStatusMonitorTest extends TestCase {
         CachingEventMulticasterImpl<XmppActivityEvent> activityBroadcaster = new CachingEventMulticasterImpl<XmppActivityEvent>(BroadcastPolicy.IF_NOT_EQUALS); 
         listener = new TestXmppActivityListener();
         activityBroadcaster.addListener(listener);
-        connectionSupport = new CachingEventMulticasterImpl<XMPPConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS);
+        connectionSupport = new CachingEventMulticasterImpl<FriendConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS);
         IdleStatusMonitor monitor = new IdleStatusMonitor(backgroundExecutor, idleTime, activityBroadcaster);
         MockServiceRegistry registry = new MockServiceRegistry();
         
@@ -71,16 +71,16 @@ public class IdleStatusMonitorTest extends TestCase {
         
         monitorRunnable.run();
         assertNull("XmppActivityEvent fired, but there is no xmpp connection", listener.event);
-        sendConnectionEvent(XMPPConnectionEvent.Type.DISCONNECTED);
+        sendConnectionEvent(FriendConnectionEvent.Type.DISCONNECTED);
         assertNull("XmppActivityEvent fired, but there is no xmpp connection", listener.event);
     }
 
-    private void sendConnectionEvent(org.limewire.xmpp.api.client.XMPPConnectionEvent.Type connectionState) {
+    private void sendConnectionEvent(org.limewire.core.api.friend.client.FriendConnectionEvent.Type connectionState) {
         
         Mockery context = new Mockery();
         FriendConnection connection = context.mock(FriendConnection.class);
         
-        connectionSupport.handleEvent(new XMPPConnectionEvent(connection, connectionState));
+        connectionSupport.handleEvent(new FriendConnectionEvent(connection, connectionState));
     }
     
     public void testIdleState() {
@@ -104,7 +104,7 @@ public class IdleStatusMonitorTest extends TestCase {
                 will(returnValue(5l));
             }});
         
-        sendConnectionEvent(XMPPConnectionEvent.Type.CONNECTED);
+        sendConnectionEvent(FriendConnectionEvent.Type.CONNECTED);
         
         monitorRunnable.run();
         assertEquals(XmppActivityEvent.ActivityState.Active, listener.event.getSource());

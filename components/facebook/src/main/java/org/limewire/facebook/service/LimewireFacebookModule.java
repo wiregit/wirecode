@@ -8,7 +8,7 @@ import com.google.inject.name.Names;
 public class LimewireFacebookModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(String.class).annotatedWith(Names.named("facebookApiKey")).toInstance("");
+        bind(String.class).annotatedWith(Names.named("facebookApiKey")).toInstance("9d8c6048e08ffe11d94e9cf3880f6757");
         bind(FacebookFriendService.class);
         //bind(FacebookFriendConnection.class);
         //bind(BuddyListResponseDeserializer.class);

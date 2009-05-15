@@ -15,6 +15,7 @@ import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
+import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.PresenceEvent;
 
 public class FacebookFriend extends AbstractFriendPresence implements Friend, FriendPresence {
@@ -28,6 +29,11 @@ public class FacebookFriend extends AbstractFriendPresence implements Friend, Fr
         this.id = id;
         this.friend = friend;
         this.network = network;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
     
     @Override

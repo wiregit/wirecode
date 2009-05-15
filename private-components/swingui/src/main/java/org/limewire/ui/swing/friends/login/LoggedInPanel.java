@@ -17,6 +17,7 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
@@ -37,7 +38,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.activity.XmppActivityEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 
@@ -67,7 +67,7 @@ class LoggedInPanel extends JXPanel {
     LoggedInPanel(ComboBoxDecorator comboDecorator,
             FriendActions friendActions, BarPainterFactory barPainterFactory,
             ButtonDecorator buttonDecorator,
-            StatusActions statusActions, EventBean<XMPPConnectionEvent> connectionEventBean, IconLibrary iconLibrary) {
+            StatusActions statusActions, EventBean<FriendConnectionEvent> connectionEventBean, IconLibrary iconLibrary) {
         GuiUtils.assignResources(this);
         setLayout(new MigLayout("insets 0, gapx 8:8:8, hidemode 3, fill"));
 
@@ -90,14 +90,14 @@ class LoggedInPanel extends JXPanel {
     }
 
     private void initComponents(final StatusActions statusActions,
-                                final EventBean<XMPPConnectionEvent> connectionEventBean) {
+                                final EventBean<FriendConnectionEvent> connectionEventBean) {
         JPopupMenu optionsMenu = new JPopupMenu(); 
         optionsMenu.setLayout(new VerticalLayout());
         optionsMenu.add(decorateItem(optionsBox.createMenuItem(new AbstractAction(I18n.tr("Add Friend")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
-                if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                FriendConnectionEvent connection = connectionEventBean.getLastEvent();
+                if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
                     new AddFriendDialog(LoggedInPanel.this,
                         connection.getSource());
                 }
@@ -178,11 +178,11 @@ class LoggedInPanel extends JXPanel {
      * It uses these events to keep the status icon for the user up to date. 
      */
     @Inject
-    void register(FriendActions actions, ListenerSupport<XMPPConnectionEvent> event) {
-        event.addListener(new EventListener<XMPPConnectionEvent>() {
+    void register(FriendActions actions, ListenerSupport<FriendConnectionEvent> event) {
+        event.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch (event.getType()) {
                 case CONNECTED:
                 case CONNECTING:

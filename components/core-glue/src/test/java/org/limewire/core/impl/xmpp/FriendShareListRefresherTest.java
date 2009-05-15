@@ -15,6 +15,7 @@ import org.limewire.core.api.browse.server.BrowseTracker;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
@@ -29,7 +30,6 @@ import org.limewire.listener.CachingEventMulticaster;
 import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.limegroup.gnutella.MockFriend;
 import com.limegroup.gnutella.library.FileManager;
@@ -161,7 +161,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final ManagedListStatusEvent event = context.mock(ManagedListStatusEvent.class);
         
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                new CachingEventMulticasterImpl<XMPPConnectionEvent>(), scheduledExecutorService);
+                new CachingEventMulticasterImpl<FriendConnectionEvent>(), scheduledExecutorService);
 
         final FinishedLoadingListener finishedLoadingListener = friendShareListRefresher.new FinishedLoadingListener();
         
@@ -214,11 +214,11 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final LibraryChangedNotifier notifierA = context.mock(LibraryChangedNotifier.class);
         final LibraryChangedNotifier notifierB = context.mock(LibraryChangedNotifier.class);
 
-        CachingEventMulticaster<XMPPConnectionEvent> connectionBroadcaster = new CachingEventMulticasterImpl<XMPPConnectionEvent>();
-        connectionBroadcaster.broadcast(new XMPPConnectionEvent(xmppConnection, XMPPConnectionEvent.Type.CONNECTED));
+        CachingEventMulticaster<FriendConnectionEvent> connectionBroadcaster = new CachingEventMulticasterImpl<FriendConnectionEvent>();
+        connectionBroadcaster.broadcast(new FriendConnectionEvent(xmppConnection, FriendConnectionEvent.Type.CONNECTED));
        
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                new CachingEventMulticasterImpl<XMPPConnectionEvent>(), scheduledExecutorService);
+                new CachingEventMulticasterImpl<FriendConnectionEvent>(), scheduledExecutorService);
 
         final FinishedLoadingListener finishedLoadingListener = friendShareListRefresher.new FinishedLoadingListener();
         
@@ -300,7 +300,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final LibraryChangedNotifier notifierA = context.mock(LibraryChangedNotifier.class);
         final LibraryChangedNotifier notifierB = context.mock(LibraryChangedNotifier.class); 
         
-        CachingEventMulticaster<XMPPConnectionEvent> connectionBroadcaster = new CachingEventMulticasterImpl<XMPPConnectionEvent>();
+        CachingEventMulticaster<FriendConnectionEvent> connectionBroadcaster = new CachingEventMulticasterImpl<FriendConnectionEvent>();
         
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
                 connectionBroadcaster, scheduledExecutorService);
@@ -352,7 +352,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         // This invocation should fail since the first getConnection() will return null
         finishedLoadingListener.handleEvent(event);
         
-        connectionBroadcaster.broadcast(new XMPPConnectionEvent(xmppConnection, XMPPConnectionEvent.Type.CONNECTED));
+        connectionBroadcaster.broadcast(new FriendConnectionEvent(xmppConnection, FriendConnectionEvent.Type.CONNECTED));
         
         // There will be only one refresh for notifierA since the first getFeature() will fail
         finishedLoadingListener.handleEvent(event);
@@ -379,7 +379,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final Friend friend = context.mock(Friend.class);
         
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                new CachingEventMulticasterImpl<XMPPConnectionEvent>(), scheduledExecutorService);
+                new CachingEventMulticasterImpl<FriendConnectionEvent>(), scheduledExecutorService);
         
         // Ensure file manager loaded flag is cleared
         friendShareListRefresher.fileManagerLoaded.set(false);
@@ -419,7 +419,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final Friend friend = context.mock(Friend.class);
         
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                new CachingEventMulticasterImpl<XMPPConnectionEvent>(), scheduledExecutorService);
+                new CachingEventMulticasterImpl<FriendConnectionEvent>(), scheduledExecutorService);
         friendShareListRefresher.fileManagerLoaded.set(true);
         
         final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
@@ -452,7 +452,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final Friend friend = context.mock(Friend.class);
         
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                new CachingEventMulticasterImpl<XMPPConnectionEvent>(), scheduledExecutorService);
+                new CachingEventMulticasterImpl<FriendConnectionEvent>(), scheduledExecutorService);
         
         final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
         
@@ -541,7 +541,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final Friend friend = context.mock(Friend.class);
         
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                new CachingEventMulticasterImpl<XMPPConnectionEvent>(), scheduledExecutorService);
+                new CachingEventMulticasterImpl<FriendConnectionEvent>(), scheduledExecutorService);
         
         final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
         

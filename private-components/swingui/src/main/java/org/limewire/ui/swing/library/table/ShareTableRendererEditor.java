@@ -14,6 +14,7 @@ import javax.swing.SwingConstants;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.EventBean;
@@ -21,7 +22,6 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -44,13 +44,13 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     private IconButton friendsButton;
     private LocalFileItem fileItem;
     
-    private final EventBean<XMPPConnectionEvent> connectionEventBean;
+    private final EventBean<FriendConnectionEvent> connectionEventBean;
     
     private final ToolTipMouseListener p2pTooltipListener;
     private final ToolTipMouseListener friendsTooltipListener;
 
     @AssistedInject
-    public ShareTableRendererEditor(@Assisted Action shareAction, EventBean<XMPPConnectionEvent> connectionEventBean){
+    public ShareTableRendererEditor(@Assisted Action shareAction, EventBean<FriendConnectionEvent> connectionEventBean){
         GuiUtils.assignResources(this);
         
         this.connectionEventBean = connectionEventBean;
@@ -91,7 +91,7 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     
     @Override
     public void configure(LocalFileItem item, boolean isRowSelected) {
-        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        FriendConnectionEvent connection = connectionEventBean.getLastEvent();
         friendsButton.setVisible(connection != null &&connection.getSource().isLoggedIn()); // don't show if not logged in
         
         fileItem = item;

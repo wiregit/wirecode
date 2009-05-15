@@ -32,6 +32,7 @@ import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.IncomingChatListener;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
@@ -61,7 +62,6 @@ import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.xmpp.api.client.PresenceEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -417,7 +417,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     
     @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownListeners,
                           @Named("available") ListenerSupport<FriendEvent> availListeners,
-                          ListenerSupport<XMPPConnectionEvent> connectionListeners,
+                          ListenerSupport<FriendConnectionEvent> connectionListeners,
                           ListenerSupport<FriendRequestEvent> friendRequestListeners) {
         
         friendRequestListeners.addListener(new EventListener<FriendRequestEvent>() {
@@ -428,10 +428,10 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         });
         
-        connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
+        connectionListeners.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECT_FAILED:
                 case DISCONNECTED:

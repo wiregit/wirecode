@@ -37,8 +37,10 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -50,6 +52,9 @@ import com.google.inject.name.Named;
 
 @Singleton
 public class FacebookFriendConnection implements FriendConnection {
+    
+    private static final Log LOG = LogFactory.getLog(FacebookFriendConnection.class);
+    
     private final FriendConnectionConfiguration configuration;
     private final Provider<String> apiKey;
     private static final String DUMMY_SECRET = "__";
@@ -64,7 +69,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private ThreadPoolListeningExecutor executorService;
     private final AtomicBoolean loggedIn = new AtomicBoolean(false);
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
-    private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
+    private final EventBroadcaster<FriendConnectionEvent> connectionBroadcaster;
     private final Map<String, FacebookFriend> friends;
     private List<Cookie> finalCookies;
     private volatile FacebookJsonRestClient facebookClient;
@@ -72,7 +77,7 @@ public class FacebookFriendConnection implements FriendConnection {
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
                                     @Named("facebookApiKey") Provider<String> apiKey,
-                                    EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster) {
+                                    EventBroadcaster<FriendConnectionEvent> connectionBroadcaster) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
@@ -109,17 +114,17 @@ public class FacebookFriendConnection implements FriendConnection {
 
     synchronized void loginImpl() throws FriendException {
       try {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTING));
+            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));
             loggingIn.set(true);
             loginToFacebook();
             requestSession();
             loggedIn.set(true);
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTED));
+            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
         } catch (IOException e) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
+            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
             throw new FriendException(e);
         } catch (JSONException e) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
+            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
             throw new FriendException(e);
         } finally {
             loggingIn.set(false);
@@ -151,14 +156,11 @@ public class FacebookFriendConnection implements FriendConnection {
         entity = responsePost.getEntity();
 
         if (entity != null) {
-            //System.out.println(EntityUtils.toString(entity));
             entity.consumeContent();
         }
 
         finalCookies = ((DefaultHttpClient) httpClient).getCookieStore().getCookies();
-        for (Cookie finalCooky : finalCookies) {
-            System.out.println(finalCooky.getName() + " = " + finalCooky.getValue());
-        }
+        LOG.debugf("cookies: {0}", finalCookies);
     }
 
     private void requestSession() throws IOException, JSONException {
@@ -179,17 +181,21 @@ public class FacebookFriendConnection implements FriendConnection {
             if (responseBody.matches( "\\{.*\\}")) {
                 json = new JSONObject(responseBody);
             } else {
+                LOG.debugf("body doesn't match inner regex: {0}", responseBody);
                 //json = new JSONArray(responseBody);
             }
             session = json.getString("session_key");
             secret = json.getString("secret");
             uid = json.getString("uid");
+            LOG.debugf("parsed session {0}, secret {1}, uid: {2}", session, secret, uid);
             facebookClient = new FacebookJsonRestClient(apiKey.get(), secret, session);
+		} else {
+		    LOG.debugf("body doesn't match regex: {0}", responseBody);
 		}
     }
 
     public String httpGET(String url) throws IOException {
-        System.out.println("GET " + url);
+        LOG.debugf("facebook GET: {0}", url);
         HttpGet loginGet = new HttpGet(url);
         loginGet.addHeader("User-Agent", USER_AGENT_HEADER);
         loginGet.addHeader("Connection", "close");
@@ -210,7 +216,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
     
     public String httpPOST(String host, String urlPostfix, List <NameValuePair> nvps) throws IOException {
-        System.out.println("POST " + host + urlPostfix);
+        LOG.debugf("facebook POST: {0} {1}", host, urlPostfix);
         String responseStr = null;
         HttpPost httpost = new HttpPost(host + urlPostfix);
         httpost.addHeader("Connection", "close");

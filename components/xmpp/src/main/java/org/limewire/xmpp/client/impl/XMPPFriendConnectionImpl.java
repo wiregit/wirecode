@@ -30,6 +30,7 @@ import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.AuthToken;
@@ -43,7 +44,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
 import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.xmpp.client.impl.features.LimewireFeatureInitializer;
@@ -73,7 +73,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     private final EventBroadcaster<FileOfferEvent> fileOfferBroadcaster;
     private final EventBroadcaster<FriendRequestEvent> friendRequestBroadcaster;
     private final EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster;
-    private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
+    private final EventBroadcaster<FriendConnectionEvent> connectionBroadcaster;
     private final AddressFactory addressFactory;
     private final EventMulticaster<FeatureEvent> featureSupport;
     private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
@@ -101,7 +101,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                        EventBroadcaster<FileOfferEvent> fileOfferBroadcaster,
                        EventBroadcaster<FriendRequestEvent> friendRequestBroadcaster,
                        EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster,
-                       EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster,
+                       EventBroadcaster<FriendConnectionEvent> connectionBroadcaster,
                        AddressFactory addressFactory,
                        EventMulticaster<FeatureEvent> featureSupport,
                        EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,                     
@@ -184,7 +184,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     void loginImpl() throws FriendException {
         synchronized (this) {
             try {
-                connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTING));        
+                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));        
                 loggingIn.set(true);
                 org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(smackConnectionListener);
                 org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
@@ -194,9 +194,9 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 connection.login(configuration.getUserInputLocalID(), configuration.getPassword(), configuration.getResource());
                 LOG.infof("logged in.");
                 loggedIn.set(true);
-                connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTED));
+                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
             } catch (org.jivesoftware.smack.XMPPException e) {
-                connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
+                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 if(connection != null && connection.isConnected()) {
                     connection.disconnect();
                 }
@@ -564,13 +564,13 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
 
         @Override
         public void connectionClosed() {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPFriendConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED));
+            connectionBroadcaster.broadcast(new FriendConnectionEvent(XMPPFriendConnectionImpl.this, FriendConnectionEvent.Type.DISCONNECTED));
             cleanup();
         }
 
         @Override
         public void connectionClosedOnError(Exception e) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPFriendConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED, e));
+            connectionBroadcaster.broadcast(new FriendConnectionEvent(XMPPFriendConnectionImpl.this, FriendConnectionEvent.Type.DISCONNECTED, e));
             cleanup();
         }
 

@@ -4,12 +4,12 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.client.impl.PresenceImpl;
 import org.limewire.xmpp.client.impl.XMPPFriendImpl;
 
@@ -31,7 +31,7 @@ class FriendListListeners {
     }
     
     @Inject void register(ListenerSupport<RosterEvent> rosterListeners,
-                          ListenerSupport<XMPPConnectionEvent> connectionListeners) {
+                          ListenerSupport<FriendConnectionEvent> connectionListeners) {
         rosterListeners.addListener(new EventListener<RosterEvent>() {
             @Override
             public void handleEvent(RosterEvent event) {
@@ -57,9 +57,9 @@ class FriendListListeners {
             }
         });
         
-        connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
+        connectionListeners.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case DISCONNECTED:
                     for(Friend user : event.getSource().getUsers()) {

@@ -42,6 +42,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryFileList;
@@ -93,7 +94,6 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -140,7 +140,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     private Map<Category, LockableUI> lockMap = new HashMap<Category, LockableUI>();
     
     private final Timer repaintTimer;
-    private ListenerSupport<XMPPConnectionEvent> connectionListeners;
+    private ListenerSupport<FriendConnectionEvent> connectionListeners;
     private ListenerSupport<FriendEvent> knownFriendsListeners;
 
     /**
@@ -157,7 +157,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     
     private ShareAllComboBox shareAllComboBox;
     private GhostDropTargetListener ghostDropTargetListener;
-    private EventBean<XMPPConnectionEvent> connectionEventBean;
+    private EventBean<FriendConnectionEvent> connectionEventBean;
     
     /**
      * Set to true if the current message overlay has a clickable feature to hide it.
@@ -188,12 +188,12 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
                           HeaderBarDecorator headerBarDecorator,
                           Provider<PlayerPanel> playerProvider, 
                           GhostDragGlassPane ghostPane,
-                          ListenerSupport<XMPPConnectionEvent> connectionListeners,
+                          ListenerSupport<FriendConnectionEvent> connectionListeners,
                           ShareListManager shareListManager,
                           TextFieldDecorator textFieldDecorator,
                           ComboBoxDecorator comboDecorator,
                           ButtonDecorator buttonDecorator,
-                          EventBean<XMPPConnectionEvent> connectionEventBean,
+                          EventBean<FriendConnectionEvent> connectionEventBean,
                           FriendsSignInPanel friendSignInPanel,
                           PlaylistManager playlistManager) {
         
@@ -280,14 +280,14 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
 
     @Inject
-    public void register(@Named("known") ListenerSupport<FriendEvent> knownFriendsListeners, ListenerSupport<XMPPConnectionEvent> connectionListeners) {
+    public void register(@Named("known") ListenerSupport<FriendEvent> knownFriendsListeners, ListenerSupport<FriendConnectionEvent> connectionListeners) {
         this.knownFriendsListeners = knownFriendsListeners;
         this.knownFriendsListeners.addListener(this);
         
-        connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
+        connectionListeners.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECTED:
                     showCorrectButton();
@@ -375,8 +375,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         // im logged in and its the first time logging in. Do hide the overlay if one of the above is true
         // but the program changed the message to a notcloseable message.
         boolean isLoggedIn = false;
-        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
-        if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+        FriendConnectionEvent connection = connectionEventBean.getLastEvent();
+        if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
             isLoggedIn = connection.getSource().isLoggedIn();
         }
         if(!isClickMessageView || !(SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true ||
@@ -434,7 +434,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
 
     private void showCorrectButton(){
-        XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
+        FriendConnectionEvent connection = connectionEventBean.getLastEvent();
         if(connection != null && connection.getSource().isLoggedIn()) {
             sharingButton.setVisible(false);
             sharingComboBox.setVisible(true);
@@ -479,10 +479,10 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         // only do this if the message hasn't been shown before
         if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true || 
             SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true) {
-            connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
+            connectionListeners.addListener(new EventListener<FriendConnectionEvent>() {
                 @Override
                 @SwingEDTEvent
-                public void handleEvent(XMPPConnectionEvent event) {
+                public void handleEvent(FriendConnectionEvent event) {
                     switch(event.getType()) { 
                     case CONNECTED:
                         if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true && 

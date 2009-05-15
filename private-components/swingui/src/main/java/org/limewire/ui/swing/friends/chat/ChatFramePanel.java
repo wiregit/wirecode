@@ -17,6 +17,7 @@ import org.jdesktop.application.Application;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.client.FileOfferEvent;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
@@ -32,7 +33,6 @@ import org.limewire.ui.swing.util.EnabledType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.VisibilityType;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -78,13 +78,13 @@ public class ChatFramePanel extends Panel implements ChatFrame {
         EventAnnotationProcessor.subscribe(this);
     }
     
-    @Inject void register(ListenerSupport<XMPPConnectionEvent> connectionSupport,
+    @Inject void register(ListenerSupport<FriendConnectionEvent> connectionSupport,
             ListenerSupport<FriendPresenceEvent> presenceSupport,
             ListenerSupport<FileOfferEvent> fileOfferEventListenerSupport) {
-        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
+            public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECTED:
                     handleLogin(event);
@@ -175,7 +175,7 @@ public class ChatFramePanel extends Panel implements ChatFrame {
 	/**
 	 * Updates the chat panel upon logging on.
 	 */    
-    private void handleLogin(XMPPConnectionEvent event) {
+    private void handleLogin(FriendConnectionEvent event) {
         setActionEnabled(true);
     }
     
