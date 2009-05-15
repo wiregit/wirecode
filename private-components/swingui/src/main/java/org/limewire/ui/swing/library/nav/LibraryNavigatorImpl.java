@@ -196,7 +196,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         addItem(allFriends, this, "growx, wmin 0, wrap", p2pNetwork.getAction(), new MoveAction(limewireList, true));
         addItem(friendsPanel, this, "growx, wmin 0, wrap", null, null);
         addItem(friendRequestPanel, this, "growx, wmin 0, wrap, gaptop 2, hidemode 3", null, null);
-        addItem(friendsScrollArea, this, "grow, wmin 0, wrap",  null, null);
+        addItem(friendsScrollArea, this, "grow, push, wmin 0, wrap",  null, null);
         addItem(limewireList, friendsListPanel, "", allFriends.getAction(), new MoveAction(onlineList, true));
         addItem(onlineList,  friendsListPanel, "", new MoveAction(limewireList, false), new MoveAction(offlineList, true));
         addItem(offlineList, friendsListPanel, "", new MoveAction(onlineList, false), null);

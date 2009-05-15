@@ -144,7 +144,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         add(storeButton, "gapbottom 2, gaptop 0");
 
         add(searchBar, "gapleft 70, gapbottom 2, gaptop 0");
-        add(searchList, "gapleft 10, gaptop 3, gapbottom 1, grow");
+        add(searchList, "gapleft 10, gaptop 3, gapbottom 1, grow, push");
         
         // Do not show store if mozilla failed to load.
         if(!MozillaInitialization.isInitialized()) {

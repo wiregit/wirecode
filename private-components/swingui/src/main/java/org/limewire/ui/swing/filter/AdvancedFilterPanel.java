@@ -169,7 +169,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         add(filterDisplayPanel, "gap 0 0 2 0, growx, wrap");
         add(upperDividerLine  , "gap 0 0 6 0, hmin 1, growx, wrap");
         add(lowerDividerLine  , "gap 0 0 0 0, hmin 1, growx, wrap");
-        add(filterScrollPane  , "gap 0 0 0 0, grow");
+        add(filterScrollPane  , "gap 0 0 0 0, grow, push");
         
         doFilterLayout();
         
