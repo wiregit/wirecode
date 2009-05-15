@@ -1,9 +1,9 @@
 package org.limewire.xmpp.api.client;
 
 import org.limewire.listener.DefaultDataTypeEvent;
-import org.limewire.core.api.friend.Friend;
+import org.limewire.xmpp.client.impl.XMPPFriendImpl;
 
-public class RosterEvent extends DefaultDataTypeEvent<Friend, RosterEvent.Type> {
+public class RosterEvent extends DefaultDataTypeEvent<XMPPFriendImpl, RosterEvent.Type> {
 
     public static enum Type {
         USER_ADDED,
@@ -11,7 +11,7 @@ public class RosterEvent extends DefaultDataTypeEvent<Friend, RosterEvent.Type> 
         USER_DELETED
     }
 
-    public RosterEvent(Friend data, Type event) {
+    public RosterEvent(XMPPFriendImpl data, Type event) {
         super(data, event);
     }
 }

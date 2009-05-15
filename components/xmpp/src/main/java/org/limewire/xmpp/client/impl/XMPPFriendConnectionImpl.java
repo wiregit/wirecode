@@ -341,7 +341,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         public void entriesDeleted(Collection<String> removedIds) {
             synchronized (users) {
                 for(String id : removedIds) {
-                    Friend user = users.remove(id);
+                    XMPPFriendImpl user = users.remove(id);
                     if(user != null) {
                         LOG.debugf("user {0} removed", user);
                         rosterListeners.broadcast(new RosterEvent(user, RosterEvent.Type.USER_DELETED));
