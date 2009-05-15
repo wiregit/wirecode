@@ -126,8 +126,10 @@ public class RatingTable implements Service {
 	 */
 	protected synchronized float getRating(RemoteFileDesc desc) {
 		float rating = getRating(lookup(tokenizer.getTokens(desc)));
-		if(LOG.isDebugEnabled())
-			LOG.debug(desc + " rated " + rating);
+		if(LOG.isDebugEnabled()) {
+		    String addr = desc.getAddress().getAddressDescription();
+            LOG.debug("Result from " + addr + " rated " + rating);
+        }
 		return rating;
 	}
 
