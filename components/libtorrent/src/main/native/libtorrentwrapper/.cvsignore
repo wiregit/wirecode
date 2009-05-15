@@ -6,3 +6,4 @@ libtorrentwrapper.dll
 libtorrent-wrapper.so
 libtorrent-wrapper.out
 libtorrent-wrapper.dylib
+torrent-wrapper.dll
