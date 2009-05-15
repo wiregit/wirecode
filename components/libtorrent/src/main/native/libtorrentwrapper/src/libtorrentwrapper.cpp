@@ -538,8 +538,10 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 
 		process_alert(alert, alertInfo);
 		
-		
-		if (alertInfo->data)  alertCallback(alertInfo);
+		#ifdef IGNORE_NON_FAST_RESUME_ALERTS
+		if (alertInfo->data)
+		#endif
+		alertCallback(alertInfo);
 
 		alertCallback(alertInfo);
 	

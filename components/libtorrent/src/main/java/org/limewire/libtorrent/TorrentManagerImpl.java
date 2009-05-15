@@ -1,6 +1,7 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -190,7 +191,9 @@ public class TorrentManagerImpl implements TorrentManager {
         backgroundExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
 
         if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
-            backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 6000, 6000,
+            backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
+                    TimeUnit.MILLISECONDS);
+            backgroundExecutor.scheduleAtFixedRate(new AlertPoller(), 15000, 10000,
                     TimeUnit.MILLISECONDS);
         }
     }
@@ -212,7 +215,6 @@ public class TorrentManagerImpl implements TorrentManager {
         @Override
         public void run() {
             pumpStatus();
-            // libTorrent.get_alerts(alertCallback);
         }
 
         private void pumpStatus() {
@@ -221,31 +223,37 @@ public class TorrentManagerImpl implements TorrentManager {
             }
         }
     }
+    
+    private class AlertPoller implements Runnable {
+        @Override
+        public void run() {
+            libTorrent.get_alerts(alertCallback);
+        }
+    }
 
     private class ResumeDataScheduler implements Runnable {
 
-        // private Iterator<String> torrentIterator =
-        // torrents.keySet().iterator();
+        private Iterator<String> torrentIterator =
+            torrents.keySet().iterator();
 
         @Override
         public void run() {
-            // TODO add back in
-            // try {
-            // lock.readLock().lock();
-            // if (!torrentIterator.hasNext()) {
-            // torrentIterator = torrents.keySet().iterator();
-            // if (!torrentIterator.hasNext()) {
-            // return;
-            // }
-            // }
-            //
-            // String sha1 = torrentIterator.next();
-            // if (torrentIds.contains(sha1)) {
-            // libTorrent.signal_fast_resume_data_request(sha1);
-            // }
-            // } finally {
-            // lock.readLock().unlock();
-            // }
+            try {
+                lock.readLock().lock();
+                if (!torrentIterator.hasNext()) {
+                    torrentIterator = torrents.keySet().iterator();
+                    if (!torrentIterator.hasNext()) {
+                        return;
+                    }
+                }
+
+                String sha1 = torrentIterator.next();
+                if (torrents.get(sha1) != null) {
+                    libTorrent.signal_fast_resume_data_request(sha1);
+                }
+            } finally {
+                lock.readLock().unlock();
+            }
         }
     }
 
