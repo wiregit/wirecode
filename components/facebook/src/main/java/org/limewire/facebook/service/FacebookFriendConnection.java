@@ -133,7 +133,7 @@ public class FacebookFriendConnection implements FriendConnection {
         }
         
         HttpPost httpost = new HttpPost(FACEBOOK_LOGIN_POST_ACTION_URL + "version=1.0" + "&auth_token=" + authToken + 
-                                        "&api_key=");
+                                        "&api_key=" + apiKey.get());
 
         httpost.addHeader("User-Agent", USER_AGENT_HEADER);
         List <NameValuePair> nvps = new ArrayList<NameValuePair>();

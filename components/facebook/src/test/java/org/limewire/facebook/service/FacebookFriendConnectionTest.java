@@ -5,6 +5,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
+import junit.framework.TestCase;
+
 import org.json.JSONException;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
@@ -28,8 +30,6 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-
-import junit.framework.TestCase;
 
 public class FacebookFriendConnectionTest extends TestCase {
     private Injector injector;

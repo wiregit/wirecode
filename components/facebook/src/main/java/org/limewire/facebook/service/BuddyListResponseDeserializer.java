@@ -7,11 +7,11 @@ import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventMulticaster;
 
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
@@ -19,20 +19,20 @@ import com.google.inject.assistedinject.AssistedInject;
 
 @Singleton
 public class BuddyListResponseDeserializer {
-
-    private final Network network;
-    private final LiveMessageAddressTransport addressTransport;
-    private final LiveMessageAuthTokenTransport authTokenTransport;
+    
+    private final FacebookFriendConnection connection;
+    private final LiveMessageAddressTransportFactory addressTransportFactory;
+    private final LiveMessageAuthTokenTransportFactory authTokenTransportFactory;
     private final EventBroadcaster<FeatureEvent> featureBroadcaster;
 
     @AssistedInject
-    BuddyListResponseDeserializer(@Assisted Network network,
-                                  LiveMessageAddressTransport addressTransport,
-                                  LiveMessageAuthTokenTransport authTokenTransport,
-                                  EventBroadcaster<FeatureEvent> featureBroadcaster) {
-        this.network = network;
-        this.addressTransport = addressTransport;
-        this.authTokenTransport = authTokenTransport;
+    BuddyListResponseDeserializer(@Assisted FacebookFriendConnection connection,
+                                  LiveMessageAddressTransportFactory addressTransportFactory,
+                                  LiveMessageAuthTokenTransportFactory authTokenTransportFactory,
+                                  EventMulticaster<FeatureEvent> featureBroadcaster) {
+        this.connection = connection;
+        this.addressTransportFactory = addressTransportFactory;
+        this.authTokenTransportFactory = authTokenTransportFactory;
         this.featureBroadcaster = featureBroadcaster;
     }
     
@@ -87,9 +87,9 @@ public class BuddyListResponseDeserializer {
 		while(it.hasNext()){
 			String key = it.next();
 			JSONObject user = (JSONObject) userInfos.get(key);
-			FacebookFriend friend = new FacebookFriend(key, user, network, featureBroadcaster);
-            friend.addTransport(Address.class, addressTransport);
-            friend.addTransport(AuthToken.class, authTokenTransport);
+			FacebookFriend friend = new FacebookFriend(key, user, connection.getConfiguration(), featureBroadcaster);
+            friend.addTransport(Address.class, addressTransportFactory.create(connection));
+            friend.addTransport(AuthToken.class, authTokenTransportFactory.create(connection));
 			onlineFriends.put(friend.getId(), friend);
 			//Launcher.getChatroomAnyway(key).setRoomName(fu.name);
 		}

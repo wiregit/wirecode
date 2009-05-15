@@ -15,7 +15,7 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPPresence;
+import org.limewire.core.api.friend.FriendPresence;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -46,7 +46,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         final String name1 = "name1";
         final Category category1 = Category.AUDIO;
 
-        final XMPPPresence presence1 = context.mock(XMPPPresence.class);
+        final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
 
         context.checking(new Expectations() {
@@ -165,7 +165,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         final String name3 = "blah1";
         final Category category3 = Category.AUDIO;
 
-        final XMPPPresence presence1 = context.mock(XMPPPresence.class);
+        final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
 
         context.checking(new Expectations() {
@@ -323,10 +323,10 @@ public class FriendLibrariesTest extends BaseTestCase {
         final String name3 = "blah1";
         final Category category3 = Category.AUDIO;
 
-        final XMPPPresence presence1 = context.mock(XMPPPresence.class);
+        final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
 
-        final XMPPPresence presence2 = context.mock(XMPPPresence.class);
+        final FriendPresence presence2 = context.mock(FriendPresence.class);
         final String presenceId2 = "2";
 
         context.checking(new Expectations() {
@@ -486,7 +486,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         final String album1 = "nameo";
         properties1.put(FilePropertyKey.ALBUM, album1);
 
-        final XMPPPresence presence1 = context.mock(XMPPPresence.class);
+        final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
 
         context.checking(new Expectations() {
@@ -644,7 +644,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         final String author2 = "nameo2";
         properties2.put(FilePropertyKey.AUTHOR, author2);
 
-        final XMPPPresence presence1 = context.mock(XMPPPresence.class);
+        final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
 
         context.checking(new Expectations() {
@@ -803,7 +803,7 @@ public class FriendLibrariesTest extends BaseTestCase {
         final String author2 = "nameo 2";
         properties2.put(FilePropertyKey.AUTHOR, author2);
 
-        final XMPPPresence presence1 = context.mock(XMPPPresence.class);
+        final FriendPresence presence1 = context.mock(FriendPresence.class);
         final String presenceId1 = "1";
 
         context.checking(new Expectations() {

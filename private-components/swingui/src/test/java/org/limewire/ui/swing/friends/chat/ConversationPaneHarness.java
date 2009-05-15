@@ -13,7 +13,7 @@ import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.IconManagerStub;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
+import org.limewire.core.api.friend.FriendPresence.Mode;
 
 /**
  *

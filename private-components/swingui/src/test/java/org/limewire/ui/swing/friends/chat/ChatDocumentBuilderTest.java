@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.xmpp.api.client.MockFileMetadata;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
+import org.limewire.core.api.friend.FriendPresence.Mode;
 
 public class ChatDocumentBuilderTest extends TestCase {
     public void testBuildChatTextWithLinks() {

@@ -6,6 +6,7 @@ import java.util.Collections;
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.Network;
 import org.limewire.io.UnresolvedIpPort;
 
 public class MockFriendConnectionConfiguration implements FriendConnectionConfiguration {
@@ -69,5 +70,10 @@ public class MockFriendConnectionConfiguration implements FriendConnectionConfig
 
     @Override public List<UnresolvedIpPort> getDefaultServers() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public Type getType() {
+        return Network.Type.XMPP;
     }
 }

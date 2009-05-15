@@ -103,7 +103,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
         FriendAccountConfiguration livejournal =
             new FriendAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, resource, getLiveJournalServers(), Network.Type.XMPP);
         FriendAccountConfiguration facebook =
-            new FriendAccountConfigurationImpl(false, "facebook.com", "Facebook", facebookIcon, resource, getGTalkServers(), Network.Type.FACEBOOK);
+            new FriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIcon, resource, getGTalkServers(), Network.Type.FACEBOOK);
 
         configs.put(facebook.getLabel(), facebook);
         configs.put(gmail.getLabel(), gmail);

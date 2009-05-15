@@ -15,6 +15,8 @@ import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
 public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken>, LiveMessageHandler {
@@ -22,9 +24,9 @@ public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken
     private final Provider<String> apiKey;
     private final FacebookFriendConnection connection;
     
-    @Inject
-    LiveMessageAuthTokenTransport(@Named("facebookApiKey") Provider<String> apiKey,
-                       FacebookFriendConnection connection) {
+    @AssistedInject
+    LiveMessageAuthTokenTransport(@Assisted FacebookFriendConnection connection,
+                                  @Named("facebookApiKey") Provider<String> apiKey) {
         this.apiKey = apiKey;
         this.connection = connection;
     }

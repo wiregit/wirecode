@@ -2,6 +2,7 @@ package org.limewire.core.api.friend.impl;
 
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresenceEvent;
+import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
@@ -44,6 +45,7 @@ public class LimeWireFriendModule extends AbstractModule {
         bind(FeatureRegistry.class).to(FeatureRegistryImpl.class);
 
         bind(FriendConnectionFactoryRegistry.class).to(FriendConnectionFactoryRegistryImpl.class);
+        bind(FriendConnectionFactory.class).to(FriendConnectionFactoryRegistryImpl.class);
         
         bind(new TypeLiteral<FeatureTransport.Handler<Address>>(){}).to(AddressHandler.class);
         bind(new TypeLiteral<FeatureTransport.Handler<AuthToken>>(){}).to(AuthTokenHandler.class);

@@ -17,6 +17,8 @@ import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
 
@@ -26,9 +28,9 @@ public class LiveMessageAddressTransport implements FeatureTransport<Address>, L
     private final FacebookFriendConnection connection;
     private final AddressFactory addressFactory;
 
-    @Inject
-    LiveMessageAddressTransport(@Named("facebookApiKey") Provider<String> apiKey,
-                       FacebookFriendConnection connection,
+    @AssistedInject
+    LiveMessageAddressTransport(@Assisted FacebookFriendConnection connection,
+                                @Named("facebookApiKey") Provider<String> apiKey,
                        AddressFactory addressFactory) {
         this.apiKey = apiKey;
         this.connection = connection;

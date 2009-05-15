@@ -3,17 +3,16 @@ package org.limewire.ui.swing.friends.chat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.IncomingChatListener;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.listener.EventListener;
-import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.PresenceEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
-public class MockUser implements XMPPFriend {
+public class MockUser implements Friend {
     private String id;
     private String name;
     
@@ -59,8 +58,8 @@ public class MockUser implements XMPPFriend {
     }
     
     @Override
-    public Map<String, XMPPPresence> getPresences() {
-        return new HashMap<String, XMPPPresence>();
+    public Map<String, FriendPresence> getPresences() {
+        return new HashMap<String, FriendPresence>();
     }
 
     @Override
@@ -84,7 +83,7 @@ public class MockUser implements XMPPFriend {
     }
 
     @Override
-    public XMPPPresence getActivePresence() {
+    public FriendPresence getActivePresence() {
         return null;
     }
 
@@ -112,6 +111,11 @@ public class MockUser implements XMPPFriend {
 
             public String getNetworkName() {
                 return "mock-network";
+            }
+
+            @Override
+            public Type getType() {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
             }
         };
     }

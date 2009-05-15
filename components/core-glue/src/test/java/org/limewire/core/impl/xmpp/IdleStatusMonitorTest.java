@@ -10,7 +10,7 @@ import org.limewire.listener.BroadcastPolicy;
 import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.activity.XmppActivityEvent;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 public class IdleStatusMonitorTest extends TestCase {
@@ -78,7 +78,7 @@ public class IdleStatusMonitorTest extends TestCase {
     private void sendConnectionEvent(org.limewire.xmpp.api.client.XMPPConnectionEvent.Type connectionState) {
         
         Mockery context = new Mockery();
-        XMPPConnection connection = context.mock(XMPPConnection.class);
+        FriendConnection connection = context.mock(FriendConnection.class);
         
         connectionSupport.handleEvent(new XMPPConnectionEvent(connection, connectionState));
     }

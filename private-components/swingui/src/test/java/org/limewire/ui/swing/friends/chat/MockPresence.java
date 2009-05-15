@@ -3,20 +3,20 @@ package org.limewire.ui.swing.friends.chat;
 import java.net.URI;
 import java.util.Collection;
 
+import org.limewire.core.api.friend.AbstractFriendPresence;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
-public class MockPresence implements XMPPPresence {
+public class MockPresence extends AbstractFriendPresence implements FriendPresence {
     private String status;
-    private final XMPPFriend user;
+    private final Friend user;
     private Mode mode;
     private String jid;
     private int priority;
     
-    MockPresence(XMPPFriend user, Mode mode, String status, String jid) {
+    MockPresence(Friend user, Mode mode, String status, String jid) {
         this.user = user;
         this.mode = mode;
         this.status = status;
@@ -24,13 +24,8 @@ public class MockPresence implements XMPPPresence {
         this.priority = 0;
     }
 
-    public XMPPFriend getUser() {
+    public Friend getUser() {
         return user;
-    }
-
-    @Override
-    public String getJID() {
-        return jid;
     }
 
     @Override
@@ -75,7 +70,7 @@ public class MockPresence implements XMPPPresence {
 
     @Override
     public String getPresenceId() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return jid;
     }
 
     @Override
