@@ -20,8 +20,6 @@ public interface TorrentManager extends Service {
 
     public void resumeTorrent(String id);
 
-    public LibTorrentStatus getStatus(String id);
-
     public List<String> getPeers(String id);
     
     public File getTorrentDownloadFolder();

@@ -359,7 +359,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void setSaveFile(File saveDirectory, String fileName, boolean overwrite)
             throws SaveLocationException {
-        super.setSaveFile(saveDirectory, fileName, overwrite);
+        throw new UnsupportedOperationException("Currently should not be called for torrents, come back later.");
+        //super.setSaveFile(saveDirectory, fileName, overwrite);
         // // if this didn't throw target is ok.
         // torrentFileSystem.setCompleteFile(new File(saveDirectory, fileName));
 
@@ -406,13 +407,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // torrent.getPeers();
 
         List<Address> list = new LinkedList<Address>();
-
-        try {
-            list.add(new ConnectableImpl("test.com", false));
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-
         return list;
     }
 

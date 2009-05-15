@@ -60,4 +60,8 @@ public class AsynchronousMulticaster<E> implements EventMulticaster<E> {
             }
         });
     }
+    
+    public int size() {
+        return listeners.size();
+    }
 }

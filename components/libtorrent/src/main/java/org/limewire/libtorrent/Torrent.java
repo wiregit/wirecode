@@ -7,6 +7,7 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -16,15 +17,17 @@ import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
+import org.limewire.listener.AsynchronousMulticaster;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
+import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class Torrent implements ListenerSupport<TorrentEvent> {
-    private final EventListenerList<TorrentEvent> listeners;
+    private final EventMulticaster<TorrentEvent> listeners;
 
     private final TorrentManager torrentManager;
 
@@ -55,9 +58,10 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
     @Inject
-    public Torrent(TorrentManager torrentManager) {
+    public Torrent(TorrentManager torrentManager, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         this.torrentManager = torrentManager;
-        this.listeners = new EventListenerList<TorrentEvent>();
+        //TODO not background executor?
+        this.listeners = new AsynchronousMulticaster<TorrentEvent>(backgroundExecutor);
         this.status = new AtomicReference<LibTorrentStatus>();
         this.paths = new ArrayList<String>();
     }

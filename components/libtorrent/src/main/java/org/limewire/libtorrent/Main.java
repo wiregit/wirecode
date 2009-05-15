@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.limewire.listener.EventListener;
 
@@ -32,7 +33,7 @@ public class Main {
         
         
         
-        Torrent torrent = new Torrent(libTorrentManager);
+        Torrent torrent = new Torrent(libTorrentManager, new ScheduledThreadPoolExecutor(1));
 //        torrent.init(torrentFile, libTorrentManager.getTorrentDownloadFolder());
         List<String> paths = Collections.emptyList();
         
