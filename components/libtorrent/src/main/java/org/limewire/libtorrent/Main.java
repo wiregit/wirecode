@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import org.limewire.listener.EventListener;
-
 public class Main {
     public static void main(String[] args) throws InterruptedException, IOException {
         TorrentManager libTorrentManager = new TorrentManagerImpl(new File(
@@ -43,22 +41,6 @@ public class Main {
         String id = torrent.getSha1() != null ? torrent.getSha1() :  sha1;
 
         System.out.println("sha1_java: " + id);
-
-        libTorrentManager.addStatusListener(id, new EventListener<LibTorrentStatusEvent>() {
-            @Override
-            public void handleEvent(LibTorrentStatusEvent event) {
-
-                LibTorrentStatus torrentStatus = event.getTorrentStatus();
-
-                System.out.println("total_done_java: " + torrentStatus.total_done);
-                System.out.println("download_rate_java: " + torrentStatus.download_rate);
-                System.out.println("num_peers_java: " + torrentStatus.num_peers);
-                System.out.println("state_java: " + torrentStatus.state + " - "
-                        + LibTorrentState.forId(torrentStatus.state));
-                System.out.println("progress_java: " + torrentStatus.progress);
-                System.out.println("paused_java: " + torrentStatus.paused);
-            }
-        });
 
         Thread.sleep(100000000);
     }

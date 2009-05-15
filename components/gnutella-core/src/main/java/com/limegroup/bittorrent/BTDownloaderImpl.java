@@ -19,6 +19,7 @@ import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentEvent;
+import org.limewire.libtorrent.TorrentManager;
 import org.limewire.libtorrent.TorrentSHA1ConversionUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
@@ -54,6 +55,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private AtomicBoolean complete = new AtomicBoolean(false);
 
+    private final Provider<TorrentManager> torrentManager;
+
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
      */
@@ -61,24 +64,25 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
-            BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider) {
+            BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
+            Provider<TorrentManager> torrentManager) {
         super(saveLocationManager);
 
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
+        this.torrentManager = torrentManager;
     }
 
     @Inject
     public void registerTorrent() {
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
-                if (TorrentEvent.COMPLETED == event) {
+                if (TorrentEvent.COMPLETED == event && !complete.getAndSet(true)) {
                     FileUtils.deleteRecursive(torrent.getCompleteFile());
                     File completeDir = getSaveFile().getParentFile();
                     torrent.moveTorrent(completeDir);
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
-                    complete.set(true);
                     deleteIncompleteFiles();
                 } else if (TorrentEvent.STOPPED == event) {
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
@@ -90,6 +94,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void init(File torrentFile) throws IOException {
         torrent.init(torrentFile, SharingSettings.getSaveDirectory());
+        torrentManager.get().registerTorrent(torrent);
         // TODO fix this logic. Should not be using protected access, should be
         // hidden
         saveFile = torrent.getCompleteFile();
@@ -357,8 +362,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void setSaveFile(File saveDirectory, String fileName, boolean overwrite)
             throws SaveLocationException {
-        throw new UnsupportedOperationException("Currently should not be called for torrents, come back later.");
-        //super.setSaveFile(saveDirectory, fileName, overwrite);
+    //    throw new UnsupportedOperationException(
+      //          "Currently should not be called for torrents, come back later.");
+        // super.setSaveFile(saveDirectory, fileName, overwrite);
         // // if this didn't throw target is ok.
         // torrentFileSystem.setCompleteFile(new File(saveDirectory, fileName));
 
@@ -426,7 +432,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean shouldBeRestarted() {
-        return getState() == DownloadState.QUEUED;
+        return true;
     }
 
     @Override
@@ -497,6 +503,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         torrent.init(memento.getName(), TorrentSHA1ConversionUtils.toHexString(urn.getBytes()),
                 memento.getContentLength(), memento.getTrackerURL(), memento.getPaths(), memento
                         .getSaveFile(), fastResumeFile, torrentFile);
+        torrentManager.get().registerTorrent(torrent);
     }
 
     public void initFromOldMemento(BTDownloadMemento memento) throws InvalidDataException {
@@ -521,6 +528,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         torrent.init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(),
                 null, null);
+        torrentManager.get().registerTorrent(torrent);
     }
 
     @Override
