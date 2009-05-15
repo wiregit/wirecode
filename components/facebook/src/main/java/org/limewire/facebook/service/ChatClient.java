@@ -73,7 +73,7 @@ public class ChatClient {
             }
 
             ThreadExecutor.startThread(new ChatListener(uid, channel), "chat-listener-thread");
-            executorService.scheduleAtFixedRate(presenceListenerFactory.createPresenceListener(post_form_id, connection), 0, 90, TimeUnit.SECONDS);
+            executorService.scheduleAtFixedRate(presenceListenerFactory.createPresenceListener(connection), 0, 90, TimeUnit.SECONDS);
         } catch (IOException ioe)  {
             throw new FriendException(ioe);
         }
