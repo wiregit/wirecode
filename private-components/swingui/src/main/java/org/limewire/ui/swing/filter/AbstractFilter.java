@@ -1,7 +1,14 @@
 package org.limewire.ui.swing.filter;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -144,10 +151,10 @@ abstract class AbstractFilter<E extends FilterableItem> implements Filter<E> {
         private Color rowColor;
         @Resource(key="AdvancedFilter.rowFont")
         private Font rowFont;
-        @Resource(key="AdvancedFilter.moreIcon")
-        private Icon moreIcon;
         @Resource(key="AdvancedFilter.popupBorderColor")
         private Color popupBorderColor;
+        // TODO create icon resource
+        private Icon popupCloseIcon = new CloseIcon(Color.WHITE, 6);
         @Resource(key="AdvancedFilter.popupHeaderFont")
         private Font popupHeaderFont;
         @Resource(key="AdvancedFilter.popupHeaderBackground")
@@ -184,17 +191,17 @@ abstract class AbstractFilter<E extends FilterableItem> implements Filter<E> {
         }
         
         /**
-         * Returns the icon for the "more" button.
-         */
-        public Icon getMoreIcon() {
-            return moreIcon;
-        }
-        
-        /**
          * Returns the border color for filter popup.
          */
         public Color getPopupBorderColor() {
             return popupBorderColor;
+        }
+        
+        /**
+         * Returns the close icon for filter popup.
+         */
+        public Icon getPopupCloseIcon() {
+            return popupCloseIcon;
         }
         
         /**
@@ -230,6 +237,58 @@ abstract class AbstractFilter<E extends FilterableItem> implements Filter<E> {
          */
         public Font getRowFont() {
             return rowFont;
+        }
+    }
+    
+    /**
+     * Button icon to close filter popup.
+     */
+    private static class CloseIcon implements Icon {
+        private static final float SIZE_TO_THICKNESS = 4.0f;
+
+        private final Color color;
+        private final int size;
+        
+        public CloseIcon(Color color, int size) {
+            this.color = color;
+            this.size = size;
+        }
+        
+        @Override
+        public int getIconHeight() {
+            return this.size;
+        }
+
+        @Override
+        public int getIconWidth() {
+            return this.size;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            // Create graphics.
+            Graphics2D g2d = (Graphics2D) g.create();
+            
+            // Set graphics to use anti-aliasing for smoothness.
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            // Set line color and thickness.
+            float thickness = Math.max(this.size / SIZE_TO_THICKNESS, 1.0f);
+            g2d.setColor(this.color);
+            g2d.setStroke(new BasicStroke(thickness));
+
+            // Create shape.
+            Shape backSlash = new Line2D.Double(0, 0, this.size, this.size);
+            Shape slash = new Line2D.Double(0, this.size, this.size, 0);
+            
+            // Draw shape at specified position.
+            g2d.translate(x, y);
+            g2d.draw(backSlash);
+            g2d.draw(slash);
+
+            // Dispose graphics.
+            g2d.dispose();
         }
     }
 }
