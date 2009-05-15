@@ -20,7 +20,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -29,6 +28,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.SideLineBorder;
 import org.limewire.ui.swing.components.SideLineBorder.Side;
@@ -87,7 +87,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     /** Container to display filter components. */
     private final JPanel filterPanel = new JPanel();
     
-    private final JSeparator separator = new JSeparator();
+    private final Line upperDividerLine;
+    private final Line lowerDividerLine;
     private final JScrollPane filterScrollPane = new JScrollPane();
     
     /** Container for category-specific filters. */
@@ -131,8 +132,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
                 "[grow]", ""));
         filterPanel.setOpaque(false);
         
-        separator.setBackground(dividerBackgroundColor);
-        separator.setForeground(dividerForegroundColor);
+        upperDividerLine = Line.createHorizontalLine(dividerForegroundColor);
+        lowerDividerLine = Line.createHorizontalLine(dividerBackgroundColor);
         
         filterScrollPane.setBorder(BorderFactory.createEmptyBorder());
         filterScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -166,7 +167,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         // Layout components.
         add(filterTextField   , "gap 6 6 6 6, growx, wrap");
         add(filterDisplayPanel, "gap 0 0 2 0, growx, wrap");
-        add(separator         , "gap 0 0 6 0, hmin 2, growx, wrap");
+        add(upperDividerLine  , "gap 0 0 6 0, hmin 1, growx, wrap");
+        add(lowerDividerLine  , "gap 0 0 0 0, hmin 1, growx, wrap");
         add(filterScrollPane  , "gap 0 0 0 0, grow");
         
         doFilterLayout();
@@ -192,8 +194,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             filterPanel.add(sourceFilter.getComponent()  , "gap 6 6 8 6, wmax " + maxWidth + ", growx, wrap");
             filterPanel.add(propertyPanel                , "gap 6 6 0 0, wmax " + maxWidth + ", grow");
             
-            // Update separator visibility.
-            updateSeparator();
+            // Update divider visibility.
+            updateDivider();
             validate();
             repaint();
             
@@ -203,11 +205,13 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     }
     
     /**
-     * Updates the visibility of the separator.
+     * Updates the visibility of the divider.
      */
-    private void updateSeparator() {
-        separator.setVisible(filterDisplayPanel.isVisible() || 
-                filterScrollPane.getVerticalScrollBar().isVisible());
+    private void updateDivider() {
+        boolean visible = filterDisplayPanel.isVisible() || 
+            filterScrollPane.getVerticalScrollBar().isVisible();
+        upperDividerLine.setVisible(visible);
+        lowerDividerLine.setVisible(visible);
     }
 
     /**
@@ -479,12 +483,9 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             // Add filter display to container.
             displayPanel.add(activeFilterPanel, "gaptop 4, wmax " + filterWidth + ", wrap");
             
-            // Display reset button if multiple filters.
-            resetButton.setVisible(displayMap.size() > 1);
-            
             // Display this container.
             setVisible(true);
-            updateSeparator();
+            updateDivider();
             
             // Repaint filter display.
             AdvancedFilterPanel.this.validate();
@@ -503,14 +504,11 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             
             // Remove filter display from map.
             displayMap.remove(filter);
-            
-            // Hide reset button if not multiple filters.
-            resetButton.setVisible(displayMap.size() > 1);
 
             // Hide this container if no active filters.
             if (displayMap.size() < 1) {
                 setVisible(false);
-                updateSeparator();
+                updateDivider();
             }
             
             // Repaint filter display.
