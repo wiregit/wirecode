@@ -98,7 +98,6 @@
 	<classpathentry kind="lib" path="lib/jars/glazedlists-1.7.0_java15.jar" sourcepath="lib/sources/glazedlists-1.7.0-source_java15.zip"/>
 	<classpathentry kind="lib" path="lib/jars/base64-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcip-annotations.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jxlayer.jar"/>
 	<classpathentry kind="lib" path="lib/jars/dnsjava-2.0.6.jar" sourcepath="lib/sources/dnsjava-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/commons-math-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/cglib-nodep.jar"/>
@@ -148,5 +147,6 @@
 	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-beta2.jar" sourcepath="lib/sources/httpcomponents-client-4.0-beta2-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.0.jar" sourcepath="lib/sources/httpcomponents-core-4.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0.jar" sourcepath="lib/sources/httpcomponents-core-4.0-src.zip"/>
+	<classpathentry kind="lib" path="lib/jars/jxlayer-4.0.jar" sourcepath="lib/sources/jxlayer-4.0-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
