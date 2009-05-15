@@ -18,8 +18,6 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
@@ -31,6 +29,9 @@ import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
+import org.limewire.core.api.friend.client.IncomingChatListener;
+import org.limewire.core.api.friend.client.MessageReader;
+import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
@@ -59,13 +60,15 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-
-import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
+import ca.odell.glazedlists.EventList;
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
@@ -756,6 +759,48 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         }
         @Override
         public void setName(String name) {
+        }
+
+        @Override
+        public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
+        }
+
+        @Override
+        public MessageWriter createChat(MessageReader reader) {
+            return null;
+        }
+
+        @Override
+        public void setChatListenerIfNecessary(IncomingChatListener listener) {
+        }
+
+        @Override
+        public void removeChatListener() {
+        }
+
+        @Override
+        public FriendPresence getActivePresence() {
+            return null;
+        }
+
+        @Override
+        public boolean hasActivePresence() {
+            return false;
+        }
+
+        @Override
+        public boolean isSignedIn() {
+            return false;
+        }
+
+        @Override
+        public Map<String, FriendPresence> getPresences() {
+            return null;
+        }
+
+        @Override
+        public boolean isSubscribed() {
+            return false;
         }
     }
 }

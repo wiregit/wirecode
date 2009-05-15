@@ -1,29 +1,33 @@
 package org.limewire.facebook.service;
 
-import java.net.URI;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.lang.reflect.ParameterizedType;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.limewire.core.api.friend.AbstractFriendPresence;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureTransport;
+import org.limewire.core.api.friend.client.IncomingChatListener;
+import org.limewire.core.api.friend.client.MessageReader;
+import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventListener;
+import org.limewire.xmpp.api.client.PresenceEvent;
 
-public class FacebookFriend implements Friend, FriendPresence {
+public class FacebookFriend extends AbstractFriendPresence implements Friend, FriendPresence {
     private final String id;
     private final JSONObject friend;
-    private final Map<Class, FeatureTransport> featureTransports;
+    private final Network network;
 
-    public FacebookFriend(String id, JSONObject friend) {
+    public FacebookFriend(String id, JSONObject friend, Network network,
+                          EventBroadcaster<FeatureEvent> featureSupport) {
+        super(featureSupport);
         this.id = id;
         this.friend = friend;
-        this.featureTransports = new ConcurrentHashMap<Class, FeatureTransport>();
+        this.network = network;
     }
     
     @Override
@@ -66,12 +70,54 @@ public class FacebookFriend implements Friend, FriendPresence {
 
     @Override
     public Network getNetwork() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return network;
     }
 
     @Override
     public Map<String, FriendPresence> getFriendPresences() {
         return Collections.singletonMap(getId(), (FriendPresence)this);
+    }
+
+    @Override
+    public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
+    }
+
+    @Override
+    public MessageWriter createChat(MessageReader reader) {
+        return null;
+    }
+
+    @Override
+    public void setChatListenerIfNecessary(IncomingChatListener listener) {
+    }
+
+    @Override
+    public void removeChatListener() {
+    }
+
+    @Override
+    public FriendPresence getActivePresence() {
+        return this;
+    }
+
+    @Override
+    public boolean hasActivePresence() {
+        return false;
+    }
+
+    @Override
+    public boolean isSignedIn() {
+        return true;
+    }
+
+    @Override
+    public Map<String, FriendPresence> getPresences() {
+        return Collections.singletonMap(getPresenceId(), (FriendPresence)this);
+    }
+
+    @Override
+    public boolean isSubscribed() {
+        return true;
     }
 
     @Override
@@ -85,47 +131,26 @@ public class FacebookFriend implements Friend, FriendPresence {
     }
 
     @Override
-    public Collection<Feature> getFeatures() {
-        return Collections.emptyList();
+    public Type getType() {
+        return Type.available;
     }
 
     @Override
-    public Feature getFeature(URI id) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public boolean hasFeatures(URI... id) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void addFeature(Feature feature) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void removeFeature(URI id) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-    
-    @Override
-    public <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature) {
-        java.lang.reflect.Type type = feature.getGenericSuperclass();
-        if(type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType)type;
-            java.lang.reflect.Type [] typeArgs = parameterizedType.getActualTypeArguments();
-            if(typeArgs != null && typeArgs.length > 0) {
-                java.lang.reflect.Type typeArg = typeArgs[0];
-                if(typeArg instanceof Class) {
-                    return (FeatureTransport<U>)featureTransports.get((Class) typeArg);    
-                }
-            }
+    public String getStatus() {
+        try {
+            return friend.getString("status");
+        } catch (JSONException e) {
+            return "";
         }
-        return null;
     }
-    
-    public <U> void addTransport(Class<U> clazz, FeatureTransport<U> transport) {
-        featureTransports.put(clazz, transport);    
+
+    @Override
+    public int getPriority() {
+        return 0;
+    }
+
+    @Override
+    public Mode getMode() {
+        return Mode.available;  // TODO figure out how fb does mode
     }
 }

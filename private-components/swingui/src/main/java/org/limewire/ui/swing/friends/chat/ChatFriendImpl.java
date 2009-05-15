@@ -5,13 +5,12 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.jdesktop.beans.AbstractBean;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -21,20 +20,20 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     private boolean chatting;
     private boolean activeConversation;
-    private final XMPPFriend user;
+    private final Friend user;
     private String status;
-    private Mode mode;
+    private FriendPresence.Mode mode;
     private long chatStartTime;
     private boolean hasUnviewedMessages;
 
-    ChatFriendImpl(final XMPPPresence presence) {
-        this.user = presence.getUser();
+    ChatFriendImpl(final FriendPresence presence) {
+        this.user = presence.getFriend();
         this.status = presence.getStatus();
         this.mode = presence.getMode();
     }
 
     @Override
-    public XMPPFriend getUser() {
+    public Friend getUser() {
         return user;
     }
     
@@ -44,12 +43,12 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
     }
 
     @Override
-    public Mode getMode() {
+    public FriendPresence.Mode getMode() {
         return mode;
     }
     
-    void setMode(Mode mode) {
-        Mode oldMode = getMode();
+    void setMode(FriendPresence.Mode mode) {
+        FriendPresence.Mode oldMode = getMode();
         this.mode = mode;
         firePropertyChange("mode", oldMode, mode);
     }
@@ -102,7 +101,7 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
     public void update() {
         // If there's an available presence, set to "Available"
         // If no available presence, use highest priority presence.
-        XMPPPresence presence = getPresenceForModeAndStatus();
+        FriendPresence presence = getPresenceForModeAndStatus();
         if (presence != null) {
             setStatus(presence.getStatus());
             setMode(presence.getMode());
@@ -134,7 +133,7 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public boolean isSignedInToLimewire() {
-        for (XMPPPresence presence : user.getPresences().values()) {
+        for (FriendPresence presence : user.getPresences().values()) {
             if (presence.getFeature(LimewireFeature.ID) != null) {
                 return true;
             }
@@ -159,19 +158,19 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
         firePropertyChange("receivingUnviewedMessages", oldHasUnviewedMessages, hasMessages);
     }
 
-    private XMPPPresence getPresenceForModeAndStatus() {
-        ArrayList<XMPPPresence> presences = new ArrayList<XMPPPresence>(user.getPresences().values());
+    private FriendPresence getPresenceForModeAndStatus() {
+        ArrayList<FriendPresence> presences = new ArrayList<FriendPresence>(user.getPresences().values());
         Collections.sort(presences, new ModeAndPriorityPresenceComparator());
         return presences.size() == 0 ? null : presences.get(presences.size()-1);
     }
     
-    private static class ModeAndPriorityPresenceComparator implements Comparator<XMPPPresence> {
+    private static class ModeAndPriorityPresenceComparator implements Comparator<FriendPresence> {
         @Override
-        public int compare(XMPPPresence o1, XMPPPresence o2) {
+        public int compare(FriendPresence o1, FriendPresence o2) {
             if (!o1.getMode().equals(o2.getMode())) {
-                if (o1.getMode() == XMPPPresence.Mode.available) {
+                if (o1.getMode() == FriendPresence.Mode.available) {
                     return 1;
-                } else if (o2.getMode() == XMPPPresence.Mode.available) {
+                } else if (o2.getMode() == FriendPresence.Mode.available) {
                     return -1;
                 }
             }

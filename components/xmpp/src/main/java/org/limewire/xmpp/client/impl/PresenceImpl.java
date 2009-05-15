@@ -1,27 +1,17 @@
 package org.limewire.xmpp.client.impl;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.lang.reflect.ParameterizedType;
 
+import org.limewire.core.api.friend.AbstractFriendPresence;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
-class PresenceImpl implements XMPPPresence {
+class PresenceImpl extends AbstractFriendPresence implements FriendPresence {
 
-    private final XMPPFriend user;
-    private final Map<URI, Feature> features;
-    private final Map<Class, FeatureTransport> featureTransports;
-    private final EventBroadcaster<FeatureEvent> featureBroadcaster;
+    private final Friend user;
     private final String jid;
     
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -33,11 +23,9 @@ class PresenceImpl implements XMPPPresence {
     
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
-                 XMPPFriend user, EventBroadcaster<FeatureEvent> featureSupport) {
+                 Friend user, EventBroadcaster<FeatureEvent> featureSupport) {
+        super(featureSupport);
         this.user = user;
-        this.features = new ConcurrentHashMap<URI, Feature>();
-        this.featureTransports = new ConcurrentHashMap<Class, FeatureTransport>();
-        this.featureBroadcaster = featureSupport;
         this.jid = presence.getFrom();
         update(presence);
     }
@@ -55,7 +43,7 @@ class PresenceImpl implements XMPPPresence {
     }
 
     @Override
-    public String getJID() {
+    public String getPresenceId() {
         return jid;
     }
 
@@ -101,75 +89,11 @@ class PresenceImpl implements XMPPPresence {
 
     @Override
     public String toString() {
-        return getJID() + " for " + user.toString();
-    }
-
-    @Override
-    public XMPPFriend getUser() {
-        return user;
-    }
-
-    @Override
-    public Collection<Feature> getFeatures() {
-        return features.values();
-    }
-
-    @Override
-    public Feature getFeature(URI id) {
-        return features.get(id);
-    }
-
-    @Override
-    public boolean hasFeatures(URI... id) {
-        for(URI uri : id) {
-            if(getFeature(uri) == null) {
-                return false;
-            }
-        }
-        return true;
+        return getPresenceId() + " for " + user.toString();
     }
 
     @Override
     public Friend getFriend() {
         return user;
-    }
-
-    @Override
-    public String getPresenceId() {
-        return getJID();
-    }
-
-    @Override
-    public void addFeature(Feature feature) {
-        features.put(feature.getID(), feature);
-        featureBroadcaster.broadcast(new FeatureEvent(this, FeatureEvent.Type.ADDED, feature));
-    }
-
-    @Override
-    public void removeFeature(URI id) {
-        Feature feature = features.remove(id);
-        if(feature != null) {
-            featureBroadcaster.broadcast(new FeatureEvent(this, FeatureEvent.Type.REMOVED, feature));
-        }
-    }
-
-    @Override
-    public <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature) {
-        java.lang.reflect.Type type = feature.getGenericSuperclass();
-        if(type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType)type;
-            java.lang.reflect.Type [] typeArgs = parameterizedType.getActualTypeArguments();
-            if(typeArgs != null && typeArgs.length > 0) {
-                java.lang.reflect.Type typeArg = typeArgs[0];
-                if(typeArg instanceof Class) {
-                    return (FeatureTransport<U>)featureTransports.get((Class) typeArg);    
-                }
-            }
-        }
-        return null;
-    }
-    
-    public <U> void addTransport(Class<U> clazz, FeatureTransport<U> transport) {
-        featureTransports.put(clazz, transport);    
     }
 }

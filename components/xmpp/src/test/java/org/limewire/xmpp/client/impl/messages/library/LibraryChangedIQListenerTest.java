@@ -6,14 +6,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jivesoftware.smack.packet.IQ.Type;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.LibraryChanged;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.core.api.friend.client.FriendConnection;
 
 public class LibraryChangedIQListenerTest extends BaseTestCase {
 
@@ -41,7 +41,7 @@ public class LibraryChangedIQListenerTest extends BaseTestCase {
         libraryChangedIQ.setType(Type.SET);
         libraryChangedIQ.setFrom("me@you.com/ldkfjd");
         
-        final XMPPFriend user = context.mock(XMPPFriend.class);
+        final Friend user = context.mock(Friend.class);
         final FriendPresence friendPresence = context.mock(FriendPresence.class);
 
         final AtomicReference<LibraryChangedEvent> event = new AtomicReference<LibraryChangedEvent>();

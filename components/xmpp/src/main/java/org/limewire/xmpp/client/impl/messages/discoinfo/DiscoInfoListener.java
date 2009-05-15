@@ -11,6 +11,7 @@ import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
@@ -18,8 +19,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.core.api.friend.client.FriendConnection;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPPresence;
 
 /**
  * sends disco info messages (http://jabber.org/protocol/disco#info) to newly available
@@ -49,7 +48,7 @@ public class DiscoInfoListener implements PacketListener {
     @Override
     public void processPacket(Packet packet) {
         DiscoverInfo discoverInfo = (DiscoverInfo)packet;
-        XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(discoverInfo.getFrom()));
+        Friend user = connection.getUser(StringUtils.parseBareAddress(discoverInfo.getFrom()));
         if (user != null) {
             FriendPresence presence = user.getFriendPresences().get(discoverInfo.getFrom());
             if(presence != null) {
@@ -90,20 +89,20 @@ public class DiscoInfoListener implements PacketListener {
         @Override
         public void handleEvent(final PresenceEvent event) {
             if(event.getType() == PresenceEvent.Type.PRESENCE_NEW
-                    && event.getData().getType() == XMPPPresence.Type.available) {
+                    && event.getData().getType() == FriendPresence.Type.available) {
                 Thread t = ThreadExecutor.newManagedThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(smackConnection);
-                            serviceDiscoveryManager.discoverInfo(event.getData().getJID());
+                            serviceDiscoveryManager.discoverInfo(event.getData().getPresenceId());
                         } catch (org.jivesoftware.smack.XMPPException exception) {
                             if(exception.getXMPPError() != null && exception.getXMPPError().getCode() != 501) {
                                 LOG.info(exception.getMessage(), exception);
                             }
                         }
                     }
-                }, "disco-info-" + event.getData().getJID());
+                }, "disco-info-" + event.getData().getPresenceId());
                 t.start();
             }
         }

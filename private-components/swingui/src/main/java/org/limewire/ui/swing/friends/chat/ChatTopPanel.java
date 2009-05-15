@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.chat;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -21,24 +19,25 @@ import javax.swing.Action;
 import javax.swing.JLabel;
 import javax.swing.ToolTipManager;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.GuiUtils;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.util.Objects;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 
 import com.google.inject.Inject;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * The top border of the chat panel, for minimizing the chat window
@@ -134,7 +133,7 @@ public class ChatTopPanel extends JXPanel {
         this.minimizeAction = minimizeAction;
     }
     
-    private String getAvailabilityHTML(Mode mode) {
+    private String getAvailabilityHTML(FriendPresence.Mode mode) {
         return "<html><img src=\"" + ChatFriendsUtil.getIconURL(mode) + "\" /></html>";
     }
     

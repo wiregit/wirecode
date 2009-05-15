@@ -5,8 +5,8 @@ import java.util.Collection;
 
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
-import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 
@@ -44,7 +44,7 @@ public class MockFriendConnection implements FriendConnection {
     }
 
     @Override
-    public ListeningFuture<Void> setMode(Mode mode) {
+    public ListeningFuture<Void> setMode(FriendPresence.Mode mode) {
         return new SimpleFuture<Void>((Void)null);
     }
 
@@ -59,13 +59,13 @@ public class MockFriendConnection implements FriendConnection {
     }
 
     @Override
-    public XMPPFriend getUser(String id) {
+    public Friend getUser(String id) {
         return null;
     }
 
     @Override
-    public Collection<XMPPFriend> getUsers() {
-        return new ArrayList<XMPPFriend>();
+    public Collection<Friend> getUsers() {
+        return new ArrayList<Friend>();
     }
 
 }

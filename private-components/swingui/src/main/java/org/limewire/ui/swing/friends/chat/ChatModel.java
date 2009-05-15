@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.client.FileOffer;
 import org.limewire.core.api.friend.client.FileOfferEvent;
@@ -15,8 +16,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.chat.Message.Type;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
@@ -149,8 +148,8 @@ public class ChatModel {
 	 * Updates the list of ChatFriends as presences sign on and off.
 	 */
     private void handlePresenceEvent(FriendPresenceEvent event) {
-        final XMPPPresence presence = (XMPPPresence)event.getData();
-        final XMPPFriend user = presence.getUser();
+        final FriendPresence presence = event.getData();
+        final Friend user = presence.getFriend();
         ChatFriend chatFriend = idToFriendMap.get(user.getId());
         switch(event.getType()) {
         case ADDED:
@@ -193,11 +192,11 @@ public class ChatModel {
 	 * This listener ensures that the ChatPanel has been created prior to 
 	 * firing a ConversationEvent.
      */
-    private void addFriend(ChatFriend chatFriend, final XMPPPresence presence) {
+    private void addFriend(ChatFriend chatFriend, final FriendPresence presence) {
         if(chatFriend == null) {
             chatFriend = new ChatFriendImpl(presence);
             chatFriends.add(chatFriend);
-            idToFriendMap.put(presence.getUser().getId(), chatFriend);
+            idToFriendMap.put(presence.getFriend().getId(), chatFriend);
         }
 
         final ChatFriend chatFriendForIncomingChat = chatFriend;
@@ -213,7 +212,7 @@ public class ChatModel {
                 return new MessageReaderImpl(chatFriendForIncomingChat);
             }
         };
-        presence.getUser().setChatListenerIfNecessary(incomingChatListener);
+        presence.getFriend().setChatListenerIfNecessary(incomingChatListener);
         chatFriend.update();
     }
 }

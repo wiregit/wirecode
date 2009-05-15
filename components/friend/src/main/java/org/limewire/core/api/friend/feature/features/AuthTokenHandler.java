@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
@@ -21,7 +22,6 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -64,7 +64,7 @@ public class AuthTokenHandler implements FeatureTransport.Handler<AuthToken>{
     public void featureReceived(String from, final AuthToken feature) {
         for(FriendConnection connection : connections) {
             synchronized (this) {
-                XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(from));
+                Friend user = connection.getUser(StringUtils.parseBareAddress(from));
                 if (user != null) {
                     FriendPresence presence = user.getFriendPresences().get(from);
                     if(presence != null) {

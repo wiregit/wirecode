@@ -3,8 +3,8 @@ package org.limewire.core.api.friend.client;
 import java.util.Collection;
 
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPPresence;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 
 public interface FriendConnection {
     
@@ -47,7 +47,7 @@ public interface FriendConnection {
      * The ExecutionException will be to an XMPPException
      * if there is an error sending the xmpp message
      */
-    public ListeningFuture<Void> setMode(XMPPPresence.Mode mode);
+    public ListeningFuture<Void> setMode(FriendPresence.Mode mode);
 
     /**
      * Add a user to the friend list
@@ -78,11 +78,11 @@ public interface FriendConnection {
      * 
      * @return null if id is not registered on this connection
      */
-    public XMPPFriend getUser(String id);
+    public Friend getUser(String id);
 
     /**
      * @return a copy of the current Collection of Users. Does NOT stay up to
      * date with changes.
      */
-    public Collection<XMPPFriend> getUsers();
+    public Collection<Friend> getUsers();
 }

@@ -5,6 +5,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,13 +30,13 @@ import org.json.JSONObject;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPPresence;
 
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -60,6 +62,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final AtomicBoolean loggedIn = new AtomicBoolean(false);
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
     private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
+    private final Map<String, FacebookFriend> friends;
 
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
@@ -69,6 +72,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
         httpClient = new AuthTokenInterceptingHttpClient();
+        this.friends = new TreeMap<String, FacebookFriend>(String.CASE_INSENSITIVE_ORDER);
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));
     }
 
@@ -210,11 +214,11 @@ public class FacebookFriendConnection implements FriendConnection {
 
     @Override
     public FriendConnectionConfiguration getConfiguration() {
-        return null;
+        return configuration;
     }
 
     @Override
-    public ListeningFuture<Void> setMode(XMPPPresence.Mode mode) {
+    public ListeningFuture<Void> setMode(FriendPresence.Mode mode) {
         return null;
     }
 
@@ -229,13 +233,23 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     @Override
-    public XMPPFriend getUser(String id) {
-        return null;
+    public Friend getUser(String id) {
+        return friends.get(id);
+    }
+
+    void userAvailable(String id, FacebookFriend friend) {
+        this.friends.put(id, friend);
+    }
+
+    void userUnavailable(String id) {
+        this.friends.remove(id);
     }
 
     @Override
-    public Collection<XMPPFriend> getUsers() {
-        return null;
+    public Collection<Friend> getUsers() {
+        synchronized (friends) {
+            return new ArrayList<Friend>(friends.values());
+        }
     }
 
     public String getAuthToken() {

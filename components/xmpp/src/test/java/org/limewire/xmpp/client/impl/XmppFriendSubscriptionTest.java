@@ -4,10 +4,10 @@ import java.util.concurrent.ExecutionException;
 
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnection;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.core.api.friend.client.FriendRequest;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.EventListener;
 import com.google.inject.TypeLiteral;
@@ -209,7 +209,7 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
     }
 
     private void removeAllUsersFromRoster(FriendConnection conn) throws FriendException, ExecutionException, InterruptedException {
-        for (XMPPFriend user : conn.getUsers()) {
+        for (Friend user : conn.getUsers()) {
             conn.removeUser(user.getId()).get();
         }
     }

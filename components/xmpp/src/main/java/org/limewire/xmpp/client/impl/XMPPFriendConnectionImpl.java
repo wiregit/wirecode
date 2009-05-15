@@ -22,11 +22,14 @@ import org.jivesoftware.smackx.ChatStateManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FileOfferEvent;
+import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.AuthToken;
@@ -41,9 +44,6 @@ import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
 import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.xmpp.client.impl.features.LimewireFeatureInitializer;
@@ -138,7 +138,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         return org.limewire.util.StringUtils.toString(this, configuration, connection);
     }
     
-    public ListeningFuture<Void> setMode(final XMPPPresence.Mode mode) {
+    public ListeningFuture<Void> setMode(final FriendPresence.Mode mode) {
         return executorService.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -148,7 +148,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         });   
     }    
 
-    void setModeImpl(XMPPPresence.Mode mode) throws FriendException {
+    void setModeImpl(FriendPresence.Mode mode) throws FriendException {
         synchronized (this) {
             try {
                 checkLoggedIn();
@@ -159,7 +159,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         }
     }
 
-    private Packet getPresenceForMode(XMPPPresence.Mode mode) {
+    private Packet getPresenceForMode(FriendPresence.Mode mode) {
         org.jivesoftware.smack.packet.Presence presence = new org.jivesoftware.smack.packet.Presence(
                 org.jivesoftware.smack.packet.Presence.Type.available);
         presence.setMode(org.jivesoftware.smack.packet.Presence.Mode.valueOf(mode.name()));
@@ -341,7 +341,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         public void entriesDeleted(Collection<String> removedIds) {
             synchronized (users) {
                 for(String id : removedIds) {
-                    XMPPFriend user = users.remove(id);
+                    Friend user = users.remove(id);
                     if(user != null) {
                         LOG.debugf("user {0} removed", user);
                         rosterListeners.broadcast(new RosterEvent(user, RosterEvent.Type.USER_DELETED));
@@ -466,7 +466,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     }
 
     @Override
-    public XMPPFriend getUser(String id) {
+    public Friend getUser(String id) {
         id = org.jivesoftware.smack.util.StringUtils.parseBareAddress(id);
         synchronized (users) { 
             return users.get(id);
@@ -474,9 +474,9 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     }
 
     @Override
-    public Collection<XMPPFriend> getUsers() {
+    public Collection<Friend> getUsers() {
         synchronized (users) { 
-            return new ArrayList<XMPPFriend>(users.values());
+            return new ArrayList<Friend>(users.values());
         }
     }
 

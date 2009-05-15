@@ -1,15 +1,10 @@
 package org.limewire.core.impl.friend;
 
 import java.net.InetAddress;
-import java.net.URI;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
+import org.limewire.core.api.friend.AbstractFriendPresence;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.Address;
@@ -24,7 +19,7 @@ import com.limegroup.gnutella.PushEndpoint;
  * a GnutellaPresence can be created for a Connection, which is supplied to
  * the RemoteLibraryManager to add and browse the presence.
  */
-public class GnutellaPresence implements FriendPresence {
+public class GnutellaPresence extends AbstractFriendPresence implements FriendPresence {
     
     private final Friend friend;
     private final String id;
@@ -91,16 +86,13 @@ public class GnutellaPresence implements FriendPresence {
             "Grunion", "Grouper", "Guppy", "Gulper", "Crab", "Lobster", "Halibut", "Hagfish",
             "Horsefish", "Seahorse", "Jellyfish", "Killifish", "Trout", "Pike", "Ray", "Razorfish",
             "Ragfish", "Hamster", "Gerbil", "Mouse", "Gnome", "Shark", "Snail", "Skilfish" };
-    
-    /** Map of features supported by this presence. */
-    private final Map<URI, Feature> features = new HashMap<URI, Feature>(1);
 
     /**
      * Constructs a GnutellaPresence with the specified address and id.
      */
     public GnutellaPresence(Address address, String id) {
         this.id = id;
-        this.features.put(AddressFeature.ID, new AddressFeature(address));
+        addFeature(new AddressFeature(address));
         this.friend = new GnutellaFriend(describe(address),
                 describeFriendly(address), id, this);
     }
@@ -137,21 +129,6 @@ public class GnutellaPresence implements FriendPresence {
             return address.getAddressDescription();
         }
     }
-    
-    @Override
-    public void addFeature(Feature feature) {
-        features.put(feature.getID(), feature);
-    }
-
-    @Override
-    public Feature getFeature(URI id) {
-        return features.get(id);
-    }
-
-    @Override
-    public Collection<Feature> getFeatures() {
-        return features.values();
-    }
 
     @Override
     public Friend getFriend() {
@@ -164,22 +141,22 @@ public class GnutellaPresence implements FriendPresence {
     }
 
     @Override
-    public boolean hasFeatures(URI... id) {
-        for (URI uri : id) {
-            if (getFeature(uri) == null) {
-                return false;
-            }
-        }
-        return true;
+    public Type getType() {
+        return Type.available;
     }
 
     @Override
-    public void removeFeature(URI id) {
-        features.remove(id);
+    public String getStatus() {
+        return "";
     }
 
     @Override
-    public <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public int getPriority() {
+        return 0;
+    }
+
+    @Override
+    public Mode getMode() {
+        return Mode.available;
     }
 }

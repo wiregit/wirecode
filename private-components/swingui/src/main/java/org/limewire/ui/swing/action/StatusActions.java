@@ -9,6 +9,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 
 import org.limewire.concurrent.FutureEvent;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
@@ -21,7 +22,6 @@ import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 
 import com.google.inject.Inject;
 
@@ -51,7 +51,7 @@ public class StatusActions {
             public void actionPerformed(ActionEvent e) {
                 XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
                 if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
-                    connection.getSource().setMode(Mode.available).addFutureListener(new EventListener<FutureEvent<Void>>() {
+                    connection.getSource().setMode(FriendPresence.Mode.available).addFutureListener(new EventListener<FutureEvent<Void>>() {
                         @Override
                         public void handleEvent(FutureEvent<Void> event) {
                             if(event.getType() == FutureEvent.Type.SUCCESS) {
@@ -73,7 +73,7 @@ public class StatusActions {
             public void actionPerformed(ActionEvent e) {
                 XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
                 if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
-                    connection.getSource().setMode(Mode.dnd).addFutureListener(new EventListener<FutureEvent<Void>>() {
+                    connection.getSource().setMode(FriendPresence.Mode.dnd).addFutureListener(new EventListener<FutureEvent<Void>>() {
                         @Override
                         public void handleEvent(FutureEvent<Void> event) {
                             if(event.getType() == FutureEvent.Type.SUCCESS) {

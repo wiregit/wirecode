@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.Map.Entry;
 
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent.Type;
@@ -25,7 +26,6 @@ import org.limewire.net.address.AddressResolver;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -89,7 +89,7 @@ public class XMPPAddressResolver implements AddressResolver {
         XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
         if(connection == null || connection.getType() != XMPPConnectionEvent.Type.CONNECTED)
             return null;
-        XMPPFriend user = connection.getSource().getUser(id);
+        Friend user = connection.getSource().getUser(id);
         if(user != null) {
             for(Entry<String, FriendPresence> entry : user.getFriendPresences().entrySet()) {
                 FriendPresence resolvedPresence =

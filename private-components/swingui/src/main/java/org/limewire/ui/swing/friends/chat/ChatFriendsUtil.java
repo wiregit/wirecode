@@ -4,16 +4,16 @@ import java.net.URL;
 
 import javax.swing.Icon;
 
-import org.limewire.xmpp.api.client.XMPPPresence;
+import org.limewire.core.api.friend.FriendPresence;
 
 class ChatFriendsUtil {
 
     public static Icon getIcon(ChatFriend chatFriend, IconLibrary icons) {
-        XMPPPresence.Mode mode = chatFriend.getMode(); 
+        FriendPresence.Mode mode = chatFriend.getMode();
         return getIcon(mode, icons);
     }
 
-    public static Icon getIcon(XMPPPresence.Mode mode, IconLibrary icons) {
+    public static Icon getIcon(FriendPresence.Mode mode, IconLibrary icons) {
         switch(mode) {
         case available:
             return icons.getAvailable();
@@ -25,7 +25,7 @@ class ChatFriendsUtil {
         return icons.getAway();
     }
     
-    public static String getIconURL(XMPPPresence.Mode mode) {
+    public static String getIconURL(FriendPresence.Mode mode) {
         switch(mode) {
         case available:
             return getURL("/org/limewire/ui/swing/mainframe/resources/icons/friends/available.png");

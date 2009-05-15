@@ -12,13 +12,15 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.ConnectBackRequestSender;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.inspection.Inspectable;
@@ -37,9 +39,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.XMPPPresence.Mode;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
 
 import com.google.inject.Inject;
@@ -77,10 +76,10 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
                 FriendConnection connection = getActiveConnection();
                 InspectionHistogram<Integer> presencesHistogram = new InspectionHistogram<Integer>();
                 if (connection != null) {
-                    for (XMPPFriend user : connection.getUsers()) {
-                        Map<String, XMPPPresence> presences = user.getPresences();
+                    for (Friend user : connection.getUsers()) {
+                        Map<String, FriendPresence> presences = user.getPresences();
                         presencesHistogram.count(presences.size());
-                        for (XMPPPresence presence : presences.values()) {
+                        for (FriendPresence presence : presences.values()) {
                             if (presence.hasFeatures(LimewireFeature.ID)) {
                                 count++;
                                 // break from inner presence loop, count each user only once
@@ -128,14 +127,14 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
                 switch(event.getSource()) {
                 case Idle:
                     try {
-                        setModeImpl(Mode.xa);
+                        setModeImpl(FriendPresence.Mode.xa);
                     } catch (FriendException e) {
                         LOG.debugf(e, "couldn't set mode based on {0}", event);
                     }
                     break;
                 case Active:
                     try {
-                        setModeImpl(jabberSettings.isDoNotDisturbSet() ? Mode.dnd : Mode.available);
+                        setModeImpl(jabberSettings.isDoNotDisturbSet() ? FriendPresence.Mode.dnd : FriendPresence.Mode.available);
                     } catch (FriendException e) {
                         LOG.debugf(e, "couldn't set mode based on {0}", event);
                     }
@@ -209,7 +208,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
                 connections.add(connection);
                 connection.loginImpl();
                 //maintain the last set login state available or do not disturb
-                connection.setModeImpl(jabberSettings.isDoNotDisturbSet() ? XMPPPresence.Mode.dnd : XMPPPresence.Mode.available);
+                connection.setModeImpl(jabberSettings.isDoNotDisturbSet() ? FriendPresence.Mode.dnd : FriendPresence.Mode.available);
                 return connection;
             } catch(FriendException e) {
                 connections.remove(connection);
@@ -264,11 +263,11 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
         if (connection == null) {
             return false;
         }
-        XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(userId));
+        Friend user = connection.getUser(StringUtils.parseBareAddress(userId));
         if (user == null) {
             return false;
         }
-        XMPPPresence presence = user.getPresences().get(userId);
+        FriendPresence presence = user.getPresences().get(userId);
         if (presence == null) {
             return false;
         }
@@ -288,7 +287,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
         return true;
     }
 
-    private void setModeImpl(Mode mode) throws FriendException {
+    private void setModeImpl(FriendPresence.Mode mode) throws FriendException {
         for(XMPPFriendConnectionImpl connection : connections) {
             connection.setModeImpl(mode);
         }

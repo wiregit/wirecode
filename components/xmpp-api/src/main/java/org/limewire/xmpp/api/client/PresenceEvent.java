@@ -1,11 +1,12 @@
 package org.limewire.xmpp.api.client;
 
 import org.limewire.listener.DefaultDataTypeEvent;
+import org.limewire.core.api.friend.FriendPresence;
 
 /**
  * This event is dispatched when a chat presence is added or updated
  */
-public class PresenceEvent extends DefaultDataTypeEvent<XMPPPresence, PresenceEvent.Type> {
+public class PresenceEvent extends DefaultDataTypeEvent<FriendPresence, PresenceEvent.Type> {
 
     public static enum Type {
         /**
@@ -20,7 +21,7 @@ public class PresenceEvent extends DefaultDataTypeEvent<XMPPPresence, PresenceEv
         PRESENCE_UPDATE
     }
 
-    public PresenceEvent(XMPPPresence data, Type event) {
+    public PresenceEvent(FriendPresence data, Type event) {
         super(data, event);
     }
 }

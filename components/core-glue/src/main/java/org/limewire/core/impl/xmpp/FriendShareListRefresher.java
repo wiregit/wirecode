@@ -22,7 +22,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -91,7 +90,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                 fileManagerLoaded.set(true);
                 XMPPConnectionEvent connection = connectionEventBean.getLastEvent();
                 if(connection != null && connection.getType() == XMPPConnectionEvent.Type.CONNECTED) {
-                    Collection<XMPPFriend> friends = connection.getSource().getUsers();
+                    Collection<Friend> friends = connection.getSource().getUsers();
                     for(Friend friend : friends) {
                         tracker.sentRefresh(friend.getId());
                         Map<String, FriendPresence> presences = friend.getFriendPresences();
