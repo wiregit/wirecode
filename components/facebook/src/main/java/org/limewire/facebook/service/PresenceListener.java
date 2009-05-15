@@ -27,7 +27,7 @@ public class PresenceListener implements Runnable {
     
     private final EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster;
     private final FacebookFriendConnection connection;
-    private final BuddyListResponseDeserializerFactory buddyListResponseDeserializerFactory;
+    private final BuddyListResponseDeserializer deserializer;
 
     private final MutableFriendManager friendManager;
     
@@ -39,7 +39,7 @@ public class PresenceListener implements Runnable {
         this.friendManager = friendManager;
         this.friendPresenceBroadcaster = friendPresenceBroadcaster;
         this.connection = connection;
-        this.buddyListResponseDeserializerFactory = buddyListResponseDeserializerFactory;
+        deserializer = buddyListResponseDeserializerFactory.create(connection);
     }
 
     public void run() {
@@ -60,8 +60,7 @@ public class PresenceListener implements Runnable {
                 return;
             } 
             LOG.debugf("buddy list response: {0}", responseStr);
-                
-            BuddyListResponseDeserializer deserializer = buddyListResponseDeserializerFactory.create(connection);
+
             Map<String, FacebookFriend> onlineFriends = deserializer.deserialize(responseStr);
             for(Friend friend : connection.getUsers()) {
                 if(!onlineFriends.containsKey(friend.getId())) {

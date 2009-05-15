@@ -1,15 +1,21 @@
 package org.limewire.facebook.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.core.api.friend.feature.FeatureInitializer;
+import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -22,13 +28,17 @@ import com.google.inject.name.Named;
 public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     private final Provider<String> apiKey;
     private final FacebookFriendConnection connection;
+    private final FeatureRegistry featureRegistry;
     private final Map<String, String> friends = new HashMap<String, String>();
 
     @AssistedInject
     LiveMessageDiscoInfoTransport(@Assisted FacebookFriendConnection connection,
-                         @Named("facebookApiKey") Provider<String> apiKey) {
+                                  @Named("facebookApiKey") Provider<String> apiKey,
+                                  FeatureRegistry featureRegistry) {
         this.apiKey = apiKey;
         this.connection = connection;
+        this.featureRegistry = featureRegistry; // TODO FeatureRegistry is a global
+        // TODO singleton, needs ot be per FriendConnection
     }
 
     @Override
@@ -39,21 +49,62 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
 
     @Override
     public String getMessageType() {
-        return "disco-info";
+        return "disco_info";
     }
 
     @Override
-    public void handle(JSONObject message) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void handle(JSONObject message) throws JSONException {  
+        try {
+            if(message.getString("event_name").equals("disco_info_response")) {
+                String from  = message.getString("from");
+                if(from != null) {
+                    FacebookFriend friend = (FacebookFriend)connection.getUser(from);
+                    if(friend != null) {
+                        JSONArray features = message.getJSONArray("features");     
+                        for(int i = 0; i < features.length(); i++) {
+                            String feature = features.getString(i);
+                            FeatureInitializer initializer = featureRegistry.get(new URI(feature));
+                            if(initializer != null) {
+                                initializer.initializeFeature(friend);
+                            }
+                        }
+                    }
+                }                           
+            } else if(message.getString("event_name").equals("disco_info")) {
+                String from  = message.getString("from");
+                if(from != null) {
+                    FacebookFriend friend = (FacebookFriend)connection.getUser(from);
+                    if(friend != null) {
+                        // TODO replace with ServiceDiscoveryManager like thing
+                        List<String> supported = new ArrayList<String>();
+                        for(URI feature : featureRegistry) {
+                            supported.add(feature.toASCIIString());
+                        }
+                        FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
+                            connection.getSecret(), connection.getSession());
+                        JSONObject response = new JSONObject("response");
+                        Map<String, String> responseMap = new HashMap<String, String>();
+                        response.put("from", connection.getUID());
+                        response.put("features", supported);
+                        client.liveMessage_send(Long.parseLong(from), "disco_info_response",
+                                        response);
+                    }
+                }
+            }
+        } catch (URISyntaxException e) {
+            throw new JSONException(e);
+        } catch (FacebookException e) {
+            throw new JSONException(e);
+        }
     }
     
     @Inject
     public void register(@Named("available") ListenerSupport<FriendEvent> availableFriends,
-                         ListenerSupport<XMPPConnectionEvent> connectionEventListenerSupport) {
-        connectionEventListenerSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+                         ListenerSupport<FriendConnectionEvent> connectionEventListenerSupport) {
+        connectionEventListenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
-            public void handleEvent(XMPPConnectionEvent event) {
-                if(event.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+            public void handleEvent(FriendConnectionEvent event) {
+                if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
                     FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
                     connection.getSecret(), connection.getSession());
                     try {

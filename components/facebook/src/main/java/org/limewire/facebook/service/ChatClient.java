@@ -152,7 +152,11 @@ public class ChatClient {
                     from = res.getString("from");                        
                 }
                 if(ms.getJSONObject(0).has("event_name")) {
-                    String messageType = ms.getJSONObject(0).getString("event_name");
+                    String eventName = ms.getJSONObject(0).getString("event_name");
+                    if(eventName.endsWith("_response")) {
+                        eventName = eventName.substring(0, eventName.indexOf("_response"));
+                    }
+                    String messageType = eventName;
                     LiveMessageHandler handler = handlerRegistry.getHandler(messageType);
                     if(handler != null) {
                         handler.handle(ms.getJSONObject(0));
