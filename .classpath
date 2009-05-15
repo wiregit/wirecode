@@ -134,8 +134,6 @@
 	<classpathentry kind="lib" path="lib/jars/EventBus-1.2b.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/javax.servlet-5.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/org.mortbay.jetty-5.1.12.jar"/>
-	<classpathentry kind="lib" path="lib/jars/swing-worker-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/jars/swingx-0.9.4.jar" sourcepath="lib/sources/swingx-0.9.4-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jaudiotagger.jar"/>
 	<classpathentry kind="lib" path="lib/jars/windows/jacob-1.14.3.jar"/>
@@ -148,5 +146,7 @@
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0.jar" sourcepath="lib/sources/httpcomponents-core-4.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/jxlayer-4.0.jar" sourcepath="lib/sources/jxlayer-4.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/miglayout-3.7-swing.jar" sourcepath="lib/sources/miglayout-3.7-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jars/swing-worker-1.2.jar" sourcepath="lib/sources/swing-worker-src-1.2.zip"/>
+	<classpathentry kind="lib" path="lib/jars/swingx-0.9.7.jar" sourcepath="lib/sources/swingx-0.9.7-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
