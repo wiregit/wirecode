@@ -43,6 +43,9 @@ public class DownloadPopupHandler implements TablePopupHandler {
 
         int popupRow = table.rowAtPoint(new Point(x, y));
         DownloadItem selectedItem = table.getDownloadItem(popupRow);
+        if(selectedItem == null)
+            return;
+        
         List<DownloadItem> selectedItems = table.getSelectedItems();
 
         if (selectedItems.size() <= 1 || !selectedItems.contains(selectedItem)) {

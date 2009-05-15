@@ -84,7 +84,7 @@ public class DownloadTable extends MouseableTable {
     public void selectAndScrollTo(URN urn) {        
         for(int y=0; y < model.getRowCount(); y++) {
             DownloadItem item = getDownloadItem(y);
-            if(urn.equals(item.getUrn())) {
+            if(item != null && urn.equals(item.getUrn())) {
                 getSelectionModel().setSelectionInterval(y, y);
                 ensureRowVisible(y);
                 break;
@@ -135,7 +135,7 @@ public class DownloadTable extends MouseableTable {
     
     private void launch(int row){
         DownloadItem item = getDownloadItem(row);
-        if(item.isLaunchable()) {
+        if(item != null && item.isLaunchable()) {
             DownloadItemUtils.launch(item);
         }
     }
