@@ -22,6 +22,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -125,7 +126,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
             trackerURL = btData.getAnnounce();
 
-            sha1 = TorrentSHA1ConversionUtils.toHexString(btData.getInfoHash());
+            sha1 = StringUtils.toHexString(btData.getInfoHash());
 
         } finally {
             IOUtils.close(fileChannel);

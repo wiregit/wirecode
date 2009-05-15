@@ -20,9 +20,9 @@ import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentEvent;
 import org.limewire.libtorrent.TorrentManager;
-import org.limewire.libtorrent.TorrentSHA1ConversionUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -385,7 +385,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     String sha1 = torrent.getSha1();
                     if (sha1 != null) {
                         try {
-                            urn = URN.createSHA1UrnFromBytes(TorrentSHA1ConversionUtils
+                            urn = URN.createSHA1UrnFromBytes(StringUtils
                                     .fromHexString(sha1));
                         } catch (IOException e) {
                             throw new RuntimeException(e);
@@ -500,7 +500,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         String torrentPath = memento.getTorrentPath();
         File torrentFile = torrentPath != null ? new File(torrentPath) : null;
-        torrent.init(memento.getName(), TorrentSHA1ConversionUtils.toHexString(urn.getBytes()),
+        torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()),
                 memento.getContentLength(), memento.getTrackerURL(), memento.getPaths(), memento
                         .getSaveFile(), fastResumeFile, torrentFile);
         torrentManager.get().registerTorrent(torrent);
@@ -524,7 +524,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         byte[] infoHash = btmetainfo.getInfoHash();
 
-        String sha1 = TorrentSHA1ConversionUtils.toHexString(infoHash);
+        String sha1 = StringUtils.toHexString(infoHash);
 
         torrent.init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(),
                 null, null);

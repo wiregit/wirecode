@@ -9,8 +9,8 @@ import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentEvent;
-import org.limewire.libtorrent.TorrentSHA1ConversionUtils;
 import org.limewire.listener.EventListener;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -208,7 +208,7 @@ public class BTUploader implements Uploader {
             synchronized (this) {
                 if (urn == null) {
                     try {
-                        urn = URN.createSHA1UrnFromBytes(TorrentSHA1ConversionUtils
+                        urn = URN.createSHA1UrnFromBytes(StringUtils
                                 .fromHexString(torrent.getSha1()));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
