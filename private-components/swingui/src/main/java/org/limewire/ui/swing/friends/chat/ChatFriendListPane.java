@@ -483,7 +483,10 @@ public class ChatFriendListPane extends JPanel {
                 chatStatus.setToolTipText(null);
                 panel.add(chatStatus);
             }
-            friendName.setText(value.toString());
+            if(value != null)
+                friendName.setText(value.toString());
+            else
+                friendName.setText("");
             panel.add(friendName);
         }
     }

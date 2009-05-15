@@ -20,7 +20,7 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        if(value != null && value instanceof DownloadItem) {
+        if(value instanceof DownloadItem) {
             DownloadItem item = (DownloadItem)value;
             return super.getTableCellRendererComponent(table, getPercentMessage(item) + getMessage(item.getState(), item), isSelected, false, row, column);
         } else {

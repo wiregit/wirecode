@@ -77,15 +77,23 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     @Override
     public Component doTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        configure((LocalFileItem)value, isSelected);
-        return this;
+        if(value instanceof LocalFileItem) {
+            configure((LocalFileItem)value, isSelected);
+            return this;
+        } else {
+            return emptyPanel;
+        }
     }
 
     @Override
     public Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
-        configure((LocalFileItem)value, true);
-        return this;
+        if(value instanceof LocalFileItem) {
+            configure((LocalFileItem)value, true);
+            return this;
+        } else {
+            return emptyPanel;
+        }
     }
     
     @Override

@@ -46,9 +46,14 @@ public class DownloadTitleRenderer extends JXPanel implements TableCellRenderer 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        DownloadItem item = (DownloadItem)value;
-        updateIcon(item.getState(), item);
-        updateTitle(item);
+        if(value instanceof DownloadItem) {
+            DownloadItem item = (DownloadItem)value;
+            updateIcon(item.getState(), item);
+            updateTitle(item);
+        } else {
+            iconLabel.setIcon(null);
+            titleLabel.setText("");
+        }
         return this;
     }
     

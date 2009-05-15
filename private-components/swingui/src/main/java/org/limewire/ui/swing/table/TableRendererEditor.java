@@ -17,7 +17,7 @@ import org.jdesktop.swingx.JXPanel;
 public abstract class TableRendererEditor extends JXPanel implements TableCellRenderer, TableCellEditor {
 
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
-    private final JPanel emptyPanel = new JXPanel();
+    protected final JPanel emptyPanel = new JXPanel();
 
     @Override
     public final void addCellEditorListener(CellEditorListener lis) {

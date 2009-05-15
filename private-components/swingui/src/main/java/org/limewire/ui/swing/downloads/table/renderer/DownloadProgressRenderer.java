@@ -49,9 +49,14 @@ public class DownloadProgressRenderer extends JXPanel implements TableCellRender
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        DownloadItem item = (DownloadItem)value;
-        updateProgress(item.getState(), item.getPercentComplete());
-        updateTime(item.getState(), item);
+        if(value instanceof DownloadItem) {
+            DownloadItem item = (DownloadItem)value;
+            updateProgress(item.getState(), item.getPercentComplete());
+            updateTime(item.getState(), item);
+        } else {
+            updateProgress(DownloadState.ERROR, 0);
+            timeLabel.setVisible(false);
+        }
         return this;
     }
     

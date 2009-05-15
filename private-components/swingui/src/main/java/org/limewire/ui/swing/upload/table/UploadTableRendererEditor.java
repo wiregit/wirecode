@@ -106,16 +106,24 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     @Override
     public Component doTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        update((UploadItem)value);
-        return this;
+        if(value instanceof UploadItem) {
+            update((UploadItem)value);
+            return this;
+        } else {
+            return emptyPanel;
+        }
     }
 
     @Override
     public Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
-        editItemReference = new WeakReference<UploadItem>((UploadItem)value);
-        update(editItemReference.get());
-        return this;
+        if(value instanceof UploadItem) {
+            editItemReference = new WeakReference<UploadItem>((UploadItem)value);
+            update(editItemReference.get());
+            return this;
+        } else {
+            return emptyPanel;
+        }
     }
     
     private void initializeComponents(ProgressBarDecorator progressBarDecorator,

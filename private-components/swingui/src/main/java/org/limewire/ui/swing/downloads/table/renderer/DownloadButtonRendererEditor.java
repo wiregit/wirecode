@@ -36,16 +36,24 @@ public class DownloadButtonRendererEditor extends TableRendererEditor{
     @Override
     protected Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
-        item =(DownloadItem)value;
-        buttonPanel.updateButtons(item.getState());
-        return this;
+        if(value instanceof DownloadItem) {
+            item =(DownloadItem)value;
+            buttonPanel.updateButtons(item.getState());
+            return this;
+        } else {
+            return emptyPanel;
+        }
     }
 
     @Override
     protected Component doTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
-        buttonPanel.updateButtons(((DownloadItem)value).getState());
-        return this;
+        if(value instanceof DownloadItem) {
+            buttonPanel.updateButtons(((DownloadItem)value).getState());
+            return this;
+        } else {
+            return emptyPanel;
+        }
     }
     
     @Override
