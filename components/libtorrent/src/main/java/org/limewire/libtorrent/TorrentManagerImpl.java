@@ -1,9 +1,6 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,10 +10,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.limewire.bittorrent.BTData;
-import org.limewire.bittorrent.BTDataImpl;
-import org.limewire.bittorrent.bencoding.Token;
-import org.limewire.io.IOUtils;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.logging.Log;
@@ -197,8 +190,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void start() {
-        backgroundExecutor
-                .scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
+        backgroundExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
 
         if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
             backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 6000, 6000,
@@ -223,7 +215,7 @@ public class TorrentManagerImpl implements TorrentManager {
         @Override
         public void run() {
             pumpStatus();
-            //libTorrent.get_alerts(alertCallback);
+            // libTorrent.get_alerts(alertCallback);
         }
 
         private void pumpStatus() {
@@ -262,26 +254,14 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public boolean isDownloading(File torrentFile) {
-        FileInputStream fis = null;
-        FileChannel fileChannel = null;
-        try {
-            fis = new FileInputStream(torrentFile);
-
-            fileChannel = fis.getChannel();
-            Map metaInfo = (Map) Token.parse(fileChannel);
-            BTData btData = new BTDataImpl(metaInfo);
-
-            String sha1 = TorrentSHA1ConversionUtils.toHexString(btData.getInfoHash());
-            return torrents.containsKey(sha1);
-        } catch (IOException e) {
-            // TODO do somthing intelligent here. Returning true will make hte
-            // file not try to resume, maybe a better method name would be
-            // fine.
-            throw new RuntimeException(e);
-        } finally {
-            IOUtils.close(fileChannel);
-            IOUtils.close(fis);
+        synchronized (torrents) {
+            for (Torrent torrent : torrents.values()) {
+                if (torrentFile != null && torrentFile.equals(torrent.getTorrentFile())) {
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     private class FastResumeAlertCallback implements AlertCallback {
