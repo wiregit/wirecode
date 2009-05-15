@@ -107,9 +107,10 @@ public class GnutellaPresence implements FriendPresence {
     private String describe(Address address) {
         if(address instanceof Connectable || address instanceof PushEndpoint) {
             IpPort ipp = (IpPort)address;
-            return ipp.getInetAddress().getHostAddress();
+            InetAddress inetAddr = ipp.getInetAddress();
+            return inetAddr == null ? null : inetAddr.getHostAddress();
         } else {
-            return address.getAddressDescription();            
+            return address.getAddressDescription();
         }
     }
     
@@ -120,6 +121,8 @@ public class GnutellaPresence implements FriendPresence {
             // Convert IP addr into a #.
             IpPort ipp = (IpPort)address;
             InetAddress inetAddr = ipp.getInetAddress();
+            if(inetAddr == null)
+                return null;
             byte[] addr = inetAddr.getAddress();
             
             if (addr.length != 4) {
