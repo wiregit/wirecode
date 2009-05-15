@@ -156,12 +156,17 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
         downloadItems.add(downloadItem);
 
+        final File torrentFile = new File("");
+        
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
+                one(downloader).getTorrentFile();
+                will(returnValue(torrentFile));
+                one(downloadManager).downloadTorrent(torrentFile, false);
             }
         });
 
@@ -185,18 +190,25 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
         downloadItems.add(downloadItem);
 
-        // TODO put in savelocatuion exception handling
+
+        final File torrentFile = new File("");
+        
         context.checking(new Expectations() {
             {
                 one(downloader).getState();
                 will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
+                one(downloader).getTorrentFile();
+                will(returnValue(torrentFile));
+                one(downloadManager).downloadTorrent(torrentFile, false);
+                will(throwException(sle));
                 one(activityCallback).handleSaveLocationException(
                         with(new IsAnything<DownloadAction>()),
                         with(new IsEqual<SaveLocationException>(sle)),
                         with(new IsEqual<Boolean>(false)));
                 will(new DownloadActionCaller());
+                one(downloadManager).downloadTorrent(torrentFile, true);
             }
         });
 
