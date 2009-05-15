@@ -30,6 +30,8 @@ using libtorrent::asio::ip::tcp;
 #include <windows.h>
 #endif
 
+#define IGNORE_NON_FAST_RESUME_ALERTS
+
 libtorrent::session s;
 std::string savePath;
 typedef libtorrent::big_number sha1_hash;
@@ -462,18 +464,18 @@ extern "C" EXTERN_RET get_num_peers(const char* id, int *num_peers) {
 	if (s.state == libtorrent::torrent_status::seeding)
 		return 0;
 
-	std::vector<libtorrent::peer_info> peers;
+	std::vector<libtorrent::peer_info> *peers = new std::vector<libtorrent::peer_info>;
 
 	try {
 		// TODO: This is failing?  Internal libtorrent error?
-		h.get_peer_info(peers);
+		h.get_peer_info(*peers);
 	} catch (libtorrent::invalid_handle e) {
 		return 0;
 	} catch (std::exception e) {
 		return 0;
 	}
 
-	*num_peers = peers.size();
+	*num_peers = peers->size();
 
 	EXTERN_BOTTOM;
 }
@@ -482,7 +484,7 @@ extern "C" EXTERN_RET get_peers(const char* id, int buffer_len, char* data) {
 	EXTERN_TOP;
 
 	libtorrent::torrent_handle h = findTorrentHandle(id);
-
+	
 	std::vector<libtorrent::peer_info> peers;
 	h.get_peer_info(peers);
 
@@ -495,9 +497,9 @@ extern "C" EXTERN_RET get_peers(const char* id, int buffer_len, char* data) {
 		std::string address = iter->ip.address().to_string();
 		int len = address.length();
 
-#ifdef LIMEDEBUG
+//#ifdef LIMEDEBUG
 		std::cout << "peer:" << address << std::endl;
-#endif
+//#endif
 
 		if (len + pos > buffer_len)
 			break;
@@ -519,7 +521,15 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 
 	std::auto_ptr<libtorrent::alert> alerts;
 
+	#ifdef IGNORE_NON_FAST_RESUME_ALERTS
+	s.set_alert_mask(libtorrent::alert::storage_notification);
+	#endif
+	
 	alerts = s.pop_alert();
+	
+	#ifdef IGNORE_NON_FAST_RESUME_ALERTS
+	s.set_alert_mask(libtorrent::alert::all_categories);
+	#endif
 
 	while (alerts.get()) {
 		libtorrent::alert* alert = alerts.get();
@@ -527,8 +537,12 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 		wrapper_alert_info* alertInfo = new wrapper_alert_info();
 
 		process_alert(alert, alertInfo);
-		alertCallback(alertInfo);
+		
+		
+		if (alertInfo->data)  alertCallback(alertInfo);
 
+		alertCallback(alertInfo);
+	
 		delete alertInfo;
 
 		alerts = s.pop_alert();
