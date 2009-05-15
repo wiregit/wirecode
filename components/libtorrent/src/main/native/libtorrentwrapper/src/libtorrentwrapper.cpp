@@ -542,8 +542,6 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 		if (alertInfo->data)
 		#endif
 		alertCallback(alertInfo);
-
-		alertCallback(alertInfo);
 	
 		delete alertInfo;
 
