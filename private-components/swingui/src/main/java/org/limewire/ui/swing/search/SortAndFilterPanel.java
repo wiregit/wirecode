@@ -43,8 +43,8 @@ import org.limewire.ui.swing.search.model.SortOption;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * This class manages the UI components for filtering and sorting
@@ -82,7 +82,7 @@ public class SortAndFilterPanel implements Disposable {
      * Constructs a SortAndFilterPanel with the specified search results data
      * model and UI decorators.
      */
-    @AssistedInject
+    @Inject
     SortAndFilterPanel(
             @Assisted SearchResultsModel searchResultsModel,
             ComboBoxDecorator comboBoxDecorator, 

@@ -71,8 +71,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * This class is responsible for rendering an individual SearchResult
@@ -154,7 +154,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
      */
     private int textPanelWidth;
     
-    @AssistedInject
+    @Inject
     ListViewTableEditorRenderer(
             CategoryIconManager categoryIconManager,
             RemoteHostWidgetFactory fromWidgetFactory,

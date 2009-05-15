@@ -24,8 +24,9 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPService;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.internal.Nullable;
 
 public class ShareTableRendererEditor extends TableRendererEditor implements Configurable{
     @Resource private Font shareButtonFont;    
@@ -48,8 +49,8 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     private final ToolTipMouseListener p2pTooltipListener;
     private final ToolTipMouseListener friendsTooltipListener;
     
-    @AssistedInject
-    public ShareTableRendererEditor(@Assisted Action shareAction, XMPPService xmppService){
+    @Inject
+    public ShareTableRendererEditor(@Nullable @Assisted Action shareAction, XMPPService xmppService){
         GuiUtils.assignResources(this);
         
         this.xmppService = xmppService;

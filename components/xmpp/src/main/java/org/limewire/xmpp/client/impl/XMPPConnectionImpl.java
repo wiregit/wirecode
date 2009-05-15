@@ -21,9 +21,9 @@ import org.jivesoftware.smackx.ChatStateManager;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.friend.client.FileOfferEvent;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
-import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
 import org.limewire.listener.EventBroadcaster;
@@ -36,11 +36,11 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.xmpp.api.client.XMPPPresence;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
 import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.xmpp.client.impl.features.LimewireFeatureInitializer;
@@ -57,8 +57,8 @@ import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListene
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection {
 
@@ -87,7 +87,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private volatile org.jivesoftware.smack.XMPPConnection connection;
     private volatile DiscoInfoListener discoInfoListener;
 
-    @AssistedInject
+    @Inject
     public XMPPConnectionImpl(@Assisted XMPPConnectionConfiguration configuration,
                        @Assisted ListeningExecutorService executorService,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,

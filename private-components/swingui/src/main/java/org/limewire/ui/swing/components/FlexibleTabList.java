@@ -21,7 +21,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.Inject;
 
 /** 
  * A horizontal container for {@link FancyTab FancyTab} objects.  
@@ -52,7 +52,7 @@ public class FlexibleTabList extends AbstractTabList {
     /**
      * Constructs a FlexibleTabList with the specified combobox decorator.
      */
-    @AssistedInject
+    @Inject
     FlexibleTabList(ComboBoxDecorator comboBoxDecorator) {
         this.comboBoxDecorator = comboBoxDecorator;
         

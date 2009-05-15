@@ -24,12 +24,12 @@ import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 /**
  * This class contains the numbers of different types of files
@@ -47,7 +47,7 @@ class SearchTabItems {
     
     @Resource private Font tabFont;
 
-    @AssistedInject
+    @Inject
     SearchTabItems(@Assisted SearchCategory category, 
             @Assisted EventList<VisualSearchResult> resultsList) { 
         

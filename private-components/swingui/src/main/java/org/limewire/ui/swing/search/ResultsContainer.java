@@ -13,8 +13,8 @@ import org.limewire.ui.swing.search.resultpanel.BaseResultPanel;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanelFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * ResultsContainer is a display panel that contains the search results tables 
@@ -38,7 +38,7 @@ public class ResultsContainer extends JXPanel {
      * model and factories.
      * @see org.limewire.ui.swing.search.ResultsContainerFactory
      */
-    @AssistedInject
+    @Inject
     ResultsContainer(
         @Assisted SearchResultsModel searchResultsModel,
         BaseResultPanelFactory baseFactory) {

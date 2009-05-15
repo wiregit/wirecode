@@ -27,8 +27,8 @@ import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.util.Objects;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * A Widget for displaying RemoteHosts associated with a piece of data. 
@@ -52,7 +52,7 @@ public class RemoteHostWidget extends JPanel {
     
     private final RemoteWidgetType type;
     
-    @AssistedInject
+    @Inject
     RemoteHostWidget(ComboBoxDecorator comboBoxDecorator,
                            RemoteHostActions fromActions,
                            @Assisted RemoteWidgetType type) {

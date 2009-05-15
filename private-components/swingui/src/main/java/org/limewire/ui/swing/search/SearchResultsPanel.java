@@ -45,8 +45,8 @@ import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * This is the top-level container for the search results display.  
@@ -109,7 +109,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     /**
      * Constructs a SearchResultsPanel with the specified components.
      */
-    @AssistedInject
+    @Inject
     public SearchResultsPanel(
             @Assisted SearchResultsModel searchResultsModel,
             ResultsContainerFactory containerFactory,

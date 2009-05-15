@@ -32,9 +32,9 @@ import org.limewire.promotion.PromotionSearcher.PromotionSearchResultsCallback;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.util.Clock;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
@@ -71,7 +71,7 @@ public class CoreSearch implements Search {
      */
     volatile byte[] searchGuid;
 
-    @AssistedInject
+    @Inject
     public CoreSearch(@Assisted SearchDetails searchDetails,
             SearchServices searchServices,
             QueryReplyListenerList listenerList,

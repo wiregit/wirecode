@@ -32,7 +32,6 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
@@ -78,7 +77,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     @Inject
     public BTTorrentFileDownloaderImpl(DownloadManager downloadManager,
-            @Assisted SaveLocationManager saveLocationManager, HttpExecutor httpExecutor,
+            SaveLocationManager saveLocationManager, HttpExecutor httpExecutor,
             TorrentManager torrentManager, BTMetaInfoFactory btMetaInfoFactory,
             ActivityCallback activityCallback) {
         super(saveLocationManager);

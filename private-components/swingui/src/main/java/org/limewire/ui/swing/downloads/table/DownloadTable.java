@@ -15,9 +15,9 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
+import org.limewire.ui.swing.downloads.table.renderer.DownloadMessageRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadProgressRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadTitleRenderer;
-import org.limewire.ui.swing.downloads.table.renderer.DownloadMessageRenderer;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -30,8 +30,8 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * Table showing DownloadItems. Provides popup menus and double click handling.
@@ -45,7 +45,7 @@ public class DownloadTable extends MouseableTable {
 
     private EventList<DownloadItem> selectedItems;
 
-    @AssistedInject
+    @Inject
 	public DownloadTable(ProgressBarDecorator progressBarDecorator, CategoryIconManager iconManager, DownloadActionHandler actionHandler, 
 	        @Assisted EventList<DownloadItem> downloadItems) {
         

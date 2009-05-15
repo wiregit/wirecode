@@ -1,32 +1,34 @@
 package org.limewire.ui.swing.friends.chat;
 
-import java.net.URLDecoder;
-import java.net.URL;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Map;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
+
+import javax.swing.JOptionPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.html.FormSubmitEvent;
-import javax.swing.JOptionPane;
 
-import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.DownloadAction;
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.ResultDownloader;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.io.InvalidDataException;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
-import com.google.inject.assistedinject.AssistedInject;
+
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -43,7 +45,7 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
     private final LibraryNavigator libraryNavigator;
 
-    @AssistedInject
+    @Inject
     public ChatHyperlinkListener(@Assisted Conversation conversation, ResultDownloader downloader,
                                  RemoteFileItemFactory remoteFileItemFactory,
                                  SaveLocationExceptionHandler saveLocationExceptionHandler,

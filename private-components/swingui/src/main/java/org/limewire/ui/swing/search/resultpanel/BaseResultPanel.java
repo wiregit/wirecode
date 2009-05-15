@@ -70,8 +70,8 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 import ca.odell.glazedlists.swing.EventTableModel;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * Base class containing the search results tables for a single category.  
@@ -123,7 +123,7 @@ public class BaseResultPanel extends JXPanel {
     /**
      * Constructs a BaseResultPanel with the specified components.
      */
-    @AssistedInject
+    @Inject
     public BaseResultPanel(
             @Assisted SearchResultsModel searchResultsModel,
             ResultsTableFormatFactory tableFormatFactory,
