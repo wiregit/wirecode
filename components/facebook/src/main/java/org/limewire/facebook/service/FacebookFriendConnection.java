@@ -15,11 +15,13 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.ProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.RedirectHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
@@ -54,7 +56,6 @@ public class FacebookFriendConnection implements FriendConnection {
     private static final String FACEBOOK_GET_SESSION_URL = "http://coelacanth:5555/getsession/";
     private String authToken;
     private String session;
-    private HttpClient httpClient;
     private String uid;
     private String secret;
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.8) Gecko/2009032609 Firefox/3.0.8";
@@ -63,6 +64,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
     private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
     private final Map<String, FacebookFriend> friends;
+    private List<Cookie> finalCookies;
 
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
@@ -71,7 +73,6 @@ public class FacebookFriendConnection implements FriendConnection {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
-        httpClient = new AuthTokenInterceptingHttpClient();
         this.friends = new TreeMap<String, FacebookFriend>(String.CASE_INSENSITIVE_ORDER);
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));
     }
@@ -125,6 +126,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private void loginToFacebook() throws IOException {        
         HttpGet loginGet = new HttpGet(FACEBOOK_LOGIN_GET_URL);
         loginGet.addHeader("User-Agent", USER_AGENT_HEADER);
+        HttpClient httpClient = new AuthTokenInterceptingHttpClient();
         HttpResponse response = httpClient.execute(loginGet);
         HttpEntity entity = response.getEntity();
 
@@ -149,19 +151,22 @@ public class FacebookFriendConnection implements FriendConnection {
             //System.out.println(EntityUtils.toString(entity));
             entity.consumeContent();
         }
-        
-//        List<Cookie> finalCookies = ((DefaultHttpClient) httpClient).getCookieStore().getCookies();
-//        for (Cookie finalCooky : finalCookies) {
-//            if (finalCooky.getName().equals("c_user")) {
-//                uid = finalCooky.getValue();
-//            }
-//        }
+
+        finalCookies = ((DefaultHttpClient) httpClient).getCookieStore().getCookies();
+        for (Cookie finalCooky : finalCookies) {
+            System.out.println(finalCooky.getName() + " = " + finalCooky.getValue());
+        }
     }
 
     private void requestSession() throws IOException, JSONException {
         HttpGet sessionRequest = new HttpGet(FACEBOOK_GET_SESSION_URL + authToken + "/");
+        HttpClient httpClient = new AuthTokenInterceptingHttpClient();
+        CookieStore cookieStore = ((DefaultHttpClient) httpClient).getCookieStore();
+        for(Cookie cookie : finalCookies) {
+            cookieStore.addCookie(cookie);
+        }
         HttpResponse response = httpClient.execute(sessionRequest);
-        parseSessionResponse(response);
+        parseSessionResponse(response);        
     }
 
     private void parseSessionResponse(HttpResponse response) throws IOException, JSONException {
@@ -179,11 +184,16 @@ public class FacebookFriendConnection implements FriendConnection {
 		}
     }
 
-    public synchronized String httpGET(String url) throws IOException {
+    public String httpGET(String url) throws IOException {
         System.out.println("GET " + url);
         HttpGet loginGet = new HttpGet(url);
         loginGet.addHeader("User-Agent", USER_AGENT_HEADER);
         loginGet.addHeader("Connection", "close");
+        HttpClient httpClient = new AuthTokenInterceptingHttpClient();
+        CookieStore cookieStore = ((DefaultHttpClient) httpClient).getCookieStore();
+        for(Cookie cookie : finalCookies) {
+            cookieStore.addCookie(cookie);
+        }
         HttpResponse response = httpClient.execute(loginGet);
         HttpEntity entity = response.getEntity();
         
@@ -195,13 +205,18 @@ public class FacebookFriendConnection implements FriendConnection {
         return responseStr;    
     }
     
-    public synchronized String httpPOST(String host, String urlPostfix, List <NameValuePair> nvps) throws IOException {
-        System.out.println("GET " + host + urlPostfix);
+    public String httpPOST(String host, String urlPostfix, List <NameValuePair> nvps) throws IOException {
+        System.out.println("POST " + host + urlPostfix);
         String responseStr = null;
         HttpPost httpost = new HttpPost(host + urlPostfix);
         httpost.addHeader("Connection", "close");
         httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
+        HttpClient httpClient = new AuthTokenInterceptingHttpClient();
+        CookieStore cookieStore = ((DefaultHttpClient) httpClient).getCookieStore();
+        for(Cookie cookie : finalCookies) {
+            cookieStore.addCookie(cookie);
+        }
         HttpResponse postResponse = httpClient.execute(httpost);
         HttpEntity entity = postResponse.getEntity();
 
