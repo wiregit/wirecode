@@ -93,7 +93,7 @@ public class SetupPage1 extends WizardPage {
     private void addAutoSharing() {
         add(createAndDecorateHeader(I18n.tr("Auto-Sharing")), "gaptop 20, span, wrap");
         add(shareDownloadedFilesCheckBox, "gaptop 5, gapleft 26");
-        add(createAndDecorateMultiLine(I18n.tr("Share files downloaded from the P2P Network with the P2P Network."), shareDownloadedFilesCheckBox), "gapleft 5, gaptop 5");
+        add(createAndDecorateMultiLine(I18n.tr("Share files downloaded from the P2P Network with the P2P Network"), shareDownloadedFilesCheckBox), "gapleft 5, gaptop 5");
         add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharing"), "gapleft 10, wrap");
     }
     
@@ -103,7 +103,7 @@ public class SetupPage1 extends WizardPage {
     private void addImproving() {
         add(createAndDecorateHeader(I18n.tr("Improve LimeWire")), "gaptop 20, span, wrap");
         add(shareUsageDataCheckBox, "gaptop 5, gapleft 26");
-        add(createAndDecorateMultiLine(I18n.tr("Help improve LimeWire by sending us anonymous usage data."), shareUsageDataCheckBox), "gapleft 5, gaptop 5");
+        add(createAndDecorateMultiLine(I18n.tr("Help improve LimeWire by sending us anonymous usage data"), shareUsageDataCheckBox), "gapleft 5, gaptop 5");
         add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=anonymousDataCollection"), "gapleft 10, wrap");
     }
     
@@ -113,7 +113,7 @@ public class SetupPage1 extends WizardPage {
     private void addContentFilters() {
         add(createAndDecorateHeader(I18n.tr("Content Filters")), "gaptop 20, span, wrap");
         add(contentFilterCheckBox, "gaptop 5, gapleft 26");
-        add(createAndDecorateMultiLine(I18n.tr("Don't let me download or upload files copyright owners request not be shared."), contentFilterCheckBox), "gapleft 5, gaptop 5");
+        add(createAndDecorateMultiLine(I18n.tr("Don't let me download or upload files copyright owners request not be shared"), contentFilterCheckBox), "gapleft 5, gaptop 5");
         add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=contentFiltering"), "gapleft 10, wrap");
     }
     

@@ -45,7 +45,7 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
         case RESUMING:
             return I18n.tr("Resuming");
         case CANCELLED:
-            return I18n.tr("Canceled");
+            return I18n.tr("Cancelled");
         case FINISHING:
             return I18n.tr("Finishing download...");
         case DONE:
