@@ -33,7 +33,9 @@ public class LibTorrentWrapper {
         } else if (OSUtils.isLinux()) {
             // compile into torrent-wrapper.so
         } else if (OSUtils.isMacOSX()) {
-            System.loadLibrary("torrent");
+          //  System.loadLibrary("stdc++.6");
+           // System.loadLibrary("gcc_s.1");
+           // System.loadLibrary("System.B");
         }
 
         // TODO make sure right libraries are loaded on linux too.
