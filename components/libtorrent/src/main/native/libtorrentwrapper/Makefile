@@ -3,7 +3,7 @@ CXXFLAGS =	-O2 -g -Wall -fmessage-length=0
 
 #TODO make OS variable dynamic
 
-OS = "linux"
+OS = "osx"
 
 
 ifeq ($(OS),"windows")
@@ -23,7 +23,7 @@ endif
 
 ifeq  ($(OS),"osx")
 	LIB_DIR = ./lib/osx
-	LIBS = -l torrent -l boost_system-xgcc40-mt-d-1_38 -l boost_filesystem-xgcc40-mt-d-1_38 -l boost_thread-xgcc40-mt-d-1_38  
+	LIBS = -l ssl -l crypto -l torrent -l boost_system-xgcc40-mt-d-1_38 -l boost_filesystem-xgcc40-mt-d-1_38 -l boost_thread-xgcc40-mt-d-1_38  
 	LIBRARY = libtorrent-wrapper.dylib
 	TARGET = libtorrent-wrapper.out
 	OPTIONS = -m64
