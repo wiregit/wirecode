@@ -31,8 +31,6 @@ using libtorrent::asio::ip::tcp;
 #include <windows.h>
 #endif
 
-#define IGNORE_NON_FAST_RESUME_ALERTS
-
 libtorrent::session s;
 std::string savePath;
 typedef libtorrent::big_number sha1_hash;
@@ -508,6 +506,30 @@ extern "C" EXTERN_RET free_torrent_status(wrapper_torrent_status* info) {
 	delete[] info->total_download;
 	delete[] info->total_upload;
 	delete[] info->error;
+
+	EXTERN_BOTTOM;
+}
+
+extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
+	EXTERN_TOP;
+
+	std::auto_ptr<libtorrent::alert> alerts;
+
+	alerts = s.pop_alert();
+
+	while (alerts.get()) {
+		libtorrent::alert* alert = alerts.get();
+
+		wrapper_alert_info* alertInfo = new wrapper_alert_info();
+
+		process_alert(alert, alertInfo);
+
+		alertCallback(alertInfo);
+
+		delete alertInfo;
+
+		alerts = s.pop_alert();
+	}
 
 	EXTERN_BOTTOM;
 }

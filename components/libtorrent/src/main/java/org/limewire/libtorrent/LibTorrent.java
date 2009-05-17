@@ -48,6 +48,12 @@ interface LibTorrent extends Library {
     public WrapperStatus freeze_and_save_all_fast_resume_data();
 
     /**
+     * Reads any stored alerts in the session, having there data coming in
+     * through the callback.
+     */
+    public WrapperStatus get_alerts(AlertCallback alertCallback);
+
+    /**
      * Fills in the Libtorrent status struct for the torrent with the given sha1
      */
     public WrapperStatus get_torrent_status(String id, LibTorrentStatus status);

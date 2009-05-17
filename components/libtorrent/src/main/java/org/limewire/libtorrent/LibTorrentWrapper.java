@@ -61,6 +61,12 @@ public class LibTorrentWrapper {
         catchWrapperException(libTorrent.freeze_and_save_all_fast_resume_data());
         LOG.debug("after get_alerts");
     }
+    
+     public void get_alerts(AlertCallback alertCallback) {
+        LOG.debug("before get_alerts");
+        catchWrapperException(libTorrent.get_alerts(alertCallback));
+        LOG.debug("after get_alerts");
+    }
 
     public void pause_torrent(String id) {
         LOG.debugf("before pause_torrent: {0}", id);

@@ -15,7 +15,6 @@ import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.BTData.BTFileData;
 import org.limewire.bittorrent.bencoding.Token;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.AsynchronousMulticaster;
 import org.limewire.listener.EventListener;
@@ -96,6 +95,8 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     public synchronized void init(File torrentFile, File saveDir) throws IOException {
         FileInputStream fis = null;
         FileChannel fileChannel = null;
+        File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
+
         try {
             fis = new FileInputStream(torrentFile);
             fileChannel = fis.getChannel();
@@ -113,9 +114,8 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
                 this.totalSize = btData.getLength();
             }
 
-            File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
-
             incompleteFile = new File(torrentDownloadFolder, name);
+            fastResumeFile = new File(torrentDownloadFolder, name + ".fastresume");
             completeFile = new File(saveDir, name);
 
             if (btData.getFiles() != null) {
@@ -133,8 +133,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             IOUtils.close(fis);
         }
 
-        File torrentFileCopy = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), getName()
-                + ".torrent");
+        File torrentFileCopy = new File(torrentDownloadFolder, name + ".torrent");
         if (!torrentFile.equals(torrentFileCopy)) {
             FileUtils.copy(torrentFile, torrentFileCopy);
         }
@@ -160,19 +159,19 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     }
 
     public List<String> getPeers() {
-        return torrentManager.getPeers(getSha1());
+        return torrentManager.getPeers(this);
     }
 
     public void moveTorrent(File directory) {
-        torrentManager.moveTorrent(getSha1(), directory);
+        torrentManager.moveTorrent(this, directory);
     }
 
     public void pause() {
-        torrentManager.pauseTorrent(getSha1());
+        torrentManager.pauseTorrent(this);
     }
 
     public void resume() {
-        torrentManager.resumeTorrent(getSha1());
+        torrentManager.resumeTorrent(this);
     }
 
     public float getDownloadRate() {
@@ -196,7 +195,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     public long getTotalSize() {
         return totalSize;
     }
-    
+
     public boolean isStarted() {
         return started.get();
     }
@@ -263,7 +262,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     public void stop() {
         if (!cancelled.getAndSet(true)) {
             if (started.getAndSet(false)) {
-                torrentManager.removeTorrent(sha1);
+                torrentManager.removeTorrent(this);
             }
             listeners.broadcast(TorrentEvent.STOPPED);
         }

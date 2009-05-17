@@ -11,22 +11,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
 
-    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = false;
+    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = true;
 
-    private final File torrentDownloadFolder;
+    private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
 
-    private final ScheduledExecutorService backgroundExecutor;
+    private final Provider<File> torrentDownloadFolder;
+
+    private final ScheduledExecutorService torrentExecutor;
+
+    private final ScheduledExecutorService alertExecutor;
+
+    private final ScheduledExecutorService resumeFileExecutor;
 
     private final LibTorrentWrapper libTorrent;
 
@@ -35,12 +42,12 @@ public class TorrentManagerImpl implements TorrentManager {
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     @Inject
-    public TorrentManagerImpl(@TorrentDownloadFolder File torrentDownloadFolder,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+    public TorrentManagerImpl(@TorrentDownloadFolder Provider<File> torrentDownloadFolder) {
 
         this.torrentDownloadFolder = torrentDownloadFolder;
-        // TODO move back to background executor?
-        this.backgroundExecutor = new ScheduledThreadPoolExecutor(1);
+        this.torrentExecutor = new ScheduledThreadPoolExecutor(1);
+        this.resumeFileExecutor = new ScheduledThreadPoolExecutor(1);
+        this.alertExecutor = new ScheduledThreadPoolExecutor(1);
 
         this.libTorrent = new LibTorrentWrapper();
         this.torrents = new ConcurrentHashMap<String, Torrent>();
@@ -54,14 +61,12 @@ public class TorrentManagerImpl implements TorrentManager {
     private void addTorrent(Torrent torrent) {
         torrents.put(torrent.getSha1(), torrent);
         File torrentFile = torrent.getTorrentFile();
-        String sha1 = torrent.getSha1();
-        File fastResumeFile = torrent.getFastResumeFile();
         String trackerURL = torrent.getTrackerURL();
 
         if (torrentFile != null) {
-            addTorrent(sha1, torrentFile, fastResumeFile);
+            addTorrent(torrent, torrentFile);
         } else {
-            addTorrent(sha1, trackerURL, fastResumeFile);
+            addTorrent(torrent, trackerURL);
         }
 
     }
@@ -72,27 +77,29 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public List<String> getPeers(String id) {
-        return libTorrent.get_peers(id);
+    public List<String> getPeers(Torrent torrent) {
+        return libTorrent.get_peers(torrent.getSha1());
     }
 
-    private void addTorrent(String sha1, File torrent, File fastResumeFile) {
-        String fastResumePath = fastResumeFile != null ? fastResumeFile.getAbsolutePath() : null;
+    private void addTorrent(Torrent torrent, File torrentFile) {
+        String fastResumePath = torrent.getFastResumeFile() != null ? torrent.getFastResumeFile()
+                .getAbsolutePath() : null;
         try {
             lock.writeLock().lock();
-            libTorrent.add_torrent(torrent.getAbsolutePath(), fastResumePath);
-            updateStatus(sha1);
+            libTorrent.add_torrent(torrentFile.getAbsolutePath(), fastResumePath);
+            updateStatus(torrent);
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    private void addTorrent(String sha1, String trackerURI, File fastResumeFile) {
-        String fastResumePath = fastResumeFile != null ? fastResumeFile.getAbsolutePath() : null;
+    private void addTorrent(Torrent torrent, String trackerURI) {
+        String fastResumePath = torrent.getFastResumeFile() != null ? torrent.getFastResumeFile()
+                .getAbsolutePath() : null;
         try {
             lock.writeLock().lock();
-            libTorrent.add_torrent_existing(sha1, trackerURI, fastResumePath);
-            updateStatus(sha1);
+            libTorrent.add_torrent_existing(torrent.getSha1(), trackerURI, fastResumePath);
+            updateStatus(torrent);
         } finally {
             lock.writeLock().unlock();
         }
@@ -100,53 +107,54 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public void removeTorrent(final String id) {
+    public void removeTorrent(Torrent torrent) {
         try {
             lock.writeLock().lock();
-            torrents.remove(id);
+            torrents.remove(torrent.getSha1());
         } finally {
             lock.writeLock().unlock();
         }
-        libTorrent.remove_torrent(id);
+        libTorrent.remove_torrent(torrent.getSha1());
     }
 
     @Override
-    public void pauseTorrent(String id) {
+    public void pauseTorrent(Torrent torrent) {
         try {
             lock.readLock().lock();
-            libTorrent.pause_torrent(id);
-            updateStatus(id);
+            String sha1 = torrent.getSha1();
+            libTorrent.pause_torrent(sha1);
+            updateStatus(torrent);
         } finally {
             lock.readLock().unlock();
         }
     }
 
     @Override
-    public void resumeTorrent(String id) {
+    public void resumeTorrent(Torrent torrent) {
         try {
             lock.readLock().lock();
-            libTorrent.resume_torrent(id);
-            updateStatus(id);
+            String sha1 = torrent.getSha1();
+            libTorrent.resume_torrent(sha1);
+            updateStatus(torrent);
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    private LibTorrentStatus getStatus(String id) {
+    private LibTorrentStatus getStatus(Torrent torrent) {
         LibTorrentStatus status = new LibTorrentStatus();
 
-        libTorrent.get_torrent_status(id, status);
+        String sha1 = torrent.getSha1();
+        libTorrent.get_torrent_status(sha1, status);
         LibTorrentStatus statusCopy = new LibTorrentStatus(status);
         libTorrent.free_torrent_status(status);
         return statusCopy;
     }
 
-    private void updateStatus(String id) {
+    private void updateStatus(Torrent torrent) {
         try {
             lock.readLock().lock();
-            LibTorrentStatus torrentStatus = getStatus(id);
-            Torrent torrent = torrents.get(id);
-
+            LibTorrentStatus torrentStatus = getStatus(torrent);
             torrent.updateStatus(torrentStatus);
         } finally {
             lock.readLock().unlock();
@@ -155,13 +163,14 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public File getTorrentDownloadFolder() {
-        return torrentDownloadFolder;
+        return torrentDownloadFolder.get();
     }
 
     @Override
-    public void moveTorrent(String id, File directory) {
-        libTorrent.move_torrent(id, directory.getAbsolutePath());
-        updateStatus(id);
+    public void moveTorrent(Torrent torrent, File directory) {
+        String sha1 = torrent.getSha1();
+        libTorrent.move_torrent(sha1, directory.getAbsolutePath());
+        updateStatus(torrent);
     }
 
     @Override
@@ -176,16 +185,17 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void initialize() {
-        libTorrent.initialize(torrentDownloadFolder.getAbsolutePath());
+        libTorrent.initialize(torrentDownloadFolder.get().getAbsolutePath());
         // TODO what if path changes.
     }
 
     @Override
     public void start() {
-        backgroundExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
+        torrentExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
+        alertExecutor.scheduleAtFixedRate(new AlertPoller(), 1000, 500, TimeUnit.MILLISECONDS);
 
         if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
-            backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
+            resumeFileExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
                     TimeUnit.MILLISECONDS);
         }
     }
@@ -194,10 +204,26 @@ public class TorrentManagerImpl implements TorrentManager {
     public void stop() {
         try {
             lock.writeLock().lock();
+            try {
+                resumeFileExecutor.shutdown();
+                alertExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOG.error("Error shutting down Resume File Executor", e);
+            }
+            try {
+                torrentExecutor.shutdown();
+                torrentExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOG.error("Error shutting down Torrent Executor", e);
+            }
+            try {
+                alertExecutor.shutdown();
+                alertExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOG.error("Error shutting down Alert Executor", e);
+            }
+
             libTorrent.freeze_and_save_all_fast_resume_data();
-            // TODO call is asynchronous, but had to remove some logic to fix
-            // mac build. This should be updated, to check that things were
-            // saved somehow.
             libTorrent.abort_torrents();
             torrents.clear();
         } finally {
@@ -213,8 +239,8 @@ public class TorrentManagerImpl implements TorrentManager {
         }
 
         private void pumpStatus() {
-            for (String id : torrents.keySet()) {
-                updateStatus(id);
+            for (Torrent torrent : torrents.values()) {
+                updateStatus(torrent);
             }
         }
     }
@@ -261,5 +287,22 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public boolean isDownloading(String sha1) {
         return torrents.containsKey(sha1);
+    }
+
+    private class AlertPoller implements Runnable {
+        @Override
+        public void run() {
+            libTorrent.get_alerts(new DebugAlertCallback());
+        }
+    }
+
+    private class DebugAlertCallback implements AlertCallback {
+
+        @Override
+        public void callback(LibTorrentAlert alert) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(alert.toString());
+            }
+        }
     }
 }
