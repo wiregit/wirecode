@@ -15,6 +15,7 @@ import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -192,11 +193,16 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public void start() {
         torrentExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
-        alertExecutor.scheduleAtFixedRate(new AlertPoller(), 1000, 500, TimeUnit.MILLISECONDS);
-
-        if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
-            resumeFileExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
-                    TimeUnit.MILLISECONDS);
+        
+        if(!OSUtils.isMacOSX()) {
+            //TODO disabling for now on the mac, on osx there is an error calling the alert callback, need toi investigate.
+            //but disabling for now so that it does not crash the jvm.
+            alertExecutor.scheduleAtFixedRate(new AlertPoller(), 1000, 500, TimeUnit.MILLISECONDS);
+    
+            if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
+                resumeFileExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
+                        TimeUnit.MILLISECONDS);
+            }
         }
     }
 
