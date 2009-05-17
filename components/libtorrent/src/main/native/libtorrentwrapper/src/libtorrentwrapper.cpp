@@ -42,7 +42,7 @@ typedef libtorrent::big_number sha1_hash;
 #define wTHROW(x) return 0;
 #else
 #define EXTERN_RET wrapper_exception*
-#define wTHROW(x) if (last_error) { delete last_error; last_error=0;} last_error = x; return last_error;
+#define wTHROW(x) if (last_error) { last_error=0;} last_error = x; return last_error;
 #endif
 
 #define EXTERN_TOP try {
@@ -259,10 +259,9 @@ void process_alert(libtorrent::alert const* alert, wrapper_alert_info* alertInfo
 }
 
 // Ported from http://www.rasterbar.com/products/libtorrent/manual.html#save-resume-data
-extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(void(*alertCallback)(void*))
+extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data()
 {
 	EXTERN_TOP;
-
 	int num_resume_data = 0;
 
 	std::vector<libtorrent::torrent_handle> handles = s.get_torrents();
@@ -274,24 +273,6 @@ extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(void(*alertCallback)(
 		if (!h.is_valid()) continue;
 
 		h.save_resume_data();
-		++num_resume_data;
-	}
-
-	while (num_resume_data > 0)
-	{	libtorrent::alert const* alert = s.wait_for_alert(libtorrent::seconds(10));
-
-		// if we don't get an alert within 10 seconds, abort
-		if (alert == 0)  break;
-
-		std::auto_ptr<libtorrent::alert> holder = s.pop_alert();
-
-		wrapper_alert_info* alertInfo = new wrapper_alert_info();
-		process_alert(alert, alertInfo);
-		alertCallback(alertInfo);
-
-		if (alertInfo->sha1[0])
-		{	--num_resume_data;
-		}
 	}
 
 	EXTERN_BOTTOM;
@@ -515,41 +496,6 @@ extern "C" EXTERN_RET get_peers(const char* id, int buffer_len, char* data) {
 		pos += len + 1;
 		data[pos++] = ';';
 		++iter;
-	}
-
-	EXTERN_BOTTOM;
-}
-
-extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
-	EXTERN_TOP;
-
-	std::auto_ptr<libtorrent::alert> alerts;
-
-	#ifdef IGNORE_NON_FAST_RESUME_ALERTS
-	s.set_alert_mask(libtorrent::alert::storage_notification);
-	#endif
-
-	alerts = s.pop_alert();
-
-	#ifdef IGNORE_NON_FAST_RESUME_ALERTS
-	s.set_alert_mask(libtorrent::alert::all_categories);
-	#endif
-
-	while (alerts.get()) {
-		libtorrent::alert* alert = alerts.get();
-
-		wrapper_alert_info* alertInfo = new wrapper_alert_info();
-
-		process_alert(alert, alertInfo);
-
-		#ifdef IGNORE_NON_FAST_RESUME_ALERTS
-		if (alertInfo->data)
-		#endif
-		alertCallback(alertInfo);
-
-		delete alertInfo;
-
-		alerts = s.pop_alert();
 	}
 
 	EXTERN_BOTTOM;

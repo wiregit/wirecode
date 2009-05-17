@@ -11,11 +11,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -24,9 +22,7 @@ import com.google.inject.name.Named;
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
 
-    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = true;
-
-    private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
+    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = false;
 
     private final File torrentDownloadFolder;
 
@@ -37,8 +33,6 @@ public class TorrentManagerImpl implements TorrentManager {
     private final Map<String, Torrent> torrents;
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
-    private final AlertCallback alertCallback = new FastResumeAlertCallback();
 
     @Inject
     public TorrentManagerImpl(@TorrentDownloadFolder File torrentDownloadFolder,
@@ -193,8 +187,6 @@ public class TorrentManagerImpl implements TorrentManager {
         if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
             backgroundExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
                     TimeUnit.MILLISECONDS);
-            backgroundExecutor.scheduleAtFixedRate(new AlertPoller(), 15000, 10000,
-                    TimeUnit.MILLISECONDS);
         }
     }
 
@@ -202,7 +194,10 @@ public class TorrentManagerImpl implements TorrentManager {
     public void stop() {
         try {
             lock.writeLock().lock();
-            libTorrent.freeze_and_save_all_fast_resume_data(alertCallback);
+            libTorrent.freeze_and_save_all_fast_resume_data();
+            // TODO call is asynchronous, but had to remove some logic to fix
+            // mac build. This should be updated, to check that things were
+            // saved somehow.
             libTorrent.abort_torrents();
             torrents.clear();
         } finally {
@@ -223,18 +218,10 @@ public class TorrentManagerImpl implements TorrentManager {
             }
         }
     }
-    
-    private class AlertPoller implements Runnable {
-        @Override
-        public void run() {
-            libTorrent.get_alerts(alertCallback);
-        }
-    }
 
     private class ResumeDataScheduler implements Runnable {
 
-        private Iterator<String> torrentIterator =
-            torrents.keySet().iterator();
+        private Iterator<String> torrentIterator = torrents.keySet().iterator();
 
         @Override
         public void run() {
@@ -249,7 +236,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
                 String sha1 = torrentIterator.next();
                 Torrent torrent = torrents.get(sha1);
-                
+
                 if (torrent != null && !torrent.isFinished()) {
                     libTorrent.signal_fast_resume_data_request(sha1);
                 }
@@ -269,30 +256,6 @@ public class TorrentManagerImpl implements TorrentManager {
             }
         }
         return false;
-    }
-
-    private class FastResumeAlertCallback implements AlertCallback {
-
-        @Override
-        public void callback(LibTorrentAlert alert) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(alert.toString());
-            }
-            String sha1 = alert.sha1;
-
-            if (!StringUtils.isEmpty(sha1)) {
-                try {
-                    lock.readLock().lock();
-                    Torrent torrent = torrents.get(sha1);
-                    if (torrent != null) {
-                        // TODO null check could be eating errors
-                        torrent.alert(alert);
-                    }
-                } finally {
-                    lock.readLock().unlock();
-                }
-            }
-        }
     }
 
     @Override

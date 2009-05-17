@@ -56,15 +56,9 @@ public class LibTorrentWrapper {
         LOG.debugf("after init: {0}", path);
     }
 
-    public void freeze_and_save_all_fast_resume_data(AlertCallback alertCallback) {
+    public void freeze_and_save_all_fast_resume_data() {
         LOG.debug("before get_alerts");
-        catchWrapperException(libTorrent.freeze_and_save_all_fast_resume_data(alertCallback));
-        LOG.debug("after get_alerts");
-    }
-    
-    public void get_alerts(AlertCallback alertCallback) {
-        LOG.debug("before get_alerts");
-        catchWrapperException(libTorrent.get_alerts(alertCallback));
+        catchWrapperException(libTorrent.freeze_and_save_all_fast_resume_data());
         LOG.debug("after get_alerts");
     }
 
