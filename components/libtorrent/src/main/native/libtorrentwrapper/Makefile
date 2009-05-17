@@ -3,7 +3,7 @@ CXXFLAGS =	-O2 -g -Wall -fmessage-length=0
 
 #TODO make OS variable dynamic
 
-OS = "osx"
+OS = "changeme"
 
 
 ifeq ($(OS),"windows")
