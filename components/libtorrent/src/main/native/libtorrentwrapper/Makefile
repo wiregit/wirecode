@@ -11,6 +11,7 @@ ifeq ($(OS),"windows")
     LIBS = -l wsock32 -l gdi32 -l ws2_32 -l winmm -l wldap32 -l kernel32 -l ssl -l crypto -l boost_system-mgw34-mt-1_38 -l boost_date_time-mgw34-mt-1_38 -l boost_filesystem-mgw34-mt-1_38 -l boost_thread-mgw34-mt-1_38 -l torrent
     LIBRARY = torrent-wrapper.dll
     TARGET = libtorrent-wrapper.exe
+    LINKOPTIONS = -shared
     OPTIONS = -DIPV6_PROTECTION_LEVEL -DWINDOWS -D_WIN32_WINNT=0x0501
 endif
 
@@ -19,6 +20,7 @@ ifeq  ($(OS),"linux")
 	LIBS = -l ssl -l rt -l torrent-0_14_2 -l boost_date_time-gcc42-mt-1_38 -l boost_filesystem-gcc42-mt-1_38 -l boost_system-gcc42-mt-1_38 -l boost_thread-gcc42-mt-1_38
 	LIBRARY = libtorrent-wrapper.so
 	TARGET = libtorrent-wrapper.out
+	LINKOPTIONS = -shared
 endif
 
 ifeq  ($(OS),"osx")
@@ -50,7 +52,7 @@ compile:    libtorrentwrapper.o
 all: library
 
 library: compile
-	$(CXX) -shared $(LINKOPTIONS) -o $(LIBRARY) $(OBJS) -L$(LIB_DIR) $(LIBS)
+	$(CXX) $(LINKOPTIONS) -o $(LIBRARY) $(OBJS) -L$(LIB_DIR) $(LIBS)
 
 copylib: library
 #	strip $(LIBRARY)
