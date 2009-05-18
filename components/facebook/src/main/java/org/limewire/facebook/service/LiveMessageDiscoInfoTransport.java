@@ -81,7 +81,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                         JSONObject response = new JSONObject("response");
                         response.put("from", connection.getUID());
                         response.put("features", supported);
-                        connection.sendLiveMessage(friend.getActivePresence(), "disco_info_response",
+                        connection.sendLiveMessage(friend.getActivePresence(), RESPONSE_TYPE,
                                         response);
                     }
                 }
@@ -104,7 +104,6 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                         try {
                             Map<String, String> message = new HashMap<String, String>();
                             message.put("from", connection.getUID());
-                            LOG.debugf("sending disc info to {0}", friend);
                             connection.sendLiveMessage(event.getData().getActivePresence(), REQUEST_TYPE,
                                     new JSONObject(message));
                         } catch (FriendException e) {

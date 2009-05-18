@@ -335,6 +335,7 @@ public class FacebookFriendConnection implements FriendConnection {
 
     public void sendLiveMessage(FriendPresence presence, String type, JSONObject message) throws FriendException {
         try {
+            LOG.debugf("live message {0} : {1} to {2}", type, message, presence);
             facebookClient.liveMessage_send(Long.parseLong(presence.getFriend().getId()), type,
                     message);
         } catch (FacebookException e) {
