@@ -31,13 +31,13 @@ public class BuddyListResponseDeserializer {
 
     @AssistedInject
     BuddyListResponseDeserializer(@Assisted FacebookFriendConnection connection,
-                                  LiveMessageAddressTransportFactory addressTransportFactory,
-                                  LiveMessageAuthTokenTransportFactory authTokenTransportFactory,
+                                  @Assisted LiveMessageAddressTransport addressTransport,
+                                  @Assisted LiveMessageAuthTokenTransport authTokenTransport,
                                   EventMulticaster<FeatureEvent> featureBroadcaster) {
         this.connection = connection;
         this.featureBroadcaster = featureBroadcaster;
-        addressTransport = addressTransportFactory.create(this.connection);
-        authTokenTransport = authTokenTransportFactory.create(this.connection);
+        this.addressTransport = addressTransport;
+        this.authTokenTransport = authTokenTransport;
     }
     
     /**

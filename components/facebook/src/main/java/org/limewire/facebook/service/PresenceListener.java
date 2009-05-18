@@ -17,13 +17,14 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
-import org.limewire.core.api.friend.client.FriendConnectionEvent.Type;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.io.Address;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.inject.Inject;
@@ -45,18 +46,24 @@ public class PresenceListener implements Runnable {
     private final ConnectionListener connectionListener = new ConnectionListener();
 
     private final EventBroadcaster<FeatureEvent> featureBroadcaster;
-    
+    private final LiveMessageAddressTransport addressTransport;
+    private final LiveMessageAuthTokenTransport authTokenTransport;
+
     @AssistedInject
     PresenceListener(@Assisted FacebookFriendConnection connection,
                      MutableFriendManager friendManager,
                      EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster,                     
                      BuddyListResponseDeserializerFactory buddyListResponseDeserializerFactory,
-                     EventBroadcaster<FeatureEvent> featureBroadcaster) {
+                     EventBroadcaster<FeatureEvent> featureBroadcaster,
+                     LiveMessageAddressTransportFactory addressTransportFactory,
+                     LiveMessageAuthTokenTransportFactory authTokenTransportFactory) {
         this.friendManager = friendManager;
         this.friendPresenceBroadcaster = friendPresenceBroadcaster;
         this.connection = connection;
         this.featureBroadcaster = featureBroadcaster;
-        deserializer = buddyListResponseDeserializerFactory.create(connection);
+        addressTransport = addressTransportFactory.create(this.connection);
+        authTokenTransport = authTokenTransportFactory.create(this.connection);
+        deserializer = buddyListResponseDeserializerFactory.create(connection, addressTransport, authTokenTransport);
     }
     
     @Inject
@@ -77,6 +84,8 @@ public class PresenceListener implements Runnable {
                 JSONObject user = users.getJSONObject(i);
                 FacebookFriend friend = new FacebookFriend(user.getString("uid"), user, connection.getConfiguration(),
                         featureBroadcaster);
+                friend.addTransport(Address.class, addressTransport);
+                friend.addTransport(AuthToken.class, authTokenTransport);
                 if (connection.getUser(friend.getId()) == null) {
                     LOG.debugf("adding {0}", friend);
                     addPresence(friend);
