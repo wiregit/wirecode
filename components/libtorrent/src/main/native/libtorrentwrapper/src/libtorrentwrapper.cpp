@@ -195,22 +195,25 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 		libtorrent::save_resume_data_alert const* alert,
 		wrapper_alert_info* alertInfo) {
 
+	bool seed = handle.is_seed();
 #ifdef LIME_DEBUG
-	std::cout << "save_resume_data_alert" << std::endl;
+	std::cout << "save_resume_data_alert: is_seed=" << seed << std::endl;
 #endif
 
-	std::string resume_data_file = handle.get_torrent_info().name()
-			+ ".fastresume";
-	boost::filesystem::path path(handle.save_path() / resume_data_file);
-	alertInfo->data = path.file_string().c_str();
+	if(!seed) {
+		std::string resume_data_file = handle.get_torrent_info().name()
+				+ ".fastresume";
+		boost::filesystem::path path(handle.save_path() / resume_data_file);
+		alertInfo->data = path.file_string().c_str();
 
 #ifdef LIME_DEBUG
-	std::cout << "(to " << alertInfo->data << ')' << std::endl;
+		std::cout << "(to " << alertInfo->data << ')' << std::endl;
 #endif
 
-	boost::filesystem::ofstream out(path, std::ios_base::binary);
-	out.unsetf(std::ios_base::skipws);
-	libtorrent::bencode(std::ostream_iterator<char>(out), *alert->resume_data);
+		boost::filesystem::ofstream out(path, std::ios_base::binary);
+		out.unsetf(std::ios_base::skipws);
+		libtorrent::bencode(std::ostream_iterator<char>(out), *alert->resume_data);
+	}
 }
 
 void process_alert(libtorrent::alert const* alert,
