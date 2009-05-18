@@ -64,7 +64,7 @@ public class PresenceListener implements Runnable {
             Map<String, FacebookFriend> onlineFriends = deserializer.deserialize(responseStr);
             for(Friend friend : connection.getUsers()) {
                 if(!onlineFriends.containsKey(friend.getId())) {
-                    removePresence((FacebookFriend)connection.getUser(friend.getId()));
+                    removePresence(connection.getUser(friend.getId()));
                 }
             }
             for(String friend : onlineFriends.keySet()) {

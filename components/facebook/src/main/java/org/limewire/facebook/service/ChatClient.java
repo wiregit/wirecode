@@ -123,7 +123,7 @@ public class ChatClient {
                             if(msgResponseBody.startsWith(prefix))
                                 msgResponseBody = msgResponseBody.substring(prefix.length());
                             JSONObject response = new JSONObject(msgResponseBody);
-                            LOG.debugf("MESSAGE: {0}", response);
+                            LOG.debugf("message: {0}", response);
                             if(response.getString("t").equals("msg")) {
                                 dispatchMessage(response);
                             } else if(response.getString("t").equals("refresh")) {

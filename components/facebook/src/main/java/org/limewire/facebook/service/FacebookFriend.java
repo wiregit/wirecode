@@ -43,11 +43,7 @@ public class FacebookFriend extends AbstractFriendPresence implements Friend, Fr
 
     @Override
     public String getName() {
-        try {
-            return friend.getString("name");
-        } catch (JSONException e) {
-            return "";
-        }
+        return friend.optString("name", "");
     }
 
     @Override
@@ -57,11 +53,7 @@ public class FacebookFriend extends AbstractFriendPresence implements Friend, Fr
 
     @Override
     public String getFirstName() {
-        try {
-            return friend.getString("firstName");
-        } catch (JSONException e) {
-            return "";
-        }
+        return friend.optString("firstName", "");
     }
 
     @Override
@@ -143,11 +135,7 @@ public class FacebookFriend extends AbstractFriendPresence implements Friend, Fr
 
     @Override
     public String getStatus() {
-        try {
-            return friend.getString("status");
-        } catch (JSONException e) {
-            return "";
-        }
+        return friend.optString("status", null);
     }
 
     @Override

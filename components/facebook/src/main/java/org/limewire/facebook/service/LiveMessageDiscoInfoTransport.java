@@ -10,6 +10,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.FriendException;
@@ -35,8 +36,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     
     private final FacebookFriendConnection connection;
     private final FeatureRegistry featureRegistry;
-    private final Map<String, String> friends = new HashMap<String, String>();
-
+    
     @AssistedInject
     LiveMessageDiscoInfoTransport(@Assisted FacebookFriendConnection connection,
             FeatureRegistry featureRegistry) {
@@ -96,36 +96,17 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     }
     
     @Inject
-    public void register(@Named("available") ListenerSupport<FriendEvent> availableFriends,
-                         ListenerSupport<FriendConnectionEvent> connectionEventListenerSupport) {
-        connectionEventListenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
-            @Override
-            public void handleEvent(FriendConnectionEvent event) {
-                if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
-                    try {
-                        JSONArray friendsArray = (JSONArray)connection.getClient().friends_getAppUsers();
-                        if(friendsArray != null) {
-                            for(int i = 0; i < friendsArray.length(); i++) {
-                                friends.put(friendsArray.getString(i), friendsArray.getString(i));
-                            }
-                        }
-                    } catch (FacebookException e) {
-                        throw new RuntimeException(e);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-        });
-        
+    public void register(@Named("available") ListenerSupport<FriendEvent> availableFriends) {
         availableFriends.addListener(new EventListener<FriendEvent>() {
             @Override
             public void handleEvent(FriendEvent event) {                
                 if(event.getType() == FriendEvent.Type.ADDED) {
-                    if(friends.containsKey(event.getData().getId())) {
+                    Friend friend = event.getData();
+                    if (friend instanceof FacebookFriend) {
                         try {
                             Map<String, String> message = new HashMap<String, String>();
                             message.put("from", connection.getUID());
+                            LOG.debugf("sending disc info to {0}", friend);
                             connection.sendLiveMessage(event.getData().getActivePresence(), REQUEST_TYPE,
                                     new JSONObject(message));
                         } catch (FriendException e) {
