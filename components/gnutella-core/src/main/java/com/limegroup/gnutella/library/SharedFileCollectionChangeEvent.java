@@ -8,7 +8,7 @@ import org.limewire.listener.SourcedEvent;
 public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileCollection> {
     
     public static enum Type {
-        COLLECTION_ADDED, COLLECTION_REMOVED, SHARE_ID_ADDED, SHARE_ID_REMOVED, SHARE_IDS_CHANGED;
+        COLLECTION_ADDED, COLLECTION_REMOVED, FRIEND_ADDED, FRIEND_REMOVED, FRIEND_IDS_CHANGED;
     }
     
     private final Type type;
@@ -25,7 +25,7 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
     }
     
     public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list, String id) {
-        assert type == Type.SHARE_ID_ADDED || type == Type.SHARE_ID_REMOVED;
+        assert type == Type.FRIEND_ADDED || type == Type.FRIEND_REMOVED;
         this.type = type;
         this.list = list;
         this.shareId = id;
@@ -33,7 +33,7 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
     }
     
     public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list, Collection<String> newIds) {
-        assert type == Type.SHARE_IDS_CHANGED;
+        assert type == Type.FRIEND_IDS_CHANGED;
         this.type = type;
         this.list = list;
         this.shareId = null;
@@ -44,7 +44,7 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
         return type;
     }
 
-    public String getShareId() {
+    public String getFriendId() {
         return shareId;
     }
 
@@ -53,7 +53,7 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
         return list;
     }
     
-    public Collection<String> getNewShareIds() {
+    public Collection<String> getNewFriendIds() {
         return newIds;
     }
 

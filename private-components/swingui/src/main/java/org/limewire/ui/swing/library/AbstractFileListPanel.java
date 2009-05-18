@@ -30,10 +30,10 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.limewire.common.Disposable;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.PromptTextField;

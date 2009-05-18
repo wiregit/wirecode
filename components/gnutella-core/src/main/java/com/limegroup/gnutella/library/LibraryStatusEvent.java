@@ -3,7 +3,7 @@ package com.limegroup.gnutella.library;
 import org.limewire.util.StringUtils;
 
 
-public class ManagedListStatusEvent {
+public class LibraryStatusEvent {
     
     public static enum Type {        
         /**
@@ -36,7 +36,7 @@ public class ManagedListStatusEvent {
     private final Type type;
     private final Library list;
     
-    public ManagedListStatusEvent(Library list, Type type) {
+    public LibraryStatusEvent(Library list, Type type) {
         this.type = type;
         this.list = list;
     }

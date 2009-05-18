@@ -30,7 +30,7 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     LibraryFileListImpl(Library managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
         super(new BasicEventList<LocalFileItem>(), coreLocalFileItemFactory);
         this.managedList = managedList;
-        this.managedList.addFileViewListener(newEventListener());
+        this.managedList.addListener(newEventListener());
         this.managedList.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {

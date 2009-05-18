@@ -5,13 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
-import org.limewire.collection.IntSet;
-import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.gnutella.URN;
 
 /** A read-only view of a collection of files. */
-public interface FileView extends Iterable<FileDesc> {
+public interface FileView extends Iterable<FileDesc>, ListenerSupport<FileViewChangeEvent> {
    
     /**
      * Returns the <tt>FileDesc</tt> for the specified URN. This only returns
@@ -41,14 +40,6 @@ public interface FileView extends Iterable<FileDesc> {
      */
     FileDesc getFileDescForIndex(int index);
 
-    /**
-     * Gets all the indexes currently in this collection.
-     * 
-     * Note: This should only be used while the readLock is held.
-     *       The contents should also not be modified.
-     */
-    IntSet getIndexes();    
-
     /** Returns true if this list contains a FileDesc for the given file. */
     boolean contains(File file);
 
@@ -59,7 +50,7 @@ public interface FileView extends Iterable<FileDesc> {
 
     /**
      * Returns an iterator over all FileDescs. The returned iterator is *NOT*
-     * thread safe. You must lock on FileList while using it.
+     * thread safe. You must lock on FileList while acquiring and using it.
      */
     Iterator<FileDesc> iterator();
 
@@ -75,16 +66,6 @@ public interface FileView extends Iterable<FileDesc> {
      * Returns the number of files in this list.
      */
     int size();
-
-    /**
-     * Adds a listener to this list
-     */
-    void addFileViewListener(EventListener<FileViewChangeEvent> listener);
-
-    /**
-     * Removes a listener from this list
-     */
-    void removeFileViewListener(EventListener<FileViewChangeEvent> listener);
 
     /** Returns a lock to use when iterating over this FileList. */
     Lock getReadLock();

@@ -43,7 +43,7 @@ class PlaylistManagerImpl implements PlaylistManager {
     @Inject
     void register() {
         // Install listener on managed file list.
-        managedList.addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        managedList.addListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 switch (event.getType()) {

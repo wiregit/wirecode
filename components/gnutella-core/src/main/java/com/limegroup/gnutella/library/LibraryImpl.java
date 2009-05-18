@@ -116,7 +116,7 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster;
-    private final EventMulticaster<ManagedListStatusEvent> managedListListenerSupport;
+    private final EventMulticaster<LibraryStatusEvent> managedListListenerSupport;
     private final EventMulticaster<FileViewChangeEvent> fileListListenerSupport;
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final UrnCache urnCache;
@@ -214,7 +214,7 @@ class LibraryImpl implements Library, FileCollection {
     LibraryImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
                         UrnCache urnCache,
                         FileDescFactory fileDescFactory,
-                        EventMulticaster<ManagedListStatusEvent> managedListSupportMulticaster,
+                        EventMulticaster<LibraryStatusEvent> managedListSupportMulticaster,
                         UrnValidator urnValidator,
                         DangerousFileChecker dangerousFileChecker) {
         this.urnCache = urnCache;
@@ -320,7 +320,7 @@ class LibraryImpl implements Library, FileCollection {
         fileListListenerSupport.broadcast(event);
     }
     
-    void dispatch(ManagedListStatusEvent event) {
+    void dispatch(LibraryStatusEvent event) {
         managedListListenerSupport.broadcast(event);
     }
 
@@ -333,11 +333,6 @@ class LibraryImpl implements Library, FileCollection {
         } finally {
             rwLock.readLock().unlock();
         }
-    }
-    
-    @Override
-    public IntSet getIndexes() {
-        throw new UnsupportedOperationException();
     }
     
     @Override
@@ -639,22 +634,22 @@ class LibraryImpl implements Library, FileCollection {
     }
 
     @Override
-    public void addFileViewListener(EventListener<FileViewChangeEvent> listener) {
+    public void addListener(EventListener<FileViewChangeEvent> listener) {
         fileListListenerSupport.addListener(listener);
     }
     
     @Override
-    public void removeFileViewListener(EventListener<FileViewChangeEvent> listener) {
-        fileListListenerSupport.removeListener(listener);
+    public boolean removeListener(EventListener<FileViewChangeEvent> listener) {
+        return fileListListenerSupport.removeListener(listener);
     }
     
     @Override
-    public void addManagedListStatusListener(EventListener<ManagedListStatusEvent> listener) {
+    public void addManagedListStatusListener(EventListener<LibraryStatusEvent> listener) {
         managedListListenerSupport.addListener(listener);
     }
     
     @Override
-    public void removeManagedListStatusListener(EventListener<ManagedListStatusEvent> listener) {
+    public void removeManagedListStatusListener(EventListener<LibraryStatusEvent> listener) {
         managedListListenerSupport.removeListener(listener);
     }
 
@@ -1228,9 +1223,9 @@ class LibraryImpl implements Library, FileCollection {
         if(loadingFinished != rev) {
             loadingFinished = rev;
             LOG.debugf("Finished loading revision: {0}", rev);
-            dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.LOAD_FINISHING));
+            dispatch(new LibraryStatusEvent(this, LibraryStatusEvent.Type.LOAD_FINISHING));
             save();
-            dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.LOAD_COMPLETE));
+            dispatch(new LibraryStatusEvent(this, LibraryStatusEvent.Type.LOAD_COMPLETE));
         }
     }
     
@@ -1402,7 +1397,7 @@ class LibraryImpl implements Library, FileCollection {
 
     /** Dispatches a SAVE event & tells library data to save. */
     void save() {
-        dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.SAVE));
+        dispatch(new LibraryStatusEvent(this, LibraryStatusEvent.Type.SAVE));
         urnCache.persistCache();
         getLibraryData().save();
     }

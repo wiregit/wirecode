@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
 
-import org.limewire.collection.IntSet;
 import org.limewire.core.api.Category;
 
 import com.limegroup.gnutella.URN;
@@ -27,21 +26,21 @@ public class GnutellaFileCollectionStub extends AbstractFileCollectionStub imple
     public final static FileDescStub FD_STUB_TWO = new FileDescStub("other.txt");
     
     @Override
-    public void addPersonToShareWith(String id) {
+    public void addFriend(String id) {
     }
     
     @Override
-    public List<String> getSharedIdList() {
+    public List<String> getFriendList() {
         return Collections.emptyList();
     }
     
     @Override
-    public boolean removePersonToShareWith(String id) {
+    public boolean removeFriend(String id) {
         return false;
     }
     
     @Override
-    public void setShareIdList(List<String> ids) {
+    public void setFriendList(List<String> ids) {
     }
     
     @Override
@@ -122,12 +121,6 @@ public class GnutellaFileCollectionStub extends AbstractFileCollectionStub imple
 
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public IntSet getIndexes() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -8,7 +8,7 @@ import java.util.concurrent.Executor;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.Category;
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.listener.SourcedEventMulticasterFactory;
+import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
@@ -41,10 +41,10 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
 
     @AssistedInject
     public SharedFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, 
-                                    @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory,
-                                    @AllFileCollections EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
+                                    SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster,
+                                    EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
                                     @Assisted int id, HashTreeCache treeCache) {
-        super(managedList, multicasterFactory);
+        super(managedList, multicaster);
         this.collectionId = id;
         this.data = data;
         this.executor = ExecutorsHelper.newProcessingQueue("SharedCollectionAdder");
@@ -66,16 +66,16 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     }
     
     @Override
-    public void addPersonToShareWith(String id) {
-        if(data.addShareIdToCollection(collectionId, id)) {
-            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.SHARE_ID_ADDED, this, id));
+    public void addFriend(String id) {
+        if(data.addFriendToCollection(collectionId, id)) {
+            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_ADDED, this, id));
         }
     }
     
     @Override
-    public boolean removePersonToShareWith(String id) {
-        if(data.removeShareIdFromCollection(collectionId, id)) {
-            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.SHARE_ID_REMOVED, this, id));
+    public boolean removeFriend(String id) {
+        if(data.removeFriendFromCollection(collectionId, id)) {
+            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_REMOVED, this, id));
             return true;
         } else {
             return false;
@@ -83,14 +83,14 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     }
     
     @Override
-    public List<String> getSharedIdList() {
-        return data.getShareIdListForCollection(collectionId);
+    public List<String> getFriendList() {
+        return data.getFriendsForCollection(collectionId);
     }
     
     @Override
-    public void setShareIdList(List<String> ids) {
-        data.setShareIdListForCollection(collectionId, ids);
-        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.SHARE_IDS_CHANGED, this, ids));
+    public void setFriendList(List<String> ids) {
+        data.setFriendsForCollection(collectionId, ids);
+        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_IDS_CHANGED, this, ids));
     }
     
     @Override

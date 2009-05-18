@@ -116,19 +116,19 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                         handleFileDescEvent(event);
                     }
                 });                
-                library.addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+                library.addManagedListStatusListener(new EventListener<LibraryStatusEvent>() {
                     @Override
-                    public void handleEvent(ManagedListStatusEvent event) {
+                    public void handleEvent(LibraryStatusEvent event) {
                         handleManagedListStatusEvent(event);
                     }
                 });
-                fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+                fileViewManager.getGnutellaFileView().addListener(new EventListener<FileViewChangeEvent>() {
                     @Override
                     public void handleEvent(FileViewChangeEvent event) {
                         handleFileListEvent(event, true);
                     }
                 });
-                fileViewManager.getIncompleteFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+                fileViewManager.getIncompleteFileView().addListener(new EventListener<FileViewChangeEvent>() {
                     @Override
                     public void handleEvent(FileViewChangeEvent event) {
                         handleFileListEvent(event, false);
@@ -329,7 +329,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         }
     }
 
-    private void handleManagedListStatusEvent(ManagedListStatusEvent evt) {
+    private void handleManagedListStatusEvent(LibraryStatusEvent evt) {
         switch (evt.getType()) {
         case LOAD_COMPLETE:
             trim();

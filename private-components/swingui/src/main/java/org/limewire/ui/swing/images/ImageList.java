@@ -14,9 +14,9 @@ import javax.swing.SwingUtilities;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
-import org.limewire.common.Disposable;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.SelectAllable;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;

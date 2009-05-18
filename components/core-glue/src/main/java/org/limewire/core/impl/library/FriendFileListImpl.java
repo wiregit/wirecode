@@ -44,7 +44,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
     protected SharedFileCollection getMutableCollection() {
         if(friendCollection == null) {
             friendCollection = collectionManager.getOrCreateCollectionByName(name);
-            friendCollection.addPersonToShareWith(name);
+            friendCollection.addFriend(name);
         }
         return friendCollection;
     }
@@ -60,7 +60,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
         if (committed) {
             combinedShareList.removeMemberList(baseList);
             if (friendView != null)
-                friendView.removeFileViewListener(eventListener);
+                friendView.removeListener(eventListener);
         }
     }
 
@@ -71,7 +71,7 @@ class FriendFileListImpl extends AbstractFriendFileList {
         committed = true;
         eventListener = newEventListener();
         friendView = viewManager.getFileViewForId(name);
-        friendView.addFileViewListener(eventListener);
+        friendView.addListener(eventListener);
         combinedShareList.addMemberList(baseList);
 
         friendView.getReadLock().lock();

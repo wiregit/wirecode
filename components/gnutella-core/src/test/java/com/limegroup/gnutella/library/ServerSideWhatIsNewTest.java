@@ -382,7 +382,7 @@ public class ServerSideWhatIsNewTest
         assertNotNull(beforeChanged);
         
         final CountDownLatch fileChangedLatch = new CountDownLatch(1);
-        fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getGnutellaFileView().addListener(new EventListener<FileViewChangeEvent>() {
             public void handleEvent(FileViewChangeEvent evt) {
                 if (evt.getType() != FileViewChangeEvent.Type.FILE_CHANGED)
                     return;
@@ -457,7 +457,7 @@ public class ServerSideWhatIsNewTest
         assertNotNull(beforeChanged);
         
         final CountDownLatch latch = new CountDownLatch(1);
-        fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getGnutellaFileView().addListener(new EventListener<FileViewChangeEvent>() {
             public void handleEvent(FileViewChangeEvent evt) {
                 if(FileViewChangeEvent.Type.FILE_CHANGED == evt.getType())
                     latch.countDown();
@@ -605,7 +605,7 @@ public class ServerSideWhatIsNewTest
         
         int sharedBefore = fileViewManager.getGnutellaFileView().size();
         final CountDownLatch shareLatch = new CountDownLatch(1);
-        fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getGnutellaFileView().addListener(new EventListener<FileViewChangeEvent>() {
             public void handleEvent(FileViewChangeEvent evt) {
                 if (evt.getType() == FileViewChangeEvent.Type.FILE_ADDED)
                     shareLatch.countDown();
@@ -670,7 +670,7 @@ public class ServerSideWhatIsNewTest
         final CountDownLatch incompleteLatch = new CountDownLatch(1);
         final CountDownLatch shareLatch = new CountDownLatch(1);
         
-        fileViewManager.getIncompleteFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getIncompleteFileView().addListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 if(event.getType() == FileViewChangeEvent.Type.FILE_ADDED) {
@@ -680,7 +680,7 @@ public class ServerSideWhatIsNewTest
         });
         
         
-        fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getGnutellaFileView().addListener(new EventListener<FileViewChangeEvent>() {
             public void handleEvent(FileViewChangeEvent evt) {
                 if (evt.getType() == FileViewChangeEvent.Type.FILE_ADDED) {
                     shareLatch.countDown();

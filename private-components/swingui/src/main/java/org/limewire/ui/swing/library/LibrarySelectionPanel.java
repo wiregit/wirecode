@@ -15,9 +15,9 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.common.Disposable;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 

@@ -24,9 +24,7 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.library.CreationTimeCache;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileViewManager;
-import com.limegroup.gnutella.library.GnutellaFileCollection;
+import com.limegroup.gnutella.library.GnutellaFileView;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
@@ -395,24 +393,16 @@ public class LimeSessionInfoTest extends BaseTestCase {
     public void testFileManagerDeligates() {
         final Mockery context = new Mockery();
         
-        final FileManager fileManager = context.mock(FileManager.class);
-        final FileViewManager viewManager = context.mock(FileViewManager.class);
+        final Library library = context.mock(Library.class);
+        final GnutellaFileView gnutella = context.mock(GnutellaFileView.class);
         
         LimeSessionInfo sessionInfo = new LimeSessionInfo(null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, fileManager, null, null, null, null, null, viewManager);
+                null, null, null, null, null, null, null, null, library, null, null, null, null, null, gnutella);
 
         context.checking(new Expectations() {{
-            
-            GnutellaFileCollection gnutellaFileList = context.mock(GnutellaFileCollection.class);
-            Library managedFileList = context.mock(Library.class);
-            allowing(viewManager).getGnutellaFileView();
-            will(returnValue(gnutellaFileList));
-            allowing(fileManager).getLibrary();
-            will(returnValue(managedFileList));
-            
-            allowing(gnutellaFileList).size();
+            allowing(gnutella).size();
             will(returnValue(1110));
-            allowing(managedFileList).size();
+            allowing(library).size();
             will(returnValue(1111));
         }});
         

@@ -75,7 +75,7 @@ class CoreRandomGlue {
         registry.register(new Service() {            
             public void initialize() {
                 //TODO: find a better way to do this
-                fileManager.getLibrary().addFileViewListener(altLocManager);
+                fileManager.getLibrary().addListener(altLocManager);
                 
                 connectionManager.addEventListener(dhtManager);
                 dhtManager.addEventListener(pushProxiesPublisher);

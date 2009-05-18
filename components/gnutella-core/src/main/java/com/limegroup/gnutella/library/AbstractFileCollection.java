@@ -18,9 +18,8 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.inspection.Inspectable;
-import org.limewire.listener.DisposableEventMulticaster;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.SourcedEventMulticasterFactory;
+import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
@@ -33,24 +32,24 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 abstract class AbstractFileCollection extends AbstractFileView implements FileCollection, Inspectable {
 
     /**  A list of listeners for this list */
-    private final DisposableEventMulticaster<FileViewChangeEvent> listenerSupport;
+    private final SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster;
     
     /** The listener on the ManagedList, to synchronize changes. */
-    private final EventListener<FileViewChangeEvent> managedListListener;
+    private final EventListener<FileViewChangeEvent> libraryListener;
     
     /** A rw lock. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     
-    public AbstractFileCollection(LibraryImpl managedList,
-            SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory) {
-        super(managedList);
-        this.listenerSupport = multicasterFactory.createDisposableMulticaster(this);
-        this.managedListListener = new ManagedListSynchronizer();
+    public AbstractFileCollection(LibraryImpl library,
+            SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster) {
+        super(library);
+        this.multicaster = multicaster;
+        this.libraryListener = new LibrarySynchonizer();
     }
     
     /** Initializes this list.  Until the list is initialized, it is not valid. */
     protected void initialize() {
-        library.addFileViewListener(managedListListener);
+        library.addListener(libraryListener);
     }
 
     @Override
@@ -120,7 +119,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         Objects.nonNull(fileDesc, "fileDesc");        
         rwLock.writeLock().lock();
         try {
-            if(isFileAddable(fileDesc) && getIndexes().add(fileDesc.getIndex())) {
+            if(isFileAddable(fileDesc) && getInternalIndexes().add(fileDesc.getIndex())) {
                 return true;
             } else {
                 return false;
@@ -160,7 +159,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         Objects.nonNull(fileDesc, "fileDesc");        
         rwLock.writeLock().lock();
         try {
-            if(getIndexes().remove(fileDesc.getIndex())) {
+            if(getInternalIndexes().remove(fileDesc.getIndex())) {
                 return true;
             } else {
                 return false;
@@ -172,7 +171,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     
     @Override
     public Iterator<FileDesc> iterator() {
-        return new FileViewIterator(AbstractFileCollection.this, getIndexes());
+        return new FileViewIterator(AbstractFileCollection.this, getInternalIndexes());
     }
     
     @Override
@@ -190,8 +189,8 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         boolean needsClearing;
         rwLock.writeLock().lock();
         try {
-            needsClearing = getIndexes().size() > 0;
-            getIndexes().clear();
+            needsClearing = getInternalIndexes().size() > 0;
+            getInternalIndexes().clear();
         } finally {
             rwLock.writeLock().unlock();
         }
@@ -229,7 +228,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         rwLock.readLock().lock();
         try {
             Map<String,Object> inspections = new HashMap<String,Object>();
-            inspections.put("num of files", Integer.valueOf(getIndexes().size()));
+            inspections.put("num of files", Integer.valueOf(getInternalIndexes().size()));
             return inspections;
         } finally {
             rwLock.readLock().unlock();
@@ -242,13 +241,13 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     }
 
     @Override
-    public void addFileViewListener(EventListener<FileViewChangeEvent> listener) {
-        listenerSupport.addListener(listener);
+    public void addListener(EventListener<FileViewChangeEvent> listener) {
+        multicaster.addListener(listener);
     }
 
     @Override
-    public void removeFileViewListener(EventListener<FileViewChangeEvent> listener) {
-        listenerSupport.removeListener(listener);
+    public boolean removeListener(EventListener<FileViewChangeEvent> listener) {
+        return multicaster.removeListener(listener);
     }
     
     /**
@@ -256,7 +255,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
      * @param fileDesc that was added
      */
     protected void fireAddEvent(FileDesc fileDesc) {
-        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_ADDED, fileDesc));
+        multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_ADDED, fileDesc));
     }
     
     /**
@@ -264,7 +263,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
      * @param fileDesc that was removed
      */
     protected void fireRemoveEvent(FileDesc fileDesc) {
-        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_REMOVED, fileDesc));
+        multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_REMOVED, fileDesc));
     }
 
     /**
@@ -273,17 +272,17 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
      * @param newFileDesc FileDesc that replaced oldFileDesc
      */
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_CHANGED, oldFileDesc, newFileDesc));
+        multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_CHANGED, oldFileDesc, newFileDesc));
     }
     
     /** Fires a clear event to all listeners. */
     protected void fireClearEvent() {
-        listenerSupport.broadcast(new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILES_CLEARED));
+        multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILES_CLEARED));
     }
     
     /** Fires an event when the state of a shared collection changes*/
     protected void fireCollectionEvent(FileViewChangeEvent.Type type, boolean value) {
-        listenerSupport.broadcast(new FileViewChangeEvent(type, value));
+        multicaster.broadcast(new FileViewChangeEvent(this, type, value));
     }
     
     /**
@@ -329,8 +328,8 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     }
 
     public void dispose() {
-        library.removeFileViewListener(managedListListener);
-        listenerSupport.dispose();
+        library.removeListener(libraryListener);
+        multicaster.removeListeners(this);
     }
     
     /**
@@ -345,7 +344,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     protected int getMaxIndex() {
         rwLock.readLock().lock();
         try {
-            return getIndexes().max();
+            return getInternalIndexes().max();
         } finally {
             rwLock.readLock().unlock();
         }
@@ -354,7 +353,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     protected int getMinIndex() {
         rwLock.readLock().lock();
         try {
-            return getIndexes().min();
+            return getInternalIndexes().min();
         } finally {
             rwLock.readLock().unlock();
         }
@@ -410,7 +409,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         }
     }
     
-    private class ManagedListSynchronizer implements EventListener<FileViewChangeEvent> {
+    private class LibrarySynchonizer implements EventListener<FileViewChangeEvent> {
         @Override
         public void handleEvent(FileViewChangeEvent event) {
             // Note: We only need to check for pending on adds,

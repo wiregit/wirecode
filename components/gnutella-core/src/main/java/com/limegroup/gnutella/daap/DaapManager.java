@@ -42,7 +42,7 @@ import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.LibraryStatusEvent;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
@@ -133,13 +133,13 @@ public class DaapManager {
             }
 
             public void initialize() {
-                fileManager.get().getLibrary().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+                fileManager.get().getLibrary().addManagedListStatusListener(new EventListener<LibraryStatusEvent>() {
                     @Override
-                    public void handleEvent(ManagedListStatusEvent event) {
+                    public void handleEvent(LibraryStatusEvent event) {
                         handleManagedListStatusEvent(event);
                     }
                 });
-                fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+                fileViewManager.getGnutellaFileView().addListener(new EventListener<FileViewChangeEvent>() {
                     @Override
                     public void handleEvent(FileViewChangeEvent event) {
                         handleFileListEvent(event);
@@ -1075,7 +1075,7 @@ public class DaapManager {
     /**
      * Listens for events from FileManager
      */
-    private void handleManagedListStatusEvent(final ManagedListStatusEvent evt) {
+    private void handleManagedListStatusEvent(final LibraryStatusEvent evt) {
         
         // if Daap isn't enabled ignore events
         if(!DaapSettings.DAAP_ENABLED.getValue())

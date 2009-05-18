@@ -8,6 +8,9 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 
+/**
+ * A marker annotation for injecting a {@link FileView} of incomplete files.
+ */
 @BindingAnnotation
 @Target( { FIELD, PARAMETER, METHOD })
 @Retention(RUNTIME)

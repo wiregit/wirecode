@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.library;
 
+/** An event that's triggered when adding to a file view failed for some reason. */
 public class FileViewChangeFailedException extends Exception {
     
     private final FileViewChangeEvent event;
@@ -18,12 +19,14 @@ public class FileViewChangeFailedException extends Exception {
         DANGEROUS_FILE
     }
 
+    /** Constructs the event with a particular reason. */
     public FileViewChangeFailedException(FileViewChangeEvent event, Reason reason) {
         super("Event: " + event + ", Reason: " + reason);
         this.event = event;
         this.reason = reason;
     }
     
+    /** Constructs the event with a reason & a Throwable as a cause. */
     public FileViewChangeFailedException(FileViewChangeEvent event, Reason reason, Throwable cause) {
         super("Event: " + event + ", Reason: " + reason, cause);
         this.event = event;

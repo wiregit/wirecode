@@ -5,7 +5,6 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SourcedEventMulticaster;
-import org.limewire.listener.SourcedEventMulticasterFactory;
 import org.limewire.listener.SourcedEventMulticasterImpl;
 import org.limewire.listener.SourcedListenerSupport;
 import org.limewire.listener.EventListenerList.EventListenerListContext;
@@ -40,19 +39,19 @@ public class LimeWireLibraryModule extends AbstractModule {
         
         SourcedEventMulticaster<FileViewChangeEvent, FileView> allFileCollectionMulticaster =
             new SourcedEventMulticasterImpl<FileViewChangeEvent, FileView>(context);
-        bind(new TypeLiteral<SourcedEventMulticasterFactory<FileViewChangeEvent, FileView>>(){}).annotatedWith(AllFileCollections.class).toInstance(allFileCollectionMulticaster);
-        bind(new TypeLiteral<ListenerSupport<FileViewChangeEvent>>(){}).annotatedWith(AllFileCollections.class).toInstance(allFileCollectionMulticaster);
+        bind(new TypeLiteral<SourcedEventMulticaster<FileViewChangeEvent, FileView>>(){}).toInstance(allFileCollectionMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FileViewChangeEvent>>(){}).toInstance(allFileCollectionMulticaster);
         
         EventMulticaster<SharedFileCollectionChangeEvent> sharedAllFileCollectionMulticaster =
             new EventMulticasterImpl<SharedFileCollectionChangeEvent>(context);
-        bind(new TypeLiteral<EventBroadcaster<SharedFileCollectionChangeEvent>>(){}).annotatedWith(AllFileCollections.class).toInstance(sharedAllFileCollectionMulticaster);
-        bind(new TypeLiteral<ListenerSupport<SharedFileCollectionChangeEvent>>(){}).annotatedWith(AllFileCollections.class).toInstance(sharedAllFileCollectionMulticaster);
+        bind(new TypeLiteral<EventBroadcaster<SharedFileCollectionChangeEvent>>(){}).toInstance(sharedAllFileCollectionMulticaster);
+        bind(new TypeLiteral<ListenerSupport<SharedFileCollectionChangeEvent>>(){}).toInstance(sharedAllFileCollectionMulticaster);
         
-        EventMulticaster<ManagedListStatusEvent> managedListMulticaster =
-            new EventMulticasterImpl<ManagedListStatusEvent>();
-        bind(new TypeLiteral<EventBroadcaster<ManagedListStatusEvent>>(){}).toInstance(managedListMulticaster);
-        bind(new TypeLiteral<ListenerSupport<ManagedListStatusEvent>>(){}).toInstance(managedListMulticaster);
-        bind(new TypeLiteral<EventMulticaster<ManagedListStatusEvent>>(){}).toInstance(managedListMulticaster);
+        EventMulticaster<LibraryStatusEvent> managedListMulticaster =
+            new EventMulticasterImpl<LibraryStatusEvent>();
+        bind(new TypeLiteral<EventBroadcaster<LibraryStatusEvent>>(){}).toInstance(managedListMulticaster);
+        bind(new TypeLiteral<ListenerSupport<LibraryStatusEvent>>(){}).toInstance(managedListMulticaster);
+        bind(new TypeLiteral<EventMulticaster<LibraryStatusEvent>>(){}).toInstance(managedListMulticaster);
         
         SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster =
             new SourcedEventMulticasterImpl<FileDescChangeEvent, FileDesc>();

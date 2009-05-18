@@ -73,7 +73,7 @@ import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LibraryUtils;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.LibraryStatusEvent;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -84,7 +84,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * version is stored in memory & on disk.
  */
 @Singleton
-public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedListStatusEvent>, Service {
+public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibraryStatusEvent>, Service {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandlerImpl.class);
     
@@ -222,7 +222,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     }
     
     @Inject
-    void register(ListenerSupport<ManagedListStatusEvent> listener) {
+    void register(ListenerSupport<LibraryStatusEvent> listener) {
         listener.addListener(this);
     }
         
@@ -1001,8 +1001,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
      * Listens for events from FileManager
      */
     @Override
-    public void handleEvent(ManagedListStatusEvent evt) {
-        if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
+    public void handleEvent(LibraryStatusEvent evt) {
+        if(evt.getType() == LibraryStatusEvent.Type.LOAD_COMPLETE) {
             tryToDownloadUpdates();
         }
     }

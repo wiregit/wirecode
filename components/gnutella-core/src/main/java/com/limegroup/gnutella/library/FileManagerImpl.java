@@ -60,7 +60,7 @@ class FileManagerImpl implements FileManager, Service {
             GnutellaFileCollectionImpl gnutellaCollectionImpl,
             IncompleteFileCollectionImpl incompleteFileCollectionImpl,
             SharedFileCollectionImplFactory sharedFileCollectionImplFactory,
-            @AllFileCollections EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster) {        
+            EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster) {        
         this.backgroundExecutor = backgroundExecutor;
         this.managedFileList = managedFileList;
         this.gnutellaCollection = gnutellaCollectionImpl;

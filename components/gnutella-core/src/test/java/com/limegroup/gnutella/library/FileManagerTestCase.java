@@ -211,7 +211,7 @@ public class FileManagerTestCase extends LimeTestCase {
         public void handleEvent(FileViewChangeEvent fme) {
             evt = fme;
             latch.countDown();
-            fme.getFileView().removeFileViewListener(this);
+            fme.getFileView().removeListener(this);
         }
         
         void await(long timeout) throws Exception {
@@ -221,7 +221,7 @@ public class FileManagerTestCase extends LimeTestCase {
 
     protected FileViewChangeEvent addIfShared(File f) throws Exception {
         Listener fel = new Listener();
-        fileViewManager.getGnutellaFileView().addFileViewListener(fel);
+        fileViewManager.getGnutellaFileView().addListener(fel);
         fman.getGnutellaCollection().add(f, LimeXMLDocument.EMPTY_LIST);
         fel.await(5000);
         return fel.evt;
@@ -229,7 +229,7 @@ public class FileManagerTestCase extends LimeTestCase {
 
     protected FileViewChangeEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
         Listener fel = new Listener();
-        fileViewManager.getGnutellaFileView().addFileViewListener(fel);
+        fileViewManager.getGnutellaFileView().addListener(fel);
         fman.getGnutellaCollection().add(f, l);
         fel.await(5000);
         return fel.evt;
@@ -237,7 +237,7 @@ public class FileManagerTestCase extends LimeTestCase {
 
     protected FileViewChangeEvent addAlways(File f) throws Exception {
         Listener fel = new Listener();
-        fileViewManager.getGnutellaFileView().addFileViewListener(fel);
+        fileViewManager.getGnutellaFileView().addListener(fel);
         fman.getGnutellaCollection().add(f);
         fel.await(5000);
         return fel.evt;
@@ -245,7 +245,7 @@ public class FileManagerTestCase extends LimeTestCase {
 
     protected FileViewChangeEvent renameFile(File f1, File f2) throws Exception {
         Listener fel = new Listener();
-        fileViewManager.getGnutellaFileView().addFileViewListener(fel);
+        fileViewManager.getGnutellaFileView().addListener(fel);
         fman.getLibrary().fileRenamed(f1, f2);
         fel.await(5000);
         return fel.evt;
@@ -253,7 +253,7 @@ public class FileManagerTestCase extends LimeTestCase {
 
     protected FileViewChangeEvent addFileForSession(File f1) throws Exception {
         Listener fel = new Listener();
-        fileViewManager.getGnutellaFileView().addFileViewListener(fel);
+        fileViewManager.getGnutellaFileView().addListener(fel);
         fman.getGnutellaCollection().addForSession(f1);
         fel.await(5000);
         return fel.evt;
@@ -261,7 +261,7 @@ public class FileManagerTestCase extends LimeTestCase {
 
     protected FileViewChangeEvent fileChanged(File f1) throws Exception {
         Listener fel = new Listener();
-        fileViewManager.getGnutellaFileView().addFileViewListener(fel);
+        fileViewManager.getGnutellaFileView().addListener(fel);
         fman.getLibrary().fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
         fel.await(5000);
         return fel.evt;

@@ -17,7 +17,7 @@ class GnutellaFileListImpl extends AbstractFriendFileList implements GnutellaFil
             CombinedShareList combinedShareList) {
         super(combinedShareList.createMemberList(), coreLocalFileItemFactory);
         this.shareList = shareList;
-        this.shareList.addFileViewListener(newEventListener());
+        this.shareList.addListener(newEventListener());
         combinedShareList.addMemberList(baseList);
     }
 

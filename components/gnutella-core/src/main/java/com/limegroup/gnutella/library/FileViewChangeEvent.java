@@ -7,6 +7,7 @@ import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
 
+/** An event that's triggered when a file view is changed. */
 public class FileViewChangeEvent implements SourcedEvent<FileView> {
     
     public static enum Type {
@@ -71,10 +72,10 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
         this.newFile = Objects.nonNull(newValue.getFile(), "newValue.getFile()");
     }
     
-    public FileViewChangeEvent(Type type, boolean state) {
+    public FileViewChangeEvent(FileView list, Type type, boolean state) {
         assert type == Type.AUDIO_COLLECTION || type == Type.VIDEO_COLLECTION || type == Type.IMAGE_COLLECTION;
         this.type = Objects.nonNull(type, "type");
-        this.list = null;
+        this.list = list;
         this.oldValue = null;
         this.newFile = null;
         this.oldFile = null;

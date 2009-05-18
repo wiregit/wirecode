@@ -18,7 +18,6 @@ import javax.swing.TransferHandler;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.collection.glazedlists.PluggableList;
-import org.limewire.common.Disposable;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
@@ -36,6 +35,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;

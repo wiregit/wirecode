@@ -25,12 +25,12 @@ import com.limegroup.gnutella.uploader.authentication.HttpRequestFileViewProvide
  * of the {@link HttpContext}.
  */
 @Singleton
-public class FileViewProvider implements HttpRequestFileViewProvider {
+public class FriendFileViewProvider implements HttpRequestFileViewProvider {
 
     private final FileViewManager fileManager;
 
     @Inject
-    public FileViewProvider(FileViewManager fileManager) {
+    public FriendFileViewProvider(FileViewManager fileManager) {
         this.fileManager = fileManager;
     }
     

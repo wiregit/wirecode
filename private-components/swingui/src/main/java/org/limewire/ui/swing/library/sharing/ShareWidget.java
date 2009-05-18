@@ -2,7 +2,7 @@ package org.limewire.ui.swing.library.sharing;
 
 import java.awt.Component;
 
-import org.limewire.common.Disposable;
+import org.limewire.ui.swing.components.Disposable;
 
 public interface ShareWidget<T> extends Disposable{
 

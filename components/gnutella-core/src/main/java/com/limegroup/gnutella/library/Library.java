@@ -21,8 +21,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 public interface Library extends FileCollection {
     
-    void addManagedListStatusListener(EventListener<ManagedListStatusEvent> listener);
-    void removeManagedListStatusListener(EventListener<ManagedListStatusEvent> listener);
+    void addManagedListStatusListener(EventListener<LibraryStatusEvent> listener);
+    void removeManagedListStatusListener(EventListener<LibraryStatusEvent> listener);
     
     void addPropertyChangeListener(PropertyChangeListener listener);
     void removePropertyChangeListener(PropertyChangeListener listener);

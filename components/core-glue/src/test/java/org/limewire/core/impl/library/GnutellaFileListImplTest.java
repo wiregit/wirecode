@@ -35,7 +35,7 @@ public class GnutellaFileListImplTest extends TestCase {
                 one(combinedShareList).createMemberList();
                 will(returnValue(memberList));
                 one(combinedShareList).addMemberList(memberList);
-                one(gnutellaFileList).addFileViewListener(with(any(EventListener.class)));
+                one(gnutellaFileList).addListener(with(any(EventListener.class)));
             }
         });
         GnutellaFileListImpl gnutellaFileListImpl = new GnutellaFileListImpl(

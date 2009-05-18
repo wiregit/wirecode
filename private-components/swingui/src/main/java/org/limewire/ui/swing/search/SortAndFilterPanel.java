@@ -27,11 +27,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.limewire.common.Disposable;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;

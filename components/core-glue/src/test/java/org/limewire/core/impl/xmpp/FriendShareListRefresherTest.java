@@ -36,7 +36,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import com.limegroup.gnutella.MockFriend;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.Library;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.LibraryStatusEvent;
 
 public class FriendShareListRefresherTest extends BaseTestCase {
 
@@ -158,7 +158,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
         final XMPPService xmppService = context.mock(XMPPService.class);
         final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        final ManagedListStatusEvent event = context.mock(ManagedListStatusEvent.class);
+        final LibraryStatusEvent event = context.mock(LibraryStatusEvent.class);
         
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
                 xmppService, scheduledExecutorService);
@@ -167,9 +167,9 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         
         context.checking(new Expectations() {
             {   exactly(1).of(event).getType();
-                will(returnValue(ManagedListStatusEvent.Type.SAVE));
+                will(returnValue(LibraryStatusEvent.Type.SAVE));
                 exactly(1).of(event).getType();
-                will(returnValue(ManagedListStatusEvent.Type.LOAD_FINISHING));
+                will(returnValue(LibraryStatusEvent.Type.LOAD_FINISHING));
             }});
         
         finishedLoadingListener.handleEvent(event);
@@ -194,7 +194,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
         final XMPPService xmppService = context.mock(XMPPService.class);
         final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        final ManagedListStatusEvent event = context.mock(ManagedListStatusEvent.class);
+        final LibraryStatusEvent event = context.mock(LibraryStatusEvent.class);
         
         final XMPPConnection xmppConnection = context.mock(XMPPConnection.class);
         
@@ -226,7 +226,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.checking(new Expectations() {
             {   // These should be checked
                 atLeast(1).of(event).getType();
-                will(returnValue(ManagedListStatusEvent.Type.LOAD_COMPLETE));
+                will(returnValue(LibraryStatusEvent.Type.LOAD_COMPLETE));
 
                 // Non critical actions
                 allowing(xmppService).getActiveConnection();
@@ -280,7 +280,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
         final XMPPService xmppService = context.mock(XMPPService.class);
         final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        final ManagedListStatusEvent event = context.mock(ManagedListStatusEvent.class);
+        final LibraryStatusEvent event = context.mock(LibraryStatusEvent.class);
         
         final XMPPConnection xmppConnection = context.mock(XMPPConnection.class);
         
@@ -312,7 +312,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.checking(new Expectations() {
             {   // These should be checked
                 atLeast(1).of(event).getType();
-                will(returnValue(ManagedListStatusEvent.Type.LOAD_COMPLETE));
+                will(returnValue(LibraryStatusEvent.Type.LOAD_COMPLETE));
 
                 // Non essential interactions
                 

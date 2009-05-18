@@ -12,18 +12,18 @@ public interface SharedFileCollection extends SmartFileCollection {
     int getId();
     
     /** Returns the current list of people this collection is shared with. */
-    List<String> getSharedIdList();
+    List<String> getFriendList();
     
     /** Adds a new person to the list of people the collection is shared with. */
-    void addPersonToShareWith(String id);
+    void addFriend(String friendId);
     
     /**
      * Removes a person from the list of people this collection is shared with.
      * Returns true if the person was removed.
      */
-    boolean removePersonToShareWith(String id);
+    boolean removeFriend(String friendId);
     
     /** Sets the new list of people this collection should be shared with. */
-    void setShareIdList(List<String> ids);
+    void setFriendList(List<String> friendIds);
 
 }

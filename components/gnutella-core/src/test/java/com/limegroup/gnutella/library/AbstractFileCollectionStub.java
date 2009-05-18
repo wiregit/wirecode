@@ -8,7 +8,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
@@ -43,7 +42,7 @@ public class AbstractFileCollectionStub implements FileCollection {
     }
     
     @Override
-    public void addFileViewListener(EventListener<FileViewChangeEvent> listener) {
+    public void addListener(EventListener<FileViewChangeEvent> listener) {
         listeners.addListener(listener);
     }
     
@@ -163,20 +162,13 @@ public class AbstractFileCollectionStub implements FileCollection {
     }
     
     @Override
-    public void removeFileViewListener(EventListener<FileViewChangeEvent> listener) {
-        listeners.removeListener(listener);
+    public boolean removeListener(EventListener<FileViewChangeEvent> listener) {
+        return listeners.removeListener(listener);
     }
     
     @Override
     public int size() {
         return fileDescList.size();
-    }
-
-    @Override
-    public IntSet getIndexes() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
+    }    
 
 }

@@ -18,7 +18,16 @@ abstract class AbstractFileView implements FileView {
         this.library = library;
     }
     
-    public IntSet getIndexes() {
+    /**
+     * Returns the {@link IntSet} that is internally used to store
+     * the index of {@link FileDesc}s contained in this view.
+     * 
+     * Subclasses can use this to perform operations in bulk.
+     * The read lock should be held while using this, or if a subclass
+     * modifies it it should consistently hold a write lock
+     * while mutating it.
+     */
+    protected IntSet getInternalIndexes() {
         return indexes;
     }
     

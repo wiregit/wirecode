@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.listener.SourcedEventMulticasterFactory;
+import org.limewire.listener.SourcedEventMulticaster;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -22,8 +22,8 @@ class IncompleteFileCollectionImpl extends AbstractFileCollection implements Inc
 
     @Inject
     public IncompleteFileCollectionImpl(LibraryImpl managedList, 
-            @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory) {
-        super(managedList, multicasterFactory);
+            SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster) {
+        super(managedList, multicaster);
         this.managedList = managedList;
     }
 

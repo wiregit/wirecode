@@ -196,7 +196,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
     public void initialize() {
         SearchSettings.PUBLISH_LIME_KEYWORDS.addSettingListener(this);
         SearchSettings.LIME_QRP_ENTRIES.addSettingListener(this);
-        fileViewManager.getGnutellaFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getGnutellaFileView().addListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {
@@ -208,7 +208,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 }
             }
         });
-        fileViewManager.getIncompleteFileView().addFileViewListener(new EventListener<FileViewChangeEvent>() {
+        fileViewManager.getIncompleteFileView().addListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {

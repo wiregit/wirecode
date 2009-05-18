@@ -55,9 +55,9 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 exactly(1).of(registry).register(with(serviceGetter));                
-                exactly(1).of(sharedFileList).addFileViewListener(with(listenerGetter));
+                exactly(1).of(sharedFileList).addListener(with(listenerGetter));
                 exactly(1).of(library).addManagedListStatusListener(with(any(EventListener.class)));
-                exactly(1).of(incompleteFileList).addFileViewListener(with(any(EventListener.class)));
+                exactly(1).of(incompleteFileList).addListener(with(any(EventListener.class)));
                 exactly(1).of(multicaster).addListener(with(any(EventListener.class)));
                 
                 atLeast(1).of(fileViewManager).getIncompleteFileView();

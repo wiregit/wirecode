@@ -1520,7 +1520,7 @@ public class UploadTest extends LimeTestCase {
             }            
         };
         try {
-            fileViewManager.getGnutellaFileView().addFileViewListener(listener);
+            fileViewManager.getGnutellaFileView().addListener(listener);
 
             HttpGet method = new HttpGet(LimeTestUtils.getRequest("localhost", PORT, fd.getSHA1Urn()));
             HttpResponse response = null;
@@ -1550,7 +1550,7 @@ public class UploadTest extends LimeTestCase {
                 HttpClientUtils.releaseConnection(response);
             }
         } finally {
-            fileViewManager.getGnutellaFileView().removeFileViewListener(listener);
+            fileViewManager.getGnutellaFileView().removeListener(listener);
         }
         
     }

@@ -83,7 +83,7 @@ public class FriendFileListImplTest extends BaseTestCase {
             {
                 one(viewManager).getFileViewForId(name);
                 will(returnValue(testFileView));
-                one(testFileView).addFileViewListener(with(any(EventListener.class)));
+                one(testFileView).addListener(with(any(EventListener.class)));
                 will(new AssignParameterAction<EventListener<FileViewChangeEvent>>(
                         fileListChangeListener, 0));
                 allowing(testFileView).getReadLock();
@@ -101,7 +101,7 @@ public class FriendFileListImplTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(combinedShareList).removeMemberList(subList);
-                one(testFileList).removeFileViewListener(fileListChangeListener.get());
+                one(testFileList).removeListener(fileListChangeListener.get());
             }
         });
         friendFileListImpl.dispose();

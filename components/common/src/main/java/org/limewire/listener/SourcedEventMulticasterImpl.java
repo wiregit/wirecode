@@ -93,39 +93,5 @@ public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implement
         synchronized(sourceListeners) {
             return sourceListeners.remove(source) != null;
         }
-    }
-    
-    
-    @Override
-    public DisposableEventMulticaster<E> createDisposableMulticaster(final S source) {
-        return new DisposableEventMulticaster<E>() {
-
-            @Override
-            public void addListener(EventListener<E> listener) {
-                SourcedEventMulticasterImpl.this.addListener(source, listener);
-            }
-
-            @Override
-            public boolean removeListener(EventListener<E> listener) {
-                return SourcedEventMulticasterImpl.this.removeListener(source, listener);
-            }
-
-            @Override
-            public void handleEvent(E event) {
-                SourcedEventMulticasterImpl.this.handleEvent(event);
-            }
-
-            @Override
-            public void broadcast(E event) {
-                SourcedEventMulticasterImpl.this.broadcast(event);
-            }
-
-            @Override
-            public void dispose() {
-                SourcedEventMulticasterImpl.this.removeListeners(source);
-            }
-            
-        };
-    }
-    
+    }    
 }

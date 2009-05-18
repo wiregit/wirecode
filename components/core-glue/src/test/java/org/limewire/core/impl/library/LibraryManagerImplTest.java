@@ -32,7 +32,7 @@ public class LibraryManagerImplTest extends BaseTestCase {
         final AtomicReference<PropertyChangeListener> propertyChangeListener = new AtomicReference<PropertyChangeListener>();
         context.checking(new Expectations() {
             {
-                one(managedList).addFileViewListener(with(any(EventListener.class)));
+                one(managedList).addListener(with(any(EventListener.class)));
                 will(new AssignParameterAction<EventListener<FileViewChangeEvent>>(
                         fileListListener, 0));
                 one(managedList).addPropertyChangeListener(with(any(PropertyChangeListener.class)));

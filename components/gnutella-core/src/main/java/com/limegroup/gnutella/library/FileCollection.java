@@ -9,15 +9,20 @@ import org.limewire.concurrent.ListeningFuture;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * A collection of FileDescs.
+ * A mutable collection of FileDescs.
+ * This is different from {@link FileView} in that it adds additional
+ * operations to add or remove FileDescs from the collection.
  */
 public interface FileCollection extends FileView {
 
-    /** Adds the FileDesc to this list. */
+    /** 
+     * Adds the FileDesc to this list. 
+     * @return true if the FileDesc could be added, false otherwise
+     */
     boolean add(FileDesc fileDesc);
 
     /**
-     * Adds a folder to the FileList. Depending on the kind of FileList, this
+     * Adds a folder to the {@link FileCollection}. Depending on the kind of collection, this
      * may either add all current contents of the folder, or the folder itself
      * (allowing for future items in the folder to be added).
      * 

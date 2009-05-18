@@ -51,7 +51,7 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     }
 
     @Override
-    public void addManagedListStatusListener(EventListener<ManagedListStatusEvent> listener) {
+    public void addManagedListStatusListener(EventListener<LibraryStatusEvent> listener) {
     }
 
     @Override
@@ -85,7 +85,7 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     }
 
     @Override
-    public void removeManagedListStatusListener(EventListener<ManagedListStatusEvent> listener) {
+    public void removeManagedListStatusListener(EventListener<LibraryStatusEvent> listener) {
     }
 
     @Override

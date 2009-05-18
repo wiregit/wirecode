@@ -8,11 +8,11 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 
 import org.jdesktop.swingx.decorator.SortController;
-import org.limewire.common.Disposable;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistListener;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFormat;

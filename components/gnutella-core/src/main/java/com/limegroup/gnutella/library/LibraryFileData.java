@@ -66,8 +66,9 @@ class LibraryFileData extends AbstractSettingsGroup {
         Collections.unmodifiableList(Arrays.asList(DEFAULT_MANAGED_EXTENSIONS_STRING.split(";")));
     
     private static enum Version {
-        FIVE_ZERO, // the first ever version 
-        FIVE_TWO; // the current version
+        // for prior versions [before 5.0], see OldLibraryData & LibraryConverter
+        ONE, // the first ever version [active 5.0 -> 5.1]
+        TWO; // the current version [active 5.2 -> ]
     }
     
     private static final String CURRENT_VERSION_KEY = "CURRENT_VERSION";
@@ -86,7 +87,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     private static final Integer MIN_COLLECTION_ID = 2;
     
     
-    private final Version CURRENT_VERSION = Version.FIVE_TWO;
+    private final Version CURRENT_VERSION = Version.TWO;
     
     private final Set<String> userExtensions = new HashSet<String>();
     private final Set<String> userRemoved = new HashSet<String>();
@@ -198,7 +199,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             if (readMap != null) {
                 Object currentVersion = readMap.get("CURRENT_VERSION");
                 if(currentVersion == null) {
-                    currentVersion = Version.FIVE_ZERO;
+                    currentVersion = Version.ONE;
                 }
                 
                 if(currentVersion instanceof Version) {
@@ -216,6 +217,9 @@ class LibraryFileData extends AbstractSettingsGroup {
         return false;
     }
     
+    /**
+     * Initializes the read map assuming it's a particular version.
+     */
     private void initializeFromVersion(Version version, Map<String, Object> readMap) {
         Set<String> userExtensions;
         Set<String> userRemoved;
@@ -227,7 +231,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         Map<Integer, List<String>> collectionShareData;
         
         switch(version) {
-        case FIVE_ZERO:
+        case ONE:
             userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
             userRemoved = GenericsUtils.scanForSet(readMap.get(USER_REMOVED_KEY), String.class, ScanMode.REMOVE);
             directoriesToManageRecursively = GenericsUtils.scanForSet(readMap.get(MANAGED_DIRECTORIES_KEY), File.class, ScanMode.REMOVE);
@@ -239,7 +243,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             collectionShareData = new HashMap<Integer, List<String>>();
             convertShareData(oldShareData, fileData, collectionNames, collectionShareData);
             break;
-        case FIVE_TWO:
+        case TWO:
             userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
             userRemoved = GenericsUtils.scanForSet(readMap.get(USER_REMOVED_KEY), String.class, ScanMode.REMOVE);
             directoriesToManageRecursively = GenericsUtils.scanForSet(readMap.get(MANAGED_DIRECTORIES_KEY), File.class, ScanMode.REMOVE);
@@ -679,7 +683,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     }
 
     /** Adds a new shareId to the given collection's Id. */
-    boolean addShareIdToCollection(int collectionId, String id) {
+    boolean addFriendToCollection(int collectionId, String friendId) {
         lock.writeLock().lock();
         try {
             List<String> ids = collectionShareData.get(collectionId);
@@ -687,8 +691,8 @@ class LibraryFileData extends AbstractSettingsGroup {
                 ids = new ArrayList<String>();
                 collectionShareData.put(collectionId, ids);
             }
-            if(!ids.contains(id)) {
-                ids.add(id);
+            if(!ids.contains(friendId)) {
+                ids.add(friendId);
                 dirty = true;
                 return true;
             } else {
@@ -700,12 +704,12 @@ class LibraryFileData extends AbstractSettingsGroup {
     }
 
     /** Removes a particular shareId from the given collection's Id. */
-    boolean removeShareIdFromCollection(int collectionId, String id) {
+    boolean removeFriendFromCollection(int collectionId, String friendId) {
         lock.writeLock().lock();
         try {
             List<String> ids = collectionShareData.get(collectionId);
             if(ids != null) {
-                return ids.remove(id);
+                return ids.remove(friendId);
             } else {
                 return false;
             }
@@ -715,7 +719,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     }
 
     /** Returns all shareIds for the given collection id. */
-    List<String> getShareIdListForCollection(int collectionId) {
+    List<String> getFriendsForCollection(int collectionId) {
         lock.readLock().lock();
         try {
             List<String> ids = collectionShareData.get(collectionId);
@@ -730,7 +734,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     }
 
     /** Sets a new share id list for the given collection id. */
-    void setShareIdListForCollection(int collectionId, List<String> newIds) {
+    void setFriendsForCollection(int collectionId, List<String> newIds) {
         lock.writeLock().lock();
         try {
             List<String> ids = collectionShareData.get(collectionId);

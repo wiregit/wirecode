@@ -67,7 +67,7 @@ import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
 import com.limegroup.gnutella.library.LibraryUtils;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.LibraryStatusEvent;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -76,7 +76,7 @@ import com.limegroup.mozilla.MozillaDownload;
 import com.limegroup.mozilla.MozillaDownloaderImpl;
 
 @Singleton
-public class DownloadManagerImpl implements DownloadManager, Service, EventListener<ManagedListStatusEvent> {
+public class DownloadManagerImpl implements DownloadManager, Service, EventListener<LibraryStatusEvent> {
     
     private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     
@@ -190,7 +190,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     }
     
     @Inject
-    void register(ListenerSupport<ManagedListStatusEvent> listeners) {
+    void register(ListenerSupport<LibraryStatusEvent> listeners) {
         listeners.addListener(this);
     }
 
@@ -1242,7 +1242,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     /**
      * Listens for events from FileManager
      */
-    public void handleEvent(ManagedListStatusEvent evt) {
+    public void handleEvent(LibraryStatusEvent evt) {
         switch(evt.getType()){
             case LOAD_FINISHING:
                 getIncompleteFileManager().registerAllIncompleteFiles();

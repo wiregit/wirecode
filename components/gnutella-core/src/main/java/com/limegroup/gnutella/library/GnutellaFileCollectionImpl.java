@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.listener.SourcedEventMulticasterFactory;
+import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
@@ -27,7 +27,7 @@ class GnutellaFileCollectionImpl extends SharedFileCollectionImpl implements Gnu
     private final AtomicLong numBytes;
     
     /** A list of session-shared data -- it isn't saved. */
-    private Map<File, File> sessionFiles = new ConcurrentHashMap<File, File>();
+    private final Map<File, File> sessionFiles = new ConcurrentHashMap<File, File>();
     
     /** A list of application shared files. */
     private final AtomicInteger applicationShared = new AtomicInteger();
@@ -39,10 +39,10 @@ class GnutellaFileCollectionImpl extends SharedFileCollectionImpl implements Gnu
     
     @Inject
     public GnutellaFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, 
-                                  @AllFileCollections SourcedEventMulticasterFactory<FileViewChangeEvent, FileView> multicasterFactory,
-                                  @AllFileCollections EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
+                                  SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster,
+                                  EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
                                   HashTreeCache treeCache) {
-        super(data, managedList, multicasterFactory, sharedCollectionBroadcaster, LibraryFileData.GNUTELLA_COLLECTION_ID, treeCache);
+        super(data, managedList, multicaster, sharedCollectionBroadcaster, LibraryFileData.GNUTELLA_COLLECTION_ID, treeCache);
         this.numBytes = new AtomicLong();
     }
     

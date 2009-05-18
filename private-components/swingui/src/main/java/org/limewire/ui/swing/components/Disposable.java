@@ -1,4 +1,4 @@
-package org.limewire.common;
+package org.limewire.ui.swing.components;
 
 /** An item that can be disposed. */
 public interface Disposable {

@@ -18,11 +18,11 @@ import javax.swing.Timer;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.common.Disposable;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.FancyTabListFactory;
 import org.limewire.ui.swing.components.IconButton;

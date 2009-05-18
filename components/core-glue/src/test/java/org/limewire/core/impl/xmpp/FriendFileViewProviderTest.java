@@ -19,7 +19,7 @@ public class FriendFileViewProviderTest extends BaseTestCase {
     
     private Mockery context;
     private FileViewManager fileManager;
-    private FileViewProvider friendFileListProvider;
+    private FriendFileViewProvider friendFileListProvider;
         
     
     public FriendFileViewProviderTest(String name) {
@@ -30,7 +30,7 @@ public class FriendFileViewProviderTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
         fileManager = context.mock(FileViewManager.class);
-        friendFileListProvider = new FileViewProvider(fileManager);
+        friendFileListProvider = new FriendFileViewProvider(fileManager);
     }
     
     public static Test suite() {
