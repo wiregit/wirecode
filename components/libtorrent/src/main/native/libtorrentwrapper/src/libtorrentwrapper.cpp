@@ -103,7 +103,7 @@ struct wrapper_alert_info {
 	}
 
 	~wrapper_alert_info() {
-		delete sha1;
+		delete[] sha1;
 	}
 };
 
