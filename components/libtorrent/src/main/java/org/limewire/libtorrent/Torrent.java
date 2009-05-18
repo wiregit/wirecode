@@ -31,21 +31,21 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     private final AtomicReference<LibTorrentStatus> status;
 
+    private final List<String> paths;
+
     private File incompleteFile = null;
 
-    private File completeFile;
+    private File completeFile = null;
 
     private File torrentFile = null;
 
-    private File fastResumeFile = null;
-
-    private final List<String> paths;
+    private volatile File fastResumeFile = null;
 
     private String sha1 = null;
 
-    private String name;
+    private String name = null;
 
-    private String trackerURL;
+    private String trackerURL = null;
 
     private long totalSize = -1;
 
@@ -72,9 +72,18 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         return listeners.removeListener(listener);
     }
 
+    /**
+     * Initializes the torrent from the given fields. Either the torrentFile and
+     * saveDir fields cannot be null. Or the name, sha1, long totalSize,
+     * trackerURL, paths, and saveDir fields must be set.
+     */
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
             List<String> paths, File fastResumeFile, File torrentFile, File saveDir)
             throws IOException {
+
+        assert (name != null && sha1 != null && totalSize > 0 && trackerURL != null
+                && paths != null && paths.size() > 0 && saveDir != null)
+                || (torrentFile != null && torrentFile.exists() && saveDir != null);
 
         this.sha1 = sha1;
         this.trackerURL = trackerURL;
@@ -149,74 +158,128 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         }
     }
 
+    /**
+     * Returns the name of this torrent.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Starts the torrent.
+     */
     public void start() {
         if (!started.getAndSet(true)) {
             resume();
         }
     }
 
+    /**
+     * Returns the torrent file backing this torrent if any exist. Null or a
+     * non-existent file can be returned.
+     */
     public File getTorrentFile() {
         return torrentFile;
     }
 
+    /**
+     * Returns the fastResume file backing this torrent if any. Null or a
+     * non-existent file can be returned.
+     */
     public File getFastResumeFile() {
         return fastResumeFile;
     }
 
+    /**
+     * Returns a list of peers connected to this torrent.
+     */
     public List<String> getPeers() {
         return torrentManager.getPeers(this);
     }
 
+    /**
+     * Moves the torrent to the specified directory.
+     */
     public void moveTorrent(File directory) {
         torrentManager.moveTorrent(this, directory);
     }
 
+    /**
+     * Pauses the torrent.
+     */
     public void pause() {
         torrentManager.pauseTorrent(this);
     }
 
+    /**
+     * Resumes the torrent from a paused state.
+     */
     public void resume() {
         torrentManager.resumeTorrent(this);
     }
 
+    /**
+     * Returns the download rate in bytes/second.
+     */
     public float getDownloadRate() {
         LibTorrentStatus status = this.status.get();
         return status == null ? 0 : status.download_rate;
     }
 
+    /**
+     * Returns a hexString representation of this torrents sha1.
+     */
     public String getSha1() {
         return sha1;
     }
 
+    /**
+     * Returns true if this torrent is paused, false otherwise.
+     */
     public boolean isPaused() {
         LibTorrentStatus status = this.status.get();
         return status == null ? false : status.isPaused();
     }
 
+    /**
+     * Returns true if this torrent is finished, false otherwise.
+     */
     public boolean isFinished() {
         return complete.get();
     }
 
+    /**
+     * Returns the total size of this torrent if all files were to be
+     * downloaded.
+     */
     public long getTotalSize() {
         return totalSize;
     }
 
+    /**
+     * Returns true if the torrent has been started, false otherwise.
+     */
     public boolean isStarted() {
         return started.get();
     }
 
+    /**
+     * Returns the first tracker url to this torrent.
+     */
     public String getTrackerURL() {
         return trackerURL;
     }
 
+    /**
+     * Returns true if this is a multi file torrent, false otherwise.
+     */
     public boolean isMultiFileTorrent() {
         return paths.size() > 0;
     }
 
+    /**
+     * Returns the total amount of the torren that has fnished downloading.
+     */
     public long getTotalDownloaded() {
         LibTorrentStatus status = this.status.get();
         if (status == null) {
@@ -226,11 +289,17 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         }
     }
 
+    /**
+     * Returns the number of peers in this torrents swarm.
+     */
     public int getNumPeers() {
         LibTorrentStatus status = this.status.get();
         return status == null ? 0 : status.num_peers;
     }
 
+    /**
+     * Returns the non absolute paths to all files in the torrent.
+     */
     public List<String> getPaths() {
         return paths;
     }
@@ -248,26 +317,45 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         return files;
     }
 
+    /**
+     * Returns a list of where all files in the torrent where be when completed.
+     */
     public List<File> getCompleteFiles() {
         return collectFiles(getCompleteFile());
     }
 
+    /**
+     * Returns a list of where all files in the torrent where be when
+     * incomplete.
+     */
     public List<File> getIncompleteFiles() {
         return collectFiles(getIncompleteFile());
     }
 
+    /**
+     * Returns the root incompelteFile for this torrent.
+     */
     public File getIncompleteFile() {
         return incompleteFile;
     }
 
+    /**
+     * Returns the root compelete file for this torrent.
+     */
     public File getCompleteFile() {
         return completeFile;
     }
 
+    /**
+     * Returns true if this is a single file torrent, false otherwise.
+     */
     public boolean isSingleFileTorrent() {
         return !isMultiFileTorrent();
     }
 
+    /**
+     * Stops the torrent by removing it from the torrent manager.
+     */
     public void stop() {
         if (!cancelled.getAndSet(true)) {
             if (started.getAndSet(false)) {
@@ -277,6 +365,9 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         }
     }
 
+    /**
+     * Returns the total number of byte uploaded for this torrent.
+     */
     public long getTotalUploaded() {
         LibTorrentStatus status = this.status.get();
         if (status == null) {
@@ -286,6 +377,9 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         }
     }
 
+    /**
+     * Returns current number of upload connections.
+     */
     public int getNumUploads() {
         LibTorrentStatus status = this.status.get();
         if (status == null) {
@@ -295,11 +389,17 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         }
     }
 
+    /**
+     * Returns the current upload rate in bytes/second
+     */
     public float getUploadRate() {
         LibTorrentStatus status = this.status.get();
         return status == null ? 0 : status.upload_rate;
     }
 
+    /**
+     * Returns the current seed ratio, with 1.0 being at 100%.
+     */
     public float getSeedRatio() {
         LibTorrentStatus status = this.status.get();
         if (status != null && status.getTotalDownload() != 0) {
@@ -308,14 +408,24 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         return 0;
     }
 
+    /**
+     * Returns true if this torrent has been canceled, false otherwise.
+     */
     public boolean isCancelled() {
         return cancelled.get();
     }
 
+    /**
+     * Returns a status object representing this torrents internal state.
+     */
     public LibTorrentStatus getStatus() {
         return status.get();
     }
 
+    /**
+     * Updates this torrents internal state using the given LibTorrentStatus
+     * object.
+     */
     public void updateStatus(LibTorrentStatus torrentStatus) {
         if (!cancelled.get()) {
             synchronized (Torrent.this) {
@@ -333,9 +443,14 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         }
     }
 
+    /**
+     * Updates this torrents internal state using the given LibTorrentAlerts
+     */
     public void alert(LibTorrentAlert alert) {
-        if (alert.category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && alert.data != null) {
-            fastResumeFile = new File(alert.data);
+        synchronized (Torrent.this) {
+            if (alert.category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && alert.data != null) {
+                fastResumeFile = new File(alert.data);
+            }
         }
     }
 }
