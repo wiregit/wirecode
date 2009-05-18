@@ -123,6 +123,8 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         String message = null;
 
         switch (sle.getErrorCode()) {
+        case DIRECTORY_NOT_WRITEABLE:
+        case DIRECTORY_DOES_NOT_EXIST:
         case NOT_A_DIRECTORY:
         case PATH_NAME_TOO_LONG:
             message = I18n.tr("Sorry, you can't download files to this location.");
