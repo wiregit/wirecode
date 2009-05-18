@@ -2,9 +2,6 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-
-import org.limewire.core.api.download.SaveLocationException;
 
 import com.limegroup.gnutella.downloader.CoreDownloader;
 
@@ -16,15 +13,9 @@ public interface BTDownloader extends CoreDownloader {
 
     void init(File torrent) throws IOException;
 
-    List<File> getIncompleteFiles();
-
-    List<File> getCompleteFiles();
-
     File getIncompleteFile();
     
-    void checkTargetLocation() throws SaveLocationException;
+    File getTorrentFile();
     
-    void checkActiveAndWaiting() throws SaveLocationException;
-
     void register();
 }

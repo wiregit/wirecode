@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -297,5 +298,10 @@ public class TorrentManagerImpl implements TorrentManager {
                 }
             }
         }
+    }
+
+    @Override
+    public Executor getTorrentExecutor() {
+        return torrentExecutor;
     }
 }

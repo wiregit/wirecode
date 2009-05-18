@@ -29,6 +29,7 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.libtorrent.TorrentManager;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceStage;
 import org.limewire.listener.EventListener;
@@ -38,6 +39,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -161,6 +163,8 @@ public class DownloadManagerImpl implements DownloadManager, Service,
 
     private final PushEndpointFactory pushEndpointFactory;
 
+    private final Provider<TorrentManager> torrentManager;
+
     @Inject
     public DownloadManagerImpl(@Named("inNetwork") DownloadCallback innetworkCallback,
             Provider<DownloadCallback> downloadCallback, Provider<MessageRouter> messageRouter,
@@ -168,8 +172,8 @@ public class DownloadManagerImpl implements DownloadManager, Service,
             Provider<PushDownloadManager> pushDownloadManager,
             CoreDownloaderFactory coreDownloaderFactory, DownloadSerializer downloaderSerializer,
             IncompleteFileManager incompleteFileManager,
-            RemoteFileDescFactory remoteFileDescFactory,
-            PushEndpointFactory pushEndpointFactory) {
+            RemoteFileDescFactory remoteFileDescFactory, PushEndpointFactory pushEndpointFactory,
+            Provider<TorrentManager> torrentManager) {
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
         this.messageRouter = messageRouter;
@@ -180,6 +184,7 @@ public class DownloadManagerImpl implements DownloadManager, Service,
         this.incompleteFileManager = incompleteFileManager;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.pushEndpointFactory = pushEndpointFactory;
+        this.torrentManager = torrentManager;
     }
 
     /*
@@ -893,36 +898,71 @@ public class DownloadManagerImpl implements DownloadManager, Service,
             throw new SaveLocationException(
                     SaveLocationException.LocationCode.TORRENT_FILE_TOO_LARGE, torrentFile);
         }
-        
+
         BTDownloader ret;
         try {
             ret = coreDownloaderFactory.createBTDownloader(torrentFile);
         } catch (IOException e) {
-           throw new SaveLocationException(e, torrentFile);
+            throw new SaveLocationException(e, torrentFile);
         }
-        
+
         if (overwrite) {
-            //TODO: Redo and tie into incomplete file manager...
             Downloader downloader = getDownloaderForURN(ret.getSha1Urn());
             if (downloader != null) {
                 downloader.stop();
                 downloader.deleteIncompleteFiles();
             }
-            
+
             downloader = getDownloaderForIncompleteFile(ret.getIncompleteFile());
             if (downloader != null) {
                 downloader.stop();
                 downloader.deleteIncompleteFiles();
             }
+        } else {
+            checkActiveAndWaiting(ret);
+
+            File saveFile = ret.getSaveFile();
+            if (saveFile.exists()) {
+                throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, saveFile);
+            }
         }
-        else {
-            ret.checkActiveAndWaiting();
-            ret.checkTargetLocation();
-        }
-        
+
         ret.register();
         initializeDownload(ret, true);
         return ret;
+    }
+
+    /**
+     * Ensures the eventual download location is not already taken by the files
+     * of any other download.
+     */
+    public void checkActiveAndWaiting(BTDownloader ret) throws SaveLocationException {
+
+        if (torrentManager.get().isDownloading(ret.getTorrentFile())) {
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                    .getSaveFile());
+        } else if (torrentManager.get().isDownloading(
+                StringUtils.toHexString(ret.getSha1Urn().getBytes()))) {
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                    .getSaveFile());
+        }
+
+        for (CoreDownloader current : getAllDownloaders()) {
+            if (ret.getSha1Urn().equals(current.getSha1Urn())) {
+                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                        .getIncompleteFile());
+            }
+
+            if (current.conflictsSaveFile(ret.getSaveFile())) {
+                throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, ret
+                        .getSaveFile());
+            }
+
+            if (current.conflictsSaveFile(ret.getIncompleteFile())) {
+                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                        .getIncompleteFile());
+            }
+        }
     }
 
     public synchronized Downloader downloadFromMozilla(MozillaDownload listener) {
