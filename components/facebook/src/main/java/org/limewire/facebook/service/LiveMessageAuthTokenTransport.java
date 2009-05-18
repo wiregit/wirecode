@@ -4,11 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.jivesoftware.smackx.packet.DiscoverInfo.Feature;
 import org.json.JSONObject;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureTransport;
+import org.limewire.core.api.friend.feature.FeatureTransport.Handler;
 import org.limewire.core.api.friend.feature.features.AuthToken;
+import org.limewire.core.api.friend.feature.features.AuthTokenHandler;
+import org.limewire.core.api.friend.impl.AuthTokenImpl;
+import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -20,10 +25,14 @@ public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken
     private static final String TYPE = "auth-token";
     
     private final FacebookFriendConnection connection;
-    
+
+    private final Handler<AuthToken> authTokenHandler;
+
     @AssistedInject
-    LiveMessageAuthTokenTransport(@Assisted FacebookFriendConnection connection) {
+    LiveMessageAuthTokenTransport(@Assisted FacebookFriendConnection connection,
+            FeatureTransport.Handler<AuthToken> authTokenHandler) {
         this.connection = connection;
+        this.authTokenHandler = authTokenHandler;
     }
     
     @Override
@@ -34,7 +43,12 @@ public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken
 
     @Override
     public void handle(String messageType, JSONObject message) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        String from = message.optString("from", null);
+        String authtoken = message.optString("auth-token", null);
+        if (from != null && authtoken != null) {
+            byte[] token = Base64.decodeBase64(StringUtils.toUTF8Bytes(authtoken));
+            authTokenHandler.featureReceived(from, new AuthTokenImpl(token));
+        }
     }
     
     @Override

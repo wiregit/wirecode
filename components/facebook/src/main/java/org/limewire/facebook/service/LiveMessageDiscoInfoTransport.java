@@ -79,7 +79,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                         for(URI feature : featureRegistry) {
                             supported.add(feature.toASCIIString());
                         }
-                        Map response = new HashMap();
+                        Map<String, Object> response = new HashMap<String, Object>();
                         response.put("from", connection.getUID());
                         response.put("features", supported);
                         connection.sendLiveMessage(friend.getActivePresence(), RESPONSE_TYPE,

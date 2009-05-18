@@ -12,7 +12,6 @@ import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
@@ -22,19 +21,16 @@ public class ChatClient {
     private static final Log LOG = LogFactory.getLog(ChatClient.class);
     
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
-    private final Provider<String> apiKey;
     private final FacebookFriendConnection connection;
     private final PresenceListenerFactory presenceListenerFactory;
     private final LiveMessageHandlerRegistry handlerRegistry;
     private final ScheduledListeningExecutorService executorService;
 
     @AssistedInject
-    ChatClient(@Named("facebookApiKey") Provider<String> apiKey,
-               @Assisted FacebookFriendConnection connection,
+    ChatClient(@Assisted FacebookFriendConnection connection,
                PresenceListenerFactory presenceListenerFactory,
                LiveMessageHandlerRegistry handlerRegistry,
                @Named("backgroundExecutor") ScheduledListeningExecutorService executorService) {
-        this.apiKey = apiKey;
         this.connection = connection;
         this.presenceListenerFactory = presenceListenerFactory;
         this.handlerRegistry = handlerRegistry;
@@ -109,7 +105,7 @@ public class ChatClient {
             int i = 0;
             int currentSeq = seq;
             while(true){
-                System.out.println(i++);
+                LOG.debugf("iteration: {0}", i++);
                 try {
                     //PostMessage("1190346972", "SEQ:"+seq);
                     currentSeq = getSeq();

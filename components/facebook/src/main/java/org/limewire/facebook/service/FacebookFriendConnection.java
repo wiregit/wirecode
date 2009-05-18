@@ -57,7 +57,6 @@ public class FacebookFriendConnection implements FriendConnection {
     
     private final FriendConnectionConfiguration configuration;
     private final Provider<String> apiKey;
-    private static final String DUMMY_SECRET = "__";
     private static final String FACEBOOK_LOGIN_GET_URL = "http://coelacanth:5555/getlogin/";
     private static final String FACEBOOK_LOGIN_POST_ACTION_URL = "https://login.facebook.com/login.php?";
     private static final String FACEBOOK_GET_SESSION_URL = "http://coelacanth:5555/getsession/";
