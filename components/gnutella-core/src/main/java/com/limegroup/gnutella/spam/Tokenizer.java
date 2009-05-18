@@ -94,8 +94,10 @@ public class Tokenizer {
      * @param set the set to which the tokens should be added
      */
     private void tokenize(RemoteFileDesc desc, Set<Token> set) {
-		if(LOG.isDebugEnabled())
-			LOG.debug("Tokenizing " + desc);
+		if(LOG.isDebugEnabled()) {
+            String addr = desc.getAddress().getAddressDescription(); 
+			LOG.debug("Tokenizing result from " + addr);
+        }
         String name = desc.getFileName();
         getKeywordTokens(FileUtils.getFilenameNoExtension(name), set);
         String ext = FileUtils.getFileExtension(name);
@@ -127,7 +129,7 @@ public class Tokenizer {
      */
     public Set<Token> getNonKeywordTokens(QueryReply qr) {
         if(LOG.isDebugEnabled())
-            LOG.debug("Tokenizing " + qr);
+            LOG.debug("Tokenizing query reply from " + qr.getIP());
         Set<Token> set = new HashSet<Token>();
         // Client GUID
         set.add(new ClientGUIDToken(Base32.encode(qr.getClientGUID())));
