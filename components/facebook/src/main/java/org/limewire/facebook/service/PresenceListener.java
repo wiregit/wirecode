@@ -12,16 +12,20 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 @Singleton
-public class PresenceListener implements Runnable {
+public class PresenceListener implements Runnable, EventListener<FriendConnectionEvent>{
     
     private static final Log LOG = LogFactory.getLog(PresenceListener.class);
     
@@ -40,6 +44,22 @@ public class PresenceListener implements Runnable {
         this.friendPresenceBroadcaster = friendPresenceBroadcaster;
         this.connection = connection;
         deserializer = buddyListResponseDeserializerFactory.create(connection);
+    }
+    
+    @Inject
+    void register(ListenerSupport<FriendConnectionEvent> friendConnectionListenerSupport) {
+        friendConnectionListenerSupport.addListener(this);
+    }
+
+    @Override
+    public void handleEvent(FriendConnectionEvent event) {
+        switch(event.getType()) {
+        case DISCONNECTED:
+            for(Friend user : event.getSource().getUsers()) {
+                friendManager.removeKnownFriend(user, false);
+            }
+            break;
+        }
     }
 
     public void run() {

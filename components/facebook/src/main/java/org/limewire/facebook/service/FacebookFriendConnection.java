@@ -98,6 +98,7 @@ public class FacebookFriendConnection implements FriendConnection {
     @Override
     public ListeningFuture<Void> logout() {
         loggedIn.set(false);
+        connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));
         return null;
     }
 
