@@ -170,7 +170,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         SearchResultTruncator truncator, IconManager iconManager) {
 
         this.categoryIconManager = categoryIconManager;
-        System.out.println("searchText=" + searchText); // TODO REMOVE
+        
         this.searchText = searchText;
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
