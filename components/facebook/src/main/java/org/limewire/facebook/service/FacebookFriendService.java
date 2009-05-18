@@ -11,6 +11,9 @@ import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.feature.FeatureRegistry;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
+import org.limewire.core.api.friend.impl.LimewireFeatureInitializer;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -27,12 +30,16 @@ class FacebookFriendService implements FriendConnectionFactory {
     private final ChatClientFactory chatClientFactory;
     private final LiveMessageDiscoInfoTransportFactory discoInfoTransportFactory;
 
+    private final FeatureRegistry featureRegistry;
+
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
                                   ChatClientFactory chatClientFactory,
-                                  LiveMessageDiscoInfoTransportFactory discoInfoTransportFactory){
+                                  LiveMessageDiscoInfoTransportFactory discoInfoTransportFactory,
+                                  FeatureRegistry featureRegistry){
         this.connectionFactory = connectionFactory;
         this.chatClientFactory = chatClientFactory;
         this.discoInfoTransportFactory = discoInfoTransportFactory;
+        this.featureRegistry = featureRegistry;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
     }
 
@@ -57,6 +64,7 @@ class FacebookFriendService implements FriendConnectionFactory {
         FacebookFriendConnection connection = connectionFactory.create(configuration);
         discoInfoTransportFactory.create(connection);
         LOG.debug("logging in");
+        new LimewireFeatureInitializer().register(featureRegistry);
         connection.loginImpl();
         ChatClient client = chatClientFactory.createChatClient(connection);
         client.start();
