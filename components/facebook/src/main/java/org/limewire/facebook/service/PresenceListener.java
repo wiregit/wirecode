@@ -69,7 +69,7 @@ public class PresenceListener implements Runnable {
             JSONArray friends = connection.getClient().friends_get();
             List<Long> friendIds = new ArrayList<Long>(friends.length());
             for (int i = 0; i < friends.length(); i++) {
-                friendIds.add(friends.getLong(0));
+                friendIds.add(friends.getLong(i));
             }
             JSONArray users = (JSONArray) connection.getClient().users_getInfo(friendIds, new HashSet<CharSequence>(Arrays.asList("uid", "first_name", "name")));
             LOG.debugf("all friends: {0}", users);
