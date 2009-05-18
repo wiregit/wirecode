@@ -11,20 +11,28 @@ import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 class FacebookFriendService implements FriendConnectionFactory {
+    
+    private static Log LOG = LogFactory.getLog(FacebookFriendService.class);
+    
     private final ThreadPoolListeningExecutor executorService;
     private final FacebookFriendConnectionFactory connectionFactory;
     private final ChatClientFactory chatClientFactory;
+    private final LiveMessageDiscoInfoTransportFactory discoInfoTransportFactory;
 
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
-                                  ChatClientFactory chatClientFactory){
+                                  ChatClientFactory chatClientFactory,
+                                  LiveMessageDiscoInfoTransportFactory discoInfoTransportFactory){
         this.connectionFactory = connectionFactory;
         this.chatClientFactory = chatClientFactory;
+        this.discoInfoTransportFactory = discoInfoTransportFactory;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
     }
 
@@ -45,7 +53,10 @@ class FacebookFriendService implements FriendConnectionFactory {
     }
     
     FacebookFriendConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
+        LOG.debug("creating connection");
         FacebookFriendConnection connection = connectionFactory.create(configuration);
+        discoInfoTransportFactory.create(connection);
+        LOG.debug("logging in");
         connection.loginImpl();
         ChatClient client = chatClientFactory.createChatClient(connection);
         client.start();
