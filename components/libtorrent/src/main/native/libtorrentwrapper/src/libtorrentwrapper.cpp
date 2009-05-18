@@ -34,9 +34,6 @@
 
 using libtorrent::asio::ip::tcp;
 
-#ifdef WINDOWS
-#include <windows.h>
-#endif
 
 libtorrent::session s;
 std::string savePath;
