@@ -99,6 +99,9 @@ class RangeFilter<E extends FilterableItem> extends AbstractFilter<E> {
             String maxText = rangeFormat.getValueText(slider.getUpperValue());
             
             if (slider.getUpperValue() == slider.getMaximum()) {
+                if (rangeFormat.isMaximumAbsolute()) {
+                    return minText;
+                }
                 // {0}: lower bound of open-ended numeric range
                 return I18n.tr("{0} or above", minText);
             } else {
@@ -112,6 +115,8 @@ class RangeFilter<E extends FilterableItem> extends AbstractFilter<E> {
             
             if (slider.getValue() == slider.getMinimum()) {
                 return I18n.tr("all");
+            } else if ((slider.getValue() == slider.getMaximum()) && rangeFormat.isMaximumAbsolute()) {
+                return minText;
             } else {
                 return I18n.tr("{0} or above", minText);
             }
