@@ -15,14 +15,14 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.StringUtils;
 
-import com.google.code.facebookapi.FacebookException;
-import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 
 public class LiveMessageAddressTransport implements FeatureTransport<Address>, LiveMessageHandler {
+    
+    private static final String TYPE = "address";
     
     private static final Log LOG = LogFactory.getLog(LiveMessageAddressTransport.class);
     
@@ -39,17 +39,12 @@ public class LiveMessageAddressTransport implements FeatureTransport<Address>, L
     @Override
     @Inject
     public void register(LiveMessageHandlerRegistry registry) {
-        registry.register(this);
-    }
-
-    @Override
-    public String getMessageType() {
-        return "address";
+        registry.register(TYPE, this);
     }
 
     @Override
     public void handle(JSONObject message) {
-
+        
     }
 
     @Override
@@ -61,6 +56,7 @@ public class LiveMessageAddressTransport implements FeatureTransport<Address>, L
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        connection.sendLiveMessage(presence, getMessageType(), new JSONObject(message));
+        LOG.debugf("sending address: {0}", message);
+        connection.sendLiveMessage(presence, TYPE, new JSONObject(message));
     }
 }

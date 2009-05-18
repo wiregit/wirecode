@@ -17,8 +17,8 @@ public class LiveMessageHandlerRegistryImpl implements LiveMessageHandlerRegistr
     }
 
     @Override
-    public void register(LiveMessageHandler handler) {
-        handlers.put(handler.getMessageType(), handler);
+    public void register(String messageType, LiveMessageHandler handler) {
+        handlers.put(messageType, handler);
     }
 
     @Override

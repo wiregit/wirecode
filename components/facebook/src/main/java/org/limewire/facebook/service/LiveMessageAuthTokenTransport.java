@@ -11,35 +11,25 @@ import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.util.StringUtils;
 
-import com.google.code.facebookapi.FacebookException;
-import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.google.inject.name.Named;
 
 public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken>, LiveMessageHandler {
     
-    private final Provider<String> apiKey;
+    private static final String TYPE = "auth-token";
+    
     private final FacebookFriendConnection connection;
     
     @AssistedInject
-    LiveMessageAuthTokenTransport(@Assisted FacebookFriendConnection connection,
-                                  @Named("facebookApiKey") Provider<String> apiKey) {
-        this.apiKey = apiKey;
+    LiveMessageAuthTokenTransport(@Assisted FacebookFriendConnection connection) {
         this.connection = connection;
     }
     
     @Override
     @Inject
     public void register(LiveMessageHandlerRegistry registry) {
-        registry.register(this);
-    }
-
-    @Override
-    public String getMessageType() {
-        return "auth-token";
+        registry.register(TYPE, this);
     }
 
     @Override
@@ -52,6 +42,6 @@ public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken
         Map<String, String> message = new HashMap<String, String>();
         message.put("from", connection.getUID());
         message.put("auth-token", StringUtils.toUTF8String(Base64.encodeBase64(localFeature.getToken())));
-        connection.sendLiveMessage(presence, getMessageType(), new JSONObject(message));
+        connection.sendLiveMessage(presence, TYPE, new JSONObject(message));
     }
 }

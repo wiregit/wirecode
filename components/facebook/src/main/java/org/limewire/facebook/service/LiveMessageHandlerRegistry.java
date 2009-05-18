@@ -1,6 +1,6 @@
 package org.limewire.facebook.service;
 
 public interface LiveMessageHandlerRegistry {
-    void register(LiveMessageHandler handler);
+    void register(String messageType, LiveMessageHandler handler);
     LiveMessageHandler getHandler(String messageType);
 }

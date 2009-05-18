@@ -9,6 +9,8 @@ import org.json.JSONObject;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
@@ -16,6 +18,9 @@ import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
 public class ChatClient {
+    
+    private static final Log LOG = LogFactory.getLog(ChatClient.class);
+    
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private final Provider<String> apiKey;
     private final FacebookFriendConnection connection;
@@ -152,32 +157,19 @@ public class ChatClient {
                     from = res.getString("from");                        
                 }
                 if(ms.getJSONObject(0).has("event_name")) {
-                    String eventName = ms.getJSONObject(0).getString("event_name");
-                    if(eventName.endsWith("_response")) {
-                        eventName = eventName.substring(0, eventName.indexOf("_response"));
-                    }
-                    String messageType = eventName;
+                    String messageType = ms.getJSONObject(0).getString("event_name");
                     LiveMessageHandler handler = handlerRegistry.getHandler(messageType);
                     if(handler != null) {
                         handler.handle(ms.getJSONObject(0));
+                    } else {
+                        LOG.debugf("no handler for type: {0}", messageType);
                     }
-//                    if(messageType.equals("disco_info")) {
-//                        FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
-//                        connection.getSecret(), connection.getSession());
-//                        Map<String, String> message = new HashMap<String, String>();
-//                            message.put("from", connection.getUID());
-//                        try {
-//                            client.liveMessage_send(Long.parseLong(from), "disco_info_response", new JSONObject(message));
-//                        } catch (FacebookException e) {
-//                            throw new RuntimeException(e);
-//                        }     
-//                    }
                 }
             }            
         }
 
         private void getPOSTFormID() throws IOException {
-            System.out.println("refreshing post_form_id");
+            LOG.debug("refreshing post_form_id");
             String homePage = connection.httpGET(HOME_PAGE);    
             String post_form_id;
             String postFormIDPrefix = "<input type=\"hidden\" id=\"post_form_id\" name=\"post_form_id\" value=\"";
@@ -216,7 +208,7 @@ public class ChatClient {
                 }
 
                 try {
-                    System.out.println("retrying to retrieve the seq code after 1 second...");
+                    LOG.debug("retrying to retrieve the seq code after 1 second...");
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();

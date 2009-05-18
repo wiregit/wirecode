@@ -26,6 +26,9 @@ import com.google.inject.name.Named;
 
 public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
 
+    private static final String REQUEST_TYPE = "disc-info-request";
+    private static final String RESPONSE_TYPE = "disc-info-response";
+    
     private final FacebookFriendConnection connection;
     private final FeatureRegistry featureRegistry;
     private final Map<String, String> friends = new HashMap<String, String>();
@@ -41,18 +44,14 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     @Override
     @Inject
     public void register(LiveMessageHandlerRegistry registry) {
-        registry.register(this);
-    }
-
-    @Override
-    public String getMessageType() {
-        return "disco_info";
+        registry.register(REQUEST_TYPE, this);
+        registry.register(RESPONSE_TYPE, this);
     }
 
     @Override
     public void handle(JSONObject message) throws JSONException {  
         try {
-            if(message.getString("event_name").equals("disco_info_response")) {
+            if(message.getString("event_name").equals(RESPONSE_TYPE)) {
                 String from = message.getString("from");
                 if(from != null) {
                     FacebookFriend friend = connection.getUser(from);
@@ -67,7 +66,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                         }
                     }
                 }                           
-            } else if(message.getString("event_name").equals(getMessageType())) {
+            } else if(message.getString("event_name").equals(REQUEST_TYPE)) {
                 String from  = message.getString("from");
                 if(from != null) {
                     FacebookFriend friend = connection.getUser(from);
@@ -120,12 +119,10 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
             public void handleEvent(FriendEvent event) {                
                 if(event.getType() == FriendEvent.Type.ADDED) {
                     if(friends.containsKey(event.getData().getId())) {
-                        //FacebookJsonRestClient client = new FacebookJsonRestClient(apiKey.get(),
-                        //connection.getSecret(), connection.getSession());
                         try {
                             Map<String, String> message = new HashMap<String, String>();
                             message.put("from", connection.getUID());
-                            connection.sendLiveMessage(event.getData().getActivePresence(), getMessageType(),
+                            connection.sendLiveMessage(event.getData().getActivePresence(), REQUEST_TYPE,
                                     new JSONObject(message));
                         } catch (FriendException e) {
                             throw new RuntimeException(e);
