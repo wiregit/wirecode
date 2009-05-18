@@ -36,13 +36,12 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import com.google.code.facebookapi.ExtensibleClient;
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Provider;
