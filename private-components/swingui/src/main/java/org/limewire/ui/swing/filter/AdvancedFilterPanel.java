@@ -395,6 +395,10 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            // Clear text filter.
+            filterTextField.setText(null);
+            
+            // Remove active filters.
             List<Filter<E>> filterList = filterDisplayPanel.getActiveFilters();
             for (Filter<E> filter : filterList) {
                 removeActiveFilter(filter);
