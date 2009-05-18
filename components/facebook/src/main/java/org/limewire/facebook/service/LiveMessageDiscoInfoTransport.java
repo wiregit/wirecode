@@ -17,6 +17,8 @@ import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.inject.Inject;
@@ -26,6 +28,8 @@ import com.google.inject.name.Named;
 
 public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
 
+    private static final Log LOG = LogFactory.getLog(LiveMessageAddressTransport.class);
+    
     private static final String REQUEST_TYPE = "disc-info-request";
     private static final String RESPONSE_TYPE = "disc-info-response";
     

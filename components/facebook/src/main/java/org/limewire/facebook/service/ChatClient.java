@@ -123,15 +123,9 @@ public class ChatClient {
                             if(msgResponseBody.startsWith(prefix))
                                 msgResponseBody = msgResponseBody.substring(prefix.length());
                             JSONObject response = new JSONObject(msgResponseBody);
+                            LOG.debugf("MESSAGE: {0}", response);
                             if(response.getString("t").equals("msg")) {
-                                System.out.println("MESSAGE: " + response);
                                 dispatchMessage(response);
-        //                        try {
-        //                            ResponseParser.messageRequestResultParser(msgResponseBody);
-        //                        } catch (JSONException e) {
-        //                            e.printStackTrace();
-        //                        }
-                                //seq++;
                             } else if(response.getString("t").equals("refresh")) {
                                 getPOSTFormID();        
                             }
