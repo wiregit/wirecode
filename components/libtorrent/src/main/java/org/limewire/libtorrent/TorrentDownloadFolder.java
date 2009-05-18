@@ -10,6 +10,9 @@ import static java.lang.annotation.ElementType.METHOD;
 
 import com.google.inject.BindingAnnotation;
 
+/**
+ * Annotation describing where to download torrents to. 
+ */
 @BindingAnnotation
 @Target( { FIELD, PARAMETER, METHOD })
 @Retention(RUNTIME)

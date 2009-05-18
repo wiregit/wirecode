@@ -26,7 +26,7 @@ public interface TorrentManager extends Service {
 
     /**
      * Returns a list of ip addresses for the peers connected to the specified
-     * torrent.s
+     * torrent.
      */
     public List<String> getPeers(Torrent torrent);
 
