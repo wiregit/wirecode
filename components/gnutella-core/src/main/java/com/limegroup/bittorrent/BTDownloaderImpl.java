@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
@@ -112,7 +113,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void stop() {
         if (!isInactive() && !torrent.isFinished()) {
-            torrent.stop();
+            new ManagedThread(new Runnable() {
+                @Override
+                public void run() {
+                    torrent.stop();
+                }
+            }, "BTDownloader Stop Torrent").start();
             downloadManager.remove(this, true);
         } else {
             downloadManager.remove(this, true);
@@ -214,14 +220,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
 
         LibTorrentStatus status = torrent.getStatus();
-        if(!torrent.isStarted() || status == null) {
+        if (!torrent.isStarted() || status == null) {
             return DownloadState.QUEUED;
         }
-        
-        if(status.isError()) {
+
+        if (status.isError()) {
             return DownloadState.INVALID;
         }
-       
+
         LibTorrentState state = LibTorrentState.forId(status.state);
         return convertState(state);
     }
@@ -480,12 +486,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         btMemento.setTrackerURL(torrent.getTrackerURL());
         btMemento.setPaths(torrent.getPaths());
         File fastResumeFile = torrent.getFastResumeFile();
-        String fastResumePath = fastResumeFile != null ? fastResumeFile
-                .getAbsolutePath() : null;
+        String fastResumePath = fastResumeFile != null ? fastResumeFile.getAbsolutePath() : null;
         btMemento.setFastResumePath(fastResumePath);
         File torrentFile = torrent.getTorrentFile();
-        String torrentPath = torrentFile != null ? torrentFile
-                .getAbsolutePath() : null;
+        String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
         btMemento.setTorrentPath(torrentPath);
     }
 
@@ -559,16 +563,21 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void deleteIncompleteFiles() {
         // TODO assert that complete or aborted?
-        FileUtils.deleteRecursive(getIncompleteFile());
-        File torrentFile = torrent.getTorrentFile();
-        if (torrentFile != null) {
-            FileUtils.delete(torrentFile, false);
-        }
+        new ManagedThread(new Runnable() {
+            @Override
+            public void run() {
+                FileUtils.deleteRecursive(getIncompleteFile());
+                File torrentFile = torrent.getTorrentFile();
+                if (torrentFile != null) {
+                    FileUtils.delete(torrentFile, false);
+                }
 
-        File fastResumeFile = torrent.getFastResumeFile();
-        if (fastResumeFile != null) {
-            FileUtils.delete(fastResumeFile, false);
-        }
+                File fastResumeFile = torrent.getFastResumeFile();
+                if (fastResumeFile != null) {
+                    FileUtils.delete(fastResumeFile, false);
+                }
+            }
+        }, "BTDownloaderImpl.deleteIncompleteFiles()").start();
     }
 
     @Override

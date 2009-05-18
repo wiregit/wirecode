@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
@@ -50,7 +51,12 @@ public class BTUploader implements Uploader {
     public void stop() {
         cancelled = activityCallback.promptTorrentUploadCancel(torrent);
         if (cancelled) {
-            torrent.stop();
+            new ManagedThread(new Runnable() {
+                @Override
+                public void run() {
+                    torrent.stop();
+                }
+            }, "BTUploader Stop Torrent").start();
             activityCallback.removeUpload(this);
         }
     }
