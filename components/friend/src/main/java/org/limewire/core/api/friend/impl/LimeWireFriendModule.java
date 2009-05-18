@@ -49,6 +49,7 @@ public class LimeWireFriendModule extends AbstractModule {
 
         bind(new TypeLiteral<ListenerSupport<FeatureEvent>>(){}).toInstance(featureMulticaster);
         bind(new TypeLiteral<EventMulticaster<FeatureEvent>>(){}).toInstance(featureMulticaster);
+        bind(new TypeLiteral<EventBroadcaster<FeatureEvent>>(){}).toInstance(featureMulticaster);
         
         bind(FeatureRegistry.class).to(FeatureRegistryImpl.class);
 
