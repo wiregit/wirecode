@@ -227,7 +227,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return DownloadState.INVALID;
         }
 
-        LibTorrentState state = LibTorrentState.forId(status.state);
+        LibTorrentState state = status.getState();
         return convertState(state);
     }
 

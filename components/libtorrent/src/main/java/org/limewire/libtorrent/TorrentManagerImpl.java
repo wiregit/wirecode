@@ -125,9 +125,8 @@ public class TorrentManagerImpl implements TorrentManager {
 
         String sha1 = torrent.getSha1();
         libTorrent.get_torrent_status(sha1, status);
-        LibTorrentStatus statusCopy = new LibTorrentStatus(status);
         libTorrent.free_torrent_status(status);
-        return statusCopy;
+        return status;
     }
 
     private void updateStatus(Torrent torrent) {
