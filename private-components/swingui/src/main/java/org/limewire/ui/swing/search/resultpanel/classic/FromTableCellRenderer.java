@@ -14,6 +14,7 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.components.RemoteHostWidget;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -39,6 +40,8 @@ public class FromTableCellRenderer extends JXPanel implements TableCellRenderer,
                 fromWidget.setPeople(((VisualSearchResult)value).getSources());
             } else if(value instanceof RemoteFileItem) {
                 fromWidget.setPeople(((RemoteFileItem)value).getSources());
+            } else if(value instanceof DownloadItem) {
+                fromWidget.setPeople(((DownloadItem)value).getRemoteHosts());
             }
         }
         fromWidget.setForeground(this.getForeground());
@@ -59,6 +62,8 @@ public class FromTableCellRenderer extends JXPanel implements TableCellRenderer,
                 fromWidget.setPeople(((VisualSearchResult)value).getSources());
             } else if(value instanceof RemoteFileItem) {
                 fromWidget.setPeople(((RemoteFileItem)value).getSources());
+            } else if(value instanceof DownloadItem) {
+                fromWidget.setPeople(((DownloadItem)value).getRemoteHosts());
             }
         }
         fromWidget.setForeground(this.getForeground());

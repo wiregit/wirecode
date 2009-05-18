@@ -12,12 +12,15 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
+import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadMessageRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadProgressRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadTitleRenderer;
+import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -47,7 +50,7 @@ public class DownloadTable extends MouseableTable {
 
     @Inject
 	public DownloadTable(ProgressBarDecorator progressBarDecorator, CategoryIconManager iconManager, DownloadActionHandler actionHandler, 
-	        @Assisted EventList<DownloadItem> downloadItems) {
+	        @Assisted EventList<DownloadItem> downloadItems, RemoteHostWidgetFactory remoteHostWidgetFactory) {
         
         GuiUtils.assignResources(this);
                 
@@ -66,6 +69,8 @@ public class DownloadTable extends MouseableTable {
 
         getColumnModel().getColumn(DownloadTableFormat.TITLE).setCellRenderer(new DownloadTitleRenderer(iconManager));
         getColumnModel().getColumn(DownloadTableFormat.PROGRESS).setCellRenderer(new DownloadProgressRenderer(progressBarDecorator));
+        getColumnModel().getColumn(DownloadTableFormat.NUM_SOURCES).setCellRenderer(new FromTableCellRenderer(remoteHostWidgetFactory.create(RemoteWidgetType.TABLE)));
+        getColumnModel().getColumn(DownloadTableFormat.NUM_SOURCES).setCellEditor(new FromTableCellRenderer(remoteHostWidgetFactory.create(RemoteWidgetType.TABLE)));
         getColumnModel().getColumn(DownloadTableFormat.MESSAGE).setCellRenderer(new DownloadMessageRenderer());
         getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellRenderer(new DownloadButtonRendererEditor());
         

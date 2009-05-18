@@ -21,6 +21,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.friend.FriendManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
@@ -68,6 +69,8 @@ public class CoreDownloadListManager implements DownloadListManager {
     private final ActivityCallback activityCallback;
     private final SpamManager spamManager;
     private final ItunesDownloadListenerFactory itunesDownloadListenerFactory;
+    private final FriendManager friendManager;
+    
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
     /**the base list - all removing and adding must be done from here.*/
     private final ThreadSafeList<DownloadItem> threadSafeDownloadItems;
@@ -78,13 +81,15 @@ public class CoreDownloadListManager implements DownloadListManager {
 	
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
-            RemoteFileDescFactory remoteFileDescFactory, ActivityCallback activityCallback, SpamManager spamManager, ItunesDownloadListenerFactory itunesDownloadListenerFactory) {
+            RemoteFileDescFactory remoteFileDescFactory, ActivityCallback activityCallback, SpamManager spamManager, 
+            ItunesDownloadListenerFactory itunesDownloadListenerFactory, FriendManager friendManager) {
 	    
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
 	    this.activityCallback = activityCallback;
         this.spamManager = spamManager;
         this.itunesDownloadListenerFactory = itunesDownloadListenerFactory;
+        this.friendManager = friendManager;
         
         threadSafeDownloadItems = GlazedListsFactory.threadSafeList(new BasicEventList<DownloadItem>());
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
@@ -284,7 +289,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadAdded(Downloader downloader) {
-            DownloadItem item = new CoreDownloadItem(downloader, queueTimeCalculator);
+            DownloadItem item = new CoreDownloadItem(downloader, queueTimeCalculator, friendManager);
             downloader.setAttribute(DownloadItem.DOWNLOAD_ITEM, item, false);
             downloader.addListener(new TorrentDownloadListener(downloadManager, activityCallback, list, downloader));
             downloader.addListener(new RecentDownloadListener(downloader));

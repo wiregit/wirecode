@@ -17,6 +17,8 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.friend.FriendManager;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.impl.RemoteHostRFD;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.friend.GnutellaPresence;
@@ -25,6 +27,7 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
+import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
@@ -51,10 +54,12 @@ class CoreDownloadItem implements DownloadItem {
     private final long finishingThreshold = 0;
 
     private final QueueTimeCalculator queueTimeCalculator;
-
-    public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator) {
+    private final FriendManager friendManager;
+    
+    public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator, FriendManager friendManager) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
+        this.friendManager = friendManager;
         
         downloader.addListener(new EventListener<DownloadStateEvent>() {
             @Override
@@ -131,13 +136,30 @@ class CoreDownloadItem implements DownloadItem {
         if(remoteFiles.size() > 0) {
             List<RemoteHost> remoteHosts = new ArrayList<RemoteHost>(remoteFiles.size());
             for(RemoteFileDesc rfd : remoteFiles) {
-                remoteHosts.add(new RemoteHostRFD(rfd, 
-                        new GnutellaPresence(rfd.getAddress(), GUID.toHexString(rfd.getClientGUID()))));
+                remoteHosts.add(new RemoteHostRFD(rfd, getFriendPresence(rfd)));
+                
             }
             return remoteHosts;
         } else {
             return Collections.emptyList();
         }
+    }
+    
+    /**
+	 * Returns a FriendPresence for this RemoteFileDesc. If this is
+	 * from a friend returns an associated LW FriendPresnce otherwise
+     * returns a generic GnutellaPresence.
+	 */
+    private FriendPresence getFriendPresence(RemoteFileDesc rfd) {
+        FriendPresence friendPresence = null;
+        
+        if(rfd.getAddress() instanceof XMPPAddress) {
+            friendPresence = friendManager.getMostRelevantFriendPresence(((XMPPAddress)rfd.getAddress()).getId());
+        } 
+        if(friendPresence == null) {
+            friendPresence = new GnutellaPresence(rfd.getAddress(), GUID.toHexString(rfd.getClientGUID()));
+        }
+        return friendPresence;
     }
 
     @Override
