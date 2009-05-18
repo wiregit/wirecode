@@ -39,6 +39,11 @@ class QualityFilterFormat<E extends FilterableItem> implements RangeFilterFormat
     }
     
     @Override
+    public boolean isMaximumAbsolute() {
+        return true;
+    }
+    
+    @Override
     public boolean isUpperLimitEnabled() {
         return false;
     }

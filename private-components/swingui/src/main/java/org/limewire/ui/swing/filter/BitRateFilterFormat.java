@@ -43,6 +43,11 @@ class BitRateFilterFormat<E extends FilterableItem> implements RangeFilterFormat
     }
     
     @Override
+    public boolean isMaximumAbsolute() {
+        return false;
+    }
+    
+    @Override
     public boolean isUpperLimitEnabled() {
         return false;
     }

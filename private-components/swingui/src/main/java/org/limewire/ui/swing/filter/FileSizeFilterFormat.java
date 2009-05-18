@@ -132,6 +132,11 @@ class FileSizeFilterFormat<E extends FilterableItem> implements RangeFilterForma
     }
     
     @Override
+    public boolean isMaximumAbsolute() {
+        return false;
+    }
+    
+    @Override
     public boolean isUpperLimitEnabled() {
         return true;
     }

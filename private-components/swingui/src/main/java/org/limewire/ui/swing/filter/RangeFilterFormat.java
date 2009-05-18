@@ -29,8 +29,12 @@ interface RangeFilterFormat<E extends FilterableItem> {
     String getValueText(int valueIndex);
     
     /**
+     * Returns true if the range maximum represents an absolute value.
+     */
+    boolean isMaximumAbsolute();
+    
+    /**
      * Returns true if the upper limit is enabled.
      */
     boolean isUpperLimitEnabled();
-    
 }

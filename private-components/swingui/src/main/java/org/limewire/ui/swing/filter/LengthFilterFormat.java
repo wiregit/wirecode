@@ -45,6 +45,11 @@ class LengthFilterFormat<E extends FilterableItem> implements RangeFilterFormat<
     }
     
     @Override
+    public boolean isMaximumAbsolute() {
+        return false;
+    }
+    
+    @Override
     public boolean isUpperLimitEnabled() {
         return true;
     }
