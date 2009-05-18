@@ -424,7 +424,11 @@ class CoreDownloadItem implements DownloadItem {
                     .synchronizedMap(new HashMap<FilePropertyKey, Object>());
             //"LimeXMLDocument" attribute is set in ManagedDownloaderImpl
             LimeXMLDocument doc = (LimeXMLDocument)downloader.getAttribute("LimeXMLDocument");
-            FilePropertyKeyPopulator.populateProperties(getFileName(), getTotalSize(), downloader.getFile().lastModified(), reloadedMap, doc);
+            long creationTime = -1;
+            if(downloader.getFile() != null) {
+                creationTime = downloader.getFile().lastModified();
+            }
+            FilePropertyKeyPopulator.populateProperties(getFileName(), getTotalSize(), creationTime, reloadedMap, doc);
             propertiesMap = reloadedMap;
         }
     }
