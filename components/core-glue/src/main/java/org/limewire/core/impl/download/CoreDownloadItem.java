@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
@@ -24,17 +25,25 @@ import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
+import com.limegroup.gnutella.lws.server.StartComTest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreDownloadItem implements DownloadItem {
-   
+
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
+
     private final Downloader downloader;
+
     private volatile int hashCode = 0;
+
     private volatile long cachedSize;
+
     private volatile boolean cancelled = false;
-    
-    private Map<FilePropertyKey, Object> propertiesMap;  // TODO this is a shallow copy of LimeXMLDocument.fieldToValue
+
+    private Map<FilePropertyKey, Object> propertiesMap; // TODO this is a
+                                                        // shallow copy of
+                                                        // LimeXMLDocument
+                                                        // .fieldToValue
 
     /**
      * size in bytes. FINISHING state is only shown for files greater than this
@@ -48,37 +57,36 @@ class CoreDownloadItem implements DownloadItem {
     public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
-        
+
         downloader.addListener(new EventListener<DownloadStateEvent>() {
             @Override
             public void handleEvent(DownloadStateEvent event) {
                 // broadcast the status has changed
                 fireDataChanged();
                 if (event.getType() == com.limegroup.gnutella.Downloader.DownloadState.ABORTED) {
-                    //attempt to delete ABORTED file
+                    // attempt to delete ABORTED file
                     CoreDownloadItem.this.downloader.deleteIncompleteFiles();
                 }
-            }           
+            }
         });
     }
 
-    
     void fireDataChanged() {
         cachedSize = downloader.getAmountRead();
         support.firePropertyChange("state", null, getState());
     }
-    
-    private Downloader getDownloader(){
+
+    private Downloader getDownloader() {
         return downloader;
     }
-    
+
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
     }
-    
+
     @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener){
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
         support.removePropertyChangeListener(listener);
     }
 
@@ -86,15 +94,21 @@ class CoreDownloadItem implements DownloadItem {
     public void cancel() {
         cancelled = true;
         support.firePropertyChange("state", null, getState());
-        downloader.stop();
-        downloader.deleteIncompleteFiles();
-        //TODO there is a race condition with the delete action, the stop does not happen right away. should revisit how this will be handled.
+        new ManagedThread(new Runnable() {
+            @Override
+            public void run() {
+                downloader.stop();
+                downloader.deleteIncompleteFiles();
+            }
+        }).start();
+        // TODO there is a race condition with the delete action, the stop does
+        // not happen right away. should revisit how this will be handled.
     }
 
     @Override
     public Category getCategory() {
         File file = downloader.getFile();
-        if(file != null) {
+        if (file != null) {
             return CategoryConverter.categoryForFile(file);
         } else {
             // TODO: See if it's OK to always use save file.
@@ -125,11 +139,11 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public int getPercentComplete() {
         DownloadState state = getState();
-        if(state == DownloadState.FINISHING || state == DownloadState.DONE){
+        if (state == DownloadState.FINISHING || state == DownloadState.DONE) {
             return 100;
         }
 
-        if(getTotalSize() == 0)
+        if (getTotalSize() == 0)
             return 0;
         else
             return (int) (100 * getCurrentSize() / getTotalSize());
@@ -146,19 +160,19 @@ class CoreDownloadItem implements DownloadItem {
         }
 
     }
-    
+
     @Override
-    public float getDownloadSpeed(){
+    public float getDownloadSpeed() {
         try {
             return downloader.getMeasuredBandwidth();
         } catch (InsufficientDataException e) {
             return 0;
-        }  
+        }
     }
 
     @Override
     public DownloadState getState() {
-        if(cancelled){
+        if (cancelled) {
             return DownloadState.CANCELLED;
         }
         return convertState(downloader.getState());
@@ -184,20 +198,20 @@ class CoreDownloadItem implements DownloadItem {
     public void resume() {
         downloader.resume();
     }
-    
+
     @Override
-    public int getRemoteQueuePosition(){
-        if(downloader.getState() == com.limegroup.gnutella.Downloader.DownloadState.REMOTE_QUEUED) {
+    public int getRemoteQueuePosition() {
+        if (downloader.getState() == com.limegroup.gnutella.Downloader.DownloadState.REMOTE_QUEUED) {
             return downloader.getQueuePosition();
-        } else { 
+        } else {
             return -1;
         }
     }
-    
+
     private DownloadState convertState(com.limegroup.gnutella.Downloader.DownloadState state) {
         switch (state) {
         case RESUMING:
-                return DownloadState.RESUMING;
+            return DownloadState.RESUMING;
         case SAVING:
         case HASHING:
             if (getTotalSize() > finishingThreshold) {
@@ -207,10 +221,9 @@ class CoreDownloadItem implements DownloadItem {
             }
 
         case DOWNLOADING:
-        case FETCHING://"FETCHING" is downloading .torrent file
+        case FETCHING:// "FETCHING" is downloading .torrent file
             return DownloadState.DOWNLOADING;
 
-        
         case CONNECTING:
         case INITIALIZING:
         case WAITING_FOR_CONNECTIONS:
@@ -220,20 +233,20 @@ class CoreDownloadItem implements DownloadItem {
             return DownloadState.DONE;
 
         case REMOTE_QUEUED:
-        case BUSY://BUSY should look like locally queued but acts like remotely
+        case BUSY:// BUSY should look like locally queued but acts like remotely
             return DownloadState.REMOTE_QUEUED;
-            
+
         case QUEUED:
             return DownloadState.LOCAL_QUEUED;
 
         case PAUSED:
             return DownloadState.PAUSED;
-        
+
         case WAITING_FOR_GNET_RESULTS:
         case ITERATIVE_GUESSING:
         case QUERYING_DHT:
             return DownloadState.TRYING_AGAIN;
-            
+
         case WAITING_FOR_USER:
         case GAVE_UP:
             return DownloadState.STALLED;
@@ -243,7 +256,8 @@ class CoreDownloadItem implements DownloadItem {
 
         case DISK_PROBLEM:
         case CORRUPT_FILE:
-        case IDENTIFY_CORRUPTION: // or should this be FINISHING?  doesn't seem to be used
+        case IDENTIFY_CORRUPTION: // or should this be FINISHING? doesn't seem
+                                  // to be used
         case RECOVERY_FAILED:
         case INVALID:
             return DownloadState.ERROR;
@@ -259,12 +273,12 @@ class CoreDownloadItem implements DownloadItem {
         }
         return getDownloader().equals(((CoreDownloadItem) o).getDownloader());
     }
-    
-    //TODO: better hashCode
+
+    // TODO: better hashCode
     @Override
-    public int hashCode(){
-        if(hashCode == 0){
-           hashCode =  37* getDownloader().hashCode();
+    public int hashCode() {
+        if (hashCode == 0) {
+            hashCode = 37 * getDownloader().hashCode();
         }
         return hashCode;
     }
@@ -279,13 +293,14 @@ class CoreDownloadItem implements DownloadItem {
             return ErrorState.DISK_PROBLEM;
         case INVALID:
             return ErrorState.FILE_NOT_SHARABLE;
-        case GAVE_UP://TODO: not using this because GAVE_UP is STALLED, not ERROR
+        case GAVE_UP:// TODO: not using this because GAVE_UP is STALLED, not
+                     // ERROR
             return ErrorState.UNABLE_TO_CONNECT;
         default:
             return ErrorState.NONE;
         }
     }
-    
+
     @Override
     public boolean isSearchAgainEnabled() {
         return downloader.getState() == com.limegroup.gnutella.Downloader.DownloadState.WAITING_FOR_USER;
@@ -295,7 +310,7 @@ class CoreDownloadItem implements DownloadItem {
     public long getRemainingTimeInState() {
         long remaining = downloader.getRemainingStateTime();
         // Change a few state times explicitly.
-        switch(downloader.getState()) {
+        switch (downloader.getState()) {
         case QUEUED:
             remaining = queueTimeCalculator.getRemainingQueueTime(this);
             break;
@@ -303,13 +318,12 @@ class CoreDownloadItem implements DownloadItem {
             remaining = UNKNOWN_TIME;
             break;
         }
-        if(remaining == Integer.MAX_VALUE) {
+        if (remaining == Integer.MAX_VALUE) {
             remaining = UNKNOWN_TIME;
         }
         return remaining;
     }
 
- 
     @Override
     public int getLocalQueuePriority() {
         return downloader.getInactivePriority();
@@ -324,16 +338,16 @@ class CoreDownloadItem implements DownloadItem {
     public File getDownloadingFile() {
         return downloader.getFile();
     }
-    
+
     @Override
     public File getLaunchableFile() {
         return downloader.getDownloadFragment();
     }
-    
+
     @Override
     public URN getUrn() {
         com.limegroup.gnutella.URN urn = downloader.getSha1Urn();
-        if(urn != null) {
+        if (urn != null) {
             return new URNImpl(urn);
         }
         return null;
@@ -343,7 +357,7 @@ class CoreDownloadItem implements DownloadItem {
     public String getFileName() {
         return downloader.getSaveFile().getName();
     }
-    
+
     @Override
     public void setSaveFile(File saveFile, boolean overwrite) throws SaveLocationException {
         File saveDir = null;
@@ -358,7 +372,7 @@ class CoreDownloadItem implements DownloadItem {
                 fileName = saveFile.getName();
             }
         }
-        
+
         // Update save directory and file name.
         downloader.setSaveFile(saveDir, fileName, overwrite);
     }
@@ -378,19 +392,19 @@ class CoreDownloadItem implements DownloadItem {
             return null;
         }
     }
-    
+
     /**
      * Lazily builds the properties map for this local file item.
      */
     private Map<FilePropertyKey, Object> getPropertiesMap() {
         synchronized (this) {
-            if(propertiesMap == null) {
+            if (propertiesMap == null) {
                 reloadProperties();
             }
             return propertiesMap;
         }
     }
-    
+
     /**
      * Reloads the properties map to whatever values are stored in the
      * LimeXmlDocs for this file.
@@ -399,10 +413,11 @@ class CoreDownloadItem implements DownloadItem {
         synchronized (this) {
             Map<FilePropertyKey, Object> reloadedMap = Collections
                     .synchronizedMap(new HashMap<FilePropertyKey, Object>());
-            //"LimeXMLDocument" attribute is set in ManagedDownloaderImpl
-            LimeXMLDocument doc = (LimeXMLDocument)downloader.getAttribute("LimeXMLDocument");
+            // "LimeXMLDocument" attribute is set in ManagedDownloaderImpl
+            LimeXMLDocument doc = (LimeXMLDocument) downloader.getAttribute("LimeXMLDocument");
             if (doc != null) {
-                FilePropertyKeyPopulator.populateProperties(getFileName(), getTotalSize(), downloader.getFile().lastModified(), reloadedMap, doc);
+                FilePropertyKeyPopulator.populateProperties(getFileName(), getTotalSize(),
+                        downloader.getFile().lastModified(), reloadedMap, doc);
             }
             propertiesMap = reloadedMap;
         }

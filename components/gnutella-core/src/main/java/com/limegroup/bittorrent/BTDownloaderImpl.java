@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
@@ -113,12 +112,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void stop() {
         if (!isInactive() && !torrent.isFinished()) {
-            new ManagedThread(new Runnable() {
-                @Override
-                public void run() {
-                    torrent.stop();
-                }
-            }, "BTDownloader Stop Torrent").start();
+            torrent.stop();
             downloadManager.remove(this, true);
         } else {
             downloadManager.remove(this, true);
@@ -563,21 +557,16 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void deleteIncompleteFiles() {
         // TODO assert that complete or aborted?
-        new ManagedThread(new Runnable() {
-            @Override
-            public void run() {
-                FileUtils.deleteRecursive(getIncompleteFile());
-                File torrentFile = torrent.getTorrentFile();
-                if (torrentFile != null) {
-                    FileUtils.delete(torrentFile, false);
-                }
+        FileUtils.deleteRecursive(getIncompleteFile());
+        File torrentFile = torrent.getTorrentFile();
+        if (torrentFile != null) {
+            FileUtils.delete(torrentFile, false);
+        }
 
-                File fastResumeFile = torrent.getFastResumeFile();
-                if (fastResumeFile != null) {
-                    FileUtils.delete(fastResumeFile, false);
-                }
-            }
-        }, "BTDownloaderImpl.deleteIncompleteFiles()").start();
+        File fastResumeFile = torrent.getFastResumeFile();
+        if (fastResumeFile != null) {
+            FileUtils.delete(fastResumeFile, false);
+        }
     }
 
     @Override
