@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package org.limewire.core.impl.mozilla;
 
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.InsufficientDataException;
