@@ -24,6 +24,12 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 
+/**
+ * Class representing the torrent being downloaded. It is updated periodically
+ * by the TorrentManager. I has all necessary helper methods to provide
+ * functionality to the BTDownloaderImpl. It delegates calls to native methods
+ * back to the TorrentManager.
+ */
 public class Torrent implements ListenerSupport<TorrentEvent> {
     private final EventMulticaster<TorrentEvent> listeners;
 

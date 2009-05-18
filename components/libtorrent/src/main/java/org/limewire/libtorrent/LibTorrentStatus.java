@@ -6,6 +6,10 @@ import org.limewire.util.StringUtils;
 
 import com.sun.jna.Structure;
 
+/**
+ * Structure used to pass data from the native code regarding a torrents state
+ * back to java.
+ */
 public class LibTorrentStatus extends Structure {
 
     /**
