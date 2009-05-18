@@ -51,9 +51,9 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     }
 
     @Override
-    public void handle(JSONObject message) throws JSONException {  
+    public void handle(String messageType, JSONObject message) throws JSONException {  
         try {
-            if(message.getString("event_name").equals(RESPONSE_TYPE)) {
+            if(messageType.equals(RESPONSE_TYPE)) {
                 String from = message.getString("from");
                 FacebookFriend friend = connection.getUser(from);
                 if(friend != null) {
@@ -66,7 +66,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                         }
                     }
                 }                           
-            } else if(message.getString("event_name").equals(REQUEST_TYPE)) {
+            } else if(messageType.equals(REQUEST_TYPE)) {                
                 String from  = message.getString("from");
                 FacebookFriend friend = connection.getUser(from);
                 if(friend != null) {
@@ -75,7 +75,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                     for(URI feature : featureRegistry) {
                         supported.add(feature.toASCIIString());
                     }
-                    JSONObject response = new JSONObject("response");
+                    Map response = new HashMap();
                     response.put("from", connection.getUID());
                     response.put("features", supported);
                     connection.sendLiveMessage(friend.getActivePresence(), RESPONSE_TYPE,
@@ -101,7 +101,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                             Map<String, String> message = new HashMap<String, String>();
                             message.put("from", connection.getUID());
                             connection.sendLiveMessage(event.getData().getActivePresence(), REQUEST_TYPE,
-                                    new JSONObject(message));
+                                    message);
                         } catch (FriendException e) {
                             throw new RuntimeException(e);
                         }  

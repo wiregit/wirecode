@@ -5,5 +5,5 @@ import org.json.JSONException;
 
 public interface LiveMessageHandler {
     void register(LiveMessageHandlerRegistry registry);
-    void handle(JSONObject message) throws JSONException;
+    void handle(String messageType, JSONObject message) throws JSONException;
 }

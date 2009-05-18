@@ -43,7 +43,7 @@ public class LiveMessageAddressTransport implements FeatureTransport<Address>, L
     }
 
     @Override
-    public void handle(JSONObject message) {
+    public void handle(String messageType, JSONObject message) {
         
     }
 
@@ -57,6 +57,6 @@ public class LiveMessageAddressTransport implements FeatureTransport<Address>, L
             throw new RuntimeException(e);
         }
         LOG.debugf("sending address: {0}", message);
-        connection.sendLiveMessage(presence, TYPE, new JSONObject(message));
+        connection.sendLiveMessage(presence, TYPE, message);
     }
 }

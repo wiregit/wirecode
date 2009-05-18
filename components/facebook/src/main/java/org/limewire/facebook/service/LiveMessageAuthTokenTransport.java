@@ -33,7 +33,7 @@ public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken
     }
 
     @Override
-    public void handle(JSONObject message) {
+    public void handle(String messageType, JSONObject message) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
     
@@ -42,6 +42,6 @@ public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken
         Map<String, String> message = new HashMap<String, String>();
         message.put("from", connection.getUID());
         message.put("auth-token", StringUtils.toUTF8String(Base64.encodeBase64(localFeature.getToken())));
-        connection.sendLiveMessage(presence, TYPE, new JSONObject(message));
+        connection.sendLiveMessage(presence, TYPE, message);
     }
 }
