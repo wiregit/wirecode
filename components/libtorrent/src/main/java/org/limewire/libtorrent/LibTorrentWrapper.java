@@ -12,6 +12,10 @@ import org.limewire.util.OSUtils;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 
+/**
+ * Wrapper class for the LibTorrent c interface. Provides library loading logic,
+ * and handles rethrowing c++ exceptions as java exceptions.
+ */
 public class LibTorrentWrapper {
 
     private static final Log LOG = LogFactory.getLog(LibTorrentWrapper.class);
@@ -138,10 +142,10 @@ public class LibTorrentWrapper {
         LOG.debug("after abort");
     }
 
-    public void free_torrent_status(LibTorrentStatus oldStatus) {
-        LOG.debugf("before free_torrent_status: {0}", oldStatus);
-        catchWrapperException(libTorrent.free_torrent_status(oldStatus.getPointer()));
-        LOG.debugf("after free_torrent_status: {0}", oldStatus);
+    public void free_torrent_status(LibTorrentStatus status) {
+        LOG.debugf("before free_torrent_status: {0}", status);
+        catchWrapperException(libTorrent.free_torrent_status(status.getPointer()));
+        LOG.debugf("after free_torrent_status: {0}", status);
     }
 
     private void catchWrapperException(WrapperStatus status) {

@@ -215,6 +215,66 @@ public class TorrentManagerImpl implements TorrentManager {
         }
     }
 
+    @Override
+    public boolean isDownloading(File torrentFile) {
+        if (torrentFile != null) {
+            synchronized (torrents) {
+                for (Torrent torrent : torrents.values()) {
+                    if (torrentFile.equals(torrent.getTorrentFile())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isDownloading(String sha1) {
+        return torrents.containsKey(sha1);
+    }
+
+    @Override
+    public Executor getTorrentExecutor() {
+        return torrentExecutor;
+    }
+
+    /**
+     * Basic implemenation of the AlertCallback interface used to delegate
+     * alerts back to the appropriate torrent.
+     */
+    private class BasicAlertCallback implements AlertCallback {
+
+        @Override
+        public void callback(LibTorrentAlert alert) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(alert.toString());
+            }
+
+            if (alert.sha1 != null) {
+                Torrent torrent = torrents.get(alert.sha1);
+                if (torrent != null) {
+                    torrent.alert(alert);
+                }
+            }
+        }
+    }
+
+    /**
+     * Used to clear the alert queue in the native code passing event back to
+     * the java code through the alertCallback interface.
+     */
+    private class AlertPoller implements Runnable {
+        @Override
+        public void run() {
+            libTorrent.get_alerts(new BasicAlertCallback());
+        }
+    }
+
+    /**
+     * Iterates through the torrents updating the status of each one to the
+     * correct current state.
+     */
     private class EventPoller implements Runnable {
 
         @Override
@@ -229,6 +289,10 @@ public class TorrentManagerImpl implements TorrentManager {
         }
     }
 
+    /**
+     * Iterates through the torrents periodically saving a fastresume file for
+     * each file.
+     */
     private class ResumeDataScheduler implements Runnable {
 
         private Iterator<String> torrentIterator = torrents.keySet().iterator();
@@ -254,53 +318,5 @@ public class TorrentManagerImpl implements TorrentManager {
                 lock.readLock().unlock();
             }
         }
-    }
-
-    @Override
-    public boolean isDownloading(File torrentFile) {
-        if (torrentFile != null) {
-            synchronized (torrents) {
-                for (Torrent torrent : torrents.values()) {
-                    if (torrentFile.equals(torrent.getTorrentFile())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isDownloading(String sha1) {
-        return torrents.containsKey(sha1);
-    }
-
-    private class AlertPoller implements Runnable {
-        @Override
-        public void run() {
-            libTorrent.get_alerts(new BasicAlertCallback());
-        }
-    }
-
-    private class BasicAlertCallback implements AlertCallback {
-
-        @Override
-        public void callback(LibTorrentAlert alert) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(alert.toString());
-            }
-
-            if (alert.sha1 != null) {
-                Torrent torrent = torrents.get(alert.sha1);
-                if (torrent != null) {
-                    torrent.alert(alert);
-                }
-            }
-        }
-    }
-
-    @Override
-    public Executor getTorrentExecutor() {
-        return torrentExecutor;
     }
 }

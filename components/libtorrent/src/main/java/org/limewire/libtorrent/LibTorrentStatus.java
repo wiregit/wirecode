@@ -8,14 +8,30 @@ import com.sun.jna.Structure;
 
 public class LibTorrentStatus extends Structure {
 
+    /**
+     * String containing the total amount of the torrent downloaded and
+     * verified.
+     */
     public String total_done;
 
+    /**
+     * String containing the total amount of the torrent downloaded.
+     */
     public String total_download;
 
+    /**
+     * String containing the total amount of the torrent uploaded.
+     */
     public String total_upload;
 
+    /**
+     * The current rate of the torrent download in bytes/second
+     */
     public float download_rate;
 
+    /**
+     * The current rate of the torrent upload in bytes/second
+     */
     public float upload_rate;
 
     public int num_peers;
@@ -42,24 +58,9 @@ public class LibTorrentStatus extends Structure {
 
     }
 
-    public LibTorrentStatus(LibTorrentStatus copy) {
-        this.total_done = new String(copy.total_done);
-        this.total_download = new String(copy.total_download);
-        this.total_upload = new String(copy.total_upload);
-        this.download_rate = copy.download_rate;
-        this.upload_rate = copy.upload_rate;
-        this.num_peers = copy.num_peers;
-        this.num_uploads = copy.num_uploads;
-        this.num_seeds = copy.num_seeds;
-        this.num_connections = copy.num_connections;
-        this.state = copy.state;
-        this.progress = copy.progress;
-        this.paused = copy.paused;
-        this.finished = copy.finished;
-        this.valid = copy.valid;
-        this.error = new String(copy.error);
-    }
-
+    /**
+     * Returns the total amount of the torrent downloaded and verified.
+     */
     public long getTotalDone() {
         if (total_done == null) {
             return -1;
@@ -69,6 +70,9 @@ public class LibTorrentStatus extends Structure {
         }
     }
 
+    /**
+     * Returns the total amount of the torrent downloaded.
+     */
     public long getTotalDownload() {
         if (total_download == null) {
             return -1;
@@ -78,6 +82,9 @@ public class LibTorrentStatus extends Structure {
         }
     }
 
+    /**
+     * Returns the total amount of the torrent uploaded.
+     */
     public long getTotalUpload() {
         if (total_upload == null) {
             return -1;
@@ -87,15 +94,31 @@ public class LibTorrentStatus extends Structure {
         }
     }
 
+    /**
+     * Returns true if the torrent is paused.
+     */
     public boolean isPaused() {
         return paused != 0;
     }
 
+    /**
+     * Returns true if the torrent is finished.
+     */
     public boolean isFinished() {
         return finished != 0;
     }
 
+    /**
+     * Returns true if the torrent is in an error state.
+     */
     public boolean isError() {
         return error != null && !StringUtils.isEmpty(error);
+    }
+
+    /**
+     * Returns the LibTorrentState for this torrent.
+     */
+    public LibTorrentState getState() {
+        return LibTorrentState.forId(state);
     }
 }

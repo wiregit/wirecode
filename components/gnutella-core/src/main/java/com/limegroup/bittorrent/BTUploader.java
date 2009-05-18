@@ -112,7 +112,7 @@ public class BTUploader implements Uploader {
         if (status.isPaused()) {
             return UploadStatus.UPLOADING;
         } else {
-            LibTorrentState state = LibTorrentState.forId(status.state);
+            LibTorrentState state = status.getState();
 
             switch (state) {
             case DOWNLOADING:
