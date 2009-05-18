@@ -40,7 +40,6 @@ public class BTUploader implements Uploader {
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
                 if (event == TorrentEvent.STOPPED) {
-                    // TODO cleanup
                     cancelled = true;
                     BTUploader.this.activityCallback.removeUpload(BTUploader.this);
                 }
@@ -48,6 +47,7 @@ public class BTUploader implements Uploader {
         });
     }
 
+    @Override
     public void stop() {
         cancelled = activityCallback.promptTorrentUploadCancel(torrent);
         if (cancelled) {
@@ -61,35 +61,43 @@ public class BTUploader implements Uploader {
         }
     }
 
+    @Override
     public String getFileName() {
         return torrent.getName();
     }
 
+    @Override
     public long getFileSize() {
         return torrent.getTotalSize();
     }
 
+    @Override
     public FileDesc getFileDesc() {
         return null;
     }
 
+    @Override
     public int getIndex() {
         // negative will make sure it never conflicts with regular uploads
         return 0 - Math.abs(hashCode());
     }
 
+    @Override
     public long amountUploaded() {
         return torrent.getTotalUploaded();
     }
 
+    @Override
     public long getTotalAmountUploaded() {
         return torrent.getTotalUploaded();
     }
 
+    @Override
     public String getHost() {
         return BITTORRENT_UPLOAD;
     }
 
+    @Override
     public UploadStatus getState() {
         LibTorrentStatus status = torrent.getStatus();
 
@@ -122,26 +130,32 @@ public class BTUploader implements Uploader {
         }
     }
 
+    @Override
     public UploadStatus getLastTransferState() {
         return UploadStatus.UPLOADING;
     }
 
+    @Override
     public boolean isBrowseHostEnabled() {
         return false;
     }
 
+    @Override
     public int getGnutellaPort() {
         return 0;
     }
 
+    @Override
     public String getUserAgent() {
         return BITTORRENT_UPLOAD;
     }
 
+    @Override
     public int getQueuePosition() {
         return 0;
     }
 
+    @Override
     public boolean isInactive() {
 
         if (torrent.getStatus().isPaused() || torrent.getStatus().isFinished()) {
@@ -151,19 +165,23 @@ public class BTUploader implements Uploader {
         return false;
     }
 
+    @Override
     public void measureBandwidth() {
         // uneeded using libtorrent rate
     }
 
+    @Override
     public float getMeasuredBandwidth() throws InsufficientDataException {
         return (torrent.getUploadRate() / 1024);
     }
 
+    @Override
     public float getAverageBandwidth() {
         // Unused
         return (torrent.getUploadRate() / 1024);
     }
 
+    @Override
     public String getCustomIconDescriptor() {
         if (torrent.isSingleFileTorrent()) {
             return null;
@@ -171,26 +189,32 @@ public class BTUploader implements Uploader {
         return BITTORRENT_UPLOAD;
     }
 
+    @Override
     public UploadType getUploadType() {
         return UploadType.SHARED_FILE;
     }
 
+    @Override
     public boolean isTLSCapable() {
         return false;
     }
 
+    @Override
     public String getAddress() {
         return "torrent upload";
     }
 
+    @Override
     public InetAddress getInetAddress() {
         return null;
     }
 
+    @Override
     public int getPort() {
         return -1;
     }
 
+    @Override
     public InetSocketAddress getInetSocketAddress() {
         return null;
     }
@@ -209,13 +233,14 @@ public class BTUploader implements Uploader {
         }
     }
 
+    @Override
     public URN getUrn() {
         if (urn == null) {
             synchronized (this) {
                 if (urn == null) {
                     try {
-                        urn = URN.createSHA1UrnFromBytes(StringUtils
-                                .fromHexString(torrent.getSha1()));
+                        urn = URN.createSHA1UrnFromBytes(StringUtils.fromHexString(torrent
+                                .getSha1()));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
