@@ -39,8 +39,8 @@ import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMementoImpl;
 
 /**
- * Wraps the Torrent class in the Downloader interface to enable the gui to treat
- * the torrent downloader as a normal downloader.
+ * Wraps the Torrent class in the Downloader interface to enable the gui to
+ * treat the torrent downloader as a normal downloader.
  */
 public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownloader {
 
@@ -97,9 +97,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void init(File torrentFile) throws IOException {
-        torrent.init(torrentFile, SharingSettings.getSaveDirectory());
+        torrent.init(null, null, -1, null, null, null, torrentFile, SharingSettings
+                .getSaveDirectory());
         File completeFile = torrent.getCompleteFile();
-        setSaveFile(completeFile.getParentFile(), completeFile.getName(), false);
+        saveFile = completeFile;
     }
 
     /**
@@ -493,9 +494,21 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         String torrentPath = memento.getTorrentPath();
         File torrentFile = torrentPath != null ? new File(torrentPath) : null;
-        torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
-                .getContentLength(), memento.getTrackerURL(), memento.getPaths(), memento
-                .getSaveFile(), fastResumeFile, torrentFile);
+        File saveDir = memento.getSaveFile().getParentFile();
+
+        try {
+            torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
+                    .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
+                    fastResumeFile, torrentFile, saveDir);
+        } catch (IOException e) {
+            try {
+                torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
+                        .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
+                        fastResumeFile, null, saveDir);
+            } catch (IOException e1) {
+                throw new InvalidDataException("Could not initialize the BTDownloader", e1);
+            }
+        }
         register();
     }
 
@@ -519,8 +532,27 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         String sha1 = StringUtils.toHexString(infoHash);
 
-        torrent.init(name, sha1, totalSize, tracker1.toString(), paths, memento.getSaveFile(),
-                null, null);
+        File saveFile = memento.getSaveFile();
+        File saveDir = saveFile == null ? SharingSettings.getSaveDirectory() : saveFile.getParentFile();
+        saveDir = saveDir == null ? SharingSettings.getSaveDirectory() : saveDir;
+        File oldIncompleteFile = btmetainfo.getFileSystem().getIncompleteFile();
+        File newIncompleteFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), name);
+        if(newIncompleteFile.exists()) {
+            throw new InvalidDataException("Cannot init memento for BTDownloader, incomplete file already exists: " + newIncompleteFile);
+        } 
+        
+        FileUtils.forceRename(oldIncompleteFile, newIncompleteFile);
+        File torrentDir = oldIncompleteFile.getParentFile();
+        if(torrentDir.getName().length() == 32) {
+            //looks like the old torrent dir
+            FileUtils.deleteRecursive(torrentDir);
+        }
+
+        try {
+            torrent.init(name, sha1, totalSize, tracker1.toString(), paths, null, null, saveDir);
+        } catch (IOException e) {
+            throw new InvalidDataException("Could not initialize the BTDownloader", e);
+        }
         register();
     }
 

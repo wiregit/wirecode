@@ -39,7 +39,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     private File fastResumeFile = null;
 
-    private List<String> paths;
+    private final List<String> paths;
 
     private String sha1 = null;
 
@@ -58,7 +58,8 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     @Inject
     public Torrent(TorrentManager torrentManager) {
         this.torrentManager = torrentManager;
-        this.listeners = new AsynchronousMulticaster<TorrentEvent>(torrentManager.getTorrentExecutor());
+        this.listeners = new AsynchronousMulticaster<TorrentEvent>(torrentManager
+                .getTorrentExecutor());
         this.status = new AtomicReference<LibTorrentStatus>();
         this.paths = new ArrayList<String>();
     }
@@ -72,68 +73,80 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     }
 
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File saveLocation, File fastResumeFile, File torrentFile) {
-        this.name = name;
-        File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
-        this.incompleteFile = new File(torrentDownloadFolder, name);
-        this.completeFile = saveLocation;
+            List<String> paths, File fastResumeFile, File torrentFile, File saveDir)
+            throws IOException {
+
         this.sha1 = sha1;
         this.trackerURL = trackerURL;
-        this.paths.addAll(paths);
-        this.totalSize = totalSize;
-        this.fastResumeFile = fastResumeFile;
-
-        if (torrentFile != null && torrentFile.exists()) {
-            this.torrentFile = torrentFile;
+        if (paths != null) {
+            this.paths.addAll(paths);
         }
-    }
+        this.totalSize = totalSize;
 
-    public synchronized void init(File torrentFile, File saveDir) throws IOException {
-        FileInputStream fis = null;
-        FileChannel fileChannel = null;
         File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
 
-        try {
-            fis = new FileInputStream(torrentFile);
-            fileChannel = fis.getChannel();
-            Map metaInfo = (Map) Token.parse(fileChannel);
-            BTData btData = new BTDataImpl(metaInfo);
-            name = btData.getName();
-            if (btData.getLength() == null) {
-                this.totalSize = 0;
-                if (btData.getFiles() != null) {
-                    for (BTFileData file : btData.getFiles()) {
-                        this.totalSize += file.getLength();
+        if (name != null) {
+            this.name = name;
+            this.incompleteFile = new File(torrentDownloadFolder, name);
+            this.fastResumeFile = fastResumeFile == null ? new File(torrentDownloadFolder, name
+                    + ".fastresume") : fastResumeFile;
+            this.completeFile = new File(saveDir, name);
+        }
+
+        if (torrentFile != null && torrentFile.exists()) {
+            FileInputStream fis = null;
+            FileChannel fileChannel = null;
+            try {
+                fis = new FileInputStream(torrentFile);
+                fileChannel = fis.getChannel();
+                Map metaInfo = (Map) Token.parse(fileChannel);
+                BTData btData = new BTDataImpl(metaInfo);
+                if (this.name == null) {
+                    this.name = btData.getName();
+                }
+                if (btData.getLength() == null) {
+                    this.totalSize = 0;
+                    if (btData.getFiles() != null) {
+                        for (BTFileData file : btData.getFiles()) {
+                            this.totalSize += file.getLength();
+                        }
+                    }
+                } else {
+                    this.totalSize = btData.getLength();
+                }
+
+                if (this.paths.size() == 0) {
+                    if (btData.getFiles() != null) {
+                        for (BTFileData fileData : btData.getFiles()) {
+                            this.paths.add(fileData.getPath());
+                        }
                     }
                 }
-            } else {
-                this.totalSize = btData.getLength();
-            }
 
-            incompleteFile = new File(torrentDownloadFolder, name);
-            fastResumeFile = new File(torrentDownloadFolder, name + ".fastresume");
-            completeFile = new File(saveDir, name);
-
-            if (btData.getFiles() != null) {
-                for (BTFileData fileData : btData.getFiles()) {
-                    paths.add(fileData.getPath());
+                if (this.trackerURL == null) {
+                    this.trackerURL = btData.getAnnounce();
                 }
+
+                if (this.sha1 == null) {
+                    this.sha1 = StringUtils.toHexString(btData.getInfoHash());
+                }
+
+            } finally {
+                IOUtils.close(fileChannel);
+                IOUtils.close(fis);
             }
 
-            trackerURL = btData.getAnnounce();
+            this.incompleteFile = new File(torrentDownloadFolder, this.name);
+            this.fastResumeFile = fastResumeFile == null ? new File(torrentDownloadFolder,
+                    this.name + ".fastresume") : fastResumeFile;
+            this.completeFile = new File(saveDir, this.name);
 
-            sha1 = StringUtils.toHexString(btData.getInfoHash());
-
-        } finally {
-            IOUtils.close(fileChannel);
-            IOUtils.close(fis);
+            File torrentFileCopy = new File(torrentDownloadFolder, this.name + ".torrent");
+            if (!torrentFile.equals(torrentFileCopy)) {
+                FileUtils.copy(torrentFile, torrentFileCopy);
+            }
+            this.torrentFile = torrentFileCopy;
         }
-
-        File torrentFileCopy = new File(torrentDownloadFolder, name + ".torrent");
-        if (!torrentFile.equals(torrentFileCopy)) {
-            FileUtils.copy(torrentFile, torrentFileCopy);
-        }
-        this.torrentFile = torrentFileCopy;
     }
 
     public String getName() {
@@ -321,7 +334,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     }
 
     public void alert(LibTorrentAlert alert) {
-        if(alert.category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && alert.data != null) {
+        if (alert.category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && alert.data != null) {
             fastResumeFile = new File(alert.data);
         }
     }
