@@ -76,6 +76,10 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
      * Initializes the torrent from the given fields. Either the torrentFile and
      * saveDir fields cannot be null. Or the name, sha1, long totalSize,
      * trackerURL, paths, and saveDir fields must be set.
+     * 
+     * Otherwise if torrentFile is set and other fields are as well, the field
+     * passed in will be used, and any missing field will be pulled from the
+     * torrent file.
      */
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
             List<String> paths, File fastResumeFile, File torrentFile, File saveDir)

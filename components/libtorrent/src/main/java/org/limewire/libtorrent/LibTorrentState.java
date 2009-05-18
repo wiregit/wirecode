@@ -3,6 +3,9 @@ package org.limewire.libtorrent;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Represents the torrent_status.state_t enum from the native libtorrent code.
+ */
 public enum LibTorrentState {
     /**
      * These state align with the torrent_status.state_t enum. We need to
