@@ -24,7 +24,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
 
-    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = false;
+    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = true;
 
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
 
@@ -56,16 +56,22 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     private void addTorrent(Torrent torrent) {
-        torrents.put(torrent.getSha1(), torrent);
         File torrentFile = torrent.getTorrentFile();
-        String trackerURL = torrent.getTrackerURL();
+        File fastResumefile = torrent.getFastResumeFile();
 
-        if (torrentFile != null) {
-            addTorrent(torrent, torrentFile);
-        } else {
-            addTorrent(torrent, trackerURL);
+        String trackerURI = torrent.getTrackerURL();
+        String fastResumePath = fastResumefile != null ? fastResumefile.getAbsolutePath() : null;
+        String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
+
+        try {
+            lock.writeLock().lock();
+            libTorrent.add_torrent(torrent.getSha1(), trackerURI, torrentPath, fastResumePath);
+            updateStatus(torrent);
+        } finally {
+            lock.writeLock().unlock();
         }
 
+        torrents.put(torrent.getSha1(), torrent);
     }
 
     @Inject
@@ -76,31 +82,6 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public List<String> getPeers(Torrent torrent) {
         return libTorrent.get_peers(torrent.getSha1());
-    }
-
-    private void addTorrent(Torrent torrent, File torrentFile) {
-        String fastResumePath = torrent.getFastResumeFile() != null ? torrent.getFastResumeFile()
-                .getAbsolutePath() : null;
-        try {
-            lock.writeLock().lock();
-            libTorrent.add_torrent(torrentFile.getAbsolutePath(), fastResumePath);
-            updateStatus(torrent);
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    private void addTorrent(Torrent torrent, String trackerURI) {
-        String fastResumePath = torrent.getFastResumeFile() != null ? torrent.getFastResumeFile()
-                .getAbsolutePath() : null;
-        try {
-            lock.writeLock().lock();
-            libTorrent.add_torrent_existing(torrent.getSha1(), trackerURI, fastResumePath);
-            updateStatus(torrent);
-        } finally {
-            lock.writeLock().unlock();
-        }
-
     }
 
     @Override
@@ -311,7 +292,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
             if (alert.sha1 != null) {
                 Torrent torrent = torrents.get(alert.sha1);
-                if(torrent != null) {
+                if (torrent != null) {
                     torrent.alert(alert);
                 }
             }

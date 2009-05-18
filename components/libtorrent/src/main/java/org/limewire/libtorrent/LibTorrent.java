@@ -18,19 +18,11 @@ interface LibTorrent extends Library {
     public WrapperStatus init(String path);
 
     /**
-     * Adds the torrent to the libtorrent session. Takes a path to a torrent
-     * file and fills in the LibtorrentInfo struct with the torrent data upon
-     * completion.
-     * @param fastResumePath 
-     */
-    public WrapperStatus add_torrent(String path, String fastResumePath);
-
-    /**
      * Adds a torrent to the libtorrent session. This can be done with only a
      * sha1 and trackerURI. optionally a path to a fast Resume data file can be
      * included to enable starting the torrent faster.
      */
-    public WrapperStatus add_torrent_existing(String sha1, String trackerURI, String fastResumeData);
+    public WrapperStatus add_torrent(String sha1, String trackerURI, String torrentPath, String fastResumeData);
 
     /**
      * Pauses the torrent with the given sha1

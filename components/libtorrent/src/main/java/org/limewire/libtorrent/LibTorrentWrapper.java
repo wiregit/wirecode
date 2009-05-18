@@ -42,10 +42,11 @@ public class LibTorrentWrapper {
         init(path);
     }
 
-    public void add_torrent(String path, String fastResumePath) {
-        LOG.debugf("before add_torrent: {0}", path);
-        catchWrapperException(libTorrent.add_torrent(path, fastResumePath));
-        LOG.debugf("after add_torrent: {0}", path);
+    public void add_torrent(String sha1, String trackerURI, String torrentPath,
+            String fastResumePath) {
+        LOG.debugf("before add_torrent: {0}", sha1);
+        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, torrentPath, fastResumePath));
+        LOG.debugf("after add_torrent: {0}", sha1);
     }
 
     private void init(String path) {
@@ -135,12 +136,6 @@ public class LibTorrentWrapper {
         LOG.debug("before abort");
         catchWrapperException(libTorrent.abort_torrents());
         LOG.debug("after abort");
-    }
-
-    public void add_torrent_existing(String sha1, String trackerURI, String fastResumeData) {
-        LOG.debugf("before add_torrent_old: {0} - {1}", sha1, trackerURI);
-        catchWrapperException(libTorrent.add_torrent_existing(sha1, trackerURI, fastResumeData));
-        LOG.debugf("after add_torrent_old: {0} - {1}", sha1, trackerURI);
     }
 
     public void free_torrent_status(LibTorrentStatus oldStatus) {
