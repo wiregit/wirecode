@@ -21,8 +21,8 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.uploader.UploadType;
 
 /**
- * A facade for the GUI to treat a single BitTorrent download as a single
- * upload.
+ * Wraps the Torrent class in the Uplaoder interface to enable the gui to treat
+ * the torrent uploader as a normal uploader.
  */
 public class BTUploader implements Uploader {
 

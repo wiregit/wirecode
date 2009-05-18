@@ -18,8 +18,15 @@ import com.limegroup.gnutella.http.HttpClientListener;
  */
 public interface BTTorrentFileDownloader extends HttpClientListener, CoreDownloader {
 
+    /**
+     * Initializes the downloader from a URI.
+     */
     public void initDownloadInformation(URI torrentURI, boolean overwrite);
 
+    /**
+     * Returns the torrent file downloaded by this downloader. Can be null if
+     * the download failed.
+     */
     public File getTorrentFile();
 
 }
