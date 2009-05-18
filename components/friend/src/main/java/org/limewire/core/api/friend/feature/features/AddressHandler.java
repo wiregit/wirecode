@@ -62,20 +62,22 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
     }
 
     public void featureReceived(String from, Address address) {
-        for(FriendConnection connection : connections) {
-            Friend friend = connection.getUser(StringUtils.parseBareAddress(from));
-            if (friend != null) {
-                FriendPresence presence = friend.getFriendPresences().get(from);
-                if(presence != null) {
-                    LOG.debugf("updating address on presence {0} to {1}", presence.getPresenceId(), address);
-                    addressRegistry.put(new XMPPAddress(presence.getPresenceId()), address);
-                    presence.addFeature(new AddressFeature(new XMPPAddress(presence.getPresenceId())));
+        synchronized (this) {
+            for(FriendConnection connection : connections) {
+                Friend friend = connection.getUser(StringUtils.parseBareAddress(from));
+                if (friend != null) {
+                    FriendPresence presence = friend.getFriendPresences().get(from);
+                    if(presence != null) {
+                        LOG.debugf("updating address on presence {0} to {1}", presence.getPresenceId(), address);
+                        addressRegistry.put(new XMPPAddress(presence.getPresenceId()), address);
+                        presence.addFeature(new AddressFeature(new XMPPAddress(presence.getPresenceId())));
+                    } else {
+                        LOG.debugf("address {0} for presence {1} is pending", address, from);
+                        pendingAddresses.put(from, address);
+                    }
                 } else {
-                    LOG.debugf("address {0} for presence {1} is pending", address, from);
-                    pendingAddresses.put(from, address); // TODO locking?
+                    LOG.debugf("no friend for: {0}", from);
                 }
-            } else {
-                LOG.debugf("no friend for: {0}", from);
             }
         }
     }
@@ -85,7 +87,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
         if (event.getType().equals(AddressEvent.Type.ADDRESS_CHANGED)) {
             // TODO async?
             LOG.debugf("new address to publish: {0}", event);
-            synchronized (AddressHandler.this) {
+            synchronized (this) {
                 for(FriendConnection connection : connections) {
                     address = event.getData();
                     for(Friend user : connection.getUsers()) {

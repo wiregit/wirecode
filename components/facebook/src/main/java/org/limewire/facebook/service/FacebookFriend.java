@@ -3,7 +3,6 @@ package org.limewire.facebook.service;
 import java.util.Collections;
 import java.util.Map;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.core.api.friend.AbstractFriendPresence;
 import org.limewire.core.api.friend.Friend;
@@ -53,7 +52,7 @@ public class FacebookFriend extends AbstractFriendPresence implements Friend, Fr
 
     @Override
     public String getFirstName() {
-        return friend.optString("firstName", "");
+        return friend.optString("first_name", "");
     }
 
     @Override
