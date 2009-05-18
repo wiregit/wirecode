@@ -55,35 +55,31 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
         try {
             if(message.getString("event_name").equals(RESPONSE_TYPE)) {
                 String from = message.getString("from");
-                if(from != null) {
-                    FacebookFriend friend = connection.getUser(from);
-                    if(friend != null) {
-                        JSONArray features = message.getJSONArray("features");     
-                        for(int i = 0; i < features.length(); i++) {
-                            String feature = features.getString(i);
-                            FeatureInitializer initializer = featureRegistry.get(new URI(feature));
-                            if(initializer != null) {
-                                initializer.initializeFeature(friend);
-                            }
+                FacebookFriend friend = connection.getUser(from);
+                if(friend != null) {
+                    JSONArray features = message.getJSONArray("features");     
+                    for(int i = 0; i < features.length(); i++) {
+                        String feature = features.getString(i);
+                        FeatureInitializer initializer = featureRegistry.get(new URI(feature));
+                        if(initializer != null) {
+                            initializer.initializeFeature(friend);
                         }
                     }
                 }                           
             } else if(message.getString("event_name").equals(REQUEST_TYPE)) {
                 String from  = message.getString("from");
-                if(from != null) {
-                    FacebookFriend friend = connection.getUser(from);
-                    if(friend != null) {
-                        // TODO replace with ServiceDiscoveryManager like thing
-                        List<String> supported = new ArrayList<String>();
-                        for(URI feature : featureRegistry) {
-                            supported.add(feature.toASCIIString());
-                        }
-                        JSONObject response = new JSONObject("response");
-                        response.put("from", connection.getUID());
-                        response.put("features", supported);
-                        connection.sendLiveMessage(friend.getActivePresence(), RESPONSE_TYPE,
-                                        response);
+                FacebookFriend friend = connection.getUser(from);
+                if(friend != null) {
+                    // TODO replace with ServiceDiscoveryManager like thing
+                    List<String> supported = new ArrayList<String>();
+                    for(URI feature : featureRegistry) {
+                        supported.add(feature.toASCIIString());
                     }
+                    JSONObject response = new JSONObject("response");
+                    response.put("from", connection.getUID());
+                    response.put("features", supported);
+                    connection.sendLiveMessage(friend.getActivePresence(), RESPONSE_TYPE,
+                            response);
                 }
             }
         } catch (URISyntaxException e) {

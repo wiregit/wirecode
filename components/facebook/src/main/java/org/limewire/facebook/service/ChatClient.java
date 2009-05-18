@@ -80,6 +80,7 @@ public class ChatClient {
             ThreadExecutor.startThread(new ChatListener(uid, channel), "chat-listener-thread");
             executorService.scheduleAtFixedRate(presenceListenerFactory.createPresenceListener(connection), 0, 90, TimeUnit.SECONDS);
         } catch (IOException ioe)  {
+            LOG.debug("starting chat failed", ioe);
             throw new FriendException(ioe);
         }
     }
