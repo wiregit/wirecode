@@ -73,6 +73,7 @@ import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.internal.Nullable;
 
 /**
  * This class is responsible for rendering an individual SearchResult
@@ -158,7 +159,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     ListViewTableEditorRenderer(
             CategoryIconManager categoryIconManager,
             RemoteHostWidgetFactory fromWidgetFactory,
-        @Assisted String searchText, 
+        @Assisted @Nullable String searchText, 
         @Assisted Navigator navigator, 
         final @Assisted DownloadHandler downloadHandler,
         SearchHeadingDocumentBuilder headingBuilder,
@@ -169,7 +170,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         SearchResultTruncator truncator, IconManager iconManager) {
 
         this.categoryIconManager = categoryIconManager;
-        
+        System.out.println("searchText=" + searchText); // TODO REMOVE
         this.searchText = searchText;
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
