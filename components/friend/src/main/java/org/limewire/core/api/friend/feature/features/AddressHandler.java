@@ -74,7 +74,9 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
                     LOG.debugf("address {0} for presence {1} is pending", address, from);
                     pendingAddresses.put(from, address); // TODO locking?
                 }
-            }   
+            } else {
+                LOG.debugf("no friend for: {0}", from);
+            }
         }
     }
 

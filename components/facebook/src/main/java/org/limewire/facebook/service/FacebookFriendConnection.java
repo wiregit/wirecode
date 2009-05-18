@@ -333,17 +333,17 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     public void sendLiveMessage(FriendPresence presence, String type, Map<String, ?> messageMap) throws FriendException {
+        sendLiveMessage(Long.parseLong(presence.getPresenceId()), type, messageMap);
+    }
+    
+    public void sendLiveMessage(Long userId, String type, Map<String, ?> messageMap) throws FriendException {
         try {
             JSONObject message = new JSONObject(messageMap);
-            //message.put("lw-message", messageMap);
-            LOG.debugf("live message {0} : {1} to {2}", type, message, presence);
-            facebookClient.liveMessage_send(Long.parseLong(presence.getFriend().getId()), type,
-                    message);
+            LOG.debugf("live message {0} to {1} : {2}", type, userId, message);
+            facebookClient.liveMessage_send(userId, type, message);
         } catch (FacebookException e) {
             throw new FriendException(e);
-        } //catch (JSONException e) {
-//            throw new FriendException(e);
-//        }
+        }
     }
 
     public FacebookJsonRestClient getClient() {

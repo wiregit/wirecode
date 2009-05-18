@@ -71,20 +71,15 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                         pendingPresences.put(from, features);
                     }
                 } else if(messageType.equals(REQUEST_TYPE)) {                
-                    String from  = message.getString("from");
-                    FacebookFriend friend = connection.getUser(from);
-                    if(friend != null) {
-                        // TODO replace with ServiceDiscoveryManager like thing
-                        List<String> supported = new ArrayList<String>();
-                        for(URI feature : featureRegistry) {
-                            supported.add(feature.toASCIIString());
-                        }
-                        Map<String, Object> response = new HashMap<String, Object>();
-                        response.put("from", connection.getUID());
-                        response.put("features", supported);
-                        connection.sendLiveMessage(friend.getActivePresence(), RESPONSE_TYPE,
-                                response);
+                    Long from = message.getLong("from");
+                    List<String> supported = new ArrayList<String>();
+                    for(URI feature : featureRegistry) {
+                        supported.add(feature.toASCIIString());
                     }
+                    Map<String, Object> response = new HashMap<String, Object>();
+                    response.put("from", connection.getUID());
+                    response.put("features", supported);
+                    connection.sendLiveMessage(from, RESPONSE_TYPE, response);
                 }
             } catch (URISyntaxException e) {
                 throw new JSONException(e);
