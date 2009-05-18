@@ -143,14 +143,21 @@ public class ChatClient {
             }
         }
 
-        private void dispatchMessage(JSONObject response) throws JSONException {
-            if(response.has("ms")) {
-                JSONArray ms = response.getJSONArray("ms");
-                if(ms.getJSONObject(0).has("event_name")) {
-                    String messageType = ms.getJSONObject(0).getString("event_name");
+        private void dispatchMessage(JSONObject message) throws JSONException {
+            if(message.has("ms")) {
+                JSONArray ms = message.getJSONArray("ms");
+                final JSONObject payload = ms.getJSONObject(0);
+                if(payload.has("event_name")) {
+                    String messageType = payload.getString("event_name");
                     LiveMessageHandler handler = handlerRegistry.getHandler(messageType);
                     if(handler != null) {
-                        handler.handle(messageType, ms.getJSONObject(0));
+                        if(payload.has("lw-message")) {
+                            JSONObject lwMessage = payload.getJSONObject("lw-message");
+                            handler.handle(messageType, lwMessage);
+                        } else {
+                            LOG.debugf("no 'lw-message' in message {0}", message);
+                        }
+                        
                     } else {
                         LOG.debugf("no handler for type: {0}", messageType);
                     }

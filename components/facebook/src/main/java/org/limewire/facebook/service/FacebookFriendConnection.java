@@ -335,10 +335,8 @@ public class FacebookFriendConnection implements FriendConnection {
 
     public void sendLiveMessage(FriendPresence presence, String type, Map<String, ?> messageMap) throws FriendException {
         try {
-            JSONObject message = new JSONObject("lw-message");
-            for(String key : messageMap.keySet()) {
-                message.put(key, messageMap.get(key));
-            }
+            JSONObject message = new JSONObject();
+            message.put("lw-message", messageMap);
             LOG.debugf("live message {0} : {1} to {2}", type, message, presence);
             facebookClient.liveMessage_send(Long.parseLong(presence.getFriend().getId()), type,
                     message);
