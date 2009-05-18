@@ -151,11 +151,11 @@ public class ChatClient {
                     String messageType = payload.getString("event_name");
                     LiveMessageHandler handler = handlerRegistry.getHandler(messageType);
                     if(handler != null) {
-                        if(payload.has("lw-message")) {
-                            JSONObject lwMessage = payload.getJSONObject("lw-message");
+                        if(payload.has("response")) {
+                            JSONObject lwMessage = payload.getJSONObject("response");
                             handler.handle(messageType, lwMessage);
                         } else {
-                            LOG.debugf("no 'lw-message' in message {0}", message);
+                            LOG.debugf("no 'response' in message {0}", message);
                         }
                         
                     } else {

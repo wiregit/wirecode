@@ -34,6 +34,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     
     private final FacebookFriendConnection connection;
     private final FeatureRegistry featureRegistry;
+    private final Map<String, JSONArray> pendingPresences = new HashMap<String, JSONArray>();
     
     @AssistedInject
     LiveMessageDiscoInfoTransport(@Assisted FacebookFriendConnection connection,
@@ -51,41 +52,45 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     }
 
     @Override
-    public void handle(String messageType, JSONObject message) throws JSONException {  
-        try {
-            if(messageType.equals(RESPONSE_TYPE)) {
-                String from = message.getString("from");
-                FacebookFriend friend = connection.getUser(from);
-                if(friend != null) {
+    public void handle(String messageType, JSONObject message) throws JSONException {
+        synchronized (this) {
+            try {
+                if(messageType.equals(RESPONSE_TYPE)) {
                     JSONArray features = message.getJSONArray("features");     
-                    for(int i = 0; i < features.length(); i++) {
-                        String feature = features.getString(i);
-                        FeatureInitializer initializer = featureRegistry.get(new URI(feature));
-                        if(initializer != null) {
-                            initializer.initializeFeature(friend);
+                    String from = message.getString("from");
+                    FacebookFriend friend = connection.getUser(from);
+                    if(friend != null) {    
+                        for(int i = 0; i < features.length(); i++) {
+                            String feature = features.getString(i);
+                            FeatureInitializer initializer = featureRegistry.get(new URI(feature));
+                            if(initializer != null) {
+                                initializer.initializeFeature(friend);
+                            }
                         }
+                    } else {
+                        pendingPresences.put(from, features);
                     }
-                }                           
-            } else if(messageType.equals(REQUEST_TYPE)) {                
-                String from  = message.getString("from");
-                FacebookFriend friend = connection.getUser(from);
-                if(friend != null) {
-                    // TODO replace with ServiceDiscoveryManager like thing
-                    List<String> supported = new ArrayList<String>();
-                    for(URI feature : featureRegistry) {
-                        supported.add(feature.toASCIIString());
+                } else if(messageType.equals(REQUEST_TYPE)) {                
+                    String from  = message.getString("from");
+                    FacebookFriend friend = connection.getUser(from);
+                    if(friend != null) {
+                        // TODO replace with ServiceDiscoveryManager like thing
+                        List<String> supported = new ArrayList<String>();
+                        for(URI feature : featureRegistry) {
+                            supported.add(feature.toASCIIString());
+                        }
+                        Map response = new HashMap();
+                        response.put("from", connection.getUID());
+                        response.put("features", supported);
+                        connection.sendLiveMessage(friend.getActivePresence(), RESPONSE_TYPE,
+                                response);
                     }
-                    Map response = new HashMap();
-                    response.put("from", connection.getUID());
-                    response.put("features", supported);
-                    connection.sendLiveMessage(friend.getActivePresence(), RESPONSE_TYPE,
-                            response);
                 }
+            } catch (URISyntaxException e) {
+                throw new JSONException(e);
+            } catch (FriendException e) {
+                throw new JSONException(e);
             }
-        } catch (URISyntaxException e) {
-            throw new JSONException(e);
-        } catch (FriendException e) {
-            throw new JSONException(e);
         }
     }
     
@@ -93,18 +98,36 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     public void register(@Named("available") ListenerSupport<FriendEvent> availableFriends) {
         availableFriends.addListener(new EventListener<FriendEvent>() {
             @Override
-            public void handleEvent(FriendEvent event) {                
-                if(event.getType() == FriendEvent.Type.ADDED) {
-                    Friend friend = event.getData();
-                    if (friend instanceof FacebookFriend) {
-                        try {
-                            Map<String, String> message = new HashMap<String, String>();
-                            message.put("from", connection.getUID());
-                            connection.sendLiveMessage(event.getData().getActivePresence(), REQUEST_TYPE,
-                                    message);
-                        } catch (FriendException e) {
-                            throw new RuntimeException(e);
-                        }  
+            public void handleEvent(FriendEvent event) {  
+                synchronized (LiveMessageDiscoInfoTransport.this) {
+                    if(event.getType() == FriendEvent.Type.ADDED) {
+                        Friend friend = event.getData();
+                        if (friend instanceof FacebookFriend) {
+                            FacebookFriend facebookFriend = (FacebookFriend)friend;
+                            try {
+                                Map<String, String> message = new HashMap<String, String>();
+                                message.put("from", connection.getUID());
+                                connection.sendLiveMessage(facebookFriend, REQUEST_TYPE,
+                                        message);
+                                
+                                if(pendingPresences.containsKey(facebookFriend.getId())) {
+                                    JSONArray features = pendingPresences.remove(facebookFriend.getId());
+                                    for(int i = 0; i < features.length(); i++) {
+                                        String feature = features.getString(i);
+                                        FeatureInitializer initializer = featureRegistry.get(new URI(feature));
+                                        if(initializer != null) {
+                                            initializer.initializeFeature(facebookFriend);
+                                        }
+                                    }
+                                }
+                            } catch (FriendException e) {
+                                throw new RuntimeException(e);
+                            } catch (URISyntaxException e) {
+                                throw new RuntimeException(e);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                     }
                 }
             }

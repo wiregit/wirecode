@@ -72,7 +72,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
                     presence.addFeature(new AddressFeature(new XMPPAddress(presence.getPresenceId())));
                 } else {
                     LOG.debugf("address {0} for presence {1} is pending", address, from);
-                    pendingAddresses.put(from, address);
+                    pendingAddresses.put(from, address); // TODO locking?
                 }
             }   
         }
