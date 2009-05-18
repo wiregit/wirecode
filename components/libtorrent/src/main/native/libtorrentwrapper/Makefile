@@ -21,6 +21,7 @@ ifeq  ($(OS),"linux")
 	LIBRARY = libtorrent-wrapper.so
 	TARGET = libtorrent-wrapper.out
 	LINKOPTIONS = -shared
+#	OPTIONS = -DLIME_DEBUG=1
 endif
 
 ifeq  ($(OS),"osx")

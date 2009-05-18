@@ -25,6 +25,13 @@
 #include "libtorrent/file.hpp"
 
 #include "libtorrent/socket.hpp"
+#include <libtorrent/extensions/metadata_transfer.hpp>
+#include <libtorrent/extensions/ut_metadata.hpp>
+#include <libtorrent/extensions/ut_pex.hpp>
+#include <libtorrent/extensions/smart_ban.hpp>
+
+
+
 using libtorrent::asio::ip::tcp;
 
 #ifdef WINDOWS
@@ -40,7 +47,7 @@ typedef libtorrent::big_number sha1_hash;
 #define wTHROW(x) return 0;
 #else
 #define EXTERN_RET wrapper_exception*
-#define wTHROW(x) if (last_error) { last_error=0;} last_error = x; return last_error;
+#define wTHROW(x) if (last_error) { delete last_error; last_error=0;} last_error = x; return last_error;
 #endif
 
 #define EXTERN_TOP try {
@@ -193,8 +200,9 @@ libtorrent::torrent_handle findTorrentHandle(const char* sha1String) {
 void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 		libtorrent::save_resume_data_alert const* alert,
 		wrapper_alert_info* alertInfo) {
-#ifdef LIMEDEBUG_RESUME
-	std::cout << "save_resume_data_alert";
+
+#ifdef LIME_DEBUG
+	std::cout << "save_resume_data_alert" << std::endl;
 #endif
 
 	std::string resume_data_file = handle.get_torrent_info().name()
@@ -202,8 +210,8 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 	boost::filesystem::path path(handle.save_path() / resume_data_file);
 	alertInfo->data = path.file_string().c_str();
 
-#ifdef LIMEDEBUG_RESUME
-	std::cout << "(to " << alertStatus->data << ')' << std::endl;
+#ifdef LIME_DEBUG
+	std::cout << "(to " << alertInfo->data << ')' << std::endl;
 #endif
 
 	boost::filesystem::ofstream out(path, std::ios_base::binary);
@@ -213,6 +221,9 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 
 void process_alert(libtorrent::alert const* alert, wrapper_alert_info* alertInfo) {
 
+#ifdef LIME_DEBUG
+	std::cout << "process alert" << std::endl;
+#endif
 	alertInfo->category = alert->category();
 	alertInfo->message = alert->message().c_str();
 
@@ -236,7 +247,7 @@ void process_alert(libtorrent::alert const* alert, wrapper_alert_info* alertInfo
 			libtorrent::save_resume_data_failed_alert const
 					* srdf_alert = dynamic_cast<libtorrent::save_resume_data_failed_alert const*> (alert);
 			if (srdf_alert) {
-#ifdef LIMEDEBUG_RESUME
+#ifdef LIME_DEBUG
 				std::cout << "save_resume_data_failed_alert (" << srdf_alert->msg << ")" << std::endl;
 #endif
 				alertInfo->message = srdf_alert->msg.c_str();
@@ -246,7 +257,7 @@ void process_alert(libtorrent::alert const* alert, wrapper_alert_info* alertInfo
 			libtorrent::fastresume_rejected_alert const
 					* fra_alert = dynamic_cast<libtorrent::fastresume_rejected_alert const*> (alert);
 			if (fra_alert) {
-#ifdef LIMEDEBUG_RESUME
+#ifdef LIME_DEBUG
 				std::cout << "fastresume_rejected_alert (" << fra_alert->msg << ")" << std::endl;
 #endif
 				alertInfo->message = fra_alert->msg.c_str();
@@ -257,7 +268,7 @@ void process_alert(libtorrent::alert const* alert, wrapper_alert_info* alertInfo
 }
 
 // Ported from http://www.rasterbar.com/products/libtorrent/manual.html#save-resume-data
-extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data()
+extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(void(*alertCallback)(void*))
 {
 	EXTERN_TOP;
 	int num_resume_data = 0;
@@ -271,6 +282,38 @@ extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data()
 		if (!h.is_valid()) continue;
 
 		h.save_resume_data();
+		++num_resume_data;
+#ifdef LIME_DEBUG
+		std::cout << "num_resume: " << num_resume_data << std::endl;
+#endif
+	}
+
+	while (num_resume_data > 0)
+
+	{
+#ifdef LIME_DEBUG
+		std::cout << "waiting for resume: " << num_resume_data << std::endl;
+#endif
+
+		libtorrent::alert const* alert = s.wait_for_alert(libtorrent::seconds(10));
+
+
+		// if we don't get an alert within 10 seconds, abort
+		if (alert == 0)  break;
+
+		std::auto_ptr<libtorrent::alert> holder = s.pop_alert();
+
+		wrapper_alert_info* alertInfo = new wrapper_alert_info();
+		process_alert(alert, alertInfo);
+		alertCallback(alertInfo);
+
+		if (alertInfo->data)
+		{
+#ifdef LIME_DEBUG
+		std::cout << "resume_found: " << std::endl;
+#endif
+			--num_resume_data;
+		}
 	}
 
 	EXTERN_BOTTOM;
@@ -283,6 +326,13 @@ extern "C" EXTERN_RET init(const char* path) {
 	savePath = newPath;
 	s.set_alert_mask(0xffffffff);
 	s.listen_on(std::make_pair(6881, 6889));
+	s.add_extension(&libtorrent::create_metadata_plugin);
+	s.add_extension(&libtorrent::create_ut_metadata_plugin);
+	s.add_extension(&libtorrent::create_ut_pex_plugin);
+	s.add_extension(&libtorrent::create_smart_ban_plugin);
+	s.start_upnp();
+	s.start_natpmp();
+
 
 	EXTERN_BOTTOM;
 }
@@ -309,13 +359,13 @@ extern "C" EXTERN_RET add_torrent_existing(char* sha1String, char* trackerURI,
 		char* fastResumePath) {
 	EXTERN_TOP;
 
-#ifdef LIMEDEBUG
+#ifdef LIME_DEBUG
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "sha1String" << sha1String << std::endl;
 	std::cout << "trackerURI" << trackerURI << std::endl;
 #endif
 	sha1_hash sha1 = getSha1Hash(sha1String);
-#ifdef LIMEDEBUG
+#ifdef LIME_DEBUG
 	std::cout << "sha1_hash" << sha1 << std::endl;
 #endif
 
@@ -351,7 +401,7 @@ extern "C" EXTERN_RET add_torrent_existing(char* sha1String, char* trackerURI,
 extern "C" EXTERN_RET add_torrent(char* path, char* fastResumePath) {
 	EXTERN_TOP;
 
-#ifdef LIMEDEBUG
+#ifdef LIME_DEBUG
 	std::cout << "adding torrent" << std::endl;
 	std::cout << "path: " << path << std::endl;
 #endif
@@ -380,9 +430,6 @@ extern "C" EXTERN_RET add_torrent(char* path, char* fastResumePath) {
 
 
 	libtorrent::torrent_handle h = s.add_torrent(p);
-
-	// TODO: ?
-	// delete p.ti;
 
 	EXTERN_BOTTOM;
 }
@@ -480,9 +527,9 @@ extern "C" EXTERN_RET get_peers(const char* id, int buffer_len, char* data) {
 		std::string address = iter->ip.address().to_string();
 		int len = address.length();
 
-//#ifdef LIMEDEBUG
+#ifdef LIME_DEBUG
 		std::cout << "peer:" << address << std::endl;
-//#endif
+#endif
 
 		if (len + pos > buffer_len)
 			break;
@@ -523,7 +570,6 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 		wrapper_alert_info* alertInfo = new wrapper_alert_info();
 
 		process_alert(alert, alertInfo);
-
 		alertCallback(alertInfo);
 
 		delete alertInfo;

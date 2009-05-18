@@ -480,11 +480,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         btMemento.setTrackerURL(torrent.getTrackerURL());
         btMemento.setPaths(torrent.getPaths());
         File fastResumeFile = torrent.getFastResumeFile();
-        String fastResumePath = fastResumeFile != null && fastResumeFile.exists() ? fastResumeFile
+        String fastResumePath = fastResumeFile != null ? fastResumeFile
                 .getAbsolutePath() : null;
         btMemento.setFastResumePath(fastResumePath);
         File torrentFile = torrent.getTorrentFile();
-        String torrentPath = torrentFile != null && torrentFile.exists() ? torrentFile
+        String torrentPath = torrentFile != null ? torrentFile
                 .getAbsolutePath() : null;
         btMemento.setTorrentPath(torrentPath);
     }

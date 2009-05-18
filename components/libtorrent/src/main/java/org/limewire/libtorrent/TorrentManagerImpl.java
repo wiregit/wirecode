@@ -24,7 +24,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
 
-    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = true;
+    private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = false;
 
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
 
@@ -34,8 +34,6 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private final ScheduledExecutorService alertExecutor;
 
-    private final ScheduledExecutorService resumeFileExecutor;
-
     private final LibTorrentWrapper libTorrent;
 
     private final Map<String, Torrent> torrents;
@@ -44,10 +42,8 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Inject
     public TorrentManagerImpl(@TorrentDownloadFolder Provider<File> torrentDownloadFolder) {
-
         this.torrentDownloadFolder = torrentDownloadFolder;
         this.torrentExecutor = new ScheduledThreadPoolExecutor(1);
-        this.resumeFileExecutor = new ScheduledThreadPoolExecutor(1);
         this.alertExecutor = new ScheduledThreadPoolExecutor(1);
 
         this.libTorrent = new LibTorrentWrapper();
@@ -193,14 +189,16 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public void start() {
         torrentExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
-        
-        if(!OSUtils.isMacOSX()) {
-            //TODO disabling for now on the mac, on osx there is an error calling the alert callback, need toi investigate.
-            //but disabling for now so that it does not crash the jvm.
-            alertExecutor.scheduleAtFixedRate(new AlertPoller(), 1000, 500, TimeUnit.MILLISECONDS);
-    
+
+        if (!OSUtils.isMacOSX()) {
+            // TODO disabling for now on the mac, on osx there is an error
+            // calling the alert callback, need toi investigate.
+            // but disabling for now so that it does not crash the jvm.
+
             if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
-                resumeFileExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
+                alertExecutor.scheduleAtFixedRate(new AlertPoller(), 1000, 500,
+                        TimeUnit.MILLISECONDS);
+                alertExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
                         TimeUnit.MILLISECONDS);
             }
         }
@@ -210,12 +208,6 @@ public class TorrentManagerImpl implements TorrentManager {
     public void stop() {
         try {
             lock.writeLock().lock();
-            try {
-                resumeFileExecutor.shutdown();
-                alertExecutor.awaitTermination(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                LOG.error("Error shutting down Resume File Executor", e);
-            }
             try {
                 torrentExecutor.shutdown();
                 torrentExecutor.awaitTermination(10, TimeUnit.SECONDS);
@@ -229,7 +221,12 @@ public class TorrentManagerImpl implements TorrentManager {
                 LOG.error("Error shutting down Alert Executor", e);
             }
 
-            libTorrent.freeze_and_save_all_fast_resume_data();
+            if (!OSUtils.isMacOSX()) {
+                // TODO disabling for now on the mac, on osx there is an error
+                // calling the alert callback, need to investigate.
+                // but disabling for now so that it does not crash the jvm.
+                libTorrent.freeze_and_save_all_fast_resume_data(new BasicAlertCallback());
+            }
             libTorrent.abort_torrents();
             torrents.clear();
         } finally {
@@ -280,10 +277,12 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public boolean isDownloading(File torrentFile) {
-        synchronized (torrents) {
-            for (Torrent torrent : torrents.values()) {
-                if (torrentFile != null && torrentFile.equals(torrent.getTorrentFile())) {
-                    return true;
+        if (torrentFile != null) {
+            synchronized (torrents) {
+                for (Torrent torrent : torrents.values()) {
+                    if (torrentFile.equals(torrent.getTorrentFile())) {
+                        return true;
+                    }
                 }
             }
         }
@@ -298,16 +297,23 @@ public class TorrentManagerImpl implements TorrentManager {
     private class AlertPoller implements Runnable {
         @Override
         public void run() {
-            libTorrent.get_alerts(new DebugAlertCallback());
+            libTorrent.get_alerts(new BasicAlertCallback());
         }
     }
 
-    private class DebugAlertCallback implements AlertCallback {
+    private class BasicAlertCallback implements AlertCallback {
 
         @Override
         public void callback(LibTorrentAlert alert) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(alert.toString());
+            }
+
+            if (alert.sha1 != null) {
+                Torrent torrent = torrents.get(alert.sha1);
+                if(torrent != null) {
+                    torrent.alert(alert);
+                }
             }
         }
     }

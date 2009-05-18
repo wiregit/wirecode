@@ -323,4 +323,10 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             }
         }
     }
+
+    public void alert(LibTorrentAlert alert) {
+        if(alert.category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT) {
+            fastResumeFile = new File(alert.data);
+        }
+    }
 }

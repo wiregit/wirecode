@@ -20,6 +20,6 @@ public class LibTorrentAlert extends Structure {
 
     @Override
     public String toString() {
-        return sha1 + " " + message + " [" + category + "] ";
+        return sha1 + " " + message + " [" + category + "] " + data;
     }
 }
