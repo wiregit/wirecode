@@ -199,8 +199,7 @@ public class FilesOptionPanel extends OptionPanel {
             super(I18n.tr("LimeWire Store"));
             
             storeOptionPanel = new LWSFileNamingOptionPanel(new OKDialogAction(), new CancelDialogAction());
-            storeOptionPanel.setPreferredSize(new Dimension(350, 140));
-            
+
             storePathTextField = new LabelTextField(iconManager);
             storePathTextField.setEditable(false);
             
