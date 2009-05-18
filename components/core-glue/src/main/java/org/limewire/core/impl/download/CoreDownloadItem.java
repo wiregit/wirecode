@@ -25,7 +25,6 @@ import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
-import com.limegroup.gnutella.lws.server.StartComTest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreDownloadItem implements DownloadItem {

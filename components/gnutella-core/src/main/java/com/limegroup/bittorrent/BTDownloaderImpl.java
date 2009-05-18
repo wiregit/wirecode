@@ -74,6 +74,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.torrentManager = torrentManager;
     }
 
+    /**
+     * Registers the a listener on the torrent to update internal state of the
+     * downloader, based on updates to the torrent.
+     */
     @Inject
     public void registerTorrent() {
         torrent.addListener(new EventListener<TorrentEvent>() {
@@ -91,14 +95,19 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         });
     }
 
+    /**
+     * initializes this downloader from the given torrent file.
+     */
     @Override
     public void init(File torrentFile) throws IOException {
         torrent.init(torrentFile, SharingSettings.getSaveDirectory());
-        // TODO fix this logic. Should not be using protected access, should be
-        // hidden
-        saveFile = torrent.getCompleteFile();
+        File completeFile = torrent.getCompleteFile();
+        setSaveFile(completeFile.getParentFile(), completeFile.getName(), false);
     }
 
+    /**
+     * Registers the internal torrent with the torrent manager.
+     */
     @Override
     public void register() {
         torrentManager.get().registerTorrent(torrent);
@@ -155,7 +164,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public boolean resume() {
         torrent.resume();
-        // TODO tie in a return value
         return true;
     }
 
@@ -366,19 +374,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public void setSaveFile(File saveDirectory, String fileName, boolean overwrite)
-            throws SaveLocationException {
-        // throw new UnsupportedOperationException(
-        // "Currently should not be called for torrents, come back later.");
-        // super.setSaveFile(saveDirectory, fileName, overwrite);
-        // // if this didn't throw target is ok.
-        // torrentFileSystem.setCompleteFile(new File(saveDirectory, fileName));
-
-        // TODO support this method in future when we allow picking a new
-        // savepath for a torrent
-    }
-
-    @Override
     protected File getDefaultSaveFile() {
         return new File(SharingSettings.getSaveDirectory(), torrent.getName());
     }
@@ -556,7 +551,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public void deleteIncompleteFiles() {
-        // TODO assert that complete or aborted?
         FileUtils.deleteRecursive(getIncompleteFile());
         File torrentFile = torrent.getTorrentFile();
         if (torrentFile != null) {
