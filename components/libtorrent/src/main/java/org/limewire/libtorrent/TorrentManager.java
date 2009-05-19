@@ -25,6 +25,11 @@ public interface TorrentManager extends Service {
     public void resumeTorrent(Torrent torrent);
 
     /**
+     * Delegates to clear any error state and restarts the torrent.
+     */
+    public void recoverTorrent(Torrent torrent);
+    
+    /**
      * Returns a list of ip addresses for the peers connected to the specified
      * torrent.
      */

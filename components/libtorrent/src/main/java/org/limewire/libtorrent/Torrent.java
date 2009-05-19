@@ -244,7 +244,12 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
      * Resumes the torrent from a paused state.
      */
     public void resume() {
-        torrentManager.resumeTorrent(this);
+        if (getStatus().isError()) {
+            torrentManager.recoverTorrent(this);
+        } 
+        else { 
+            torrentManager.resumeTorrent(this);
+        }
     }
 
     /**

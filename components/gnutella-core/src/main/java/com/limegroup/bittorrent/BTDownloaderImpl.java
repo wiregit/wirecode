@@ -168,8 +168,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean resume() {
-        //TODO can update logic to clear errors in the torrent
-        //that way torrents can have a try again link like other downloads.
         torrent.resume();
         return true;
     }
@@ -217,9 +215,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     }
 
+    boolean stopped = false;
+    
     @Override
     public DownloadState getState() {
-        
         LibTorrentStatus status = torrent.getStatus();
         if (!torrent.isStarted() || status == null) {
             return DownloadState.QUEUED;
@@ -230,9 +229,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         if (torrent.isCancelled()) {
             return DownloadState.ABORTED;
         }
-        
+
+        // TODO: This currently shows stalled which will probably
+        //        be inaccurate.
         if(status.isError()) {
-            return DownloadState.INVALID;
+            return DownloadState.GAVE_UP;
         }
 
         if (torrent.isFinished()) {

@@ -124,7 +124,13 @@ public class LibTorrentWrapper {
     public void signal_fast_resume_data_request(String id) {
         LOG.debugf("before print signal_fast_resume_data_request: {0}", id);
         catchWrapperException(libTorrent.signal_fast_resume_data_request(id));
-        LOG.debugf("after print signal_fast_resume_data_request: {0} - {1}", id);
+        LOG.debugf("after print signal_fast_resume_data_request: {0}", id);
+    }
+    
+    public void clear_error_and_retry(String id) {
+        LOG.debugf("before print clear_error_and_retry: {0}", id);
+        catchWrapperException(libTorrent.clear_error_and_retry(id));
+        LOG.debugf("after print clear_error_and_retry: {0}", id);
     }
 
     public void move_torrent(String id, String absolutePath) {

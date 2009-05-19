@@ -116,7 +116,7 @@ public class LibTorrentStatus extends Structure {
      * Returns true if the torrent is in an error state.
      */
     public boolean isError() {
-        return error != null && !StringUtils.isEmpty(error);
+        return !StringUtils.isEmpty(error);
     }
 
     /**

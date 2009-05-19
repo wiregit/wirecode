@@ -119,6 +119,19 @@ public class TorrentManagerImpl implements TorrentManager {
             lock.readLock().unlock();
         }
     }
+    
+    @Override
+    public void recoverTorrent(Torrent torrent) {
+        try {
+            lock.readLock().lock();
+            String sha1 = torrent.getSha1();
+            libTorrent.clear_error_and_retry(sha1);
+            updateStatus(torrent);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+    
 
     private LibTorrentStatus getStatus(Torrent torrent) {
         LibTorrentStatus status = new LibTorrentStatus();
