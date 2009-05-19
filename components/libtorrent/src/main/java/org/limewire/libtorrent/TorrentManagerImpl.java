@@ -64,15 +64,14 @@ public class TorrentManagerImpl implements TorrentManager {
         String fastResumePath = fastResumefile != null ? fastResumefile.getAbsolutePath() : null;
         String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
 
+        lock.writeLock().lock();
         try {
-            lock.writeLock().lock();
             libTorrent.add_torrent(torrent.getSha1(), trackerURI, torrentPath, fastResumePath);
             updateStatus(torrent);
+            torrents.put(torrent.getSha1(), torrent);
         } finally {
             lock.writeLock().unlock();
         }
-
-        torrents.put(torrent.getSha1(), torrent);
     }
 
     @Inject
@@ -87,19 +86,19 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void removeTorrent(Torrent torrent) {
+        lock.writeLock().lock();
         try {
-            lock.writeLock().lock();
             torrents.remove(torrent.getSha1());
+            libTorrent.remove_torrent(torrent.getSha1());
         } finally {
             lock.writeLock().unlock();
         }
-        libTorrent.remove_torrent(torrent.getSha1());
     }
 
     @Override
     public void pauseTorrent(Torrent torrent) {
+        lock.readLock().lock();
         try {
-            lock.readLock().lock();
             String sha1 = torrent.getSha1();
             libTorrent.pause_torrent(sha1);
             updateStatus(torrent);
@@ -110,8 +109,8 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void resumeTorrent(Torrent torrent) {
+        lock.readLock().lock();
         try {
-            lock.readLock().lock();
             String sha1 = torrent.getSha1();
             libTorrent.resume_torrent(sha1);
             updateStatus(torrent);
@@ -122,8 +121,8 @@ public class TorrentManagerImpl implements TorrentManager {
     
     @Override
     public void recoverTorrent(Torrent torrent) {
+    	lock.readLock().lock();
         try {
-            lock.readLock().lock();
             String sha1 = torrent.getSha1();
             libTorrent.clear_error_and_retry(sha1);
             updateStatus(torrent);
@@ -183,32 +182,43 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void initialize() {
-        libTorrent.initialize(torrentDownloadFolder.get().getAbsolutePath());
+        lock.writeLock().lock();
+        try {
+            libTorrent.initialize(torrentDownloadFolder.get().getAbsolutePath());
+        } finally {
+            lock.writeLock().unlock();
+        }
         // TODO what if path changes.
     }
 
     @Override
     public void start() {
-        torrentExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
+        lock.writeLock().lock();
+        try {
+            torrentExecutor
+                    .scheduleAtFixedRate(new EventPoller(), 1000, 500, TimeUnit.MILLISECONDS);
 
-        if (!OSUtils.isMacOSX()) {
-            // TODO disabling for now on the mac, on osx there is an error
-            // calling the alert callback, need toi investigate.
-            // but disabling for now so that it does not crash the jvm.
+            if (!OSUtils.isMacOSX()) {
+                // TODO disabling for now on the mac, on osx there is an error
+                // calling the alert callback, need toi investigate.
+                // but disabling for now so that it does not crash the jvm.
 
-            if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
-                alertExecutor.scheduleAtFixedRate(new AlertPoller(), 1000, 500,
-                        TimeUnit.MILLISECONDS);
-                alertExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
-                        TimeUnit.MILLISECONDS);
+                if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
+                    alertExecutor.scheduleAtFixedRate(new AlertPoller(), 1000, 500,
+                            TimeUnit.MILLISECONDS);
+                    alertExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
+                            TimeUnit.MILLISECONDS);
+                }
             }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
     @Override
     public void stop() {
+        lock.writeLock().lock();
         try {
-            lock.writeLock().lock();
             try {
                 torrentExecutor.shutdown();
                 torrentExecutor.awaitTermination(10, TimeUnit.SECONDS);
@@ -319,8 +329,8 @@ public class TorrentManagerImpl implements TorrentManager {
 
         @Override
         public void run() {
+            lock.readLock().lock();
             try {
-                lock.readLock().lock();
                 if (!torrentIterator.hasNext()) {
                     torrentIterator = torrents.keySet().iterator();
                     if (!torrentIterator.hasNext()) {
