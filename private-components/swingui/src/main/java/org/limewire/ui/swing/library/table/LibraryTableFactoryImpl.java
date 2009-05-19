@@ -11,15 +11,12 @@ import javax.swing.TransferHandler;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.playlist.Playlist;
-import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
@@ -37,9 +34,10 @@ import org.limewire.ui.swing.library.playlist.PlaylistTransferHandler;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
+import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupMenu;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
-import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
-import org.limewire.ui.swing.properties.PropertiesFactory;
+import org.limewire.ui.swing.library.table.menu.MyLibraryPopupMenuFactory;
+import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
@@ -53,13 +51,13 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -70,16 +68,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private ShareListManager shareListManager;
 
     private AudioPlayer player;
-
-    private DownloadListManager downloadListManager;
-
-    private MagnetLinkFactory magnetLinkFactory;
-
-    private PropertiesFactory<LocalFileItem> localItemPropFactory;
-
-    private PropertiesFactory<RemoteFileItem> remoteItemPropFactory;
-    
-    private PropertiesFactory<DownloadItem> downloadItemPropFactory;
     
     private LibraryImageSubPanelFactory subPanelFactory;
     
@@ -97,10 +85,10 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final IconManager iconManager;
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
-    private final SharingActionFactory sharingActionFactory;
-    private final XMPPService xmppService;
     private final LibraryNavigator libraryNavigator;
-    private final PlaylistManager playlistManager;
+    private final FileInfoDialogFactory fileInfoFactory;
+    private final MyLibraryPopupMenuFactory popupFactory;
+    private final Provider<FriendLibraryPopupMenu> friendLibraryPopupMenu;
 
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager,
@@ -108,10 +96,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             ShareListManager shareListManager, 
             AudioPlayer player,
             DownloadListManager downloadListManager, 
-            MagnetLinkFactory magnetLinkFactory,
-            PropertiesFactory<LocalFileItem> localItemPropFactory,
-            PropertiesFactory<RemoteFileItem> remoteItemPropFactory,
-            PropertiesFactory<DownloadItem> downloadItemPropFactory,
             LibraryImageSubPanelFactory factory, 
             SaveLocationExceptionHandler saveLocationExceptionHandler,
             ShareTableRendererEditorFactory shareTableRendererEditorFactory, 
@@ -119,27 +103,22 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             GhostDragGlassPane ghostPane, 
             CategoryIconManager categoryIconManager,
             RemoteHostWidgetFactory fromWidgetfactory,
-            SharingActionFactory sharingActionFactory,
-            XMPPService xmppService,
             LibraryNavigator libraryNavigator,
-            PlaylistManager playlistManager) {
+            FileInfoDialogFactory fileInfoFactory,
+            MyLibraryPopupMenuFactory popupFactory,
+            Provider<FriendLibraryPopupMenu> friendLibraryPopupMenu) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.player = player;
-        this.downloadListManager = downloadListManager;
-        this.magnetLinkFactory = magnetLinkFactory;
-        this.localItemPropFactory = localItemPropFactory;
-        this.remoteItemPropFactory = remoteItemPropFactory;
-        this.downloadItemPropFactory = downloadItemPropFactory;
         this.subPanelFactory = factory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.ghostPane = ghostPane;
         this.fromWidgetFactory = fromWidgetfactory;
-        this.sharingActionFactory = sharingActionFactory;
-        this.xmppService = xmppService;
         this.libraryNavigator = libraryNavigator;
-        this.playlistManager = playlistManager;
+        this.fileInfoFactory = fileInfoFactory;
+        this.popupFactory = popupFactory;
+        this.friendLibraryPopupMenu = friendLibraryPopupMenu;
         
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
@@ -188,10 +167,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         }
 
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList(), shareListManager, listChanger));
-        libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
-                category, libraryManager, shareListManager, magnetLinkFactory,
-                localItemPropFactory, sharingActionFactory, xmppService, 
-                libraryNavigator, playlistManager));
+        libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), popupFactory.createMyLibraryPopupMenu(category)));
         
         try {
             libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane, listChanger));
@@ -293,8 +269,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         default:
             throw new IllegalArgumentException("Unknown category: " + category);
         }
-        libTable.setPopupHandler(new FriendLibraryPopupHandler(
-                castToRemoteLibraryTable(libTable), downloadListManager, remoteItemPropFactory, saveLocationExceptionHandler, downloadItemPropFactory, libraryManager));
+        libTable.setPopupHandler(new FriendLibraryPopupHandler(castToRemoteLibraryTable(libTable), friendLibraryPopupMenu.get()));
 
         EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());
         libTable.setDropMode(DropMode.ON);
@@ -318,8 +293,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
                 saveLocationExceptionHandler, shareTableRendererEditorFactory);
         
         // Install popup menu handler.
-        libTable.setPopupHandler(new PlaylistPopupHandler(libTable, playlist,
-                libraryNavigator, localItemPropFactory));
+        libTable.setPopupHandler(new PlaylistPopupHandler(libTable, playlist, libraryNavigator, fileInfoFactory));
 
         // Install transfer handler to reorder playlist items.
         libTable.setTransferHandler(new PlaylistTransferHandler(playlist));

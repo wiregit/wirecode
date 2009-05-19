@@ -1,10 +1,6 @@
 package org.limewire.ui.swing.downloads.table;
 
-import org.limewire.core.api.download.DownloadItem;
-import org.limewire.ui.swing.properties.PropertiesFactory;
-
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
 
 public class LimeWireUiDownloadsTableModule extends AbstractModule {
@@ -17,8 +13,5 @@ public class LimeWireUiDownloadsTableModule extends AbstractModule {
                         DownloadTableFactory.class, DownloadTable.class));
         
         bind(DownloadActionHandler.class);
-        
-        bind(new TypeLiteral<PropertiesFactory<DownloadItem>>(){}).to(DownloadItemPropertiesFactory.class);
     }
-
 }

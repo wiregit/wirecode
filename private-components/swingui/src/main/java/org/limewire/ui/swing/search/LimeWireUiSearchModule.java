@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.StringTrieSet;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
-import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactoryImpl;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -13,7 +12,6 @@ import org.limewire.ui.swing.search.resultpanel.NameRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.NameRendererFactoryImpl;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilderImpl;
-import org.limewire.ui.swing.search.resultpanel.SearchResultPropertiesFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncatorImpl;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
@@ -71,8 +69,6 @@ public class LimeWireUiSearchModule extends AbstractModule {
         
         
         bind(RemoteHostActions.class).to(RemoteHostActionsImpl.class);
-
-        bind(new TypeLiteral<PropertiesFactory<VisualSearchResult>>(){}).to(SearchResultPropertiesFactory.class);
         
         bind(NameRendererFactory.class).to(NameRendererFactoryImpl.class);
         

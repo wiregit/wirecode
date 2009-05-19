@@ -1,5 +1,7 @@
 package org.limewire.core.api.friend;
 
+import java.util.Collection;
+
 /**
  * Retrieves relevant information about a Friend.
  */
@@ -18,4 +20,9 @@ public interface FriendManager {
      * available, false otherwise. 
      */ 
     public boolean containsAvailableFriend(String id);
+    
+    /**
+	 * Returns a Collection of all known friends.
+	 */
+    public Collection<Friend> getKnownFriends();
 }

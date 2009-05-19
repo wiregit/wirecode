@@ -33,7 +33,7 @@ import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.properties.PropertiesFactory;
+import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -106,11 +106,11 @@ public class BaseResultPanel extends JXPanel {
     
     private final ResultsTableFormatFactory tableFormatFactory;
     private final Navigator navigator;
-    private final PropertiesFactory<VisualSearchResult> properties;
     private final ListViewRowHeightRule rowHeightRule;
     private final RemoteHostWidgetFactory fromWidgetfactory;
     private final NameRendererFactory nameRendererFactory;
     private final DownloadHandler downloadHandler;
+    private final FileInfoDialogFactory fileInfoFactory;
     
     private RangeList<VisualSearchResult> maxSizedList;
     private ListEventListener<VisualSearchResult> maxSizedListener;
@@ -129,20 +129,20 @@ public class BaseResultPanel extends JXPanel {
             ResultsTableFormatFactory tableFormatFactory,
             ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             Navigator navigator,
-            PropertiesFactory<VisualSearchResult> properties, 
             ListViewRowHeightRule rowHeightRule,
             RemoteHostWidgetFactory fromWidgetFactory,
             LibraryNavigator libraryNavigator,
-            NameRendererFactory nameRendererFactory) {
+            NameRendererFactory nameRendererFactory,
+            FileInfoDialogFactory fileInfoFactory) {
         
         this.searchResultsModel = searchResultsModel;
         this.tableFormatFactory = tableFormatFactory;
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         this.navigator = navigator;
-        this.properties = properties;
         this.rowHeightRule = rowHeightRule;
         this.fromWidgetfactory = fromWidgetFactory;
         this.nameRendererFactory = nameRendererFactory;
+        this.fileInfoFactory = fileInfoFactory;
         this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, libraryNavigator);
 
         // Create tables.
@@ -177,7 +177,7 @@ public class BaseResultPanel extends JXPanel {
         ResultsTable<VisualSearchResult> table = new ResultsTable<VisualSearchResult>();
         
         // Set table fields that do not change with search category.
-        table.setPopupHandler(new SearchPopupHandler(table, downloadHandler, properties));
+        table.setPopupHandler(new SearchPopupHandler(table, downloadHandler, fileInfoFactory));
         table.setDoubleClickHandler(new ClassicDoubleClickHandler(table, downloadHandler));
         table.setRowHeight(TABLE_ROW_HEIGHT);
         

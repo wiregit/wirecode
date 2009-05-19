@@ -18,7 +18,6 @@ import org.limewire.ui.swing.properties.LimeWireUiPropertiesModule;
 import org.limewire.ui.swing.search.LimeWireUiSearchModule;
 import org.limewire.ui.swing.statusbar.LimeWireUiStatusbarModule;
 import org.limewire.ui.swing.tray.LimeWireUiTrayModule;
-import org.limewire.ui.swing.upload.LimeWireUiUploadModule;
 import org.limewire.ui.swing.util.LimeWireUiUtilModule;
 import org.limewire.ui.swing.wizard.LimeWireUiWizardModule;
 
@@ -50,7 +49,6 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiStatusbarModule());
         install(new LimeWireUiPainterModule(isPro));
         install(new LimeWireUiComponentsModule());
-        install(new LimeWireUiUploadModule());
         install(new LimeWireUiDockModule());
         install(new LimeWireUiWizardModule());
         install(new LimeWireUiPropertiesModule());
