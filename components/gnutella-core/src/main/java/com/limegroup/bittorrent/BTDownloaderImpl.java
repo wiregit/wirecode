@@ -501,6 +501,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             throws InvalidDataException {
         urn = memento.getSha1Urn();
 
+        if (urn == null) {
+            throw new InvalidDataException(
+                    "Null SHA1 URN retrieved from LibTorrent torrent momento.");
+        }
+        
         if (!urn.isSHA1()) {
             throw new InvalidDataException(
                     "Non SHA1 URN retrieved from LibTorrent torrent momento.");
