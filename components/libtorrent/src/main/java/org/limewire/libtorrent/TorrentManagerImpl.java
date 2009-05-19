@@ -39,6 +39,12 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private final Map<String, Torrent> torrents;
 
+    /**
+     * Used to protect from calling libtorrent code with invalid torrent data.
+     * Locks access around libtorrent and removing/updating the torrents map to
+     * make sure the torrents torrent manger knows about are the same as what
+     * libtorrent knows about.
+     */
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     @Inject
@@ -118,10 +124,10 @@ public class TorrentManagerImpl implements TorrentManager {
             lock.readLock().unlock();
         }
     }
-    
+
     @Override
     public void recoverTorrent(Torrent torrent) {
-    	lock.readLock().lock();
+        lock.readLock().lock();
         try {
             String sha1 = torrent.getSha1();
             libTorrent.clear_error_and_retry(sha1);
@@ -130,7 +136,6 @@ public class TorrentManagerImpl implements TorrentManager {
             lock.readLock().unlock();
         }
     }
-    
 
     private LibTorrentStatus getStatus(Torrent torrent) {
         LibTorrentStatus status = new LibTorrentStatus();
