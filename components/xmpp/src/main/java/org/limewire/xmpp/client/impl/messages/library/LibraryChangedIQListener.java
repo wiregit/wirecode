@@ -58,7 +58,7 @@ public class LibraryChangedIQListener implements PacketListener {
         if (LOG.isDebugEnabled()) {
             LOG.debug("handling library changed set " + packet.getPacketID());
         }
-        Friend user = connection.getUser(StringUtils.parseBareAddress(packet.getFrom()));
+        Friend user = connection.getFriend(StringUtils.parseBareAddress(packet.getFrom()));
         if (user != null) {
             FriendPresence presence = user.getFriendPresences().get(packet.getFrom());
             if(presence != null) {

@@ -76,7 +76,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
                 FriendConnection connection = getActiveConnection();
                 InspectionHistogram<Integer> presencesHistogram = new InspectionHistogram<Integer>();
                 if (connection != null) {
-                    for (Friend user : connection.getUsers()) {
+                    for (Friend user : connection.getFriends()) {
                         Map<String, FriendPresence> presences = user.getPresences();
                         presencesHistogram.count(presences.size());
                         for (FriendPresence presence : presences.values()) {
@@ -263,7 +263,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
         if (connection == null) {
             return false;
         }
-        Friend user = connection.getUser(StringUtils.parseBareAddress(userId));
+        Friend user = connection.getFriend(StringUtils.parseBareAddress(userId));
         if (user == null) {
             return false;
         }

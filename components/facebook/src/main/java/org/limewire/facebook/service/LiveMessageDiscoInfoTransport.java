@@ -58,7 +58,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                 if(messageType.equals(RESPONSE_TYPE)) {
                     JSONArray features = message.getJSONArray("features");     
                     String from = message.getString("from");
-                    FacebookFriend friend = connection.getUser(from);
+                    FacebookFriend friend = connection.getFriend(from);
                     if(friend != null) {    
                         for(int i = 0; i < features.length(); i++) {
                             String feature = features.getString(i);

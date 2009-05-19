@@ -48,7 +48,7 @@ public class DiscoInfoListener implements PacketListener {
     @Override
     public void processPacket(Packet packet) {
         DiscoverInfo discoverInfo = (DiscoverInfo)packet;
-        Friend user = connection.getUser(StringUtils.parseBareAddress(discoverInfo.getFrom()));
+        Friend user = connection.getFriend(StringUtils.parseBareAddress(discoverInfo.getFrom()));
         if (user != null) {
             FriendPresence presence = user.getFriendPresences().get(discoverInfo.getFrom());
             if(presence != null) {

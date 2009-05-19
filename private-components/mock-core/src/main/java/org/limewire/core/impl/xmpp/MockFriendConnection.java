@@ -49,22 +49,22 @@ public class MockFriendConnection implements FriendConnection {
     }
 
     @Override
-    public ListeningFuture<Void> addUser(String id, String name) {
+    public ListeningFuture<Void> addFriend(String id, String name) {
         return new SimpleFuture<Void>((Void)null);
     }
 
     @Override
-    public ListeningFuture<Void> removeUser(String id) {
+    public ListeningFuture<Void> removeFriend(String id) {
         return new SimpleFuture<Void>((Void)null);
     }
 
     @Override
-    public Friend getUser(String id) {
+    public Friend getFriend(String id) {
         return null;
     }
 
     @Override
-    public Collection<Friend> getUsers() {
+    public Collection<Friend> getFriends() {
         return new ArrayList<Friend>();
     }
 

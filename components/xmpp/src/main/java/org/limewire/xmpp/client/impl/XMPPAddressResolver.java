@@ -89,7 +89,7 @@ public class XMPPAddressResolver implements AddressResolver {
         FriendConnectionEvent connection = connectionEventBean.getLastEvent();
         if(connection == null || connection.getType() != FriendConnectionEvent.Type.CONNECTED)
             return null;
-        Friend user = connection.getSource().getUser(id);
+        Friend user = connection.getSource().getFriend(id);
         if(user != null) {
             for(Entry<String, FriendPresence> entry : user.getFriendPresences().entrySet()) {
                 FriendPresence resolvedPresence =

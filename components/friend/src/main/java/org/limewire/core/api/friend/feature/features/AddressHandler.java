@@ -64,7 +64,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
     public void featureReceived(String from, Address address) {
         synchronized (this) {
             for(FriendConnection connection : connections) {
-                Friend friend = connection.getUser(StringUtils.parseBareAddress(from));
+                Friend friend = connection.getFriend(StringUtils.parseBareAddress(from));
                 if (friend != null) {
                     FriendPresence presence = friend.getFriendPresences().get(from);
                     if(presence != null) {
@@ -90,7 +90,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
             synchronized (this) {
                 for(FriendConnection connection : connections) {
                     address = event.getData();
-                    for(Friend user : connection.getUsers()) {
+                    for(Friend user : connection.getFriends()) {
                         for(Map.Entry<String, FriendPresence> presenceEntry : user.getFriendPresences().entrySet()) {
                             if(presenceEntry.getValue().hasFeatures(LimewireFeature.ID)) {
                                 try {

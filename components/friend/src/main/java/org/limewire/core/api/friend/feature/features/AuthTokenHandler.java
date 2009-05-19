@@ -64,7 +64,7 @@ public class AuthTokenHandler implements FeatureTransport.Handler<AuthToken>{
     public void featureReceived(String from, final AuthToken feature) {
         for(FriendConnection connection : connections) {
             synchronized (this) {
-                Friend user = connection.getUser(StringUtils.parseBareAddress(from));
+                Friend user = connection.getFriend(StringUtils.parseBareAddress(from));
                 if (user != null) {
                     FriendPresence presence = user.getFriendPresences().get(from);
                     if(presence != null) {

@@ -231,7 +231,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 will(returnValue(ManagedListStatusEvent.Type.LOAD_COMPLETE));
 
                 // Non critical actions
-                allowing(xmppConnection).getUsers();
+                allowing(xmppConnection).getFriends();
                 will(returnValue(users));
                 allowing(users.get(0)).getId();
                 will(returnValue(id1));
@@ -316,7 +316,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 will(returnValue(ManagedListStatusEvent.Type.LOAD_COMPLETE));
 
                 // Non essential interactions                
-                allowing(xmppConnection).getUsers();
+                allowing(xmppConnection).getFriends();
                 will(returnValue(users));
                 allowing(users.get(0)).getId();
                 will(returnValue(id1));

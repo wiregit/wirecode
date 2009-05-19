@@ -90,7 +90,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                 fileManagerLoaded.set(true);
                 FriendConnectionEvent connection = connectionEventBean.getLastEvent();
                 if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
-                    Collection<Friend> friends = connection.getSource().getUsers();
+                    Collection<Friend> friends = connection.getSource().getFriends();
                     for(Friend friend : friends) {
                         tracker.sentRefresh(friend.getId());
                         Map<String, FriendPresence> presences = friend.getFriendPresences();

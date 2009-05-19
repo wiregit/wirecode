@@ -248,17 +248,17 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     @Override
-    public ListeningFuture<Void> addUser(String id, String name) {
+    public ListeningFuture<Void> addFriend(String id, String name) {
         return null;
     }
 
     @Override
-    public ListeningFuture<Void> removeUser(String id) {
+    public ListeningFuture<Void> removeFriend(String id) {
         return null;
     }
 
     @Override
-    public FacebookFriend getUser(String id) {
+    public FacebookFriend getFriend(String id) {
         return friends.get(id);
     }
 
@@ -271,7 +271,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     @Override
-    public Collection<Friend> getUsers() {
+    public Collection<Friend> getFriends() {
         synchronized (friends) {
             return new ArrayList<Friend>(friends.values());
         }

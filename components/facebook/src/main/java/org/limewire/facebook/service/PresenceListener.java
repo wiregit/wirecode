@@ -86,7 +86,7 @@ public class PresenceListener implements Runnable {
                         featureBroadcaster);
                 friend.addTransport(Address.class, addressTransport);
                 friend.addTransport(AuthToken.class, authTokenTransport);
-                if (connection.getUser(friend.getId()) == null) {
+                if (connection.getFriend(friend.getId()) == null) {
                     LOG.debugf("adding {0}", friend);
                     addPresence(friend);
                 } else {
@@ -120,13 +120,13 @@ public class PresenceListener implements Runnable {
             LOG.debugf("buddy list response: {0}", responseStr);
 
             Map<String, FacebookFriend> onlineFriends = deserializer.deserialize(responseStr);
-            for(Friend friend : connection.getUsers()) {
+            for(Friend friend : connection.getFriends()) {
                 if(!onlineFriends.containsKey(friend.getId())) {
-                    removePresence(connection.getUser(friend.getId()));
+                    removePresence(connection.getFriend(friend.getId()));
                 }
             }
             for(String friend : onlineFriends.keySet()) {
-                if(connection.getUser(friend) == null) {
+                if(connection.getFriend(friend) == null) {
                     addPresence(onlineFriends.get(friend));
                 }        
             }
@@ -163,7 +163,7 @@ public class PresenceListener implements Runnable {
         public void handleEvent(FriendConnectionEvent event) {
             switch(event.getType()) {
             case DISCONNECTED:
-                for(Friend user : event.getSource().getUsers()) {
+                for(Friend user : event.getSource().getFriends()) {
                     friendManager.removeKnownFriend(user, false);
                 }
                 break;

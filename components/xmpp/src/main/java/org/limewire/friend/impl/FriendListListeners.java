@@ -62,7 +62,7 @@ class FriendListListeners {
             public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case DISCONNECTED:
-                    for(Friend user : event.getSource().getUsers()) {
+                    for(Friend user : event.getSource().getFriends()) {
                         friendManager.removeKnownFriend(user, false);
                     }
                     break;

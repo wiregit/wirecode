@@ -406,7 +406,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
 
 
     @Override
-    public ListeningFuture<Void> addUser(final String id, final String name) {
+    public ListeningFuture<Void> addFriend(final String id, final String name) {
         return executorService.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -434,7 +434,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     }
 
     @Override
-    public ListeningFuture<Void> removeUser(final String id) {
+    public ListeningFuture<Void> removeFriend(final String id) {
         return executorService.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -466,7 +466,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     }
 
     @Override
-    public Friend getUser(String id) {
+    public Friend getFriend(String id) {
         id = org.jivesoftware.smack.util.StringUtils.parseBareAddress(id);
         synchronized (users) { 
             return users.get(id);
@@ -474,7 +474,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     }
 
     @Override
-    public Collection<Friend> getUsers() {
+    public Collection<Friend> getFriends() {
         synchronized (users) { 
             return new ArrayList<Friend>(users.values());
         }

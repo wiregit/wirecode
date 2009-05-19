@@ -59,7 +59,7 @@ public interface FriendConnection {
      * The ExecutionException will be to an XMPPException
      * if there is an error sending the xmpp message
      */
-    public ListeningFuture<Void> addUser(String id, String name);
+    public ListeningFuture<Void> addFriend(String id, String name);
     
     /**
      * Remove a user from the friend list
@@ -70,7 +70,7 @@ public interface FriendConnection {
      * The ExecutionException will be to an XMPPException
      * if there is an error sending the xmpp message
      */
-    public ListeningFuture<Void> removeUser(String id);
+    public ListeningFuture<Void> removeFriend(String id);
 
     /**
      * Returns the user belonging to <code>id</code>. <code>id</code>
@@ -78,11 +78,11 @@ public interface FriendConnection {
      * 
      * @return null if id is not registered on this connection
      */
-    public Friend getUser(String id);
+    public Friend getFriend(String id);
 
     /**
      * @return a copy of the current Collection of Users. Does NOT stay up to
      * date with changes.
      */
-    public Collection<Friend> getUsers();
+    public Collection<Friend> getFriends();
 }
