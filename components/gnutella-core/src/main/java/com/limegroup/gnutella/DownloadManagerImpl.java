@@ -947,20 +947,22 @@ public class DownloadManagerImpl implements DownloadManager, Service,
                     .getSaveFile());
         }
 
-        for (CoreDownloader current : getAllDownloaders()) {
-            if (ret.getSha1Urn().equals(current.getSha1Urn())) {
-                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
-                        .getIncompleteFile());
-            }
+        synchronized (activeAndWaiting) {
+            for (CoreDownloader current : activeAndWaiting) {
+                if (ret.getSha1Urn().equals(current.getSha1Urn())) {
+                    throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                            .getIncompleteFile());
+                }
 
-            if (current.conflictsSaveFile(ret.getSaveFile())) {
-                throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, ret
-                        .getSaveFile());
-            }
+                if (current.conflictsSaveFile(ret.getSaveFile())) {
+                    throw new SaveLocationException(LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, ret
+                            .getSaveFile());
+                }
 
-            if (current.conflictsSaveFile(ret.getIncompleteFile())) {
-                throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
-                        .getIncompleteFile());
+                if (current.conflictsSaveFile(ret.getIncompleteFile())) {
+                    throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
+                            .getIncompleteFile());
+                }
             }
         }
     }
