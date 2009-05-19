@@ -38,24 +38,54 @@ public class LibTorrentStatus extends Structure {
      */
     public float upload_rate;
 
+    /**
+     * The number of peers this torrent has.
+     */
     public int num_peers;
 
+    /**
+     * The number of uplaod peers this torrent has.
+     */
     public int num_uploads;
 
+    /**
+     * The number of seeds this torrent has.
+     */
     public int num_seeds;
 
+    /**
+     * The number of connections this torrent has.
+     */
     public int num_connections;
 
+    /**
+     * The state of this torrent, aligning with LibTorrentState.
+     */
     public int state;
 
+    /**
+     * The progress of this torretns download, from 0 to 1.0.
+     */
     public float progress;
 
+    /**
+     * boolean of whether this torrent is paused.
+     */
     public int paused;
 
+    /**
+     * boolean of whether this torrent is finished.
+     */
     public int finished;
 
+    /**
+     * boolean of whether this torrent is valid.
+     */
     public int valid;
 
+    /**
+     * String containing the error message for the torrent. Null/empty if there is no error.
+     */
     public String error;
 
     public LibTorrentStatus() {
