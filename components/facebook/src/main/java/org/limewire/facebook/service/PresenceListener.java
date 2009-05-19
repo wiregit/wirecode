@@ -46,13 +46,11 @@ public class PresenceListener implements Runnable {
     private final MutableFriendManager friendManager;
     
     private final ConnectionListener connectionListener = new ConnectionListener();
+
+    private LiveMessageAddressTransport addressTransport;
+
+    private LiveMessageAuthTokenTransport authTokenTransport;
     
-    private final FeatureListener featureListener = new FeatureListener();
-
-    private final LiveMessageAddressTransportFactory liveAddressTransportFactory;
-
-    private final LiveMessageAuthTokenTransportFactory liveAuthTokenTransportFactory;
-
     @AssistedInject
     PresenceListener(@Assisted FacebookFriendConnection connection,
                      MutableFriendManager friendManager,
@@ -63,16 +61,14 @@ public class PresenceListener implements Runnable {
         this.friendManager = friendManager;
         this.friendPresenceBroadcaster = friendPresenceBroadcaster;
         this.connection = connection;
-        this.liveAddressTransportFactory = liveAddressTransportFactory;
-        this.liveAuthTokenTransportFactory = liveAuthTokenTransportFactory;
         this.deserializer = buddyListResponseDeserializerFactory.create(connection);
+        this.addressTransport = liveAddressTransportFactory.create(connection);
+        authTokenTransport = liveAuthTokenTransportFactory.create(connection);
     }
     
     @Inject
-    void register(ListenerSupport<FriendConnectionEvent> listenerSupport,
-            ListenerSupport<FeatureEvent> featuresListenerSupport) {
+    void register(ListenerSupport<FriendConnectionEvent> listenerSupport) {
         listenerSupport.addListener(connectionListener);
-        featuresListenerSupport.addListener(featureListener);
     }
     
     /**
@@ -167,6 +163,9 @@ public class PresenceListener implements Runnable {
         FacebookFriendPresence oldPresences = friend.getFacebookPresence();
         if (oldPresences == null) {
             LOG.debugf("new friend is available: {0}", friend);
+            if (friend.hasLimeWireAppInstalled()) {
+                addTransports(presence);
+            }
             friend.setPresence(presence);
             friendManager.addAvailableFriend(friend);
             friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.ADDED));
@@ -175,6 +174,11 @@ public class PresenceListener implements Runnable {
         }
     } 
     
+    private void addTransports(FacebookFriendPresence presence) {
+        presence.addTransport(Address.class, addressTransport);
+        presence.addTransport(AuthToken.class, authTokenTransport);
+    }
+
     private void removePresence(FacebookFriend friend) {
         FacebookFriendPresence presence = friend.getFacebookPresence();
         if (presence != null) {
@@ -195,25 +199,6 @@ public class PresenceListener implements Runnable {
                 fetchAllFriends();
                 break;
             }
-        }
-    }
-    
-    private class FeatureListener implements EventListener<FeatureEvent> {
-        @Override
-        public void handleEvent(FeatureEvent event) {
-            FriendPresence presence = event.getSource();
-            if (event.getType() != Type.ADDED) {
-                return;
-            }
-            if (event.getData().getID().equals(LimewireFeature.ID)) {
-                return;
-            }
-            if (!(presence instanceof FacebookFriendPresence)) {
-                return;
-            }
-            LOG.debugf("adding transports to: {0}", presence);
-            presence.addTransport(Address.class, liveAddressTransportFactory.create(connection));
-            presence.addTransport(AuthToken.class, liveAuthTokenTransportFactory.create(connection));
         }
     }
 }

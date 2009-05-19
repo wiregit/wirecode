@@ -129,4 +129,8 @@ public class FacebookFriend extends AbstractFriend {
     public FacebookFriendPresence getFacebookPresence() {
         return presence.get();
     }
+
+    public boolean hasLimeWireAppInstalled() {
+        return hasLimeWireAppInstalled;
+    }
 }
