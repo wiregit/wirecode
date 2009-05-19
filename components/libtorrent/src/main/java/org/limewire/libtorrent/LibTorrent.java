@@ -7,7 +7,7 @@ import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
 /**
- * Interface definition for accession the C LibTorrentWrapper library. 
+ * Interface definition for accessing the C LibTorrentWrapper library. 
  */
 interface LibTorrent extends Library {
 
