@@ -166,6 +166,13 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             }
             this.torrentFile = torrentFileCopy;
         }
+        
+        for (File file : getIncompleteFiles()) {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+        }
     }
 
     /**
@@ -462,5 +469,12 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
                 fastResumeFile = new File(alert.data);
             }
         }
+    }
+
+    /**
+     * Returns true if the torrent is in an error state, false otherwise.
+     */
+    public boolean isError() {
+        return status.get() != null && status.get().isError();
     }
 }

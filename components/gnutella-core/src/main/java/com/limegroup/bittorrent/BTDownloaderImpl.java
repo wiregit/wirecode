@@ -79,12 +79,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void registerTorrent() {
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
-                if (TorrentEvent.COMPLETED == event && !complete.getAndSet(true)) {
+                if (TorrentEvent.COMPLETED == event && !complete.get()) {
                     FileUtils.deleteRecursive(torrent.getCompleteFile());
                     File completeDir = getSaveFile().getParentFile();
                     torrent.moveTorrent(completeDir);
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                     deleteIncompleteFiles();
+                    complete.set(true);
                 } else if (TorrentEvent.STOPPED == event) {
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                 }
@@ -213,6 +214,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         if (torrent.isCancelled()) {
             return DownloadState.ABORTED;
+        }
+        
+        if(torrent.isError()) {
+            return DownloadState.INVALID;
         }
 
         if (torrent.isFinished()) {

@@ -18,6 +18,7 @@ import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.ActivityCallbackAdapter;
 import com.limegroup.gnutella.LimeWireCoreModule;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
 
 /**
@@ -124,8 +125,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
         try {
             FileUtils.deleteRecursive(completeFile);
 
-            File incompleteFile1 = downloader.getIncompleteFile();
-            incompleteFile1.delete();
+            File incompleteFile = downloader.getIncompleteFile();
+            incompleteFile.delete();
 
             File completeFile1 = downloader.getCompleteFiles().get(0);
             completeFile1.delete();
@@ -227,8 +228,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
         try {
             FileUtils.deleteRecursive(completeFile);
 
-            File incompleteFile1 = downloader.getIncompleteFiles().get(0);
-            incompleteFile1.delete();
+            File incompleteFile = downloader.getIncompleteFile();
+            incompleteFile.delete();
 
             File completeFile1 = downloader.getCompleteFiles().get(0);
             completeFile1.delete();
@@ -278,35 +279,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
         }
     }
 
-    /**
-     * This test has a peer and a bad webseed address. The bad address should be
-     * ignored and the download will happen from the peer.
-     */
-    public void testSingleBadWebSeedSingleFilePeers() throws Exception {
-        File torrentFile = createFile("test-single-badwebseed-single-file-peer.torrent");
-
-        BTDownloaderImpl downloader = createBTDownloader(torrentFile);
-
-        File completeFile = downloader.getSaveFile();
-        try {
-            FileUtils.deleteRecursive(completeFile);
-
-            File incompleteFile1 = downloader.getIncompleteFiles().get(0);
-            incompleteFile1.delete();
-
-            File completeFile1 = downloader.getCompleteFiles().get(0);
-            completeFile1.delete();
-
-            downloader.startDownload();
-            finishDownload(downloader);
-
-            assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
-        } finally {
-            downloader.finish();
-            FileUtils.deleteRecursive(completeFile);
-        }
-    }
-
     private File createFile(String fileName) {
         String torrentfilePath = torrentDir.getAbsolutePath() + "/" + fileName;
         File torrentFile = new File(torrentfilePath);
@@ -325,18 +297,21 @@ public class BTDownloaderImplTest extends LimeTestCase {
         torrentManager.start();
         BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory
                 .createBTDownloader(torrentFile);
+        downloader.register();
         return downloader;
     }
 
     private void finishDownload(BTDownloader downloader) throws InterruptedException {
         int maxIterations = 100;
         int index = 0;
-        while (!downloader.isCompleted()) {
+        while (!downloader.isCompleted() && downloader.getState() != DownloadState.INVALID) {
             if (index++ > maxIterations) {
                 AssertComparisons.fail("Failure downloading the file. Taking too long.");
             }
             Thread.sleep(1000);
         }
+        
+        assertEquals(DownloadState.COMPLETE, downloader.getState());
 
         // TODO use countdown latch.
     }
