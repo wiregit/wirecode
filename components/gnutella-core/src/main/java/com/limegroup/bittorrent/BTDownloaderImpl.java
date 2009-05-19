@@ -214,8 +214,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         return file;
 
     }
-
-    boolean stopped = false;
     
     @Override
     public DownloadState getState() {

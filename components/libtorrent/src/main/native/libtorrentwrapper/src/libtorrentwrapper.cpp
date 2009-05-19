@@ -459,6 +459,16 @@ extern "C" EXTERN_RET signal_fast_resume_data_request(const char* id) {
 	EXTERN_BOTTOM;
 }
 
+extern "C" EXTERN_RET clear_error_and_retry(const char* id) {
+	EXTERN_TOP;
+
+		libtorrent::torrent_handle h = findTorrentHandle(id);
+		h.clear_error();
+
+	EXTERN_BOTTOM;
+}
+
+
 extern "C" EXTERN_RET get_num_peers(const char* id, int *num_peers) {
 	EXTERN_TOP;
 

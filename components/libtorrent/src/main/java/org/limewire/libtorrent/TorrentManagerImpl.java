@@ -143,8 +143,8 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     private void updateStatus(Torrent torrent) {
+        lock.readLock().lock();
         try {
-            lock.readLock().lock();
             LibTorrentStatus torrentStatus = getStatus(torrent);
             torrent.updateStatus(torrentStatus);
         } finally {
@@ -159,8 +159,8 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void moveTorrent(Torrent torrent, File directory) {
+        lock.writeLock().lock();
         try {
-            lock.writeLock().lock();
             String sha1 = torrent.getSha1();
             libTorrent.pause_torrent(sha1);
             libTorrent.move_torrent(sha1, directory.getAbsolutePath());
