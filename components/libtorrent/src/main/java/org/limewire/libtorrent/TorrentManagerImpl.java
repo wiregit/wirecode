@@ -146,9 +146,16 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void moveTorrent(Torrent torrent, File directory) {
-        String sha1 = torrent.getSha1();
-        libTorrent.move_torrent(sha1, directory.getAbsolutePath());
-        updateStatus(torrent);
+        try {
+            lock.writeLock().lock();
+            String sha1 = torrent.getSha1();
+            libTorrent.pause_torrent(sha1);
+            libTorrent.move_torrent(sha1, directory.getAbsolutePath());
+            libTorrent.resume_torrent(sha1);
+            updateStatus(torrent);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     @Override

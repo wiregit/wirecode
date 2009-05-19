@@ -166,7 +166,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             }
             this.torrentFile = torrentFileCopy;
         }
-        
+
         for (File file : getIncompleteFiles()) {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
@@ -219,6 +219,18 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
      */
     public void moveTorrent(File directory) {
         torrentManager.moveTorrent(this, directory);
+        int count = 0;
+        //TODO find a better way to do this.
+        while (!getCompleteFile().exists()) {
+            if (count++ > 50) {
+                break;
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
     }
 
     /**
@@ -469,12 +481,5 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
                 fastResumeFile = new File(alert.data);
             }
         }
-    }
-
-    /**
-     * Returns true if the torrent is in an error state, false otherwise.
-     */
-    public boolean isError() {
-        return status.get() != null && status.get().isError();
     }
 }

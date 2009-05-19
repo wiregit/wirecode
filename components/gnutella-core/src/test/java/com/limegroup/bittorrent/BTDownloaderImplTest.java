@@ -107,8 +107,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
             assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
         } finally {
-            downloader.finish();
-            FileUtils.deleteRecursive(completeFile);
+            cleanup(downloader, completeFile);
         }
     }
 
@@ -140,8 +139,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
             assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
             assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2, 411090);
         } finally {
-            downloader.finish();
-            FileUtils.deleteRecursive(completeFile);
+            cleanup(downloader, completeFile);
         }
     }
 
@@ -160,8 +158,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
             finishDownload(downloader);
             assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
         } finally {
-            downloader.finish();
-            FileUtils.deleteRecursive(completeFile);
+            cleanup(downloader, completeFile);
         }
     }
 
@@ -182,8 +179,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
             assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
         } finally {
-            downloader.finish();
-            FileUtils.deleteRecursive(completeFile);
+            cleanup(downloader, completeFile);
         }
     }
 
@@ -214,8 +210,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
             assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
             assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2, 411090);
         } finally {
-            downloader.finish();
-            FileUtils.deleteRecursive(completeFile);
+            cleanup(downloader, completeFile);
         }
     }
 
@@ -246,8 +241,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
             assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
             assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2, 411090);
         } finally {
-            downloader.finish();
-            FileUtils.deleteRecursive(completeFile);
+            cleanup(downloader, completeFile);
         }
     }
 
@@ -274,8 +268,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
             assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
         } finally {
-            downloader.finish();
-            FileUtils.deleteRecursive(completeFile);
+            cleanup(downloader, completeFile);
         }
     }
 
@@ -326,5 +319,11 @@ public class BTDownloaderImplTest extends LimeTestCase {
         AssertComparisons.assertEquals(fileSize, file.length());
         String testmd5 = FileUtils.getMD5(file);
         AssertComparisons.assertEquals(md5, testmd5);
+    }
+    
+    private void cleanup(BTDownloaderImpl downloader, File completeFile) {
+        downloader.finish();
+        downloader.getTorrent().stop();
+        FileUtils.deleteRecursive(completeFile);
     }
 }

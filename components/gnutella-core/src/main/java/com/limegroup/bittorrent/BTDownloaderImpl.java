@@ -50,6 +50,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final BTUploaderFactory btUploaderFactory;
 
+    private AtomicBoolean finishing = new AtomicBoolean(false);
+    
     private AtomicBoolean complete = new AtomicBoolean(false);
 
     private final Provider<TorrentManager> torrentManager;
@@ -80,6 +82,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
                 if (TorrentEvent.COMPLETED == event && !complete.get()) {
+                    finishing.set(true);
                     FileUtils.deleteRecursive(torrent.getCompleteFile());
                     File completeDir = getSaveFile().getParentFile();
                     torrent.moveTorrent(completeDir);
@@ -211,29 +214,30 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public DownloadState getState() {
-
+        
+        LibTorrentStatus status = torrent.getStatus();
+        if (!torrent.isStarted() || status == null) {
+            return DownloadState.QUEUED;
+        }
+        
+        LibTorrentState state = status.getState();
+        
         if (torrent.isCancelled()) {
             return DownloadState.ABORTED;
         }
         
-        if(torrent.isError()) {
+        if(status.isError()) {
             return DownloadState.INVALID;
         }
 
         if (torrent.isFinished()) {
             return DownloadState.COMPLETE;
         }
-
-        LibTorrentStatus status = torrent.getStatus();
-        if (!torrent.isStarted() || status == null) {
-            return DownloadState.QUEUED;
+        
+        if(finishing.get()) {
+            return DownloadState.SAVING;
         }
 
-        if (status.isError()) {
-            return DownloadState.INVALID;
-        }
-
-        LibTorrentState state = status.getState();
         return convertState(state);
     }
 
@@ -667,5 +671,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public File getTorrentFile() {
         return torrent.getTorrentFile();
+    }
+    
+    public Torrent getTorrent() {
+        return torrent;
     }
 }
