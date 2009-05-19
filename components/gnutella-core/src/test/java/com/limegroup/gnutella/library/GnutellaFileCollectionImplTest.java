@@ -260,7 +260,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
         assertFalse(fileList.contains(notShared));
         
         assertTrue(managedList.getLibraryData().isFileInCollection(shared, LibraryFileData.GNUTELLA_COLLECTION_ID));
-        assertFalse(managedList.getLibraryData().isFileInCollection(shared, LibraryFileData.GNUTELLA_COLLECTION_ID));
+        assertFalse(managedList.getLibraryData().isFileInCollection(sessionShared, LibraryFileData.GNUTELLA_COLLECTION_ID));
 
         // reload, session share disappears.
         assertLoads(managedList);

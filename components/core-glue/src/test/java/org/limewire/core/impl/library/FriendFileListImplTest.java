@@ -29,20 +29,22 @@ public class FriendFileListImplTest extends BaseTestCase {
 
     private CoreLocalFileItemFactory coreLocalFileItemFactory = null;
 
-    private FileCollectionManager collectionManager = null;
-    private FileViewManager viewManager = null;
+    private FileCollectionManager fileCollectionManager = null;
+    private FileViewManager fileViewManager = null;
 
     private CombinedShareList combinedShareList = null;
 
     private FriendFileListImpl friendFileListImpl = null;
 
-    private SharedFileCollection testFileList = null;
+    private SharedFileCollection testFileCollection = null;
     private FileView testFileView = null;
 
     private EventList<LocalFileItem> subList = null;
 
     private AtomicReference<EventListener<FileViewChangeEvent>> fileListChangeListener = null;
 
+    private final String name = "name";
+    
     public FriendFileListImplTest(String name) {
         super(name);
         
@@ -58,8 +60,8 @@ public class FriendFileListImplTest extends BaseTestCase {
         };
 
         coreLocalFileItemFactory = context.mock(CoreLocalFileItemFactory.class);
-        collectionManager = context.mock(FileCollectionManager.class);
-        viewManager = context.mock(FileViewManager.class);
+        fileCollectionManager = context.mock(FileCollectionManager.class);
+        fileViewManager = context.mock(FileViewManager.class);
         combinedShareList = context.mock(CombinedShareList.class);
 
         subList = new BasicEventList<LocalFileItem>();
@@ -70,18 +72,17 @@ public class FriendFileListImplTest extends BaseTestCase {
                 one(combinedShareList).addMemberList(subList);
             }
         });
-        final String name = "name";
-        friendFileListImpl = new FriendFileListImpl(coreLocalFileItemFactory, collectionManager, viewManager, name,
+        friendFileListImpl = new FriendFileListImpl(coreLocalFileItemFactory, fileCollectionManager, fileViewManager, name,
                 combinedShareList);
 
-        testFileList = context.mock(SharedFileCollection.class);
+        testFileCollection = context.mock(SharedFileCollection.class);
         testFileView = context.mock(FileView.class);
 
         fileListChangeListener = new AtomicReference<EventListener<FileViewChangeEvent>>();
 
         context.checking(new Expectations() {
             {
-                one(viewManager).getFileViewForId(name);
+                one(fileViewManager).getFileViewForId(name);
                 will(returnValue(testFileView));
                 one(testFileView).addListener(with(any(EventListener.class)));
                 will(new AssignParameterAction<EventListener<FileViewChangeEvent>>(
@@ -101,7 +102,7 @@ public class FriendFileListImplTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 one(combinedShareList).removeMemberList(subList);
-                one(testFileList).removeListener(fileListChangeListener.get());
+                one(testFileView).removeListener(fileListChangeListener.get());
             }
         });
         friendFileListImpl.dispose();
@@ -109,14 +110,24 @@ public class FriendFileListImplTest extends BaseTestCase {
     }
 
     public void testGetCoreFileList() {
-        assertEquals(testFileList, friendFileListImpl.getMutableCollection());
+        context.checking(new Expectations() {
+            {
+                one(fileCollectionManager).getOrCreateCollectionByName(name);
+                will(returnValue(testFileCollection));
+                one(testFileCollection).addFriend(name);
+            }
+        });
+        assertEquals(testFileCollection, friendFileListImpl.getMutableCollection());
         context.assertIsSatisfied();
     }
 
     public void testClearCategory() {
         context.checking(new Expectations() {
             {
-                one(testFileList).clearCategory(Category.AUDIO);
+                one(fileCollectionManager).getOrCreateCollectionByName(name);
+                will(returnValue(testFileCollection));
+                one(testFileCollection).addFriend(name);
+                one(testFileCollection).clearCategory(Category.AUDIO);
             }
         });
         friendFileListImpl.clearCategory(Category.AUDIO);
@@ -126,7 +137,10 @@ public class FriendFileListImplTest extends BaseTestCase {
     public void testAddSnapshotCategory() {
         context.checking(new Expectations() {
             {
-                one(testFileList).addSnapshotCategory(Category.AUDIO);
+                one(fileCollectionManager).getOrCreateCollectionByName(name);
+                will(returnValue(testFileCollection));
+                one(testFileCollection).addFriend(name);
+                one(testFileCollection).addSnapshotCategory(Category.AUDIO);
             }
         });
         friendFileListImpl.addSnapshotCategory(Category.AUDIO);
@@ -136,14 +150,17 @@ public class FriendFileListImplTest extends BaseTestCase {
     public void testIsCategoryAutomaticallyAdded() {
         context.checking(new Expectations() {
             {
-                one(testFileList).isAddNewAudioAlways();
+                one(fileCollectionManager).getOrCreateCollectionByName(name);
+                will(returnValue(testFileCollection));
+                one(testFileCollection).addFriend(name);
+                one(testFileCollection).isAddNewAudioAlways();
                 will(returnValue(true));
             }
         });
         assertTrue(friendFileListImpl.isCategoryAutomaticallyAdded(Category.AUDIO));
         context.checking(new Expectations() {
             {
-                one(testFileList).isAddNewAudioAlways();
+                one(testFileCollection).isAddNewAudioAlways();
                 will(returnValue(false));
             }
         });
@@ -151,14 +168,14 @@ public class FriendFileListImplTest extends BaseTestCase {
 
         context.checking(new Expectations() {
             {
-                one(testFileList).isAddNewImageAlways();
+                one(testFileCollection).isAddNewImageAlways();
                 will(returnValue(true));
             }
         });
         assertTrue(friendFileListImpl.isCategoryAutomaticallyAdded(Category.IMAGE));
         context.checking(new Expectations() {
             {
-                one(testFileList).isAddNewImageAlways();
+                one(testFileCollection).isAddNewImageAlways();
                 will(returnValue(false));
             }
         });
@@ -166,14 +183,14 @@ public class FriendFileListImplTest extends BaseTestCase {
 
         context.checking(new Expectations() {
             {
-                one(testFileList).isAddNewVideoAlways();
+                one(testFileCollection).isAddNewVideoAlways();
                 will(returnValue(true));
             }
         });
         assertTrue(friendFileListImpl.isCategoryAutomaticallyAdded(Category.VIDEO));
         context.checking(new Expectations() {
             {
-                one(testFileList).isAddNewVideoAlways();
+                one(testFileCollection).isAddNewVideoAlways();
                 will(returnValue(false));
             }
         });
@@ -184,39 +201,42 @@ public class FriendFileListImplTest extends BaseTestCase {
     public void testSetCategoryAutomaticallyAdded() {
         context.checking(new Expectations() {
             {
-                one(testFileList).setAddNewAudioAlways(true);
+                one(fileCollectionManager).getOrCreateCollectionByName(name);
+                will(returnValue(testFileCollection));
+                one(testFileCollection).addFriend(name);
+                one(testFileCollection).setAddNewAudioAlways(true);
             }
         });
         friendFileListImpl.setCategoryAutomaticallyAdded(Category.AUDIO, true);
         context.checking(new Expectations() {
             {
-                one(testFileList).setAddNewAudioAlways(false);
+                one(testFileCollection).setAddNewAudioAlways(false);
             }
         });
         friendFileListImpl.setCategoryAutomaticallyAdded(Category.AUDIO, false);
 
         context.checking(new Expectations() {
             {
-                one(testFileList).setAddNewImageAlways(true);
+                one(testFileCollection).setAddNewImageAlways(true);
             }
         });
         friendFileListImpl.setCategoryAutomaticallyAdded(Category.IMAGE, true);
         context.checking(new Expectations() {
             {
-                one(testFileList).setAddNewImageAlways(false);
+                one(testFileCollection).setAddNewImageAlways(false);
             }
         });
         friendFileListImpl.setCategoryAutomaticallyAdded(Category.IMAGE, false);
 
         context.checking(new Expectations() {
             {
-                one(testFileList).setAddNewVideoAlways(true);
+                one(testFileCollection).setAddNewVideoAlways(true);
             }
         });
         friendFileListImpl.setCategoryAutomaticallyAdded(Category.VIDEO, true);
         context.checking(new Expectations() {
             {
-                one(testFileList).setAddNewVideoAlways(false);
+                one(testFileCollection).setAddNewVideoAlways(false);
             }
         });
         friendFileListImpl.setCategoryAutomaticallyAdded(Category.VIDEO, false);
@@ -228,7 +248,10 @@ public class FriendFileListImplTest extends BaseTestCase {
         final File file1 = new File("file1");
         context.checking(new Expectations() {
             {
-                one(testFileList).add(file1);
+                one(fileCollectionManager).getOrCreateCollectionByName(name);
+                will(returnValue(testFileCollection));
+                one(testFileCollection).addFriend(name);
+                one(testFileCollection).add(file1);
             }
         });
         friendFileListImpl.addFile(file1);
@@ -239,7 +262,20 @@ public class FriendFileListImplTest extends BaseTestCase {
         final File file1 = new File("file1");
         context.checking(new Expectations() {
             {
-                one(testFileList).remove(file1);
+                one(testFileView).contains(file1);
+                will(returnValue(false));
+            }
+        });
+        friendFileListImpl.removeFile(file1);
+        
+        context.checking(new Expectations() {
+            {   
+                one(testFileView).contains(file1);
+                will(returnValue(true));
+                one(fileCollectionManager).getOrCreateCollectionByName(name);
+                will(returnValue(testFileCollection));
+                one(testFileCollection).addFriend(name);
+                one(testFileCollection).remove(file1);
             }
         });
         friendFileListImpl.removeFile(file1);
@@ -250,7 +286,10 @@ public class FriendFileListImplTest extends BaseTestCase {
         final File folder1 = new File("folder1");
         context.checking(new Expectations() {
             {
-                one(testFileList).addFolder(folder1);
+                one(fileCollectionManager).getOrCreateCollectionByName(name);
+                will(returnValue(testFileCollection));
+                one(testFileCollection).addFriend(name);
+                one(testFileCollection).addFolder(folder1);
             }
         });
         friendFileListImpl.addFolder(folder1);
@@ -261,7 +300,7 @@ public class FriendFileListImplTest extends BaseTestCase {
         final File file1 = new File("file1");
         context.checking(new Expectations() {
             {
-                one(testFileList).contains(file1);
+                one(testFileView).contains(file1);
                 will(returnValue(true));
             }
         });
@@ -270,7 +309,7 @@ public class FriendFileListImplTest extends BaseTestCase {
         final File file2 = new File("file2");
         context.checking(new Expectations() {
             {
-                one(testFileList).contains(file2);
+                one(testFileView).contains(file2);
                 will(returnValue(false));
             }
         });
