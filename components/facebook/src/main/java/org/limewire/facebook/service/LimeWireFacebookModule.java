@@ -5,7 +5,7 @@ import org.limewire.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryProvider;
 import com.google.inject.name.Names;
 
-public class LimewireFacebookModule extends AbstractModule {
+public class LimeWireFacebookModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(String.class).annotatedWith(Names.named("facebookApiKey")).toInstance("9d8c6048e08ffe11d94e9cf3880f6757");

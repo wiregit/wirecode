@@ -15,7 +15,7 @@ import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.LimeWireCoreSettingsModule;
-import org.limewire.facebook.service.LimewireFacebookModule;
+import org.limewire.facebook.service.LimeWireFacebookModule;
 import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
@@ -228,7 +228,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireDownloadModule());
         binder().install(new LimeWireHashTreeModule());        
         binder().install(new LimeWireDHTModule());
-        binder().install(new LimewireFacebookModule());
+        binder().install(new LimeWireFacebookModule());
         binder().install(new LimeWireHttpModule());
         binder().install(new LimeWireSearchModule());
         binder().install(new LimeWireStatisticsModule());

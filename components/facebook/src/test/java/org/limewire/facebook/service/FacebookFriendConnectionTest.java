@@ -40,7 +40,7 @@ public class FacebookFriendConnectionTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        injector = Guice.createInjector(Stage.PRODUCTION, new LimewireFacebookModule(),
+        injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireFacebookModule(),
                 new AbstractModule() {
                     @Override
                     protected void configure() {
