@@ -81,7 +81,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * downloader, based on updates to the torrent.
      */
     @Inject
-    public void registerTorrent() {
+    public void registerTorrentListener() {
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
                 if (TorrentEvent.COMPLETED == event && !complete.get()) {
