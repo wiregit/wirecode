@@ -469,51 +469,36 @@ extern "C" EXTERN_RET get_num_peers(const char* id, int *num_peers) {
 		if (s.state == libtorrent::torrent_status::seeding)
 			return 0;
 
-		std::vector<tcp::endpoint> peers;
+		std::vector<libtorrent::peer_list_entry> peers;
 
 		try {
-			h.get_peer_ips(peers);
+			h.get_full_peer_list(peers);
 		} catch (libtorrent::invalid_handle e) {
 			return 0;
 		} catch (std::exception e) {
 			return 0;
 		}
 
-
 		*num_peers = peers.size();
 		
 	EXTERN_BOTTOM;
 }
 
-/*  libtorrent - torrent.cpp
-	void torrent::get_peer_ips(std::vector<tcp::endpoint>& v)
-	{
-		v.clear();
-		peer_iterator i = begin();
-
-		while ( i != end() )
-		{	peer_connection* peer = *i;
-			v.push_back(peer->remote());
-			++i;
-		}
-	}
-	*/
-/*
 extern "C" EXTERN_RET get_peers(const char* id, int buffer_len, char* data) {
 	EXTERN_TOP;
 
 		libtorrent::torrent_handle h = findTorrentHandle(id);
 
-		std::vector<tcp::endpoint> peers;
-		h.get_peer_ips(peers);
+		std::vector<libtorrent::peer_list_entry> peers;
+		h.get_full_peer_list(peers);
 
 		int pos = 0;
 
-		std::vector<tcp::endpoint>::iterator iter = peers.begin();
+		std::vector<libtorrent::peer_list_entry>::iterator iter = peers.begin();
 
 		while (iter != peers.end()) {
 
-			std::string address = iter->address().to_string();
+			std::string address = iter->ip.address().to_string();
 			int len = address.length();
 
 #ifdef LIME_DEBUG
@@ -535,7 +520,6 @@ extern "C" EXTERN_RET get_peers(const char* id, int buffer_len, char* data) {
 
 	EXTERN_BOTTOM;
 }
-*/
 
 extern "C" EXTERN_RET free_torrent_status(wrapper_torrent_status* info) {
 	EXTERN_TOP;

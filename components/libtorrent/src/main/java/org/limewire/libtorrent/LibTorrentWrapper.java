@@ -1,5 +1,6 @@
 package org.limewire.libtorrent;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.OSUtils;
 
+import com.sun.jna.Memory;
 import com.sun.jna.Native;
 
 /**
@@ -96,11 +98,6 @@ public class LibTorrentWrapper {
     }
 
     public List<String> get_peers(String id) {
-
-        return Collections.emptyList();
-        
-        // TODO:
-        /*
         Memory numPeersMemory = new Memory(4);
         int numUnfilteredPeers = numPeersMemory.getInt(0);
         
@@ -122,7 +119,6 @@ public class LibTorrentWrapper {
         List<String> peers = Arrays.asList(memory.getString(0).split(";"));
 
         return peers;
-        */
     }
 
     public void signal_fast_resume_data_request(String id) {
