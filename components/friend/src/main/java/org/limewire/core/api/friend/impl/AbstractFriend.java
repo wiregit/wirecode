@@ -4,7 +4,6 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
-import org.limewire.xmpp.api.client.PresenceEvent;
 
 public abstract class AbstractFriend implements Friend {
     

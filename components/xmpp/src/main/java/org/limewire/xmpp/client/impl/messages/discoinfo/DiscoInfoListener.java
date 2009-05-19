@@ -13,10 +13,10 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
+import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.core.api.friend.client.FriendConnection;
 

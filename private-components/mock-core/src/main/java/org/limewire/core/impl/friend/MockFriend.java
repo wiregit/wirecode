@@ -8,7 +8,7 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.xmpp.api.client.PresenceEvent;
+import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.listener.EventListener;
 
 public class MockFriend implements Friend {

@@ -8,8 +8,8 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 
 public class RosterListenerMock implements EventListener<RosterEvent> {

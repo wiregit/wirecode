@@ -14,13 +14,13 @@ import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.impl.AbstractFriendPresence;
+import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.xmpp.api.client.PresenceEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

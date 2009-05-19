@@ -1,4 +1,4 @@
-package org.limewire.xmpp.api.client;
+package org.limewire.core.api.friend.impl;
 
 import org.limewire.listener.DefaultDataTypeEvent;
 import org.limewire.core.api.friend.FriendPresence;

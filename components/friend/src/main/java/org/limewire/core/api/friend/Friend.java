@@ -2,11 +2,11 @@ package org.limewire.core.api.friend;
 
 import java.util.Map;
 
-import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.IncomingChatListener;
+import org.limewire.core.api.friend.impl.PresenceEvent;
 
 /** 
  * A Friend.

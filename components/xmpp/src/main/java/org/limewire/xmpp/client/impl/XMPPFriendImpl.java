@@ -25,11 +25,11 @@ import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.impl.AbstractFriend;
+import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.StringUtils;
-import org.limewire.xmpp.api.client.PresenceEvent;
 
 
 public class XMPPFriendImpl extends AbstractFriend {
