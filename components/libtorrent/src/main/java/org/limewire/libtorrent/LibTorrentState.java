@@ -1,7 +1,7 @@
 package org.limewire.libtorrent;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents the torrent_status.state_t enum from the native libtorrent code.
@@ -15,12 +15,14 @@ public enum LibTorrentState {
     QUEUED_FOR_CHECKING(0), CHECKING_FILES(1), DOWNLOADING_METADATA(2),
     DOWNLOADING(3), FINISHED(4), SEEDING(5), ALLOCATING(6);
 
-    private static final Map<Integer, LibTorrentState> map = new ConcurrentHashMap<Integer, LibTorrentState>();
+    private static final Map<Integer, LibTorrentState> map;
 
     static {
+        Map<Integer, LibTorrentState> builder = new HashMap<Integer, LibTorrentState>();
         for ( LibTorrentState state : LibTorrentState.values() ) {
-            map.put(state.id, state);
+            builder.put(state.id, state);
         }
+        map = builder;
     }
 
     private final int id;
