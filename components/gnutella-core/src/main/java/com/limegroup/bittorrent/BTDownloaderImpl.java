@@ -3,6 +3,7 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,8 +12,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
+import org.limewire.io.IpPortImpl;
 import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
@@ -412,12 +415,16 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public List<Address> getSourcesAsAddresses() {
 
-        // TODO: use torrent.getPeers() ... currently a strange internal
-        // libtorrent error retrieving peers.
-
-        // torrent.getPeers();
-
         List<Address> list = new LinkedList<Address>();
+        
+        for ( String ip : torrent.getPeers() ) {
+            try {
+                list.add(new ConnectableImpl(new IpPortImpl(ip), false));
+            } catch (UnknownHostException e) {
+                // Discard invalid host
+            }
+        }
+
         return list;
     }
 

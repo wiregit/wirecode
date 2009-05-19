@@ -58,7 +58,7 @@ interface LibTorrent extends Library {
     /**
      * Retrieves the peers for the torrent with the given sha1
      */
-    public WrapperStatus get_peers(String id, Memory memory);
+    public WrapperStatus get_peers(String id, int len, Memory memory);
 
     /**
      * Tells the session to save the fast resume data for the torrent with the

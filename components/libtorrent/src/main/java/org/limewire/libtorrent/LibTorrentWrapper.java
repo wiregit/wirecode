@@ -1,6 +1,5 @@
 package org.limewire.libtorrent;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,7 +8,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.OSUtils;
 
-import com.sun.jna.Memory;
 import com.sun.jna.Native;
 
 /**
@@ -99,13 +97,17 @@ public class LibTorrentWrapper {
 
     public List<String> get_peers(String id) {
 
-        Memory numPeersMemory = new Memory(8);
-
-        LOG.debugf("before get_num_peers: {0}", id);
-        libTorrent.get_num_peers(id, numPeersMemory);
-        LOG.debugf("before get_num_peers: {0}", id);
-
+        return Collections.emptyList();
+        
+        // TODO:
+        /*
+        Memory numPeersMemory = new Memory(4);
         int numUnfilteredPeers = numPeersMemory.getInt(0);
+        
+        LOG.debugf("before get_num_peers: {0}", id);
+        catchWrapperException(libTorrent.get_num_peers(id, numPeersMemory));
+        numUnfilteredPeers = numPeersMemory.getInt(0);
+        LOG.debugf("after get_num_peers: {0} - {1}", id, numUnfilteredPeers);
 
         if (numUnfilteredPeers == 0) {
             return Collections.emptyList();
@@ -114,12 +116,13 @@ public class LibTorrentWrapper {
         Memory memory = new Memory(numUnfilteredPeers * 16);
 
         LOG.debugf("before get_peers: {0}", id);
-        libTorrent.get_peers(id, memory);
+        catchWrapperException(libTorrent.get_peers(id, (int)memory.getSize(), memory));
         LOG.debugf("after get_peers: {0}", id);
-
+        
         List<String> peers = Arrays.asList(memory.getString(0).split(";"));
 
         return peers;
+        */
     }
 
     public void signal_fast_resume_data_request(String id) {
