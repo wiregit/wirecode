@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader.serial;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,7 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
 
     @Override
     public DownloaderType getDownloadType() {
-        return (DownloaderType) serialObjects.get("downloadType");
+        return DownloaderType.BTDOWNLOADER;
     }
 
     @Override
@@ -52,7 +53,16 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
 
     @Override
     public URN getSha1Urn() {
-        return (URN) serialObjects.get("sha1Urn");
+        URN sha1URN = null;
+        String sha1URNString = (String) serialObjects.get("sha1Urn");
+        if (sha1URNString != null) {
+            try {
+                sha1URN = URN.createSHA1Urn(sha1URNString);
+            } catch (IOException e) {
+                // invalid urn
+            }
+        }
+        return sha1URN;
     }
 
     @Override
@@ -75,7 +85,7 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
     public String getTorrentPath() {
         return (String) serialObjects.get("torrentPath");
     }
-    
+
     @Override
     public void setAttributes(Map<String, Object> attributes) {
         serialObjects.put("attributes", attributes);
@@ -84,11 +94,6 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
     @Override
     public void setDefaultFileName(String defaultFileName) {
         serialObjects.put("defaultFileName", defaultFileName);
-    }
-
-    @Override
-    public void setDownloadType(DownloaderType downloaderType) {
-        serialObjects.put("downloadType", downloaderType);
     }
 
     @Override
@@ -108,7 +113,8 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
 
     @Override
     public void setSha1Urn(URN sha1Urn) {
-        serialObjects.put("sha1Urn", sha1Urn);
+        String sha1URNString = sha1Urn != null ? sha1Urn.toString() : null;
+        serialObjects.put("sha1Urn", sha1URNString);
     }
 
     @Override
@@ -129,5 +135,11 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
     @Override
     public void setTorrentPath(String torrentPath) {
         serialObjects.put("torrentPath", torrentPath);
+    }
+
+    @Override
+    public void setDownloadType(DownloaderType downloaderType) {
+        // not needed getDownloadType is overridden to always return
+        // BTDownloader.
     }
 }
