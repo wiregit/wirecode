@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
@@ -60,7 +61,11 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                     JSONArray features = message.getJSONArray("features");     
                     String from = message.getString("from");
                     FacebookFriend friend = connection.getFriend(from);
-                    if(friend != null) {    
+                    if(friend == null) {
+                        return;
+                    }
+                    FriendPresence presence = friend.getFacebookPresence();
+                    if (presence != null) {
                         for(int i = 0; i < features.length(); i++) {
                             String feature = features.getString(i);
                             FeatureInitializer initializer = featureRegistry.get(new URI(feature));
@@ -69,6 +74,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                             }
                         }
                     } else {
+                        LOG.debugf("pending features {0} from {1}", features, from);
                         pendingPresences.put(from, features);
                     }
                 } else if(messageType.equals(REQUEST_TYPE)) {                
