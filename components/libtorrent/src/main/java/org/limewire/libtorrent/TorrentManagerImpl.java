@@ -251,7 +251,7 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public boolean isDownloading(File torrentFile) {
+    public boolean isManagedTorrent(File torrentFile) {
         if (torrentFile != null) {
             synchronized (torrents) {
                 for (Torrent torrent : torrents.values()) {
@@ -265,7 +265,7 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public boolean isDownloading(String sha1) {
+    public boolean isManagedTorrent(String sha1) {
         return torrents.containsKey(sha1);
     }
 

@@ -591,7 +591,7 @@ public class IncompleteFileManager  {
                 String name = incompleteFile.getName();
                 
                 if(isTorrentFile(incompleteFile)) {
-                    return !torrentManager.get().isDownloading(incompleteFile);
+                    return !torrentManager.get().isManagedTorrent(incompleteFile);
                 } else {
                     if(!name.startsWith(INCOMPLETE_PREFIX)) {
                         return false;

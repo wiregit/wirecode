@@ -938,10 +938,10 @@ public class DownloadManagerImpl implements DownloadManager, Service,
      */
     public void checkActiveAndWaiting(BTDownloader ret) throws SaveLocationException {
 
-        if (torrentManager.get().isDownloading(ret.getTorrentFile())) {
+        if (torrentManager.get().isManagedTorrent(ret.getTorrentFile())) {
             throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
                     .getSaveFile());
-        } else if (torrentManager.get().isDownloading(
+        } else if (torrentManager.get().isManagedTorrent(
                 StringUtils.toHexString(ret.getSha1Urn().getBytes()))) {
             throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, ret
                     .getSaveFile());

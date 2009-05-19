@@ -61,15 +61,15 @@ public interface TorrentManager extends Service {
 
     /**
      * Returns true if the torrent manager currently has a torrent registered
-     * that is downloading from the specified torrent file.
+     * from the specified torrent file.
      */
-    public boolean isDownloading(File torrentFile);
+    public boolean isManagedTorrent(File torrentFile);
 
     /**
-     * Returns true if the torrent manager is currently downloading a torrent
+     * Returns true if the torrent manager currently has a torrent
      * with the specified sha1.
      */
-    public boolean isDownloading(String sha1);
+    public boolean isManagedTorrent(String sha1);
 
     /**
      * Returns the Executor used by the torrent code. 
