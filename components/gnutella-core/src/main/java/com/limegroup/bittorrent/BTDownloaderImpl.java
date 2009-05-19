@@ -53,9 +53,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final BTUploaderFactory btUploaderFactory;
 
-    private AtomicBoolean finishing = new AtomicBoolean(false);
+    private final AtomicBoolean finishing = new AtomicBoolean(false);
     
-    private AtomicBoolean complete = new AtomicBoolean(false);
+    private final AtomicBoolean complete = new AtomicBoolean(false);
 
     private final Provider<TorrentManager> torrentManager;
 
@@ -168,6 +168,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public boolean resume() {
+        //TODO can update logic to clear errors in the torrent
+        //that way torrents can have a try again link like other downloads.
         torrent.resume();
         return true;
     }
