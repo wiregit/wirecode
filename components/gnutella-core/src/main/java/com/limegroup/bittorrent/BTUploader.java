@@ -31,7 +31,7 @@ public class BTUploader implements Uploader {
 
     private final Torrent torrent;
 
-	private final AtomicBoolean cancelled = new AtomicBoolean(false);
+    private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     private volatile URN urn = null;
 
@@ -50,7 +50,7 @@ public class BTUploader implements Uploader {
 
     @Override
     public void stop() {
-        //TODO refactor to prompt from the gui
+        // TODO refactor to prompt from the gui
         cancelled.set(activityCallback.promptTorrentUploadCancel(torrent));
         if (cancelled.get()) {
             new ManagedThread(new Runnable() {
@@ -104,7 +104,7 @@ public class BTUploader implements Uploader {
         if (cancelled.get()) {
             return UploadStatus.CANCELLED;
         }
-        
+
         LibTorrentStatus status = torrent.getStatus();
 
         if (status == null) {
@@ -241,8 +241,7 @@ public class BTUploader implements Uploader {
             synchronized (this) {
                 if (urn == null) {
                     try {
-                        urn = URN.createSHA1UrnFromBytes(StringUtils.fromHexString(torrent
-                                .getSha1()));
+                        urn = URN.createSha1UrnFromHex(torrent.getSha1());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

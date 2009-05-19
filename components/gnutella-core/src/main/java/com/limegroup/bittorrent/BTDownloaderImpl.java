@@ -54,7 +54,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final BTUploaderFactory btUploaderFactory;
 
     private final AtomicBoolean finishing = new AtomicBoolean(false);
-    
+
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
     private final Provider<TorrentManager> torrentManager;
@@ -214,31 +214,31 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         return file;
 
     }
-    
+
     @Override
     public DownloadState getState() {
         LibTorrentStatus status = torrent.getStatus();
         if (!torrent.isStarted() || status == null) {
             return DownloadState.QUEUED;
         }
-        
+
         LibTorrentState state = status.getState();
-        
+
         if (torrent.isCancelled()) {
             return DownloadState.ABORTED;
         }
 
         // TODO: This currently shows stalled which will probably
-        //        be inaccurate.
-        if(status.isError()) {
+        // be inaccurate.
+        if (status.isError()) {
             return DownloadState.GAVE_UP;
         }
 
         if (torrent.isFinished()) {
             return DownloadState.COMPLETE;
         }
-        
-        if(finishing.get()) {
+
+        if (finishing.get()) {
             return DownloadState.SAVING;
         }
 
@@ -394,13 +394,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         if (urn == null) {
             synchronized (this) {
                 if (urn == null) {
-                    String sha1 = torrent.getSha1();
-                    if (sha1 != null) {
-                        try {
-                            urn = URN.createSHA1UrnFromBytes(StringUtils.fromHexString(sha1));
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                    try {
+                        urn = URN.createSha1UrnFromHex(torrent.getSha1());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -417,8 +414,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public List<Address> getSourcesAsAddresses() {
 
         List<Address> list = new LinkedList<Address>();
-        
-        for ( String ip : torrent.getPeers() ) {
+
+        for (String ip : torrent.getPeers()) {
             try {
                 list.add(new ConnectableImpl(new IpPortImpl(ip), false));
             } catch (UnknownHostException e) {
@@ -505,7 +502,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             throw new InvalidDataException(
                     "Null SHA1 URN retrieved from LibTorrent torrent momento.");
         }
-        
+
         if (!urn.isSHA1()) {
             throw new InvalidDataException(
                     "Non SHA1 URN retrieved from LibTorrent torrent momento.");
@@ -555,18 +552,21 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         String sha1 = StringUtils.toHexString(infoHash);
 
         File saveFile = memento.getSaveFile();
-        File saveDir = saveFile == null ? SharingSettings.getSaveDirectory() : saveFile.getParentFile();
+        File saveDir = saveFile == null ? SharingSettings.getSaveDirectory() : saveFile
+                .getParentFile();
         saveDir = saveDir == null ? SharingSettings.getSaveDirectory() : saveDir;
         File oldIncompleteFile = btmetainfo.getFileSystem().getIncompleteFile();
         File newIncompleteFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), name);
-        if(newIncompleteFile.exists()) {
-            throw new InvalidDataException("Cannot init memento for BTDownloader, incomplete file already exists: " + newIncompleteFile);
-        } 
-        
+        if (newIncompleteFile.exists()) {
+            throw new InvalidDataException(
+                    "Cannot init memento for BTDownloader, incomplete file already exists: "
+                            + newIncompleteFile);
+        }
+
         FileUtils.forceRename(oldIncompleteFile, newIncompleteFile);
         File torrentDir = oldIncompleteFile.getParentFile();
-        if(torrentDir.getName().length() == 32) {
-            //looks like the old torrent dir
+        if (torrentDir.getName().length() == 32) {
+            // looks like the old torrent dir
             FileUtils.deleteRecursive(torrentDir);
         }
 
@@ -685,7 +685,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public File getTorrentFile() {
         return torrent.getTorrentFile();
     }
-    
+
     public Torrent getTorrent() {
         return torrent;
     }
