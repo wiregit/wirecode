@@ -424,7 +424,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     }
 
     /**
-     * Returns the current upload rate in bytes/second
+     * Returns the current upload rate in bytes/second.
      */
     public float getUploadRate() {
         LibTorrentStatus status = this.status.get();
@@ -478,7 +478,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     }
 
     /**
-     * Updates this torrents internal state using the given LibTorrentAlerts
+     * Updates this torrents internal state using the given LibTorrentAlerts.
      */
     public void alert(LibTorrentAlert alert) {
         synchronized (Torrent.this) {
