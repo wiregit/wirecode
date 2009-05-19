@@ -650,7 +650,11 @@ class LibraryFileData extends AbstractSettingsGroup {
         lock.readLock().lock();
         try {
             List<Integer> collections = fileData.get(file);
-            return collections.contains(collectionId);
+            if(collections != null) {
+                return collections.contains(collectionId);
+            } else {
+                return false;
+            }
         } finally {
             lock.readLock().unlock();
         }

@@ -546,14 +546,12 @@ public class UploadTest extends LimeTestCase {
 
     public void testHTTP11DownloadRangeNoSpace() throws Exception {
         HttpGet method = new HttpGet(fileNameUrl);
-        method.addHeader(new BasicHeader(
-                "Range", "bytes 2-5"));/* {
-            public String toExternalForm() {
+        method.addHeader(new BasicHeader("Range", "bytes 2-5") {
+            @Override
+            public String toString() {
                 return "Range:bytes 2-5\r\n";
             }
-
-            ;
-        });*/
+        });
         HttpResponse response = null;
         try {
             response = client.execute(method);

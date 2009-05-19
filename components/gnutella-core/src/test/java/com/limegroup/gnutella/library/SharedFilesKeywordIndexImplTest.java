@@ -22,9 +22,8 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     private SourcedEventMulticaster multicaster;
     private SharedFilesKeywordIndexImpl keywordIndex;
     private Mockery context;
-    private FileViewManager fileViewManager;
-    private FileCollection sharedFileList;
-    private FileCollection incompleteFileList;
+    private GnutellaFileView sharedFileList;
+    private FileView incompleteFileList;
     private Library library;
 
     public SharedFilesKeywordIndexImplTest(String name) {
@@ -36,11 +35,10 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         context = new Mockery();
         multicaster = context.mock(SourcedEventMulticaster.class);
         registry = context.mock(ServiceRegistry.class);
-        fileViewManager = context.mock(FileViewManager.class);
         library = context.mock(Library.class);
-        sharedFileList = context.mock(GnutellaFileCollection.class);
-        incompleteFileList = context.mock(IncompleteFileCollection.class);
-        keywordIndex = new SharedFilesKeywordIndexImpl(library, null, null, null, null, null, fileViewManager);
+        sharedFileList = context.mock(GnutellaFileView.class);
+        incompleteFileList = context.mock(FileView.class);
+        keywordIndex = new SharedFilesKeywordIndexImpl(library, null, null, null, null, null, sharedFileList, incompleteFileList);
     }
     
     @SuppressWarnings("unchecked")
@@ -60,25 +58,15 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
                 exactly(1).of(incompleteFileList).addListener(with(any(EventListener.class)));
                 exactly(1).of(multicaster).addListener(with(any(EventListener.class)));
                 
-                atLeast(1).of(fileViewManager).getIncompleteFileView();
-                will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(originalFile);
                 will(returnValue(false));
-                atLeast(1).of(fileViewManager).getGnutellaFileView();
-                will(returnValue(sharedFileList));
                 atLeast(1).of(sharedFileList).contains(originalFile);
                 will(returnValue(true));
                 
-                atLeast(1).of(fileViewManager).getIncompleteFileView();
-                will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(originalFile);
                 will(returnValue(false));
-                atLeast(1).of(fileViewManager).getIncompleteFileView();
-                will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(newFile);
                 will(returnValue(false));
-                atLeast(1).of(fileViewManager).getGnutellaFileView();
-                will(returnValue(sharedFileList));
                 atLeast(1).of(sharedFileList).contains(newFile);
                 will(returnValue(true));
             }

@@ -80,16 +80,18 @@ class FileViewManagerImpl implements FileViewManager {
             @Override
             @BlockingEvent(queueName="FileViewManager")
             public void handleEvent(FileViewChangeEvent event) {
-                switch(event.getType()) {
-                case FILE_ADDED:
-                    fileAddedToCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView());
-                    break;
-                case FILE_REMOVED:
-                    fileRemovedFromCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView());
-                    break;
-                case FILES_CLEARED:
-                    collectionCleared((SharedFileCollection)event.getFileView());
-                    break;
+                if(!(event.getSource() instanceof IncompleteFileCollection)) {                
+                    switch(event.getType()) {
+                    case FILE_ADDED:
+                        fileAddedToCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView());
+                        break;
+                    case FILE_REMOVED:
+                        fileRemovedFromCollection(event.getFileDesc(), (SharedFileCollection)event.getFileView());
+                        break;
+                    case FILES_CLEARED:
+                        collectionCleared((SharedFileCollection)event.getFileView());
+                        break;
+                    }
                 }
             }
         });
