@@ -37,7 +37,7 @@ public class GnutellaFriendTest extends BaseTestCase {
         assertEquals(renderName1, gnutellaFriend.getRenderName());
         assertEquals(id1, gnutellaFriend.getId());
         assertNull(gnutellaFriend.getNetwork());
-        Map<String, FriendPresence> friendPresences = gnutellaFriend.getFriendPresences();
+        Map<String, FriendPresence> friendPresences = gnutellaFriend.getPresences();
         assertEquals(friendPresence1, friendPresences.get(presenceId1));
         
         context.assertIsSatisfied();

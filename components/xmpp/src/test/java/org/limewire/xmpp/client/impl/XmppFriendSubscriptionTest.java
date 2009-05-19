@@ -101,7 +101,7 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         setFriendRequestListener(USERNAME_5, true);
 
         // automatedtestfriend5 requests automatedtestfriend6
-        connectionFive.addFriend(USERNAME_6, USERNAME_6).get();
+        connectionFive.addNewFriend(USERNAME_6, USERNAME_6).get();
 
         // sleep to wait for automatedtestfriend6 to confirm, friends to exchange roster packets, etc
         Thread.sleep(SLEEP);
@@ -126,7 +126,7 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         setFriendRequestListener(USERNAME_5, false);
 
         // automatedtestfriend5 requests automatedtestfriend6
-        connectionFive.addFriend(USERNAME_6, USERNAME_6).get();
+        connectionFive.addNewFriend(USERNAME_6, USERNAME_6).get();
 
         // sleep to wait for friend6 to deny
         Thread.sleep(SLEEP);
@@ -170,7 +170,7 @@ public class XmppFriendSubscriptionTest extends XmppBaseTestCase {
         setFriendRequestListener(USERNAME_5, true);
 
         // automatedtestfriend5 requests automatedtestfriend6
-        connectionFive.addFriend(USERNAME_6, USERNAME_6).get();
+        connectionFive.addNewFriend(USERNAME_6, USERNAME_6).get();
 
         // sleep to wait for automatedtestfriend6 to confirm, friends to exchange roster packets, etc
         Thread.sleep(SLEEP);

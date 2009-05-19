@@ -59,10 +59,6 @@ public class GnutellaFriend implements Friend {
         return null;
     }
 
-    public Map<String, FriendPresence> getFriendPresences() {
-        return map;
-    }
-
     @Override
     public String getFirstName() {
         return getName();
@@ -102,7 +98,7 @@ public class GnutellaFriend implements Friend {
 
     @Override
     public Map<String, FriendPresence> getPresences() {
-        return null;
+        return map;
     }
 
     @Override

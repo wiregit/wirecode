@@ -59,7 +59,7 @@ public class AddFriendDialog extends LimeJDialog {
                 final String nickname = nick;
                 setVisible(false);
                 dispose();
-                connection.addFriend(username, nickname);
+                connection.addNewFriend(username, nickname);
             }
         };
 

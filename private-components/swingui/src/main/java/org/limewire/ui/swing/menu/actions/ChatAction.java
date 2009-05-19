@@ -35,7 +35,7 @@ public class ChatAction extends AbstractAction {
     /** Sets a new friend for this action and updates the enabledness. */
     public void setFriend(Friend friend) {
         this.friend = friend;
-        setEnabled(friend != null && !friend.isAnonymous() && !friend.getFriendPresences().isEmpty());
+        setEnabled(friend != null && !friend.isAnonymous() && !friend.getPresences().isEmpty());
     }
 
     protected Friend getFriend() {

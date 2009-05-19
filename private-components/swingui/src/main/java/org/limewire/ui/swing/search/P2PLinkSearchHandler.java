@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
-import org.limewire.core.api.friend.AbstractFriendPresence;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
@@ -14,6 +13,7 @@ import org.limewire.core.api.friend.client.IncomingChatListener;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
+import org.limewire.core.api.friend.impl.AbstractFriendPresence;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
@@ -117,7 +117,7 @@ class P2PLinkSearchHandler implements SearchHandler {
         }
 
         @Override
-        public Map<String, FriendPresence> getFriendPresences() {
+        public Map<String, FriendPresence> getPresences() {
             Map<String, FriendPresence> map = new HashMap<String, FriendPresence>();
             map.put(presence.getPresenceId(), presence);
             return map;
@@ -187,11 +187,6 @@ class P2PLinkSearchHandler implements SearchHandler {
         @Override
         public boolean isSignedIn() {
             return false;
-        }
-
-        @Override
-        public Map<String, FriendPresence> getPresences() {
-            return null;
         }
 
         @Override

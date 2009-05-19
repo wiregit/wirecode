@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.core.api.friend.feature.FeatureTransport.Handler;
 import org.limewire.io.Address;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;

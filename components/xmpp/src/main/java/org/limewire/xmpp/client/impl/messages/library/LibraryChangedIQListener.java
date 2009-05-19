@@ -60,7 +60,7 @@ public class LibraryChangedIQListener implements PacketListener {
         }
         Friend user = connection.getFriend(StringUtils.parseBareAddress(packet.getFrom()));
         if (user != null) {
-            FriendPresence presence = user.getFriendPresences().get(packet.getFrom());
+            FriendPresence presence = user.getPresences().get(packet.getFrom());
             if(presence != null) {
                 libChangedBroadcaster.broadcast(new LibraryChangedEvent(presence, LibraryChanged.LIBRARY_CHANGED));
             }

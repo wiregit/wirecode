@@ -15,6 +15,7 @@ import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
@@ -63,8 +64,8 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                         for(int i = 0; i < features.length(); i++) {
                             String feature = features.getString(i);
                             FeatureInitializer initializer = featureRegistry.get(new URI(feature));
-                            if(initializer != null) {
-                                initializer.initializeFeature(friend);
+                            if (initializer != null) {
+                                initializer.initializeFeature(friend.getFacebookPresence());
                             }
                         }
                     } else {
@@ -95,34 +96,38 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
             @Override
             public void handleEvent(FriendEvent event) {  
                 synchronized (LiveMessageDiscoInfoTransport.this) {
-                    if(event.getType() == FriendEvent.Type.ADDED) {
-                        Friend friend = event.getData();
-                        if (friend instanceof FacebookFriend) {
-                            FacebookFriend facebookFriend = (FacebookFriend)friend;
-                            try {
-                                Map<String, String> message = new HashMap<String, String>();
-                                message.put("from", connection.getUID());
-                                connection.sendLiveMessage(facebookFriend, REQUEST_TYPE,
-                                        message);
-                                
-                                if(pendingPresences.containsKey(facebookFriend.getId())) {
-                                    JSONArray features = pendingPresences.remove(facebookFriend.getId());
-                                    for(int i = 0; i < features.length(); i++) {
-                                        String feature = features.getString(i);
-                                        FeatureInitializer initializer = featureRegistry.get(new URI(feature));
-                                        if(initializer != null) {
-                                            initializer.initializeFeature(facebookFriend);
-                                        }
-                                    }
+                    if(event.getType() != FriendEvent.Type.ADDED) {
+                        return;
+                    }
+                    Friend friend = event.getData();
+                    if (!(friend instanceof FacebookFriend)) {
+                        return;
+                    }
+                    FacebookFriendPresence presence = ((FacebookFriend)friend).getFacebookPresence();
+                    if (!presence.hasFeatures(LimewireFeature.ID)) {
+                        LOG.debugf("not a facebook friend {0}", presence);
+                        return;
+                    }
+                    try {
+                        Map<String, String> message = new HashMap<String, String>();
+                        message.put("from", connection.getUID());
+                        connection.sendLiveMessage(presence, REQUEST_TYPE, message);
+                        JSONArray features = pendingPresences.remove(presence.getPresenceId());
+                        if (features != null) {
+                            for(int i = 0; i < features.length(); i++) {
+                                String feature = features.getString(i);
+                                FeatureInitializer initializer = featureRegistry.get(new URI(feature));
+                                if (initializer != null) {
+                                    initializer.initializeFeature(presence);
                                 }
-                            } catch (FriendException e) {
-                                throw new RuntimeException(e);
-                            } catch (URISyntaxException e) {
-                                throw new RuntimeException(e);
-                            } catch (JSONException e) {
-                                throw new RuntimeException(e);
                             }
                         }
+                    } catch (FriendException e) {
+                        throw new RuntimeException(e);
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }

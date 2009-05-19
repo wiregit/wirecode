@@ -4,14 +4,13 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.core.api.friend.impl.AbstractFriend;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.client.impl.PresenceImpl;
-import org.limewire.xmpp.client.impl.XMPPFriendImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,12 +29,11 @@ class FriendListListeners {
         this.friendPresenceBroadcaster = friendPresenceBroadcaster;
     }
     
-    @Inject void register(ListenerSupport<RosterEvent> rosterListeners,
-                          ListenerSupport<FriendConnectionEvent> connectionListeners) {
+    @Inject void register(ListenerSupport<RosterEvent> rosterListeners) {
         rosterListeners.addListener(new EventListener<RosterEvent>() {
             @Override
             public void handleEvent(RosterEvent event) {
-                XMPPFriendImpl friend = event.getData();
+                AbstractFriend friend = event.getData();
 
                 switch(event.getType()) {
                 case USER_ADDED:
@@ -56,23 +54,10 @@ class FriendListListeners {
                 }
             }
         });
-        
-        connectionListeners.addListener(new EventListener<FriendConnectionEvent>() {
-            @Override
-            public void handleEvent(FriendConnectionEvent event) {
-                switch(event.getType()) {
-                case DISCONNECTED:
-                    for(Friend user : event.getSource().getFriends()) {
-                        friendManager.removeKnownFriend(user, false);
-                    }
-                    break;
-                }
-            }
-        });
     }
 
     
-    public void addKnownFriend(XMPPFriendImpl friend) {
+    public void addKnownFriend(AbstractFriend friend) {
         friend.addPresenceListener(presenceListener);
         friendManager.addKnownFriend(friend);
     }
@@ -90,7 +75,7 @@ class FriendListListeners {
     }
     
     private void removePresence(PresenceImpl presence) {
-        XMPPFriendImpl friend = presence.getFriend();
+        AbstractFriend friend = presence.getFriend();
         if(!friend.isSignedIn()) {
             friendManager.removeAvailableFriend(friend);
         }

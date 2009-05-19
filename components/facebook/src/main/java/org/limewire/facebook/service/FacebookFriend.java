@@ -2,32 +2,36 @@ package org.limewire.facebook.service;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.json.JSONObject;
-import org.limewire.core.api.friend.AbstractFriendPresence;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.IncomingChatListener;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.listener.EventBroadcaster;
-import org.limewire.listener.EventListener;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
+import org.limewire.core.api.friend.impl.AbstractFriend;
 import org.limewire.util.StringUtils;
-import org.limewire.xmpp.api.client.PresenceEvent;
 
-public class FacebookFriend extends AbstractFriendPresence implements Friend, FriendPresence {
+public class FacebookFriend extends AbstractFriend {
+    
     private final String id;
     private final JSONObject friend;
     private final Network network;
+    
+    /**
+     * The presence of the facebook friend, null when friend is not online.
+     */
+    private final AtomicReference<FacebookFriendPresence> presence = new AtomicReference<FacebookFriendPresence>();
+    
+    private final boolean hasLimeWireAppInstalled;
 
-    public FacebookFriend(String id, JSONObject friend, Network network,
-                          EventBroadcaster<FeatureEvent> featureSupport) {
-        super(featureSupport);
+    public FacebookFriend(String id, JSONObject friend, Network network, boolean hasLimeWireAppInstalled) {
         this.id = id;
         this.friend = friend;
         this.network = network;
+        this.hasLimeWireAppInstalled = hasLimeWireAppInstalled;
     }
     
     @Override
@@ -56,13 +60,23 @@ public class FacebookFriend extends AbstractFriendPresence implements Friend, Fr
     }
 
     @Override
-    public void setName(String name) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public MessageWriter createChat(MessageReader reader) {
+        return null;
     }
 
     @Override
-    public boolean isAnonymous() {
-        return false;
+    public FriendPresence getActivePresence() {
+        return presence.get();
+    }
+
+    @Override
+    public Map<String, FriendPresence> getPresences() {
+        FriendPresence copy = presence.get();
+        if (copy != null) {
+            return Collections.singletonMap(id, copy);
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
     @Override
@@ -71,45 +85,18 @@ public class FacebookFriend extends AbstractFriendPresence implements Friend, Fr
     }
 
     @Override
-    public Map<String, FriendPresence> getFriendPresences() {
-        return Collections.singletonMap(getId(), (FriendPresence)this);
-    }
-
-    @Override
-    public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
-    }
-
-    @Override
-    public MessageWriter createChat(MessageReader reader) {
-        return null;
-    }
-
-    @Override
-    public void setChatListenerIfNecessary(IncomingChatListener listener) {
-    }
-
-    @Override
-    public void removeChatListener() {
-    }
-
-    @Override
-    public FriendPresence getActivePresence() {
-        return this;
-    }
-
-    @Override
     public boolean hasActivePresence() {
+        return presence.get() != null;
+    }
+
+    @Override
+    public boolean isAnonymous() {
         return false;
     }
 
     @Override
     public boolean isSignedIn() {
-        return true;
-    }
-
-    @Override
-    public Map<String, FriendPresence> getPresences() {
-        return Collections.singletonMap(getPresenceId(), (FriendPresence)this);
+        return presence.get() != null;
     }
 
     @Override
@@ -118,32 +105,28 @@ public class FacebookFriend extends AbstractFriendPresence implements Friend, Fr
     }
 
     @Override
-    public Friend getFriend() {
-        return this;
+    public void removeChatListener() {
     }
 
     @Override
-    public String getPresenceId() {
-        return getId();
+    public void setChatListenerIfNecessary(IncomingChatListener listener) {
     }
 
     @Override
-    public Type getType() {
-        return Type.available;
+    public void setName(String name) {
     }
-
-    @Override
-    public String getStatus() {
-        return friend.optString("status", null);
+    
+    void setPresence(FacebookFriendPresence facebookFriendPresence) {
+        presence.set(facebookFriendPresence);
+        if (hasLimeWireAppInstalled) {
+            facebookFriendPresence.addFeature(new LimewireFeature());
+        }
     }
-
-    @Override
-    public int getPriority() {
-        return 0;
-    }
-
-    @Override
-    public Mode getMode() {
-        return Mode.available;  // TODO figure out how fb does mode
+    
+    /**
+     * @return null if friend is not available for chat
+     */
+    public FacebookFriendPresence getFacebookPresence() {
+        return presence.get();
     }
 }

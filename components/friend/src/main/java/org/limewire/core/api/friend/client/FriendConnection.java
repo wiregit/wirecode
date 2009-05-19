@@ -50,7 +50,7 @@ public interface FriendConnection {
     public ListeningFuture<Void> setMode(FriendPresence.Mode mode);
 
     /**
-     * Add a user to the friend list
+     * Adds a new friend who is not a friend yet to the list of friends.
      * @param id cannot be null
      * @param name can be null
      * @return a {@link ListeningFuture} if callers wish to be
@@ -59,7 +59,7 @@ public interface FriendConnection {
      * The ExecutionException will be to an XMPPException
      * if there is an error sending the xmpp message
      */
-    public ListeningFuture<Void> addFriend(String id, String name);
+    public ListeningFuture<Void> addNewFriend(String id, String name);
     
     /**
      * Remove a user from the friend list
@@ -84,5 +84,5 @@ public interface FriendConnection {
      * @return a copy of the current Collection of Users. Does NOT stay up to
      * date with changes.
      */
-    public Collection<Friend> getFriends();
+    public Collection<? extends Friend> getFriends();
 }

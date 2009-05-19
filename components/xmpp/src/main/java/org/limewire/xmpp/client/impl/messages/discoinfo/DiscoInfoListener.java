@@ -50,7 +50,7 @@ public class DiscoInfoListener implements PacketListener {
         DiscoverInfo discoverInfo = (DiscoverInfo)packet;
         Friend user = connection.getFriend(StringUtils.parseBareAddress(discoverInfo.getFrom()));
         if (user != null) {
-            FriendPresence presence = user.getFriendPresences().get(discoverInfo.getFrom());
+            FriendPresence presence = user.getPresences().get(discoverInfo.getFrom());
             if(presence != null) {
                 for(URI uri : featureRegistry) {
                     if(discoverInfo.containsFeature(uri.toASCIIString())) {

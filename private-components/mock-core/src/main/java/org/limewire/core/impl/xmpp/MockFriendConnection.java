@@ -49,7 +49,7 @@ public class MockFriendConnection implements FriendConnection {
     }
 
     @Override
-    public ListeningFuture<Void> addFriend(String id, String name) {
+    public ListeningFuture<Void> addNewFriend(String id, String name) {
         return new SimpleFuture<Void>((Void)null);
     }
 

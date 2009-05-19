@@ -48,7 +48,7 @@ public class LibraryChangedIQListenerTest extends BaseTestCase {
         context.checking(new Expectations() {{
             one(connection).getFriend("me@you.com");
             will(returnValue(user));
-            one(user).getFriendPresences();
+            one(user).getPresences();
             will(returnValue(Collections.singletonMap("me@you.com/ldkfjd", friendPresence)));
             one(eventBroadcaster).broadcast(with(any(LibraryChangedEvent.class)));
             will(new AssignParameterAction<LibraryChangedEvent>(event, 0));

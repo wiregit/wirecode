@@ -66,7 +66,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
             for(FriendConnection connection : connections) {
                 Friend friend = connection.getFriend(StringUtils.parseBareAddress(from));
                 if (friend != null) {
-                    FriendPresence presence = friend.getFriendPresences().get(from);
+                    FriendPresence presence = friend.getPresences().get(from);
                     if(presence != null) {
                         LOG.debugf("updating address on presence {0} to {1}", presence.getPresenceId(), address);
                         addressRegistry.put(new XMPPAddress(presence.getPresenceId()), address);
@@ -90,14 +90,18 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
             synchronized (this) {
                 for(FriendConnection connection : connections) {
                     address = event.getData();
-                    for(Friend user : connection.getFriends()) {
-                        for(Map.Entry<String, FriendPresence> presenceEntry : user.getFriendPresences().entrySet()) {
-                            if(presenceEntry.getValue().hasFeatures(LimewireFeature.ID)) {
+                    for(Friend friend : connection.getFriends()) {
+                        for(FriendPresence presence : friend.getPresences().values()) {
+                            if(presence.hasFeatures(LimewireFeature.ID)) {
                                 try {
-                                    FeatureTransport<Address> transport = presenceEntry.getValue().getTransport(AddressFeature.class);
-                                    transport.sendFeature(presenceEntry.getValue(), address);
+                                    FeatureTransport<Address> transport = presence.getTransport(AddressFeature.class);
+                                    if (transport != null) {
+                                        transport.sendFeature(presence, address);
+                                    } else {
+                                        LOG.debugf("no address transport for: {0}", presence);
+                                    }
                                 } catch (FriendException e) {
-                                    LOG.debugf(e, "couldn't send address to {0}", presenceEntry.getKey());
+                                    LOG.debugf("couldn't send address", e);
                                 }
                             }
                         }

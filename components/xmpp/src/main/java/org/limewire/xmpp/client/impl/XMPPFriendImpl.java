@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import net.jcip.annotations.GuardedBy;
+
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.RosterEntry;
@@ -13,7 +15,6 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.ChatState;
@@ -23,18 +24,16 @@ import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
+import org.limewire.core.api.friend.impl.AbstractFriend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.PresenceEvent;
 
-import net.jcip.annotations.GuardedBy;
 
-
-public class XMPPFriendImpl implements Friend {
+public class XMPPFriendImpl extends AbstractFriend {
+   
     private static final Log LOG = LogFactory.getLog(XMPPFriendImpl.class);
 
     private final String id;
@@ -42,7 +41,6 @@ public class XMPPFriendImpl implements Friend {
     private final String idNoService;
     private AtomicReference<RosterEntry> rosterEntry;
     private final org.jivesoftware.smack.XMPPConnection connection;
-    private final EventListenerList<PresenceEvent> presenceListeners;
     private final Network network;
 
     // -----------------------------------------------------------------
@@ -76,7 +74,6 @@ public class XMPPFriendImpl implements Friend {
         this.network = network;
         this.rosterEntry = new AtomicReference<RosterEntry>(rosterEntry);
         this.presences = new HashMap<String, FriendPresence>();
-        this.presenceListeners = new EventListenerList<PresenceEvent>();
         this.activePresenceJid = null;
         this.connection = connection;
         this.presenceLock = new Object();
@@ -158,19 +155,12 @@ public class XMPPFriendImpl implements Friend {
     }
 
     @Override
-    public Map<String, FriendPresence> getFriendPresences() {
-        synchronized (presenceLock) {
-            return Collections.unmodifiableMap(new HashMap<String, FriendPresence>(presences));
-        }
-    }
-    
-    @Override
     public Map<String, FriendPresence> getPresences() {
         synchronized (presenceLock) {
             return Collections.unmodifiableMap(new HashMap<String, FriendPresence>(presences));
         }
     }
-
+    
     @Override
     public boolean isSubscribed() {
         switch(rosterEntry.get().getType()) {
@@ -189,7 +179,7 @@ public class XMPPFriendImpl implements Friend {
         synchronized (presenceLock) {
             presences.put(presence.getPresenceId(), presence);
         }
-        presenceListeners.broadcast(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_NEW));
+        firePresenceEvent(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_NEW));
     }
 
     void removePresense(FriendPresence presence) {
@@ -216,15 +206,7 @@ public class XMPPFriendImpl implements Friend {
             }
         }
 
-        presenceListeners.broadcast(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_UPDATE));
-    }
-
-    @Override
-    public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
-        presenceListeners.addListener(presenceListener);
-        for(FriendPresence presence : getPresences().values()) {
-            presenceListener.handleEvent(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_NEW));
-        }
+        firePresenceEvent(new PresenceEvent(presence, PresenceEvent.Type.PRESENCE_UPDATE));
     }
 
     @Override
@@ -239,7 +221,7 @@ public class XMPPFriendImpl implements Friend {
         synchronized (presenceLock) {
             presences.put(updatedPresence.getPresenceId(), updatedPresence);
         }
-        presenceListeners.broadcast(new PresenceEvent(updatedPresence, PresenceEvent.Type.PRESENCE_UPDATE));
+        firePresenceEvent(new PresenceEvent(updatedPresence, PresenceEvent.Type.PRESENCE_UPDATE));
     }
 
     FriendPresence getPresence(String jid) {

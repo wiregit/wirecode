@@ -62,11 +62,6 @@ class MockChatFriend implements ChatFriend {
             }
 
             @Override
-            public Map<String, FriendPresence> getFriendPresences() {
-                return Collections.emptyMap();
-            }
-
-            @Override
             public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {}
 
             @Override

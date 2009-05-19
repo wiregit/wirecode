@@ -135,7 +135,7 @@ public class ChatModel {
         ChatFriend chatFriend = idToFriendMap.get(fromFriendId);
 
         if (chatFriend != null) {
-            Map<String, FriendPresence> presences = chatFriend.getUser().getFriendPresences();
+            Map<String, FriendPresence> presences = chatFriend.getUser().getPresences();
             FriendPresence fileOfferPresence = presences.get(fromJID);
             if (fileOfferPresence != null) {
                 new MessageReceivedEvent(new MessageFileOfferImpl(fromFriendId, fromFriendId,

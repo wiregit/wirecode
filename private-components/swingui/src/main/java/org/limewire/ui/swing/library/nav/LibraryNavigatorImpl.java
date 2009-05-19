@@ -734,10 +734,6 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             return text;
         }
         @Override
-        public Map<String, FriendPresence> getFriendPresences() {
-            return Collections.emptyMap();
-        }
-        @Override
         public String getId() {
             return text;
         }
@@ -795,7 +791,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
 
         @Override
         public Map<String, FriendPresence> getPresences() {
-            return null;
+            return Collections.emptyMap();
         }
 
         @Override

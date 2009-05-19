@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.friends.chat;
 
-import org.limewire.core.api.friend.AbstractFriendPresence;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.impl.AbstractFriendPresence;
 
 public class MockPresence extends AbstractFriendPresence implements FriendPresence {
     private String status;

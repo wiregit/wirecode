@@ -237,9 +237,9 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 will(returnValue(id1));
                 allowing(users.get(1)).getId();
                 will(returnValue(id2));
-                allowing(users.get(0)).getFriendPresences();
+                allowing(users.get(0)).getPresences();
                 will(returnValue(presences1));
-                allowing(users.get(1)).getFriendPresences();
+                allowing(users.get(1)).getPresences();
                 will(returnValue(presences2));
                 allowing(presences1.get("a")).getFeature(LibraryChangedNotifierFeature.ID);
                 will(returnValue(featureA));
@@ -322,9 +322,9 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 will(returnValue(id1));
                 allowing(users.get(1)).getId();
                 will(returnValue(id2));
-                allowing(users.get(0)).getFriendPresences();
+                allowing(users.get(0)).getPresences();
                 will(returnValue(presences1));
-                allowing(users.get(1)).getFriendPresences();
+                allowing(users.get(1)).getPresences();
                 will(returnValue(presences2));
                 
                 // --Stunt the first feature request with null, make sure the process recovers--
@@ -556,7 +556,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 // Non critical actions
                 allowing(friend).getId();
                 will(returnValue(friendID));
-                allowing(friend).getFriendPresences();
+                allowing(friend).getPresences();
                 will(returnValue(presences));
                 allowing(presences.get("a")).getFeature(LibraryChangedNotifierFeature.ID);
                 will(returnValue(featureA));

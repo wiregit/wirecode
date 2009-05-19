@@ -54,13 +54,6 @@ public interface Friend {
     Network getNetwork();
 
     /**
-     * Returns a map of all {@link FriendPresence FriendPresences} for this
-     * Friend. Keys are the identifier of the presence, as defined by
-     * {@link FriendPresence#getPresenceId()}.
-     */
-    Map<String, FriendPresence> getFriendPresences();
-
-    /**
      * Allows the xmpp service user to register a listener for presence changes of this user
      * @param presenceListener
      */
@@ -109,9 +102,9 @@ public interface Friend {
     boolean isSignedIn();
 
     /**
-     * An analague to {@link org.limewire.core.api.friend.Friend#getFriendPresences()},
-     * except returns a Map of {@link org.limewire.xmpp.api.client.FriendPresence}, the keys being
-     * the {@link org.limewire.xmpp.api.client.FriendPresence#getPresenceId()}.
+     * Returns a map of all {@link FriendPresence FriendPresences} for this
+     * Friend. Keys are the identifier of the presence, as defined by
+     * {@link FriendPresence#getPresenceId()}.
      */
     Map<String, FriendPresence> getPresences();
 

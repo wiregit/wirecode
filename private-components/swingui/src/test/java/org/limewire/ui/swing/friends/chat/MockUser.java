@@ -53,11 +53,6 @@ public class MockUser implements Friend {
     }
 
     @Override
-    public Map<String, FriendPresence> getFriendPresences() {
-        return new HashMap<String, FriendPresence>();
-    }
-    
-    @Override
     public Map<String, FriendPresence> getPresences() {
         return new HashMap<String, FriendPresence>();
     }

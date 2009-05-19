@@ -27,10 +27,10 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.AuthToken;
@@ -341,15 +341,16 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         public void entriesDeleted(Collection<String> removedIds) {
             synchronized (users) {
                 for(String id : removedIds) {
-                    XMPPFriendImpl user = users.remove(id);
-                    if(user != null) {
-                        LOG.debugf("user {0} removed", user);
-                        rosterListeners.broadcast(new RosterEvent(user, RosterEvent.Type.USER_DELETED));
+                    XMPPFriendImpl friend = users.remove(id);
+                    if(friend != null) {
+                        LOG.debugf("user {0} removed", friend);
+                        rosterListeners.broadcast(new RosterEvent(friend, RosterEvent.Type.USER_DELETED));
                     }
                 }
             }
         }
 
+        @Override
         public void presenceChanged(final org.jivesoftware.smack.packet.Presence presence) {
             String localJID;
             try {
@@ -363,7 +364,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                     LOG.debugf("presence from {0} changed to {1}", presence.getFrom(), presence.getType());
                     synchronized (user) {
                         if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
-                            if(!user.getFriendPresences().containsKey(presence.getFrom())) {
+                            if(!user.getPresences().containsKey(presence.getFrom())) {
                                 addNewPresence(user, presence);
                             } else {
                                 updatePresence(user, presence);
@@ -398,7 +399,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         }
 
         private void updatePresence(XMPPFriendImpl user, org.jivesoftware.smack.packet.Presence presence) {
-            PresenceImpl currentPresence = (PresenceImpl)user.getFriendPresences().get(presence.getFrom());
+            PresenceImpl currentPresence = (PresenceImpl)user.getPresences().get(presence.getFrom());
             currentPresence.update(presence);
             user.updatePresence(currentPresence);
         }
@@ -406,7 +407,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
 
 
     @Override
-    public ListeningFuture<Void> addFriend(final String id, final String name) {
+    public ListeningFuture<Void> addNewFriend(final String id, final String name) {
         return executorService.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {

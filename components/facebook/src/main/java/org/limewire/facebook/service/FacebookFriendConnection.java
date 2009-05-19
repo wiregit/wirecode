@@ -32,7 +32,6 @@ import org.json.JSONObject;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
@@ -248,7 +247,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     @Override
-    public ListeningFuture<Void> addFriend(String id, String name) {
+    public ListeningFuture<Void> addNewFriend(String id, String name) {
         return null;
     }
 
@@ -262,18 +261,14 @@ public class FacebookFriendConnection implements FriendConnection {
         return friends.get(id);
     }
 
-    void userAvailable(String id, FacebookFriend friend) {
-        this.friends.put(id, friend);
+    void addFriend(FacebookFriend friend) {
+        friends.put(friend.getId(), friend);
     }
-
-    void userUnavailable(String id) {
-        this.friends.remove(id);
-    }
-
+    
     @Override
-    public Collection<Friend> getFriends() {
+    public Collection<FacebookFriend> getFriends() {
         synchronized (friends) {
-            return new ArrayList<Friend>(friends.values());
+            return new ArrayList<FacebookFriend>(friends.values());
         }
     }
 

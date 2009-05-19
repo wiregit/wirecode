@@ -11,9 +11,6 @@ import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.feature.FeatureRegistry;
-import org.limewire.core.api.friend.feature.features.LimewireFeature;
-import org.limewire.core.api.friend.impl.LimewireFeatureInitializer;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -28,18 +25,15 @@ class FacebookFriendService implements FriendConnectionFactory {
     private final ThreadPoolListeningExecutor executorService;
     private final FacebookFriendConnectionFactory connectionFactory;
     private final ChatClientFactory chatClientFactory;
-    private final LiveMessageDiscoInfoTransportFactory discoInfoTransportFactory;
 
-    private final FeatureRegistry featureRegistry;
+    private final LiveMessageDiscoInfoTransportFactory liveDiscoInfoTransportFactory;
 
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
                                   ChatClientFactory chatClientFactory,
-                                  LiveMessageDiscoInfoTransportFactory discoInfoTransportFactory,
-                                  FeatureRegistry featureRegistry){
+                                  LiveMessageDiscoInfoTransportFactory liveDiscoInfoTransportFactory) {
         this.connectionFactory = connectionFactory;
         this.chatClientFactory = chatClientFactory;
-        this.discoInfoTransportFactory = discoInfoTransportFactory;
-        this.featureRegistry = featureRegistry;
+        this.liveDiscoInfoTransportFactory = liveDiscoInfoTransportFactory;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
     }
 
@@ -62,9 +56,8 @@ class FacebookFriendService implements FriendConnectionFactory {
     FacebookFriendConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
         LOG.debug("creating connection");
         FacebookFriendConnection connection = connectionFactory.create(configuration);
-        discoInfoTransportFactory.create(connection);
+        liveDiscoInfoTransportFactory.create(connection);
         LOG.debug("logging in");
-        new LimewireFeatureInitializer().register(featureRegistry);
         connection.loginImpl();
         ChatClient client = chatClientFactory.createChatClient(connection);
         client.start();

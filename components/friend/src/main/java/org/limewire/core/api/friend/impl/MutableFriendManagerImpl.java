@@ -11,8 +11,11 @@ import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -36,6 +39,22 @@ public class MutableFriendManagerImpl implements MutableFriendManager {
             EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster) {
         this.knownBroadcaster = knownBroadcaster;
         this.availableBroadcaster = availableBroadcaster;
+    }
+    
+    @Inject
+    void register(ListenerSupport<FriendConnectionEvent> listenerSupport) {
+        listenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
+            @Override
+            public void handleEvent(FriendConnectionEvent event) {
+                switch(event.getType()) {
+                case DISCONNECTED:
+                    for (Friend user : event.getSource().getFriends()) {
+                        removeKnownFriend(user, false);
+                    }
+                    break;
+                }
+            }
+        });
     }
     
     @Override
@@ -69,7 +88,7 @@ public class MutableFriendManagerImpl implements MutableFriendManager {
         if(friend == null) {
             return null;
         } else {
-            Collection<FriendPresence> presences = friend.getFriendPresences().values();
+            Collection<FriendPresence> presences = friend.getPresences().values();
             //TODO: this is not guarenteed to return the correct FriendPresence
             // if the user is logged in through two LWs with the same ID
             // Not really able to fix this without modifying the Browse/File Request

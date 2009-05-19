@@ -17,6 +17,7 @@ import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
+import org.limewire.core.api.friend.impl.AuthTokenImpl;
 import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -66,7 +67,7 @@ public class AuthTokenHandler implements FeatureTransport.Handler<AuthToken>{
             synchronized (this) {
                 Friend user = connection.getFriend(StringUtils.parseBareAddress(from));
                 if (user != null) {
-                    FriendPresence presence = user.getFriendPresences().get(from);
+                    FriendPresence presence = user.getPresences().get(from);
                     if(presence != null) {
                         LOG.debugf("updating auth token on presence {0} to {1}", presence, feature);
                         presence.addFeature(new AuthTokenFeature(feature));
@@ -92,23 +93,18 @@ public class AuthTokenHandler implements FeatureTransport.Handler<AuthToken>{
                 try {
                     final byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(friendPresence.getPresenceId())).getBytes(Charset.forName("UTF-8"));
                     FeatureTransport<AuthToken> transport = friendPresence.getTransport(AuthTokenFeature.class);
-                    transport.sendFeature(friendPresence, new AuthToken() {
-                        @Override
-                        public byte[] getToken() {
-                            return authToken;
-                        }
-                    });
+                    if (transport != null) {
+                        transport.sendFeature(friendPresence, new AuthTokenImpl(authToken));
+                    } else {
+                        LOG.debugf("no auth transport for: {0}", friendPresence);
+                    }
                 } catch (FriendException e) {
                     LOG.debugf(e, "couldn't send auth token to {0} " + friendPresence);
                 }
-                if (pendingAuthTokens.containsKey(friendPresence.getPresenceId())) {
-                    final AuthToken authToken = pendingAuthTokens.remove(friendPresence.getPresenceId());
+                AuthToken authToken = pendingAuthTokens.remove(friendPresence.getPresenceId());
+                if (authToken != null) {
                     if (LOG.isDebugEnabled()) {
-                        try {
-                            LOG.debug("updating auth token on presence " + friendPresence.getPresenceId() + " to " + new String(Base64.encodeBase64(authToken.getToken()), "UTF-8"));
-                        } catch (UnsupportedEncodingException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
+                        LOG.debug("updating auth token on presence " + friendPresence.getPresenceId() + " to " + org.limewire.util.StringUtils.toUTF8String(Base64.encodeBase64(authToken.getToken())));
                     }
                     friendPresence.addFeature(new AuthTokenFeature(authToken));
                 }

@@ -90,10 +90,10 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                 fileManagerLoaded.set(true);
                 FriendConnectionEvent connection = connectionEventBean.getLastEvent();
                 if(connection != null && connection.getType() == FriendConnectionEvent.Type.CONNECTED) {
-                    Collection<Friend> friends = connection.getSource().getFriends();
+                    Collection<? extends Friend> friends = connection.getSource().getFriends();
                     for(Friend friend : friends) {
                         tracker.sentRefresh(friend.getId());
-                        Map<String, FriendPresence> presences = friend.getFriendPresences();
+                        Map<String, FriendPresence> presences = friend.getPresences();
                         for(FriendPresence presence : presences.values()) {
                             Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);                                
                             if(notifier != null) {
@@ -141,7 +141,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                 Date lastRefreshTime = browseTracker.lastRefreshTime(friend.getId());
                 if(lastBrowseTime != null && (lastRefreshTime == null || lastBrowseTime.after(lastRefreshTime))) {
                     browseTracker.sentRefresh(friend.getId());
-                    Map<String,FriendPresence> presences = friend.getFriendPresences();
+                    Map<String,FriendPresence> presences = friend.getPresences();
                     for(FriendPresence presence : presences.values()) {
                         Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);
                         if(notifier != null) {

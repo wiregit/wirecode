@@ -511,7 +511,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                    if ((activePresence != null) && activePresence.hasFeatures(FileOfferFeature.ID)) {
                         sentFileOffer = performFileOffer(metadata, activePresence);
                    } else {
-                       for (FriendPresence presence : chatUser.getFriendPresences().values()) {
+                       for (FriendPresence presence : chatUser.getPresences().values()) {
                             sentFileOffer |= performFileOffer(metadata, presence);
                        }
                    }

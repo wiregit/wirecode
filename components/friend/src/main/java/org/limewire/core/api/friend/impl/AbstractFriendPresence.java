@@ -1,4 +1,4 @@
-package org.limewire.core.api.friend;
+package org.limewire.core.api.friend.impl;
 
 import java.lang.reflect.ParameterizedType;
 import java.net.URI;
@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureTransport;
@@ -13,10 +14,11 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListenerList;
 
 public abstract class AbstractFriendPresence implements FriendPresence {
+    
     private final Map<URI, Feature> features;
     private final Map<Class, FeatureTransport> featureTransports;
     private final EventBroadcaster<FeatureEvent> featureBroadcaster;
-
+    
     public AbstractFriendPresence() {
         this(new EventListenerList<FeatureEvent>());
     }
@@ -70,7 +72,7 @@ public abstract class AbstractFriendPresence implements FriendPresence {
             if(typeArgs != null && typeArgs.length > 0) {
                 java.lang.reflect.Type typeArg = typeArgs[0];
                 if(typeArg instanceof Class) {
-                    return (FeatureTransport<U>)featureTransports.get((Class) typeArg);
+                    return featureTransports.get(typeArg);
                 }
             }
         }

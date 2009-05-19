@@ -55,7 +55,7 @@ public class XMPPAddressResolverTest extends BaseTestCase {
             will(returnValue(user));
             allowing(connection).getFriend(with(any(String.class)));
             will(returnValue(null));
-            allowing(user).getFriendPresences();
+            allowing(user).getPresences();
             will(returnValue(Collections.singletonMap("me@you.com/resource", friendPresence)));
             allowing(friendPresence).getFeature(AuthTokenFeature.ID);
             will(returnValue(new AuthTokenFeature(new AuthToken() {
