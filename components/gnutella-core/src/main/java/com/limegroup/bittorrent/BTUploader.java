@@ -50,6 +50,7 @@ public class BTUploader implements Uploader {
 
     @Override
     public void stop() {
+        //TODO refactor to prompt from the gui
         cancelled.set(activityCallback.promptTorrentUploadCancel(torrent));
         if (cancelled.get()) {
             new ManagedThread(new Runnable() {
