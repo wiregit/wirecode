@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.util.UnboxUtils;
+
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.DownloaderType;
 
@@ -45,10 +47,7 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
     @Override
     public long getContentLength() {
         Long l = (Long) serialObjects.get("contentLength");
-        if (l == null)
-            return -1;
-        else
-            return l;
+        return UnboxUtils.toLong(l, -1);
     }
 
     @Override

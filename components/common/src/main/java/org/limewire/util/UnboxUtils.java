@@ -20,6 +20,14 @@ public class UnboxUtils {
             return obj;
         }
     }
+    
+    public static long toLong(Long obj, long defaultVaule) {
+        if(obj == null) {
+            return defaultVaule;
+        } else {
+            return obj;
+        }
+    }
 
     public static boolean toBoolean(Boolean obj) {
         if(obj == null) {
