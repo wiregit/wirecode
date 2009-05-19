@@ -33,6 +33,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
@@ -72,6 +73,22 @@ public class FacebookFriendConnection implements FriendConnection {
     private List<Cookie> finalCookies;
     private volatile FacebookJsonRestClient facebookClient;
 
+    // TODO hack
+    private final Network network = new Network() {
+        @Override
+        public String getCanonicalizedLocalID() {
+            return getUID();
+        }
+        @Override
+        public String getNetworkName() {
+            return getConfiguration().getNetworkName();
+        }
+        @Override
+        public Type getType() {
+            return Type.FACEBOOK;
+        }
+    };
+    
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
                                     @Named("facebookApiKey") Provider<String> apiKey,
@@ -344,5 +361,9 @@ public class FacebookFriendConnection implements FriendConnection {
 
     public FacebookJsonRestClient getClient() {
         return facebookClient;
+    }
+    
+    public Network getNetwork() {
+        return network;
     }
 }

@@ -13,15 +13,13 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.feature.FeatureEvent.Type;
 import org.limewire.core.api.friend.feature.features.AuthToken;
-import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.io.Address;
+import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -87,7 +85,8 @@ public class PresenceListener implements Runnable {
             for (int i = 0; i < users.length(); i++) {
                 JSONObject user = users.getJSONObject(i);
                 String id = user.getString("uid");
-                FacebookFriend friend = new FacebookFriend(id, user, connection.getConfiguration(), limeWireFriends.contains(id));
+                FacebookFriend friend = new FacebookFriend(id, user,
+                        connection.getNetwork(), limeWireFriends.contains(id));
                 LOG.debugf("adding {0}", friend);
                 addFriend(friend);
             }
@@ -192,6 +191,7 @@ public class PresenceListener implements Runnable {
     
     private class ConnectionListener implements EventListener<FriendConnectionEvent> {
         @Override
+        // TODO make this a @BlockingEvent
         public void handleEvent(FriendConnectionEvent event) {
             switch(event.getType()) {
             case CONNECTED:
