@@ -242,12 +242,12 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
 
     @Override
     public void addListener(EventListener<FileViewChangeEvent> listener) {
-        multicaster.addListener(listener);
+        multicaster.addListener(this, listener);
     }
 
     @Override
     public boolean removeListener(EventListener<FileViewChangeEvent> listener) {
-        return multicaster.removeListener(listener);
+        return multicaster.removeListener(this, listener);
     }
     
     /**
