@@ -43,7 +43,7 @@ class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
     }
     
     /**
-     * A token used to represent a bencoded mapping of a Key -> Value
+     * A token used to represent a bencoded mapping of a Key -> Value.
      * The Key must be a String.
      */
     private static class BEEntry extends Token<Object> {
