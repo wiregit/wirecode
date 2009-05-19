@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.libtorrent.LibTorrentState;
@@ -30,9 +31,9 @@ public class BTUploader implements Uploader {
 
     private final Torrent torrent;
 
-    private volatile URN urn = null;
+	private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
-    private boolean cancelled = false;
+    private volatile URN urn = null;
 
     public BTUploader(Torrent torrent, ActivityCallback activityCallback) {
         this.torrent = torrent;
@@ -40,7 +41,7 @@ public class BTUploader implements Uploader {
         torrent.addListener(new EventListener<TorrentEvent>() {
             public void handleEvent(TorrentEvent event) {
                 if (event == TorrentEvent.STOPPED) {
-                    cancelled = true;
+                    cancelled.set(true);
                     BTUploader.this.activityCallback.removeUpload(BTUploader.this);
                 }
             };
@@ -49,8 +50,8 @@ public class BTUploader implements Uploader {
 
     @Override
     public void stop() {
-        cancelled = activityCallback.promptTorrentUploadCancel(torrent);
-        if (cancelled) {
+        cancelled.set(activityCallback.promptTorrentUploadCancel(torrent));
+        if (cancelled.get()) {
             new ManagedThread(new Runnable() {
                 @Override
                 public void run() {
@@ -99,14 +100,14 @@ public class BTUploader implements Uploader {
 
     @Override
     public UploadStatus getState() {
+        if (cancelled.get()) {
+            return UploadStatus.CANCELLED;
+        }
+        
         LibTorrentStatus status = torrent.getStatus();
 
         if (status == null) {
             return UploadStatus.CONNECTING;
-        }
-
-        if (cancelled) {
-            return UploadStatus.CANCELLED;
         }
 
         if (status.isPaused()) {
