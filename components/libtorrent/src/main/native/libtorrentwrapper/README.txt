@@ -6,7 +6,10 @@ bjam --toolset=gcc boost=source link=shared variant=release character-set=unicod
 bjam --toolset=gcc boost=source link=static variant=release character-set=unicode invariant-checks=off debug-symbols=off
 
 #building libtorrent on osx
-bjam --toolset=darwin boost=source link=static variant=release character-set=unicode invariant-checks=off debug-symbols=off
+export CXXFLAGS=" -arch x86_64"
+export LDFLAGS=" -arch x86_64"
+bjam --toolset=darwin boost=source link=static variant=release character-set=unicode invariant-checks=off debug-symbols=off architecture=x86 address-model=64
+
 
 
 
