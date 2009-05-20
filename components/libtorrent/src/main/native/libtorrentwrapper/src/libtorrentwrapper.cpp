@@ -32,7 +32,7 @@
 
 using libtorrent::asio::ip::tcp;
 
-libtorrent::session* s = 0;
+libtorrent::session* session = 0;
 std::string savePath;
 typedef libtorrent::big_number sha1_hash;
 
@@ -190,7 +190,7 @@ void get_wrapper_torrent_status(libtorrent::torrent_handle handle,
 
 libtorrent::torrent_handle findTorrentHandle(const char* sha1String) {
 	sha1_hash sha1 = getSha1Hash(sha1String);
-	libtorrent::torrent_handle torrent_handle = s->find_torrent(sha1);
+	libtorrent::torrent_handle torrent_handle = session->find_torrent(sha1);
 	return torrent_handle;
 }
 
@@ -278,8 +278,8 @@ extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(
 	W_TRY;
 		int num_resume_data = 0;
 
-		std::vector<libtorrent::torrent_handle> handles = s->get_torrents();
-		s->pause();
+		std::vector<libtorrent::torrent_handle> handles = session->get_torrents();
+		session->pause();
 
 		for (std::vector<libtorrent::torrent_handle>::iterator i =
 				handles.begin(); i != handles.end(); ++i) {
@@ -303,14 +303,14 @@ extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(
 			std::cout << "waiting for resume: " << num_resume_data << std::endl;
 #endif
 
-			libtorrent::alert const* alert = s->wait_for_alert(
+			libtorrent::alert const* alert = session->wait_for_alert(
 					libtorrent::seconds(10));
 
 			// if we don't get an alert within 10 seconds, abort
 			if (alert == 0)
 				break;
 
-			std::auto_ptr<libtorrent::alert> holder = s->pop_alert();
+			std::auto_ptr<libtorrent::alert> holder = session->pop_alert();
 
 			wrapper_alert_info* alertInfo = new wrapper_alert_info();
 			process_alert(alert, alertInfo);
@@ -329,38 +329,38 @@ extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(
 
 extern "C" EXTERN_RET init(const char* path) {
 	W_TRY;
-		s = new libtorrent::session;
+		session = new libtorrent::session;
 		std::string newPath(path);
 		savePath = newPath;
-		s->set_alert_mask(0xffffffff);
-		s->listen_on(std::make_pair(6881, 6889));
-		s->add_extension(&libtorrent::create_metadata_plugin);
-		s->add_extension(&libtorrent::create_ut_metadata_plugin);
-		s->add_extension(&libtorrent::create_ut_pex_plugin);
-		s->add_extension(&libtorrent::create_smart_ban_plugin);
-		s->start_upnp();
-		s->start_natpmp();
+		session->set_alert_mask(0xffffffff);
+		session->listen_on(std::make_pair(6881, 6889));
+		session->add_extension(&libtorrent::create_metadata_plugin);
+		session->add_extension(&libtorrent::create_ut_metadata_plugin);
+		session->add_extension(&libtorrent::create_ut_pex_plugin);
+		session->add_extension(&libtorrent::create_smart_ban_plugin);
+		session->start_upnp();
+		session->start_natpmp();
 
 	W_HANDLE_EXCEPTION;
 }
 
 extern "C" EXTERN_RET abort_torrents() {
 	W_TRY;
-		s->pause();
-		s->stop_upnp();
-		s->stop_natpmp();
+		session->pause();
+		session->stop_upnp();
+		session->stop_natpmp();
 
-		std::vector<libtorrent::torrent_handle> handles = s->get_torrents();
+		std::vector<libtorrent::torrent_handle> handles = session->get_torrents();
 		while (handles.size() > 1) {
 			for (std::vector<libtorrent::torrent_handle>::iterator i =
 					handles.begin(); i != handles.end(); ++i) {
 				libtorrent::torrent_handle& h = *i;
-				s->remove_torrent(h);
+				session->remove_torrent(h);
 			}
-			handles = s->get_torrents();
+			handles = session->get_torrents();
 		}
-		s->abort();
-		delete s;
+		session->abort();
+		delete session;
 	W_HANDLE_EXCEPTION;
 }
 
@@ -420,7 +420,7 @@ extern "C" EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
 			}
 		}
 
-		libtorrent::torrent_handle h = s->add_torrent(p);
+		libtorrent::torrent_handle h = session->add_torrent(p);
 
 	W_HANDLE_EXCEPTION;
 }
@@ -438,7 +438,7 @@ extern "C" EXTERN_RET remove_torrent(const char* id) {
 	W_TRY;
 
 		libtorrent::torrent_handle h = findTorrentHandle(id);
-		s->remove_torrent(h);
+		session->remove_torrent(h);
 
 	W_HANDLE_EXCEPTION;
 }
@@ -568,7 +568,7 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 
 		std::auto_ptr<libtorrent::alert> alerts;
 
-		alerts = s->pop_alert();
+		alerts = session->pop_alert();
 
 		while (alerts.get()) {
 			libtorrent::alert* alert = alerts.get();
@@ -580,7 +580,7 @@ extern "C" EXTERN_RET get_alerts(void(*alertCallback)(void*)) {
 
 			delete alertInfo;
 
-			alerts = s->pop_alert();
+			alerts = session->pop_alert();
 		}
 
 	W_HANDLE_EXCEPTION;
