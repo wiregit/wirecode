@@ -12,7 +12,6 @@ import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.InsufficientDataException;
