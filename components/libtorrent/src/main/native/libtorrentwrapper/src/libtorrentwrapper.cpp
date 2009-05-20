@@ -388,11 +388,11 @@ extern "C" EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
 
 		sha1_hash sha1 = getSha1Hash(sha1String);
 
-		libtorrent::add_torrent_params p;
-		p.save_path = savePath;
-		p.info_hash = sha1;
-		p.tracker_url = trackerURI;
-		p.auto_managed = false;
+		libtorrent::add_torrent_params torrent_params;
+		torrent_params.save_path = savePath;
+		torrent_params.info_hash = sha1;
+		torrent_params.tracker_url = trackerURI;
+		torrent_params.auto_managed = false;
 
 		std::vector<char> resume_buf;
 
@@ -400,7 +400,7 @@ extern "C" EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
 			boost::filesystem::ifstream torrent_file(torrentPath,
 					std::ios_base::binary);
 			if (!torrent_file.fail()) {
-				p.ti = new libtorrent::torrent_info(torrentPath);
+				torrent_params.ti = new libtorrent::torrent_info(torrentPath);
 			}
 		}
 
@@ -416,11 +416,11 @@ extern "C" EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
 
 				std::copy(iter, ios_iter, std::back_inserter(resume_buf));
 
-				p.resume_data = &resume_buf;
+				torrent_params.resume_data = &resume_buf;
 			}
 		}
 
-		libtorrent::torrent_handle h = session->add_torrent(p);
+		libtorrent::torrent_handle h = session->add_torrent(torrent_params);
 
 	W_HANDLE_EXCEPTION;
 }
