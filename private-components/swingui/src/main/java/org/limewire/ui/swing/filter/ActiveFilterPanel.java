@@ -54,6 +54,7 @@ class ActiveFilterPanel extends JXPanel {
         label.setFont(textFont);
         label.setForeground(textColor);
         label.setHorizontalAlignment(JLabel.LEADING);
+        label.setVerticalAlignment(JLabel.CENTER);
         label.setText((String) removeAction.getValue(Action.NAME));
         
         removeButton.setAction(removeAction);
