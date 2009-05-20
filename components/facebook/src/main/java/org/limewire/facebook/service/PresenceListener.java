@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -15,19 +16,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.io.Address;
-import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
 import com.google.code.facebookapi.FacebookException;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -43,11 +38,11 @@ public class PresenceListener implements Runnable {
 
     private final MutableFriendManager friendManager;
     
-    private final ConnectionListener connectionListener = new ConnectionListener();
-
     private LiveMessageAddressTransport addressTransport;
 
     private LiveMessageAuthTokenTransport authTokenTransport;
+    
+    private final AtomicBoolean firstRun = new AtomicBoolean(true);
     
     @AssistedInject
     PresenceListener(@Assisted FacebookFriendConnection connection,
@@ -62,11 +57,6 @@ public class PresenceListener implements Runnable {
         this.deserializer = buddyListResponseDeserializerFactory.create(connection);
         this.addressTransport = liveAddressTransportFactory.create(connection);
         authTokenTransport = liveAuthTokenTransportFactory.create(connection);
-    }
-    
-    @Inject
-    void register(ListenerSupport<FriendConnectionEvent> listenerSupport) {
-        listenerSupport.addListener(connectionListener);
     }
     
     /**
@@ -120,6 +110,9 @@ public class PresenceListener implements Runnable {
     }
     
     public void run() {
+        if (firstRun.compareAndSet(true, false)) {
+            fetchAllFriends();
+        }
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair("buddy_list", "1"));
         nvps.add(new BasicNameValuePair("notifications", "1"));
@@ -188,17 +181,5 @@ public class PresenceListener implements Runnable {
             LOG.debugf("offline friend already removed: {0}", friend);
         }
     }
-    
-    private class ConnectionListener implements EventListener<FriendConnectionEvent> {
-        @Override
-        // TODO make this a @BlockingEvent
-        public void handleEvent(FriendConnectionEvent event) {
-            switch(event.getType()) {
-            case CONNECTED:
-                LOG.debug("connect event");
-                fetchAllFriends();
-                break;
-            }
-        }
-    }
+ 
 }
