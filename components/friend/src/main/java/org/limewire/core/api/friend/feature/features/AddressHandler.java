@@ -39,7 +39,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
                           FeatureRegistry featureRegistry) {
         this.addressRegistry = addressRegistry;
         this.pendingAddresses = new HashMap<String, Address>();
-        connections = new HashSet<FriendConnection>();
+        this.connections = new HashSet<FriendConnection>();
         new AddressIQFeatureInitializer().register(featureRegistry);
     }
                                                       
@@ -49,12 +49,14 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
         connectionEventListenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             public void handleEvent(FriendConnectionEvent event) {
-                switch (event.getType()) {
+                synchronized (AddressHandler.this) {
+                    switch (event.getType()) {
                     case CONNECTED:
                         connections.add(event.getSource()); 
                         break;
                     case DISCONNECTED:
                         connections.remove(event.getSource());
+                    }
                 }
             }
         });
@@ -85,7 +87,6 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
     @Override
     public void handleEvent(AddressEvent event) {
         if (event.getType().equals(AddressEvent.Type.ADDRESS_CHANGED)) {
-            // TODO async?
             LOG.debugf("new address to publish: {0}", event);
             synchronized (this) {
                 for(FriendConnection connection : connections) {

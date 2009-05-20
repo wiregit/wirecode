@@ -54,11 +54,17 @@ public class ChatClient {
             int channelBeginPos = homePage.indexOf(channelPrefix)
                     + channelPrefix.length();
             if (channelBeginPos < channelPrefix.length()){
-                throw new IOException("can't find channel");
+                channel = FacebookSettings.CHAT_CHANNEL.get();
+                // no cached value
+                if (channel.length() == 0) {
+                    throw new IOException("can't find channel");
+                }
+                LOG.debugf("using cached channel: {0}", channel);
             }
             else {
                 channel = homePage.substring(channelBeginPos,
                         channelBeginPos + 2);
+                FacebookSettings.CHAT_CHANNEL.set(channel);
             }
 
             String post_form_id;

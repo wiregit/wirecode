@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
@@ -63,7 +62,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
         initializePresenceFeatures(presence, features);
     }
     
-    private void handleDiscInfoRequest(JSONObject message) throws JSONException, FriendException {
+    private void handleDiscInfoRequest(JSONObject message) throws JSONException {
         String friendId = message.getString("from");
         FacebookFriend friend = connection.getFriend(friendId);
         if (friend == null) {
@@ -93,8 +92,6 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                 handleDiscInfoRequest(message);
             }
         } catch (URISyntaxException e) {
-            throw new JSONException(e);
-        } catch (FriendException e) {
             throw new JSONException(e);
         }
     }
@@ -127,13 +124,9 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                     return;
                 }
                 FacebookFriendPresence presence = facebookFriend.getFacebookPresence();
-                try {
-                    Map<String, String> message = new HashMap<String, String>();
-                    message.put("from", connection.getUID());
-                    connection.sendLiveMessage(presence, REQUEST_TYPE, message);
-                } catch (FriendException e) {
-                    throw new RuntimeException(e);
-                }
+                Map<String, String> message = new HashMap<String, String>();
+                message.put("from", connection.getUID());
+                connection.sendLiveMessage(presence, REQUEST_TYPE, message);
             }
         });
     }

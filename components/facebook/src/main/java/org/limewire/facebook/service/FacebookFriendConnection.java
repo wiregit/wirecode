@@ -128,7 +128,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.featureEventBroadcaster = featureEventBroadcaster;
         this.friendPresenceBroadcaster = friendPresenceBroadcaster;
         this.friendManager = friendManager;
-        executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));
+        this.executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));
         this.addressTransport = addressTransportFactory.create(this);
         this.authTokenTransport = authTokenTransportFactory.create(this);
     }
@@ -363,18 +363,23 @@ public class FacebookFriendConnection implements FriendConnection {
         }
     }
 
-    public void sendLiveMessage(FriendPresence presence, String type, Map<String, ?> messageMap) throws FriendException {
+    public void sendLiveMessage(FriendPresence presence, String type, Map<String, ?> messageMap) {
         sendLiveMessage(Long.parseLong(presence.getPresenceId()), type, messageMap);
     }
     
-    public void sendLiveMessage(Long userId, String type, Map<String, ?> messageMap) throws FriendException {
-        try {
-            JSONObject message = new JSONObject(messageMap);
-            LOG.debugf("live message {0} to {1} : {2}", type, userId, message);
-            facebookClient.liveMessage_send(userId, type, message);
-        } catch (FacebookException e) {
-            throw new FriendException(e);
-        }
+    public void sendLiveMessage(final Long userId, final String type, Map<String, ?> messageMap) {
+        final JSONObject message = new JSONObject(messageMap);
+        executorService.submit(new Runnable() {
+            public void run() {
+                try {
+                    LOG.debugf("live message {0} to {1} : {2}", type, userId, message);
+                    facebookClient.liveMessage_send(userId, type, message);
+                }
+                catch (FacebookException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     public FacebookJsonRestClient getClient() {
