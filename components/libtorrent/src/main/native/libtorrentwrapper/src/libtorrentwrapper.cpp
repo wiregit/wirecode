@@ -52,7 +52,7 @@ typedef libtorrent::big_number sha1_hash;
 
 #define EXTERN_TRY_CONTAINER_END \
 } catch (std::exception e) \
-{	wTHROW(new wrapper_exception(EXCEPTION_RETHROWN, e.what())); \
+{	wTHROW(new wrapper_exception(e)); \
 } catch (...) \
 {	wTHROW(new wrapper_exception()); \
 } \
@@ -62,8 +62,13 @@ struct wrapper_exception {
 	int type;
 	const char* message;
 
-	wrapper_exception(int type, const char* message) {
-		this->type = type;
+	wrapper_exception(std::exception e) {
+		this->type = EXCEPTION_RETHROWN;
+		this->message = e.what();
+	}
+
+	wrapper_exception(char* message) {
+		this->type = EXCEPTION_MANUALLY_THROWN;
 		this->message = message;
 	}
 
