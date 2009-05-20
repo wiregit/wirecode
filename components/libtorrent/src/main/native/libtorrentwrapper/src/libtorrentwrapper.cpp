@@ -107,9 +107,7 @@ struct wrapper_alert_info {
 	}
 };
 
-void getString(int num, char* heap) {
-	std::stringstream oss;
-	oss << num;
+void getString(std::stringstream& oss, char* heap) {
 	std::string str = oss.str();
 	const char* chars = str.c_str();
 
@@ -118,33 +116,26 @@ void getString(int num, char* heap) {
 		heap[i] = chars[i];
 	}
 	heap[str.length()] = '\0';
+}
+
+void getIntString(int num, char* heap) {
+	std::stringstream oss;
+	oss << num;
+	getString(oss, heap);
 }
 
 void getSizeTypeString(libtorrent::size_type size, char* heap) {
 	std::stringstream oss;
 	oss << size;
-	std::string str = oss.str();
-	const char* chars = str.c_str();
-
-	//memcpy(&heap, &chars, str.length()+1);
-	for (int i = 0; i < str.length(); i++) {
-		heap[i] = chars[i];
-	}
-	heap[str.length()] = '\0';
+	getString(oss, heap);
 }
 
-void getSha1String(sha1_hash sha1, char* heap) {
+void getSha1String(libtorrent::sha1_hash sha1, char* heap) {
 	std::stringstream oss;
 	oss << sha1;
-	std::string str = oss.str();
-	const char* chars = str.c_str();
-
-	//memcpy(&heap, &chars, str.length()+1);
-	for (int i = 0; i < str.length(); i++) {
-		heap[i] = chars[i];
-	}
-	heap[str.length()] = '\0';
+	getString(oss, heap);
 }
+
 
 sha1_hash getSha1Hash(const char* sha1String) {
 	sha1_hash sha1;
@@ -519,7 +510,7 @@ extern "C" EXTERN_RET get_num_viewable_peers(const char* id, char* num_peers) {
 		// Limit the maximum number that can be viewed to 300
 		if (num > 300)  num = 300;
 		
-		getString(num, num_peers);
+		getIntString(num, num_peers);
 
 	EXTERN_BOTTOM;
 }
