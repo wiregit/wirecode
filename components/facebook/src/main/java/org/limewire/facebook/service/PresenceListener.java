@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -14,11 +13,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.friend.MutableFriendManager;
-import org.limewire.core.api.friend.feature.features.AuthToken;
-import org.limewire.io.Address;
-import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -32,31 +26,14 @@ public class PresenceListener implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(PresenceListener.class);
     
-    private final EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster;
     private final FacebookFriendConnection connection;
-    private final BuddyListResponseDeserializer deserializer;
-
-    private final MutableFriendManager friendManager;
-    
-    private LiveMessageAddressTransport addressTransport;
-
-    private LiveMessageAuthTokenTransport authTokenTransport;
+    private final BuddyListResponseDeserializer deserializer = new BuddyListResponseDeserializer();
     
     private final AtomicBoolean firstRun = new AtomicBoolean(true);
     
     @AssistedInject
-    PresenceListener(@Assisted FacebookFriendConnection connection,
-                     MutableFriendManager friendManager,
-                     EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster,                     
-                     BuddyListResponseDeserializerFactory buddyListResponseDeserializerFactory,
-                     LiveMessageAddressTransportFactory liveAddressTransportFactory,
-                     LiveMessageAuthTokenTransportFactory liveAuthTokenTransportFactory) {
-        this.friendManager = friendManager;
-        this.friendPresenceBroadcaster = friendPresenceBroadcaster;
+    PresenceListener(@Assisted FacebookFriendConnection connection) {
         this.connection = connection;
-        this.deserializer = buddyListResponseDeserializerFactory.create(connection);
-        this.addressTransport = liveAddressTransportFactory.create(connection);
-        authTokenTransport = liveAuthTokenTransportFactory.create(connection);
     }
     
     /**
@@ -78,7 +55,7 @@ public class PresenceListener implements Runnable {
                 FacebookFriend friend = new FacebookFriend(id, user,
                         connection.getNetwork(), limeWireFriends.contains(id));
                 LOG.debugf("adding {0}", friend);
-                addFriend(friend);
+                connection.addKnownFriend(friend);
             }
         } catch (FacebookException e) {
             LOG.debug("friend error", e);
@@ -129,13 +106,12 @@ public class PresenceListener implements Runnable {
             } 
             LOG.debugf("buddy list response: {0}", responseStr);
 
-            Map<String, FacebookFriendPresence> onlineFriends = deserializer.deserialize(responseStr);
+            Set<String> onlineFriendIds = deserializer.parseOnlineFriendIds(responseStr);
             for (FacebookFriend friend : connection.getFriends()) {
-                FacebookFriendPresence presence = onlineFriends.get(friend.getId());
-                if (presence != null) {
-                    updatePresence(friend, presence);
+                if (onlineFriendIds.contains(friend.getId())) {
+                    connection.setAvailable(friend);
                 } else {
-                    removePresence(friend);
+                    connection.removePresence(friend);
                 }
             }
         } catch (JSONException e) {
@@ -144,42 +120,6 @@ public class PresenceListener implements Runnable {
             e.printStackTrace();
         }
         
-    }
-    
-    private void addFriend(FacebookFriend friend) {
-        connection.addFriend(friend);
-        friendManager.addKnownFriend(friend);
-    }
-    
-    private void updatePresence(FacebookFriend friend, FacebookFriendPresence presence) {
-        FacebookFriendPresence oldPresences = friend.getFacebookPresence();
-        if (oldPresences == null) {
-            LOG.debugf("new friend is available: {0}", friend);
-            if (friend.hasLimeWireAppInstalled()) {
-                addTransports(presence);
-            }
-            friend.setPresence(presence);
-            friendManager.addAvailableFriend(friend);
-            friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.ADDED));
-        } else {
-            LOG.debugf("friend already available: {0}", friend);
-        }
-    } 
-    
-    private void addTransports(FacebookFriendPresence presence) {
-        presence.addTransport(Address.class, addressTransport);
-        presence.addTransport(AuthToken.class, authTokenTransport);
-    }
-
-    private void removePresence(FacebookFriend friend) {
-        FacebookFriendPresence presence = friend.getFacebookPresence();
-        if (presence != null) {
-            LOG.debugf("removing offline friend {0}", friend);
-            friendManager.removeAvailableFriend(friend);
-            friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.REMOVED));
-        } else {
-            LOG.debugf("offline friend already removed: {0}", friend);
-        }
     }
  
 }

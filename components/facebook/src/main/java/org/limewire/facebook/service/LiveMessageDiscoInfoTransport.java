@@ -16,7 +16,6 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
-import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
@@ -36,7 +35,6 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     
     private final FacebookFriendConnection connection;
     private final FeatureRegistry featureRegistry;
-    private final Map<String, JSONArray> pendingPresences = new HashMap<String, JSONArray>();
     
     @AssistedInject
     LiveMessageDiscoInfoTransport(@Assisted FacebookFriendConnection connection,
@@ -53,45 +51,60 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
         registry.register(RESPONSE_TYPE, this);
     }
 
+    private void handleDiscInfoResponse(JSONObject message) throws JSONException, URISyntaxException {
+        JSONArray features = message.getJSONArray("features");     
+        String from = message.getString("from");
+        FacebookFriend friend = connection.getFriend(from);
+        if (friend == null) {
+            LOG.debugf("no friend for id {0}", from);
+            return;
+        }
+        FriendPresence presence = friend.getFacebookPresence();
+        initializePresenceFeatures(presence, features);
+    }
+    
+    private void handleDiscInfoRequest(JSONObject message) throws JSONException, FriendException {
+        String friendId = message.getString("from");
+        FacebookFriend friend = connection.getFriend(friendId);
+        if (friend == null) {
+            LOG.debugf("disc info from non-friend: {0}", friendId);
+            return;
+        }
+        // this is the first unconditional message received, so the friend
+        // might not be in list of online friends yet, mark friend as available
+        // to obtain presence
+        FacebookFriendPresence presence = connection.setAvailable(friend);
+        List<String> supported = new ArrayList<String>();
+        for(URI feature : featureRegistry) {
+            supported.add(feature.toASCIIString());
+        }
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("from", connection.getUID());
+        response.put("features", supported);
+        connection.sendLiveMessage(presence, RESPONSE_TYPE, response);   
+    }
+    
     @Override
     public void handle(String messageType, JSONObject message) throws JSONException {
-        synchronized (this) {
-            try {
-                if(messageType.equals(RESPONSE_TYPE)) {
-                    JSONArray features = message.getJSONArray("features");     
-                    String from = message.getString("from");
-                    FacebookFriend friend = connection.getFriend(from);
-                    if(friend == null) {
-                        return;
-                    }
-                    FriendPresence presence = friend.getFacebookPresence();
-                    if (presence != null) {
-                        for(int i = 0; i < features.length(); i++) {
-                            String feature = features.getString(i);
-                            FeatureInitializer initializer = featureRegistry.get(new URI(feature));
-                            if (initializer != null) {
-                                initializer.initializeFeature(friend.getFacebookPresence());
-                            }
-                        }
-                    } else {
-                        LOG.debugf("pending features {0} from {1}", features, from);
-                        pendingPresences.put(from, features);
-                    }
-                } else if(messageType.equals(REQUEST_TYPE)) {                
-                    Long from = message.getLong("from");
-                    List<String> supported = new ArrayList<String>();
-                    for(URI feature : featureRegistry) {
-                        supported.add(feature.toASCIIString());
-                    }
-                    Map<String, Object> response = new HashMap<String, Object>();
-                    response.put("from", connection.getUID());
-                    response.put("features", supported);
-                    connection.sendLiveMessage(from, RESPONSE_TYPE, response);
-                }
-            } catch (URISyntaxException e) {
-                throw new JSONException(e);
-            } catch (FriendException e) {
-                throw new JSONException(e);
+        try {
+            if(messageType.equals(RESPONSE_TYPE)) {
+                handleDiscInfoResponse(message);
+            } else if(messageType.equals(REQUEST_TYPE)) {                
+                handleDiscInfoRequest(message);
+            }
+        } catch (URISyntaxException e) {
+            throw new JSONException(e);
+        } catch (FriendException e) {
+            throw new JSONException(e);
+        }
+    }
+    
+    private void initializePresenceFeatures(FriendPresence presence, JSONArray features) throws JSONException, URISyntaxException {
+        for(int i = 0; i < features.length(); i++) {
+            String feature = features.getString(i);
+            FeatureInitializer initializer = featureRegistry.get(new URI(feature));
+            if (initializer != null) {
+                initializer.initializeFeature(presence);
             }
         }
     }
@@ -101,40 +114,25 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
         availableFriends.addListener(new EventListener<FriendEvent>() {
             @Override
             public void handleEvent(FriendEvent event) {  
-                synchronized (LiveMessageDiscoInfoTransport.this) {
-                    if(event.getType() != FriendEvent.Type.ADDED) {
-                        return;
-                    }
-                    Friend friend = event.getData();
-                    if (!(friend instanceof FacebookFriend)) {
-                        return;
-                    }
-                    FacebookFriendPresence presence = ((FacebookFriend)friend).getFacebookPresence();
-                    if (!presence.hasFeatures(LimewireFeature.ID)) {
-                        LOG.debugf("not a facebook friend {0}", presence);
-                        return;
-                    }
-                    try {
-                        Map<String, String> message = new HashMap<String, String>();
-                        message.put("from", connection.getUID());
-                        connection.sendLiveMessage(presence, REQUEST_TYPE, message);
-                        JSONArray features = pendingPresences.remove(presence.getPresenceId());
-                        if (features != null) {
-                            for(int i = 0; i < features.length(); i++) {
-                                String feature = features.getString(i);
-                                FeatureInitializer initializer = featureRegistry.get(new URI(feature));
-                                if (initializer != null) {
-                                    initializer.initializeFeature(presence);
-                                }
-                            }
-                        }
-                    } catch (FriendException e) {
-                        throw new RuntimeException(e);
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
+                if(event.getType() != FriendEvent.Type.ADDED) {
+                    return;
+                }
+                Friend friend = event.getData();
+                if (!(friend instanceof FacebookFriend)) {
+                    return;
+                }
+                FacebookFriend facebookFriend = (FacebookFriend)friend;
+                if (!facebookFriend.hasLimeWireAppInstalled()) {
+                    LOG.debugf("not a limewire friend: {0}", friend);
+                    return;
+                }
+                FacebookFriendPresence presence = facebookFriend.getFacebookPresence();
+                try {
+                    Map<String, String> message = new HashMap<String, String>();
+                    message.put("from", connection.getUID());
+                    connection.sendLiveMessage(presence, REQUEST_TYPE, message);
+                } catch (FriendException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });

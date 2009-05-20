@@ -23,7 +23,7 @@ public class FacebookFriend extends AbstractFriend {
     /**
      * The presence of the facebook friend, null when friend is not online.
      */
-    private final AtomicReference<FacebookFriendPresence> presence = new AtomicReference<FacebookFriendPresence>();
+    private volatile FacebookFriendPresence presence = null;
     
     private final boolean hasLimeWireAppInstalled;
 
@@ -66,12 +66,12 @@ public class FacebookFriend extends AbstractFriend {
 
     @Override
     public FriendPresence getActivePresence() {
-        return presence.get();
+        return presence;
     }
 
     @Override
     public Map<String, FriendPresence> getPresences() {
-        FriendPresence copy = presence.get();
+        FriendPresence copy = presence;
         if (copy != null) {
             return Collections.singletonMap(id, copy);
         } else {
@@ -86,7 +86,7 @@ public class FacebookFriend extends AbstractFriend {
 
     @Override
     public boolean hasActivePresence() {
-        return presence.get() != null;
+        return presence != null;
     }
 
     @Override
@@ -96,7 +96,7 @@ public class FacebookFriend extends AbstractFriend {
 
     @Override
     public boolean isSignedIn() {
-        return presence.get() != null;
+        return presence != null;
     }
 
     @Override
@@ -117,17 +117,14 @@ public class FacebookFriend extends AbstractFriend {
     }
     
     void setPresence(FacebookFriendPresence facebookFriendPresence) {
-        presence.set(facebookFriendPresence);
-        if (hasLimeWireAppInstalled) {
-            facebookFriendPresence.addFeature(new LimewireFeature());
-        }
+        presence = facebookFriendPresence;
     }
     
     /**
      * @return null if friend is not available for chat
      */
     public FacebookFriendPresence getFacebookPresence() {
-        return presence.get();
+        return presence;
     }
 
     public boolean hasLimeWireAppInstalled() {

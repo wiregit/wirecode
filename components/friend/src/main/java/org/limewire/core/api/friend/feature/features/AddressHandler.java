@@ -95,11 +95,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
                             if(presence.hasFeatures(LimewireFeature.ID)) {
                                 try {
                                     FeatureTransport<Address> transport = presence.getTransport(AddressFeature.class);
-                                    if (transport != null) {
-                                        transport.sendFeature(presence, address);
-                                    } else {
-                                        LOG.debugf("no address transport for: {0}", presence);
-                                    }
+                                    transport.sendFeature(presence, address);
                                 } catch (FriendException e) {
                                     LOG.debugf("couldn't send address", e);
                                 }
