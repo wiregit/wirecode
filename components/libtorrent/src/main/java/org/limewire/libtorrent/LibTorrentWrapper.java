@@ -29,7 +29,7 @@ public class LibTorrentWrapper {
      * Initializes the LibTorrent library. Finding necessary dependencies first,
      * then loading the libtorrent library as a jna lib.
      */
-    public void initialize(String path) {
+    public void initialize() {
         if (OSUtils.isWindows()) {
             System.loadLibrary("mingwm10");
             System.loadLibrary("boost_system-mgw34-mt-1_38");
@@ -46,20 +46,20 @@ public class LibTorrentWrapper {
         // TODO make sure right libraries are loaded on linux too.
         this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
 
-        init(path);
+        init();
     }
 
     public void add_torrent(String sha1, String trackerURI, String torrentPath,
-            String fastResumePath) {
+            String savePath, String fastResumePath) {
         LOG.debugf("before add_torrent: {0}", sha1);
-        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, torrentPath, fastResumePath));
+        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, torrentPath, savePath, fastResumePath));
         LOG.debugf("after add_torrent: {0}", sha1);
     }
 
-    private void init(String path) {
-        LOG.debugf("before init: {0}", path);
-        catchWrapperException(libTorrent.init(path));
-        LOG.debugf("after init: {0}", path);
+    private void init() {
+        LOG.debugf("before init");
+        catchWrapperException(libTorrent.init());
+        LOG.debugf("after init");
     }
 
     public void freeze_and_save_all_fast_resume_data(AlertCallback alertCallback) {

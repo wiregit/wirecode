@@ -36,11 +36,6 @@ public interface TorrentManager extends Service {
     public List<String> getPeers(Torrent torrent);
 
     /**
-     * Returns the folder setup to download torrents to.
-     */
-    public File getTorrentDownloadFolder();
-
-    /**
      * Moves the underlying storage of the torrent to the specified directory.
      * Currently this is used to move an a completed torrent from the incomplete
      * directory to the complete directory, without interrupting any seeding

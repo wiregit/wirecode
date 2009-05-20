@@ -33,7 +33,7 @@
 using libtorrent::asio::ip::tcp;
 
 libtorrent::session* session = 0;
-std::string savePath;
+
 typedef libtorrent::big_number sha1_hash;
 
 #ifdef NO_ERROR
@@ -327,11 +327,9 @@ extern "C" EXTERN_RET freeze_and_save_all_fast_resume_data(
 	W_HANDLE_EXCEPTION;
 }
 
-extern "C" EXTERN_RET init(const char* path) {
+extern "C" EXTERN_RET init() {
 	W_TRY;
 		session = new libtorrent::session;
-		std::string newPath(path);
-		savePath = newPath;
 		session->set_alert_mask(0xffffffff);
 		session->listen_on(std::make_pair(6881, 6889));
 		session->add_extension(&libtorrent::create_metadata_plugin);
@@ -375,7 +373,7 @@ extern "C" EXTERN_RET move_torrent(const char* id, const char* path) {
 }
 
 extern "C" EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
-		char* torrentPath, char* fastResumePath) {
+		char* torrentPath, char* savePath, char* fastResumePath) {
 	W_TRY;
 
 #ifdef LIME_DEBUG

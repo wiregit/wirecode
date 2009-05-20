@@ -23,6 +23,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Class representing the torrent being downloaded. It is updated periodically
@@ -54,6 +55,8 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     private String trackerURL = null;
 
     private long totalSize = -1;
+    
+    private final Provider<File> torrentDownloadFolderProvider;
 
     private final AtomicBoolean started = new AtomicBoolean(false);
 
@@ -62,12 +65,15 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
     @Inject
-    public Torrent(TorrentManager torrentManager) {
+    public Torrent(TorrentManager torrentManager, 
+            @TorrentDownloadFolder Provider<File> torrentDownloadFolderProvider) {
         this.torrentManager = torrentManager;
-        this.listeners = new AsynchronousMulticaster<TorrentEvent>(torrentManager
+        this.torrentDownloadFolderProvider = torrentDownloadFolderProvider;
+        
+        listeners = new AsynchronousMulticaster<TorrentEvent>(torrentManager
                 .getTorrentExecutor());
-        this.status = new AtomicReference<LibTorrentStatus>();
-        this.paths = new ArrayList<String>();
+        status = new AtomicReference<LibTorrentStatus>();
+        paths = new ArrayList<String>();
     }
 
     public void addListener(EventListener<TorrentEvent> listener) {
@@ -102,7 +108,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
         }
         this.totalSize = totalSize;
 
-        File torrentDownloadFolder = torrentManager.getTorrentDownloadFolder();
+        File torrentDownloadFolder = torrentDownloadFolderProvider.get();
 
         if (name != null) {
             this.name = name;
@@ -486,5 +492,9 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
                 fastResumeFile = new File(alert.data);
             }
         }
+    }
+
+    public String getIncompleteDownloadPath() {
+        return incompleteFile.getParentFile().getAbsolutePath();
     }
 }

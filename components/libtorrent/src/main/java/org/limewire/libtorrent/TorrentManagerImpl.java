@@ -19,7 +19,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -28,8 +27,6 @@ public class TorrentManagerImpl implements TorrentManager {
     private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = true;
 
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
-
-    private final Provider<File> torrentDownloadFolder;
 
     private final ScheduledExecutorService torrentExecutor;
 
@@ -48,8 +45,7 @@ public class TorrentManagerImpl implements TorrentManager {
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     @Inject
-    public TorrentManagerImpl(@TorrentDownloadFolder Provider<File> torrentDownloadFolder) {
-        this.torrentDownloadFolder = torrentDownloadFolder;
+    public TorrentManagerImpl() {
         this.torrentExecutor = new ScheduledThreadPoolExecutor(1);
         this.alertExecutor = new ScheduledThreadPoolExecutor(1);
 
@@ -72,7 +68,8 @@ public class TorrentManagerImpl implements TorrentManager {
 
         lock.writeLock().lock();
         try {
-            libTorrent.add_torrent(torrent.getSha1(), trackerURI, torrentPath, fastResumePath);
+            libTorrent.add_torrent(torrent.getSha1(), trackerURI, torrentPath, 
+                    torrent.getIncompleteDownloadPath(), fastResumePath);
             updateStatus(torrent);
             torrents.put(torrent.getSha1(), torrent);
         } finally {
@@ -157,11 +154,6 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public File getTorrentDownloadFolder() {
-        return torrentDownloadFolder.get();
-    }
-
-    @Override
     public void moveTorrent(Torrent torrent, File directory) {
         lock.writeLock().lock();
         try {
@@ -189,7 +181,7 @@ public class TorrentManagerImpl implements TorrentManager {
     public void initialize() {
         lock.writeLock().lock();
         try {
-            libTorrent.initialize(torrentDownloadFolder.get().getAbsolutePath());
+            libTorrent.initialize();
         } finally {
             lock.writeLock().unlock();
         }
