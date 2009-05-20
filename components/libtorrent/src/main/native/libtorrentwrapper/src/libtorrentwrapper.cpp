@@ -347,16 +347,6 @@ extern "C" EXTERN_RET abort_torrents() {
 		session->pause();
 		session->stop_upnp();
 		session->stop_natpmp();
-
-		std::vector<libtorrent::torrent_handle> handles = session->get_torrents();
-		while (handles.size() > 1) {
-			for (std::vector<libtorrent::torrent_handle>::iterator i =
-					handles.begin(); i != handles.end(); ++i) {
-				libtorrent::torrent_handle& h = *i;
-				session->remove_torrent(h);
-			}
-			handles = session->get_torrents();
-		}
 		session->abort();
 		delete session;
 	W_HANDLE_EXCEPTION;
