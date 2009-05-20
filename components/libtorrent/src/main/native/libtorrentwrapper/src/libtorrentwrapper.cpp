@@ -342,9 +342,10 @@ extern "C" EXTERN_RET init(const char* path) {
 
 extern "C" EXTERN_RET abort_torrents() {
 	EXTERN_TOP;
-
+		s.pause();
+		s.stop_upnp();
+		s.stop_natpmp();
 		s.abort();
-
 	EXTERN_BOTTOM;
 }
 
@@ -490,7 +491,7 @@ extern "C" EXTERN_RET get_num_peers(const char* id, int *num_peers) {
 		}
 
 		*num_peers = peers.size();
-		
+
 	EXTERN_BOTTOM;
 }
 
