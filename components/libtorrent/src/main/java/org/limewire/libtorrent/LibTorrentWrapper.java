@@ -18,6 +18,9 @@ import com.sun.jna.Native;
  */
 public class LibTorrentWrapper {
 
+    private static final char MAX_LENGTH_DIGITS = 4;
+    private static final int IP_SIZE = 16;
+    
     private static final Log LOG = LogFactory.getLog(LibTorrentWrapper.class);
 
     private LibTorrent libTorrent;
@@ -98,19 +101,24 @@ public class LibTorrentWrapper {
     }
 
     public List<String> get_peers(String id) {
-        Memory numPeersMemory = new Memory(4);
+        Memory numPeersMemory = new Memory(MAX_LENGTH_DIGITS);
         int numUnfilteredPeers = numPeersMemory.getInt(0);
         
         LOG.debugf("before get_num_peers: {0}", id);
-        catchWrapperException(libTorrent.get_num_peers(id, numPeersMemory));
-        numUnfilteredPeers = numPeersMemory.getInt(0);
+        catchWrapperException(libTorrent.get_num_viewable_peers(id, numPeersMemory));
+        try {
+            numUnfilteredPeers = Integer.parseInt(numPeersMemory.getString(0));
+        } 
+        catch (NumberFormatException e) {
+            numUnfilteredPeers = 0;
+        }
         LOG.debugf("after get_num_peers: {0} - {1}", id, numUnfilteredPeers);
 
         if (numUnfilteredPeers == 0) {
             return Collections.emptyList();
         }
 
-        Memory memory = new Memory(numUnfilteredPeers * 16);
+        Memory memory = new Memory(numUnfilteredPeers * IP_SIZE);
 
         LOG.debugf("before get_peers: {0}", id);
         catchWrapperException(libTorrent.get_peers(id, (int)memory.getSize(), memory));

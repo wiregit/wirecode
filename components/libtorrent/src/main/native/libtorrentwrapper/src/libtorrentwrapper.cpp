@@ -107,6 +107,19 @@ struct wrapper_alert_info {
 	}
 };
 
+void getString(int num, char* heap) {
+	std::stringstream oss;
+	oss << num;
+	std::string str = oss.str();
+	const char* chars = str.c_str();
+
+	//memcpy(&heap, &chars, str.length()+1);
+	for (int i = 0; i < str.length(); i++) {
+		heap[i] = chars[i];
+	}
+	heap[str.length()] = '\0';
+}
+
 void getSizeTypeString(libtorrent::size_type size, char* heap) {
 	std::stringstream oss;
 	oss << size;
@@ -481,7 +494,7 @@ extern "C" EXTERN_RET clear_error_and_retry(const char* id) {
 	EXTERN_BOTTOM;
 }
 
-extern "C" EXTERN_RET get_num_peers(const char* id, int *num_peers) {
+extern "C" EXTERN_RET get_num_viewable_peers(const char* id, char* num_peers) {
 	EXTERN_TOP;
 
 		libtorrent::torrent_handle h = findTorrentHandle(id);
@@ -501,7 +514,12 @@ extern "C" EXTERN_RET get_num_peers(const char* id, int *num_peers) {
 			return 0;
 		}
 
-		*num_peers = peers.size();
+		int num = peers.size();
+		
+		// Limit the maximum number that can be viewed to 300
+		if (num > 300)  num = 300;
+		
+		getString(num, num_peers);
 
 	EXTERN_BOTTOM;
 }

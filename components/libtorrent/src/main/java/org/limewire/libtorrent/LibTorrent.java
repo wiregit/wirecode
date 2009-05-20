@@ -53,7 +53,7 @@ interface LibTorrent extends Library {
     /**
      * Returns the number of peers for the torrent with the given sha1
      */
-    public WrapperStatus get_num_peers(String id, Pointer num_peers);
+    public WrapperStatus get_num_viewable_peers(String id, Pointer num_peers);
 
     /**
      * Retrieves the peers for the torrent with the given sha1
