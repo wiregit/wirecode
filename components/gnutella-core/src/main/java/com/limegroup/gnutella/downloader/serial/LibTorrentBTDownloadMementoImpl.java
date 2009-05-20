@@ -50,6 +50,10 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
         return UnboxUtils.toLong(l, -1);
     }
 
+    public File getIncompleteFile() {
+        return (File)serialObjects.get("incompleteFile");
+    }
+    
     @Override
     public URN getSha1Urn() {
         URN sha1URN = null;
@@ -110,6 +114,11 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
         serialObjects.put("contentLength", contentLength);
     }
 
+    @Override
+    public void setIncompleteFile(File incompleteFile) {
+        serialObjects.put("incompleteFile", incompleteFile);
+    }
+    
     @Override
     public void setSha1Urn(URN sha1Urn) {
         String sha1URNString = sha1Urn != null ? sha1Urn.toString() : null;

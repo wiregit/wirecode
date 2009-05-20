@@ -105,7 +105,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void init(File torrentFile) throws IOException {
         torrent.init(null, null, -1, null, null, null, torrentFile, SharingSettings
-                .getSaveDirectory());
+                .getSaveDirectory(), null);
         File completeFile = torrent.getCompleteFile();
         saveFile = completeFile;
     }
@@ -484,6 +484,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         btMemento.setName(torrent.getName());
         btMemento.setSha1Urn(getSha1Urn());
         btMemento.setContentLength(getContentLength());
+        btMemento.setIncompleteFile(getIncompleteFile());
         btMemento.setTrackerURL(torrent.getTrackerURL());
         btMemento.setPaths(torrent.getPaths());
         File fastResumeFile = torrent.getFastResumeFile();
@@ -515,15 +516,16 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         File torrentFile = torrentPath != null ? new File(torrentPath) : null;
         File saveDir = memento.getSaveFile().getParentFile();
 
+        // TODO: needs a bit of cleanup
         try {
             torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
                     .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
-                    fastResumeFile, torrentFile, saveDir);
+                    fastResumeFile, torrentFile, saveDir, memento.getIncompleteFile());
         } catch (IOException e) {
             try {
                 torrent.init(memento.getName(), StringUtils.toHexString(urn.getBytes()), memento
                         .getContentLength(), memento.getTrackerURL(), memento.getPaths(),
-                        fastResumeFile, null, saveDir);
+                        fastResumeFile, null, saveDir, memento.getIncompleteFile());
             } catch (IOException e1) {
                 throw new InvalidDataException("Could not initialize the BTDownloader", e1);
             }
@@ -571,7 +573,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
 
         try {
-            torrent.init(name, sha1, totalSize, tracker1.toString(), paths, null, null, saveDir);
+            torrent.init(name, sha1, totalSize, tracker1.toString(), paths, null, null, saveDir, null);
         } catch (IOException e) {
             throw new InvalidDataException("Could not initialize the BTDownloader", e);
         }

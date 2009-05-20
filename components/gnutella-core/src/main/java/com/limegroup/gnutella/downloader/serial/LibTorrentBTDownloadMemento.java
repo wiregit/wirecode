@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader.serial;
 
+import java.io.File;
 import java.util.List;
 
 import com.limegroup.gnutella.URN;
@@ -10,6 +11,8 @@ public interface LibTorrentBTDownloadMemento extends DownloadMemento {
 
     public long getContentLength();
 
+    public File getIncompleteFile();
+    
     public URN getSha1Urn();
 
     public String getTrackerURL();
@@ -22,6 +25,8 @@ public interface LibTorrentBTDownloadMemento extends DownloadMemento {
 
     public void setContentLength(long contentLength);
 
+    public void setIncompleteFile(File incompleteFile);
+    
     public void setSha1Urn(URN sha1Urn);
 
     public void setPaths(List<String> paths);

@@ -93,9 +93,10 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
      * passed in will be used, and any missing field will be pulled from the
      * torrent file.
      */
+    // TODO: a little messy
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File fastResumeFile, File torrentFile, File saveDir)
-            throws IOException {
+            List<String> paths, File fastResumeFile, File torrentFile, File saveDir, File incompleteFile) 
+        throws IOException {
 
         assert (name != null && sha1 != null && totalSize > 0 && trackerURL != null
                 && paths != null && paths.size() > 0 && saveDir != null)
@@ -112,7 +113,8 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
         if (name != null) {
             this.name = name;
-            this.incompleteFile = new File(torrentDownloadFolder, name);
+            
+            this.incompleteFile = incompleteFile == null ? new File(torrentDownloadFolder, name) : incompleteFile;
             this.fastResumeFile = fastResumeFile == null ? new File(torrentDownloadFolder, name
                     + ".fastresume") : fastResumeFile;
             this.completeFile = new File(saveDir, name);
@@ -161,7 +163,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
                 IOUtils.close(fis);
             }
 
-            this.incompleteFile = new File(torrentDownloadFolder, this.name);
+            this.incompleteFile = incompleteFile == null ? new File(torrentDownloadFolder, this.name) : incompleteFile;
             this.fastResumeFile = fastResumeFile == null ? new File(torrentDownloadFolder,
                     this.name + ".fastresume") : fastResumeFile;
             this.completeFile = new File(saveDir, this.name);
