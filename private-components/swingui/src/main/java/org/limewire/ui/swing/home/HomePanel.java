@@ -5,6 +5,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
@@ -13,6 +15,7 @@ import javax.swing.event.HyperlinkListener;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Application;
+import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.browser.BrowserUtils;
 import org.limewire.ui.swing.browser.UriAction;
@@ -27,6 +30,7 @@ import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /** The main home page.*/
 @Singleton
@@ -37,22 +41,42 @@ public class HomePanel extends JXPanel {
     private boolean firstRequest = true;
     
     private final Application application;
-    private final Browser browser;
-    private final HTMLPane fallbackBrowser;
+    private final Navigator navigator;
+    
+    private Browser browser;
+    private HTMLPane fallbackBrowser;
 
+    private boolean loaded = false;
+    
     @Inject
     public HomePanel(Application application, final Navigator navigator) {
         this.application = application;
+        this.navigator = navigator;
         
         setPreferredSize(new Dimension(500, 500));
-        
         setLayout(new GridBagLayout());
+    }
+    
+    @Inject
+    public void registerBrowserStarter(ServiceScheduler scheduler, 
+            @Named("swingExecutor") ScheduledExecutorService executor) {
+
+        Runnable command = new Runnable() {
+            @Override
+            public void run() {
+                loadDefaultUrl();
+            }
+        };
+        
+        scheduler.schedule("HomePanel Initer", 
+                command, 0, TimeUnit.MILLISECONDS, executor);
+    }
+    
+    private void initBrowser() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        
-        
         
         if(MozillaInitialization.isInitialized()) {            
             // Hide the page when the browser goes away.
@@ -80,7 +104,6 @@ public class HomePanel extends JXPanel {
             browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN, VisibilityMode.DEFAULT);
             fallbackBrowser = null;
             add(browser, gbc);
-            loadDefaultUrl();
         } else {
             browser = null;
             fallbackBrowser = new HTMLPane();
@@ -92,7 +115,6 @@ public class HomePanel extends JXPanel {
                     }
                 }
             });
-            loadDefaultUrl();
             JScrollPane scroller = new JScrollPane(fallbackBrowser,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -105,7 +127,13 @@ public class HomePanel extends JXPanel {
         load("http://client-data.limewire.com/client_startup/home/");
     }
 
+    
     public void load(String url) {
+        if (!loaded) {
+            initBrowser();
+            loaded = true;
+        }
+        
         url = application.getUniqueUrl(url);
         if(MozillaInitialization.isInitialized()) {
             if(firstRequest) {

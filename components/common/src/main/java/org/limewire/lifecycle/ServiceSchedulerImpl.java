@@ -15,6 +15,11 @@ class ServiceSchedulerImpl implements ServiceScheduler {
     }
     
     @Override
+    public StagedRegisterBuilder schedule(String commandName, Runnable command, long delay, TimeUnit unit, ScheduledExecutorService service) {
+        return serviceRegistry.register(new ScheduledService(commandName, false, command, delay, 0, unit, service));
+    }
+    
+    @Override
     public StagedRegisterBuilder scheduleAtFixedRate(String commandName, Runnable command, long initialDelay,
             long period, TimeUnit unit, ScheduledExecutorService service) {
         return serviceRegistry.register(new ScheduledService(commandName, true, command, initialDelay, period, unit, service));
@@ -60,7 +65,12 @@ class ServiceSchedulerImpl implements ServiceScheduler {
             if(fixedRate) {
                 future = service.scheduleAtFixedRate(command, initialDelay, delayOrPeriod, timeUnit);
             } else {
-                future = service.scheduleWithFixedDelay(command, initialDelay, delayOrPeriod, timeUnit);
+                if (delayOrPeriod == 0) {
+                    future = service.schedule(command, initialDelay, timeUnit);
+                }
+                else {
+                    future = service.scheduleWithFixedDelay(command, initialDelay, delayOrPeriod, timeUnit);
+                }
             }
             
         }
