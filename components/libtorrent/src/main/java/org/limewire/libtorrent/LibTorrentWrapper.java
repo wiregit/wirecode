@@ -143,8 +143,6 @@ public class LibTorrentWrapper {
 
     public void move_torrent(String id, String absolutePath) {
         LOG.debugf("before move_torrent: {0} - {1}", id, absolutePath);
-        // TODO libtorrent documentation says this method will only work if the
-        // new path is on the same device, might need a fallback plan
         catchWrapperException(libTorrent.move_torrent(id, absolutePath));
         LOG.debugf("after move_torrent: {0} - {1}", id, absolutePath);
     }
