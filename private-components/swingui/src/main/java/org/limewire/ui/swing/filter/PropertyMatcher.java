@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.util.Objects;
 
 import ca.odell.glazedlists.matchers.Matcher;
 
@@ -43,11 +44,26 @@ class PropertyMatcher<E extends FilterableItem> implements Matcher<E> {
         switch (filterType) {
         case EXTENSION:
             return values.contains(item.getFileExtension().toLowerCase());
+            
         case PROPERTY:
-            return values.contains(item.getProperty(propertyKey));
+            Object property = item.getProperty(propertyKey);
+            if (FilePropertyKey.isLong(propertyKey)) {
+                return values.contains(property);
+            } else {
+                // Treat non-Long property types as strings and ignore case
+                // when comparing values.
+                for (Object value : values) {
+                    if (Objects.compareToNullIgnoreCase((String) value, (String) property, false) == 0) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
         case FILE_TYPE:
             String type = iconManager.getMIMEDescription(item.getFileExtension());
             return values.contains(type);
+            
         default:
             return false;
         }
