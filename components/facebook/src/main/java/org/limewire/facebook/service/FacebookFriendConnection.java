@@ -47,6 +47,7 @@ import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.ConnectBackRequest;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -112,6 +113,8 @@ public class FacebookFriendConnection implements FriendConnection {
     };
 
     private final MutableFriendManager friendManager;
+
+    private final LiveMessageConnectBackRequestTransport connectBackRequestTransport;
     
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
@@ -121,7 +124,8 @@ public class FacebookFriendConnection implements FriendConnection {
                                     EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster,
                                     MutableFriendManager friendManager,
                                     LiveMessageAddressTransportFactory addressTransportFactory,
-                                    LiveMessageAuthTokenTransportFactory authTokenTransportFactory) {
+                                    LiveMessageAuthTokenTransportFactory authTokenTransportFactory,
+                                    LiveMessageConnectBackRequestTransportFactory connectBackRequestTransportFactory) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
@@ -131,6 +135,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));
         this.addressTransport = addressTransportFactory.create(this);
         this.authTokenTransport = authTokenTransportFactory.create(this);
+        this.connectBackRequestTransport = connectBackRequestTransportFactory.create(this);
     }
 
     @Override
@@ -436,6 +441,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private void addTransports(FacebookFriendPresence presence) {
         presence.addTransport(Address.class, addressTransport);
         presence.addTransport(AuthToken.class, authTokenTransport);
+        presence.addTransport(ConnectBackRequest.class, connectBackRequestTransport);
     }
 
     void removePresence(FacebookFriend friend) {

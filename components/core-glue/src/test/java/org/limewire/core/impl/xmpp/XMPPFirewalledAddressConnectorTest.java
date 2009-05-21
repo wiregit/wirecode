@@ -341,7 +341,7 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 exactly(1).of(networkManager).acceptedIncomingConnection();
                 will(returnValue(false));
                 
-                exactly(1).of(connectRequestSender).send("403", publicConnectable, guid, 407);
+                exactly(1).of(connectRequestSender).send("403", null);
                 will(returnValue(true));
                 
                 exactly(1).of(socket).connect(with(same(inetSocketAddr)),
@@ -507,10 +507,10 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 exactly(2).of(networkManager).acceptedIncomingConnection();
                 will(returnValue(true));
                 
-                exactly(1).of(connectRequestSender).send("403", publicConnectable, guid, 0);
+                exactly(1).of(connectRequestSender).send("403", null);
                 will(returnValue(false));
                 
-                exactly(1).of(connectRequestSender).send("403", publicConnectable, guid, 0);
+                exactly(1).of(connectRequestSender).send("403", null);
                 will(returnValue(true));
                 
                 exactly(1).of(pushDownloadManager).connect(fwAddress, observer);

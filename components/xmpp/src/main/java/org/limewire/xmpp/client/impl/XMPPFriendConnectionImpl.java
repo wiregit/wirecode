@@ -42,7 +42,6 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventRebroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
@@ -55,6 +54,7 @@ import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListenerFacto
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQListener;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQProvider;
 import org.limewire.xmpp.client.impl.messages.discoinfo.DiscoInfoListener;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
@@ -76,7 +76,6 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     private final EventBroadcaster<FriendConnectionEvent> connectionBroadcaster;
     private final AddressFactory addressFactory;
     private final EventMulticaster<FeatureEvent> featureSupport;
-    private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
     private final ListeningExecutorService executorService;
     private final List<ConnectionConfigurationFactory> connectionConfigurationFactories;
     private final AddressIQListenerFactory addressIQListenerFactory;
@@ -94,6 +93,8 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     private volatile org.jivesoftware.smack.XMPPConnection connection;
     private volatile DiscoInfoListener discoInfoListener;
 
+    private final ConnectBackRequestIQListenerFactory connectBackRequestIQListenerFactory;
+
     @AssistedInject
     public XMPPFriendConnectionImpl(@Assisted FriendConnectionConfiguration configuration,
                        @Assisted ListeningExecutorService executorService,
@@ -104,10 +105,10 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                        EventBroadcaster<FriendConnectionEvent> connectionBroadcaster,
                        AddressFactory addressFactory,
                        EventMulticaster<FeatureEvent> featureSupport,
-                       EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,                     
                        List<ConnectionConfigurationFactory> connectionConfigurationFactories,
                        AddressIQListenerFactory addressIQListenerFactory,
                        AuthTokenIQListenerFactory authTokenIQListenerFactory,
+                       ConnectBackRequestIQListenerFactory connectBackRequestIQListenerFactory,
                        FeatureRegistry featureRegistry) {
         this.configuration = configuration;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
@@ -116,11 +117,11 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         this.connectionBroadcaster = connectionBroadcaster;
         this.addressFactory = addressFactory;
         this.featureSupport = featureSupport;
-        this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
         this.executorService = executorService;
         this.connectionConfigurationFactories = connectionConfigurationFactories;
         this.addressIQListenerFactory = addressIQListenerFactory;
         this.authTokenIQListenerFactory = authTokenIQListenerFactory;
+        this.connectBackRequestIQListenerFactory = connectBackRequestIQListenerFactory;
         this.featureRegistry = featureRegistry;
         rosterListeners = new EventListenerList<RosterEvent>();
         // FIXME: this is only used by tests
@@ -547,7 +548,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
             LibraryChangedIQListener libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventBroadcaster, XMPPFriendConnectionImpl.this);
             connection.addPacketListener(libChangedIQListener, libChangedIQListener.getPacketFilter());
 
-            ConnectBackRequestIQListener connectRequestIQListener = new ConnectBackRequestIQListener(connectRequestEventBroadcaster, featureRegistry);
+            ConnectBackRequestIQListener connectRequestIQListener = connectBackRequestIQListenerFactory.create(XMPPFriendConnectionImpl.this);
             connection.addPacketListener(connectRequestIQListener, connectRequestIQListener.getPacketFilter());
             
             new FileOfferInitializer(connection).register(featureRegistry);

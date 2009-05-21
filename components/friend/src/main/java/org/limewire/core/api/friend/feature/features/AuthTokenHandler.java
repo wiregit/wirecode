@@ -1,6 +1,5 @@
 package org.limewire.core.api.friend.feature.features;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,11 +8,11 @@ import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jivesoftware.smack.util.StringUtils;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;

@@ -18,6 +18,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.ConnectBackRequest;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressConnector;
 import org.limewire.net.address.FirewalledAddress;
@@ -110,8 +111,7 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
         final PushedSocketConnectObserver pushedSocketObserver = new PushedSocketConnectObserver(firewalledAddress, observer);
         observers.add(pushedSocketObserver);
         boolean isFWT = !networkManager.acceptedIncomingConnection(); 
-        boolean canSend = connectRequestSender.send(xmppFirewalledAddress.getXmppAddress().getFullId(), publicAddress, clientGuid, 
-                isFWT ? networkManager.supportsFWTVersion() : 0);
+        boolean canSend = connectRequestSender.send(xmppFirewalledAddress.getXmppAddress().getFullId(), new ConnectBackRequest(publicAddress, clientGuid, isFWT ? networkManager.supportsFWTVersion() : 0));
         if (!canSend) {
             LOG.debugf("could not send xmpp connect back request {0}", address);
             // fall back on push download manager

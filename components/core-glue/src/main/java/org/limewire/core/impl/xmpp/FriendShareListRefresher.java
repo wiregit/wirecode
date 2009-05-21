@@ -1,6 +1,5 @@
 package org.limewire.core.impl.xmpp;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,14 +22,14 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 /**
  * Sends library changed messages to friends when:<BR>
@@ -38,7 +37,6 @@ import ca.odell.glazedlists.event.ListEventListener;
  * OR<BR>
  * 2) A friend's sharelist changes
  */
-
 @Singleton
 class FriendShareListRefresher implements RegisteringEventListener<FriendShareListEvent> {
 

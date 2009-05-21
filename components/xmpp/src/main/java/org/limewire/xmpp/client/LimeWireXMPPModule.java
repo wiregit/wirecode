@@ -37,6 +37,8 @@ import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListenerFactory;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQListener;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQListenerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -99,6 +101,7 @@ public class LimeWireXMPPModule extends AbstractModule {
          
         bind(AddressIQListenerFactory.class).toProvider(FactoryProvider.newFactory(AddressIQListenerFactory.class, AddressIQListener.class));
         bind(AuthTokenIQListenerFactory.class).toProvider(FactoryProvider.newFactory(AuthTokenIQListenerFactory.class, AuthTokenIQListener.class));
+        bind(ConnectBackRequestIQListenerFactory.class).toProvider(FactoryProvider.newFactory(ConnectBackRequestIQListenerFactory.class, ConnectBackRequestIQListener.class));
         
         // bind egearly, so it registers itself with SocketsManager
         bind(XMPPAddressResolver.class).asEagerSingleton();

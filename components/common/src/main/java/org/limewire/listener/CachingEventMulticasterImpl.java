@@ -65,7 +65,8 @@ public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E
      */
     @Override
     public void addListener(EventListener<E> eEventListener) {
-        if(cachedEvent != null) {
+        E copy = cachedEvent;
+        if(copy != null) {
             // An alternate way to do this would be to add some kind of notifyListener(EventListener, Event)
             // method/interface, similar to EventListenerList#notifyListener, that would internally
             // use the context.  This would remove the need to pass a context to this class,
@@ -73,7 +74,7 @@ public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E
             // Overall it's probably the better option to do it via notifyListener, because that would
             // also allow the multicaster to control how the event is broadcast, but harder to fit
             // into the existing multicaster impls.
-            EventListenerList.dispatch(eEventListener, cachedEvent, listenerContext);
+            EventListenerList.dispatch(eEventListener, copy, listenerContext);
         }
         multicaster.addListener(eEventListener);
     }

@@ -28,8 +28,6 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.io.Connectable;
-import org.limewire.io.GUID;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
@@ -37,6 +35,7 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.ConnectBackRequest;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
@@ -257,7 +256,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     } 
     
     @Override
-    public boolean send(String userId, Connectable address, GUID clientGuid, int supportedFWTVersion) {
+    public boolean send(String userId, ConnectBackRequest connectBackRequest) {
         LOG.debug("send connect request");
         XMPPFriendConnectionImpl connection = getActiveConnection();
         if (connection == null) {
@@ -274,7 +273,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
         if (!presence.hasFeatures(ConnectBackRequestFeature.ID)) {
             return false;
         }
-        ConnectBackRequestIQ connectRequest = new ConnectBackRequestIQ(address, clientGuid, supportedFWTVersion);
+        ConnectBackRequestIQ connectRequest = new ConnectBackRequestIQ(connectBackRequest);
         connectRequest.setTo(userId);
         try {
             connectRequest.setFrom(connection.getLocalJid());
