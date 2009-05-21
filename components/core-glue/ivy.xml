@@ -28,6 +28,7 @@
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="geocode" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="promotion" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="libtorrent" rev="latest.integration" conf="compile,runtime"/>
         
         <dependency org="none" name="glazedlists" rev="${glazedlists.version}" conf="compile,runtime"/>
         <dependency org="none" name="MozillaInterfaces" rev="${MozillaInterfaces.version}" conf="compile,runtime"/>

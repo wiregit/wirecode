@@ -30,6 +30,7 @@
 	<classpathentry kind="src" output="components/io/build/classes" path="components/io/src/main/java"/>
 	<classpathentry kind="src" output="components/io/build/tests" path="components/io/src/test/java"/>
 	<classpathentry kind="src" output="components/io/build/test-common" path="components/io/src/test-common/java"/>
+	<classpathentry kind="src" output="components/libtorrent/build/classes" path="components/libtorrent/src/main/java"/>
 	<classpathentry kind="src" output="components/lwsserver/build/classes" path="components/lwsserver/src/main/java"/>
 	<classpathentry kind="src" output="components/lwsserver/build/tests" path="components/lwsserver/src/test/java"/>
 	<classpathentry kind="src" output="components/lwsserver/build/test-common" path="components/lwsserver/src/test-common/java"/>
@@ -126,7 +127,6 @@
 	<classpathentry kind="lib" path="lib/jars/MozillaInterfaces-1.9.jar" sourcepath="lib/sources/MozillaInterfaces-1.9-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/MozillaGlue-1.9.jar" sourcepath="lib/sources/MozillaGlue-1.9-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/mozswing.jar" sourcepath="lib/sources/mozswing-src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/jna.jar"/>
 	<classpathentry kind="lib" path="lib/jars/smack.jar" sourcepath="lib/sources/smack-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/smackx-debug.jar" sourcepath="lib/sources/smack-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/smackx.jar" sourcepath="lib/sources/smack-src.jar"/>
@@ -148,5 +148,6 @@
 	<classpathentry kind="lib" path="lib/jars/swing-worker-1.2.jar" sourcepath="lib/sources/swing-worker-src-1.2.zip"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-0.9.7.jar" sourcepath="lib/sources/swingx-0.9.7-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/hsqldb-1.8.0.10.jar" sourcepath="lib/sources/hsqldb-1.8.0.10-src.zip"/>
+	<classpathentry kind="lib" path="lib/jars/jna-3.1.0.jar" sourcepath="lib/sources/jna-3.1.0-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

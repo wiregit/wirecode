@@ -10,7 +10,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -24,7 +23,7 @@ import com.limegroup.gnutella.downloader.DownloadStateEvent;
  * finishes then the torrent download will be started.
  */
 public class TorrentDownloadListener implements EventListener<DownloadStateEvent> {
-    
+
     private final Downloader downloader;
 
     private final DownloadManager downloadManager;
@@ -33,8 +32,9 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
 
     private final List<DownloadItem> downloadItems;
 
-    public TorrentDownloadListener(DownloadManager downloadManager, ActivityCallback activityCallback,
-            List<DownloadItem> downloadItems, Downloader downloader) {
+    public TorrentDownloadListener(DownloadManager downloadManager,
+            ActivityCallback activityCallback, List<DownloadItem> downloadItems,
+            Downloader downloader) {
         this.downloader = Objects.nonNull(downloader, "downloader");
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.activityCallback = Objects.nonNull(activityCallback, "activityCallback");
@@ -57,19 +57,19 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
         DownloadState downloadStatus = event.getType();
         if (DownloadState.COMPLETE == downloadStatus) {
             if (downloader instanceof BTTorrentFileDownloader) {
-                BTMetaInfo btMetaInfo = null;
+                File torrentFile = null;
                 try {
                     BTTorrentFileDownloader btTorrentFileDownloader = (BTTorrentFileDownloader) downloader;
-                    btMetaInfo = btTorrentFileDownloader.getBtMetaInfo();
-                    downloadManager.downloadTorrent(btMetaInfo, false);
+                    torrentFile = btTorrentFileDownloader.getTorrentFile();
+                    downloadManager.downloadTorrent(torrentFile, false);
                     downloadItems.remove(getDownloadItem(downloader));
                 } catch (SaveLocationException sle) {
-                    final BTMetaInfo btMetaInfoCopy = btMetaInfo;
+                    final File torrentFileCopy = torrentFile;
                     activityCallback.handleSaveLocationException(new DownloadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {
-                            downloadManager.downloadTorrent(btMetaInfoCopy, overwrite);
+                            downloadManager.downloadTorrent(torrentFileCopy, overwrite);
                             downloadItems.remove(getDownloadItem(downloader));
                         }
                     }, sle, false);

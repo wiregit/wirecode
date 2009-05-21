@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
@@ -98,9 +99,15 @@ class CoreDownloadItem implements DownloadItem {
     public void cancel() {
         cancelled = true;
         support.firePropertyChange("state", null, getState());
-        downloader.stop();
-        downloader.deleteIncompleteFiles();
-        //TODO there is a race condition with the delete action, the stop does not happen right away. should revisit how this will be handled.
+        new ManagedThread(new Runnable() {
+            @Override
+            public void run() {
+                downloader.stop();
+                downloader.deleteIncompleteFiles();
+            }
+        }).start();
+        // TODO there is a race condition with the delete action, the stop does
+        // not happen right away. should revisit how this will be handled.
     }
 
     @Override
@@ -252,7 +259,7 @@ class CoreDownloadItem implements DownloadItem {
             }
 
         case DOWNLOADING:
-        case FETCHING://"FETCHING" is downloading .torrent file
+        case FETCHING:// "FETCHING" is downloading .torrent file
             return DownloadState.DOWNLOADING;
 
         
@@ -444,12 +451,18 @@ class CoreDownloadItem implements DownloadItem {
         synchronized (this) {
             Map<FilePropertyKey, Object> reloadedMap = Collections
                     .synchronizedMap(new HashMap<FilePropertyKey, Object>());
-            //"LimeXMLDocument" attribute is set in ManagedDownloaderImpl
-            LimeXMLDocument doc = (LimeXMLDocument)downloader.getAttribute("LimeXMLDocument");
             long creationTime = -1;
             File file = downloader.getFile();
             if(file != null) {
                 creationTime = file.lastModified();
+			}
+			
+			// "LimeXMLDocument" attribute is set in ManagedDownloaderImpl
+            LimeXMLDocument doc = (LimeXMLDocument) downloader.getAttribute("LimeXMLDocument");
+           
+            if (doc != null) {
+                FilePropertyKeyPopulator.populateProperties(getFileName(), getTotalSize(),
+                        downloader.getFile().lastModified(), reloadedMap, doc);
             }
             FilePropertyKeyPopulator.populateProperties(getFileName(), getTotalSize(), creationTime, reloadedMap, doc);
             propertiesMap = reloadedMap;
