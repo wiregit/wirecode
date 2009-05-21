@@ -1,13 +1,5 @@
 package org.limewire.ui.swing;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-
-import org.limewire.concurrent.AbstractLazySingletonProvider;
-import org.limewire.concurrent.ScheduledListeningExecutorService;
-import org.limewire.concurrent.SwingTimer;
-import org.limewire.inject.AbstractModule;
 import org.limewire.ui.swing.browser.LimeWireUiBrowserModule;
 import org.limewire.ui.swing.callback.GuiCallbackImpl;
 import org.limewire.ui.swing.components.LimeWireUiComponentsModule;
@@ -29,8 +21,7 @@ import org.limewire.ui.swing.tray.LimeWireUiTrayModule;
 import org.limewire.ui.swing.util.LimeWireUiUtilModule;
 import org.limewire.ui.swing.wizard.LimeWireUiWizardModule;
 
-import com.google.inject.Singleton;
-import com.google.inject.name.Names;
+import com.google.inject.AbstractModule;
 
 public class LimeWireSwingUiModule extends AbstractModule {
     
@@ -62,15 +53,5 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiWizardModule());
         install(new LimeWireUiPropertiesModule());
         install(new LimeWireUiBrowserModule());
-        
-        bindAll(Names.named("swingExecutor"), ScheduledListeningExecutorService.class, SwingTimerProvider.class, ExecutorService.class, Executor.class, ScheduledExecutorService.class);
-    }
-
-    @Singleton
-    private static class SwingTimerProvider extends AbstractLazySingletonProvider<ScheduledListeningExecutorService> {
-        @Override
-        protected ScheduledListeningExecutorService createObject() {
-            return new SwingTimer();
-        }
     }
 }

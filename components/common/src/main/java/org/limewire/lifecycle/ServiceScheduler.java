@@ -30,7 +30,4 @@ public interface ServiceScheduler {
      */
     public StagedRegisterBuilder scheduleWithFixedDelay(String commandName, Runnable command,
             long initialDelay, long delay, TimeUnit unit, ScheduledExecutorService service);
-    
-    public StagedRegisterBuilder schedule(String commandName, Runnable command, 
-            long delay, TimeUnit unit, ScheduledExecutorService service);
 }
