@@ -157,7 +157,7 @@ class LibTorrentWrapper {
 
     public void move_torrent(String id, String absolutePath) {
         LOG.debugf("before move_torrent: {0} - {1}", id, absolutePath);
-        catchWrapperException(libTorrent.move_torrent(id, absolutePath));
+        catchWrapperException(libTorrent.move_torrent(id, new WString(absolutePath)));
         LOG.debugf("after move_torrent: {0} - {1}", id, absolutePath);
     }
 

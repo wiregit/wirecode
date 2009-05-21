@@ -82,7 +82,7 @@ interface LibTorrent extends Library {
      * Moves the torrent with the given sha1 from its current location to the
      * location defined in absolutePath.
      */
-    public WrapperStatus move_torrent(String id, String absolutePath);
+    public WrapperStatus move_torrent(String id, WString absolutePath);
 
     /**
      * Aborts all of the torrents in the session.

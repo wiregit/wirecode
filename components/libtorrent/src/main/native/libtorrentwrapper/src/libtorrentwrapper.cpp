@@ -366,12 +366,11 @@ extern "C" EXTERN_RET abort_torrents() {
 	EXTERN_TRY_CONTAINER_END;
 }
 
-extern "C" EXTERN_RET move_torrent(const char* id, const char* path) {
+extern "C" EXTERN_RET move_torrent(const char* id, const wchar_t* path) {
 	EXTERN_TRY_CONTAINER_BEGIN;
 
 		libtorrent::torrent_handle h = findTorrentHandle(id);
-		std::string newPath(path);
-		h.move_storage(newPath);
+		h.move_storage(WIDE_PATH(path));
 
 	EXTERN_TRY_CONTAINER_END;
 }
