@@ -45,7 +45,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
-import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
@@ -555,7 +554,6 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
             connection.addPacketListener(connectRequestIQListener, connectRequestIQListener.getPacketFilter());
             
             new FileOfferInitializer(connection).register(featureRegistry);
-            new LibraryChangedNotifierFeatureInitializer().register(featureRegistry);
             new LimewireFeatureInitializer().register(featureRegistry);
             
             SubscriptionListener sub = new SubscriptionListener(connection,

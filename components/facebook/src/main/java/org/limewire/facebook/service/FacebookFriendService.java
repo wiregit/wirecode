@@ -6,6 +6,8 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.feature.FeatureRegistry;
+import org.limewire.core.api.friend.impl.LimewireFeatureInitializer;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
@@ -27,13 +29,16 @@ class FacebookFriendService implements FriendConnectionFactory {
     private final ChatClientFactory chatClientFactory;
 
     private final LiveMessageDiscoInfoTransportFactory liveDiscoInfoTransportFactory;
+    private final FeatureRegistry featureRegistry;
 
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
                                   ChatClientFactory chatClientFactory,
-                                  LiveMessageDiscoInfoTransportFactory liveDiscoInfoTransportFactory) {
+                                  LiveMessageDiscoInfoTransportFactory liveDiscoInfoTransportFactory,
+                                  FeatureRegistry featureRegistry) {
         this.connectionFactory = connectionFactory;
         this.chatClientFactory = chatClientFactory;
         this.liveDiscoInfoTransportFactory = liveDiscoInfoTransportFactory;
+        this.featureRegistry = featureRegistry;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
     }
 
@@ -57,6 +62,7 @@ class FacebookFriendService implements FriendConnectionFactory {
         LOG.debug("creating connection");
         FacebookFriendConnection connection = connectionFactory.create(configuration);
         liveDiscoInfoTransportFactory.create(connection);
+        new LimewireFeatureInitializer().register(featureRegistry);
         LOG.debug("logging in");
         connection.loginImpl();
         ChatClient client = chatClientFactory.createChatClient(connection);

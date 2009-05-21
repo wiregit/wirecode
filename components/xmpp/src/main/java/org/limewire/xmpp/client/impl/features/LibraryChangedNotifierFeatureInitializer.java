@@ -5,7 +5,6 @@ import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
-
 public class LibraryChangedNotifierFeatureInitializer implements FeatureInitializer {
 
     @Override
@@ -23,3 +22,4 @@ public class LibraryChangedNotifierFeatureInitializer implements FeatureInitiali
         friendPresence.removeFeature(LibraryChangedNotifierFeature.ID);
     }
 }
+

@@ -7,9 +7,11 @@ import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.LibraryChanged;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
+import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,9 +23,11 @@ public class LibraryChangedHandler implements  FeatureTransport.Handler<LibraryC
 
     @Inject
     public LibraryChangedHandler(EventBean<FriendConnectionEvent> friendConnectionEvent,
-                                 EventBroadcaster<LibraryChangedEvent> libChangedBroadcaster) {
+                                 EventBroadcaster<LibraryChangedEvent> libChangedBroadcaster,
+                                 FeatureRegistry featureRegistry) {
         this.friendConnectionEvent = friendConnectionEvent;
         this.libChangedBroadcaster = libChangedBroadcaster;
+        new LibraryChangedNotifierFeatureInitializer().register(featureRegistry);
     }
 
     @Override
