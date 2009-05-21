@@ -367,11 +367,11 @@ public class CoreDownloadItemTest extends BaseTestCase {
             {
                 one(downloader).getAttribute("LimeXMLDocument");
                 will(returnValue(document));
-                one(downloader).getSaveFile();
+                allowing(downloader).getSaveFile();
                 will(returnValue(new File("test.mp3")));
-                one(downloader).getFile();
+                allowing(downloader).getFile();
                 will(returnValue(new File("test.mp3")));
-                one(downloader).getContentLength();
+                allowing(downloader).getContentLength();
                 will(returnValue(1234L));
             }
         });
@@ -404,11 +404,11 @@ public class CoreDownloadItemTest extends BaseTestCase {
             {
                 one(downloader).getAttribute("LimeXMLDocument");
                 will(returnValue(document));
-                one(downloader).getSaveFile();
+                allowing(downloader).getSaveFile();
                 will(returnValue(new File("test.mp3")));
-                one(downloader).getFile();
+                allowing(downloader).getFile();
                 will(returnValue(new File("test.mp3")));
-                one(downloader).getContentLength();
+                allowing(downloader).getContentLength();
                 will(returnValue(1234L));
             }
         });
