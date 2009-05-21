@@ -470,6 +470,7 @@
 	        	   timeout="1200000"
 	    	>
 	            <sysproperty key="java.library.path"      		 value="${@{nativePathRefId}}"/>
+	        	<sysproperty key="jna.library.path"               value="${@{nativePathRefId}}"/>
 	    		<sysproperty key="junit.test.method"      		 value="${method}"/>
 	    		<sysproperty key="junit.test.times"        		 value="${times}"/>
 	    	    <sysproperty key="junit.test.hidetestname"		 value="${hidetestname}"/>
