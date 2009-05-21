@@ -8,9 +8,14 @@ import org.limewire.setting.ProbabilisticBooleanSetting;
  * BitTorrent settings.
  */
 public class BittorrentSettings extends LimeProps {
+    
+
     private BittorrentSettings() {
         // empty constructor
     }
+    
+    public static final BooleanSetting LIBTORRENT_ENABLED = FACTORY
+            .createBooleanSetting("LIBTORRENT_ENABLED", true);
 
     /**
      * minimum tracker reask delay in seconds that we will use

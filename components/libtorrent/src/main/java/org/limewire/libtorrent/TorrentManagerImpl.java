@@ -19,6 +19,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -33,6 +34,7 @@ public class TorrentManagerImpl implements TorrentManager {
     private final ScheduledExecutorService alertExecutor;
 
     private final LibTorrentWrapper libTorrent;
+    private final Provider<Boolean> torrentEnabled;
 
     private final Map<String, Torrent> torrents;
 
@@ -45,22 +47,30 @@ public class TorrentManagerImpl implements TorrentManager {
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     @Inject
-    public TorrentManagerImpl() {
+    public TorrentManagerImpl(LibTorrentWrapper torrentWrapper, @TorrentEnabled Provider<Boolean> torrentEnabled) {
         this.torrentExecutor = new ScheduledThreadPoolExecutor(1);
         this.alertExecutor = new ScheduledThreadPoolExecutor(1);
 
-        this.libTorrent = new LibTorrentWrapper();
+        this.torrentEnabled = torrentEnabled;
+        this.libTorrent = torrentWrapper;
         this.torrents = new ConcurrentHashMap<String, Torrent>();
+    }
+    
+    private void validateLibrary() {
+        if(!torrentEnabled.get()) {
+            throw new LibTorrentException("LibTorrent is disabled (through settings)",
+                    LibTorrentException.DISABLED_EXCEPTION);
+        }
+        if(!isValid()) {
+            throw new LibTorrentException("The TorrentManager is invalid.",
+                    LibTorrentException.LOAD_EXCEPTION);
+        }
     }
 
     @Override
     public void registerTorrent(Torrent torrent) {
-        if (isValid()) {
-            addTorrent(torrent);
-        } else {
-            throw new LibTorrentException("The TorrentManager is invalid.",
-                    LibTorrentException.LOAD_EXCEPTION);
-        }
+        validateLibrary();
+        addTorrent(torrent);
     }
 
     @Override
@@ -94,93 +104,69 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public List<String> getPeers(Torrent torrent) {
-        if (isValid()) {
-            return libTorrent.get_peers(torrent.getSha1());
-        } else {
-            throw new LibTorrentException("The TorrentManager is invalid.",
-                    LibTorrentException.LOAD_EXCEPTION);
-        }
+        validateLibrary();
+        return libTorrent.get_peers(torrent.getSha1());
     }
 
     @Override
     public void removeTorrent(Torrent torrent) {
-        if (isValid()) {
-            lock.writeLock().lock();
-            try {
-                torrents.remove(torrent.getSha1());
-                libTorrent.remove_torrent(torrent.getSha1());
-            } finally {
-                lock.writeLock().unlock();
-            }
-        } else {
-            throw new LibTorrentException("The TorrentManager is invalid.",
-                    LibTorrentException.LOAD_EXCEPTION);
+        validateLibrary();
+        lock.writeLock().lock();
+        try {
+            torrents.remove(torrent.getSha1());
+            libTorrent.remove_torrent(torrent.getSha1());
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
     @Override
     public void pauseTorrent(Torrent torrent) {
-        if (isValid()) {
-            lock.readLock().lock();
-            try {
-                String sha1 = torrent.getSha1();
-                libTorrent.pause_torrent(sha1);
-                updateStatus(torrent);
-            } finally {
-                lock.readLock().unlock();
-            }
-        } else {
-            throw new LibTorrentException("The TorrentManager is invalid.",
-                    LibTorrentException.LOAD_EXCEPTION);
+        validateLibrary();
+        lock.readLock().lock();
+        try {
+            String sha1 = torrent.getSha1();
+            libTorrent.pause_torrent(sha1);
+            updateStatus(torrent);
+        } finally {
+            lock.readLock().unlock();
         }
     }
 
     @Override
     public void resumeTorrent(Torrent torrent) {
-        if (isValid()) {
-            lock.readLock().lock();
-            try {
-                String sha1 = torrent.getSha1();
-                libTorrent.resume_torrent(sha1);
-                updateStatus(torrent);
-            } finally {
-                lock.readLock().unlock();
-            }
-        } else {
-            throw new LibTorrentException("The TorrentManager is invalid.",
-                    LibTorrentException.LOAD_EXCEPTION);
+        validateLibrary();
+        lock.readLock().lock();
+        try {
+            String sha1 = torrent.getSha1();
+            libTorrent.resume_torrent(sha1);
+            updateStatus(torrent);
+        } finally {
+            lock.readLock().unlock();
         }
     }
 
     @Override
     public void recoverTorrent(Torrent torrent) {
-        if (isValid()) {
-            lock.readLock().lock();
-            try {
-                String sha1 = torrent.getSha1();
-                libTorrent.clear_error_and_retry(sha1);
-                updateStatus(torrent);
-            } finally {
-                lock.readLock().unlock();
-            }
-        } else {
-            throw new LibTorrentException("The TorrentManager is invalid.",
-                    LibTorrentException.LOAD_EXCEPTION);
+        validateLibrary();
+        lock.readLock().lock();
+        try {
+            String sha1 = torrent.getSha1();
+            libTorrent.clear_error_and_retry(sha1);
+            updateStatus(torrent);
+        } finally {
+            lock.readLock().unlock();
         }
     }
 
     private LibTorrentStatus getStatus(Torrent torrent) {
-        if (isValid()) {
-            LibTorrentStatus status = new LibTorrentStatus();
+        validateLibrary();
+        LibTorrentStatus status = new LibTorrentStatus();
 
-            String sha1 = torrent.getSha1();
-            libTorrent.get_torrent_status(sha1, status);
-            libTorrent.free_torrent_status(status);
-            return status;
-        } else {
-            throw new LibTorrentException("The TorrentManager is invalid.",
-                    LibTorrentException.LOAD_EXCEPTION);
-        }
+        String sha1 = torrent.getSha1();
+        libTorrent.get_torrent_status(sha1, status);
+        libTorrent.free_torrent_status(status);
+        return status;
     }
 
     private void updateStatus(Torrent torrent) {
@@ -195,20 +181,16 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void moveTorrent(Torrent torrent, File directory) {
-        if (isValid()) {
-            lock.writeLock().lock();
-            try {
-                String sha1 = torrent.getSha1();
-                libTorrent.pause_torrent(sha1);
-                libTorrent.move_torrent(sha1, directory.getAbsolutePath());
-                libTorrent.resume_torrent(sha1);
-                updateStatus(torrent);
-            } finally {
-                lock.writeLock().unlock();
-            }
-        } else {
-            throw new LibTorrentException("The TorrentManager is invalid.",
-                    LibTorrentException.LOAD_EXCEPTION);
+        validateLibrary();
+        lock.writeLock().lock();
+        try {
+            String sha1 = torrent.getSha1();
+            libTorrent.pause_torrent(sha1);
+            libTorrent.move_torrent(sha1, directory.getAbsolutePath());
+            libTorrent.resume_torrent(sha1);
+            updateStatus(torrent);
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
@@ -224,11 +206,13 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void initialize() {
-        lock.writeLock().lock();
-        try {
-            libTorrent.initialize();
-        } finally {
-            lock.writeLock().unlock();
+        if(torrentEnabled.get()) {
+            lock.writeLock().lock();
+            try {
+                libTorrent.initialize();
+            } finally {
+                lock.writeLock().unlock();
+            }
         }
     }
 

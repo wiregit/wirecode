@@ -19,7 +19,7 @@ import com.sun.jna.WString;
  * Wrapper class for the LibTorrent c interface. Provides library loading logic,
  * and handles rethrowing c++ exceptions as java exceptions.
  */
-public class LibTorrentWrapper {
+class LibTorrentWrapper {
 
     private static final char MAX_LENGTH_DIGITS = 4;
     private static final int IP_SIZE = 16;
@@ -34,7 +34,7 @@ public class LibTorrentWrapper {
      * Initializes the LibTorrent library. Finding necessary dependencies first,
      * then loading the libtorrent library as a jna lib.
      */
-    public void initialize() {
+    void initialize() {
         try {
             if (OSUtils.isWindows()) {
                 System.loadLibrary("mingwm10");

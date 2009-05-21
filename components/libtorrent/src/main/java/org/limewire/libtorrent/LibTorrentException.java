@@ -7,6 +7,7 @@ public class LibTorrentException extends RuntimeException {
     private final int type;
 
     public static final int LOAD_EXCEPTION = -100000;
+    public static final int DISABLED_EXCEPTION = -100001;
 
     public LibTorrentException(String message, int type) {
         super(message);
