@@ -13,11 +13,9 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
 
-import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-@Singleton
 public class AddressIQListener implements PacketListener, FeatureTransport<Address> {
     private static final Log LOG = LogFactory.getLog(AddressIQListener.class);
 

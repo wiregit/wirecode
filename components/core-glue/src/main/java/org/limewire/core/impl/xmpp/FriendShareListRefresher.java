@@ -11,7 +11,9 @@ import org.limewire.core.api.browse.server.BrowseTracker;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
 import org.limewire.core.api.library.FriendShareListEvent;
@@ -21,6 +23,8 @@ import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -40,6 +44,8 @@ import com.limegroup.gnutella.library.ManagedListStatusEvent;
 @Singleton
 class FriendShareListRefresher implements RegisteringEventListener<FriendShareListEvent> {
 
+    private static Log LOG = LogFactory.getLog(FriendShareListRefresher.class);
+    
     private final BrowseTracker tracker;
     private final EventBean<FriendConnectionEvent> connectionEventBean;
     private final ScheduledExecutorService scheduledExecutorService;
@@ -94,7 +100,12 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                         for(FriendPresence presence : presences.values()) {
                             Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);                                
                             if(notifier != null) {
-                                notifier.getFeature().sendLibraryRefresh();
+                                FeatureTransport<LibraryChangedNotifier> notifierFeatureTransport = presence.getTransport(LibraryChangedNotifierFeature.class);
+                                try {
+                                    notifierFeatureTransport.sendFeature(presence, notifier.getFeature());
+                                } catch (FriendException e) {
+                                    LOG.error("library changed notification failed", e);
+                                }
                             }
                         }
                     }
@@ -142,7 +153,12 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                     for(FriendPresence presence : presences.values()) {
                         Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);
                         if(notifier != null) {
-                            notifier.getFeature().sendLibraryRefresh();
+                            FeatureTransport<LibraryChangedNotifier> notifierFeatureTransport = presence.getTransport(LibraryChangedNotifierFeature.class);
+                            try {
+                                notifierFeatureTransport.sendFeature(presence, notifier.getFeature());
+                            } catch (FriendException e) {
+                                LOG.error("library changed notification failed", e);
+                            }
                         }
                     }
                 }

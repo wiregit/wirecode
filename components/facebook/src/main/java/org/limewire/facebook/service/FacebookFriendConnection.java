@@ -43,6 +43,7 @@ import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AuthToken;
+import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
@@ -89,6 +90,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster;
     private LiveMessageAddressTransport addressTransport;
     private LiveMessageAuthTokenTransport authTokenTransport;
+    private final LiveMessageLibraryRefreshTransport libraryRefreshTransport;
 
     private final EventBroadcaster<FeatureEvent> featureEventBroadcaster;
     
@@ -125,7 +127,8 @@ public class FacebookFriendConnection implements FriendConnection {
                                     MutableFriendManager friendManager,
                                     LiveMessageAddressTransportFactory addressTransportFactory,
                                     LiveMessageAuthTokenTransportFactory authTokenTransportFactory,
-                                    LiveMessageConnectBackRequestTransportFactory connectBackRequestTransportFactory) {
+                                    LiveMessageConnectBackRequestTransportFactory connectBackRequestTransportFactory,
+                                    LiveMessageLibraryRefreshTransportFactory liveMessageLibraryRefreshTransportFactory) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
@@ -136,6 +139,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.addressTransport = addressTransportFactory.create(this);
         this.authTokenTransport = authTokenTransportFactory.create(this);
         this.connectBackRequestTransport = connectBackRequestTransportFactory.create(this);
+        this.libraryRefreshTransport = liveMessageLibraryRefreshTransportFactory.create(this);
     }
 
     @Override
@@ -151,9 +155,18 @@ public class FacebookFriendConnection implements FriendConnection {
 
     @Override
     public ListeningFuture<Void> logout() {
+        return executorService.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                logoutImpl();
+                return null;
+            }
+        });
+    }
+    
+    private void logoutImpl() {
         loggedIn.set(false);
-        connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));
-        return null;
+        connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));    
     }
 
     @Override
@@ -442,6 +455,7 @@ public class FacebookFriendConnection implements FriendConnection {
         presence.addTransport(Address.class, addressTransport);
         presence.addTransport(AuthToken.class, authTokenTransport);
         presence.addTransport(ConnectBackRequest.class, connectBackRequestTransport);
+        presence.addTransport(LibraryChangedNotifier.class, libraryRefreshTransport);
     }
 
     void removePresence(FacebookFriend friend) {

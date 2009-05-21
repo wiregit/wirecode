@@ -18,5 +18,6 @@ public class LimeWireFacebookModule extends AbstractModule {
         bind(LiveMessageAuthTokenTransportFactory.class).toProvider(FactoryProvider.newFactory(LiveMessageAuthTokenTransportFactory.class, LiveMessageAuthTokenTransport.class));
         bind(LiveMessageDiscoInfoTransportFactory.class).toProvider(FactoryProvider.newFactory(LiveMessageDiscoInfoTransportFactory.class, LiveMessageDiscoInfoTransport.class));
         bind(LiveMessageConnectBackRequestTransportFactory.class).toProvider(FactoryProvider.newFactory(LiveMessageConnectBackRequestTransportFactory.class, LiveMessageConnectBackRequestTransport.class));
+        bind(LiveMessageLibraryRefreshTransportFactory.class).toProvider(FactoryProvider.newFactory(LiveMessageLibraryRefreshTransportFactory.class, LiveMessageLibraryRefreshTransport.class));
     }
 }

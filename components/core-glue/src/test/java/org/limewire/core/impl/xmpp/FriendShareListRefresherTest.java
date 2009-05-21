@@ -255,8 +255,8 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 // Assertions
                 exactly(1).of(tracker).sentRefresh(id1);
                 exactly(1).of(tracker).sentRefresh(id2);
-                exactly(2).of(notifierA).sendLibraryRefresh();
-                exactly(1).of(notifierB).sendLibraryRefresh();
+//                exactly(2).of(notifierA).sendLibraryRefresh();
+//                exactly(1).of(notifierB).sendLibraryRefresh();
                 
             }});
         
@@ -343,8 +343,8 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 // Assertions
                 exactly(1).of(tracker).sentRefresh(id1);
                 exactly(1).of(tracker).sentRefresh(id2);
-                exactly(1).of(notifierA).sendLibraryRefresh();
-                exactly(1).of(notifierB).sendLibraryRefresh();
+//                exactly(1).of(notifierA).sendLibraryRefresh();
+//                exactly(1).of(notifierB).sendLibraryRefresh();
                 
             }});
         
@@ -578,8 +578,8 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 
                 // Assertions -- B should not be notified since it's getFeature() failed
                 exactly(1).of(tracker).sentRefresh(friendID);
-                exactly(1).of(notifierA).sendLibraryRefresh();
-                never(notifierB).sendLibraryRefresh();
+//                exactly(1).of(notifierA).sendLibraryRefresh();
+//                never(notifierB).sendLibraryRefresh();
             }});
         
         scheduledLibraryRefreshSender.run();

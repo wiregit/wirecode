@@ -29,7 +29,7 @@ public class LibraryChangedNotifierFeatureInitializerTest extends BaseTestCase {
     
     public void testRegister() {
         final FeatureRegistry featureRegistry = context.mock(FeatureRegistry.class);
-        final LibraryChangedNotifierFeatureInitializer initializer = new LibraryChangedNotifierFeatureInitializer(null);
+        final LibraryChangedNotifierFeatureInitializer initializer = new LibraryChangedNotifierFeatureInitializer();
         context.checking(new Expectations() {{
             one(featureRegistry).add(LibraryChangedNotifierFeature.ID, initializer);
         }});
@@ -51,7 +51,7 @@ public class LibraryChangedNotifierFeatureInitializerTest extends BaseTestCase {
                 }
             });
         }});
-        LibraryChangedNotifierFeatureInitializer initializer = new LibraryChangedNotifierFeatureInitializer(null);
+        LibraryChangedNotifierFeatureInitializer initializer = new LibraryChangedNotifierFeatureInitializer();
         initializer.initializeFeature(friendPresence);
         context.assertIsSatisfied();
     }

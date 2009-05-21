@@ -7,26 +7,30 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.client.LibraryChanged;
-import org.limewire.core.api.friend.client.LibraryChangedEvent;
-import org.limewire.listener.EventBroadcaster;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.feature.FeatureTransport;
+import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
 import org.xmlpull.v1.XmlPullParserException;
 
-public class LibraryChangedIQListener implements PacketListener {
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
+public class LibraryChangedIQListener implements PacketListener, FeatureTransport<LibraryChangedNotifier> {
     
     private static final Log LOG = LogFactory.getLog(LibraryChangedIQListener.class);
 
-    private final EventBroadcaster<LibraryChangedEvent> libChangedBroadcaster;
-    private final FriendConnection connection;
+    private final Handler<LibraryChangedNotifier> libChangedHandler;
+    private final XMPPFriendConnectionImpl connection;
 
-    public LibraryChangedIQListener(EventBroadcaster<LibraryChangedEvent> libChangedListeners,
-                                    FriendConnection connection) {
-        this.libChangedBroadcaster = libChangedListeners;
+    @AssistedInject
+    public LibraryChangedIQListener(Handler<LibraryChangedNotifier> libChangedListeners,
+                                    @Assisted XMPPFriendConnectionImpl connection) {
+        this.libChangedHandler = libChangedListeners;
         this.connection = connection;
     }
 
@@ -62,7 +66,24 @@ public class LibraryChangedIQListener implements PacketListener {
         if (user != null) {
             FriendPresence presence = user.getPresences().get(packet.getFrom());
             if(presence != null) {
-                libChangedBroadcaster.broadcast(new LibraryChangedEvent(presence, LibraryChanged.LIBRARY_CHANGED));
+                libChangedHandler.featureReceived(packet.getFrom(), new LibraryChangedNotifier(){});
+            }
+        }
+    }
+
+    @Override
+    public void sendFeature(FriendPresence presence, LibraryChangedNotifier localFeature) throws FriendException {
+        LOG.debug("send library refresh");
+        if(connection.isLoggedIn()) {
+            final LibraryChangedIQ libraryChangedIQ = new LibraryChangedIQ();
+            libraryChangedIQ.setType(IQ.Type.SET);
+            libraryChangedIQ.setTo(presence.getPresenceId());
+            libraryChangedIQ.setPacketID(IQ.nextID());
+            try {
+                LOG.debugf("sending refresh to {0}", presence.getPresenceId());
+                connection.sendPacket(libraryChangedIQ);
+            } catch (FriendException e) {
+                LOG.debugf("library refresh failed", e);
             }
         }
     }

@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.reflect.ParameterizedType;
 
-public class FeatureTransportHandlerRegistryImpl implements FeatureTransportHandlerRegistry{
+public class FeatureTransportHandlerRegistryImpl implements FeatureTransportHandlerRegistry {
     
     private final Map<Class, FeatureTransport.Handler> featureTransports;
     
