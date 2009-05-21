@@ -1,16 +1,14 @@
 package org.limewire.ui.swing.search.model;
 
-import java.awt.EventQueue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.swing.SwingUtilities;
+
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -74,10 +72,6 @@ class BasicSearchResultsModel implements SearchResultsModel {
 
     /** Filtered list of grouped search results. */
     private final FilterList<VisualSearchResult> filteredResultList;
-
-    /** Cache of filtered lists by media category. */
-    private final Map<Category, FilterList<VisualSearchResult>> categoryListMap = 
-        new EnumMap<Category, FilterList<VisualSearchResult>>(Category.class);
 
     /** Listener to handle search request events. */
     private SearchListener searchListener;
@@ -218,25 +212,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
     }
 
     /**
-     * Returns a list of filtered results for the specified search category.
+     * Returns a list of filtered results.
      */
     @Override
-    public EventList<VisualSearchResult> getCategorySearchResults(SearchCategory searchCategory) {
-        if (searchCategory == SearchCategory.ALL) {
-            return filteredResultList;
-            
-        } else {
-            // Get filtered list from cache.
-            Category category = searchCategory.getCategory();
-            FilterList<VisualSearchResult> filteredList = categoryListMap.get(category);
-            // Create filtered list if necessary, and add to cache.
-            if (filteredList == null) {
-                filteredList = GlazedListsFactory.filterList(filteredResultList, 
-                        new CategoryMatcher(category));
-                categoryListMap.put(category, filteredList);
-            }
-            return filteredList;
-        }
+    public EventList<VisualSearchResult> getFilteredSearchResults() {
+        return filteredResultList;
     }
 
     /**
@@ -264,14 +244,18 @@ class BasicSearchResultsModel implements SearchResultsModel {
     public void setSelectedCategory(SearchCategory selectedCategory) {
         if (this.selectedCategory != selectedCategory) {
             this.selectedCategory = selectedCategory;
-            // Dispose of existing visible and sorted lists.
-            if (visibleResultList != null) {
-                visibleResultList.dispose();
-                sortedResultList.dispose();
-            }
-            // Update visible and sorted lists.
-            EventList<VisualSearchResult> filteredList = getCategorySearchResults(selectedCategory);
-            sortedResultList = GlazedListsFactory.sortedList(filteredList, null);
+            updateSortedList();
+        }
+    }
+    
+    /**
+     * Updates sorted list of visible results.  This method is called when the
+     * selected category is changed.
+     */
+    private void updateSortedList() {
+        // Create visible and sorted lists if necessary.
+        if (visibleResultList == null) {
+            sortedResultList = GlazedListsFactory.sortedList(filteredResultList, null);
             visibleResultList = GlazedListsFactory.filterList(sortedResultList, new VisibleMatcher());
             sortedResultList.setComparator((sortOption != null) ? SortFactory.getSortComparator(sortOption) : null);
         }
@@ -307,8 +291,13 @@ class BasicSearchResultsModel implements SearchResultsModel {
             return;
         }
         
-        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), EventQueue.isDispatchThread());
-        allSearchResults.add(result);
+        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), SwingUtilities.isEventDispatchThread());
+        try {
+            allSearchResults.add(result);
+        } catch (Throwable th) {
+            // Throw wrapper exception with detailed message.
+            throw new RuntimeException(createMessageDetail("Problem adding result", result), th);
+        }
     }
 
     /**
@@ -374,19 +363,19 @@ class BasicSearchResultsModel implements SearchResultsModel {
     }
     
     /**
-     * A matcher used to filter search results by category.
+     * Returns a detailed message including the specified prefix and search 
+     * result.
      */
-    private static class CategoryMatcher implements Matcher<VisualSearchResult> {
-        private final Category category;
+    private String createMessageDetail(String prefix, SearchResult result) {
+        StringBuilder buf = new StringBuilder(prefix);
         
-        public CategoryMatcher(Category category) {
-            this.category = category;
-        }
-
-        @Override
-        public boolean matches(VisualSearchResult vsr) {
-            return (vsr.getCategory() == category);
-        }
+        buf.append(", searchCategory=").append(searchInfo.getSearchCategory());
+        buf.append(", resultCategory=").append(result.getCategory());
+        buf.append(", unfilteredSize=").append(getUnfilteredList().size());
+        buf.append(", filteredSize=").append(getFilteredList().size());
+        buf.append(", EDT=").append(SwingUtilities.isEventDispatchThread());
+        
+        return buf.toString();
     }
 
     /**

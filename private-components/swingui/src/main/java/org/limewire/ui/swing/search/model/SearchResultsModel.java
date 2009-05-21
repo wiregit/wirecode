@@ -55,9 +55,9 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
     EventList<VisualSearchResult> getObservableSearchResults();
 
     /**
-     * Returns a list of filtered results for the specified search category.
+     * Returns a list of filtered results in the search.
      */
-    EventList<VisualSearchResult> getCategorySearchResults(SearchCategory category);
+    EventList<VisualSearchResult> getFilteredSearchResults();
 
     /**
      * Returns a list of sorted and filtered results for the selected search
