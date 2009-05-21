@@ -3,10 +3,12 @@ package org.limewire.libtorrent;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.ExceptionUtils;
 import org.limewire.util.OSUtils;
 
 import com.sun.jna.Memory;
@@ -20,8 +22,10 @@ public class LibTorrentWrapper {
 
     private static final char MAX_LENGTH_DIGITS = 4;
     private static final int IP_SIZE = 16;
-    
+
     private static final Log LOG = LogFactory.getLog(LibTorrentWrapper.class);
+
+    private final AtomicBoolean loaded = new AtomicBoolean(false);
 
     private LibTorrent libTorrent;
 
@@ -30,36 +34,46 @@ public class LibTorrentWrapper {
      * then loading the libtorrent library as a jna lib.
      */
     public void initialize() {
-        if (OSUtils.isWindows()) {
-            System.loadLibrary("mingwm10");
-            System.loadLibrary("boost_system-mgw34-mt-1_38");
-            System.loadLibrary("boost_date_time-mgw34-mt-1_38");
-            System.loadLibrary("boost_filesystem-mgw34-mt-1_38");
-            System.loadLibrary("boost_thread-mgw34-mt-1_38");
-            System.loadLibrary("torrent");
-        } else if (OSUtils.isLinux()) {
-            // everything compiled into libtorrent-wrapper.so
-        } else if (OSUtils.isMacOSX()) {
-            // everything compiled into libtorrent-wrapper.dylib
+        try {
+            if (OSUtils.isWindows()) {
+                System.loadLibrary("mingwm10");
+                System.loadLibrary("boost_system-mgw34-mt-1_38");
+                System.loadLibrary("boost_date_time-mgw34-mt-1_38");
+                System.loadLibrary("boost_filesystem-mgw34-mt-1_38");
+                System.loadLibrary("boost_thread-mgw34-mt-1_38");
+                System.loadLibrary("torrent");
+            } else if (OSUtils.isLinux()) {
+                // everything compiled into libtorrent-wrapper.so
+            } else if (OSUtils.isMacOSX()) {
+                // everything compiled into libtorrent-wrapper.dylib
+            }
+
+            // TODO make sure right libraries are loaded on linux too.
+            this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
+
+            init();
+            loaded.set(true);
+        } catch (UnsatisfiedLinkError e) {
+            ExceptionUtils.reportOrReturn(e);
         }
-
-        // TODO make sure right libraries are loaded on linux too.
-        this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
-
-        init();
     }
 
-    public void add_torrent(String sha1, String trackerURI, String torrentPath,
-            String savePath, String fastResumePath) {
-        LOG.debugf("before add_torrent: {0}", sha1);
-        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, torrentPath, savePath, fastResumePath));
-        LOG.debugf("after add_torrent: {0}", sha1);
+    public boolean isLoaded() {
+        return loaded.get();
     }
 
     private void init() {
         LOG.debugf("before init");
         catchWrapperException(libTorrent.init());
         LOG.debugf("after init");
+    }
+
+    public void add_torrent(String sha1, String trackerURI, String torrentPath, String savePath,
+            String fastResumePath) {
+        LOG.debugf("before add_torrent: {0}", sha1);
+        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, torrentPath, savePath,
+                fastResumePath));
+        LOG.debugf("after add_torrent: {0}", sha1);
     }
 
     public void freeze_and_save_all_fast_resume_data(AlertCallback alertCallback) {
@@ -103,13 +117,12 @@ public class LibTorrentWrapper {
     public List<String> get_peers(String id) {
         Memory numPeersMemory = new Memory(MAX_LENGTH_DIGITS);
         int numUnfilteredPeers = numPeersMemory.getInt(0);
-        
+
         LOG.debugf("before get_num_peers: {0}", id);
         catchWrapperException(libTorrent.get_num_viewable_peers(id, numPeersMemory));
         try {
             numUnfilteredPeers = Integer.parseInt(numPeersMemory.getString(0));
-        } 
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             numUnfilteredPeers = 0;
         }
         LOG.debugf("after get_num_peers: {0} - {1}", id, numUnfilteredPeers);
@@ -121,9 +134,9 @@ public class LibTorrentWrapper {
         Memory memory = new Memory(numUnfilteredPeers * IP_SIZE);
 
         LOG.debugf("before get_peers: {0}", id);
-        catchWrapperException(libTorrent.get_peers(id, (int)memory.getSize(), memory));
+        catchWrapperException(libTorrent.get_peers(id, (int) memory.getSize(), memory));
         LOG.debugf("after get_peers: {0}", id);
-        
+
         List<String> peers = Arrays.asList(memory.getString(0).split(";"));
 
         return peers;
@@ -134,7 +147,7 @@ public class LibTorrentWrapper {
         catchWrapperException(libTorrent.signal_fast_resume_data_request(id));
         LOG.debugf("after print signal_fast_resume_data_request: {0}", id);
     }
-    
+
     public void clear_error_and_retry(String id) {
         LOG.debugf("before print clear_error_and_retry: {0}", id);
         catchWrapperException(libTorrent.clear_error_and_retry(id));

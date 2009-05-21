@@ -290,7 +290,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         torrentManager.start();
         BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory
                 .createBTDownloader(torrentFile);
-        downloader.register();
+        downloader.registerTorrentWithTorrentManager();
         return downloader;
     }
 

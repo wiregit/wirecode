@@ -780,7 +780,11 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
     private Downloader resumeTorrentDownload(File torrentFile) throws CantResumeException,
             SaveLocationException {
-        return downloadTorrent(torrentFile, false);
+        if(torrentManager.get().isValid()) {
+            return downloadTorrent(torrentFile, false);
+        } else {
+            throw new CantResumeException("Torrent Manager Invalid", torrentFile.getName());
+        }
     }
     
     /* (non-Javadoc)
@@ -848,7 +852,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             }
         }
 
-        ret.register();
+        ret.registerTorrentWithTorrentManager();
         initializeDownload(ret, true);
         return ret;
     }

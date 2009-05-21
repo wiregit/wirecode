@@ -123,8 +123,8 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
             CoreDownloader downloader = coreFactory.get();
             downloader.initFromMemento(memento);
             return downloader;
-        } catch (ClassCastException cce) {
-            throw new InvalidDataException("invalid memento!", cce);
+        } catch (Throwable t) {
+            throw new InvalidDataException("invalid memento!", t);
         }
     }
 

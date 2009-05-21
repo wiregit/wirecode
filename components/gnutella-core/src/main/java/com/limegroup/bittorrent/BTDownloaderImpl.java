@@ -115,7 +115,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * Registers the internal torrent with the torrent manager.
      */
     @Override
-    public void register() {
+    public void registerTorrentWithTorrentManager() {
         torrentManager.get().registerTorrent(torrent);
     }
 
@@ -526,7 +526,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 throw new InvalidDataException("Could not initialize the BTDownloader", e1);
             }
         }
-        register();
+        registerTorrentWithTorrentManager();
     }
 
     public void initFromOldMemento(BTDownloadMemento memento) throws InvalidDataException {
@@ -573,7 +573,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         } catch (IOException e) {
             throw new InvalidDataException("Could not initialize the BTDownloader", e);
         }
-        register();
+        registerTorrentWithTorrentManager();
     }
 
     @Override

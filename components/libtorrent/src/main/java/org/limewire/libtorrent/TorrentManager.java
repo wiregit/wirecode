@@ -70,4 +70,9 @@ public interface TorrentManager extends Service {
      * Returns the Executor used by the torrent code. 
      */
     public Executor getTorrentExecutor();
+
+    /**
+     * Returns true if the TorrentManager loaded properly and is in a valid state. 
+     */
+    public boolean isValid();
 }
