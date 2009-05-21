@@ -41,6 +41,7 @@ import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMementoImpl;
+import com.limegroup.gnutella.library.FileManager;
 
 /**
  * Wraps the Torrent class in the Downloader interface to enable the gui to
@@ -59,6 +60,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
     private final Provider<TorrentManager> torrentManager;
+    
+    private final FileManager fileManager;
 
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
@@ -68,13 +71,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
             BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
-            Provider<TorrentManager> torrentManager) {
+            Provider<TorrentManager> torrentManager, FileManager fileManager) {
         super(saveLocationManager);
 
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
         this.torrentManager = torrentManager;
+        this.fileManager = fileManager;
     }
 
     /**
@@ -93,6 +97,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                     deleteIncompleteFiles();
                     complete.set(true);
+                    File completeFile = getSaveFile();
+                    if(completeFile.isDirectory()) {
+                        fileManager.getManagedFileList().addFolder(completeFile);
+                    } else {
+                        fileManager.getManagedFileList().add(completeFile);
+                    }
                 } else if (TorrentEvent.STOPPED == event) {
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                 }
@@ -189,12 +199,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public File getDownloadFragment() {
-        if (!isLaunchable()) {
-            return null;
-        }
-
         if (isCompleted()) {
             return getSaveFile();
+        }
+        
+        if (!isLaunchable()) {
+            return null;
         }
 
         if (torrent.isMultiFileTorrent()) {
@@ -454,6 +464,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public synchronized void finish() {
+        deleteIncompleteFiles();
     }
 
     @Override
