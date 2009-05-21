@@ -13,6 +13,7 @@ import org.limewire.util.OSUtils;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
+import com.sun.jna.WString;
 
 /**
  * Wrapper class for the LibTorrent c interface. Provides library loading logic,
@@ -71,8 +72,8 @@ public class LibTorrentWrapper {
     public void add_torrent(String sha1, String trackerURI, String torrentPath, String savePath,
             String fastResumePath) {
         LOG.debugf("before add_torrent: {0}", sha1);
-        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, torrentPath, savePath,
-                fastResumePath));
+        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, 
+                new WString(torrentPath), new WString(savePath), new WString(fastResumePath)));
         LOG.debugf("after add_torrent: {0}", sha1);
     }
 

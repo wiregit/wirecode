@@ -5,6 +5,7 @@ import org.limewire.libtorrent.callback.AlertCallback;
 import com.sun.jna.Library;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+import com.sun.jna.WString;
 
 /**
  * Interface definition for accessing the C LibTorrentWrapper library. 
@@ -22,8 +23,8 @@ interface LibTorrent extends Library {
      * sha1 and trackerURI. optionally a path to a fast Resume data file can be
      * included to enable starting the torrent faster.
      */
-    public WrapperStatus add_torrent(String sha1, String trackerURI, String torrentPath, 
-            String savePath, String fastResumeData);
+    public WrapperStatus add_torrent(String sha1, String trackerURI, WString torrentPath, 
+            WString savePath, WString fastResumeData);
 
     /**
      * Pauses the torrent with the given sha1

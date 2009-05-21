@@ -4,6 +4,7 @@
 #include <memory>
 #include <string.h>
 
+#include "libtorrent/utf8.hpp"
 #include "libtorrent/config.hpp"
 #include "libtorrent/session.hpp"
 #include "libtorrent/peer_info.hpp"
@@ -57,6 +58,8 @@ typedef libtorrent::big_number sha1_hash;
 {	wTHROW(new wrapper_exception()); \
 } \
 return 0;
+
+#define WIDE_PATH(x) boost::filesystem::path(libtorrent::wchar_utf8(x))
 
 struct wrapper_exception {
 	int type;
@@ -353,13 +356,13 @@ extern "C" EXTERN_RET init() {
 
 extern "C" EXTERN_RET abort_torrents() {
 	EXTERN_TRY_CONTAINER_BEGIN;
-		
+
 		session->pause();
 		session->stop_upnp();
 		session->stop_natpmp();
 		session->abort();
 		delete session;
-		
+
 	EXTERN_TRY_CONTAINER_END;
 }
 
@@ -374,7 +377,7 @@ extern "C" EXTERN_RET move_torrent(const char* id, const char* path) {
 }
 
 extern "C" EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
-		char* torrentPath, char* savePath, char* fastResumePath) {
+		wchar_t* torrentPath, wchar_t* savePath, wchar_t* fastResumePath) {
 	EXTERN_TRY_CONTAINER_BEGIN;
 
 #ifdef LIME_DEBUG
@@ -388,7 +391,7 @@ extern "C" EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
 		sha1_hash sha1 = getSha1Hash(sha1String);
 
 		libtorrent::add_torrent_params torrent_params;
-		torrent_params.save_path = savePath;
+		torrent_params.save_path = WIDE_PATH(savePath);
 		torrent_params.info_hash = sha1;
 		torrent_params.tracker_url = trackerURI;
 		torrent_params.auto_managed = false;
@@ -396,15 +399,18 @@ extern "C" EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
 		std::vector<char> resume_buf;
 
 		if (torrentPath) {
-			boost::filesystem::ifstream torrent_file(torrentPath,
+			boost::filesystem::ifstream torrent_file(
+					WIDE_PATH(torrentPath),
 					std::ios_base::binary);
 			if (!torrent_file.fail()) {
-				torrent_params.ti = new libtorrent::torrent_info(torrentPath);
+				torrent_params.ti = new libtorrent::torrent_info(
+					WIDE_PATH(torrentPath));
 			}
 		}
 
 		if (fastResumePath) {
-			boost::filesystem::ifstream resume_file(fastResumePath,
+			boost::filesystem::ifstream resume_file(
+					WIDE_PATH(fastResumePath),
 					std::ios_base::binary);
 
 			if (!resume_file.fail()) {
