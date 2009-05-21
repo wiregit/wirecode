@@ -322,7 +322,7 @@ public class BaseResultPanel extends JXPanel {
 
         // Get results list and table format for selected category.
         SearchCategory selectedCategory = searchResultsModel.getSelectedCategory();
-        EventList<VisualSearchResult> eventList = searchResultsModel.getCategorySearchResults(selectedCategory);
+        EventList<VisualSearchResult> eventList = searchResultsModel.getFilteredSearchResults();
         ResultsTableFormat<VisualSearchResult> tableFormat = tableFormatFactory.createTableFormat(selectedCategory);
 
         // Create sorted list and set table model.
