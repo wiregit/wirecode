@@ -17,6 +17,8 @@ import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.util.BaseTestCase;
 
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
 /**
@@ -574,8 +576,8 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group0, group1.getSimilarityParent());
     }
 
-    /** Tests method to retrieve filtered search results by category. */
-    public void testGetCategorySearchResults() {
+    /** Tests method to retrieve filtered search results. */
+    public void testGetFilteredSearchResults() {
         // Create test search results.
         TestSearchResult testResult1 = new TestSearchResult("1", "xray");
         TestSearchResult testResult2 = new TestSearchResult("2", "zulu");
@@ -588,14 +590,29 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult2);
         model.addSearchResult(testResult3);
         model.addSearchResult(testResult4);
-
-        // Get category search results.
-        List<VisualSearchResult> categoryList = model.getCategorySearchResults(SearchCategory.VIDEO);
         
-        // Verify category list.
+        // Apply category filter.
+        model.setFilterEditor(new AbstractMatcherEditor<VisualSearchResult>() {
+            Matcher<VisualSearchResult> matcher = new Matcher<VisualSearchResult>() {
+                @Override
+                public boolean matches(VisualSearchResult item) {
+                    return item.getCategory() == Category.VIDEO;
+                }
+            };
+            
+            @Override
+            public Matcher<VisualSearchResult> getMatcher() {
+                return matcher;
+            }
+        });
+        
+        // Get filtered search results.
+        List<VisualSearchResult> filteredList = model.getFilteredSearchResults();
+        
+        // Verify filtered list.
         int expectedSize = 1;
-        int actualSize = categoryList.size();
-        assertEquals("category list size", expectedSize, actualSize);
+        int actualSize = filteredList.size();
+        assertEquals("filtered list size", expectedSize, actualSize);
     }
     
     /** Tests method to retrieve sorted and filtered search results. */
@@ -643,7 +660,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult4);
         
         // Get all search results.
-        List<VisualSearchResult> filteredList = model.getCategorySearchResults(SearchCategory.ALL);
+        List<VisualSearchResult> filteredList = model.getFilteredSearchResults();
         
         // Verify unfiltered list.
         int expectedSize = 4;
