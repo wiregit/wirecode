@@ -51,6 +51,8 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
  * property filters. 
  */
 public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implements Disposable {
+    private static final int LEFT_INSET = 6;
+    private static final int RIGHT_INSET = 6;
 
     @Resource(key="AdvancedFilter.filterWidth") private int filterWidth;
     @Resource private Color backgroundColor;
@@ -122,9 +124,10 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         setBorder(new SideLineBorder(borderColor, Side.RIGHT));
         setLayout(new MigLayout("insets 0 0 0 0, gap 0!, fill, hidemode 3"));
         
+        int textFieldWidth = filterWidth - LEFT_INSET - RIGHT_INSET;
         textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.NONE);
-        filterTextField.setMinimumSize(new Dimension(filterWidth, filterTextField.getMinimumSize().height));
-        filterTextField.setPreferredSize(new Dimension(filterWidth, filterTextField.getPreferredSize().height));
+        filterTextField.setMinimumSize(new Dimension(textFieldWidth, filterTextField.getMinimumSize().height));
+        filterTextField.setPreferredSize(new Dimension(textFieldWidth, filterTextField.getPreferredSize().height));
         
         filterDisplayPanel = new FilterDisplayPanel();
         
@@ -190,9 +193,9 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             
             // Add components using max width.
             filterPanel.removeAll();
-            filterPanel.add(categoryFilter.getComponent(), "gap 6 6 8 6, wmax " + maxWidth + ", growx, wrap");
-            filterPanel.add(sourceFilter.getComponent()  , "gap 6 6 8 6, wmax " + maxWidth + ", growx, wrap");
-            filterPanel.add(propertyPanel                , "gap 6 6 0 0, wmax " + maxWidth + ", grow");
+            filterPanel.add(categoryFilter.getComponent(), "gap 0 0 8 6, wmax " + maxWidth + ", growx, wrap");
+            filterPanel.add(sourceFilter.getComponent()  , "gap 0 0 8 6, wmax " + maxWidth + ", growx, wrap");
+            filterPanel.add(propertyPanel                , "gap 0 0 0 0, wmax " + maxWidth + ", grow");
             
             // Update divider visibility.
             updateDivider();
@@ -485,7 +488,8 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             displayMap.put(filter, activeFilterPanel);
             
             // Add filter display to container.
-            displayPanel.add(activeFilterPanel, "gaptop 4, wmax " + filterWidth + ", wrap");
+            int maxWidth = filterWidth - LEFT_INSET - RIGHT_INSET;
+            displayPanel.add(activeFilterPanel, "gaptop 4, wmax " + maxWidth + ", wrap");
             
             // Display this container.
             setVisible(true);
@@ -598,7 +602,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             
             // Add more/less button if needed.
             if ((filterMin > 0) && (filterList.size() > filterMin)) {
-                add(moreButton, "gap 0 0 8 3, aligny top");
+                add(moreButton, "gap 6 6 8 3, aligny top");
             }
             
             // Update more/less button.

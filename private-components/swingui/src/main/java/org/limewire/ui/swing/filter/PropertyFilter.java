@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.PopupMenuEvent;
@@ -27,6 +28,9 @@ import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXList;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -58,7 +62,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     
     private final JPanel panel = new JPanel();
     private final JLabel propertyLabel = new JLabel();
-    private final JList list = new JList();
+    private final JXList list = new JXList();
     private final HyperlinkButton moreButton = new HyperlinkButton();
     
     private FunctionList<E, Object> propertyList;
@@ -93,11 +97,16 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         propertyLabel.setForeground(resources.getHeaderColor());
         propertyLabel.setText(getPropertyText());
         
-        list.setCellRenderer(new PropertyCellRenderer());
+        list.setCellRenderer(new PropertyCellRenderer(BorderFactory.createEmptyBorder(1, 7, 0, 7)));
         list.setFont(resources.getRowFont());
         list.setForeground(resources.getRowColor());
         list.setOpaque(false);
+        list.setRolloverEnabled(true);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        // Add highlighter for rollover.
+        list.setHighlighters(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                resources.getHighlightBackground(), resources.getHighlightForeground()));
         
         // Add listener to show cursor on mouse over.
         list.addMouseListener(new RolloverCursorListener());
@@ -133,9 +142,9 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         list.setPrototypeCellValue("Type");
         int listHeight = 3 * list.getFixedCellHeight();
         
-        panel.add(propertyLabel, "wrap");
+        panel.add(propertyLabel, "gap 6 6, wrap");
         panel.add(list         , "hmax " + listHeight + ", grow, wrap");
-        panel.add(moreButton   , "");
+        panel.add(moreButton   , "gap 6 6");
     }
     
     /**
@@ -333,7 +342,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         private final JPanel titlePanel = new JPanel();
         private final JLabel titleLabel = new JLabel();
         private final JButton closeButton = new JButton();
-        private final JList moreList = new JList();
+        private final JXList moreList = new JXList();
         private final JScrollPane scrollPane = new JScrollPane();
         private final JPopupMenu popupMenu = new JPopupMenu();
         
@@ -366,11 +375,16 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 }
             });
             
-            moreList.setCellRenderer(new PropertyCellRenderer());
+            moreList.setCellRenderer(new PropertyCellRenderer(BorderFactory.createEmptyBorder(1, 4, 0, 1)));
             moreList.setFont(resources.getRowFont());
             moreList.setForeground(resources.getRowColor());
             moreList.setOpaque(false);
+            moreList.setRolloverEnabled(true);
             moreList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            
+            // Add highlighter for rollover.
+            moreList.setHighlighters(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                    resources.getHighlightBackground(), resources.getHighlightForeground()));
             
             // Add listener to show cursor on mouse over.
             moreList.addMouseListener(new RolloverCursorListener());
@@ -385,7 +399,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
             // Add selection listener to update filter.
             popupSelectionModel.addListSelectionListener(new SelectionListener(popupSelectionModel));
             
-            scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 0));
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setViewportView(moreList);
             
@@ -456,9 +470,10 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
             }
             
             // Display popup next to property label.  Coordinates are relative
-            // to the invoker, so we adjust the vertical position to align with
-            // the filter label.
-            popupMenu.show(moreButton, list.getWidth(), propertyLabel.getY() - moreButton.getY());
+            // to the invoker, so we adjust the horizontal position to align
+            // with the list, and the vertical position to align with the 
+            // filter label.
+            popupMenu.show(moreButton, list.getWidth() - 12, propertyLabel.getY() - moreButton.getY());
         }
         
         /**
@@ -511,6 +526,11 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * Cell renderer for property values.
      */
     private class PropertyCellRenderer extends DefaultListCellRenderer {
+        private final Border border;
+        
+        public PropertyCellRenderer(Border border) {
+            this.border = border;
+        }
         
         @Override
         public Component getListCellRendererComponent(JList list, Object value, 
@@ -529,8 +549,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 ((JLabel) renderer).setText(buf.toString());
                 
                 // Set appearance.
-                ((JLabel) renderer).setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
-                ((JLabel) renderer).setOpaque(false);
+                ((JLabel) renderer).setBorder(border);
             }
             
             return renderer;

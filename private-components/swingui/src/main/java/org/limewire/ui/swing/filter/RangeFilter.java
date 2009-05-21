@@ -62,9 +62,9 @@ class RangeFilter<E extends FilterableItem> extends AbstractFilter<E> {
         // Add listener to update filter.
         slider.addChangeListener(new SliderListener());
         
-        panel.add(headerLabel, "wrap");
-        panel.add(valueLabel , "wrap");
-        panel.add(slider     , "growx");
+        panel.add(headerLabel, "gap 6 6, wrap");
+        panel.add(valueLabel , "gap 6 6, wrap");
+        panel.add(slider     , "gap 6 6, growx");
     }
     
     @Override

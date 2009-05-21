@@ -1,9 +1,6 @@
 package org.limewire.ui.swing.filter;
 
 import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -12,11 +9,16 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXList;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -48,7 +50,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
     private final JPanel panel = new JPanel();
     private final JLabel label = new JLabel();
-    private final JList list = new JList();
+    private final JXList list = new JXList();
     
     private final EventList<SourceType> sourceList = new BasicEventList<SourceType>();
     
@@ -73,22 +75,17 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         list.setFont(resources.getRowFont());
         list.setForeground(resources.getRowColor());
         list.setOpaque(false);
+        list.setRolloverEnabled(true);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
-        // Add listener to show cursor on mouse over.
-        list.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                e.getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                e.getComponent().setCursor(Cursor.getDefaultCursor());
-            }
-        });
+        // Add highlighter for rollover.
+        list.setHighlighters(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                resources.getHighlightBackground(), resources.getHighlightForeground()));
         
-        panel.add(label, "wrap");
+        // Add listener to show cursor on mouse over.
+        list.addMouseListener(new RolloverCursorListener());
+        
+        panel.add(label, "gap 6 6, wrap");
         panel.add(list , "grow");
         
         initialize();
@@ -184,6 +181,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * Cell renderer for source values.
      */
     private class SourceCellRenderer extends DefaultListCellRenderer {
+        private final Border border = BorderFactory.createEmptyBorder(1, 7, 0, 7);
         
         @Override
         public Component getListCellRendererComponent(JList list, Object value, 
@@ -194,8 +192,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             
             if (renderer instanceof JLabel) {
                 // Set appearance.
-                ((JLabel) renderer).setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
-                ((JLabel) renderer).setOpaque(false);
+                ((JLabel) renderer).setBorder(border);
             }
 
             return renderer;

@@ -10,11 +10,15 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXList;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.ui.swing.components.RolloverCursorListener;
@@ -36,7 +40,7 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
     private final JPanel panel = new JPanel();
     private final JLabel categoryLabel = new JLabel();
-    private final JList list = new JList();
+    private final JXList list = new JXList();
     
     private Category selectedCategory;
     private FunctionList<E, Category> categoryList;
@@ -62,12 +66,17 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
         list.setFont(resources.getRowFont());
         list.setForeground(resources.getRowColor());
         list.setOpaque(false);
+        list.setRolloverEnabled(true);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        // Add highlighter for rollover.
+        list.setHighlighters(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                resources.getHighlightBackground(), resources.getHighlightForeground()));
         
         // Add listener to show cursor on mouse over.
         list.addMouseListener(new RolloverCursorListener());
         
-        panel.add(categoryLabel, "wrap");
+        panel.add(categoryLabel, "gap 6 6, wrap");
         panel.add(list         , "grow");
 
         // Apply results list to filter.
@@ -212,6 +221,7 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * Cell renderer for category values.
      */
     private class CategoryCellRenderer extends DefaultListCellRenderer {
+        private final Border border = BorderFactory.createEmptyBorder(1, 7, 0, 7);
         
         @Override
         public Component getListCellRendererComponent(JList list, Object value, 
@@ -230,8 +240,7 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 ((JLabel) renderer).setText(buf.toString());
 
                 // Set appearance.
-                ((JLabel) renderer).setBorder(BorderFactory.createEmptyBorder(1, 1, 0, 1));
-                ((JLabel) renderer).setOpaque(false);
+                ((JLabel) renderer).setBorder(border);
             }
 
             return renderer;

@@ -147,6 +147,10 @@ abstract class AbstractFilter<E extends FilterableItem> implements Filter<E> {
         private Color headerColor;
         @Resource(key="AdvancedFilter.headerFont")
         private Font headerFont;
+        @Resource(key="AdvancedFilter.highlightBackground")
+        private Color highlightBackground;
+        @Resource(key="AdvancedFilter.highlightForeground")
+        private Color highlightForeground;
         @Resource(key="AdvancedFilter.rowColor")
         private Color rowColor;
         @Resource(key="AdvancedFilter.rowFont")
@@ -188,6 +192,20 @@ abstract class AbstractFilter<E extends FilterableItem> implements Filter<E> {
          */
         public Font getHeaderFont() {
             return headerFont;
+        }
+        
+        /**
+         * Returns the background color for highlighted filter rows.
+         */
+        public Color getHighlightBackground() {
+            return highlightBackground;
+        }
+        
+        /**
+         * Returns the foreground color for highlighted filter rows.
+         */
+        public Color getHighlightForeground() {
+            return highlightForeground;
         }
         
         /**
