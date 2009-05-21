@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search;
 import java.awt.BorderLayout;
 import java.awt.Component;
 
-import javax.swing.Action;
 import javax.swing.Scrollable;
 
 import org.jdesktop.swingx.JXPanel;
@@ -26,9 +25,6 @@ public class ResultsContainer extends JXPanel {
 
     /** Results panel containing display tables. */
     private final BaseResultPanel baseResultPanel;
-
-    /** Data model containing search results. */
-    private final SearchResultsModel searchResultsModel;
     
     /** Current view type; either LIST or TABLE. */
     private SearchViewType mode = SearchViewType.forId(SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue());
@@ -43,8 +39,6 @@ public class ResultsContainer extends JXPanel {
         @Assisted SearchResultsModel searchResultsModel,
         BaseResultPanelFactory baseFactory) {
         
-        this.searchResultsModel = searchResultsModel;
-        
         // Create result panel.
         baseResultPanel = baseFactory.create(searchResultsModel);
         
@@ -54,16 +48,6 @@ public class ResultsContainer extends JXPanel {
         add(baseResultPanel, BorderLayout.CENTER);
     }
 
-    /**
-     * Installs a listener on the list of search results to update the result
-     * count for the specified search category and tab action.  The result
-     * count is displayed in parentheses next to the category name.
-     */
-    public void synchronizeResultCount(SearchCategory key, final Action action) {
-        // Adds itself as a listener to the list & keeps the action in sync.
-        new SourceCountMaintainer(searchResultsModel.getCategorySearchResults(key), action);
-    }
-    
     /**
      * Changes whether the list view or table view is displayed.
      * @param mode LIST or TABLE
