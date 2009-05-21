@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
 	<classpathentry kind="src" path="components/core-glue/src/test/java"/>
+	<classpathentry kind="src" output="components/gnutella-core/build/tests" path="components/gnutella-core/src/test/java"/>
+	<classpathentry kind="src" output="components/gnutella-core/build/classes" path="components/gnutella-core/src/main/java"/>
 	<classpathentry kind="src" output="components/player/build/tests" path="components/player/src/test/java"/>
 	<classpathentry kind="src" output="components/player/build/classes" path="components/player/src/main/java"/>
 	<classpathentry kind="src" output="components/player-api/build/classes" path="components/player-api/src/main/java"/>
 	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/resources"/>
-	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
 	<classpathentry kind="src" output="components/resources/src/main/resources" path="components/resources/src/main/resources"/>
 	<classpathentry kind="src" output="components/test-util/build/classes" path="components/test-util/src/main/java"/>
 	<classpathentry kind="src" output="components/test-util/build/tests" path="components/test-util/src/test/java"/>
@@ -40,7 +40,6 @@
 	<classpathentry kind="src" output="components/lwsserver/build/tests" path="components/lwsserver/src/test/java"/>
 	<classpathentry kind="src" output="components/promotion/build/classes" path="components/promotion/src/main/java"/>
 	<classpathentry kind="src" output="components/promotion/build/tests" path="components/promotion/src/test/java"/>
-	<classpathentry kind="src" path="core/examples/mojito"/>
 	<classpathentry kind="src" output="components/geocode/build/classes" path="components/geocode/src/main/java"/>
 	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
 	<classpathentry kind="src" output="components/xmpp/build/classes" path="components/xmpp/src/main/java"/>
