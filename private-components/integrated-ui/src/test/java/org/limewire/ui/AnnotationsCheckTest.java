@@ -32,15 +32,17 @@ public class AnnotationsCheckTest extends BaseTestCase {
 
         Injector injector = Guice.createInjector(new LimeWireModule()); 
         Map<String, String> results = new HashMap<String, String>();
+        int checked = 0;
         while (st.hasMoreTokens()) {
             String next = st.nextToken();
-            // Ignore test directories..
-            if(next.endsWith(File.separator + "tests")) {
+            if(!next.endsWith("build" + File.separator + "classes")) {
                 continue;
             }
+            checked++;
             results.putAll(InspectionTool.generateMappings(new File(next), injector, new String[0]));
         }
         assertFalse(results.isEmpty());
+        assertGreaterThan(10, checked);
     }
 }
 

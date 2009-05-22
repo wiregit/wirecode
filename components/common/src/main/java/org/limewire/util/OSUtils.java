@@ -1,12 +1,11 @@
 package org.limewire.util;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.HashMap;
 
-import org.limewire.inspection.InspectionPoint;
 import org.limewire.inspection.Inspectable;
-import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionPoint;
 
 /**
  * Provides methods to get operating system properties, resources and versions, 
@@ -80,22 +79,18 @@ public class OSUtils {
     private static boolean _isOS2;
 
     /** Operating System information */
-    @SuppressWarnings("unused")
-    @InspectableContainer
-    private static class OsInspectableContainer {
-        @InspectionPoint("os_info")
-        private final Inspectable osInspect = new Inspectable() {
-            @Override
-            public Object inspect() {
-                Map<String, Object> data = new HashMap<String, Object>();
-                data.put("os_name", getOS());
-                data.put("os_ver", getOSVersion());
-                data.put("os_arch", getOSArch());
-                data.put("num_cpus", Runtime.getRuntime().availableProcessors());
-                return data;
-            }
-        };
-    }
+    @SuppressWarnings("unused") @InspectionPoint("os_info")
+    private static final Inspectable osInspect = new Inspectable() {
+        @Override
+        public Object inspect() {
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("os_name", getOS());
+            data.put("os_ver", getOSVersion());
+            data.put("os_arch", getOSArch());
+            data.put("num_cpus", Runtime.getRuntime().availableProcessors());
+            return data;
+        }
+    };
 
     /**
      * Sets the operating system variables.

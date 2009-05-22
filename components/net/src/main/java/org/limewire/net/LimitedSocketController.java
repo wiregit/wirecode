@@ -32,10 +32,9 @@ import com.google.inject.Singleton;
  * is available for connecting.
  */
 @Singleton
-class LimitedSocketController extends SimpleSocketController {
+class LimitedSocketController extends AbstractSocketController {
     
-    private final static Log LOG =
-        LogFactory.getLog(LimitedSocketController.class);
+    private final static Log LOG = LogFactory.getLog(LimitedSocketController.class);
     
     private static final int DEFAULT_MAX_CONNECTING_SOCKETS = 4;
 
