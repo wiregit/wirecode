@@ -105,6 +105,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                 } else if (TorrentEvent.STOPPED == event) {
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
+                } else if (TorrentEvent.FAST_RESUME_FILE_SAVED == event) {
+                    //TODO kind of an ugly way to clean this up
+                    if(finishing.get() || complete.get() || torrent.isCancelled()) {
+                        FileUtils.delete(torrent.getFastResumeFile(), false);
+                    }
                 }
             };
         });
