@@ -205,7 +205,7 @@ public class DownloadHeaderPanel extends JXPanel {
         }
     };
     
-    private final Action downloadSettingsAction = new AbstractAction(I18n.tr("Download Settings...")) {
+    private final Action downloadSettingsAction = new AbstractAction(I18n.tr("Download Options...")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             new OptionsDisplayEvent(OptionsDialog.DOWNLOADS).publish();
