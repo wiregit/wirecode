@@ -45,10 +45,20 @@ public class TorrentManagerImpl implements TorrentManager {
      */
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
+    /**
+     * Future for the job updating the torrent status.
+     */
     private ScheduledFuture<?> torrentFuture;
 
+    /**
+     * Future for the job listening to torrent alerts.
+     */
     private ScheduledFuture<?> alertFuture;
 
+    /**
+     * Future for the job creating resume files.
+     * The alert job must be running for the resume files to be created properly.
+     */
     private ScheduledFuture<?> resumeFileFuture;
 
     @Inject
