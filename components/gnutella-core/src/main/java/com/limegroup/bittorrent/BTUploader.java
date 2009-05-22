@@ -47,6 +47,7 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
     public void handleEvent(TorrentEvent event) {
         if (event == TorrentEvent.STOPPED) {
             finish();
+            torrent.removeListener(this);
         }
     };
     
