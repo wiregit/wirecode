@@ -38,6 +38,10 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
         this.torrent = torrent;
         this.activityCallback = activityCallback;
     }
+    
+    public void registerTorrentListener() {
+        torrent.addListener(this);
+    }
 
     @Override
     public void handleEvent(TorrentEvent event) {
@@ -63,7 +67,6 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
     private void finish() {
         cancelled.set(true);
         activityCallback.removeUpload(this);
-        //torrent.removeListener(this);
     }
 
     @Override
