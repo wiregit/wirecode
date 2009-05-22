@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.download.SaveLocationManager;
@@ -22,12 +23,15 @@ import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentEvent;
 import org.limewire.libtorrent.TorrentManager;
+import org.limewire.listener.AsynchronousMulticaster;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.EventMulticaster;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -47,7 +51,8 @@ import com.limegroup.gnutella.library.FileManager;
  * Wraps the Torrent class in the Downloader interface to enable the gui to
  * treat the torrent downloader as a normal downloader.
  */
-public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownloader, EventListener<TorrentEvent> {
+public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownloader,
+        EventListener<TorrentEvent> {
 
     private final DownloadManager downloadManager;
 
@@ -60,8 +65,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
     private final Provider<TorrentManager> torrentManager;
-    
+
     private final FileManager fileManager;
+
+    private final EventMulticaster<DownloadStateEvent> listeners;
 
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
@@ -71,14 +78,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
             BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
-            Provider<TorrentManager> torrentManager, FileManager fileManager) {
+            Provider<TorrentManager> torrentManager, FileManager fileManager,
+            @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
         super(saveLocationManager);
-
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
         this.torrentManager = torrentManager;
         this.fileManager = fileManager;
+        this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(fastExecutor);
     }
 
     /**
@@ -89,7 +97,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public void registerTorrentListener() {
         torrent.addListener(this);
     }
-    
+
     @Override
     public void handleEvent(TorrentEvent event) {
         if (TorrentEvent.COMPLETED == event && !complete.get()) {
@@ -98,25 +106,26 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             File completeDir = getSaveFile().getParentFile();
             torrent.moveTorrent(completeDir);
             deleteIncompleteFiles();
-            complete.set(true);
             File completeFile = getSaveFile();
-            if(completeFile.isDirectory()) {
+            if (completeFile.isDirectory()) {
                 fileManager.getManagedFileList().addFolder(completeFile);
             } else {
                 fileManager.getManagedFileList().add(completeFile);
             }
+            complete.set(true);
+            listeners.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
         } else if (TorrentEvent.STOPPED == event) {
             torrent.removeListener(this);
+            listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
         } else if (TorrentEvent.FAST_RESUME_FILE_SAVED == event) {
-            //TODO kind of an ugly way to clean this up
-            if(finishing.get() || complete.get() || torrent.isCancelled()) {
+            // TODO kind of an ugly way to clean this up
+            if (finishing.get() || complete.get() || torrent.isCancelled()) {
                 deleteIncompleteFiles();
             }
         }
     };
-
 
     /**
      * initializes this downloader from the given torrent file.
@@ -134,14 +143,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void registerTorrentWithTorrentManager() {
-        //TODO move file creation logic to a more appropriate place
+        // TODO move file creation logic to a more appropriate place
         for (File file : torrent.getIncompleteFiles()) {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
                 try {
                     file.createNewFile();
                 } catch (IOException e) {
-                   //non-fatal libtorrent will create them
+                    // non-fatal libtorrent will create them
                 }
             }
         }
@@ -221,7 +230,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         if (isCompleted()) {
             return getSaveFile();
         }
-        
+
         if (!isLaunchable()) {
             return null;
         }
@@ -326,7 +335,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         // we never give up because of corruption (because this can never be
         // called)
     }
-    
+
     @Override
     public List<RemoteFileDesc> getRemoteFileDescs() {
         return Collections.emptyList();
@@ -599,7 +608,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
 
         try {
-            torrent.init(name, sha1, totalSize, tracker1.toString(), paths, null, null, saveDir, null);
+            torrent.init(name, sha1, totalSize, tracker1.toString(), paths, null, null, saveDir,
+                    null);
         } catch (IOException e) {
             throw new InvalidDataException("Could not initialize the BTDownloader", e);
         }
@@ -617,15 +627,18 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     }
 
+    /**
+     * Adds basic DownloadStateEvent listener support. Currently only
+     * broadcasts, COMPLETED and ABORTED states.
+     */
     @Override
     public void addListener(EventListener<DownloadStateEvent> listener) {
-        // TODO implement
+        listeners.addListener(listener);
     }
 
     @Override
     public boolean removeListener(EventListener<DownloadStateEvent> listener) {
-        // TODO implement
-        return false;
+        return listeners.removeListener(listener);
     }
 
     @Override
