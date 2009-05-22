@@ -2,6 +2,7 @@ package org.limewire.libtorrent;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import org.limewire.lifecycle.Service;
 
@@ -64,6 +65,11 @@ public interface TorrentManager extends Service {
      * with the specified sha1.
      */
     public boolean isManagedTorrent(String sha1);
+
+    /**
+     * Returns the Executor used by the torrent code. 
+     */
+    public Executor getTorrentExecutor();
 
     /**
      * Returns true if the TorrentManager loaded properly and is in a valid state. 

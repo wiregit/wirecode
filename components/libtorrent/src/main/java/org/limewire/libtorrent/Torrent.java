@@ -7,7 +7,6 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,7 +24,6 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.name.Named;
 
 /**
  * Class representing the torrent being downloaded. It is updated periodically
@@ -68,11 +66,12 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     @Inject
     public Torrent(TorrentManager torrentManager, 
-            @TorrentDownloadFolder Provider<File> torrentDownloadFolderProvider, @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
+            @TorrentDownloadFolder Provider<File> torrentDownloadFolderProvider) {
         this.torrentManager = torrentManager;
         this.torrentDownloadFolderProvider = torrentDownloadFolderProvider;
         
-        listeners = new AsynchronousMulticaster<TorrentEvent>(fastExecutor);
+        listeners = new AsynchronousMulticaster<TorrentEvent>(torrentManager
+                .getTorrentExecutor());
         status = new AtomicReference<LibTorrentStatus>();
         paths = new ArrayList<String>();
     }

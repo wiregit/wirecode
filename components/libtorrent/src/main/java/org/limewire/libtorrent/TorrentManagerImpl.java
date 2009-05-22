@@ -5,8 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -20,7 +21,6 @@ import org.limewire.util.OSUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 @Singleton
 public class TorrentManagerImpl implements TorrentManager {
@@ -29,10 +29,11 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private static final Log LOG = LogFactory.getLog(TorrentManagerImpl.class);
 
-    private final ScheduledExecutorService fastExecutor;
+    private final ScheduledExecutorService torrentExecutor;
+
+    private final ScheduledExecutorService alertExecutor;
 
     private final LibTorrentWrapper libTorrent;
-
     private final Provider<Boolean> torrentEnabled;
 
     private final Map<String, Torrent> torrents;
@@ -45,39 +46,22 @@ public class TorrentManagerImpl implements TorrentManager {
      */
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    /**
-     * Future for the job updating the torrent status.
-     */
-    private ScheduledFuture<?> torrentFuture;
-
-    /**
-     * Future for the job listening to torrent alerts.
-     */
-    private ScheduledFuture<?> alertFuture;
-
-    /**
-     * Future for the job creating resume files.
-     * The alert job must be running for the resume files to be created properly.
-     */
-    private ScheduledFuture<?> resumeFileFuture;
-
     @Inject
-    public TorrentManagerImpl(LibTorrentWrapper torrentWrapper,
-            @TorrentEnabled Provider<Boolean> torrentEnabled,
-            @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
-        this.fastExecutor = fastExecutor;
+    public TorrentManagerImpl(LibTorrentWrapper torrentWrapper, @TorrentEnabled Provider<Boolean> torrentEnabled) {
+        this.torrentExecutor = new ScheduledThreadPoolExecutor(1);
+        this.alertExecutor = new ScheduledThreadPoolExecutor(1);
 
         this.torrentEnabled = torrentEnabled;
         this.libTorrent = torrentWrapper;
         this.torrents = new ConcurrentHashMap<String, Torrent>();
     }
-
+    
     private void validateLibrary() {
-        if (!torrentEnabled.get()) {
+        if(!torrentEnabled.get()) {
             throw new LibTorrentException("LibTorrent is disabled (through settings)",
                     LibTorrentException.DISABLED_EXCEPTION);
         }
-        if (!isValid()) {
+        if(!isValid()) {
             throw new LibTorrentException("The TorrentManager is invalid.",
                     LibTorrentException.LOAD_EXCEPTION);
         }
@@ -202,8 +186,7 @@ public class TorrentManagerImpl implements TorrentManager {
         try {
             String sha1 = torrent.getSha1();
             libTorrent.pause_torrent(sha1);
-            // FileUtils.forceRename(torrent.getIncompleteFile(),
-            // torrent.getCompleteFile());
+            //FileUtils.forceRename(torrent.getIncompleteFile(), torrent.getCompleteFile());
             libTorrent.move_torrent(sha1, directory.getAbsolutePath());
             libTorrent.resume_torrent(sha1);
             updateStatus(torrent);
@@ -224,7 +207,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void initialize() {
-        if (torrentEnabled.get()) {
+        if(torrentEnabled.get()) {
             lock.writeLock().lock();
             try {
                 libTorrent.initialize();
@@ -239,7 +222,7 @@ public class TorrentManagerImpl implements TorrentManager {
         if (isValid()) {
             lock.writeLock().lock();
             try {
-                torrentFuture = fastExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500,
+                torrentExecutor.scheduleAtFixedRate(new EventPoller(), 1000, 500,
                         TimeUnit.MILLISECONDS);
 
                 if (!OSUtils.isMacOSX()) {
@@ -249,10 +232,10 @@ public class TorrentManagerImpl implements TorrentManager {
                     // but disabling for now so that it does not crash the jvm.
 
                     if (PERIODICALLY_SAVE_FAST_RESUME_DATA) {
-                        alertFuture = fastExecutor.scheduleAtFixedRate(new AlertPoller(), 1000,
-                                500, TimeUnit.MILLISECONDS);
-                        resumeFileFuture = fastExecutor.scheduleAtFixedRate(
-                                new ResumeDataScheduler(), 10000, 10000, TimeUnit.MILLISECONDS);
+                        alertExecutor.scheduleAtFixedRate(new AlertPoller(), 1000, 500,
+                                TimeUnit.MILLISECONDS);
+                        alertExecutor.scheduleAtFixedRate(new ResumeDataScheduler(), 10000, 10000,
+                                TimeUnit.MILLISECONDS);
                     }
                 }
 
@@ -266,15 +249,17 @@ public class TorrentManagerImpl implements TorrentManager {
     public void stop() {
         lock.writeLock().lock();
         try {
-            if (resumeFileFuture != null) {
-                resumeFileFuture.cancel(true);
+            try {
+                torrentExecutor.shutdown();
+                torrentExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOG.error("Error shutting down Torrent Executor", e);
             }
-
-            if (torrentFuture != null) {
-                torrentFuture.cancel(true);
-            }
-            if (alertFuture != null) {
-                alertFuture.cancel(true);
+            try {
+                alertExecutor.shutdown();
+                alertExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOG.error("Error shutting down Alert Executor", e);
             }
 
             if (isValid()) {
@@ -310,6 +295,11 @@ public class TorrentManagerImpl implements TorrentManager {
     @Override
     public boolean isManagedTorrent(String sha1) {
         return torrents.containsKey(sha1);
+    }
+
+    @Override
+    public Executor getTorrentExecutor() {
+        return torrentExecutor;
     }
 
     /**

@@ -47,7 +47,7 @@ import com.limegroup.gnutella.library.FileManager;
  * Wraps the Torrent class in the Downloader interface to enable the gui to
  * treat the torrent downloader as a normal downloader.
  */
-public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownloader, EventListener<TorrentEvent> {
+public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownloader {
 
     private final DownloadManager downloadManager;
 
@@ -87,35 +87,33 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Inject
     public void registerTorrentListener() {
-        torrent.addListener(this);
+        torrent.addListener(new EventListener<TorrentEvent>() {
+            public void handleEvent(TorrentEvent event) {
+                if (TorrentEvent.COMPLETED == event && !complete.get()) {
+                    finishing.set(true);
+                    FileUtils.deleteRecursive(torrent.getCompleteFile());
+                    File completeDir = getSaveFile().getParentFile();
+                    torrent.moveTorrent(completeDir);
+                    deleteIncompleteFiles();
+                    complete.set(true);
+                    File completeFile = getSaveFile();
+                    if(completeFile.isDirectory()) {
+                        fileManager.getManagedFileList().addFolder(completeFile);
+                    } else {
+                        fileManager.getManagedFileList().add(completeFile);
+                    }
+                    BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
+                } else if (TorrentEvent.STOPPED == event) {
+                    BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
+                } else if (TorrentEvent.FAST_RESUME_FILE_SAVED == event) {
+                    //TODO kind of an ugly way to clean this up
+                    if(finishing.get() || complete.get() || torrent.isCancelled()) {
+                        FileUtils.delete(torrent.getFastResumeFile(), false);
+                    }
+                }
+            };
+        });
     }
-    
-    @Override
-    public void handleEvent(TorrentEvent event) {
-        if (TorrentEvent.COMPLETED == event && !complete.get()) {
-            finishing.set(true);
-            FileUtils.deleteRecursive(torrent.getCompleteFile());
-            File completeDir = getSaveFile().getParentFile();
-            torrent.moveTorrent(completeDir);
-            deleteIncompleteFiles();
-            complete.set(true);
-            File completeFile = getSaveFile();
-            if(completeFile.isDirectory()) {
-                fileManager.getManagedFileList().addFolder(completeFile);
-            } else {
-                fileManager.getManagedFileList().add(completeFile);
-            }
-            BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
-        } else if (TorrentEvent.STOPPED == event) {
-            BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
-        } else if (TorrentEvent.FAST_RESUME_FILE_SAVED == event) {
-            //TODO kind of an ugly way to clean this up
-            if(finishing.get() || complete.get() || torrent.isCancelled()) {
-                FileUtils.delete(torrent.getFastResumeFile(), false);
-            }
-        }
-    };
-
 
     /**
      * initializes this downloader from the given torrent file.
@@ -483,7 +481,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public synchronized void finish() {
         deleteIncompleteFiles();
-        torrent.removeListener(this);
     }
 
     @Override
