@@ -141,6 +141,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         filterScrollPane.setBorder(BorderFactory.createEmptyBorder());
         filterScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         filterScrollPane.setViewportView(filterPanel);
+        filterScrollPane.getVerticalScrollBar().setUnitIncrement(5);
         
         // Add listener to update filter layout when scroll bar appears.
         filterScrollPane.getVerticalScrollBar().addComponentListener(new ComponentAdapter() {
