@@ -164,7 +164,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
             httpExecutor.releaseResources(response);
         }
 
-        eventListenerList.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));
+        eventListenerList.broadcast(new DownloadStateEvent(this, downloadStatus));
         return false;
     }
 
@@ -185,7 +185,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
                 backup = new File(tFile.getParent(), tFile.getName().concat(".bak"));
                 FileUtils.forceRename(tFile, backup);
             }
-            if (FileUtils.forceRename(torrentFile, tFile)) {
+            if (FileUtils.copy(torrentFile, tFile)) {
                 fileManager.getGnutellaFileList().add(tFile);
             } else {
                 if (backup != null) {
