@@ -483,7 +483,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public synchronized void finish() {
         deleteIncompleteFiles();
-        torrent.removeListener(this);
+        //torrent.removeListener(this);
     }
 
     @Override

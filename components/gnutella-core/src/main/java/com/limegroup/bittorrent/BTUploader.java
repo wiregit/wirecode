@@ -24,7 +24,7 @@ import com.limegroup.gnutella.uploader.UploadType;
  * Wraps the Torrent class in the Uplaoder interface to enable the gui to treat
  * the torrent uploader as a normal uploader.
  */
-public class BTUploader implements Uploader {
+public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
 
     private final ActivityCallback activityCallback;
 
@@ -37,29 +37,33 @@ public class BTUploader implements Uploader {
     public BTUploader(Torrent torrent, ActivityCallback activityCallback) {
         this.torrent = torrent;
         this.activityCallback = activityCallback;
-        torrent.addListener(new EventListener<TorrentEvent>() {
-            public void handleEvent(TorrentEvent event) {
-                if (event == TorrentEvent.STOPPED) {
-                    cancelled.set(true);
-                    BTUploader.this.activityCallback.removeUpload(BTUploader.this);
-                }
-            };
-        });
     }
 
     @Override
+    public void handleEvent(TorrentEvent event) {
+        if (event == TorrentEvent.STOPPED) {
+            finish();
+        }
+    };
+    
+    @Override
     public void stop() {
         // TODO refactor to prompt from the gui
-        cancelled.set(activityCallback.promptTorrentUploadCancel(torrent));
-        if (cancelled.get()) {
+        if (activityCallback.promptTorrentUploadCancel(torrent)) {
             new ManagedThread(new Runnable() {
                 @Override
                 public void run() {
                     torrent.stop();
                 }
             }, "BTUploader Stop Torrent").start();
-            activityCallback.removeUpload(this);
+            finish();
         }
+    }
+    
+    private void finish() {
+        cancelled.set(true);
+        activityCallback.removeUpload(this);
+        //torrent.removeListener(this);
     }
 
     @Override
