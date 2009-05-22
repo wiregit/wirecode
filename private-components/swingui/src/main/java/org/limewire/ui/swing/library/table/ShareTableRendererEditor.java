@@ -119,11 +119,11 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
             //if the share documents with gnutella option is unchecked, the user must be logged in for the share button to be enabled.
             if(!LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
                 p2pButton.setEnabled(false);
-                p2pButton.setToolTipText(I18n.tr("Sharing documents with the p2p network is disabled."));
+                p2pButton.setToolTipText(I18n.tr("Sharing documents with the P2P Network is disabled."));
                 p2pButton.addMouseListener(p2pTooltipListener);
             } else {
                 p2pButton.setEnabled(true);
-                p2pButton.setToolTipText(I18n.tr("Share this file with the p2p network."));
+                p2pButton.setToolTipText(I18n.tr("Share this file with the P2P Network."));
             }
             
             friendsButton.setEnabled(true);
@@ -140,7 +140,7 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
             friendsButton.addMouseListener(p2pTooltipListener);
         } else {
             p2pButton.setEnabled(true);
-            p2pButton.setToolTipText(I18n.tr("Share this file with the p2p network."));
+            p2pButton.setToolTipText(I18n.tr("Share this file with the P2P Network."));
             friendsButton.setEnabled(true);
             friendsButton.setToolTipText(I18n.tr("Share this file with a friend."));
         }
