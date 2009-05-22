@@ -89,8 +89,8 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
         if (event.getType().equals(AddressEvent.Type.ADDRESS_CHANGED)) {
             LOG.debugf("new address to publish: {0}", event);
             synchronized (this) {
+                address = event.getData();
                 for(FriendConnection connection : connections) {
-                    address = event.getData();
                     for(Friend friend : connection.getFriends()) {
                         for(FriendPresence presence : friend.getPresences().values()) {
                             if(presence.hasFeatures(LimewireFeature.ID)) {
