@@ -94,7 +94,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     FileUtils.deleteRecursive(torrent.getCompleteFile());
                     File completeDir = getSaveFile().getParentFile();
                     torrent.moveTorrent(completeDir);
-                    BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                     deleteIncompleteFiles();
                     complete.set(true);
                     File completeFile = getSaveFile();
@@ -103,6 +102,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                     } else {
                         fileManager.getManagedFileList().add(completeFile);
                     }
+                    BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                 } else if (TorrentEvent.STOPPED == event) {
                     BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
                 }

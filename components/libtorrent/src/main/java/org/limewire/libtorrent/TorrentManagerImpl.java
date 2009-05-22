@@ -16,6 +16,7 @@ import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -186,6 +187,7 @@ public class TorrentManagerImpl implements TorrentManager {
         try {
             String sha1 = torrent.getSha1();
             libTorrent.pause_torrent(sha1);
+            FileUtils.forceRename(torrent.getIncompleteFile(), torrent.getCompleteFile());
             libTorrent.move_torrent(sha1, directory.getAbsolutePath());
             libTorrent.resume_torrent(sha1);
             updateStatus(torrent);
