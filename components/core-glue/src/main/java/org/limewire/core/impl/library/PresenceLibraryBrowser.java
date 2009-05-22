@@ -281,9 +281,10 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             synchronized (librariesToBrowse) {
                 currentRevision = ++latestConnectivityEventRevision;
                 copy = new ArrayList<PresenceLibrary>(librariesToBrowse);
-                LOG.debugf("revision: {0}, libraries to browse again: {1}", currentRevision, copy);
                 librariesToBrowse.clear();
             }
+            // outside of synchronized to avoid dead lock
+            LOG.debugf("revision: {0}, libraries to browse again: {1}", currentRevision, copy);
             for (PresenceLibrary library : copy) {
                 tryToResolveAndBrowse(library, currentRevision);
             }
