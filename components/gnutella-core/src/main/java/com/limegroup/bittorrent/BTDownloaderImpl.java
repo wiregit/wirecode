@@ -126,6 +126,17 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void registerTorrentWithTorrentManager() {
+        //TODO move file creation logic to a more appropriate place
+        for (File file : torrent.getIncompleteFiles()) {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                   //non-fatal libtorrent will create them
+                }
+            }
+        }
         torrentManager.get().registerTorrent(torrent);
     }
 

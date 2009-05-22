@@ -174,13 +174,6 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             }
             this.torrentFile = torrentFileCopy;
         }
-
-        for (File file : getIncompleteFiles()) {
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            }
-        }
     }
 
     /**
@@ -445,7 +438,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     public float getSeedRatio() {
         LibTorrentStatus status = this.status.get();
         if (status != null && status.getTotalDownload() != 0) {
-            return (status.getTotalUpload() / status.getTotalDownload());
+            return (status.getTotalUpload() / getTotalSize());
         }
         return 0;
     }
