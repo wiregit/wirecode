@@ -14,10 +14,10 @@ import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureRegistryImpl;
 import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.core.api.friend.feature.features.AddressHandler;
+import org.limewire.core.api.friend.feature.features.AddressDispatcher;
 import org.limewire.core.api.friend.feature.features.AuthToken;
-import org.limewire.core.api.friend.feature.features.AuthTokenHandler;
-import org.limewire.core.api.friend.feature.features.LibraryChangedHandler;
+import org.limewire.core.api.friend.feature.features.AuthTokenDispatcher;
+import org.limewire.core.api.friend.feature.features.LibraryChangedDispatcher;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
@@ -58,9 +58,9 @@ public class LimeWireFriendModule extends AbstractModule {
         bind(FriendConnectionFactoryRegistry.class).to(FriendConnectionFactoryRegistryImpl.class);
         bind(FriendConnectionFactory.class).to(FriendConnectionFactoryRegistryImpl.class);
         
-        bind(new TypeLiteral<FeatureTransport.Handler<Address>>(){}).to(AddressHandler.class);
-        bind(new TypeLiteral<FeatureTransport.Handler<AuthToken>>(){}).to(AuthTokenHandler.class);
-        bind(new TypeLiteral<FeatureTransport.Handler<LibraryChangedNotifier>>(){}).to(LibraryChangedHandler.class);
+        bind(new TypeLiteral<FeatureTransport.Handler<Address>>(){}).to(AddressDispatcher.class);
+        bind(new TypeLiteral<FeatureTransport.Handler<AuthToken>>(){}).to(AuthTokenDispatcher.class);
+        bind(new TypeLiteral<FeatureTransport.Handler<LibraryChangedNotifier>>(){}).to(LibraryChangedDispatcher.class);
         
         bind(FriendManager.class).to(MutableFriendManagerImpl.class);
         bind(MutableFriendManager.class).to(MutableFriendManagerImpl.class);

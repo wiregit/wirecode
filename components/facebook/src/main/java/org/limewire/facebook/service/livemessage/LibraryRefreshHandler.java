@@ -1,4 +1,4 @@
-package org.limewire.facebook.service;
+package org.limewire.facebook.service.livemessage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,12 +8,13 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
+import org.limewire.facebook.service.FacebookFriendConnection;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class LiveMessageLibraryRefreshTransport implements FeatureTransport<LibraryChangedNotifier>, LiveMessageHandler {
+public class LibraryRefreshHandler implements FeatureTransport<LibraryChangedNotifier>, LiveMessageHandler {
     
     private static final String TYPE = "library-changed";
     
@@ -21,7 +22,7 @@ public class LiveMessageLibraryRefreshTransport implements FeatureTransport<Libr
     private final Handler<LibraryChangedNotifier> handler;
 
     @AssistedInject
-    public LiveMessageLibraryRefreshTransport(@Assisted FacebookFriendConnection connection,
+    public LibraryRefreshHandler(@Assisted FacebookFriendConnection connection,
                                               Handler<LibraryChangedNotifier> handler) {
         this.connection = connection;
         this.handler = handler;
@@ -42,7 +43,7 @@ public class LiveMessageLibraryRefreshTransport implements FeatureTransport<Libr
     @Override
     public void sendFeature(FriendPresence presence, LibraryChangedNotifier localFeature) throws FriendException {
         Map<String, String> message = new HashMap<String, String>();
-        message.put("from", connection.getUID());
+        message.put("from", connection.getPresenceId());
         connection.sendLiveMessage(presence, TYPE, message);
     }
 }

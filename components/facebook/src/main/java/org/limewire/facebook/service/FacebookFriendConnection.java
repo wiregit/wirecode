@@ -49,6 +49,14 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequest;
+import org.limewire.facebook.service.livemessage.AddressHandlerFactory;
+import org.limewire.facebook.service.livemessage.AuthTokenHandler;
+import org.limewire.facebook.service.livemessage.AuthTokenHandlerFactory;
+import org.limewire.facebook.service.livemessage.ConnectBackRequestHandler;
+import org.limewire.facebook.service.livemessage.ConnectBackRequestHandlerFactory;
+import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
+import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
+import org.limewire.facebook.service.livemessage.AddressHandler;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -88,9 +96,9 @@ public class FacebookFriendConnection implements FriendConnection {
     private final Object presenceLock = new Object();
     
     private final EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster;
-    private LiveMessageAddressTransport addressTransport;
-    private LiveMessageAuthTokenTransport authTokenTransport;
-    private final LiveMessageLibraryRefreshTransport libraryRefreshTransport;
+    private AddressHandler addressHandler;
+    private AuthTokenHandler authTokenHandler;
+    private final LibraryRefreshHandler libraryRefreshHandler;
 
     private final EventBroadcaster<FeatureEvent> featureEventBroadcaster;
     
@@ -116,8 +124,8 @@ public class FacebookFriendConnection implements FriendConnection {
 
     private final MutableFriendManager friendManager;
 
-    private final LiveMessageConnectBackRequestTransport connectBackRequestTransport;
-    
+    private final ConnectBackRequestHandler connectBackRequestHandler;
+
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
                                     @Named("facebookApiKey") Provider<String> apiKey,
@@ -125,10 +133,10 @@ public class FacebookFriendConnection implements FriendConnection {
                                     EventBroadcaster<FeatureEvent> featureEventBroadcaster,
                                     EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster,
                                     MutableFriendManager friendManager,
-                                    LiveMessageAddressTransportFactory addressTransportFactory,
-                                    LiveMessageAuthTokenTransportFactory authTokenTransportFactory,
-                                    LiveMessageConnectBackRequestTransportFactory connectBackRequestTransportFactory,
-                                    LiveMessageLibraryRefreshTransportFactory liveMessageLibraryRefreshTransportFactory) {
+                                    AddressHandlerFactory addressHandlerFactory,
+                                    AuthTokenHandlerFactory authTokenHandlerFactory,
+                                    ConnectBackRequestHandlerFactory connectBackRequestHandlerFactory,
+                                    LibraryRefreshHandlerFactory libraryRefreshHandlerFactory) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
@@ -136,10 +144,10 @@ public class FacebookFriendConnection implements FriendConnection {
         this.friendPresenceBroadcaster = friendPresenceBroadcaster;
         this.friendManager = friendManager;
         this.executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));
-        this.addressTransport = addressTransportFactory.create(this);
-        this.authTokenTransport = authTokenTransportFactory.create(this);
-        this.connectBackRequestTransport = connectBackRequestTransportFactory.create(this);
-        this.libraryRefreshTransport = liveMessageLibraryRefreshTransportFactory.create(this);
+        this.addressHandler = addressHandlerFactory.create(this);
+        this.authTokenHandler = authTokenHandlerFactory.create(this);
+        this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
+        this.libraryRefreshHandler = libraryRefreshHandlerFactory.create(this);
     }
 
     @Override
@@ -336,6 +344,10 @@ public class FacebookFriendConnection implements FriendConnection {
     public String getUID() {
         return uid;    
     }
+
+    public String getPresenceId() {
+        return uid + "/" + configuration.getResource();
+    }
     
     public String getSecret() {
         return secret;
@@ -430,7 +442,7 @@ public class FacebookFriendConnection implements FriendConnection {
      * 
      * @return the old or new presence
      */
-    FacebookFriendPresence setAvailable(FacebookFriend friend) {
+    public FacebookFriendPresence setAvailable(FacebookFriend friend) {
         FacebookFriendPresence newPresence = null;
         synchronized (presenceLock) {
             FacebookFriendPresence oldPresence = friend.getFacebookPresence();
@@ -452,10 +464,10 @@ public class FacebookFriendConnection implements FriendConnection {
     } 
     
     private void addTransports(FacebookFriendPresence presence) {
-        presence.addTransport(Address.class, addressTransport);
-        presence.addTransport(AuthToken.class, authTokenTransport);
-        presence.addTransport(ConnectBackRequest.class, connectBackRequestTransport);
-        presence.addTransport(LibraryChangedNotifier.class, libraryRefreshTransport);
+        presence.addTransport(Address.class, addressHandler);
+        presence.addTransport(AuthToken.class, authTokenHandler);
+        presence.addTransport(ConnectBackRequest.class, connectBackRequestHandler);
+        presence.addTransport(LibraryChangedNotifier.class, libraryRefreshHandler);
     }
 
     void removePresence(FacebookFriend friend) {

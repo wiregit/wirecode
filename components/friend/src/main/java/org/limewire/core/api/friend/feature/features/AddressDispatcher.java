@@ -27,29 +27,29 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class AddressHandler implements EventListener<AddressEvent>, FeatureTransport.Handler<Address> {
-    private static final Log LOG = LogFactory.getLog(AddressHandler.class);
+public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTransport.Handler<Address> {
+    private static final Log LOG = LogFactory.getLog(AddressDispatcher.class);
     private final XMPPAddressRegistry addressRegistry;
     private final Map<String, Address> pendingAddresses;
     private Address address;
     private final Set<FriendConnection> connections;
 
     @Inject
-    public AddressHandler(XMPPAddressRegistry addressRegistry,
+    public AddressDispatcher(XMPPAddressRegistry addressRegistry,
                           FeatureRegistry featureRegistry) {
         this.addressRegistry = addressRegistry;
         this.pendingAddresses = new HashMap<String, Address>();
         this.connections = new HashSet<FriendConnection>();
         new AddressIQFeatureInitializer().register(featureRegistry);
     }
-                                                      
+
     @Inject
     void register(ListenerSupport<FriendConnectionEvent> connectionEventListenerSupport,
                   ListenerSupport<AddressEvent> addressEventListenerSupport) {
         connectionEventListenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             public void handleEvent(FriendConnectionEvent event) {
-                synchronized (AddressHandler.this) {
+                synchronized (AddressDispatcher.this) {
                     switch (event.getType()) {
                     case CONNECTED:
                         connections.add(event.getSource()); 
@@ -116,7 +116,7 @@ public class AddressHandler implements EventListener<AddressEvent>, FeatureTrans
 
         @Override
         public void initializeFeature(FriendPresence friendPresence) {
-            synchronized (AddressHandler.this) {
+            synchronized (AddressDispatcher.this) {
                 if (address != null) {
                     try {
                         FeatureTransport<Address> transport = friendPresence.getTransport(AddressFeature.class);

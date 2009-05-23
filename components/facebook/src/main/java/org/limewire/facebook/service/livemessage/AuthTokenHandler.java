@@ -1,26 +1,23 @@
-package org.limewire.facebook.service;
+package org.limewire.facebook.service.livemessage;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.jivesoftware.smackx.packet.DiscoverInfo.Feature;
 import org.json.JSONObject;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.core.api.friend.feature.FeatureTransport.Handler;
 import org.limewire.core.api.friend.feature.features.AuthToken;
-import org.limewire.core.api.friend.feature.features.AuthTokenHandler;
 import org.limewire.core.api.friend.impl.AuthTokenImpl;
-import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
 import org.limewire.util.StringUtils;
+import org.limewire.facebook.service.FacebookFriendConnection;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken>, LiveMessageHandler {
+public class AuthTokenHandler implements LiveMessageHandler, FeatureTransport<AuthToken> {
     
     private static final String TYPE = "auth-token";
     
@@ -29,12 +26,12 @@ public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken
     private final Handler<AuthToken> authTokenHandler;
 
     @AssistedInject
-    LiveMessageAuthTokenTransport(@Assisted FacebookFriendConnection connection,
+    AuthTokenHandler(@Assisted FacebookFriendConnection connection,
             FeatureTransport.Handler<AuthToken> authTokenHandler) {
         this.connection = connection;
         this.authTokenHandler = authTokenHandler;
     }
-    
+
     @Override
     @Inject
     public void register(LiveMessageHandlerRegistry registry) {
@@ -54,7 +51,7 @@ public class LiveMessageAuthTokenTransport implements FeatureTransport<AuthToken
     @Override
     public void sendFeature(FriendPresence presence, AuthToken localFeature) throws FriendException {
         Map<String, String> message = new HashMap<String, String>();
-        message.put("from", connection.getUID());
+        message.put("from", connection.getPresenceId());
         message.put("auth-token", StringUtils.toUTF8String(Base64.encodeBase64(localFeature.getToken())));
         connection.sendLiveMessage(presence, TYPE, message);
     }

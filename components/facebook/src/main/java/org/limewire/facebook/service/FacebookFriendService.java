@@ -15,6 +15,7 @@ import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,16 +29,16 @@ class FacebookFriendService implements FriendConnectionFactory {
     private final FacebookFriendConnectionFactory connectionFactory;
     private final ChatClientFactory chatClientFactory;
 
-    private final LiveMessageDiscoInfoTransportFactory liveDiscoInfoTransportFactory;
+    private final DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory;
     private final FeatureRegistry featureRegistry;
 
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
                                   ChatClientFactory chatClientFactory,
-                                  LiveMessageDiscoInfoTransportFactory liveDiscoInfoTransportFactory,
+                                  DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory,
                                   FeatureRegistry featureRegistry) {
         this.connectionFactory = connectionFactory;
         this.chatClientFactory = chatClientFactory;
-        this.liveDiscoInfoTransportFactory = liveDiscoInfoTransportFactory;
+        this.liveDiscoInfoHandlerFactory = liveDiscoInfoHandlerFactory;
         this.featureRegistry = featureRegistry;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
     }
@@ -61,7 +62,7 @@ class FacebookFriendService implements FriendConnectionFactory {
     FacebookFriendConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
         LOG.debug("creating connection");
         FacebookFriendConnection connection = connectionFactory.create(configuration);
-        liveDiscoInfoTransportFactory.create(connection);
+        liveDiscoInfoHandlerFactory.create(connection);
         new LimewireFeatureInitializer().register(featureRegistry);
         LOG.debug("logging in");
         connection.loginImpl();

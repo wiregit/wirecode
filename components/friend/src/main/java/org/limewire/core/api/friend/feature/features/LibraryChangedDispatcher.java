@@ -17,12 +17,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class LibraryChangedHandler implements  FeatureTransport.Handler<LibraryChangedNotifier> {
+public class LibraryChangedDispatcher implements  FeatureTransport.Handler<LibraryChangedNotifier> {
     private final EventBean<FriendConnectionEvent> friendConnectionEvent;
     private final EventBroadcaster<LibraryChangedEvent> libChangedBroadcaster;
 
     @Inject
-    public LibraryChangedHandler(EventBean<FriendConnectionEvent> friendConnectionEvent,
+    public LibraryChangedDispatcher(EventBean<FriendConnectionEvent> friendConnectionEvent,
                                  EventBroadcaster<LibraryChangedEvent> libChangedBroadcaster,
                                  FeatureRegistry featureRegistry) {
         this.friendConnectionEvent = friendConnectionEvent;

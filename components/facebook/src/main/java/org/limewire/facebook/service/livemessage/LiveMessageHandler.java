@@ -1,4 +1,4 @@
-package org.limewire.facebook.service;
+package org.limewire.facebook.service.livemessage;
 
 import org.json.JSONObject;
 import org.json.JSONException;

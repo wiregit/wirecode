@@ -1,4 +1,4 @@
-package org.limewire.facebook.service;
+package org.limewire.facebook.service.livemessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,17 +15,18 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.StringUtils;
+import org.limewire.facebook.service.FacebookFriendConnection;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 
-public class LiveMessageAddressTransport implements FeatureTransport<Address>, LiveMessageHandler {
+public class AddressHandler implements LiveMessageHandler, FeatureTransport<Address> {
     
     private static final String TYPE = "address";
     
-    private static final Log LOG = LogFactory.getLog(LiveMessageAddressTransport.class);
+    private static final Log LOG = LogFactory.getLog(AddressHandler.class);
     
     private final FacebookFriendConnection connection;
     private final AddressFactory addressFactory;
@@ -33,7 +34,7 @@ public class LiveMessageAddressTransport implements FeatureTransport<Address>, L
     private final Handler<Address> addressHandler;
 
     @AssistedInject
-    LiveMessageAddressTransport(@Assisted FacebookFriendConnection connection,
+    AddressHandler(@Assisted FacebookFriendConnection connection,
             AddressFactory addressFactory,
             FeatureTransport.Handler<Address> addressHandler) {
         this.connection = connection;
@@ -66,7 +67,7 @@ public class LiveMessageAddressTransport implements FeatureTransport<Address>, L
     @Override
     public void sendFeature(FriendPresence presence, Address localFeature) throws FriendException {
         Map<String, String> message = new HashMap<String, String>();
-        message.put("from", connection.getUID());
+        message.put("from", connection.getPresenceId());
         try {
             AddressSerializer serializer = addressFactory.getSerializer(localFeature.getClass());
             message.put("address-type", serializer.getAddressType());

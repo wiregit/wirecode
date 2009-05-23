@@ -1,4 +1,4 @@
-package org.limewire.facebook.service;
+package org.limewire.facebook.service.livemessage;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jivesoftware.smack.util.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +16,9 @@ import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
+import org.limewire.facebook.service.FacebookFriend;
+import org.limewire.facebook.service.FacebookFriendConnection;
+import org.limewire.facebook.service.FacebookFriendPresence;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
@@ -25,9 +29,9 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
-public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
+public class DiscoInfoHandler implements LiveMessageHandler {
 
-    private static final Log LOG = LogFactory.getLog(LiveMessageAddressTransport.class);
+    private static final Log LOG = LogFactory.getLog(AddressHandler.class);
     
     private static final String REQUEST_TYPE = "disc-info-request";
     private static final String RESPONSE_TYPE = "disc-info-response";
@@ -36,7 +40,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     private final FeatureRegistry featureRegistry;
     
     @AssistedInject
-    LiveMessageDiscoInfoTransport(@Assisted FacebookFriendConnection connection,
+    DiscoInfoHandler(@Assisted FacebookFriendConnection connection,
             FeatureRegistry featureRegistry) {
         this.connection = connection;
         this.featureRegistry = featureRegistry; // TODO FeatureRegistry is a global
@@ -53,9 +57,10 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     private void handleDiscInfoResponse(JSONObject message) throws JSONException, URISyntaxException {
         JSONArray features = message.getJSONArray("features");     
         String from = message.getString("from");
-        FacebookFriend friend = connection.getFriend(from);
+        String friendId = StringUtils.parseBareAddress(from);
+        FacebookFriend friend = connection.getFriend(friendId);
         if (friend == null) {
-            LOG.debugf("no friend for id {0}", from);
+            LOG.debugf("no friend for id {0}", friendId);
             return;
         }
         FriendPresence presence = friend.getFacebookPresence();
@@ -63,7 +68,8 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
     }
     
     private void handleDiscInfoRequest(JSONObject message) throws JSONException {
-        String friendId = message.getString("from");
+        String from = message.getString("from");
+        String friendId = StringUtils.parseBareAddress(from);
         FacebookFriend friend = connection.getFriend(friendId);
         if (friend == null) {
             LOG.debugf("disc info from non-friend: {0}", friendId);
@@ -78,7 +84,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
             supported.add(feature.toASCIIString());
         }
         Map<String, Object> response = new HashMap<String, Object>();
-        response.put("from", connection.getUID());
+        response.put("from", connection.getPresenceId());
         response.put("features", supported);
         connection.sendLiveMessage(presence, RESPONSE_TYPE, response);   
     }
@@ -125,7 +131,7 @@ public class LiveMessageDiscoInfoTransport implements LiveMessageHandler {
                 }
                 FacebookFriendPresence presence = facebookFriend.getFacebookPresence();
                 Map<String, String> message = new HashMap<String, String>();
-                message.put("from", connection.getUID());
+                message.put("from", connection.getPresenceId());
                 connection.sendLiveMessage(presence, REQUEST_TYPE, message);
             }
         });

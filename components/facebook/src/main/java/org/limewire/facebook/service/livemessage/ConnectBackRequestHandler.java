@@ -1,4 +1,4 @@
-package org.limewire.facebook.service;
+package org.limewire.facebook.service.livemessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,26 +19,27 @@ import org.limewire.net.ConnectBackRequest;
 import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.util.StringUtils;
+import org.limewire.facebook.service.FacebookFriendConnection;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class LiveMessageConnectBackRequestTransport implements FeatureTransport<ConnectBackRequest>,
+public class ConnectBackRequestHandler implements FeatureTransport<ConnectBackRequest>,
         LiveMessageHandler {
 
-    private static final Log LOG = LogFactory.getLog(LiveMessageAddressTransport.class); 
+    private static final Log LOG = LogFactory.getLog(AddressHandler.class);
     
     private static final String TYPE = "connect-back-request";
     
     private final EventBroadcaster<ConnectBackRequestedEvent> connectBackEventBroadcaster;
     
     @AssistedInject
-    public LiveMessageConnectBackRequestTransport(@Assisted FacebookFriendConnection connection,
+    public ConnectBackRequestHandler(@Assisted FacebookFriendConnection connection,
                 EventBroadcaster<ConnectBackRequestedEvent> connectBackEventBroadcaster) {
         this.connectBackEventBroadcaster = connectBackEventBroadcaster;
     }
-    
+
     @Inject
     @Override
     public void register(LiveMessageHandlerRegistry registry) {

@@ -1,4 +1,4 @@
-package org.limewire.facebook.service;
+package org.limewire.facebook.service.livemessage;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

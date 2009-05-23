@@ -27,23 +27,23 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class AuthTokenHandler implements FeatureTransport.Handler<AuthToken>{
+public class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
     
-    private static final Log LOG = LogFactory.getLog(AuthTokenHandler.class);
+    private static final Log LOG = LogFactory.getLog(AuthTokenDispatcher.class);
     
     private final Map<String, AuthToken> pendingAuthTokens;
     private final DefaultFriendAuthenticator authenticator;
     private final Set<FriendConnection> connections;
     
     @Inject
-    AuthTokenHandler(DefaultFriendAuthenticator authenticator,
+    AuthTokenDispatcher(DefaultFriendAuthenticator authenticator,
                      FeatureRegistry featureRegistry) {
         this.authenticator = authenticator;
         this.connections = new HashSet<FriendConnection>();
         this.pendingAuthTokens = new HashMap<String, AuthToken>();
         new AuthTokenFeatureInitializer().register(featureRegistry);
     }
-    
+
     @Inject
     void register(ListenerSupport<FriendConnectionEvent> connectionEventListenerSupport) {
         connectionEventListenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
@@ -88,7 +88,7 @@ public class AuthTokenHandler implements FeatureTransport.Handler<AuthToken>{
 
         @Override
         public void initializeFeature(FriendPresence friendPresence) {
-            synchronized (AuthTokenHandler.this) {
+            synchronized (AuthTokenDispatcher.this) {
                 try {
                     final byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(friendPresence.getPresenceId())).getBytes(Charset.forName("UTF-8"));
                     FeatureTransport<AuthToken> transport = friendPresence.getTransport(AuthTokenFeature.class);

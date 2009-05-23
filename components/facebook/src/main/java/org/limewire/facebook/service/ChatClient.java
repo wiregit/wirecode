@@ -11,6 +11,8 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.facebook.service.livemessage.LiveMessageHandler;
+import org.limewire.facebook.service.livemessage.LiveMessageHandlerRegistry;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
