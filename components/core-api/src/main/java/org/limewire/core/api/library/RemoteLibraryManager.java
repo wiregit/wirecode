@@ -40,7 +40,7 @@ public interface RemoteLibraryManager {
      */
     boolean hasFriendLibrary(Friend friend);
 
-    /** A list of all friend's libraries suitable for use in Swing. */
+    /** A list of all friends' libraries suitable for use in Swing. */
     EventList<FriendLibrary> getSwingFriendLibraryList();
     
     /** Returns a FileList that is a concatenation of all friends libraries. */
