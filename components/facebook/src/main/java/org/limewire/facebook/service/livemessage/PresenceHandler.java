@@ -23,8 +23,6 @@ public class PresenceHandler implements LiveMessageHandler{
         this.connection = connection;
     }
 
-    //private final FeatureTransport.Handler<Address> addressHandler;
-
     @Override
     @Inject
     public void register(LiveMessageHandlerRegistry registry) {
@@ -34,8 +32,10 @@ public class PresenceHandler implements LiveMessageHandler{
     @Override
     public void handle(String messageType, JSONObject message) throws JSONException {
         String from = message.optString("from", null);
-        String addressType = message.optString("guid", null);
-        String addressData = message.optString("session-id", null);
-
+        String type = message.optString("type", null);
+        if(type != null && type.equals("unavailable")) {
+            connection.removePresence(from);
+        }
+        // TODO "available"
     }
 }

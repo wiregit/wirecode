@@ -6,22 +6,29 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
 import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.feature.FeatureRegistry;
-import org.limewire.core.api.friend.impl.LimewireFeatureInitializer;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.feature.FeatureRegistry;
+import org.limewire.core.api.friend.impl.LimewireFeatureInitializer;
+import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
+import org.limewire.facebook.service.livemessage.PresenceHandlerFactory;
+import org.limewire.lifecycle.Asynchronous;
+import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class FacebookFriendService implements FriendConnectionFactory {
+class FacebookFriendService implements FriendConnectionFactory, Service {
     
     private static Log LOG = LogFactory.getLog(FacebookFriendService.class);
     
@@ -30,17 +37,81 @@ class FacebookFriendService implements FriendConnectionFactory {
     private final ChatClientFactory chatClientFactory;
 
     private final DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory;
+    private final PresenceHandlerFactory presenceHandlerFactory;
     private final FeatureRegistry featureRegistry;
+    private volatile ChatClient client;
+    private volatile FacebookFriendConnection connection;
 
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
                                   ChatClientFactory chatClientFactory,
                                   DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory,
+                                  PresenceHandlerFactory presenceHandlerFactory,
                                   FeatureRegistry featureRegistry) {
         this.connectionFactory = connectionFactory;
         this.chatClientFactory = chatClientFactory;
         this.liveDiscoInfoHandlerFactory = liveDiscoInfoHandlerFactory;
+        this.presenceHandlerFactory = presenceHandlerFactory;
         this.featureRegistry = featureRegistry;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
+    }
+    
+    @Inject
+    void register(ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    @Inject
+    void register(ListenerSupport<FriendConnectionEvent> listenerSupport) {
+        listenerSupport.addListener(new EventListener<FriendConnectionEvent> (){
+            @Override
+            public void handleEvent(FriendConnectionEvent event) {
+                FriendConnection connection = event.getSource();
+                if(connection instanceof FacebookFriendConnection) {
+                    FacebookFriendConnection facebookFriendConnection = (FacebookFriendConnection)connection;    
+                    if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
+                        client = chatClientFactory.createChatClient(facebookFriendConnection);
+                        try {
+                            client.start();
+                        } catch (FriendException e) {
+                            LOG.error("chat faild to start", e);
+                            // TODO disconnect
+                        }
+                    } else if(event.getType() == FriendConnectionEvent.Type.DISCONNECTED) {
+                        if(client != null) {
+                            client.setDone();
+                            client = null;
+                        }
+                    }
+                }                 
+            }
+        });
+    }
+
+    @Override
+    public void start() {
+        
+    }
+
+    @Override
+    @Asynchronous
+    public void stop() {
+        logoutImpl();
+    }
+
+    @Override
+    public void initialize() {
+        
+    }
+
+    @Override
+    public String getServiceName() {
+        return getClass().getSimpleName();
+    }
+    
+    private void logoutImpl() {
+        if(connection != null) {
+            connection.logoutImpl();
+        }
     }
 
     @Override
@@ -61,13 +132,13 @@ class FacebookFriendService implements FriendConnectionFactory {
     
     FacebookFriendConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
         LOG.debug("creating connection");
-        FacebookFriendConnection connection = connectionFactory.create(configuration);
+        connection = connectionFactory.create(configuration);
         liveDiscoInfoHandlerFactory.create(connection);
+        presenceHandlerFactory.create(connection);
         new LimewireFeatureInitializer().register(featureRegistry);
-        LOG.debug("logging in");
+        LOG.debug("logging in to facebook...");
         connection.loginImpl();
-        ChatClient client = chatClientFactory.createChatClient(connection);
-        client.start();
+        LOG.debug("logged in.");
         return connection;
     }
 }

@@ -12,6 +12,8 @@ import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
 import org.limewire.facebook.service.livemessage.LiveMessageHandlerRegistry;
 import org.limewire.facebook.service.livemessage.LiveMessageHandlerRegistryImpl;
+import org.limewire.facebook.service.livemessage.PresenceHandler;
+import org.limewire.facebook.service.livemessage.PresenceHandlerFactory;
 import org.limewire.inject.AbstractModule;
 
 import com.google.inject.assistedinject.FactoryProvider;
@@ -29,7 +31,9 @@ public class LimeWireFacebookModule extends AbstractModule {
         bind(AddressHandlerFactory.class).toProvider(FactoryProvider.newFactory(AddressHandlerFactory.class, AddressHandler.class));
         bind(AuthTokenHandlerFactory.class).toProvider(FactoryProvider.newFactory(AuthTokenHandlerFactory.class, AuthTokenHandler.class));
         bind(DiscoInfoHandlerFactory.class).toProvider(FactoryProvider.newFactory(DiscoInfoHandlerFactory.class, DiscoInfoHandler.class));
+        bind(PresenceHandlerFactory.class).toProvider(FactoryProvider.newFactory(PresenceHandlerFactory.class, PresenceHandler.class));
         bind(ConnectBackRequestHandlerFactory.class).toProvider(FactoryProvider.newFactory(ConnectBackRequestHandlerFactory.class, ConnectBackRequestHandler.class));
         bind(LibraryRefreshHandlerFactory.class).toProvider(FactoryProvider.newFactory(LibraryRefreshHandlerFactory.class, LibraryRefreshHandler.class));
+        bind(FacebookFriendFactory.class).toProvider(FactoryProvider.newFactory(FacebookFriendFactory.class, FacebookFriend.class));
     }
 }

@@ -7,10 +7,12 @@ import org.limewire.util.StringUtils;
 
 public class FacebookFriendPresence extends AbstractFriendPresence {
 
+    private final String presenceId;
     private final FacebookFriend friend;
 
-    public FacebookFriendPresence(FacebookFriend friend, EventBroadcaster<FeatureEvent> featureEventBroadcaster) {
+    public FacebookFriendPresence(String presenceId, FacebookFriend friend, EventBroadcaster<FeatureEvent> featureEventBroadcaster) {
         super(featureEventBroadcaster);
+        this.presenceId = presenceId;
         this.friend = friend;
     }
     
@@ -26,7 +28,7 @@ public class FacebookFriendPresence extends AbstractFriendPresence {
 
     @Override
     public String getPresenceId() {
-        return friend.getId();
+        return presenceId;
     }
 
     @Override

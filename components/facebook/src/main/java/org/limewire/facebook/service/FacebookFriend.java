@@ -1,8 +1,10 @@
 package org.limewire.facebook.service;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONObject;
 import org.limewire.core.api.friend.FriendPresence;
@@ -10,28 +12,34 @@ import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.IncomingChatListener;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.feature.features.LimewireFeature;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.impl.AbstractFriend;
 import org.limewire.util.StringUtils;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 public class FacebookFriend extends AbstractFriend {
     
     private final String id;
     private final JSONObject friend;
     private final Network network;
-    
-    /**
-     * The presence of the facebook friend, null when friend is not online.
-     */
-    private volatile FacebookFriendPresence presence = null;
+    private final Map<String, FacebookFriendPresence> presenceMap = new ConcurrentHashMap<String, FacebookFriendPresence>();
     
     private final boolean hasLimeWireAppInstalled;
+    private final FeatureRegistry featureRegistry;
 
-    public FacebookFriend(String id, JSONObject friend, Network network, boolean hasLimeWireAppInstalled) {
+    
+    @AssistedInject
+    public FacebookFriend(@Assisted String id, @Assisted JSONObject friend,
+                          @Assisted Network network, @Assisted boolean hasLimeWireAppInstalled,
+                          FeatureRegistry featureRegistry) {
         this.id = id;
         this.friend = friend;
         this.network = network;
         this.hasLimeWireAppInstalled = hasLimeWireAppInstalled;
+        this.featureRegistry = featureRegistry;
     }
     
     @Override
@@ -66,17 +74,12 @@ public class FacebookFriend extends AbstractFriend {
 
     @Override
     public FriendPresence getActivePresence() {
-        return presence;
+        return null;
     }
 
     @Override
     public Map<String, FriendPresence> getPresences() {
-        FriendPresence copy = presence;
-        if (copy != null) {
-            return Collections.singletonMap(id, copy);
-        } else {
-            return Collections.emptyMap();
-        }
+        return Collections.unmodifiableMap(new HashMap<String, FriendPresence>(presenceMap));
     }
 
     @Override
@@ -86,7 +89,7 @@ public class FacebookFriend extends AbstractFriend {
 
     @Override
     public boolean hasActivePresence() {
-        return presence != null;
+        return false;
     }
 
     @Override
@@ -96,7 +99,7 @@ public class FacebookFriend extends AbstractFriend {
 
     @Override
     public boolean isSignedIn() {
-        return presence != null;
+        return !presenceMap.isEmpty();
     }
 
     @Override
@@ -116,15 +119,17 @@ public class FacebookFriend extends AbstractFriend {
     public void setName(String name) {
     }
     
-    void setPresence(FacebookFriendPresence facebookFriendPresence) {
-        presence = facebookFriendPresence;
+    void addPresence(FacebookFriendPresence presence) {
+        presenceMap.put(presence.getPresenceId(), presence);    
     }
     
-    /**
-     * @return null if friend is not available for chat
-     */
-    public FacebookFriendPresence getFacebookPresence() {
-        return presence;
+    void removePresence(FacebookFriendPresence presence) {
+        Collection<Feature> features = presence.getFeatures();
+        for(Feature feature : features) {
+            featureRegistry.get(feature.getID()).removeFeature(presence);
+        }
+        presenceMap.remove(presence.getPresenceId());
+        
     }
 
     public boolean hasLimeWireAppInstalled() {

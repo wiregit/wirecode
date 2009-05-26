@@ -42,6 +42,7 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventRebroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.ConnectBackRequest;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.client.impl.features.FileOfferInitializer;
@@ -84,6 +85,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     private volatile AddressIQListener addressIQListener;
     private volatile AuthTokenIQListener authTokenIQListener;
     private volatile LibraryChangedIQListener libraryChangedIQListener;
+    private volatile ConnectBackRequestIQListener connectRequestIQListener;
 
     private final EventListenerList<RosterEvent> rosterListeners;
     private final Map<String, XMPPFriendImpl> users;
@@ -397,6 +399,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
             final PresenceImpl presenceImpl = new PresenceImpl(presence, user, featureSupport);
             presenceImpl.addTransport(Address.class, addressIQListener);
             presenceImpl.addTransport(AuthToken.class, authTokenIQListener);
+            presenceImpl.addTransport(ConnectBackRequest.class, connectRequestIQListener);
             presenceImpl.addTransport(LibraryChangedNotifier.class, libraryChangedIQListener);
             user.addPresense(presenceImpl);
         }
@@ -550,7 +553,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
             libraryChangedIQListener = libraryChangedIQListenerFactory.create(XMPPFriendConnectionImpl.this);
             connection.addPacketListener(libraryChangedIQListener, libraryChangedIQListener.getPacketFilter());
 
-            ConnectBackRequestIQListener connectRequestIQListener = connectBackRequestIQListenerFactory.create(XMPPFriendConnectionImpl.this);
+            connectRequestIQListener = connectBackRequestIQListenerFactory.create(XMPPFriendConnectionImpl.this);
             connection.addPacketListener(connectRequestIQListener, connectRequestIQListener.getPacketFilter());
             
             new FileOfferInitializer(connection).register(featureRegistry);

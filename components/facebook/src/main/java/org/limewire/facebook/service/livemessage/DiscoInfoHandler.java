@@ -11,9 +11,8 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.facebook.service.FacebookFriend;
@@ -27,7 +26,6 @@ import org.limewire.logging.LogFactory;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.google.inject.name.Named;
 
 public class DiscoInfoHandler implements LiveMessageHandler {
 
@@ -63,8 +61,13 @@ public class DiscoInfoHandler implements LiveMessageHandler {
             LOG.debugf("no friend for id {0}", friendId);
             return;
         }
-        FriendPresence presence = friend.getFacebookPresence();
-        initializePresenceFeatures(presence, features);
+        connection.addPresence(from);
+        FriendPresence presence = friend.getPresences().get(from);
+        if(presence != null) {
+            initializePresenceFeatures(presence, features);
+        } else {
+            // TODO ?
+        }
     }
     
     private void handleDiscInfoRequest(JSONObject message) throws JSONException {
@@ -78,15 +81,20 @@ public class DiscoInfoHandler implements LiveMessageHandler {
         // this is the first unconditional message received, so the friend
         // might not be in list of online friends yet, mark friend as available
         // to obtain presence
-        FacebookFriendPresence presence = connection.setAvailable(friend);
-        List<String> supported = new ArrayList<String>();
-        for(URI feature : featureRegistry) {
-            supported.add(feature.toASCIIString());
+        connection.addPresence(from);
+        FriendPresence presence = friend.getPresences().get(from);
+        if(presence != null) {
+            List<String> supported = new ArrayList<String>();
+            for(URI feature : featureRegistry) {
+                supported.add(feature.toASCIIString());
+            }
+            Map<String, Object> response = new HashMap<String, Object>();
+            response.put("from", connection.getPresenceId());
+            response.put("features", supported);
+            connection.sendLiveMessage(presence, RESPONSE_TYPE, response);   
+        } else {
+            // TODO ?
         }
-        Map<String, Object> response = new HashMap<String, Object>();
-        response.put("from", connection.getPresenceId());
-        response.put("features", supported);
-        connection.sendLiveMessage(presence, RESPONSE_TYPE, response);   
     }
     
     @Override
@@ -113,26 +121,25 @@ public class DiscoInfoHandler implements LiveMessageHandler {
     }
     
     @Inject
-    public void register(@Named("available") ListenerSupport<FriendEvent> availableFriends) {
-        availableFriends.addListener(new EventListener<FriendEvent>() {
+    public void register(ListenerSupport<FriendPresenceEvent> availableFriends) {
+        availableFriends.addListener(new EventListener<FriendPresenceEvent>() {
             @Override
-            public void handleEvent(FriendEvent event) {  
-                if(event.getType() != FriendEvent.Type.ADDED) {
+            public void handleEvent(FriendPresenceEvent event) {  
+                if(event.getType() != FriendPresenceEvent.Type.ADDED) {
                     return;
                 }
-                Friend friend = event.getData();
-                if (!(friend instanceof FacebookFriend)) {
+                FriendPresence friendPresence = event.getData();
+                if (!(friendPresence instanceof FacebookFriendPresence)) {
                     return;
                 }
-                FacebookFriend facebookFriend = (FacebookFriend)friend;
+                FacebookFriend facebookFriend = (FacebookFriend)friendPresence.getFriend();
                 if (!facebookFriend.hasLimeWireAppInstalled()) {
-                    LOG.debugf("not a limewire friend: {0}", friend);
+                    LOG.debugf("not a limewire friend: {0}", facebookFriend);
                     return;
                 }
-                FacebookFriendPresence presence = facebookFriend.getFacebookPresence();
                 Map<String, String> message = new HashMap<String, String>();
                 message.put("from", connection.getPresenceId());
-                connection.sendLiveMessage(presence, REQUEST_TYPE, message);
+                connection.sendLiveMessage(friendPresence, REQUEST_TYPE, message);
             }
         });
     }

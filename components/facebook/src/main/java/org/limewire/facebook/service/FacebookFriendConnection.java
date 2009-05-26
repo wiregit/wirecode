@@ -8,6 +8,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -22,14 +26,17 @@ import org.apache.http.client.RedirectHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.jivesoftware.smack.util.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
@@ -44,11 +51,7 @@ import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
-import org.limewire.io.Address;
-import org.limewire.listener.EventBroadcaster;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectBackRequest;
+import org.limewire.facebook.service.livemessage.AddressHandler;
 import org.limewire.facebook.service.livemessage.AddressHandlerFactory;
 import org.limewire.facebook.service.livemessage.AuthTokenHandler;
 import org.limewire.facebook.service.livemessage.AuthTokenHandlerFactory;
@@ -56,7 +59,11 @@ import org.limewire.facebook.service.livemessage.ConnectBackRequestHandler;
 import org.limewire.facebook.service.livemessage.ConnectBackRequestHandlerFactory;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
-import org.limewire.facebook.service.livemessage.AddressHandler;
+import org.limewire.io.Address;
+import org.limewire.listener.EventBroadcaster;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+import org.limewire.net.ConnectBackRequest;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -76,11 +83,12 @@ public class FacebookFriendConnection implements FriendConnection {
     private static final String FACEBOOK_LOGIN_GET_URL = "http://coelacanth:5555/getlogin/";
     private static final String FACEBOOK_LOGIN_POST_ACTION_URL = "https://login.facebook.com/login.php?";
     private static final String FACEBOOK_GET_SESSION_URL = "http://coelacanth:5555/getsession/";
+    private static final String FACEBOOK_LOGOUT_GET_URL = "https://www.facebook.com/logout.php?";
     private String authToken;
     private String session;
     private String uid;
     private String secret;
-    private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.8) Gecko/2009032609 Firefox/3.0.8";
+    private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10";
     private ThreadPoolListeningExecutor executorService;
     private final AtomicBoolean loggedIn = new AtomicBoolean(false);
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
@@ -123,6 +131,7 @@ public class FacebookFriendConnection implements FriendConnection {
     };
 
     private final MutableFriendManager friendManager;
+    private final FacebookFriendFactory friendFactory;
 
     private final ConnectBackRequestHandler connectBackRequestHandler;
 
@@ -136,13 +145,15 @@ public class FacebookFriendConnection implements FriendConnection {
                                     AddressHandlerFactory addressHandlerFactory,
                                     AuthTokenHandlerFactory authTokenHandlerFactory,
                                     ConnectBackRequestHandlerFactory connectBackRequestHandlerFactory,
-                                    LibraryRefreshHandlerFactory libraryRefreshHandlerFactory) {
+                                    LibraryRefreshHandlerFactory libraryRefreshHandlerFactory,
+                                    FacebookFriendFactory friendFactory) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
         this.featureEventBroadcaster = featureEventBroadcaster;
         this.friendPresenceBroadcaster = friendPresenceBroadcaster;
         this.friendManager = friendManager;
+        this.friendFactory = friendFactory;
         this.executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));
         this.addressHandler = addressHandlerFactory.create(this);
         this.authTokenHandler = authTokenHandlerFactory.create(this);
@@ -172,9 +183,49 @@ public class FacebookFriendConnection implements FriendConnection {
         });
     }
     
-    private void logoutImpl() {
+    void logoutImpl() {
         loggedIn.set(false);
+        try {
+            //expireSession();
+            sendOfflinePresences();
+            logoutFromFacebook();
+            expireSession();
+        } catch (IOException e) {
+            LOG.debug("logout failed", e);
+        } catch (FacebookException e) {
+            LOG.debug("logout failed", e);
+        }
         connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));    
+    }
+
+    private void sendOfflinePresences() {
+        for(FacebookFriend friend : friends.values()) {
+            if(friend.hasLimeWireAppInstalled() && friend.isSignedIn()) { // TODO check for LW feature
+                Map<String, String> message = new HashMap<String, String>();
+                message.put("from", getPresenceId());
+                message.put("type", "unavailable");
+                sendLiveMessage(Long.parseLong(friend.getId()), "presence", message);
+            }
+        }
+    }
+
+    private void expireSession() throws FacebookException {
+        if(facebookClient != null) {
+            facebookClient.auth_expireSession();
+        }
+    }
+
+    private void logoutFromFacebook() throws IOException {
+        HttpGet logoutGet = new HttpGet(FACEBOOK_LOGOUT_GET_URL + "version=1.0" + "&auth_token=" + authToken + 
+                                        "&api_key=" + apiKey.get());
+        logoutGet.addHeader("User-Agent", USER_AGENT_HEADER);
+        HttpClient httpClient = createHttpClient();
+        HttpResponse response = httpClient.execute(logoutGet);
+        HttpEntity entity = response.getEntity();
+
+        if (entity != null) {
+            entity.consumeContent();
+        }
     }
 
     @Override
@@ -193,6 +244,7 @@ public class FacebookFriendConnection implements FriendConnection {
             loggingIn.set(true);
             loginToFacebook();
             requestSession();
+            fetchAllFriends();
             loggedIn.set(true);
             connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
         } catch (IOException e) {
@@ -205,8 +257,56 @@ public class FacebookFriendConnection implements FriendConnection {
             loggingIn.set(false);
         }
     }
+    
+    /**
+     * Fetches all friends and adds them as known friends.
+     */
+    private void fetchAllFriends() {
+        try {
+            JSONArray friends = getClient().friends_get();
+            List<Long> friendIds = new ArrayList<Long>(friends.length());
+            for (int i = 0; i < friends.length(); i++) {
+                friendIds.add(friends.getLong(i));
+            }
+            JSONArray users = (JSONArray) getClient().users_getInfo(friendIds, new HashSet<CharSequence>(Arrays.asList("uid", "first_name", "name", "status")));
+            Set<String> limeWireFriends = fetchLimeWireFriends();
+            LOG.debugf("all friends: {0}", users);
+            for (int i = 0; i < users.length(); i++) {
+                JSONObject user = users.getJSONObject(i);
+                String id = user.getString("uid");
+                FacebookFriend friend = friendFactory.create(id, user,
+                        getNetwork(), limeWireFriends.contains(id));
+                LOG.debugf("adding {0}", friend);
+                addKnownFriend(friend);
+            }
+        } catch (FacebookException e) {
+            LOG.debug("friend error", e);
+        } catch (JSONException e) {
+            LOG.debug("json error", e);
+        }
+    }
+    
+    /**
+     * Fetches friend ids that have the LimeWire application installed
+     * and marks the existing friends as LimeWire capable.
+     */
+    private Set<String> fetchLimeWireFriends() throws FacebookException {
+        JSONArray limeWireFriendIds;
+        try {
+            limeWireFriendIds = (JSONArray)getClient().friends_getAppUsers();
+            LOG.debugf("limewire friends: {0}", limeWireFriendIds);
+            Set<String> limeWireIds = new HashSet<String>(limeWireFriendIds.length());
+            for (int i = 0; i < limeWireFriendIds.length(); i++) {
+                limeWireIds.add(limeWireFriendIds.getString(i));
+            }
+            return limeWireIds;
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    private void loginToFacebook() throws IOException {        
+    private void loginToFacebook() throws IOException {   
+        LOG.debugf("getting facebook login URL from {0}...", FACEBOOK_LOGIN_GET_URL);
         HttpGet loginGet = new HttpGet(FACEBOOK_LOGIN_GET_URL);
         loginGet.addHeader("User-Agent", USER_AGENT_HEADER);
         HttpClient httpClient = createHttpClient();
@@ -216,9 +316,11 @@ public class FacebookFriendConnection implements FriendConnection {
         if (entity != null) {
             entity.consumeContent();
         }
-        
-        HttpPost httpost = new HttpPost(FACEBOOK_LOGIN_POST_ACTION_URL + "version=1.0" + "&auth_token=" + authToken + 
-                                        "&api_key=" + apiKey.get());
+
+        final String loginURL = FACEBOOK_LOGIN_POST_ACTION_URL + "version=1.0" + "&auth_token=" + authToken +
+                "&api_key=" + apiKey.get();
+        LOG.debugf("logging into {0}...", loginURL);
+        HttpPost httpost = new HttpPost(loginURL);
 
         httpost.addHeader("User-Agent", USER_AGENT_HEADER);
         List <NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -236,6 +338,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     private void requestSession() throws IOException, JSONException {
+        LOG.debugf("requesting session from {0}...", FACEBOOK_GET_SESSION_URL + authToken + "/");
         HttpGet sessionRequest = new HttpGet(FACEBOOK_GET_SESSION_URL + authToken + "/");
         HttpClient httpClient = createHttpClient();
         HttpResponse response = httpClient.execute(sessionRequest);
@@ -255,8 +358,13 @@ public class FacebookFriendConnection implements FriendConnection {
             session = json.getString("session_key");
             secret = json.getString("secret");
             uid = json.getString("uid");
-            LOG.debugf("parsed session {0}, secret {1}, uid: {2}", session, secret, uid);
+            LOG.debugf("received session {0}, secret {1}, uid: {2}", session, secret, uid);
             facebookClient = new FacebookJsonRestClient(apiKey.get(), secret, session);
+            if(LOG.isDebugEnabled()) {
+                for(Cookie cookie : cookieStore.getCookies()) {
+                    LOG.debugf(cookie.getName() + " = " + cookie.getValue());
+                }
+            }
 		} else {
 		    LOG.debugf("body doesn't match regex: {0}", responseBody);
 		}
@@ -352,7 +460,7 @@ public class FacebookFriendConnection implements FriendConnection {
     public String getSecret() {
         return secret;
     }
-    
+
     private class AuthTokenInterceptingHttpClient extends DefaultHttpClient  {
         @Override
         protected RedirectHandler createRedirectHandler() {
@@ -394,7 +502,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     public void sendLiveMessage(FriendPresence presence, String type, Map<String, ?> messageMap) {
-        sendLiveMessage(Long.parseLong(presence.getPresenceId()), type, messageMap);
+        sendLiveMessage(Long.parseLong(presence.getFriend().getId()), type, messageMap);
     }
     
     public void sendLiveMessage(final Long userId, final String type, Map<String, ?> messageMap) {
@@ -442,25 +550,28 @@ public class FacebookFriendConnection implements FriendConnection {
      * 
      * @return the old or new presence
      */
-    public FacebookFriendPresence setAvailable(FacebookFriend friend) {
+    public void addPresence(String presenceId) {
         FacebookFriendPresence newPresence = null;
         synchronized (presenceLock) {
-            FacebookFriendPresence oldPresence = friend.getFacebookPresence();
-            if (oldPresence != null) {
-                LOG.debugf("friend already available: {0}", friend);
-                return oldPresence;
-            } else {
-                LOG.debugf("new friend is available: {0}", friend);
-                newPresence = new FacebookFriendPresence(friend, featureEventBroadcaster);
-                if (friend.hasLimeWireAppInstalled()) {
-                    addTransports(newPresence);
+            String friendId = StringUtils.parseBareAddress(presenceId);
+            FacebookFriend facebookFriend = getFriend(friendId);
+            if(facebookFriend != null) {
+                Map<String, FriendPresence> presences = facebookFriend.getPresences();
+                if(!presences.containsKey(presenceId)) { 
+                    boolean firstPresence = presences.size() == 0;
+                    LOG.debugf("new friend is available: {0}", presenceId);
+                    newPresence = new FacebookFriendPresence(presenceId, facebookFriend, featureEventBroadcaster);
+                    if (facebookFriend.hasLimeWireAppInstalled()) {
+                        addTransports(newPresence);
+                    }
+                    facebookFriend.addPresence(newPresence); 
+                    if(firstPresence) {
+                        friendManager.addAvailableFriend(facebookFriend);    
+                    }                    
+                    friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(newPresence, FriendPresenceEvent.Type.ADDED));
                 }
-                friend.setPresence(newPresence);
             }
-        }
-        friendManager.addAvailableFriend(friend);
-        friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(newPresence, FriendPresenceEvent.Type.ADDED));
-        return newPresence;
+        }                
     } 
     
     private void addTransports(FacebookFriendPresence presence) {
@@ -469,21 +580,33 @@ public class FacebookFriendConnection implements FriendConnection {
         presence.addTransport(ConnectBackRequest.class, connectBackRequestHandler);
         presence.addTransport(LibraryChangedNotifier.class, libraryRefreshHandler);
     }
-
-    void removePresence(FacebookFriend friend) {
-        FacebookFriendPresence presence = null;
+    
+    public void removePresence(String presenceId) {
         synchronized (presenceLock) {
-            presence = friend.getFacebookPresence();
-            if (presence != null) {
-                LOG.debugf("removing offline friend {0}", friend);
-                friend.setPresence(null);
-            } else {
-                LOG.debugf("offline friend already removed: {0}", friend);
+            String friendId = StringUtils.parseBareAddress(presenceId);
+            FacebookFriend facebookFriend = getFriend(friendId);
+            if(facebookFriend != null) {
+                FriendPresence presence = facebookFriend.getPresences().get(presenceId);
+                if(presence != null) {
+                    FacebookFriendPresence facebookFriendPresence = (FacebookFriendPresence)presence;
+                    facebookFriend.removePresence(facebookFriendPresence);
+                    friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(facebookFriendPresence, FriendPresenceEvent.Type.REMOVED));
+                    if(!facebookFriend.isSignedIn()) {
+                        friendManager.removeAvailableFriend(facebookFriend);            
+                    }
+                }
             }
-            if (presence != null) {
-                friendManager.removeAvailableFriend(friend);
+        }     
+    }
+
+    void removeAllPresences(FacebookFriend friend) {
+        synchronized (presenceLock) {
+            Map<String, FriendPresence> presenceMap = friend.getPresences();
+            for(FriendPresence presence : presenceMap.values()) {
+                friend.removePresence((FacebookFriendPresence)presence);
                 friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.REMOVED));
             }
+            friendManager.removeAvailableFriend(friend);            
         }
     }
  

@@ -27,6 +27,9 @@ public class ChatClient {
     private final PresenceListenerFactory presenceListenerFactory;
     private final LiveMessageHandlerRegistry handlerRegistry;
     private final ScheduledListeningExecutorService executorService;
+    private ChatClient.ChatListener chatListener;
+    private volatile boolean done;
+    private PresenceListener presenceListener;
 
     @AssistedInject
     ChatClient(@Assisted FacebookFriendConnection connection,
@@ -37,6 +40,10 @@ public class ChatClient {
         this.presenceListenerFactory = presenceListenerFactory;
         this.handlerRegistry = handlerRegistry;
         this.executorService = executorService;//ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName())); //executorService;
+    }
+    
+    void setDone() {
+        this.done = true;
     }
 
     public void start() throws FriendException {
@@ -82,7 +89,8 @@ public class ChatClient {
             }
 
             ThreadExecutor.startThread(new ChatListener(uid, channel), "chat-listener-thread");
-            executorService.scheduleAtFixedRate(presenceListenerFactory.createPresenceListener(connection), 0, 90, TimeUnit.SECONDS);
+            presenceListener = presenceListenerFactory.createPresenceListener(connection);
+            executorService.scheduleAtFixedRate(presenceListener, 0, 90, TimeUnit.SECONDS);
         } catch (IOException ioe)  {
             LOG.debug("starting chat failed", ioe);
             throw new FriendException(ioe);
@@ -102,17 +110,20 @@ public class ChatClient {
 
         @Override
         public void run() {
+            done = false;
             try {
                 seq = getSeq();
             } catch(IOException e1){
                 e1.printStackTrace();
+                done = true;
             } catch(JSONException e1){
                 e1.printStackTrace();
+                done = true;
             }
 
             int i = 0;
             int currentSeq = seq;
-            while(true){
+            while(!done){
                 LOG.debugf("iteration: {0}", i++);
                 try {
                     //PostMessage("1190346972", "SEQ:"+seq);
@@ -141,8 +152,10 @@ public class ChatClient {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                    done = true;
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    done = true;
                 }
             }
         }
