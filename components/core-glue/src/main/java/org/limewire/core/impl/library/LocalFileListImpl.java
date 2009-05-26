@@ -21,10 +21,14 @@ import org.limewire.listener.EventListener;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileList;
-import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 
+//TODO: This really should only deal with collections, but
+//because the UI still wants to know about "shared with",
+//we have to keep track of all the views for now.
 abstract class LocalFileListImpl implements LocalFileList {
     
     protected final EventList<LocalFileItem> baseList;
@@ -42,27 +46,33 @@ abstract class LocalFileListImpl implements LocalFileList {
 
     }
     
-    /** Returns the FileList this should act on. */
-    protected abstract FileList getCoreFileList();
+    /** Returns the FileCollection this should mutate. */
+    protected abstract FileCollection getMutableCollection();
+    
+    /** Returns the FileView this should view. */
+    // TODO: This will disappear when the UI starts showing collections.
+    protected abstract FileView getFileView();
     
     @Override
     public ListeningFuture<LocalFileItem> addFile(File file) {
-        return new Wrapper((getCoreFileList().add(file)));
+        return new Wrapper((getMutableCollection().add(file)));
     }
 
     @Override
     public void removeFile(File file) {
-        getCoreFileList().remove(file);
+        if(contains(file)) {
+            getMutableCollection().remove(file);
+        }
     }
     
     @Override
     public ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder) {
-        return new ListWrapper((getCoreFileList().addFolder(folder)));
+        return new ListWrapper((getMutableCollection().addFolder(folder)));
     }
 
     @Override
     public boolean contains(File file) {
-        return getCoreFileList().contains(file);
+        return getFileView().contains(file);
     }
     
     @Override
@@ -75,7 +85,7 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     protected boolean containsCoreUrn(com.limegroup.gnutella.URN urn) {
-        return !getCoreFileList().getFileDescsMatching(urn).isEmpty();
+        return !getFileView().getFileDescsMatching(urn).isEmpty();
     }
 
     @Override
@@ -152,24 +162,24 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     /** Notification that a collection share has changed. */
-    protected abstract void collectionUpdate(FileListChangedEvent.Type type, boolean shared);
+    protected abstract void collectionUpdate(FileViewChangeEvent.Type type, boolean shared);
    
     /** Constructs a new EventListener for list change events. */
-    protected EventListener<FileListChangedEvent> newEventListener() {
-        return new EventListener<FileListChangedEvent>() {
+    protected EventListener<FileViewChangeEvent> newEventListener() {
+        return new EventListener<FileViewChangeEvent>() {
             @Override
-            public void handleEvent(FileListChangedEvent event) {
+            public void handleEvent(FileViewChangeEvent event) {              
                 switch(event.getType()) {
-                case ADDED:
+                case FILE_ADDED:
                     addFileDesc(event.getFileDesc());
                     break;
-                case CHANGED:
+                case FILE_CHANGED:
                     changeFileDesc(event.getOldValue(), event.getFileDesc());
                     break;
-                case REMOVED:
+                case FILE_REMOVED:
                     removeFileDesc(event.getFileDesc());
                     break;
-                case CLEAR:
+                case FILES_CLEARED:
                     clearFileDescs();
                     break;     
                 case AUDIO_COLLECTION:
@@ -221,7 +231,7 @@ abstract class LocalFileListImpl implements LocalFileList {
     
     @Override
     public LocalFileItem getFileItem(File file) {
-      FileDesc fileDesc = getCoreFileList().getFileDesc(file);
+      FileDesc fileDesc = getFileView().getFileDesc(file);
       if(fileDesc != null) {
           return (LocalFileItem)fileDesc.getClientProperty(FILE_ITEM_PROPERTY);
       }

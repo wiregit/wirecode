@@ -434,7 +434,7 @@ public class Backend extends org.limewire.gnutella.tests.LimeTestCase {
             for (int i = 0; i < files.length; i++) {
                 if (!files[i].isFile())
                     continue;
-                fileManager.getGnutellaFileList().add(files[i]);
+                fileManager.getGnutellaCollection().add(files[i]);
             }
         }
     }

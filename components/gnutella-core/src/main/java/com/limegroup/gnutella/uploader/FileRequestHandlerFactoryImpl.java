@@ -13,7 +13,7 @@ import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandlerFactory;
-import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
+import com.limegroup.gnutella.uploader.authentication.HttpRequestFileViewProvider;
 
 @Singleton
 class FileRequestHandlerFactoryImpl implements FileRequestHandlerFactory {
@@ -68,7 +68,7 @@ class FileRequestHandlerFactoryImpl implements FileRequestHandlerFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.uploader.FileRequestHandlerFactory#createFileRequestHandler(com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider, boolean)
      */
-    public FileRequestHandler createFileRequestHandler(HttpRequestFileListProvider fileListProvider, boolean requiresAuthentication) {
+    public FileRequestHandler createFileRequestHandler(HttpRequestFileViewProvider fileListProvider, boolean requiresAuthentication) {
         if(!requiresAuthentication) {
             return new FileRequestHandler(sessionManager, fileManager, httpHeaderUtils,
                     httpRequestHandlerFactory, creationTimeCache, fileResponseEntityFactory,
@@ -84,7 +84,7 @@ class FileRequestHandlerFactoryImpl implements FileRequestHandlerFactory {
     
     @RequiresAuthentication
     class ProtectedFileRequestHandler extends FileRequestHandler {
-        ProtectedFileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager, HTTPHeaderUtils httpHeaderUtils, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<CreationTimeCache> creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, AltLocManager altLocManager, AlternateLocationFactory alternateLocationFactory, Provider<DownloadManager> downloadManager, Provider<HashTreeCache> tigerTreeCache, PushEndpointFactory pushEndpointFactory, HashTreeWriteHandlerFactory tigerWriteHandlerFactory, HttpRequestFileListProvider fileListProvider) {
+        ProtectedFileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager, HTTPHeaderUtils httpHeaderUtils, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<CreationTimeCache> creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, AltLocManager altLocManager, AlternateLocationFactory alternateLocationFactory, Provider<DownloadManager> downloadManager, Provider<HashTreeCache> tigerTreeCache, PushEndpointFactory pushEndpointFactory, HashTreeWriteHandlerFactory tigerWriteHandlerFactory, HttpRequestFileViewProvider fileListProvider) {
             super(sessionManager, fileManager, httpHeaderUtils, httpRequestHandlerFactory, creationTimeCache, fileResponseEntityFactory, altLocManager, alternateLocationFactory, downloadManager, tigerTreeCache, pushEndpointFactory, tigerWriteHandlerFactory, fileListProvider);
         }
     }

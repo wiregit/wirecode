@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+
 /**
  * Alerts DisposalListeners when it is disposed
  */

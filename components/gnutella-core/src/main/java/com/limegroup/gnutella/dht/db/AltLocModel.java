@@ -24,8 +24,8 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.SharedFileList;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
@@ -47,10 +47,11 @@ public class AltLocModel implements StorableModel {
 
     private final Provider<HashTreeCache> tigerTreeCache;
 
-    private final Provider<FileManager> fileManager;
-    
+    private final Provider<FileViewManager> fileManager;
+
     @Inject
-    public AltLocModel(AltLocValueFactory altLocValueFactory, Provider<FileManager> fileManager, Provider<HashTreeCache> tigerTreeCache) {
+    public AltLocModel(AltLocValueFactory altLocValueFactory,
+            Provider<FileViewManager> fileManager, Provider<HashTreeCache> tigerTreeCache) {
         this.altLocValueFactory = altLocValueFactory;
         this.fileManager = fileManager;
         this.tigerTreeCache = tigerTreeCache;
@@ -67,7 +68,7 @@ public class AltLocModel implements StorableModel {
         List<Storable> toRemove = new ArrayList<Storable>();
         List<Storable> toPublish = new ArrayList<Storable>();
         
-        SharedFileList sharedFiles = fileManager.get().getGnutellaFileList();
+        FileView sharedFiles = fileManager.get().getGnutellaFileView();
         synchronized (values) {
             sharedFiles.getReadLock().lock();
             try {

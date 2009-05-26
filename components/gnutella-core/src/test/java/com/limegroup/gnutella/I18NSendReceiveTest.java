@@ -126,7 +126,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
             fo.write('a');
             fo.flush();
             fo.close();
-            assertNotNull(fileManager.getGnutellaFileList().add(f).get(1, TimeUnit.SECONDS));
+            assertNotNull(fileManager.getGnutellaCollection().add(f).get(1, TimeUnit.SECONDS));
         }
     }
 
@@ -291,7 +291,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
     private void addMetaData(String fname, String xmlstr) throws Exception {
         FileManager fm = fileManager;
         FileDesc fd = 
-            fm.getManagedFileList().getFileDesc(new File(_scratchDir, fname));
+            fm.getLibrary().getFileDesc(new File(_scratchDir, fname));
         
         LimeXMLDocument newDoc = 
             limeXMLDocumentFactory.createLimeXMLDocument(buildXMLString(xmlstr));

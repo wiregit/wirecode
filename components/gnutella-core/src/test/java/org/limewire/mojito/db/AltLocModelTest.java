@@ -43,7 +43,7 @@ public class AltLocModelTest extends LimeTestCase {
         FileManagerTestUtils.waitForLoad(fileManager, 5000);
         
         File testMp3 = TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3");
-        fileDesc = fileManager.getGnutellaFileList().add(testMp3).get(1, TimeUnit.SECONDS);
+        fileDesc = fileManager.getGnutellaCollection().add(testMp3).get(1, TimeUnit.SECONDS);
         assertNotNull(fileDesc);
     }
 

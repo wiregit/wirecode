@@ -16,6 +16,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.tigertree.HashTree;
 
@@ -162,11 +163,11 @@ public class DownloadTHEXTest extends DownloadTestCase {
 
         // there should be an entry for the sha1 urn.
         URN ttroot = tree.getTreeRootUrn();
-        FileManager fm = injector.getInstance(FileManager.class);
-        assertNotNull(fm.getGnutellaFileList().getFileDesc(TestFile.hash()));
+        FileViewManager fm = injector.getInstance(FileViewManager.class);
+        assertNotNull(fm.getGnutellaFileView().getFileDesc(TestFile.hash()));
         
         // and the filedesc should have both
-        FileDesc fd = fm.getGnutellaFileList().getFileDesc(TestFile.hash());
+        FileDesc fd = fm.getGnutellaFileView().getFileDesc(TestFile.hash());
         assertTrue(fd.getUrns().contains(TestFile.hash()));
         assertTrue(fd.getUrns().contains(ttroot));
     }
@@ -197,10 +198,10 @@ public class DownloadTHEXTest extends DownloadTestCase {
             
             // the sha1 should point to the filedesc 
             FileManager fm = injector.getInstance(FileManager.class);
-            assertNotNull(fm.getIncompleteFileList().getFileDesc(TestFile.hash()));
+            assertNotNull(fm.getIncompleteFileCollection().getFileDesc(TestFile.hash()));
             
             // and the filedesc should have both
-            FileDesc fd = fm.getIncompleteFileList().getFileDesc(TestFile.hash());
+            FileDesc fd = fm.getIncompleteFileCollection().getFileDesc(TestFile.hash());
             assertInstanceof(IncompleteFileDesc.class, fd);
             assertTrue(fd.getUrns().contains(TestFile.hash()));
             assertTrue(fd.getUrns().contains(ttroot));

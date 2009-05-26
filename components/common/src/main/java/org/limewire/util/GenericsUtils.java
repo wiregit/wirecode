@@ -25,6 +25,83 @@ public class GenericsUtils {
     }
 
     private GenericsUtils() {}
+
+    
+    /**
+     * Scans the object 'o' to make sure that it is a map,
+     * all keys are type K, all values are type V, and all
+     * values within V are of type T.
+     * If o is not a map, a ClassCastException is thrown.
+     * 
+     * The given ScanMode is used while scanning.  If the ScanMode
+     * is NEW_COPY_REMOVED, this throws an exception.
+     * 
+     * @param o
+     * @param remove
+     * @return
+     */
+    @SuppressWarnings({ "cast", "unchecked" })
+    public static <K, V extends List, T> Map<K, List<T>> scanForMapOfList(Object o, Class<K> k, Class<V> v, Class<T> t, ScanMode mode) {
+        Map map = (Map)scanForMapOfCollection(o, k, v, t, mode);
+        return (Map<K, List<T>>)map;
+    }
+
+    
+    /**
+     * Scans the object 'o' to make sure that it is a map,
+     * all keys are type K, all values are type V, and all
+     * values within V are of type T.
+     * If o is not a map, a ClassCastException is thrown.
+     * 
+     * The given ScanMode is used while scanning.  If the ScanMode
+     * is NEW_COPY_REMOVED, this throws an exception.
+     * 
+     * @param o
+     * @param remove
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <K, V extends Collection, T> Map<K, Collection<T>> scanForMapOfCollection(Object o, Class<K> k, Class<V> v, Class<T> t, ScanMode mode) {
+        if(mode == ScanMode.NEW_COPY_REMOVED)
+            throw new IllegalArgumentException(ScanMode.NEW_COPY_REMOVED + " is not supported");
+        
+        if(o instanceof Map) {
+            Map map = (Map)o;
+            for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
+                Map.Entry entry = (Map.Entry)i.next();
+                Object key = entry.getKey();
+                Object value = entry.getValue();
+                if(key == null || value == null ||
+                   !k.isAssignableFrom(key.getClass()) ||
+                   !v.isAssignableFrom(value.getClass())) {
+                    switch(mode) {
+                    case EXCEPTION:
+                        StringBuilder errorReport = new StringBuilder();
+                        if (key == null)
+                            errorReport.append("key is null ");
+                        else if (!k.isAssignableFrom(key.getClass()))
+                            errorReport.append("key class not assignable ")
+                                    .append(key.getClass()).append(" to ").append(k);
+                        if (value == null)
+                            errorReport.append("value is null for key ").append(key);
+                        else if (!v.isAssignableFrom(value.getClass()))
+                            errorReport.append("value class not assignable ")
+                                    .append(value.getClass()).append(" to ").append(v);
+                        throw new ClassCastException(errorReport.toString());
+                    case REMOVE:
+                        i.remove();
+                        break;
+                    }
+                } else { // value is valid, validate the entries within it.
+                    scanForCollection(value, t, mode);
+                }
+            }
+            
+            return map;
+        } else {
+            throw new ClassCastException();
+        }
+    }
     
     /**
      * Utility method for calling scanForMap(o, k, v, mode, null).

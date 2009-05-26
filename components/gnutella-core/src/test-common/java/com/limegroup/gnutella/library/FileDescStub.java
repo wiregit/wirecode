@@ -104,7 +104,7 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public void decrementShareListCount() {
+    public void decrementSharedCollectionCount() {
         // TODO Auto-generated method stub
         
     }
@@ -170,7 +170,7 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public int getShareListCount() {
+    public int getSharedCollectionCount() {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -217,7 +217,7 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public void incrementShareListCount() {
+    public void incrementSharedCollectionCount() {
         // TODO Auto-generated method stub
         
     }
@@ -235,7 +235,7 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public boolean isSharedWithGnutella() {
+    public boolean isInGnutellaCollection() {
         // TODO Auto-generated method stub
         return false;
     }
@@ -264,7 +264,7 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public void setSharedWithGnutella(boolean b) {
+    public void setInGnutellaCollection(boolean b) {
         // TODO Auto-generated method stub
         
     }

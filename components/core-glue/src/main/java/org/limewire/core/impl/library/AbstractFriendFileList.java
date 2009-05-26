@@ -10,7 +10,8 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.EventList;
 
-import com.limegroup.gnutella.library.FileListChangedEvent.Type;
+import com.limegroup.gnutella.library.SharedFileCollection;
+import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 
 abstract class AbstractFriendFileList extends LocalFileListImpl implements FriendFileList {
 
@@ -22,7 +23,7 @@ abstract class AbstractFriendFileList extends LocalFileListImpl implements Frien
 
     // upgrade to require FriendFileList
     @Override
-    abstract protected com.limegroup.gnutella.library.FriendFileList getCoreFileList();
+    abstract protected SharedFileCollection getMutableCollection();
 
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -36,23 +37,23 @@ abstract class AbstractFriendFileList extends LocalFileListImpl implements Frien
     
     @Override
     public void clearCategory(Category category) {
-        getCoreFileList().clearCategory(category);
+        getMutableCollection().clearCategory(category);
     }
 
     @Override
     public void addSnapshotCategory(Category category) {
-        getCoreFileList().addSnapshotCategory(category);
+        getMutableCollection().addSnapshotCategory(category);
     }
     
     @Override
     public boolean isCategoryAutomaticallyAdded(Category category) {
         switch(category) {
         case AUDIO:
-            return getCoreFileList().isAddNewAudioAlways();
+            return getMutableCollection().isAddNewAudioAlways();
         case IMAGE:
-            return getCoreFileList().isAddNewImageAlways();
+            return getMutableCollection().isAddNewImageAlways();
         case VIDEO:
-            return getCoreFileList().isAddNewVideoAlways();
+            return getMutableCollection().isAddNewVideoAlways();
         default:
             throw new IllegalArgumentException("invalid category: " + category);
         }
@@ -62,13 +63,13 @@ abstract class AbstractFriendFileList extends LocalFileListImpl implements Frien
     public void setCategoryAutomaticallyAdded(Category category, boolean added) {
         switch (category) {
         case AUDIO:
-            getCoreFileList().setAddNewAudioAlways(added);
+            getMutableCollection().setAddNewAudioAlways(added);
             break;
         case IMAGE:
-            getCoreFileList().setAddNewImageAlways(added);
+            getMutableCollection().setAddNewImageAlways(added);
             break;
         case VIDEO:
-            getCoreFileList().setAddNewVideoAlways(added);
+            getMutableCollection().setAddNewVideoAlways(added);
             break;
         default:
             throw new IllegalArgumentException("invalid category: " + category);

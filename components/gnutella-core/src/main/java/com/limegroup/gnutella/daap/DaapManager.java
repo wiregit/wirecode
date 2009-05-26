@@ -37,11 +37,12 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileList;
-import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.LibraryStatusEvent;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
@@ -69,6 +70,7 @@ public class DaapManager {
     private static final Log LOG = LogFactory.getLog(DaapManager.class);
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<FileManager> fileManager;
+    private final FileViewManager fileViewManager;
     private final Provider<IPFilter> ipFilter;
     private final Provider<NetworkInstanceUtils> networkInstanceUtils;
     private final Provider<ActivityCallback> activityCallback;
@@ -101,12 +103,14 @@ public class DaapManager {
                         Provider<FileManager> fileManager,
                         Provider<IPFilter> ipFilter,
                         Provider<NetworkInstanceUtils> networkInstanceUtils,
-                        Provider<ActivityCallback> activityCallback) {
+                        Provider<ActivityCallback> activityCallback,
+                        FileViewManager fileViewManager) {
         this.backgroundExecutor = backgroundExecutor;
         this.fileManager = fileManager;
         this.ipFilter = ipFilter;
         this.networkInstanceUtils = networkInstanceUtils;
         this.activityCallback = activityCallback;
+        this.fileViewManager = fileViewManager;
     }
     
     @Inject
@@ -129,15 +133,15 @@ public class DaapManager {
             }
 
             public void initialize() {
-                fileManager.get().getManagedFileList().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+                fileManager.get().getLibrary().addManagedListStatusListener(new EventListener<LibraryStatusEvent>() {
                     @Override
-                    public void handleEvent(ManagedListStatusEvent event) {
+                    public void handleEvent(LibraryStatusEvent event) {
                         handleManagedListStatusEvent(event);
                     }
                 });
-                fileManager.get().getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+                fileViewManager.getGnutellaFileView().addListener(new EventListener<FileViewChangeEvent>() {
                     @Override
-                    public void handleEvent(FileListChangedEvent event) {
+                    public void handleEvent(FileViewChangeEvent event) {
                         handleFileListEvent(event);
                     }
                 });
@@ -359,7 +363,7 @@ public class DaapManager {
     /**
      * Handles a change event.
      */
-    private synchronized void handleChangeEvent(FileListChangedEvent evt) {
+    private synchronized void handleChangeEvent(FileViewChangeEvent evt) {
         Song song = urnToSong.remove(evt.getOldValue().getSHA1Urn());
         if (song != null) {
             urnToSong.put(evt.getFileDesc().getSHA1Urn(), song);
@@ -387,7 +391,7 @@ public class DaapManager {
     /**
      * Handles an add event.
      */
-    private synchronized void handleAddEvent(FileListChangedEvent evt) {
+    private synchronized void handleAddEvent(FileViewChangeEvent evt) {
         // Transactions synchronize on the Library. So if there's
         // an ongoing commit we may get a ConcurrentModificationException
         // because Database has to iterate through all Playlists and
@@ -433,7 +437,7 @@ public class DaapManager {
     /**
      * Handles a remove event.
      */
-    private synchronized void handleRemoveEvent(FileListChangedEvent evt) {
+    private synchronized void handleRemoveEvent(FileViewChangeEvent evt) {
         Song song = urnToSong.remove(evt.getFileDesc().getSHA1Urn());
 
         if (song != null) {
@@ -470,7 +474,7 @@ public class DaapManager {
         int size = masterPlaylist.getSongCount();        
         Transaction txn = library.beginTransaction();    
    
-        FileList sharedFileList = fileManager.get().getGnutellaFileList();
+        FileView sharedFileList = fileViewManager.getGnutellaFileView();
         sharedFileList.getReadLock().lock();
         try {
             for(FileDesc fd : sharedFileList) {
@@ -1071,7 +1075,7 @@ public class DaapManager {
     /**
      * Listens for events from FileManager
      */
-    private void handleManagedListStatusEvent(final ManagedListStatusEvent evt) {
+    private void handleManagedListStatusEvent(final LibraryStatusEvent evt) {
         
         // if Daap isn't enabled ignore events
         if(!DaapSettings.DAAP_ENABLED.getValue())
@@ -1088,7 +1092,7 @@ public class DaapManager {
         });
     }
     
-    private void handleFileListEvent(final FileListChangedEvent evt) {
+    private void handleFileListEvent(final FileViewChangeEvent evt) {
         // if Daap isn't enabled ignore events
         if (!DaapSettings.DAAP_ENABLED.getValue())
             return;
@@ -1100,16 +1104,16 @@ public class DaapManager {
                     return;
 
                 switch (evt.getType()) {
-                case CHANGED:
+                case FILE_CHANGED:
                     handleChangeEvent(evt);
                     break;
-                case ADDED:
+                case FILE_ADDED:
                     handleAddEvent(evt);
                     break;
-                case REMOVED:
+                case FILE_REMOVED:
                     handleRemoveEvent(evt);
                     break;
-                case CLEAR:
+                case FILES_CLEARED:
                     handleClearEvent();
                     break;
                 }

@@ -77,6 +77,7 @@ import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileDescChangeEvent;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -1133,8 +1134,9 @@ public final class MessageRouterImplTest extends LimeTestCase {
         @Inject
         public TestQRPUpdater(FileManager fileManager, 
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                ListenerSupport<FileDescChangeEvent> fileDescListenerSupport) {
-            super(fileManager, backgroundExecutor, fileDescListenerSupport);
+                ListenerSupport<FileDescChangeEvent> fileDescListenerSupport, 
+                FileViewManager fileViewManager) {
+            super(fileManager, backgroundExecutor, fileDescListenerSupport, fileViewManager);
         }
         
         @Override

@@ -71,9 +71,10 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -120,6 +121,7 @@ public class UploadTest extends LimeTestCase {
     private UploadManager uploadManager;
 
     private FileManager fileManager;
+    private FileViewManager fileViewManager;
 
     private String fileNameUrl;
     private String relativeFileNameUrl;
@@ -153,8 +155,8 @@ public class UploadTest extends LimeTestCase {
         
         startServices();
         File testDir = TestUtils.getResourceFile(testDirName);
-        Future<FileDesc> fd1 = fileManager.getGnutellaFileList().add(new File(testDir, fileName));
-        Future<FileDesc> fd2 = fileManager.getGnutellaFileList().add(new File(testDir, otherFileName));
+        Future<FileDesc> fd1 = fileManager.getGnutellaCollection().add(new File(testDir, fileName));
+        Future<FileDesc> fd2 = fileManager.getGnutellaCollection().add(new File(testDir, otherFileName));
 
         // get urls from file manager
         FileDesc fd = fd1.get();
@@ -168,19 +170,19 @@ public class UploadTest extends LimeTestCase {
         
         // add incomplete file to file manager
         File incFile = new File(_incompleteDir, incName);
-        fileManager.getManagedFileList().remove(incFile);
+        fileManager.getLibrary().remove(incFile);
         CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile, false);
         URN urn = URN.createSHA1Urn(incompleteHash);
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
         vf = injector.getInstance(VerifyingFileFactory.class).createVerifyingFile(252450);
-        fileManager.getIncompleteFileList().addIncompleteFile(incFile, urns, incName, 1981, vf);
+        fileManager.getIncompleteFileCollection().addIncompleteFile(incFile, urns, incName, 1981, vf);
         incompleteHashUrl = LimeTestUtils.getRequest("localhost", PORT, incompleteHash);
         
         badHashUrl = LimeTestUtils.getRequest("localhost", PORT, badHash);
 
-        assertEquals(1, fileManager.getIncompleteFileList().size());
-        assertEquals(2, fileManager.getGnutellaFileList().size());
+        assertEquals(1, fileManager.getIncompleteFileCollection().size());
+        assertEquals(2, fileManager.getGnutellaCollection().size());
         assertEquals("Unexpected uploads in progress", 0, uploadManager.uploadsInProgress());
         assertEquals("Unexpected queued uploads", 0, uploadManager.getNumQueuedUploads());
 
@@ -233,6 +235,7 @@ public class UploadTest extends LimeTestCase {
         
         // make sure the FileDesc objects in file manager are up-to-date
         fileManager = injector.getInstance(FileManager.class);
+        fileViewManager = injector.getInstance(FileViewManager.class);
         injector.getInstance(ServiceRegistry.class).initialize();
         FileManagerTestUtils.waitForLoad(fileManager, 4000);
         
@@ -543,14 +546,12 @@ public class UploadTest extends LimeTestCase {
 
     public void testHTTP11DownloadRangeNoSpace() throws Exception {
         HttpGet method = new HttpGet(fileNameUrl);
-        method.addHeader(new BasicHeader(
-                "Range", "bytes 2-5"));/* {
-            public String toExternalForm() {
+        method.addHeader(new BasicHeader("Range", "bytes 2-5") {
+            @Override
+            public String toString() {
                 return "Range:bytes 2-5\r\n";
             }
-
-            ;
-        });*/
+        });
         HttpResponse response = null;
         try {
             response = client.execute(method);
@@ -1503,21 +1504,21 @@ public class UploadTest extends LimeTestCase {
         // modify shared file and make sure it gets new timestamp
         Thread.sleep(1000);
         
-        FileDesc fd = fileManager.getGnutellaFileList().getFileDesc(URN.createSHA1Urn(hash));
+        FileDesc fd = fileViewManager.getGnutellaFileView().getFileDesc(URN.createSHA1Urn(hash));
         fd.getFile().setLastModified(System.currentTimeMillis());
         assertNotEquals(fd.getFile().lastModified(), fd.lastModified());
 
         // catch notification when file is reshared
         final CountDownLatch latch = new CountDownLatch(1);
-        EventListener<FileListChangedEvent> listener = new EventListener<FileListChangedEvent>() {
-            public void handleEvent(FileListChangedEvent event) {
-                if (event.getType() == FileListChangedEvent.Type.CHANGED) {
+        EventListener<FileViewChangeEvent> listener = new EventListener<FileViewChangeEvent>() {
+            public void handleEvent(FileViewChangeEvent event) {
+                if (event.getType() == FileViewChangeEvent.Type.FILE_CHANGED) {
                     latch.countDown();
                 }
             }            
         };
         try {
-            fileManager.getGnutellaFileList().addFileListListener(listener);
+            fileViewManager.getGnutellaFileView().addListener(listener);
 
             HttpGet method = new HttpGet(LimeTestUtils.getRequest("localhost", PORT, fd.getSHA1Urn()));
             HttpResponse response = null;
@@ -1530,7 +1531,7 @@ public class UploadTest extends LimeTestCase {
 
             assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
 
-            fd = fileManager.getGnutellaFileList().getFileDesc(URN.createSHA1Urn(hash));
+            fd = fileViewManager.getGnutellaFileView().getFileDesc(URN.createSHA1Urn(hash));
             assertNotNull(fd);
             method = new HttpGet(LimeTestUtils.getRequest("localhost", PORT, fd.getSHA1Urn()));
             try {
@@ -1547,7 +1548,7 @@ public class UploadTest extends LimeTestCase {
                 HttpClientUtils.releaseConnection(response);
             }
         } finally {
-            fileManager.getGnutellaFileList().removeFileListListener(listener);
+            fileViewManager.getGnutellaFileView().removeListener(listener);
         }
         
     }
@@ -1561,7 +1562,7 @@ public class UploadTest extends LimeTestCase {
     }
 
     private HashTree getThexTree(HashTreeCache tigerTreeCache) throws Exception {
-        FileDesc fd = fileManager.getGnutellaFileList().getFileDesc(URN.createSHA1Urn(hash));
+        FileDesc fd = fileViewManager.getGnutellaFileView().getFileDesc(URN.createSHA1Urn(hash));
         return ((HashTreeCacheImpl)tigerTreeCache).getHashTreeAndWait(fd, 1000);
     }
 

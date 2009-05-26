@@ -45,7 +45,7 @@ import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMementoImpl;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.Library;
 
 /**
  * Wraps the Torrent class in the Downloader interface to enable the gui to
@@ -66,7 +66,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final Provider<TorrentManager> torrentManager;
 
-    private final FileManager fileManager;
+    private final Library library;
 
     private final EventMulticaster<DownloadStateEvent> listeners;
 
@@ -78,14 +78,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
             BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
-            Provider<TorrentManager> torrentManager, FileManager fileManager,
+            Provider<TorrentManager> torrentManager, Library library,
             @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
         this.torrentManager = torrentManager;
-        this.fileManager = fileManager;
+        this.library = library;
         this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(fastExecutor);
     }
 
@@ -108,9 +108,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             deleteIncompleteFiles();
             File completeFile = getSaveFile();
             if (completeFile.isDirectory()) {
-                fileManager.getManagedFileList().addFolder(completeFile);
+                library.addFolder(completeFile);
             } else {
-                fileManager.getManagedFileList().add(completeFile);
+                library.add(completeFile);
             }
             complete.set(true);
             listeners.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));

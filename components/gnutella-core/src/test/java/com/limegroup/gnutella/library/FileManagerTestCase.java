@@ -47,6 +47,7 @@ public class FileManagerTestCase extends LimeTestCase {
     // protected so that subclasses can
     // use these variables as well.
     protected volatile FileManagerImpl fman = null;
+    protected FileViewManager fileViewManager;
     protected QRPUpdater qrpUpdater = null;
     protected Object loaded = new Object();
     protected Response[] responses;
@@ -77,6 +78,7 @@ public class FileManagerTestCase extends LimeTestCase {
         });
 
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
+        fileViewManager = injector.getInstance(FileViewManager.class);
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         creationTimeCache = injector.getInstance(CreationTimeCache.class);
         qrpUpdater = injector.getInstance(QRPUpdater.class);
@@ -203,13 +205,13 @@ public class FileManagerTestCase extends LimeTestCase {
     // classes and methods related to adding files to file manager
     ////////////////////////////////////////////////////////////////////////////////////
 
-    public static class Listener implements EventListener<FileListChangedEvent> {
+    public static class Listener implements EventListener<FileViewChangeEvent> {
         private final CountDownLatch latch = new CountDownLatch(1);
-        public FileListChangedEvent evt;
-        public void handleEvent(FileListChangedEvent fme) {
+        public FileViewChangeEvent evt;
+        public void handleEvent(FileViewChangeEvent fme) {
             evt = fme;
             latch.countDown();
-            fme.getList().removeFileListListener(this);
+            fme.getFileView().removeListener(this);
         }
         
         void await(long timeout) throws Exception {
@@ -217,50 +219,50 @@ public class FileManagerTestCase extends LimeTestCase {
         }
     }
 
-    protected FileListChangedEvent addIfShared(File f) throws Exception {
+    protected FileViewChangeEvent addIfShared(File f) throws Exception {
         Listener fel = new Listener();
-        fman.getGnutellaFileList().addFileListListener(fel);
-        fman.getGnutellaFileList().add(f, LimeXMLDocument.EMPTY_LIST);
+        fileViewManager.getGnutellaFileView().addListener(fel);
+        fman.getGnutellaCollection().add(f, LimeXMLDocument.EMPTY_LIST);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileListChangedEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
+    protected FileViewChangeEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
         Listener fel = new Listener();
-        fman.getGnutellaFileList().addFileListListener(fel);
-        fman.getGnutellaFileList().add(f, l);
+        fileViewManager.getGnutellaFileView().addListener(fel);
+        fman.getGnutellaCollection().add(f, l);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileListChangedEvent addAlways(File f) throws Exception {
+    protected FileViewChangeEvent addAlways(File f) throws Exception {
         Listener fel = new Listener();
-        fman.getGnutellaFileList().addFileListListener(fel);
-        fman.getGnutellaFileList().add(f);
+        fileViewManager.getGnutellaFileView().addListener(fel);
+        fman.getGnutellaCollection().add(f);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileListChangedEvent renameFile(File f1, File f2) throws Exception {
+    protected FileViewChangeEvent renameFile(File f1, File f2) throws Exception {
         Listener fel = new Listener();
-        fman.getGnutellaFileList().addFileListListener(fel);
-        fman.getManagedFileList().fileRenamed(f1, f2);
+        fileViewManager.getGnutellaFileView().addListener(fel);
+        fman.getLibrary().fileRenamed(f1, f2);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileListChangedEvent addFileForSession(File f1) throws Exception {
+    protected FileViewChangeEvent addFileForSession(File f1) throws Exception {
         Listener fel = new Listener();
-        fman.getGnutellaFileList().addFileListListener(fel);
-        fman.getGnutellaFileList().addForSession(f1);
+        fileViewManager.getGnutellaFileView().addListener(fel);
+        fman.getGnutellaCollection().addForSession(f1);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileListChangedEvent fileChanged(File f1) throws Exception {
+    protected FileViewChangeEvent fileChanged(File f1) throws Exception {
         Listener fel = new Listener();
-        fman.getGnutellaFileList().addFileListListener(fel);
-        fman.getManagedFileList().fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
+        fileViewManager.getGnutellaFileView().addListener(fel);
+        fman.getLibrary().fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
         fel.await(5000);
         return fel.evt;
     }

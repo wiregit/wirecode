@@ -34,6 +34,7 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -77,6 +78,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
     private SpamManager spamManager;
     private HeadersFactory headersFactory;
     protected FileManager fileManager;
+    protected FileViewManager fileViewManager;
     protected FileDesc berkeleyFD;
     protected FileDesc susheelFD;
     
@@ -151,13 +153,14 @@ public abstract class ClientSideTestCase extends LimeTestCase {
         spamManager = injector.getInstance(SpamManager.class);
         headersFactory = injector.getInstance(HeadersFactory.class);
         fileManager = injector.getInstance(FileManager.class);
+        fileViewManager = injector.getInstance(FileViewManager.class);
 
         lifecycleManager.start();
         connectionServices.connect();
         
-        Future<FileDesc> f1 = fileManager.getGnutellaFileList().add(
+        Future<FileDesc> f1 = fileManager.getGnutellaCollection().add(
                 TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt"));
-        Future<FileDesc> f2 = fileManager.getGnutellaFileList().add(
+        Future<FileDesc> f2 = fileManager.getGnutellaCollection().add(
                 TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt"));
         
         berkeleyFD = f1.get(1, TimeUnit.SECONDS);

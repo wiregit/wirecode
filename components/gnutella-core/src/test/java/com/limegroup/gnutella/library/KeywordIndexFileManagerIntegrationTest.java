@@ -58,8 +58,8 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
                 "artist=\"Sammy B\" album=\"Jazz in A minor\" genre=\"mean Median Standard Deviation\" "));
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
-        FileListChangedEvent result = addIfShared(f1, l1);
-        assertTrue(result.toString(), result.getType() == FileListChangedEvent.Type.ADDED);
+        FileViewChangeEvent result = addIfShared(f1, l1);
+        assertTrue(result.toString(), result.getType() == FileViewChangeEvent.Type.FILE_ADDED);
         assertEquals(d1, result.getFileDesc().getLimeXMLDocuments().get(0));
 
         // test exact match of keywords in metadata
@@ -131,7 +131,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         assertEquals(0, responses.length);
 
         // remove file
-        fman.getManagedFileList().remove(f1);
+        fman.getLibrary().remove(f1);
 
         // no more matches
         responses = keywordIndex.query(queryRequestFactory.createQuery("Sammy B"));
@@ -241,7 +241,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         assertTrue(responsesContain(algebraXml, nine, eightFourSixXml));
 
         // remove a file for which "eig" matches in the metadata
-        fman.getManagedFileList().remove(algebraFile);
+        fman.getLibrary().remove(algebraFile);
 
         // 9. Perform same query as before, and while the other files should still match,
         //    the removed file should no longer match
@@ -307,7 +307,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
             FileManagerTestUtils.buildAudioXMLString("artist=\"sixty seven\" album=\"blah blah\" genre=\"blah blah file\" "));
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(eightFourSixXml);
-        FileListChangedEvent fileAdded = addIfShared(eightFourSixFile, l1);
+        FileViewChangeEvent fileAdded = addIfShared(eightFourSixFile, l1);
         FileDesc fileAddedDesc = fileAdded.getFileDesc();
         int fileDescHitCount = 0;
 

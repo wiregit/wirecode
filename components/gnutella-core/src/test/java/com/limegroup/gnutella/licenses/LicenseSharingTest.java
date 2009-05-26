@@ -24,6 +24,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -38,6 +39,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 public final class LicenseSharingTest extends ClientSideTestCase {
 
     private FileManager fileManager;
+    private FileViewManager fileViewManager;
     private LimeXMLDocumentFactory limeXMLDocumentFactory;
     private Injector injector;
     private QueryRequestFactory queryRequestFactory;
@@ -72,6 +74,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	    });
         super.setUp(injector);
 	    fileManager = injector.getInstance(FileManager.class);
+	    fileViewManager = injector.getInstance(FileViewManager.class);
 	    limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
 	    queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 	    limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
@@ -83,24 +86,24 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         File cc3 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
         File cc4 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
         File wma5 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
-        assertNotNull(fileManager.getGnutellaFileList().add(cc1).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(cc2).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(cc3).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(cc4).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(wma5).get(5, TimeUnit.SECONDS));
-        fileManager.getGnutellaFileList().remove(berkeleyFD);
-        fileManager.getGnutellaFileList().remove(susheelFD);
+        assertNotNull(fileManager.getGnutellaCollection().add(cc1).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(cc2).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(cc3).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(cc4).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(wma5).get(5, TimeUnit.SECONDS));
+        fileManager.getGnutellaCollection().remove(berkeleyFD);
+        fileManager.getGnutellaCollection().remove(susheelFD);
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
-	    List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaFileList());
+	    List<FileDesc> fds = CollectionUtils.listOf(fileViewManager.getGnutellaFileView());
 	    assertEquals(5, fds.size());
 	    for(FileDesc fd : fds )
 	        assertTrue(fd.toString(), fd.isLicensed());
     }
     
     public void testQRPExchange() throws Exception {
-        assertEquals(5, fileManager.getGnutellaFileList().size());
+        assertEquals(5, fileViewManager.getGnutellaFileView().size());
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());

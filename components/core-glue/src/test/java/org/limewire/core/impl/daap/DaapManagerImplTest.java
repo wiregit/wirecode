@@ -24,6 +24,7 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.daap.DaapManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 
 public class DaapManagerImplTest extends BaseTestCase {
 
@@ -41,6 +42,7 @@ public class DaapManagerImplTest extends BaseTestCase {
         Mockery context = new Mockery();
         final FileManager fileManager = context.mock(FileManager.class);
         final Provider<FileManager> fileManagerProvider = context.mock(Provider.class);
+        final FileViewManager fileViewManager = context.mock(FileViewManager.class);
         final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
         final IPFilter ipFilter = context.mock(IPFilter.class);
         final Provider<IPFilter> ipFilterProvider = context.mock(Provider.class);
@@ -50,7 +52,7 @@ public class DaapManagerImplTest extends BaseTestCase {
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final Provider<ActivityCallback> activityCallbackProvider = context.mock(Provider.class);
         DaapManager daapManager = new DaapManager(executorService, fileManagerProvider,
-                ipFilterProvider, networkInstanceUtilsProvider, activityCallbackProvider);
+                ipFilterProvider, networkInstanceUtilsProvider, activityCallbackProvider, fileViewManager);
         DaapManagerImpl daapServer = new DaapManagerImpl(daapManager);
 
         context.checking(new Expectations() {

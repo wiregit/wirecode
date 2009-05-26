@@ -20,8 +20,8 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
 
     private QueryRequestFactory queryRequestFactory;
-    private ManagedFileList managedList;
-    private GnutellaFileList fileList;
+    private Library managedList;
+    private GnutellaFileCollection fileList;
     private SharedFilesKeywordIndex keywordIndex;
     private Response[] responses;
     private Injector injector;
@@ -39,8 +39,8 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
-        fileList = injector.getInstance(FileManager.class).getGnutellaFileList();
-        managedList = injector.getInstance(FileManager.class).getManagedFileList();
+        fileList = injector.getInstance(FileManager.class).getGnutellaCollection();
+        managedList = injector.getInstance(FileManager.class).getLibrary();
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         injector.getInstance(ServiceRegistry.class).initialize();

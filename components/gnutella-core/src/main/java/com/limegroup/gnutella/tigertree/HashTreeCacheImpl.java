@@ -32,7 +32,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.Library;
 
 /** This class maps SHA1_URNs to hash trees and roots. */
 /* This is public for tests, but only the interface should be used. */
@@ -62,10 +62,10 @@ public final class HashTreeCacheImpl implements HashTreeCache {
     private volatile boolean dirty = false;
     
     private final HashTreeFactory tigerTreeFactory;
-    private final ManagedFileList managedFileList;
+    private final Library managedFileList;
     
     @Inject
-    HashTreeCacheImpl(HashTreeFactory tigerTreeFactory, ManagedFileList managedFileList) {
+    HashTreeCacheImpl(HashTreeFactory tigerTreeFactory, Library managedFileList) {
         this.tigerTreeFactory = tigerTreeFactory;
         this.managedFileList = managedFileList;
         Tuple<Map<URN, URN>, Map<URN, HashTree>> tuple = loadCaches();
@@ -345,7 +345,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
         Iterator<URN> iter = roots.keySet().iterator();
         while (iter.hasNext()) {
             URN sha1 = iter.next();
-            if (!fileManager.getManagedFileList().getFileDescsMatching(sha1).isEmpty()) {
+            if (!fileManager.getLibrary().getFileDescsMatching(sha1).isEmpty()) {
                 continue;
             } else if (downloadManager.getIncompleteFileManager().getFileForUrn(sha1) != null) {
                 continue;

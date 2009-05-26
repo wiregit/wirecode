@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -28,8 +29,8 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
-import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileListProvider;
-import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
+import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileViewProvider;
+import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileViewProvider;
 
 /**
  * Tests how the availability of upload slots affects responses, as well
@@ -88,14 +89,14 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         someFileMatches.add(USER_TORRENT);
         someFileMatches.add(APP_TXT);        
         
-        assertNotNull(fileManager.getGnutellaFileList().add(textFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(torrentFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(userTorrentFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(appTextFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaFileList().add(appTorrentFile).get(1, TimeUnit.SECONDS));
-        fileManager.getGnutellaFileList().remove(berkeleyFD);
-        fileManager.getGnutellaFileList().remove(susheelFD);
-        assertEquals(5, fileManager.getGnutellaFileList().size());
+        assertNotNull(fileManager.getGnutellaCollection().add(textFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(torrentFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(userTorrentFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(appTextFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaCollection().add(appTorrentFile).get(1, TimeUnit.SECONDS));
+        fileManager.getGnutellaCollection().remove(berkeleyFD);
+        fileManager.getGnutellaCollection().remove(susheelFD);
+        assertEquals(5, fileViewManager.getGnutellaFileView().size());
         
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         uploadManagerStub = (UploadManagerStub) injector.getInstance(UploadManager.class);
@@ -128,12 +129,13 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
                 Provider<HTTPAcceptor> httpAcceptor,
                 Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
                 TcpBandwidthStatistics tcpBandwidthStatistics,
-                Provider<GnutellaUploadFileListProvider> gnutellaUploadFileListProvider,
-                Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider,
-                UrnValidator urnValidator) {
+                Provider<GnutellaUploadFileViewProvider> gnutellaUploadFileListProvider,
+                Provider<GnutellaBrowseFileViewProvider> gnutellaBrowseFileListProvider,
+                UrnValidator urnValidator,
+                FileViewManager fileViewManager) {
             super(slotManager, httpRequestHandlerFactory, httpAcceptor,
                     fileManager, activityCallback, tcpBandwidthStatistics, gnutellaUploadFileListProvider,
-                    gnutellaBrowseFileListProvider, urnValidator);
+                    gnutellaBrowseFileListProvider, urnValidator, fileViewManager);
         }
 		@Override
 		public synchronized boolean isServiceable() {

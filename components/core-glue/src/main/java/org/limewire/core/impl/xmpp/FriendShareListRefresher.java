@@ -28,7 +28,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.LibraryStatusEvent;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -64,7 +64,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
 
     @Inject
     public void register(FileManager fileManager) {
-        fileManager.getManagedFileList().addManagedListStatusListener(new FinishedLoadingListener());
+        fileManager.getLibrary().addManagedListStatusListener(new FinishedLoadingListener());
     }
 
     @Inject
@@ -83,11 +83,11 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
         }
     }
     
-    class FinishedLoadingListener implements EventListener<ManagedListStatusEvent> {
+    class FinishedLoadingListener implements EventListener<LibraryStatusEvent> {
         @SuppressWarnings("unchecked")
         @BlockingEvent
-        public void handleEvent(ManagedListStatusEvent evt) {
-            if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
+        public void handleEvent(LibraryStatusEvent evt) {
+            if(evt.getType() == LibraryStatusEvent.Type.LOAD_COMPLETE) {
                 fileManagerLoaded.set(true);  
                 XMPPConnection connection = xmppService.getActiveConnection();
                 if(connection != null) {

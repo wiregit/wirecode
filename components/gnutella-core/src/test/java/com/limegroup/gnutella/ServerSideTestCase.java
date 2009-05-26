@@ -20,6 +20,7 @@ import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.util.EmptyResponder;
 
 /**
@@ -71,6 +72,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     protected Injector injector;
     
     protected FileManager fileManager;
+    protected FileViewManager fileViewManager;
     protected FileDesc berkeleyFD;
     protected FileDesc susheelFD;
 
@@ -153,6 +155,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         headersFactory = injector.getInstance(HeadersFactory.class);
         blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         fileManager = injector.getInstance(FileManager.class);
+        fileViewManager = injector.getInstance(FileViewManager.class);
 
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
 
@@ -162,9 +165,9 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
         
-        Future<FileDesc> f1 = fileManager.getGnutellaFileList().add(
+        Future<FileDesc> f1 = fileManager.getGnutellaCollection().add(
                 TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt"));
-        Future<FileDesc> f2 = fileManager.getGnutellaFileList().add(
+        Future<FileDesc> f2 = fileManager.getGnutellaCollection().add(
                 TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt"));
         
         berkeleyFD = f1.get(1, TimeUnit.SECONDS);

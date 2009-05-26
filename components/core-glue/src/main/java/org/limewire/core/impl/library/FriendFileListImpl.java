@@ -2,37 +2,56 @@ package org.limewire.core.impl.library;
 
 import org.limewire.listener.EventListener;
 
-import com.limegroup.gnutella.library.FileListChangedEvent;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
+import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.SharedFileCollection;
 
 /**
  * Implementation of the FriendFileList interface, used to keep track of what
  * files are shared with a specific friend.
  */
+// TODO: This really should only deal with collections, but
+//       because the UI still wants to know about "shared with",
+//       we have to keep track of all the views for now.
 class FriendFileListImpl extends AbstractFriendFileList {
-    private final FileManager fileManager;
+    private final FileCollectionManager collectionManager;
+    private final FileViewManager viewManager;
 
-    private com.limegroup.gnutella.library.FriendFileList friendFileList;
+    private volatile SharedFileCollection friendCollection;
+    private volatile FileView friendView;
 
     private final String name;
 
     private volatile boolean committed = false;
 
-    private volatile EventListener<FileListChangedEvent> eventListener;
+    private volatile EventListener<FileViewChangeEvent> eventListener;
 
     private final CombinedShareList combinedShareList;
 
-    FriendFileListImpl(CoreLocalFileItemFactory coreLocalFileItemFactory, FileManager fileManager,
-            String name, CombinedShareList combinedShareList) {
+    FriendFileListImpl(CoreLocalFileItemFactory coreLocalFileItemFactory,
+            FileCollectionManager collectionManager, FileViewManager viewManager, String name,
+            CombinedShareList combinedShareList) {
         super(combinedShareList.createMemberList(), coreLocalFileItemFactory);
-        this.fileManager = fileManager;
+        this.viewManager = viewManager;
+        this.collectionManager = collectionManager;
         this.name = name;
         this.combinedShareList = combinedShareList;
     }
 
     @Override
-    protected com.limegroup.gnutella.library.FriendFileList getCoreFileList() {
-        return friendFileList;
+    protected SharedFileCollection getMutableCollection() {
+        if(friendCollection == null) {
+            friendCollection = collectionManager.getOrCreateCollectionByName(name);
+            friendCollection.addFriend(name);
+        }
+        return friendCollection;
+    }
+    
+    @Override
+    protected FileView getFileView() {
+        return friendView;
     }
 
     @Override
@@ -40,8 +59,8 @@ class FriendFileListImpl extends AbstractFriendFileList {
         super.dispose();
         if (committed) {
             combinedShareList.removeMemberList(baseList);
-            if (friendFileList != null)
-                friendFileList.removeFileListListener(eventListener);
+            if (friendView != null)
+                friendView.removeListener(eventListener);
         }
     }
 
@@ -51,17 +70,16 @@ class FriendFileListImpl extends AbstractFriendFileList {
     void commit() {
         committed = true;
         eventListener = newEventListener();
-        friendFileList = fileManager.getOrCreateFriendFileList(name);
-        friendFileList.addFileListListener(eventListener);
+        friendView = viewManager.getFileViewForId(name);
+        friendView.addListener(eventListener);
         combinedShareList.addMemberList(baseList);
 
-        com.limegroup.gnutella.library.FileList fileList = friendFileList;
-
-        fileList.getReadLock().lock();
+        friendView.getReadLock().lock();
         try {
-            addAllFileDescs(fileList);
+            // TODO: this isn't safe because adding can trigger callbacks and we're holding friendView's lock here. 
+            addAllFileDescs(friendView);
         } finally {
-            fileList.getReadLock().unlock();
+            friendView.getReadLock().unlock();
         }
     }
 }

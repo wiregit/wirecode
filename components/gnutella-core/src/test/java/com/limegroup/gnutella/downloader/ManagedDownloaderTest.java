@@ -74,6 +74,7 @@ import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.library.IncompleteFileDescStub;
+import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -119,11 +120,11 @@ public class ManagedDownloaderTest extends LimeTestCase {
             protected void configure() {
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
-               bind(FileManager.class).to(FileManagerStub.class);
                bind(NetworkManager.class).to(NetworkManagerStub.class);
                bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProvider);
             } 
         });
+        allModules.add(new LibraryStubModule());
         allModules.addAll(Arrays.asList(modules));
         injector = LimeTestUtils.createInjector(allModules.toArray(new Module[allModules.size()]));
         ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
@@ -164,14 +165,14 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	URN partialURN = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
         
     	IncompleteFileDescStub partialDesc = new IncompleteFileDescStub("incomplete",partialURN,3);
-    	fileManager.getIncompleteFileList().add(partialDesc);
+    	fileManager.getIncompleteFileCollection().add(partialDesc);
     	
     	// then create an rfd from a firewalled host
     	RemoteFileDesc rfd = newPushRFD("incomplete","urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE",GUID.makeGuid());
     	
     	//test that currently we have no altlocs for the incomplete file
     	
-    	FileDesc test = fileManager.getIncompleteFileList().getFileDesc(partialURN);
+    	FileDesc test = fileManager.getIncompleteFileCollection().getFileDesc(partialURN);
     	assertNotNull(test);
     	AltLocManager altLocManager = injector.getInstance(AltLocManager.class);    	
     	assertEquals(0, altLocManager.getNumLocs(test.getSHA1Urn()));
@@ -568,7 +569,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null);
+                    null, null, null);
 	    managedDownloaderImpl1.addListener(downloadListener1);
         
         ManagedDownloaderImpl managedDownloaderImpl2 =
@@ -576,7 +577,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null);
+                    null, null, null);
         managedDownloaderImpl2.addListener(downloadListener2);
         
 	    context.checking(new Expectations() {{

@@ -75,7 +75,7 @@ class CoreRandomGlue {
         registry.register(new Service() {            
             public void initialize() {
                 //TODO: find a better way to do this
-                fileManager.getManagedFileList().addFileListListener(altLocManager);
+                fileManager.getLibrary().addListener(altLocManager);
                 
                 connectionManager.addEventListener(dhtManager);
                 dhtManager.addEventListener(pushProxiesPublisher);
@@ -128,7 +128,7 @@ class CoreRandomGlue {
     
     
     private void cleanupTorrentMetadataFiles() {
-        if(!fileManager.getManagedFileList().isLoadFinished()) {
+        if(!fileManager.getLibrary().isLoadFinished()) {
             return;
         }
         
@@ -147,7 +147,7 @@ class CoreRandomGlue {
         File tFile;
         for(int i = 0; i < file_list.length; i++) {
             tFile = file_list[i];
-            if(fileManager.getGnutellaFileList().getFileDesc(tFile) != null && 
+            if(fileManager.getLibrary().getFileDesc(tFile) != null && 
                     tFile.lastModified() < purgeLimit) {
                 tFile.delete();
             }

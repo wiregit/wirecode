@@ -3,18 +3,29 @@ package org.limewire.listener;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.limewire.listener.EventListenerList.EventListenerListContext;
+
+/** A default implementation of {@link SourcedEventMulticaster}. */
 public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implements
         SourcedEventMulticaster<E, S> {
+    
+    /** The context all listeners will use. */
+    private final EventListenerListContext listenerContext;
 
     /** The list of listeners for every change event. */
     private final EventListenerList<E> listenersForAll;
     
     /** A Map of listeners for each source. */
     private final Map<S, EventListenerList<E>> sourceListeners;
-    
+        
     public SourcedEventMulticasterImpl() {
-        listenersForAll = new EventListenerList<E>();
-        sourceListeners = new ConcurrentHashMap<S, EventListenerList<E>>();
+        this(new EventListenerListContext());
+    }
+    
+    public SourcedEventMulticasterImpl(EventListenerListContext context) {
+        this.listenerContext = context;
+        this.listenersForAll = new EventListenerList<E>(listenerContext);
+        this.sourceListeners = new ConcurrentHashMap<S, EventListenerList<E>>();
     }
     
     @Override
@@ -46,7 +57,7 @@ public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implement
         synchronized(sourceListeners) {
             EventListenerList<E> list = sourceListeners.get(source);
             if(list == null) {
-                list = new EventListenerList<E>();
+                list = new EventListenerList<E>(listenerContext);
                 sourceListeners.put(source, list);
             }
             list.addListener(listener);
@@ -82,6 +93,5 @@ public class SourcedEventMulticasterImpl<E extends SourcedEvent<S>, S> implement
         synchronized(sourceListeners) {
             return sourceListeners.remove(source) != null;
         }
-    }
-    
+    }    
 }
