@@ -56,7 +56,7 @@ class CategoryDetector<E extends FilterableItem> {
         };
         filterableSource.getUnfilteredList().addListEventListener(resultsListener);
         
-        // Create timer listener to detect the category after enough time as 
+        // Create timer listener to detect the category after enough time has 
         // passed.
         timerListener = new ActionListener() {
             @Override
