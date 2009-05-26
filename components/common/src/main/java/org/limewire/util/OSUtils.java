@@ -80,17 +80,7 @@ public class OSUtils {
 
     /** Operating System information */
     @SuppressWarnings("unused") @InspectionPoint("os_info")
-    private static final Inspectable osInspect = new Inspectable() {
-        @Override
-        public Object inspect() {
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put("os_name", getOS());
-            data.put("os_ver", getOSVersion());
-            data.put("os_arch", getOSArch());
-            data.put("num_cpus", Runtime.getRuntime().availableProcessors());
-            return data;
-        }
-    };
+    private static final Inspectable osInspect = new OSInspecter();
 
     /**
      * Sets the operating system variables.
@@ -332,5 +322,17 @@ public class OSUtils {
     
     public static boolean supportsTLS() {
         return true;
+    }
+    
+    private static class OSInspecter implements Inspectable {
+        @Override
+        public Object inspect() {
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("os_name", getOS());
+            data.put("os_ver", getOSVersion());
+            data.put("os_arch", getOSArch());
+            data.put("num_cpus", Runtime.getRuntime().availableProcessors());
+            return data;
+        }
     }
 }
