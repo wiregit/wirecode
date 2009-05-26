@@ -1,0 +1,3 @@
+#Fri May 15 12:19:53 EDT 2009
+eclipse.preferences.version=1
+environment/project/0.737685745=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<environment append\="true" appendContributed\="true">\n<variable delimiter\="\:" name\="PWD" operation\="replace" value\="${workspace_loc}/components/libtorrent/src/main/native/libtorrentwrapper"/>\n<variable delimiter\="\:" name\="CWD" operation\="replace" value\="${workspace_loc}/components/libtorrent/src/main/native/libtorrentwrapper"/>\n</environment>\n
