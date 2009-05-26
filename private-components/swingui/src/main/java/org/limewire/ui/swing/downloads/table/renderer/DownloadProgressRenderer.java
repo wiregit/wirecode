@@ -19,6 +19,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Inject;
+
 public class DownloadProgressRenderer extends JXPanel implements TableCellRenderer {
     @Resource private int progressBarWidth;
     @Resource private int progressBarHeight;
@@ -26,7 +28,7 @@ public class DownloadProgressRenderer extends JXPanel implements TableCellRender
     private LimeProgressBar progressBar;
     private JLabel timeLabel;
     
-    
+    @Inject
     public DownloadProgressRenderer(ProgressBarDecorator progressBarDecorator){
         super(new MigLayout("insets 0 0 0 0, gap 0 0 0 0, novisualpadding, nogrid, aligny center"));
         GuiUtils.assignResources(this);

@@ -24,6 +24,8 @@ import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
+import com.google.inject.Provider;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -56,7 +58,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
     private final DownloadListManager downloadListManager;
 
     /** Save exception handler. */
-    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
 
     /** List of all search results. */
     private final EventList<SearchResult> allSearchResults;
@@ -95,9 +97,9 @@ class BasicSearchResultsModel implements SearchResultsModel {
      * search request object, and services.
      */
     public BasicSearchResultsModel(SearchInfo searchInfo, Search search, 
-            PropertiableHeadings propertiableHeadings,
+            Provider<PropertiableHeadings> propertiableHeadings,
             DownloadListManager downloadListManager,
-            SaveLocationExceptionHandler saveLocationExceptionHandler) {
+            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
         
         this.searchInfo = searchInfo;
         this.search = search;
@@ -349,7 +351,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
                     }
                 }
             } else {
-                saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
+                saveLocationExceptionHandler.get().handleSaveLocationException(new DownloadAction() {
                     @Override
                     public void download(File saveFile, boolean overwrite)
                             throws SaveLocationException {
@@ -405,9 +407,9 @@ class BasicSearchResultsModel implements SearchResultsModel {
     private static class SearchResultGrouper implements
             AdvancedFunction<List<SearchResult>, VisualSearchResult> {
         private final AtomicInteger resultCount;
-        private final PropertiableHeadings propertiableHeadings;
+        private final Provider<PropertiableHeadings> propertiableHeadings;
 
-        public SearchResultGrouper(AtomicInteger resultCount, PropertiableHeadings propertiableHeadings) {
+        public SearchResultGrouper(AtomicInteger resultCount, Provider<PropertiableHeadings> propertiableHeadings) {
             this.resultCount = resultCount;
             this.propertiableHeadings = propertiableHeadings;
         }

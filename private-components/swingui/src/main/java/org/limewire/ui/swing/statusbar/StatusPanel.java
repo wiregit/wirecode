@@ -14,8 +14,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
-import org.limewire.player.api.AudioPlayer;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.painter.StatusBarSectionPainter;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
@@ -34,8 +32,8 @@ public class StatusPanel extends JXPanel {
     private final DownloadCountPanel downloadCountPanel;
     
     @Inject
-    public StatusPanel(GnutellaConnectionManager connectionManager, AudioPlayer player, 
-            FriendStatusPanel friendStatusPanel, LibraryNavigator libraryNavigator,
+    public StatusPanel(GnutellaConnectionManager connectionManager, MiniPlayerPanel miniPlayerPanel, 
+            FriendStatusPanel friendStatusPanel, 
             ConnectionStatusPanel connectionStatus, ProStatusPanel proStatusPanel,
             SharedFileCountPanel sharedFileCountPanel, DownloadCountPanel downloadCountPanel,
             BarPainterFactory barPainterFactory) {
@@ -54,7 +52,6 @@ public class StatusPanel extends JXPanel {
         sharedFileCountPanel.setBackgroundPainter(sectionPainter);
         downloadCountPanel.setBackgroundPainter(sectionPainter);
         
-        MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player, libraryNavigator);
         miniPlayerPanel.setVisible(false);
         
         Component chatButton = friendStatusPanel.getComponent();

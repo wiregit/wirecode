@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.friends.chat;
 
+import org.limewire.inject.LazyBinder;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManagerImpl;
 
@@ -14,7 +15,6 @@ public class LimeWireUiFriendsChatModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(IconLibrary.class).to(IconLibraryImpl.class);
         bind(ChatFrame.class).to(ChatFramePanel.class);
         bind(ChatHyperlinkListenerFactory.class).toProvider(
                 FactoryProvider.newFactory(
@@ -22,6 +22,7 @@ public class LimeWireUiFriendsChatModule extends AbstractModule {
         bind(ConversationPaneFactory.class).toProvider(
                 FactoryProvider.newFactory(
                         ConversationPaneFactory.class, ConversationPane.class));
-        bind(XMPPAccountConfigurationManager.class).to(XMPPAccountConfigurationManagerImpl.class);
+        bind(XMPPAccountConfigurationManager.class).toProvider(LazyBinder.newLazyProvider(
+                XMPPAccountConfigurationManager.class, XMPPAccountConfigurationManagerImpl.class));
     }
 }

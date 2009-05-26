@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library;
 
+import org.limewire.inject.LazyBinder;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactoryImpl;
 import org.limewire.ui.swing.library.nav.LimeWireUiLibraryNavModule;
@@ -21,7 +22,8 @@ public class LimeWireUiLibraryModule extends AbstractModule {
     protected void configure() {
         install(new LimeWireUiLibraryNavModule());
         
-        bind(LibraryTableFactory.class).to(LibraryTableFactoryImpl.class);
+        bind(LibraryTableFactory.class).toProvider(LazyBinder.newLazyProvider(
+                LibraryTableFactory.class, LibraryTableFactoryImpl.class));
         bind(SharingActionFactory.class).to(SharingActionFactoryImpl.class);
         bind(LibraryImageSubPanelFactory.class).to(LibraryImageSubPanelFactoryImpl.class);
         
@@ -30,5 +32,11 @@ public class LimeWireUiLibraryModule extends AbstractModule {
         
         bind(MyLibraryPopupMenuFactory.class).toProvider(
                 FactoryProvider.newFactory(MyLibraryPopupMenuFactory.class, MyLibraryPopupMenu.class));
+        
+        bind(FriendLibraryFactory.class).toProvider(
+                FactoryProvider.newFactory(FriendLibraryFactory.class, FriendLibraryPanel.class));
+
+        bind(MyLibraryFactory.class).toProvider(
+                FactoryProvider.newFactory(MyLibraryFactory.class, MyLibraryPanel.class));
     }
 }

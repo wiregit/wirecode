@@ -18,7 +18,6 @@ import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
-import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ThumbnailManager;
@@ -27,21 +26,18 @@ import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditor;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditorFactory;
-import org.limewire.ui.swing.library.table.menu.MyLibraryPopupMenuFactory;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler;
-import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
+import org.limewire.ui.swing.library.table.menu.MyLibraryPopupMenuFactory;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.Provider;
 
-@Singleton
 public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFactory {
 
     private ThumbnailManager thumbnailManager;
@@ -52,28 +48,24 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
 
-    private final SharingActionFactory sharingActionFactory;
-    private final FriendsSignInPanel friendSignInPanel;
     private final ShareListManager shareListManager;
-    private final XMPPService xmppService;
     private final ComboBoxDecorator comboDecorator;
     private final MyLibraryPopupMenuFactory libraryPopupFactory;
+    private final Provider<LibraryImageFolderComboBox> libraryImageComboBox;
     
     @Inject
     public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager, 
-            ShareTableRendererEditorFactory shareTableRendererEditorFactory, SharingActionFactory sharingActionFactory, 
-            ShareListManager shareListManager, XMPPService xmppService, FriendsSignInPanel friendSignInPanel,
+            ShareTableRendererEditorFactory shareTableRendererEditorFactory, ShareListManager shareListManager, 
             ComboBoxDecorator comboDecorator, LibraryNavigator libraryNavigator, PlaylistManager playlistManager,
-            FileInfoDialogFactory fileInfoFactory, MyLibraryPopupMenuFactory libraryPopupFactory) {
+            FileInfoDialogFactory fileInfoFactory, MyLibraryPopupMenuFactory libraryPopupFactory,
+            Provider<LibraryImageFolderComboBox> libraryImageComboBox) {
         this.thumbnailManager = thumbnailManager;
         this.libraryManager = libraryManager;
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
-        this.sharingActionFactory = sharingActionFactory;
         this.shareListManager = shareListManager;
-        this.xmppService = xmppService;
-        this.friendSignInPanel = friendSignInPanel;
         this.comboDecorator = comboDecorator;
         this.libraryPopupFactory = libraryPopupFactory;
+        this.libraryImageComboBox = libraryImageComboBox;
     }
     
     @Override
@@ -81,7 +73,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
             EventList<LocalFileItem> eventList, LocalFileList fileList,
             ShareWidget<File> shareWidget, LibraryListSourceChanger listChanger) {
 
-        LibraryImageFolderComboBox comboBox = new LibraryImageFolderComboBox(xmppService, sharingActionFactory, friendSignInPanel);
+        LibraryImageFolderComboBox comboBox = libraryImageComboBox.get();
         comboDecorator.decorateLinkComboBox(comboBox);
         
         LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList, comboBox);

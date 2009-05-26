@@ -22,9 +22,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
 class ConnectionStatusPanel extends JXPanel {
     
     private final String connectingText = I18n.tr("Connecting");

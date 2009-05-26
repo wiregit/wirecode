@@ -17,9 +17,10 @@ import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.listener.ActionHandListener;
-import org.limewire.ui.swing.mainframe.StorePanel;
+import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
@@ -34,7 +35,7 @@ public class SponsoredResultsPanel extends JXPanel {
     private final Application application;
     private final Navigator navigator;
     private final HomePanel homePanel;
-    private final StorePanel storePanel;
+    private final StoreMediator storeMediator;
 
     @Resource private int textWidth;
     @Resource private int areaWidth;
@@ -46,11 +47,11 @@ public class SponsoredResultsPanel extends JXPanel {
     @Resource private Font urlFont;
     
     @Inject
-    public SponsoredResultsPanel(Navigator navigator, StorePanel storePanel, HomePanel homePanel, Application application) {
+    public SponsoredResultsPanel(Navigator navigator, StoreMediator storeMediator, HomePanel homePanel, Application application) {
         GuiUtils.assignResources(this);
         this.application = application;
         this.navigator = navigator;
-        this.storePanel = storePanel;
+        this.storeMediator = storeMediator;
         this.homePanel = homePanel;
         setLayout(new VerticalLayout(10));
         setMaximumSize(new Dimension(areaWidth, Short.MAX_VALUE));
@@ -120,11 +121,11 @@ public class SponsoredResultsPanel extends JXPanel {
                 switch(result.getTarget()) {
                 case HOME:
                     homePanel.load(result.getUrl());
-                    navigator.getNavItem(NavCategory.LIMEWIRE, HomePanel.NAME).select();
+                    navigator.getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
                     break;
                 case STORE:
-                    storePanel.load(result.getUrl());
-                    NavItem item = navigator.getNavItem(NavCategory.LIMEWIRE, StorePanel.NAME);
+                    storeMediator.getComponent().load(result.getUrl());
+                    NavItem item = navigator.getNavItem(NavCategory.LIMEWIRE, StoreMediator.NAME);
                     if(item != null) {
                         item.select();
                     }

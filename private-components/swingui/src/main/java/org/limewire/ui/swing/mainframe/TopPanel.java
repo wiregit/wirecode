@@ -22,14 +22,15 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
-import org.limewire.ui.swing.home.HomePanel;
+import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.nav.NavMediator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
@@ -40,14 +41,14 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.painter.factories.SearchTabPainterFactory;
 import org.limewire.ui.swing.search.AdvancedSearchBuilder;
+import org.limewire.ui.swing.search.AdvancedSearchMediator;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchBar;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
-import org.limewire.ui.swing.search.UiSearchListener;
-import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
+import org.limewire.ui.swing.search.SearchResultMediator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.mozilla.browser.MozillaInitialization;
@@ -68,15 +69,15 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @Inject
     public TopPanel(final SearchHandler searchHandler,
                     Navigator navigator,
-                    final HomePanel homePanel,
-                    final StorePanel storePanel,
+                    final HomeMediator homeMediator,
+                    final StoreMediator storeMediator,
                     final LeftPanel leftPanel,
                     SearchBar searchBar,
                     FlexibleTabListFactory tabListFactory,
                     BarPainterFactory barPainterFactory,
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryNavigator libraryNavigator,
-                    AdvancedSearchPanel advancedSearchPanel,
+                    AdvancedSearchMediator advancedSearchMediator,
                     AdvancedSearchBuilder advancedSearchBuilder) {        
         GuiUtils.assignResources(this);
         
@@ -90,15 +91,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
         setBackgroundPainter(barPainterFactory.createTopBarPainter());
         
         // add advanced search into the navigator, for use elsewhere.
-        navigator.createNavItem(NavCategory.LIMEWIRE, AdvancedSearchPanel.NAME, advancedSearchPanel);
-        advancedSearchPanel.addSearchListener(new UiSearchListener() {
-            @Override
-            public void searchTriggered(SearchInfo searchInfo) {
-                searchHandler.doSearch(searchInfo);
-            }
-        });
+        navigator.createNavItem(NavCategory.LIMEWIRE, AdvancedSearchMediator.NAME, advancedSearchMediator);
         
-        homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);      
+        homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME, homeMediator);      
         JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
         homeButton.setName("WireframeTop.homeButton");
         homeButton.setToolTipText(I18n.tr("Home"));
@@ -107,13 +102,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
         homeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                homePanel.loadDefaultUrl();
+                homeMediator.getComponent().loadDefaultUrl();
             }
         });
         
         JButton storeButton;
         if(MozillaInitialization.isInitialized()) {
-            NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
+            NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StoreMediator.NAME, storeMediator);
             storeButton = new IconButton(NavigatorUtils.getNavAction(storeNav));
         } else {
             storeButton = new IconButton();
@@ -125,7 +120,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         storeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                storePanel.loadDefaultUrl();
+                storeMediator.getComponent().loadDefaultUrl();
             }
         });
      
@@ -160,9 +155,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
             }
             
             @Override public void categoryAdded(NavCategory category) {}
-            @Override public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {}
-            @Override public void itemRemoved(NavCategory category, NavItem navItem, JComponent panel) {}
-            @Override public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, JComponent panel) {}
+            @Override public void itemAdded(NavCategory category, NavItem navItem) {}
+            @Override public void itemRemoved(NavCategory category, NavItem navItem) {}
+            @Override public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, NavMediator navMediator) {}
       ;  });
     };
 
@@ -172,11 +167,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
     }
 
     @Override
-    public SearchNavItem addSearch(
-        String title, final JComponent searchPanel, final Search search) {
-        
-        final NavItem item = navigator.createNavItem(
-            NavCategory.SEARCH_RESULTS, title, searchPanel);
+    public SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search) {
+
+        final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(searchPanel));
         final SearchAction action = new SearchAction(item);
         search.addSearchListener(action);
 

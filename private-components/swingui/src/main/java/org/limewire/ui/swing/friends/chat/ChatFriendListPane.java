@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.friends.chat;
 
-import static org.limewire.ui.swing.friends.chat.ChatFriendsUtil.getIcon;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
@@ -68,6 +67,7 @@ import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPPresence;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -84,7 +84,7 @@ import com.google.inject.Inject;
 /**
  * The pane that lists all available friends in the chat area.
  */
-public class ChatFriendListPane extends JPanel {
+public class ChatFriendListPane extends JPanel { 
     
     private static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
     private static final Cursor HAND_CURSOR = new Cursor(Cursor.HAND_CURSOR);
@@ -95,7 +95,6 @@ public class ChatFriendListPane extends JPanel {
     
     private final EventList<ChatFriend> chatFriends;
     private final JTable friendsTable;
-    private final IconLibrary icons;
     private final ChatModel chatModel;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final LibraryNavigator libraryNavigator;
@@ -108,11 +107,17 @@ public class ChatFriendListPane extends JPanel {
     @Resource private Font  friendFont;
     @Resource private Color friendSelectionColor;
     @Resource private Color activeConversationBackgroundColor;
+    @Resource private Icon unviewedMessageIcon;
+    @Resource private Icon availableIcon;
+    @Resource private Icon doNotDisturbIcon;
+    @Resource private Icon chattingIcon;
+    @Resource private Icon endChatIcon;
+    @Resource private Icon endChatOverIcon;  
+    @Resource private Icon awayIcon;
 
     @Inject
-    public ChatFriendListPane(IconLibrary icons, LibraryNavigator libraryNavigator, ChatModel chatModel) {
+    public ChatFriendListPane(LibraryNavigator libraryNavigator, ChatModel chatModel) {
         super(new BorderLayout());
-        this.icons = icons;
         this.chatModel = chatModel;
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
         this.libraryNavigator = libraryNavigator;
@@ -328,6 +333,10 @@ public class ChatFriendListPane extends JPanel {
         return ALL_CHAT_MESSAGES_TOPIC_PATTERN;
     }
     
+    public String getLoggedInId() {
+        return chatModel.getLoggedInId();
+    }
+    
     public void fireConversationStarted(String friendId) {
         ChatFriend chatFriend = chatModel.getChatFriend(friendId);
         if(chatFriend != null) {
@@ -376,14 +385,27 @@ public class ChatFriendListPane extends JPanel {
         }
         
         if(!chatFriend.isActiveConversation() && chatFriend.hasReceivedUnviewedMessages()) {
-            return icons.getUnviewedMessages();
+            return unviewedMessageIcon;
         }
         
         //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally
         if (chatFriend.isChatting()) {
-            return icons.getChatting();
+            return chattingIcon;
         }
-        return getIcon(chatFriend, icons);
+        return getIcon(chatFriend);
+    }
+    
+    private Icon getIcon(ChatFriend chatFriend) {
+        XMPPPresence.Mode mode = chatFriend.getMode();
+        switch(mode) {
+        case available:
+            return availableIcon;
+        case chat:
+            return chattingIcon;
+        case dnd:
+            return doNotDisturbIcon;
+        }
+        return awayIcon;
     }
     
     private void fireCloseChat(ChatFriend chatFriend) {
@@ -475,7 +497,7 @@ public class ChatFriendListPane extends JPanel {
             if (isChatHoveredOver) {
                 Point hoverPoint = mouseHoverFriend.getHoverPoint();
                 boolean overCloseIcon = isOverCloseIcon(hoverPoint);
-                chatStatus.setIcon(overCloseIcon ? icons.getEndChatOverIcon() : icons.getEndChat());
+                chatStatus.setIcon(overCloseIcon ? endChatOverIcon : endChatIcon);
                 chatStatus.setToolTipText(tr("Close conversation"));
                 panel.add(chatStatus, "gapleft 4, gapright 2");
             } else {
@@ -543,7 +565,7 @@ public class ChatFriendListPane extends JPanel {
     }
     
     private boolean isOverCloseIcon(Point point) {
-        return point.x > LEFT_EDGE_PADDING_PIXELS && point.x < icons.getEndChat().getIconWidth() + LEFT_EDGE_PADDING_PIXELS;
+        return point.x > LEFT_EDGE_PADDING_PIXELS && point.x < endChatIcon.getIconWidth() + LEFT_EDGE_PADDING_PIXELS;
     }
     
     private class AlternatingIconTimer {
@@ -582,7 +604,7 @@ public class ChatFriendListPane extends JPanel {
         }
         
         private Icon getIcon() {
-            return flashCount % 2 == 0 ? icons.getUnviewedMessages() : icons.getChatting();
+            return flashCount % 2 == 0 ? unviewedMessageIcon : chattingIcon;
         }
     }
     

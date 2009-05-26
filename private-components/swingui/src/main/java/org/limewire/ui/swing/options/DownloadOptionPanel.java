@@ -26,13 +26,14 @@ import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Downloads Option View
  */
 public class DownloadOptionPanel extends OptionPanel {
 
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     
     private SavingPanel savingPanel;
     private JCheckBox clearDownloadsCheckBox;
@@ -40,7 +41,7 @@ public class DownloadOptionPanel extends OptionPanel {
     private JCheckBox deleteFileOnCancelCheckBox;
     
     @Inject
-    public DownloadOptionPanel(IconManager iconManager) {
+    public DownloadOptionPanel(Provider<IconManager> iconManager) {
         this.iconManager = iconManager;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));

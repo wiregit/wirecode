@@ -140,9 +140,9 @@ public class AppFrame extends SingleFrameApplication {
         
         isStartup = args.length > 0 && STARTUP.equals(args[0]);
     }
-
+   
     @Override
-    protected void startup() {        
+    protected void startup() { 
         String title = getContext().getResourceMap().getString("Application.title");
         JFrame frame = new FirstVizIgnorer(title);
         frame.setName("mainFrame");
@@ -152,7 +152,7 @@ public class AppFrame extends SingleFrameApplication {
         assert ui == null;
         createUiInjector();
         assert ui != null;
-
+        
         if(isStartup || SwingUiSettings.MINIMIZE_TO_TRAY.getValue()) {
             trayNotifier.showTrayIcon();            
         } else {

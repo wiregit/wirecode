@@ -46,6 +46,7 @@ import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Constructs the file type sharing panel to be used in the options
@@ -75,7 +76,7 @@ public final class FileTypeOptionPanelManager {
     private final Collection<String> originalExtensions;
 
     private final CategoryIconManager categoryIconManager;
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     private final LibraryData libraryData;
     private JButton addButton;
     private JTextField extTextField;
@@ -90,7 +91,7 @@ public final class FileTypeOptionPanelManager {
     
     @Inject
     public FileTypeOptionPanelManager(CategoryIconManager categoryIconManager,
-            IconManager iconManager, LibraryManager libraryManager) {
+            Provider<IconManager> iconManager, LibraryManager libraryManager) {
         
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
@@ -443,7 +444,7 @@ public final class FileTypeOptionPanelManager {
         }
         
         public String getToolTipText(String obj) {
-            return iconManager.getMIMEDescription(obj);
+            return iconManager.get().getMIMEDescription(obj);
         }
 
         public Icon getIcon(String obj) {
@@ -451,9 +452,9 @@ public final class FileTypeOptionPanelManager {
                 throw new NullPointerException("Null object passed to icon lookup.");
             }
             
-            Icon icon = iconManager.getIconForExtension(obj);
+            Icon icon = iconManager.get().getIconForExtension(obj);
             
-            return icon != null ? icon : iconManager.getBlankIcon();
+            return icon != null ? icon : iconManager.get().getBlankIcon();
         }
     }
     
@@ -517,7 +518,7 @@ public final class FileTypeOptionPanelManager {
 
         @Override
         public String getComment(String obj) {
-            return iconManager.getMIMEDescription(obj);
+            return iconManager.get().getMIMEDescription(obj);
         }
 
         @Override

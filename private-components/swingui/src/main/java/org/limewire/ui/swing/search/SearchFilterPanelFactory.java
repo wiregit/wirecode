@@ -9,6 +9,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Factory implementation for creating an advanced filter panel for search
@@ -18,7 +19,7 @@ public class SearchFilterPanelFactory implements AdvancedFilterPanelFactory<Visu
 
     private final TextFieldDecorator textFieldDecorator;
     private final FriendActions friendManager;
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     
     /**
      * Constructs a SearchFilterPanelFactory with the specified UI decorators
@@ -27,7 +28,7 @@ public class SearchFilterPanelFactory implements AdvancedFilterPanelFactory<Visu
     @Inject
     public SearchFilterPanelFactory(TextFieldDecorator textFieldDecorator,
             FriendActions friendManager,
-            IconManager iconManager) {
+            Provider<IconManager> iconManager) {
         this.textFieldDecorator = textFieldDecorator;
         this.friendManager = friendManager;
         this.iconManager = iconManager;

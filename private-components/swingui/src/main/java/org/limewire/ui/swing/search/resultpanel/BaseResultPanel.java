@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -31,7 +32,6 @@ import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.search.SearchViewType;
@@ -55,6 +55,7 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
+import org.limewire.ui.swing.table.IconLabelRendererFactory;
 import org.limewire.ui.swing.table.QualityRenderer;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
@@ -71,6 +72,7 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -108,9 +110,14 @@ public class BaseResultPanel extends JXPanel {
     private final Navigator navigator;
     private final ListViewRowHeightRule rowHeightRule;
     private final RemoteHostWidgetFactory fromWidgetfactory;
-    private final NameRendererFactory nameRendererFactory;
+    private final Provider<IconLabelRendererFactory> iconLabelRendererFactory;
     private final DownloadHandler downloadHandler;
     private final FileInfoDialogFactory fileInfoFactory;
+    private final Provider<TimeRenderer> timeRenderer;
+    private final Provider<FileSizeRenderer> fileSizeRenderer;
+    private final Provider<CalendarRenderer> calendarRenderer;
+    private final Provider<QualityRenderer> qualityRenderer;
+    private final DefaultTableCellRenderer defaultTableCellRenderer;
     
     private RangeList<VisualSearchResult> maxSizedList;
     private ListEventListener<VisualSearchResult> maxSizedListener;
@@ -132,8 +139,10 @@ public class BaseResultPanel extends JXPanel {
             ListViewRowHeightRule rowHeightRule,
             RemoteHostWidgetFactory fromWidgetFactory,
             LibraryNavigator libraryNavigator,
-            NameRendererFactory nameRendererFactory,
-            FileInfoDialogFactory fileInfoFactory) {
+            Provider<IconLabelRendererFactory> iconLabelRendererFactory,
+            FileInfoDialogFactory fileInfoFactory, Provider<TimeRenderer> timeRenderer,
+            Provider<FileSizeRenderer> fileSizeRenderer, Provider<CalendarRenderer> calendarRenderer,
+            Provider<QualityRenderer> qualityRenderer, DefaultTableCellRenderer defaultTableCellRenderer) {
         
         this.searchResultsModel = searchResultsModel;
         this.tableFormatFactory = tableFormatFactory;
@@ -141,9 +150,14 @@ public class BaseResultPanel extends JXPanel {
         this.navigator = navigator;
         this.rowHeightRule = rowHeightRule;
         this.fromWidgetfactory = fromWidgetFactory;
-        this.nameRendererFactory = nameRendererFactory;
+        this.iconLabelRendererFactory = iconLabelRendererFactory;
         this.fileInfoFactory = fileInfoFactory;
         this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, libraryNavigator);
+        this.timeRenderer = timeRenderer;
+        this.fileSizeRenderer = fileSizeRenderer;
+        this.calendarRenderer = calendarRenderer;
+        this.qualityRenderer = qualityRenderer;
+        this.defaultTableCellRenderer = defaultTableCellRenderer;
 
         // Create tables.
         this.resultsList = createList();
@@ -359,9 +373,7 @@ public class BaseResultPanel extends JXPanel {
     protected void setupCellRenderers(ResultsTableFormat<VisualSearchResult> tableFormat) {
         SearchCategory selectedCategory = searchResultsModel.getSelectedCategory();
         
-        CalendarRenderer calendarRenderer = new CalendarRenderer();
-        TableCellRenderer nameRenderer = nameRendererFactory.createNameRenderer((selectedCategory == SearchCategory.ALL));
-        TableCellRenderer defaultRenderer = new DefaultLibraryRenderer();
+        TableCellRenderer nameRenderer = iconLabelRendererFactory.get().createIconRenderer(selectedCategory == SearchCategory.ALL);
         
         int columnCount = tableFormat.getColumnCount();
         for (int i = 0; i < columnCount; i++) {
@@ -369,10 +381,10 @@ public class BaseResultPanel extends JXPanel {
             if (clazz == String.class
                 || clazz == Integer.class
                 || clazz == Long.class) {
-                setCellRenderer(i, defaultRenderer);
+                setCellRenderer(i, defaultTableCellRenderer);
                 setCellEditor(i, null);
             } else if (clazz == Calendar.class) {
-                setCellRenderer(i, calendarRenderer);
+                setCellRenderer(i, calendarRenderer.get());
                 setCellEditor(i, null);
             } else if (i == tableFormat.getNameColumn()) {
                 setCellRenderer(i, nameRenderer);
@@ -386,31 +398,31 @@ public class BaseResultPanel extends JXPanel {
         // Set specific column renderers for selected category.
         switch (selectedCategory) {
         case ALL:
-            setCellRenderer(AllTableFormat.SIZE_INDEX, new FileSizeRenderer());
+            setCellRenderer(AllTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             break;
         case AUDIO:
             setHeaderRenderer(AudioTableFormat.LENGTH_INDEX, new TableCellHeaderRenderer(JLabel.TRAILING));
-            setCellRenderer(AudioTableFormat.SIZE_INDEX, new FileSizeRenderer());
-            setCellRenderer(AudioTableFormat.LENGTH_INDEX, new TimeRenderer());
-            setCellRenderer(AudioTableFormat.QUALITY_INDEX, new QualityRenderer());
+            setCellRenderer(AudioTableFormat.SIZE_INDEX, fileSizeRenderer.get());
+            setCellRenderer(AudioTableFormat.LENGTH_INDEX, timeRenderer.get());
+            setCellRenderer(AudioTableFormat.QUALITY_INDEX, qualityRenderer.get());
             break;
         case VIDEO:
             setHeaderRenderer(VideoTableFormat.LENGTH_INDEX, new TableCellHeaderRenderer(JLabel.TRAILING));
-            setCellRenderer(VideoTableFormat.SIZE_INDEX, new FileSizeRenderer());
-            setCellRenderer(VideoTableFormat.LENGTH_INDEX, new TimeRenderer());
-            setCellRenderer(VideoTableFormat.QUALITY_INDEX, new QualityRenderer());
+            setCellRenderer(VideoTableFormat.SIZE_INDEX, fileSizeRenderer.get());
+            setCellRenderer(VideoTableFormat.LENGTH_INDEX, timeRenderer.get());
+            setCellRenderer(VideoTableFormat.QUALITY_INDEX, qualityRenderer.get());
             break;
         case DOCUMENT:
-            setCellRenderer(DocumentTableFormat.SIZE_INDEX, new FileSizeRenderer());
+            setCellRenderer(DocumentTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             break;
         case IMAGE:
-            setCellRenderer(ImageTableFormat.SIZE_INDEX, new FileSizeRenderer());
+            setCellRenderer(ImageTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             break;
         case PROGRAM:
-            setCellRenderer(ProgramTableFormat.SIZE_INDEX, new FileSizeRenderer());
+            setCellRenderer(ProgramTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             break;
         case OTHER:
-            setCellRenderer(OtherTableFormat.SIZE_INDEX, new FileSizeRenderer());
+            setCellRenderer(OtherTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             break;
         default:
             break;

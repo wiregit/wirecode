@@ -88,6 +88,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.XMPPFriend;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.name.Named;
 
@@ -111,7 +112,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final MessageWriter writer;
     private final ChatFriend chatFriend;
     private final ShareListManager shareListManager;
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     private final LibraryNavigator libraryNavigator;
     private HyperlinkButton downloadlink;
     private HyperlinkButton sharelink;
@@ -127,14 +128,15 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     @Resource(key="ChatConversation.toolbarBottomColor") private Color toolbarBottomColor;
     @Resource(key="ChatConversation.toolbarBorderColor") private Color toolbarBorderColor;
     @Resource(key="ChatConversation.linkFont") private Font linkFont;
+    @Resource private Icon endChat;
 
     private final JScrollPane conversationScroll;
     private final JPanel chatWrapper;
     
     @Inject
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
-                            ShareListManager libraryManager, IconManager iconManager, LibraryNavigator libraryNavigator,
-                            IconLibrary iconLibrary, ChatHyperlinkListenerFactory chatHyperlinkListenerFactory,
+                            ShareListManager libraryManager, Provider<IconManager> iconManager, LibraryNavigator libraryNavigator,
+                            ChatHyperlinkListenerFactory chatHyperlinkListenerFactory,
                             @Named("backgroundExecutor")ScheduledExecutorService schedExecService) {
         this.writer = writer;
         this.chatFriend = chatFriend;
@@ -167,7 +169,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                 new CloseChatEvent(chatFriend).publish();
             }
         });
-        closeConversation.setIcon(iconLibrary.getEndChat());
+        closeConversation.setIcon(endChat);
         
         chatWrapper = new JPanel();
         chatWrapper.setLayout(new OverlayLayout(chatWrapper));
@@ -408,7 +410,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
                 String extension = FileUtils.getFileExtension(buttonText);
                 if (!extension.isEmpty()) {
-                    Icon icon = iconManager.getIconForExtension(extension);
+                    Icon icon = iconManager.get().getIconForExtension(extension);
                     button.setIcon(icon);
                 }
 

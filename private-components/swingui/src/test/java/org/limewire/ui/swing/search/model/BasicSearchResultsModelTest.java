@@ -40,7 +40,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         super.setUp();
         // Create test instance.
         model = new BasicSearchResultsModel(new TestSearchInfo(), 
-                new TestSearch(), new TestPropertiableHeadings(), null, null);
+                new TestSearch(), null, null, null);
     }
     
     @Override

@@ -8,17 +8,16 @@ import org.limewire.ui.swing.library.SelectAllable;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.Provider;
 
-@Singleton
 public class SharingActionFactoryImpl implements SharingActionFactory {
 
     private final ShareListManager shareListManager;
-    private final ShareWidgetFactory shareWidgetFactory;
+    private final Provider<ShareWidgetFactory> shareWidgetFactory;
     private final FriendsSignInPanel friendsSignInPanel;
     
     @Inject
-    public SharingActionFactoryImpl(ShareListManager shareListManager, ShareWidgetFactory shareWidgetFactory,
+    public SharingActionFactoryImpl(ShareListManager shareListManager, Provider<ShareWidgetFactory> shareWidgetFactory,
             FriendsSignInPanel friendsSignInPanel) {
         this.shareListManager = shareListManager;
         this.shareWidgetFactory = shareWidgetFactory;

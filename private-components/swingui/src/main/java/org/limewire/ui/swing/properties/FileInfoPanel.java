@@ -78,6 +78,7 @@ import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -95,7 +96,7 @@ public class FileInfoPanel extends JPanel {
     @Resource private Icon removeIconRollover;
     @Resource private Icon removeIconPressed;
     
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     private final CategoryIconManager categoryIconManager;
     private final ThumbnailManager thumbnailManager;
     private final MagnetLinkFactory magnetLinkFactory;
@@ -115,7 +116,7 @@ public class FileInfoPanel extends JPanel {
     
     @Inject
     public FileInfoPanel(@Assisted FileInfoType type, @Assisted PropertiableFile propertiableFile, 
-            IconManager iconManager, CategoryIconManager categoryIconManager,
+            Provider<IconManager> iconManager, CategoryIconManager categoryIconManager,
             ThumbnailManager thumbnailManager, MagnetLinkFactory magnetLinkFactory,
             LibraryNavigator libraryNavigator, PropertyDictionary propertyDictionary,
             ShareListManager shareListManager, FriendManager friendManager,
@@ -479,7 +480,7 @@ public class FileInfoPanel extends JPanel {
             break;
         case DOCUMENT:
             panel.add(createLabel(I18n.tr("Type:")), "split 2");
-            panel.add(createLabelField(iconManager.getMIMEDescription(propertiableFile)), "growx, wrap");
+            panel.add(createLabelField(iconManager.get().getMIMEDescription(propertiableFile)), "growx, wrap");
             panel.add(createLabel(I18n.tr("Date Created:")), "split 2");
             panel.add(createLabelField(FileInfoUtils.convertDate(propertiableFile)), "growx, wrap");
             break;
@@ -487,7 +488,7 @@ public class FileInfoPanel extends JPanel {
             break;
         case OTHER:
             panel.add(createLabel(I18n.tr("Type:")), "split 2");
-            panel.add(createLabelField(iconManager.getMIMEDescription(propertiableFile)), "growx, wrap");
+            panel.add(createLabelField(iconManager.get().getMIMEDescription(propertiableFile)), "growx, wrap");
             break;
         }
         panel.add(createLabel(I18n.tr("Hash:")), "split 2");
@@ -577,12 +578,12 @@ public class FileInfoPanel extends JPanel {
             case IMAGE:
                 return thumbnailManager.getThumbnailForFile(((LocalFileItem)propertiableFile).getFile());
             default:
-                return categoryIconManager.getIcon(propertiableFile, iconManager);
+                return categoryIconManager.getIcon(propertiableFile);
             }
         case DOWNLOADING_FILE:
         case REMOTE_FILE:
         default:
-            return categoryIconManager.getIcon(propertiableFile, iconManager);
+            return categoryIconManager.getIcon(propertiableFile);
         }
     }
     

@@ -70,9 +70,9 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDi
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.internal.Nullable;
 
@@ -124,12 +124,11 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     
     @Resource private Icon dividerIcon;
     
-    private final SearchHeadingDocumentBuilder headingBuilder;
+    private final Provider<SearchHeadingDocumentBuilder> headingBuilder;
     private final ListViewRowHeightRule rowHeightRule;
     private final ListViewDisplayedRowsLimit displayLimit;
-    private final SearchResultTruncator truncator;
+    private final Provider<SearchResultTruncator> truncator;
     private final HeadingFontWidthResolver headingFontWidthResolver = new HeadingFontWidthResolver();
-    private final IconManager iconManager;
     private final FileInfoDialogFactory fileInfoFactory;
     private RemoteHostWidget fromWidget;
     private JButton itemIconButton;
@@ -164,11 +163,11 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         @Assisted @Nullable String searchText, 
         @Assisted Navigator navigator, 
         final @Assisted DownloadHandler downloadHandler,
-        SearchHeadingDocumentBuilder headingBuilder,
+        Provider<SearchHeadingDocumentBuilder> headingBuilder,
         ListViewRowHeightRule rowHeightRule,
         final @Assisted ListViewDisplayedRowsLimit displayLimit,
         LibraryNavigator libraryNavigator,
-        SearchResultTruncator truncator, IconManager iconManager, FileInfoDialogFactory fileInfoFactory) {
+        Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory) {
 
         this.categoryIconManager = categoryIconManager;
         
@@ -177,7 +176,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.rowHeightRule = rowHeightRule;
         this.displayLimit = displayLimit;
         this.truncator = truncator;
-        this.iconManager = iconManager;
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
         
@@ -354,7 +352,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         case LIBRARY:
             return libraryIcon;
         }
-        return categoryIconManager.getIcon(vsr, iconManager);
+        return categoryIconManager.getIcon(vsr);
     }
 
     private Cursor getIconCursor(VisualSearchResult vsr) {
@@ -393,7 +391,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             @Override
             public String getText() {
                 String headingText = result.getHeading();
-                String truncatedHeading = truncator.truncateHeading(headingText, fudgeFactorPixelWidth, headingFontWidthResolver);
+                String truncatedHeading = truncator.get().truncateHeading(headingText, fudgeFactorPixelWidth, headingFontWidthResolver);
                 handleHeadingTooltip(headingText, truncatedHeading);
                 return truncatedHeading;
             }
@@ -411,14 +409,14 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             public String getText(String adjoiningFragment) {
                 int adjoiningTextPixelWidth = headingFontWidthResolver.getPixelWidth(adjoiningFragment);
                 String headingText = result.getHeading();
-                String truncatedHeading = truncator.truncateHeading(headingText, 
+                String truncatedHeading = truncator.get().truncateHeading(headingText, 
                         fudgeFactorPixelWidth - adjoiningTextPixelWidth, headingFontWidthResolver);
                 handleHeadingTooltip(headingText, truncatedHeading);
                 return truncatedHeading;
             }
         };
 
-        this.heading.setText(headingBuilder.getHeadingDocument(searchHeading, downloadState, result.isSpam()));
+        this.heading.setText(headingBuilder.get().getHeadingDocument(searchHeading, downloadState, result.isSpam()));
         this.downloadSourceCount.setText(Integer.toString(vsr.getSources().size()));
     }
 

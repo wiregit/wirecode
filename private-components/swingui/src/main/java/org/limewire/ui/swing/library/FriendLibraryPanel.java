@@ -55,6 +55,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import com.google.inject.name.Named;
 
 /**
@@ -92,7 +93,9 @@ public class FriendLibraryPanel extends AbstractFileListPanel {
     private EmptyFriendLibraryMessagePanel emptyMessagePanel;
     
     @Inject
-    public FriendLibraryPanel(HeaderBarDecorator headerBarFactory,
+    public FriendLibraryPanel(@Assisted PluggableList<RemoteFileItem> baseLibraryList,
+            @Assisted FriendLibraryListSourceChanger currentFriendFilterChanger,
+            HeaderBarDecorator headerBarFactory,
             TextFieldDecorator textFieldDecorator, CategoryIconManager categoryIconManager,
             LibraryTableFactory libraryTableFactory, DownloadListManager downloadListManager,
             LibraryManager libraryManager, LibraryNavigator libraryNavigator,
@@ -110,9 +113,7 @@ public class FriendLibraryPanel extends AbstractFileListPanel {
         this.shareListManager = shareListManager;
         this.emptyMessagePanel = emptyMessagePanel;
         this.friendManager = friendManager;
-        
-        final PluggableList<RemoteFileItem> baseLibraryList = new PluggableList<RemoteFileItem>(remoteLibraryManager.getAllFriendsFileList().getModel().getPublisher(), remoteLibraryManager.getAllFriendsFileList().getModel().getReadWriteLock());
-        currentFriendFilterChanger = new FriendLibraryListSourceChanger(baseLibraryList, remoteLibraryManager);
+        this.currentFriendFilterChanger = currentFriendFilterChanger;
         
         createMyCategories(baseLibraryList);
         

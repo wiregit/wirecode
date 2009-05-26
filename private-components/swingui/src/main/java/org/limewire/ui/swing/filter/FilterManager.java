@@ -11,6 +11,8 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.util.IconManager;
 
+import com.google.inject.Provider;
+
 /**
  * A manager for filters.  FilterManager maintains a set of filters that can be
  * applied to a filterable data source.  A variety of filter types are
@@ -25,7 +27,7 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
     private final FilterableSource<E> filterableSource;
     
     /** Icon manager for determining file types. */
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     
     /** Map containing non-property filters. */
     private final Map<FilterType, Filter<E>> filterMap = 
@@ -43,7 +45,7 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
      * Constructs a FilterManager using the specified filterable data source
      * and icon manager.
      */
-    public FilterManager(FilterableSource<E> filterableSource, IconManager iconManager) {
+    public FilterManager(FilterableSource<E> filterableSource, Provider<IconManager> iconManager) {
         this.filterableSource = filterableSource;
         this.iconManager = iconManager;
     }

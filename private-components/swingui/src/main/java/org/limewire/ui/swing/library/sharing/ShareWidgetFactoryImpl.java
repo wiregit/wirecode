@@ -2,12 +2,12 @@ package org.limewire.ui.swing.library.sharing;
 
 import java.io.File;
 
-
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.ShapeDialog;
@@ -17,10 +17,9 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.impl.ThreadSafeList;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-@Singleton
+@LazySingleton
 public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     
     private ShareWidget<File> fileShareWidget;

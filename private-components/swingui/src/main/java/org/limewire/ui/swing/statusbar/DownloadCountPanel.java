@@ -14,9 +14,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
 class DownloadCountPanel extends JXLabel {
         
     @Inject

@@ -28,8 +28,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 
 public class UploadPanel extends JXPanel{
-    
-    public static final String NAME = "UploadPanel";
+
     private JXButton clearAllButton;
     private HeaderBar header;
     private HeaderBarDecorator headerBarDecorator;

@@ -15,22 +15,20 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.chat.Message.Type;
-import org.limewire.xmpp.api.client.XMPPPresence;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.xmpp.api.client.XMPPPresence;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+
+import com.google.inject.Inject;
 
 /**
  * General purpose model for the chat window. Keeps track of presences, userId, etc..
  * Most EventBus chat events are now fired from within this class. Prior to firing
  * these events we ensure that the ChatPanel has been constructed. 
  */
-@Singleton
 public class ChatModel {
 	/** Reference to the heavy weight panel */
     private final ChatFramePanel chatFramePanel;

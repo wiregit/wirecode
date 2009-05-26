@@ -28,6 +28,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Files Option View
@@ -37,7 +38,7 @@ public class FilesOptionPanel extends OptionPanel {
     private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
     private final ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel;
     private final DaapManager daapManager;
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     
     private ManageExtensionsPanel manageExtensionsPanel;
     private SaveFoldersPanel saveFoldersPanel;
@@ -47,7 +48,7 @@ public class FilesOptionPanel extends OptionPanel {
     @Inject
     FilesOptionPanel(ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory, 
             ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel, DaapManager daapManager,
-            IconManager iconManager) { 
+            Provider<IconManager> iconManager) { 
         
         this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
         this.manageFileExtensionsOptionPanel = manageFileExtensionsOptionPanel;

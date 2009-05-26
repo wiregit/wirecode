@@ -12,10 +12,13 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
 import org.limewire.ui.swing.table.TableRendererEditor;
 
+import com.google.inject.Inject;
+
 public class DownloadButtonRendererEditor extends TableRendererEditor{
     private DownloadButtonPanel buttonPanel;
     private DownloadItem item;
     
+    @Inject
     public DownloadButtonRendererEditor(){        
         buttonPanel = new DownloadButtonPanel();
         

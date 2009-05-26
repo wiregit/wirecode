@@ -25,9 +25,9 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.search.RemoteHostActions;
-import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -45,19 +45,20 @@ public class RemoteHostWidget extends JPanel {
     private final LimeComboBox comboBox;
     private final JPopupMenu comboBoxMenu;
     
-    private final RemoteHostActions fromActions;
+    private final Provider<RemoteHostActions> fromActions;
     
     private List<RemoteHost> people = new ArrayList<RemoteHost>();
     private List<RemoteHost> poppedUpPeople = Collections.emptyList();
     
     private final RemoteWidgetType type;
+    private RemoteHostActions remoteHostActions;
     
     @Inject
     RemoteHostWidget(ComboBoxDecorator comboBoxDecorator,
-                           RemoteHostActions fromActions,
+                           Provider<RemoteHostActions> fromActions,
                            @Assisted RemoteWidgetType type) {
         
-        this.fromActions = Objects.nonNull(fromActions, "fromActions");
+        this.fromActions = fromActions;
         this.type = type;
         
         comboBox = new LimeComboBox();
@@ -103,7 +104,7 @@ public class RemoteHostWidget extends JPanel {
             
             @Override
             public void actionPerformed(ActionEvent e) {
-                fromActions.chatWith(person);
+                getRemoteHostAction().chatWith(person);
             }
         };
     }
@@ -116,7 +117,7 @@ public class RemoteHostWidget extends JPanel {
         
             @Override
             public void actionPerformed(ActionEvent e) {
-                fromActions.viewLibraryOf(person);
+                getRemoteHostAction().viewLibraryOf(person);
             }
         };
     }
@@ -129,9 +130,15 @@ public class RemoteHostWidget extends JPanel {
         
             @Override
             public void actionPerformed(ActionEvent e) {
-                fromActions.showFilesSharedBy(person);
+                getRemoteHostAction().showFilesSharedBy(person);
             }
         };
+    }
+    
+    private RemoteHostActions getRemoteHostAction() {
+        if(remoteHostActions == null)
+            remoteHostActions = fromActions.get();
+        return remoteHostActions;
     }
 
     private void layoutComponents() {

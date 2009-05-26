@@ -93,7 +93,6 @@ import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -106,6 +105,7 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
 import com.google.inject.name.Named;
 
 public class MyLibraryPanel extends AbstractFileListPanel implements EventListener<FriendEvent> {
@@ -131,7 +131,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     private final LibraryManager libraryManager;
     private final LibraryNavigator libraryNavigator;
     private final Map<Catalog, LibraryOperable<? extends LocalFileItem>> selectableMap;
-    private final ShareWidgetFactory shareFactory;    
+    private final Provider<ShareWidgetFactory> shareFactory;    
     private final PlaylistManager playlistManager;
     private final ShareListManager shareListManager;
     
@@ -182,12 +182,13 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     };
 
     @Inject
-    public MyLibraryPanel(LibraryManager libraryManager,
+    public MyLibraryPanel(@Assisted PluggableList<LocalFileItem> baseLibraryList,
+                          @Assisted LibraryListSourceChanger currentFriendFilterChanger,
+                          LibraryManager libraryManager,
                           LibraryNavigator libraryNavigator,
-                          IconManager iconManager,
                           LibraryTableFactory tableFactory,
                           CategoryIconManager categoryIconManager,
-                          ShareWidgetFactory shareFactory,
+                          Provider<ShareWidgetFactory> shareFactory,
                           HeaderBarDecorator headerBarDecorator,
                           Provider<PlayerPanel> playerProvider, 
                           GhostDragGlassPane ghostPane,
@@ -215,12 +216,12 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         this.xmppService = xmppService;
         this.playlistManager = playlistManager;
         this.shareListManager = shareListManager;
+        this.currentFriendFilterChanger = currentFriendFilterChanger;
         
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
-        PluggableList<LocalFileItem> baseLibraryList = new PluggableList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
-        currentFriendFilterChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager, shareListManager);
+
         sharingComboBox = new SharingFilterComboBox(currentFriendFilterChanger, this, shareListManager);
         comboDecorator.decorateLinkComboBox(sharingComboBox);
         sharingComboBox.setText(I18n.tr("What I'm Sharing"));
@@ -232,7 +233,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         sharingComboBox.addSelectionListener(new SelectionListener(){
             @Override
             public void selectionChanged(Action item) {
-                messagePanel.setMessage(currentFriendFilterChanger.getCurrentFriend());
+                messagePanel.setMessage(MyLibraryPanel.this.currentFriendFilterChanger.getCurrentFriend());
                 messagePanel.setVisible(true);
                 sharingComboBox.setVisible(false);
             }
@@ -317,7 +318,6 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
             }
         });
     }
-
 
     private void createAndAddPlayer() {
         playerPanel = playerProvider.get();
@@ -442,7 +442,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
     
     private JComponent createMyCategoryAction(final Category category, EventList<LocalFileItem> filtered) {        
-        final ShareWidget<File> fileShareWidget = shareFactory.createFileShareWidget();
+        final ShareWidget<File> fileShareWidget = shareFactory.get().createFileShareWidget();
         addDisposable(fileShareWidget);             
         JScrollPane scrollPane;        
         Catalog catalog = new Catalog(category);

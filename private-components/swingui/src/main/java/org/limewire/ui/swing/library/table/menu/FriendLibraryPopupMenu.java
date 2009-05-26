@@ -23,6 +23,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class FriendLibraryPopupMenu extends JPopupMenu {
 
@@ -32,7 +33,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
 
     final private DownloadListManager downloadListManager;
 
-    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
 
     private final LibraryManager libraryManager;
     
@@ -40,7 +41,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
 
     @Inject
     public FriendLibraryPopupMenu(DownloadListManager downloadListManager,
-            SaveLocationExceptionHandler saveLocationExceptionHandler,
+            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler,
             LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory) {
         this.downloadListManager = downloadListManager;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
@@ -115,7 +116,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
                             try {
                                 downloadListManager.addDownload(fileItem);
                             } catch (SaveLocationException e) {
-                                saveLocationExceptionHandler.handleSaveLocationException(
+                                saveLocationExceptionHandler.get().handleSaveLocationException(
                                         new DownloadAction() {
                                             @Override
                                             public void download(File saveFile, boolean overwrite)

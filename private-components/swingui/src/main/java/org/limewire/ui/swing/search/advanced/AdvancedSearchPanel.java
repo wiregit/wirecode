@@ -43,9 +43,7 @@ import com.google.inject.Inject;
 
 /** The container for advanced searching. */
 public class AdvancedSearchPanel extends JXPanel {
-    
-    public static final String NAME = "ADVANCED_SEARCH";
-    
+        
     private final FriendAutoCompleterFactory friendAutoCompleterFactory;
     private final AdvancedSearchBuilder advancedSearchBuilder;
     private final PropertyDictionary propertyDictionary;

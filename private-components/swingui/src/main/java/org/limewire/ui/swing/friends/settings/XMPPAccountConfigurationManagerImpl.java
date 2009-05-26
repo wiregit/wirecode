@@ -13,15 +13,15 @@ import javax.swing.Icon;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.friend.client.PasswordManager;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
+import org.limewire.inject.LazySingleton;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.io.UnresolvedIpPortImpl;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
+@LazySingleton
 public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigurationManager {
     
     private final PasswordManager passwordManager;

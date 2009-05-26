@@ -8,6 +8,8 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.Objects;
 
+import com.google.inject.Provider;
+
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
@@ -16,7 +18,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 class PropertyMatcher<E extends FilterableItem> implements Matcher<E> {
     private final FilterType filterType;
     private final FilePropertyKey propertyKey;
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     
     /** Property values to match. */
     private final Set<Object> values = new HashSet<Object>();
@@ -26,7 +28,7 @@ class PropertyMatcher<E extends FilterableItem> implements Matcher<E> {
      * key, icon manager, and collection of property values.
      */
     public PropertyMatcher(FilterType filterType, FilePropertyKey propertyKey,
-            IconManager iconManager, Collection<Object> values) {
+            Provider<IconManager> iconManager, Collection<Object> values) {
         this.filterType = filterType;
         this.propertyKey = propertyKey;
         this.iconManager = iconManager;
@@ -61,7 +63,7 @@ class PropertyMatcher<E extends FilterableItem> implements Matcher<E> {
             }
             
         case FILE_TYPE:
-            String type = iconManager.getMIMEDescription(item.getFileExtension());
+            String type = iconManager.get().getMIMEDescription(item.getFileExtension());
             return values.contains(type);
             
         default:

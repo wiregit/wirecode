@@ -20,12 +20,8 @@ import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
 public class StorePanel extends JPanel {
-    public static final String NAME = "LimeWire Store";
-
     private final Browser browser;
     private final Application application;
 
@@ -58,7 +54,7 @@ public class StorePanel extends JPanel {
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        navigator.getNavItem(NavCategory.LIMEWIRE, NAME).select();
+                        navigator.getNavItem(NavCategory.LIMEWIRE, StoreMediator.NAME).select();
                         load(targetedUrl.getUri());
                     }
                 });

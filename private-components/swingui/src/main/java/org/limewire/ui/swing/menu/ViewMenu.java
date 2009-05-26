@@ -7,7 +7,6 @@ import javax.swing.Action;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
-import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
 import org.limewire.ui.swing.mainframe.LeftPanel;
 import org.limewire.ui.swing.util.EnabledType;
@@ -20,8 +19,7 @@ import com.google.inject.Inject;
 public class ViewMenu extends MnemonicMenu {
 
     @Inject
-    public ViewMenu(final LeftPanel leftPanel,
-            final ChatFrame chatFrame, final DownloadMediator downloadMediator) {
+    public ViewMenu(final LeftPanel leftPanel, final ChatFrame chatFrame) {
         super(I18n.tr("&View"));
         add(buildShowHideAction(leftPanel, I18n.tr("Hide &Sidebar"), I18n.tr("Show &Sidebar")));
         add(buildShowHideAction(chatFrame, I18n.tr("Hide &Chat Window"), I18n.tr("Show &Chat Window")));

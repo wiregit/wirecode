@@ -2,28 +2,9 @@ package org.limewire.ui.swing.friends.chat;
 
 import java.net.URL;
 
-import javax.swing.Icon;
-
 import org.limewire.xmpp.api.client.XMPPPresence;
 
 class ChatFriendsUtil {
-
-    public static Icon getIcon(ChatFriend chatFriend, IconLibrary icons) {
-        XMPPPresence.Mode mode = chatFriend.getMode(); 
-        return getIcon(mode, icons);
-    }
-
-    public static Icon getIcon(XMPPPresence.Mode mode, IconLibrary icons) {
-        switch(mode) {
-        case available:
-            return icons.getAvailable();
-        case chat:
-            return icons.getChatting();
-        case dnd:
-            return icons.getDoNotDisturb();
-        }
-        return icons.getAway();
-    }
     
     public static String getIconURL(XMPPPresence.Mode mode) {
         switch(mode) {

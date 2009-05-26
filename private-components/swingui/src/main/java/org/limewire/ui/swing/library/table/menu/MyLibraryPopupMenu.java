@@ -33,6 +33,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -44,7 +45,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private final Category category;
     private final FileInfoDialogFactory fileInfoFactory;
     private final XMPPService xmppService;
-    private final SharingActionFactory sharingActionFactory;   
+    private final Provider<SharingActionFactory> sharingActionFactoryProvider;   
     private final LibraryNavigator libraryNavigator;
     private final PlaylistManager playlistManager;
 
@@ -55,10 +56,10 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     @Inject
     public MyLibraryPopupMenu(@Assisted Category category, LibraryManager libraryManager,
-            SharingActionFactory sharingActionFactory, XMPPService xmppService, LibraryNavigator libraryNavigator, 
+            Provider<SharingActionFactory> sharingActionFactory, XMPPService xmppService, LibraryNavigator libraryNavigator, 
             PlaylistManager playlistManager, FileInfoDialogFactory fileInfoFactory) {
         this.libraryManager = libraryManager;
-        this.sharingActionFactory = sharingActionFactory;
+        this.sharingActionFactoryProvider = sharingActionFactory;
         this.category = category;
         this.xmppService = xmppService;
         this.libraryNavigator = libraryNavigator;
@@ -149,6 +150,8 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         addSeparator();
 
+        SharingActionFactory sharingActionFactory = sharingActionFactoryProvider.get();
+        
         boolean isDocumentSharingAllowed = isGnutellaShareAllowed(category) & shareActionEnabled;
         add(sharingActionFactory.createShareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
         add(sharingActionFactory.createUnshareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);

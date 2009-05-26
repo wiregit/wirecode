@@ -29,6 +29,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -42,13 +43,13 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
 
     private final ResultDownloader downloader;
     private final RemoteFileItemFactory remoteFileItemFactory;
-    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
     private final LibraryNavigator libraryNavigator;
 
     @Inject
     public ChatHyperlinkListener(@Assisted Conversation conversation, ResultDownloader downloader,
                                  RemoteFileItemFactory remoteFileItemFactory,
-                                 SaveLocationExceptionHandler saveLocationExceptionHandler,
+                                 Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler,
                                  LibraryNavigator libraryNavigator) {
 
         this.conversation = conversation;
@@ -102,7 +103,7 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
         } catch (SaveLocationException sle) {
             final RemoteFileItem remoteFileItem = file;
             final MessageFileOffer messageFileOffer = msgWithfileOffer;
-            saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
+            saveLocationExceptionHandler.get().handleSaveLocationException(new DownloadAction() {
                 @Override
                 public void download(File saveFile, boolean overwrite)
                         throws SaveLocationException {

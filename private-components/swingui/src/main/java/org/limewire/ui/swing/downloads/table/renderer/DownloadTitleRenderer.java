@@ -16,6 +16,8 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.google.inject.Inject;
+
 public class DownloadTitleRenderer extends JXPanel implements TableCellRenderer {
     @Resource
     private Icon warningIcon;
@@ -27,6 +29,7 @@ public class DownloadTitleRenderer extends JXPanel implements TableCellRenderer 
     
     private CategoryIconManager categoryIconManager;
     
+    @Inject
     public DownloadTitleRenderer(CategoryIconManager categoryIconManager){
         setLayout(new MigLayout("insets 0 0 0 0, gap 0 0 0 0, novisualpadding, nogrid, aligny center"));
         GuiUtils.assignResources(this);

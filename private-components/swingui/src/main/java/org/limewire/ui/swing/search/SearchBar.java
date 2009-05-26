@@ -39,7 +39,6 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -173,11 +172,9 @@ public class SearchBar extends JXPanel {
                 menu.add(new HyperlinkButton(new AbstractAction(I18n.tr("Advanced Search")) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        NavItem item = navigator.getNavItem(NavCategory.LIMEWIRE, AdvancedSearchPanel.NAME);
-                        if(item != null) {
-                            item.select();
-                            menu.setVisible(false);
-                        }
+                        NavItem item = navigator.getNavItem(NavCategory.LIMEWIRE, AdvancedSearchMediator.NAME);
+                        item.select();
+                        menu.setVisible(false);
                     }
                 }));
             }

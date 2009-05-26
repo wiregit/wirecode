@@ -14,7 +14,6 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
-import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadMessageRenderer;
@@ -25,7 +24,6 @@ import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
-import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -49,12 +47,14 @@ public class DownloadTable extends MouseableTable {
     private EventList<DownloadItem> selectedItems;
 
     @Inject
-	public DownloadTable(ProgressBarDecorator progressBarDecorator, CategoryIconManager iconManager, DownloadActionHandler actionHandler, 
+	public DownloadTable(DownloadTitleRenderer downloadTitleRenderer, DownloadProgressRenderer downloadProgressRenderer, 
+	        DownloadMessageRenderer downloadMessageRenderer, DownloadButtonRendererEditor buttonRenderer,
+	        DownloadButtonRendererEditor buttonEditor, DownloadActionHandler actionHandler, 
 	        @Assisted EventList<DownloadItem> downloadItems, RemoteHostWidgetFactory remoteHostWidgetFactory) {
         
         GuiUtils.assignResources(this);
                 
-        initialize(downloadItems, actionHandler);
+        initialize(downloadItems, actionHandler, buttonEditor);
         
         TableColors colors = new TableColors();
         setHighlighters(
@@ -67,12 +67,12 @@ public class DownloadTable extends MouseableTable {
         
         setShowGrid(true, false);        
 
-        getColumnModel().getColumn(DownloadTableFormat.TITLE).setCellRenderer(new DownloadTitleRenderer(iconManager));
-        getColumnModel().getColumn(DownloadTableFormat.PROGRESS).setCellRenderer(new DownloadProgressRenderer(progressBarDecorator));
+        getColumnModel().getColumn(DownloadTableFormat.TITLE).setCellRenderer(downloadTitleRenderer);
+        getColumnModel().getColumn(DownloadTableFormat.PROGRESS).setCellRenderer(downloadProgressRenderer);
         getColumnModel().getColumn(DownloadTableFormat.NUM_SOURCES).setCellRenderer(new FromTableCellRenderer(remoteHostWidgetFactory.create(RemoteWidgetType.TABLE)));
         getColumnModel().getColumn(DownloadTableFormat.NUM_SOURCES).setCellEditor(new FromTableCellRenderer(remoteHostWidgetFactory.create(RemoteWidgetType.TABLE)));
-        getColumnModel().getColumn(DownloadTableFormat.MESSAGE).setCellRenderer(new DownloadMessageRenderer());
-        getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellRenderer(new DownloadButtonRendererEditor());
+        getColumnModel().getColumn(DownloadTableFormat.MESSAGE).setCellRenderer(downloadMessageRenderer);
+        getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellRenderer(buttonRenderer);
         
         setRowHeight(rowHeight);        
     }
@@ -98,7 +98,8 @@ public class DownloadTable extends MouseableTable {
         
     }
 
-    private void initialize(EventList<DownloadItem> downloadItems, DownloadActionHandler actionHandler) {
+    private void initialize(EventList<DownloadItem> downloadItems, DownloadActionHandler actionHandler,
+            DownloadButtonRendererEditor buttonEditor) {
         model = new DownloadTableModel(downloadItems);
         setModel(model);
         
@@ -132,9 +133,8 @@ public class DownloadTable extends MouseableTable {
 
         setEnterKeyAction(enterAction);
 
-        DownloadButtonRendererEditor editor = new DownloadButtonRendererEditor();
-        editor.setActionHandler(actionHandler);
-        getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellEditor(editor);
+        buttonEditor.setActionHandler(actionHandler);
+        getColumnModel().getColumn(DownloadTableFormat.ACTION).setCellEditor(buttonEditor);
 
     }
     

@@ -17,7 +17,7 @@ public class SearchResultAdapterTest extends TestCase {
     protected void setUp() {
         result = new MockSearchResult();
         propertiableHeadings = new MockPropertiableHeadings();
-        adapter = new SearchResultAdapter(Arrays.asList(new SearchResult[] { result }), propertiableHeadings);
+        adapter = new SearchResultAdapter(Arrays.asList(new SearchResult[] { result }), null);
     }
 
     public void testHeadingAndSubHeadingCached() {

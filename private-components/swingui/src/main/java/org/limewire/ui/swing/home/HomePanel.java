@@ -26,13 +26,9 @@ import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /** The main home page.*/
-@Singleton
 public class HomePanel extends JXPanel {
-
-    public static final String NAME = "Home";
     
     private boolean firstRequest = true;
     
@@ -69,7 +65,7 @@ public class HomePanel extends JXPanel {
                     SwingUtils.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            navigator.getNavItem(NavCategory.LIMEWIRE, NAME).select();
+                            navigator.getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
                             load(targetedUrl.getUri());
                         }
                     });

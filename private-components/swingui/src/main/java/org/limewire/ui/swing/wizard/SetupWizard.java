@@ -9,20 +9,21 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class SetupWizard {
     
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     private Wizard wizard;
     
     @Inject
-    public SetupWizard(SetupComponentDecoratorFactory decoratorFactory, 
-            IconManager iconManager,
-            LibraryManager libraryManager){
+    public SetupWizard(Provider<SetupComponentDecoratorFactory> decoratorFactory, 
+            Provider<IconManager> iconManager,
+            Provider<LibraryManager> libraryManager){
         this.iconManager = iconManager;
         
         if (shouldShowWizard()) {
-            createWizard(decoratorFactory, libraryManager.getLibraryData());
+            createWizard(decoratorFactory.get(), libraryManager.get().getLibraryData());
         }
     }
     

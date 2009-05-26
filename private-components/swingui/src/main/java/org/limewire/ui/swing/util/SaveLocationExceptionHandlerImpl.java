@@ -26,13 +26,11 @@ import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * A universal handler for SaveLocationException messages generated while
  * performing downloads.
  */
-@Singleton
 public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHandler {
     private static final Log LOG = LogFactory.getLog(SaveLocationExceptionHandlerImpl.class);
 

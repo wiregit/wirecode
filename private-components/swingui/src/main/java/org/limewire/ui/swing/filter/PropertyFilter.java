@@ -39,6 +39,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.Objects;
 
+import com.google.inject.Provider;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.FunctionList;
@@ -58,7 +60,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
     private final FilterType filterType;
     private final FilePropertyKey propertyKey;
-    private final IconManager iconManager;
+    private final Provider<IconManager> iconManager;
     
     private final JPanel panel = new JPanel();
     private final JLabel propertyLabel = new JLabel();
@@ -77,7 +79,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
      */
     public PropertyFilter(EventList<E> resultsList,
             FilterType filterType, FilePropertyKey propertyKey, 
-            IconManager iconManager) {
+            Provider<IconManager> iconManager) {
         
         if ((filterType == FilterType.PROPERTY) && (propertyKey == null)) {
             throw new IllegalArgumentException("Property filter cannot use null key");
@@ -619,7 +621,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
             case PROPERTY:
                 return item.getProperty(propertyKey);
             case FILE_TYPE:
-                return iconManager.getMIMEDescription(item.getFileExtension());
+                return iconManager.get().getMIMEDescription(item.getFileExtension());
             default:
                 return null;
             }

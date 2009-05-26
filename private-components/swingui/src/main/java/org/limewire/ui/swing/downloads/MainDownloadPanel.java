@@ -18,7 +18,6 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
-import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
@@ -34,6 +33,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -46,8 +46,8 @@ public class MainDownloadPanel extends JPanel {
     private DownloadMediator downloadMediator;
     
     private boolean isInitialized = false;
-    private final DownloadTableFactory downloadTableFactory;
-    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    private final Provider<DownloadTableFactory> downloadTableFactory;
+    private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
     private final DownloadListManager downloadListManager;
     
     @Resource private int preferredHeight;
@@ -59,12 +59,11 @@ public class MainDownloadPanel extends JPanel {
 	 * Create the panel
 	 */
 	@Inject
-	public MainDownloadPanel(DownloadTableFactory downloadTableFactory, 
+	public MainDownloadPanel(Provider<DownloadTableFactory> downloadTableFactory, 
 	        DownloadMediator downloadMediator,
-	        DockIconFactory dockIconFactory,
 	        TrayNotifier notifier, 
 	        DownloadListManager downloadListManager,
-	        SaveLocationExceptionHandler saveLocationExceptionHandler) {
+	        Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
 	    this.downloadMediator = downloadMediator;
 	    this.downloadTableFactory = downloadTableFactory;
 	    this.downloadListManager = downloadListManager;
@@ -95,7 +94,7 @@ public class MainDownloadPanel extends JPanel {
         isInitialized = true;
         setLayout(new BorderLayout());
 
-        table = downloadTableFactory.create(downloadMediator.getDownloadList());
+        table = downloadTableFactory.get().create(downloadMediator.getDownloadList());
         table.setTableHeader(null);
         JScrollPane pane = new JScrollPane(table);
         pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));

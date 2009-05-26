@@ -42,13 +42,12 @@ public class ChatPanel extends JXPanel implements Displayable {
     private final ChatFriendListPane friendsPanel;
     private final Map<String, ConversationPane> chats;
     private final ChatTopPanel chatTopPanel;
-    private final ChatModel chatModel;
     
     @Resource private Color border;
     
     @Inject
-    public ChatPanel(ConversationPaneFactory conversationFactory, IconLibrary icons, ChatFriendListPane friendsPanel,
-            ChatTopPanel chatTopPanel, ChatModel chatModel) {
+    public ChatPanel(ConversationPaneFactory conversationFactory, ChatFriendListPane friendsPanel,
+            ChatTopPanel chatTopPanel) {
         GuiUtils.assignResources(this);
 
         setLayout(new MigLayout("gap 0, insets 0 0 0 2, fill"));
@@ -58,7 +57,6 @@ public class ChatPanel extends JXPanel implements Displayable {
         this.conversationFactory = conversationFactory;
         this.friendsPanel = friendsPanel;
         this.chats = new HashMap<String, ConversationPane>();
-        this.chatModel = chatModel;
 
         setPreferredSize(new Dimension(400, 240));
         add(chatTopPanel, "dock north");
@@ -131,7 +129,7 @@ public class ChatPanel extends JXPanel implements Displayable {
         LOG.debugf("ConversationSelectedEvent with friend: {0}", chatFriend.getName());
         ConversationPane chatPane = chats.get(chatFriend.getID());
         if (chatPane == null) {
-            chatPane = conversationFactory.create(event.getWriter(), chatFriend, chatModel.getLoggedInId());
+            chatPane = conversationFactory.create(event.getWriter(), chatFriend, friendsPanel.getLoggedInId());
             chats.put(chatFriend.getID(), chatPane);
         }
         

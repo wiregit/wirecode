@@ -11,8 +11,11 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Inject;
+
 public class DownloadMessageRenderer extends DefaultTableCellRenderer {
     
+    @Inject
     public DownloadMessageRenderer(){
         new DownloadRendererProperties().decorateComponent(this);
     }

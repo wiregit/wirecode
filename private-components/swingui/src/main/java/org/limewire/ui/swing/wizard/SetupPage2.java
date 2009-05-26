@@ -34,6 +34,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Provider;
+
 public class SetupPage2 extends WizardPage {
 
     /**
@@ -70,11 +72,11 @@ public class SetupPage2 extends WizardPage {
 
     private final ExcludedFolderCollectionManager excludedFolders = new ExcludedFolderCollectionManagerImpl();
         
-    public SetupPage2(SetupComponentDecorator decorator, IconManager iconManager, LibraryData libraryData) {
+    public SetupPage2(SetupComponentDecorator decorator, Provider<IconManager> iconManager, LibraryData libraryData) {
         this(decorator, iconManager, libraryData, false);
     }
     
-    public SetupPage2(SetupComponentDecorator decorator, IconManager iconManager, LibraryData libraryData,
+    public SetupPage2(SetupComponentDecorator decorator, Provider<IconManager> iconManager, LibraryData libraryData,
             boolean isUpgrade) {
         
         this.libraryData = libraryData;

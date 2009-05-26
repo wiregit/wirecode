@@ -11,9 +11,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
-@Singleton
 class SharedFileCountPanel extends JXLabel {
         
     @Inject

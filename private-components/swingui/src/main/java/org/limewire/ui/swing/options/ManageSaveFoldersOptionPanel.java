@@ -27,6 +27,7 @@ import org.limewire.util.MediaType;
 import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -74,7 +75,7 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
      */
     @Inject
     public ManageSaveFoldersOptionPanel(CategoryIconManager categoryIconManager,
-            @Assisted Action okAction, @Assisted CancelDialogAction cancelAction, IconManager iconManager) {
+            @Assisted Action okAction, @Assisted CancelDialogAction cancelAction, Provider<IconManager> iconManager) {
 
         GuiUtils.assignResources(this);
 

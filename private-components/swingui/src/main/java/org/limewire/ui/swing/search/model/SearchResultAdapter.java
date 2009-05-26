@@ -27,6 +27,8 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Provider;
+
 /**
  * An implementation of VisualSearchResult for displaying actual search 
  * results. 
@@ -42,7 +44,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
 
     private final Set<RemoteHost> remoteHosts;
     
-    private final PropertiableHeadings propertiableHeadings;
+    private final Provider<PropertiableHeadings> propertiableHeadings;
 
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
 
@@ -70,7 +72,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
      * Constructs a SearchResultAdapter with the specified List of core results
      * and property values.
      */
-    public SearchResultAdapter(List<SearchResult> sourceValue, PropertiableHeadings propertiableHeadings) {
+    public SearchResultAdapter(List<SearchResult> sourceValue, Provider<PropertiableHeadings> propertiableHeadings) {
         this.coreResults = sourceValue;
         this.propertiableHeadings = propertiableHeadings;
 
@@ -330,7 +332,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     @Override
     public String getHeading() {
         if (cachedHeading == null) {
-            cachedHeading =  sanitize(propertiableHeadings.getHeading(this));
+            cachedHeading =  sanitize(propertiableHeadings.get().getHeading(this));
         }
         return cachedHeading;
     }
@@ -355,7 +357,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     @Override
     public String getSubHeading() {
         if (cachedSubHeading == null) {
-            cachedSubHeading = sanitize(propertiableHeadings.getSubHeading(this));
+            cachedSubHeading = sanitize(propertiableHeadings.get().getSubHeading(this));
         }
         return cachedSubHeading;
     }

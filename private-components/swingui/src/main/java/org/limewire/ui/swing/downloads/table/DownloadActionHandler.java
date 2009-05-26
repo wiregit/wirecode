@@ -18,9 +18,8 @@ import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.Provider;
 
-@Singleton
 public class DownloadActionHandler {
     
     public final static String PAUSE_COMMAND = "pause";
@@ -43,15 +42,16 @@ public class DownloadActionHandler {
     
     private final LibraryNavigator libraryNavigator;
     private DownloadListManager downloadListManager;
-    private ShareWidget<File> shareWidget;
+    private ShareWidget<File> shareWidget = null;
     private LibraryManager libraryManager;
     private final FileInfoDialogFactory fileInfoFactory;
+    private final Provider<ShareWidgetFactory> shareFactory;
     
     @Inject
-    public DownloadActionHandler(ShareWidgetFactory shareFactory, DownloadListManager downloadListManager, 
+    public DownloadActionHandler(Provider<ShareWidgetFactory> shareFactory, DownloadListManager downloadListManager, 
             LibraryNavigator libraryNavigator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory){
         this.downloadListManager = downloadListManager;
-        this.shareWidget = shareFactory.createFileShareWidget();
+        this.shareFactory = shareFactory;
         this.libraryNavigator = libraryNavigator;
         this.libraryManager = libraryManager;
         this.fileInfoFactory = fileInfoFactory;
@@ -89,6 +89,8 @@ public class DownloadActionHandler {
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadListManager.remove(item);
         } else if (actionCommmand == SHARE_COMMAND){
+            if(shareWidget == null)
+                shareWidget = shareFactory.get().createFileShareWidget();
             shareWidget.setShareable(item.getDownloadingFile());
             shareWidget.show(null);
         } else if( actionCommmand == LIBRARY_COMMAND) {

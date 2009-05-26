@@ -39,6 +39,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
+import com.google.inject.Provider;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.CompositeMatcherEditor;
@@ -112,7 +114,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     public AdvancedFilterPanel(FilterableSource<E> filterableSource,
             TextFieldDecorator textFieldDecorator,
             FriendActions friendManager,
-            IconManager iconManager) {
+            Provider<IconManager> iconManager) {
         
         this.filterableSource = filterableSource;
         this.editorList = new BasicEventList<MatcherEditor<E>>();
