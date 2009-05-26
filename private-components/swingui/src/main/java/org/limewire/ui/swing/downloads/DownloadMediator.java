@@ -173,7 +173,8 @@ public class DownloadMediator {
             case LOCAL_QUEUED: return 8;
             case TRYING_AGAIN: return 9;
             case STALLED: return 10;
-            case ERROR: return 11;            
+            case ERROR: return 11;       
+            case CANCELLED: return 12;
             }
             
            throw new IllegalArgumentException("Unknown DownloadState: " + state);

@@ -492,7 +492,8 @@ public class FileInfoPanel extends JPanel {
             break;
         }
         panel.add(createLabel(I18n.tr("Hash:")), "split 2");
-        panel.add(createLabelField(propertiableFile.getUrn().toString()), "growx, wrap");
+        String urn = propertiableFile.getUrn() == null ? "" : propertiableFile.getUrn().toString();
+        panel.add(createLabelField(urn), "growx, wrap");
     }
     
     /**
