@@ -271,7 +271,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         for (int i = 0; i < packageDepth + 1; i++) {
             f = f.getParentFile();
         }
-        //      build/          tests/          
+        //      build/             component/          
         return f.getParentFile().getParentFile();
     }
 }       

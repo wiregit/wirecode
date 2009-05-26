@@ -20,6 +20,7 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.inspection.InspectionHistogram;
+import org.limewire.inspection.InspectionRequirements;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -63,14 +64,14 @@ class LimitedSocketController extends AbstractSocketController {
      *  5. Maximum time 1 request has spent in the queue
      *
      */
-    @InspectionPoint("limited-socket-stats")
+    @InspectionPoint(value = "limited-socket-stats", requires = InspectionRequirements.OS_WINDOWS)
     private final LimitedSocketInspectable inspectable = new LimitedSocketInspectable();
 
     /**
      * A histogram representing the number of requests in the waiting queue upon connection attempt
      * (inspection gathered at beginning of call to {@link #connectPlain})
      */
-    @InspectionPoint("limited-socket-req")
+    @InspectionPoint(value = "limited-socket-req", requires = InspectionRequirements.OS_WINDOWS)
     private final InspectionHistogram<Integer> requestsInQueue = new InspectionHistogram<Integer>();
 
     /**
