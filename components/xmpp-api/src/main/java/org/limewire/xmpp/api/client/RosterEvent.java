@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.limewire.listener.DefaultDataTypeEvent;
 
-public class RosterEvent extends DefaultDataTxmppypeEvent<Collection<XMPPFriend>, RosterEvent.Type> {
+public class RosterEvent extends DefaultDataTypeEvent<Collection<XMPPFriend>, RosterEvent.Type> {
 
     public static enum Type {
         FRIENDS_ADDED,
