@@ -64,8 +64,11 @@ public class MainPanel extends JPanel {
             public void itemRemoved(NavCategory category, NavItem navItem) {
                 LOG.debugf("Removed item {0}", navItem);
                 JComponent component = loadedComponents.get(asString(navItem));
-                if(component != null)
+                System.out.println(component);
+                if(component != null){
                     remove(component);
+                    loadedComponents.remove(asString(navItem));
+                }
             }
             @Override
             public void itemSelected(NavCategory category, NavItem navItem,
