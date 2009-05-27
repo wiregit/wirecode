@@ -27,17 +27,17 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 /**
  * sends disco info messages (http://jabber.org/protocol/disco#info) to newly available
- * presences and then calls the appropriate FeatureInitializer for each of the 
+ * presences and then calls the appropriate FeatureInitializer for each of the
  * features that come back in the response.
  */
 public class DiscoInfoListener implements PacketListener, FeatureRegistry {
-    
+
     private static final Log LOG = LogFactory.getLog(DiscoInfoListener.class);
-    
+
     private final Map<URI, FeatureInitializer> featureInitializerMap;
     private final XMPPConnection connection;
     private final org.jivesoftware.smack.XMPPConnection smackConnection;
-    
+
     private final XMPPConnectionListener connectionListener;
     private ListenerSupport<XMPPConnectionEvent> connectionSupport;
     private ListenerSupport<FriendPresenceEvent> friendPresenceSupport;
@@ -85,8 +85,8 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
         FriendPresence friendPresence = null;
 
         if ((discoFromField != null) &&
-            isForThisConnection(discoFromField) ||
-            ((friendPresence = matchValidPresence(discoFromField)) != null)) {
+                isForThisConnection(discoFromField) ||
+                ((friendPresence = matchValidPresence(discoFromField)) != null)) {
 
             String featureInitializer = friendPresence != null ? friendPresence.getPresenceId() : discoFromField;
             for (URI uri : featureInitializerMap.keySet()) {
@@ -108,7 +108,6 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
         for (URI uri : featureInitializerMap.keySet()) {
             featureInitializerMap.get(uri).cleanup();
         }
-        featureInitializerMap.clear();
         smackConnection.removePacketListener(this);
     }
 
@@ -116,7 +115,7 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
      * Asynchronously discovers features of an xmpp entity.  Does not wait for reply packets.
      *
      * @param entityName name of entity (can be anything, such as a
-     * presence id, an xmpp server name, etc)
+     *                   presence id, an xmpp server name, etc)
      */
     private void discoverFeatures(String entityName) {
         try {
@@ -139,9 +138,9 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
     /**
      * @param from address (e.g. loginName@serviceName.com/resourceInfo)
      * @return the intended presence of the announced feature based on
-     * what is in the disco info packet.
-     *
-     * Returns NULL if there is no presence for the announced feature
+     *         what is in the disco info packet.
+     *         <p/>
+     *         Returns NULL if there is no presence for the announced feature
      */
     private FriendPresence matchValidPresence(String from) {
 
@@ -163,7 +162,7 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
 
     // listen for new presences in order to discover presence features
     private class FriendPresenceListener implements EventListener<FriendPresenceEvent> {
-        @BlockingEvent(queueName="presence feature discovery")
+        @BlockingEvent(queueName = "presence feature discovery")
         @Override
         public void handleEvent(final FriendPresenceEvent event) {
             if (event.getType() == FriendPresenceEvent.Type.ADDED) {
@@ -191,5 +190,5 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
                             || ((DiscoverInfo) packet).getType() == IQ.Type.RESULT);
         }
     }
-    
+
 }
