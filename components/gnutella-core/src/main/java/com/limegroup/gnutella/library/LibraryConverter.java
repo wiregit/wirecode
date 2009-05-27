@@ -45,7 +45,7 @@ class LibraryConverter {
         for(File file : oldData.SPECIAL_FILES_TO_SHARE) {
             file = FileUtils.canonicalize(file);            
             newData.addManagedFile(file, true);
-            newData.setFileInCollection(file, LibraryFileData.GNUTELLA_COLLECTION_ID, true);
+            newData.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
         }
         
         for(File file : oldData.FILES_NOT_TO_SHARE) {
@@ -124,7 +124,7 @@ class LibraryConverter {
         if(fileList != null) {
             for (File file : fileList) {
                 file = FileUtils.canonicalize(file);
-                data.setFileInCollection(file, LibraryFileData.GNUTELLA_COLLECTION_ID, true);
+                data.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
             }
         }
 

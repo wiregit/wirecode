@@ -30,11 +30,11 @@ import org.limewire.util.BaseTestCase;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileCollectionManager;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.FileViewManager;
-import com.limegroup.gnutella.library.GnutellaFileCollection;
 import com.limegroup.gnutella.library.SharedFileCollection;
 
 public class ShareListManagerImplTest extends BaseTestCase {
@@ -52,7 +52,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
 
         final FileCollectionManager fileCollectionManager = context.mock(FileCollectionManager.class);
         final FileViewManager fileViewManager = context.mock(FileViewManager.class);
-        final GnutellaFileCollection gnutellaFileCollection = context.mock(GnutellaFileCollection.class);
+        final FileCollection gnutellaFileCollection = context.mock(FileCollection.class);
         final CoreLocalFileItemFactory coreLocalFileItemFactory = context
                 .mock(CoreLocalFileItemFactory.class);
         final EventBroadcaster<FriendShareListEvent> friendShareListEventBroadcaster = context
@@ -119,7 +119,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
 
         final FileCollectionManager fileCollectionManager = context.mock(FileCollectionManager.class);
         final FileViewManager fileViewManager = context.mock(FileViewManager.class);
-        final GnutellaFileCollection gnutellaFileCollection = context.mock(GnutellaFileCollection.class);
+        final FileCollection gnutellaFileCollection = context.mock(FileCollection.class);
         final CoreLocalFileItemFactory coreLocalFileItemFactory = context
                 .mock(CoreLocalFileItemFactory.class);
         final EventBroadcaster<FriendShareListEvent> friendShareListEventBroadcaster = context
@@ -196,7 +196,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
 
         final FileCollectionManager fileCollectionManager = context.mock(FileCollectionManager.class);
         final FileViewManager fileViewManager = context.mock(FileViewManager.class);
-        final GnutellaFileCollection gnutellaFileCollection = context.mock(GnutellaFileCollection.class);
+        final FileCollection gnutellaFileCollection = context.mock(FileCollection.class);
         final CoreLocalFileItemFactory coreLocalFileItemFactory = context
                 .mock(CoreLocalFileItemFactory.class);
         final EventBroadcaster<FriendShareListEvent> friendShareListEventBroadcaster = context
@@ -277,7 +277,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
 
         final FileCollectionManager fileCollectionManager = context.mock(FileCollectionManager.class);
         final FileViewManager fileViewManager = context.mock(FileViewManager.class);
-        final GnutellaFileCollection gnutellaFileCollection = context.mock(GnutellaFileCollection.class);
+        final FileCollection gnutellaFileCollection = context.mock(FileCollection.class);
         final CoreLocalFileItemFactory coreLocalFileItemFactory = context
                 .mock(CoreLocalFileItemFactory.class);
         final EventBroadcaster<FriendShareListEvent> friendShareListEventBroadcaster = context

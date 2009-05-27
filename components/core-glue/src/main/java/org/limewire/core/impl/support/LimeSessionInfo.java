@@ -20,7 +20,8 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.library.CreationTimeCache;
-import com.limegroup.gnutella.library.GnutellaFileView;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
@@ -44,7 +45,7 @@ class LimeSessionInfo implements SessionInfo {
     private final ConnectionCheckerManager connectionCheckerManager;
     private final NIODispatcher nioDispatcher;
     private final Library library;
-    private final GnutellaFileView gnutellaFileView;
+    private final FileView gnutellaFileView;
     private final SimppManager simppManager;
     private final UploadSlotManager uploadSlotManager;
     private final ConnectionServices connectionServices;
@@ -62,7 +63,7 @@ class LimeSessionInfo implements SessionInfo {
                            Library library, SimppManager simppManager,
                            UploadSlotManager uploadSlotManager, ConnectionServices connectionServices,
                            LifecycleManager lifecycleManager, RemoteLibraryManager remoteLibraryManager,
-                           GnutellaFileView gnutellaFileView) {
+                           @GnutellaFiles FileView gnutellaFileView) {
         this.dispatcher = dispatcher;
         this.downloadManager = downloadManager;
         this.statistics = statistics;

@@ -16,11 +16,11 @@ public class LibraryStubModule extends AbstractModule {
         return stub.getLibrary();
     }
     
-    @Provides GnutellaFileCollection gfc(FileManagerStub stub) {
+    @Provides @GnutellaFiles FileCollection gfc(FileManagerStub stub) {
         return stub.getGnutellaCollection();
     }
     
-    @Provides GnutellaFileView gfv(FileManagerStub stub) {
+    @Provides @GnutellaFiles FileView gfv(FileManagerStub stub) {
         return stub.getGnutellaCollection();
     }
     
@@ -28,7 +28,7 @@ public class LibraryStubModule extends AbstractModule {
         return stub.getIncompleteFileCollection();
     }
     
-    @Provides @IncompleteView FileView ifv(FileManagerStub stub) {
+    @Provides @IncompleteFiles FileView ifv(FileManagerStub stub) {
         return stub.getIncompleteFileCollection();
     }
 

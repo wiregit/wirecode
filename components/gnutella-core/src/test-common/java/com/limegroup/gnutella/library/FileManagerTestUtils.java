@@ -65,12 +65,6 @@ public class FileManagerTestUtils {
         }
     }
     
-    public static void assertAddsForSession(GnutellaFileCollection fileList, File... files) throws Exception {
-        for (File file : files) {
-            assertNotNull(fileList.addForSession(file).get(1, TimeUnit.SECONDS));
-        }
-    }
-    
     public static void assertFileRenames(Library fileList, File old, File newFile) throws Exception {
         assertNotNull(fileList.fileRenamed(old, newFile).get(1, TimeUnit.SECONDS));
     }

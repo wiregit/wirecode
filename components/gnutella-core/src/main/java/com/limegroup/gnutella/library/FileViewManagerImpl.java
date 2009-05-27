@@ -16,6 +16,7 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.Comparators;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.IntSet.IntSetIterator;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -46,7 +47,6 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 class FileViewManagerImpl implements FileViewManager {
     
     private final LibraryImpl library;
-    private final GnutellaFileCollectionImpl gnutellaView;
     private final IncompleteFileCollectionImpl incompleteView;
     
     /** Lock held to mutate any structure in this class or to mutate a MultiFileView. */
@@ -67,15 +67,16 @@ class FileViewManagerImpl implements FileViewManager {
         new SourcedEventMulticasterImpl<FileViewChangeEvent, FileView>();
 
     @Inject
-    public FileViewManagerImpl(LibraryImpl library, GnutellaFileCollectionImpl gnutellaCollection,
-            IncompleteFileCollectionImpl incompleteCollection) {
+    public FileViewManagerImpl(LibraryImpl library, IncompleteFileCollectionImpl incompleteCollection) {
         this.library = library;
-        this.gnutellaView = gnutellaCollection;
         this.incompleteView = incompleteCollection;
     }
     
     @Inject void register(ListenerSupport<FileViewChangeEvent> viewListeners,
-                          ListenerSupport<SharedFileCollectionChangeEvent> collectionListeners) {
+                          ListenerSupport<SharedFileCollectionChangeEvent> collectionListeners,
+                          FileCollectionManager collectionManager) {
+        collectionAdded(collectionManager.getCollectionById(LibraryFileData.DEFAULT_SHARED_COLLECTION_ID));
+        
         viewListeners.addListener(new EventListener<FileViewChangeEvent>() {
             @Override
             @BlockingEvent(queueName="FileViewManager")
@@ -124,8 +125,8 @@ class FileViewManagerImpl implements FileViewManager {
     }
     
     @Override
-    public GnutellaFileView getGnutellaFileView() {
-        return gnutellaView;
+    public FileView getGnutellaFileView() {
+        return getFileViewForId(Friend.P2P_FRIEND_ID);
     }
     
     /**
@@ -409,9 +410,16 @@ class FileViewManagerImpl implements FileViewManager {
         
         /** All views this is backed off of. */
         private final List<FileView> backingViews = new ArrayList<FileView>();
-
+        
+        private volatile long totalFileSize = 0;
+        
         MultiFileView() {
             super(FileViewManagerImpl.this.library);
+        }
+        
+        @Override
+        public long getNumBytes() {
+            return totalFileSize;
         }
 
         @Override
@@ -485,7 +493,9 @@ class FileViewManagerImpl implements FileViewManager {
                 while(iter.hasNext()) {
                     int i = iter.next();
                     if(getInternalIndexes().add(i)) {
-                        added.add(library.getFileDescForIndex(i));
+                        FileDesc fd = library.getFileDescForIndex(i);
+                        added.add(fd);
+                        totalFileSize += fd.getFileSize();
                     }
                 }
             } finally {
@@ -517,6 +527,7 @@ class FileViewManagerImpl implements FileViewManager {
                 }
             }
             getInternalIndexes().remove(fileDesc.getIndex());
+            totalFileSize -= fileDesc.getFileSize();
             return true;
         }
 
@@ -528,7 +539,11 @@ class FileViewManagerImpl implements FileViewManager {
          *         false if the FileDesc already existed in the view.
          */
         boolean fileAddedFromView(FileDesc fileDesc, FileView fileView) {
-            return getInternalIndexes().add(fileDesc.getIndex());
+            boolean added = getInternalIndexes().add(fileDesc.getIndex());
+            if(added) {
+                totalFileSize += fileDesc.getFileSize();
+            }
+            return added;
         }
         
         /**
@@ -563,6 +578,7 @@ class FileViewManagerImpl implements FileViewManager {
                     FileDesc fd = library.getFileDescForIndex(iter.next());
                     if(fd != null) {
                         removedFds.add(fd);
+                        totalFileSize -= fd.getFileSize();
                     }                
                 }
             }

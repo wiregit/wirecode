@@ -81,12 +81,12 @@ public class CreationTimeCache {
     private final ExecutorService deserializeQueue = ExecutorsHelper.newProcessingQueue("CreationTimeCacheDeserializer");
     
     private final Library library;
-    private final GnutellaFileView gnutellaFileView;
+    private final FileView gnutellaFileView;
     
     private final Future<Maps> deserializer;
 
     @Inject
-    CreationTimeCache(Library library, GnutellaFileView gnutellaFileView) {
+    CreationTimeCache(Library library, @GnutellaFiles FileView gnutellaFileView) {
         this.gnutellaFileView = gnutellaFileView;
         this.library = library;
         this.deserializer = deserializeQueue.submit(new Callable<Maps>() {

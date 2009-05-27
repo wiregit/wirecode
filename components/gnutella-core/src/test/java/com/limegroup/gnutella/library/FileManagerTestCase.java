@@ -251,14 +251,6 @@ public class FileManagerTestCase extends LimeTestCase {
         return fel.evt;
     }
 
-    protected FileViewChangeEvent addFileForSession(File f1) throws Exception {
-        Listener fel = new Listener();
-        fileViewManager.getGnutellaFileView().addListener(fel);
-        fman.getGnutellaCollection().addForSession(f1);
-        fel.await(5000);
-        return fel.evt;
-    }
-
     protected FileViewChangeEvent fileChanged(File f1) throws Exception {
         Listener fel = new Listener();
         fileViewManager.getGnutellaFileView().addListener(fel);

@@ -11,6 +11,20 @@ import com.limegroup.gnutella.URN;
 
 /** A read-only view of a collection of files. */
 public interface FileView extends Iterable<FileDesc>, ListenerSupport<FileViewChangeEvent> {
+    
+    /** Returns the size of all files within this view, in <b>bytes</b>. */
+    long getNumBytes();
+    
+    /**
+     * Returns a list of all the file descriptors in this list that exist in the
+     * given directory, in any order.
+     * 
+     * This method is not recursive; files in any of the directory's children
+     * are not returned.
+     * 
+     * This operation is <b>not</b> efficient, and should not be done often.
+     */
+    List<FileDesc> getFilesInDirectory(File directory);
    
     /**
      * Returns the <tt>FileDesc</tt> for the specified URN. This only returns

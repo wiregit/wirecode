@@ -23,6 +23,15 @@ public class AbstractFileCollectionStub implements FileCollection {
     private final EventListenerList<FileViewChangeEvent> listeners
         = new EventListenerList<FileViewChangeEvent>();
     
+    @Override
+    public long getNumBytes() {
+        long size = 0;
+        for(FileDesc fd : fileDescList) {
+            size += fd.getFileSize();
+        }
+        return size;
+    }
+    
     public boolean add(FileDesc fileDesc) {
         boolean added = fileDescList.add(fileDesc);
         if(added) {
@@ -118,7 +127,7 @@ public class AbstractFileCollectionStub implements FileCollection {
         return matchingFDs;
     }
     
-    protected List<FileDesc> getFilesInDirectory(File directory) {
+    public List<FileDesc> getFilesInDirectory(File directory) {
         List<FileDesc> matchingFDs = new ArrayList<FileDesc>();
         for(FileDesc fd : fileDescList) {
             if(fd.getFile().getParentFile().equals(directory)) {

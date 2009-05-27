@@ -4,14 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import org.limewire.core.api.Category;
 
 import com.limegroup.gnutella.URN;
 
 
-public class GnutellaFileCollectionStub extends AbstractFileCollectionStub implements GnutellaFileCollection, GnutellaFileView {
+public class GnutellaFileCollectionStub extends AbstractFileCollectionStub implements SharedFileCollection {
     
     public final static URN DEFAULT_URN;
     static {
@@ -44,11 +43,6 @@ public class GnutellaFileCollectionStub extends AbstractFileCollectionStub imple
     }
     
     @Override
-    public Future<FileDesc> addForSession(File file) {
-        throw new UnsupportedOperationException();
-    }
-    
-    @Override
     public long getNumBytes() {
         long bytes = 0;
         for(FileDesc fd : fileDescList) {
@@ -60,16 +54,6 @@ public class GnutellaFileCollectionStub extends AbstractFileCollectionStub imple
     @Override
     public void clearCategory(Category category) {
         
-    }
-    
-    @Override
-    public boolean hasApplicationSharedFiles() {
-        return false;
-    }
-    
-    @Override
-    public boolean isFileApplicationShare(String filename) {
-        return false;
     }
     
     @Override
@@ -102,11 +86,6 @@ public class GnutellaFileCollectionStub extends AbstractFileCollectionStub imple
 
     @Override
     public void setAddNewVideoAlways(boolean value) {
-    }
-
-    @Override
-    public void removeDocuments() {
-        
     }
 
     @Override

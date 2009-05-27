@@ -6,19 +6,20 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.GnutellaFiles;
 
 @Singleton
 public class LocalPongInfoImpl implements LocalPongInfo {
     
     private final Provider<ConnectionManager> connectionManager;
-    private final Provider<FileViewManager> fileManager;
+    private final FileView gnutellaFileView;
 
     @Inject
     public LocalPongInfoImpl(Provider<ConnectionManager> connectionManager,
-            Provider<FileViewManager> fileManager) {
+            @GnutellaFiles FileView gnutellaFileView) {
         this.connectionManager = connectionManager;
-        this.fileManager = fileManager;
+        this.gnutellaFileView = gnutellaFileView;
     }
 
 
@@ -37,11 +38,11 @@ public class LocalPongInfoImpl implements LocalPongInfo {
     }
 
     public long getNumSharedFiles() {
-        return fileManager.get().getGnutellaFileView().size();
+        return gnutellaFileView.size();
     }
 
     public int getSharedFileSize() {
-        return ByteUtils.long2int(fileManager.get().getGnutellaFileView().getNumBytes());
+        return ByteUtils.long2int(gnutellaFileView.getNumBytes());
     }
 
     public boolean isSupernode() {

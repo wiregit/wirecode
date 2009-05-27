@@ -3,7 +3,6 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +38,9 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     
     /** A rw lock. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    
+    /** The total size of all contained files. */
+    private volatile long totalFileSize = 0;
     
     public AbstractFileCollection(LibraryImpl library,
             SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster) {
@@ -120,6 +122,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         rwLock.writeLock().lock();
         try {
             if(isFileAddable(fileDesc) && getInternalIndexes().add(fileDesc.getIndex())) {
+                totalFileSize += fileDesc.getFileSize();
                 return true;
             } else {
                 return false;
@@ -160,6 +163,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         rwLock.writeLock().lock();
         try {
             if(getInternalIndexes().remove(fileDesc.getIndex())) {
+                totalFileSize -= fileDesc.getFileSize();
                 return true;
             } else {
                 return false;
@@ -167,6 +171,11 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         } finally {
             rwLock.writeLock().unlock();
         }
+    }
+    
+    @Override
+    public long getNumBytes() {
+        return totalFileSize;
     }
     
     @Override
@@ -191,6 +200,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         try {
             needsClearing = getInternalIndexes().size() > 0;
             getInternalIndexes().clear();
+            totalFileSize = 0;
         } finally {
             rwLock.writeLock().unlock();
         }
@@ -199,36 +209,14 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
             fireClearEvent();
         }
     }
-    
-    // Exists here so all subclasses can have access if needed.
-    protected List<FileDesc> getFilesInDirectory(File directory) {
-        // Remove case, trailing separators, etc.
-        try {
-            directory = FileUtils.getCanonicalFile(Objects.nonNull(directory, "directory"));
-        } catch (IOException e) { // invalid directory ?
-            return Collections.emptyList();
-        }
-
-        List<FileDesc> list = new ArrayList<FileDesc>();
-        rwLock.readLock().lock();
-        try {
-            for(FileDesc fd : this) {
-                if(directory.equals(fd.getFile().getParentFile())) {
-                    list.add(fd);
-                }
-            }
-        } finally {
-            rwLock.readLock().unlock();
-        }
-        return list;
-    }
 
     @Override
     public Object inspect() {
         rwLock.readLock().lock();
         try {
             Map<String,Object> inspections = new HashMap<String,Object>();
-            inspections.put("num of files", Integer.valueOf(getInternalIndexes().size()));
+            inspections.put("num of files", Integer.valueOf(size()));
+            inspections.put("size of all files", Long.valueOf(totalFileSize));
             return inspections;
         } finally {
             rwLock.readLock().unlock();

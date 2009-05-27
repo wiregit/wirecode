@@ -1,11 +1,14 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.limewire.collection.IntSet;
+import org.limewire.util.FileUtils;
+import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.URN;
 
@@ -111,5 +114,28 @@ abstract class AbstractFileView implements FileView {
             getReadLock().unlock();
         }
     }
+
+    @Override
+    public List<FileDesc> getFilesInDirectory(File directory) {
+        // Remove case, trailing separators, etc.
+        try {
+            directory = FileUtils.getCanonicalFile(Objects.nonNull(directory, "directory"));
+        } catch (IOException e) { // invalid directory ?
+            return Collections.emptyList();
+        }
+
+        List<FileDesc> list = new ArrayList<FileDesc>();
+        getReadLock().lock();
+        try {
+            for(FileDesc fd : this) {
+                if(directory.equals(fd.getFile().getParentFile())) {
+                    list.add(fd);
+                }
+            }
+        } finally {
+            getReadLock().unlock();
+        }
+        return list;
+    }    
 
 }

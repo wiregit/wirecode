@@ -47,7 +47,8 @@ import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.library.GnutellaFileCollection;
+import com.limegroup.gnutella.library.FileCollection;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -70,7 +71,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     private final File incompleteTorrentFile;
 
-    private final GnutellaFileCollection gnutellaFileCollection;
+    private final FileCollection gnutellaFileCollection;
 
     /**
      * Something to shutdown if the user cancels the fetching
@@ -82,7 +83,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     @Inject
     public BTTorrentFileDownloaderImpl(DownloadManager downloadManager,
             SaveLocationManager saveLocationManager, HttpExecutor httpExecutor,
-            ActivityCallback activityCallback, GnutellaFileCollection gnutellaFileCollection) {
+            ActivityCallback activityCallback, @GnutellaFiles FileCollection gnutellaFileCollection) {
         super(saveLocationManager);
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.httpExecutor = Objects.nonNull(httpExecutor, "httpExecutor");

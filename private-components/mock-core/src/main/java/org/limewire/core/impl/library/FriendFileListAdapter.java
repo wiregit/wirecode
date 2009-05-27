@@ -2,9 +2,8 @@ package org.limewire.core.impl.library;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FriendFileList;
-import org.limewire.core.api.library.GnutellaFileList;
 
-public class FriendFileListAdapter extends FileListAdapter implements FriendFileList, GnutellaFileList {
+public class FriendFileListAdapter extends FileListAdapter implements FriendFileList {
 
    
     @Override
@@ -14,11 +13,6 @@ public class FriendFileListAdapter extends FileListAdapter implements FriendFile
     
     @Override
     public void setCategoryAutomaticallyAdded(Category category, boolean added) {
-    }
-
-    @Override
-    public void removeDocuments() {
-        
     }
     
     @Override

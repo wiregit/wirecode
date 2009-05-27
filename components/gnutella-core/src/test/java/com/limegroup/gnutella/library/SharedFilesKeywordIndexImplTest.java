@@ -22,7 +22,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     private SourcedEventMulticaster multicaster;
     private SharedFilesKeywordIndexImpl keywordIndex;
     private Mockery context;
-    private GnutellaFileView sharedFileList;
+    private FileView sharedFileList;
     private FileView incompleteFileList;
     private Library library;
 
@@ -36,7 +36,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         multicaster = context.mock(SourcedEventMulticaster.class);
         registry = context.mock(ServiceRegistry.class);
         library = context.mock(Library.class);
-        sharedFileList = context.mock(GnutellaFileView.class);
+        sharedFileList = context.mock(FileView.class);
         incompleteFileList = context.mock(FileView.class);
         keywordIndex = new SharedFilesKeywordIndexImpl(library, null, null, null, null, null, sharedFileList, incompleteFileList);
     }

@@ -24,7 +24,7 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.downloader.DiskController;
 import com.limegroup.gnutella.library.CreationTimeCache;
-import com.limegroup.gnutella.library.GnutellaFileView;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
@@ -394,7 +394,7 @@ public class LimeSessionInfoTest extends BaseTestCase {
         final Mockery context = new Mockery();
         
         final Library library = context.mock(Library.class);
-        final GnutellaFileView gnutella = context.mock(GnutellaFileView.class);
+        final FileView gnutella = context.mock(FileView.class);
         
         LimeSessionInfo sessionInfo = new LimeSessionInfo(null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, library, null, null, null, null, null, gnutella);

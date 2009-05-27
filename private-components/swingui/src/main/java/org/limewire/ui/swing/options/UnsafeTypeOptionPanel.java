@@ -11,6 +11,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.NotImplementedException;
 
 public class UnsafeTypeOptionPanel extends OptionPanel {
 
@@ -18,12 +19,12 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     private JCheckBox documentCheckBox;
     private JButton okButton;
     private final LibraryManager libraryManager;
-    private final ShareListManager shareListManager;
+//    private final ShareListManager shareListManager;
    
     public UnsafeTypeOptionPanel(Action okButtonAction, LibraryManager libraryManager,
             ShareListManager shareListManager) {
         this.libraryManager = libraryManager;
-        this.shareListManager = shareListManager;
+//        this.shareListManager = shareListManager;
 
         setLayout(new MigLayout("gapy 10"));
         
@@ -50,7 +51,8 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         }
         
         if (!documentCheckBox.isSelected()) {
-            shareListManager.getGnutellaShareList().removeDocuments();
+            throw new NotImplementedException();
+//            shareListManager.getGnutellaShareList().removeDocuments();
         }
         return false;
     }

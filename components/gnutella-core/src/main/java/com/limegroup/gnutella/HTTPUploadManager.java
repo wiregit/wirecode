@@ -40,8 +40,7 @@ import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.uploader.FileRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPUploadSession;
@@ -192,9 +191,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private final Provider<ActivityCallback> activityCallback;
 
-    private final Provider<FileManager> fileManager;
-    private final FileViewManager viewManager;
-
     private volatile boolean started;
     
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
@@ -209,27 +205,28 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     
     private final UrnValidator urnValidator;
     
+    private final Library library;
+    
     @Inject
     public HTTPUploadManager(UploadSlotManager slotManager,
             HttpRequestHandlerFactory httpRequestHandlerFactory,
             Provider<HTTPAcceptor> httpAcceptor,
-            Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
+            Provider<ActivityCallback> activityCallback,
             TcpBandwidthStatistics tcpBandwidthStatistics,
             Provider<GnutellaUploadFileViewProvider> gnutellaFileListProvider,
             Provider<GnutellaBrowseFileViewProvider> gnutellaBrowseFileListProvider,
             UrnValidator urnValidator,
-            FileViewManager fileViewManager) {
+            Library library) {
         this.gnutellaUploadFileListProvider = gnutellaFileListProvider;
         this.gnutellaBrowseFileListProvider = gnutellaBrowseFileListProvider;
         this.slotManager = Objects.nonNull(slotManager, "slotManager");
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.freeLoaderRequestHandler = httpRequestHandlerFactory.createFreeLoaderRequestHandler();
         this.httpAcceptor = Objects.nonNull(httpAcceptor, "httpAcceptor");
-        this.fileManager = Objects.nonNull(fileManager, "fileManager");
+        this.library = Objects.nonNull(library, "library");
         this.activityCallback = Objects.nonNull(activityCallback, "activityCallback");
         this.tcpBandwidthStatistics = Objects.nonNull(tcpBandwidthStatistics, "tcpBandwidthStatistics");
         this.urnValidator = urnValidator;
-        this.viewManager = fileViewManager;
     }
     
     public String getServiceName() {
@@ -409,9 +406,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             return false;
         }
         
-        if (viewManager.getGnutellaFileView().hasApplicationSharedFiles())
-            return slotManager.hasHTTPSlotForMeta(uploadsInProgress()
-                    + getNumQueuedUploads());
         return isServiceable();
     }
 
@@ -442,7 +436,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public boolean releaseLock(File file) {
         assert started;
         
-        FileDesc fd = fileManager.get().getLibrary().getFileDesc(file);
+        FileDesc fd = library.getFileDesc(file);
         if (fd != null)
             return killUploadsForFileDesc(fd);
         else

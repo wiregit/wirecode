@@ -235,6 +235,16 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     @Override
+    public List<FileDesc> getFilesInDirectory(File directory) {
+        throw new UnsupportedOperationException("unsupported");
+    }
+    
+    @Override
+    public long getNumBytes() {
+        throw new UnsupportedOperationException("unsupported");
+    }
+    
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.addPropertyChangeListener(listener);
     }

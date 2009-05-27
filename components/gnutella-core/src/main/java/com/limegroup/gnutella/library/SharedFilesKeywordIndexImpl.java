@@ -78,7 +78,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private final Provider<ResponseFactory> responseFactory;
 
     private final Library library;
-    private final GnutellaFileView gnutellaFileView;
+    private final FileView gnutellaFileView;
     private final FileView incompleteFileView;
 
     private final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
@@ -93,8 +93,8 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             Provider<ResponseFactory> responseFactory,
             Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
             ActivityCallback activityCallback, LimeXMLSchemaRepository schemaRepository,
-            GnutellaFileView gnutellaFileView,
-            @IncompleteView FileView incompleteFileView) {
+            @GnutellaFiles FileView gnutellaFileView,
+            @IncompleteFiles FileView incompleteFileView) {
         this.library = library;
         this.creationTimeCache = creationTimeCache;
         this.responseFactory = responseFactory;

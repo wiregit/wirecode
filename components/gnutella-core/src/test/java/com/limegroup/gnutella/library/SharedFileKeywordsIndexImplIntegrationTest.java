@@ -21,7 +21,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
 
     private QueryRequestFactory queryRequestFactory;
     private Library managedList;
-    private GnutellaFileCollection fileList;
+    private FileCollection fileList;
     private SharedFilesKeywordIndex keywordIndex;
     private Response[] responses;
     private Injector injector;

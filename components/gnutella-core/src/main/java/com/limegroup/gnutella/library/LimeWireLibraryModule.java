@@ -28,10 +28,8 @@ public class LimeWireLibraryModule extends AbstractModule {
         
         bind(FileManager.class).to(FileManagerImpl.class);
         bind(Library.class).to(LibraryImpl.class);
-        bind(GnutellaFileCollection.class).to(GnutellaFileCollectionImpl.class);
-        bind(GnutellaFileView.class).to(GnutellaFileCollectionImpl.class);
         bind(IncompleteFileCollection.class).to(IncompleteFileCollectionImpl.class);
-        bind(FileView.class).annotatedWith(IncompleteView.class).to(IncompleteFileCollection.class);
+        bind(FileView.class).annotatedWith(IncompleteFiles.class).to(IncompleteFileCollection.class);
         bind(SharedFileCollectionImplFactory.class).toProvider(
                 FactoryProvider.newFactory(SharedFileCollectionImplFactory.class, SharedFileCollectionImpl.class));
         
@@ -65,6 +63,14 @@ public class LimeWireLibraryModule extends AbstractModule {
     
     @Provides LibraryFileData libraryFileData(LibraryImpl library) {
         return library.getLibraryData();
+    }
+    
+    @Provides @GnutellaFiles FileCollection gnetFileCollection(FileCollectionManager manager) {
+        return manager.getGnutellaCollection();
+    }
+    
+    @Provides @GnutellaFiles FileView gnetFileView(FileViewManager manager) {
+        return manager.getGnutellaFileView();
     }
     
     

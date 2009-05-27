@@ -81,7 +81,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -1408,14 +1408,14 @@ public class AltLocUploadTest extends LimeTestCase {
         TestUploadManager(UploadSlotManager slotManager,
                 HttpRequestHandlerFactory httpRequestHandlerFactory,
                 Provider<HTTPAcceptor> httpAcceptor,
-                Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
+                Provider<ActivityCallback> activityCallback,
                 TcpBandwidthStatistics tcpBandwidthStatistics,
                 Provider<GnutellaUploadFileViewProvider> gnutellaUploadFileListProvider,
                 Provider<GnutellaBrowseFileViewProvider> gnutellaBrowseFileListProvider,
-                UrnValidator urnValidator, FileViewManager fileViewManager) {
+                UrnValidator urnValidator, Library library) {
             super(slotManager, httpRequestHandlerFactory, httpAcceptor,
-                    fileManager, activityCallback, tcpBandwidthStatistics, gnutellaUploadFileListProvider,
-                    gnutellaBrowseFileListProvider, urnValidator, fileViewManager);
+                    activityCallback, tcpBandwidthStatistics, gnutellaUploadFileListProvider,
+                    gnutellaBrowseFileListProvider, urnValidator, library);
         }
         
         @Override

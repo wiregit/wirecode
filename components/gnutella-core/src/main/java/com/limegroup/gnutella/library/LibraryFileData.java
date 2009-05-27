@@ -79,9 +79,8 @@ class LibraryFileData extends AbstractSettingsGroup {
     private static final String COLLECTION_NAME_KEY = "COLLECTION_NAMES";
     private static final String COLLECTION_SHARE_DATA_KEY = "COLLECTION_SHARE_DATA";
     
-    static final Integer GNUTELLA_COLLECTION_ID = 0;
-    static final Integer ALL_FRIENDS_COLLECTION_ID = 1;
-    private static final Integer MIN_COLLECTION_ID = 2;
+    static final Integer DEFAULT_SHARED_COLLECTION_ID = 0;
+    private static final Integer MIN_COLLECTION_ID = 1;
     
     
     private final Version CURRENT_VERSION = Version.TWO;
@@ -318,7 +317,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                         collections = new ArrayList<Integer>(1);
                         fileData.put(file, collections);
                     }
-                    collections.add(GNUTELLA_COLLECTION_ID);
+                    collections.add(DEFAULT_SHARED_COLLECTION_ID);
                 }
             }
         }

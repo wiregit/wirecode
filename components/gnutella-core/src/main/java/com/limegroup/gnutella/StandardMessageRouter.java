@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -349,23 +348,9 @@ public class StandardMessageRouter extends MessageRouterImpl {
         if ( (responses == null) || ((responses.length < 1)) )
             return false;
 
-        // if we cannot service a regular query, only send back results for
-        // application-shared metafiles, if any.
-        if (!uploadManager.isServiceable()) {        	
-        	List<Response> filtered = new ArrayList<Response>(responses.length);
-        	for(Response r : responses) {
-        		if (r.isMetaFile() && 
-        				fileManager.getGnutellaFileView().isFileApplicationShare(r.getName()))
-        			filtered.add(r);
-        	}
-        	
-        	if (filtered.isEmpty()) {// nothing to send..
-        	    notServiced.countMessage(query);
-        		return false;
-        	}
-        	
-        	if (filtered.size() != responses.length)
-        		responses = filtered.toArray(new Response[filtered.size()]);
+        if (!uploadManager.isServiceable()) {
+    	    notServiced.countMessage(query);
+    		return false;
         }
         
         // Here we can do a couple of things - if the query wants

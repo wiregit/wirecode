@@ -72,7 +72,7 @@ public class FileManagerStub implements FileManager, FileViewManager {
     }
 
     @Override
-    public GnutellaFileView getGnutellaFileView() {
+    public FileView getGnutellaFileView() {
         return gnutellaStub;
     }
 

@@ -7,7 +7,6 @@ import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendShareListEvent;
-import org.limewire.core.api.library.GnutellaFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
@@ -21,9 +20,10 @@ import org.limewire.logging.LogFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileCollectionManager;
 import com.limegroup.gnutella.library.FileViewManager;
-import com.limegroup.gnutella.library.GnutellaFileCollection;
+import com.limegroup.gnutella.library.GnutellaFiles;
 
 @Singleton
 class ShareListManagerImpl implements ShareListManager {
@@ -35,7 +35,7 @@ class ShareListManagerImpl implements ShareListManager {
     
     private final CombinedShareList combinedShareList;
     
-    private final GnutellaFileListImpl gnutellaFileList;    
+    private final FriendFileList gnutellaFileList;    
     
     private final ConcurrentHashMap<String, FriendFileListImpl> friendLocalFileLists;
 
@@ -48,13 +48,13 @@ class ShareListManagerImpl implements ShareListManager {
             CoreLocalFileItemFactory coreLocalFileItemFactory,
             EventBroadcaster<FriendShareListEvent> friendShareListEventListener,
             LibraryManager libraryManager,
-            GnutellaFileCollection gnutellaFileCollection) {
+            @GnutellaFiles FileCollection gnutellaFileCollection) {
         this.collectionManager = collectionManager;
         this.viewManager = viewManager;
         this.coreLocalFileItemFactory = coreLocalFileItemFactory;
         this.friendShareListEventBroadcaster = friendShareListEventListener;
         this.combinedShareList = new CombinedShareList(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
-        this.gnutellaFileList = new GnutellaFileListImpl(coreLocalFileItemFactory, gnutellaFileCollection, combinedShareList);
+        this.gnutellaFileList = new SimpleFriendFileListImpl(coreLocalFileItemFactory, gnutellaFileCollection, viewManager.getGnutellaFileView(), combinedShareList);
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
     }
 
@@ -98,7 +98,7 @@ class ShareListManagerImpl implements ShareListManager {
     }
 
     @Override
-    public GnutellaFileList getGnutellaShareList() {
+    public FriendFileList getGnutellaShareList() {
         return gnutellaFileList;
     }
     
