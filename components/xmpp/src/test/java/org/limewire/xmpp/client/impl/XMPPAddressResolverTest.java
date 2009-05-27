@@ -52,9 +52,9 @@ public class XMPPAddressResolverTest extends BaseTestCase {
         context.checking(new Expectations() {{
             allowing(xmppService).getActiveConnection();
             will(returnValue(connection));
-            allowing(connection).getUser("me@you.com");
+            allowing(connection).getFriend("me@you.com");
             will(returnValue(user));
-            allowing(connection).getUser(with(any(String.class)));
+            allowing(connection).getFriend(with(any(String.class)));
             will(returnValue(null));
             allowing(user).getFriendPresences();
             will(returnValue(Collections.singletonMap("me@you.com/resource", friendPresence)));

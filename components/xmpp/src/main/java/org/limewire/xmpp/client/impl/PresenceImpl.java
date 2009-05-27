@@ -30,10 +30,10 @@ class PresenceImpl implements XMPPPresence {
     
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
-                 XMPPFriend user, EventBroadcaster<FeatureEvent> featureSupport) {
+                 XMPPFriend user, EventBroadcaster<FeatureEvent> featureBroadcaster) {
         this.user = user;
         this.features = new ConcurrentHashMap<URI, Feature>();
-        this.featureBroadcaster = featureSupport;
+        this.featureBroadcaster = featureBroadcaster;
         this.jid = presence.getFrom();
         update(presence);
     }
@@ -101,7 +101,7 @@ class PresenceImpl implements XMPPPresence {
     }
 
     @Override
-    public XMPPFriend getUser() {
+    public XMPPFriend getXMPPFriend() {
         return user;
     }
 

@@ -16,7 +16,7 @@ public interface ChatFriend {
     /**
      * @return User object used by this chat friend
      */
-    XMPPFriend getUser();
+    XMPPFriend getFriend();
 
     /**
      * @return the user id corresponding to this chat friend.  This is typically the id

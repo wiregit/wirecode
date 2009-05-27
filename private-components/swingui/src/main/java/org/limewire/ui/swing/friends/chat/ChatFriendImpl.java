@@ -28,13 +28,13 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
     private boolean hasUnviewedMessages;
 
     ChatFriendImpl(final XMPPPresence presence) {
-        this.user = presence.getUser();
+        this.user = presence.getXMPPFriend();
         this.status = presence.getStatus();
         this.mode = presence.getMode();
     }
 
     @Override
-    public XMPPFriend getUser() {
+    public XMPPFriend getFriend() {
         return user;
     }
     

@@ -125,7 +125,7 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
         if (ChatDocumentBuilder.LIBRARY_LINK.equals(linkDescription)) {
             ChatFriend libraryChatFriend = conversation.getChatFriend();
             LOG.debugf("Opening a view to {0}'s library", libraryChatFriend.getName());
-            libraryNavigator.selectFriendLibrary(libraryChatFriend.getUser());
+            libraryNavigator.selectFriendLibrary(libraryChatFriend.getFriend());
 
         } else if (ChatDocumentBuilder.MY_LIBRARY_LINK.equals(linkDescription)) {
             LOG.debugf("Opening a view to my library");

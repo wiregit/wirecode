@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.net.URI;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -54,13 +55,16 @@ import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.core.api.friend.client.FileMetaData;
-import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.feature.features.NoSave;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
+import org.limewire.core.api.friend.feature.features.NoSaveFeature;
+import org.limewire.core.api.friend.feature.features.NoSaveStatus;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
@@ -86,6 +90,7 @@ import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.XMPPFriend;
+import org.limewire.xmpp.api.client.XMPPPresence;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -93,7 +98,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.name.Named;
 
 /**
- *
+ * Class representing the chat window.
  */
 public class ConversationPane extends JPanel implements Displayable, Conversation {
     private static final int PADDING = 5;
@@ -116,8 +121,11 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final LibraryNavigator libraryNavigator;
     private HyperlinkButton downloadlink;
     private HyperlinkButton sharelink;
+    private HyperlinkButton nosaveLink;
+    private JXPanel toolbar;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
+    private NoSave noSaveState;
 
     private ListenerSupport<FriendEvent> friendSupport;
     private ListenerSupport<FeatureEvent> featureSupport;
@@ -132,7 +140,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
     private final JScrollPane conversationScroll;
     private final JPanel chatWrapper;
-    
+
     @Inject
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
                             ShareListManager libraryManager, Provider<IconManager> iconManager, LibraryNavigator libraryNavigator,
@@ -146,6 +154,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         this.shareListManager = libraryManager;
         this.iconManager = iconManager;
         this.libraryNavigator = libraryNavigator;
+        this.noSaveState = null;
         
         GuiUtils.assignResources(this);
 
@@ -220,7 +229,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
         PopupUtil.addPopupMenus(editor, new CopyAction(editor), new CopyAllAction());
 
-        FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, libraryManager.getOrCreateFriendShareList(chatFriend.getUser()));
+        FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, libraryManager.getOrCreateFriendShareList(chatFriend.getFriend()));
         editor.setDropTarget(friendShare.getDropTarget());
 
         add(footerPanel(writer, chatFriend, schedExecService), BorderLayout.SOUTH);
@@ -263,6 +272,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
+
+        // TODO: Refactor this,ChatDocumentBuilder, etc into cleaner/clearer, way to display msgs
         Message message = event.getMessage();
         LOG.debugf("Message: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         messages.add(message);
@@ -274,12 +285,26 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
         if (message instanceof MessageFileOffer) {
             MessageFileOffer msgWithFileOffer = (MessageFileOffer)message;
-            String fileOfferID = msgWithFileOffer.getFileOffer().getId();
-            idToMessageWithFileOffer.put(fileOfferID, msgWithFileOffer);
+            addFileOfferMessage(msgWithFileOffer);
+        } else if (message instanceof NoSaveStatusMessage) {
+            updateNoSaveLink(((NoSaveStatusMessage)message).getStatus());
         }
 
         displayMessages();
     }
+
+
+    private void addFileOfferMessage(MessageFileOffer msgWithFileOffer) {
+        String fileOfferID = msgWithFileOffer.getFileOffer().getId();
+        idToMessageWithFileOffer.put(fileOfferID, msgWithFileOffer);
+    }
+
+    private void updateNoSaveLink(NoSave noSave) {
+        noSaveState = noSave;
+        nosaveLink.setText("<html><u>" + (noSaveState == NoSave.ENABLED ? tr("On the Record") :
+                tr("Off the Record")) + "</u></html>");
+    }
+
 
     @RuntimeTopicEventSubscriber(methodName="getChatStateTopicName")
     public void handleChatStateUpdate(String topic, ChatStateEvent event) {
@@ -296,10 +321,16 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
             currentChatState = ChatState.active;
             displayMessages(false);
             inputPanel.getInputComponent().setEnabled(true);
+            if ((nosaveLink != null) && hasFeature(NoSaveFeature.ID)) {
+                nosaveLink.setVisible(true);
+            }
             break;
         case REMOVED:
             displayMessages(true);
             inputPanel.getInputComponent().setEnabled(false);
+            if (nosaveLink != null) {
+                nosaveLink.setVisible(false);
+            }
             break;
         }
     }
@@ -313,6 +344,16 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                 downloadlink.setEnabled(true);
             } else if (featureEventType == FeatureEvent.Type.REMOVED) {
                 downloadlink.setEnabled(false);
+            }
+        } else if (feature.getID().equals(NoSaveFeature.ID)) {
+            if (featureEventType == FeatureEvent.Type.ADDED) {
+                ensureNoSaveLinkExists();
+                NoSave status = ((NoSaveStatus)feature.getFeature()).getStatus();
+                if (status != noSaveState) {
+                    NoSaveStatusMessage msg = new NoSaveStatusMessage(friendId,
+                            Message.Type.Server, status);
+                    new MessageReceivedEvent(msg).publish();
+                }
             }
         }
     }
@@ -430,14 +471,18 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         sharelink.setFont(linkFont);
         
         
-        JXPanel toolbar = new JXPanel(new MigLayout("insets 0 0 0 5, gap 10, alignx right, aligny 50%"));
+        toolbar = new JXPanel(new MigLayout("insets 0 0 0 5, gap 10, alignx right, aligny 50%"));
         ResizeUtils.forceHeight(toolbar, 22);
         
         toolbar.setBackgroundPainter(new GenericBarPainter<JXPanel>(
                 new GradientPaint(0, 0, toolbarTopColor, 0, 1, toolbarBottomColor),
                 toolbarBorderColor, PainterUtils.TRASPARENT,
                 toolbarBorderColor, PainterUtils.TRASPARENT));
-        
+
+        if (hasFeature(NoSaveFeature.ID)) {
+            ensureNoSaveLinkExists();
+        }
+
         toolbar.add(downloadlink);
         toolbar.add(sharelink);
 
@@ -447,10 +492,48 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         panel.add(inputPanel, BorderLayout.CENTER);
 
         JTextComponent inputComponent = inputPanel.getInputComponent();
-        FriendShareDropTarget friendShare = new FriendShareDropTarget(inputComponent, shareListManager.getOrCreateFriendShareList(chatFriend.getUser()));
+        FriendShareDropTarget friendShare = new FriendShareDropTarget(inputComponent, shareListManager.getOrCreateFriendShareList(chatFriend.getFriend()));
         inputComponent.setDropTarget(friendShare.getDropTarget());
 
         return panel;
+    }
+
+    
+    private boolean hasFeature(URI feature) {
+        return getFeature(feature) != null;
+    }
+
+    /**
+     * Returns the feature identified by the method parameter. The
+     * feature can be in any of the presences of the friend.
+     * <p>
+     * This was done to get around implementing adding/removing features on
+     * objects (such as xmpp connections and friends) other than FriendPresences
+     *
+     * @param feature desired feature's URI
+     * @return {@link Feature}
+     */
+    private Feature getFeature(URI feature) {
+        for (XMPPPresence presence : chatFriend.getFriend().getPresences().values()) {
+            if (presence.hasFeatures(feature)) {
+                return presence.getFeature(feature);
+            }
+        }
+        return null;
+    }
+
+    private void ensureNoSaveLinkExists() {
+        if (nosaveLink == null) {
+            NoSaveToggleAction action = new NoSaveToggleAction();
+            nosaveLink = new HyperlinkButton(action);
+            nosaveLink.setFont(linkFont);
+
+            // initialize nosave state
+            NoSaveFeature nosaveFeature = (NoSaveFeature)getFeature(NoSaveFeature.ID);
+            updateNoSaveLink(nosaveFeature.getFeature().getStatus());
+
+            toolbar.add(nosaveLink, 0);
+        }
     }
 
     @Override
@@ -467,7 +550,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            libraryNavigator.selectFriendLibrary(chatFriend.getUser());
+            libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
         }
     }
 
@@ -478,7 +561,26 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            libraryNavigator.selectFriendShareList(chatFriend.getUser());
+            libraryNavigator.selectFriendShareList(chatFriend.getFriend());
+        }
+    }
+
+    /**
+     * Sets the nosave state to be the opposite of what it currently is.
+     * Sends a nosave IQ msg to the server.
+     * 
+     */
+    private class NoSaveToggleAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            NoSaveStatus status = ((NoSaveFeature)getFeature(NoSaveFeature.ID)).getFeature();
+
+            try {
+                status.toggleStatus();
+            } catch (FriendException e1) {
+                LOG.warn("Error occurred while toggling nosave status", e1);
+            }
         }
     }
 
@@ -508,7 +610,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
                    // if active presence exists, send file offer to it,
                    // otherwise broadcast to every presence with FileOfferFeature.ID feature
-                   XMPPFriend chatUser = chatFriend.getUser();
+                   XMPPFriend chatUser = chatFriend.getFriend();
                    FriendPresence activePresence = chatUser.getActivePresence();
                    if ((activePresence != null) && activePresence.hasFeatures(FileOfferFeature.ID)) {
                         sentFileOffer = performFileOffer(metadata, activePresence);

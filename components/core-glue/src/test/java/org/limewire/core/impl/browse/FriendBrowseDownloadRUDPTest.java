@@ -132,7 +132,7 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
     public void testBrowseDownloadFromFriendBehindFirewall() throws Exception {
         waitForFeature(AddressFeature.ID, FRIEND);
         
-        Collection<XMPPPresence> presences = conn.getUser(FRIEND).getPresences().values();
+        Collection<XMPPPresence> presences = conn.getFriend(FRIEND).getPresences().values();
         assertEquals(1, presences.size());
         XMPPPresence presence = presences.iterator().next();
 
@@ -232,10 +232,10 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
 
 
         // check for the feature in case it already came in prior to listener being added
-        XMPPFriend user = conn.getUser(friendId);
+        XMPPFriend user = conn.getFriend(friendId);
         if (user != null && !user.getPresences().isEmpty()) {
             // friend already signed in
-            XMPPPresence presence = conn.getUser(friendId).getPresences().values().iterator().next();
+            XMPPPresence presence = conn.getFriend(friendId).getPresences().values().iterator().next();
             if (presence.getFeature(featureUri) != null) {
                 return;
             }

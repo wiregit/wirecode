@@ -75,7 +75,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                 XMPPConnection connection = getActiveConnection();
                 InspectionHistogram<Integer> presencesHistogram = new InspectionHistogram<Integer>();
                 if (connection != null) {
-                    for (XMPPFriend user : connection.getUsers()) {
+                    for (XMPPFriend user : connection.getFriends()) {
                         Map<String, XMPPPresence> presences = user.getPresences();
                         presencesHistogram.count(presences.size());
                         for (XMPPPresence presence : presences.values()) {
@@ -279,7 +279,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
         if (connection == null) {
             return false;
         }
-        XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(userId));
+        XMPPFriend user = connection.getFriend(StringUtils.parseBareAddress(userId));
         if (user == null) {
             return false;
         }

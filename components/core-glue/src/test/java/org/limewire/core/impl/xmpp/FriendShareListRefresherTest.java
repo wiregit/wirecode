@@ -231,7 +231,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 // Non critical actions
                 allowing(xmppService).getActiveConnection();
                 will(returnValue(xmppConnection));
-                allowing(xmppConnection).getUsers();
+                allowing(xmppConnection).getFriends();
                 will(returnValue(users));
                 allowing(users.get(0)).getId();
                 will(returnValue(id1));
@@ -323,7 +323,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
                 allowing(xmppService).getActiveConnection();
                 will(returnValue(xmppConnection));
                 
-                allowing(xmppConnection).getUsers();
+                allowing(xmppConnection).getFriends();
                 will(returnValue(users));
                 allowing(users.get(0)).getId();
                 will(returnValue(id1));

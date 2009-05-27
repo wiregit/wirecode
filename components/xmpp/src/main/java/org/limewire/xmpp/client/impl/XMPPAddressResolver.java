@@ -89,9 +89,9 @@ public class XMPPAddressResolver implements AddressResolver {
         XMPPConnection connection = xmppService.getActiveConnection();
         if(connection == null)
             return null;
-        XMPPFriend user = connection.getUser(id);
-        if(user != null) {
-            for(Entry<String, FriendPresence> entry : user.getFriendPresences().entrySet()) {
+        XMPPFriend friend = connection.getFriend(id);
+        if(friend != null) {
+            for(Entry<String, FriendPresence> entry : friend.getFriendPresences().entrySet()) {
                 FriendPresence resolvedPresence =
                     getMatchingPresence(address, entry.getKey(), entry.getValue());
                 if(resolvedPresence != null) {

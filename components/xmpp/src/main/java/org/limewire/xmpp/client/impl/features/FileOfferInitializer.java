@@ -22,7 +22,7 @@ public class FileOfferInitializer implements FeatureInitializer{
 
     @Override
     public void register(FeatureRegistry registry) {
-        registry.add(FileOfferFeature.ID, this);
+        registry.add(FileOfferFeature.ID, this, true);
     }
 
     @Override
@@ -34,6 +34,10 @@ public class FileOfferInitializer implements FeatureInitializer{
     @Override
     public void removeFeature(FriendPresence friendPresence) {
         friendPresence.removeFeature(FileOfferFeature.ID);
+    }
+
+    @Override
+    public void cleanup() {
     }
 
     private static class FileOffererImpl implements FileOfferer {

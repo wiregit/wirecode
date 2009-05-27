@@ -52,11 +52,11 @@ public interface XMPPPresence extends FriendPresence {
     /**
      * @return the {@link XMPPFriend} associated with this presence.
      */
-    public XMPPFriend getUser();
+    public XMPPFriend getXMPPFriend();
 
     /**
-     * the jid of the user.  jid's have the form <code>user@host.com/client</code>
-     * @return the jid of the user.
+     * the jid of the XMPP friend.  jid's have the form <code>user@host.com/client</code>
+     * @return the jid of the XMPP friend.
      */
     public String getJID();
 

@@ -15,7 +15,7 @@ public class PresenceEvent extends DefaultDataTypeEvent<XMPPPresence, PresenceEv
 
         /**
          * Indicates that this is an update to the presence. For the exact kind
-         * of update, see the {@link org.limewire.xmpp.api.client.Presence.Type}.
+         * of update, see the {@link XMPPPresence.Type}.
          */
         PRESENCE_UPDATE
     }

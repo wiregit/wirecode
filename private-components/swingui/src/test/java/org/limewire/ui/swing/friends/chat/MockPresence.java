@@ -10,21 +10,21 @@ import org.limewire.xmpp.api.client.XMPPFriend;
 
 public class MockPresence implements XMPPPresence {
     private String status;
-    private final XMPPFriend user;
+    private final XMPPFriend xmppFriend;
     private Mode mode;
     private String jid;
     private int priority;
     
-    MockPresence(XMPPFriend user, Mode mode, String status, String jid) {
-        this.user = user;
+    MockPresence(XMPPFriend xmppFriend, Mode mode, String status, String jid) {
+        this.xmppFriend = xmppFriend;
         this.mode = mode;
         this.status = status;
         this.jid = jid;
         this.priority = 0;
     }
 
-    public XMPPFriend getUser() {
-        return user;
+    public XMPPFriend getXMPPFriend() {
+        return xmppFriend;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class MockPresence implements XMPPPresence {
 
     @Override
     public Friend getFriend() {
-        return user;
+        return xmppFriend;
     }
 
     @Override

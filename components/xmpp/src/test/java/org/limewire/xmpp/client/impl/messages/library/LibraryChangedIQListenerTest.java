@@ -46,7 +46,7 @@ public class LibraryChangedIQListenerTest extends BaseTestCase {
 
         final AtomicReference<LibraryChangedEvent> event = new AtomicReference<LibraryChangedEvent>();
         context.checking(new Expectations() {{
-            one(connection).getUser("me@you.com");
+            one(connection).getFriend("me@you.com");
             will(returnValue(user));
             one(user).getFriendPresences();
             will(returnValue(Collections.singletonMap("me@you.com/ldkfjd", friendPresence)));

@@ -51,7 +51,7 @@ public class AuthTokenIQListener implements PacketListener {
 
     private void handleAuthTokenUpdate(AuthTokenIQ iq) {
         synchronized (this) {
-            XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(iq.getFrom()));
+            XMPPFriend user = connection.getFriend(StringUtils.parseBareAddress(iq.getFrom()));
             if (user != null) {
                 FriendPresence presence = user.getFriendPresences().get(iq.getFrom());
                 if(presence != null) {
@@ -65,10 +65,10 @@ public class AuthTokenIQListener implements PacketListener {
         }
     }
 
-    private void sendResult(FriendPresence presence) throws FriendException {
-        byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(presence.getPresenceId())).getBytes(Charset.forName("UTF-8"));
+    private void sendResult(String presenceId) throws FriendException {
+        byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(presenceId)).getBytes(Charset.forName("UTF-8"));
         AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
-        queryResult.setTo(presence.getPresenceId());
+        queryResult.setTo(presenceId);
         queryResult.setFrom(connection.getLocalJid());
         queryResult.setType(IQ.Type.SET);
         connection.sendPacket(queryResult);
@@ -85,14 +85,14 @@ public class AuthTokenIQListener implements PacketListener {
     private class AuthTokenFeatureInitializer implements FeatureInitializer {
         @Override
         public void register(FeatureRegistry registry) {
-            registry.add(AuthTokenFeature.ID, this);
+            registry.add(AuthTokenFeature.ID, this, true);
         }
 
         @Override
         public void initializeFeature(FriendPresence friendPresence) {
             synchronized (AuthTokenIQListener.this) {
                 try {
-                    sendResult(friendPresence);
+                    sendResult(friendPresence.getPresenceId());
                 } catch (FriendException e) {
                     LOG.debugf(e, "couldn't send auth token to {0} " + friendPresence);
                 }
@@ -113,6 +113,10 @@ public class AuthTokenIQListener implements PacketListener {
         @Override
         public void removeFeature(FriendPresence friendPresence) {
             friendPresence.removeFeature(AuthTokenFeature.ID);
+        }
+
+        @Override
+        public void cleanup() {
         }
     }
 }

@@ -159,7 +159,11 @@ public class ChatFramePanel extends Panel implements ChatFrame {
 
     private Notification getNoticeForMessage(MessageReceivedEvent event) {
         final Message message = event.getMessage();
-        String title = tr("Chat from {0}", message.getSenderName());
+
+        // todo: each message type should know how to display itself as a notification
+        String title = message.getType() == Message.Type.Server ?
+                tr("Message from the chat server") :
+                tr("Chat from {0}", message.getSenderName());
         String messageString = message.toString();
         Notification notification = new Notification(title, messageString, new AbstractAction(I18n.tr("Reply")) {
             @Override

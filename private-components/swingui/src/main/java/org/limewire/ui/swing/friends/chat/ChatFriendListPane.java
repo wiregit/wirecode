@@ -775,7 +775,7 @@ public class ChatFriendListPane extends JPanel {
         public void actionPerformed(ActionEvent e) {
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
-                libraryNavigator.selectFriendLibrary(chatFriend.getUser());
+                libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
             }
         }
     }
@@ -789,7 +789,7 @@ public class ChatFriendListPane extends JPanel {
         public void actionPerformed(ActionEvent e) {
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
-                libraryNavigator.selectFriendShareList(chatFriend.getUser());
+                libraryNavigator.selectFriendShareList(chatFriend.getFriend());
             }
         }
 

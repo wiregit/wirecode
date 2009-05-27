@@ -134,7 +134,7 @@ public class ChatModel {
         ChatFriend chatFriend = idToFriendMap.get(fromFriendId);
 
         if (chatFriend != null) {
-            Map<String, FriendPresence> presences = chatFriend.getUser().getFriendPresences();
+            Map<String, FriendPresence> presences = chatFriend.getFriend().getFriendPresences();
             FriendPresence fileOfferPresence = presences.get(fromJID);
             if (fileOfferPresence != null) {
                 new MessageReceivedEvent(new MessageFileOfferImpl(fromFriendId, fromFriendId,
@@ -148,7 +148,7 @@ public class ChatModel {
 	 */
     private void handlePresenceEvent(FriendPresenceEvent event) {
         final XMPPPresence presence = (XMPPPresence)event.getData();
-        final XMPPFriend user = presence.getUser();
+        final XMPPFriend user = presence.getXMPPFriend();
         ChatFriend chatFriend = idToFriendMap.get(user.getId());
         switch(event.getType()) {
         case ADDED:
@@ -195,7 +195,7 @@ public class ChatModel {
         if(chatFriend == null) {
             chatFriend = new ChatFriendImpl(presence);
             chatFriends.add(chatFriend);
-            idToFriendMap.put(presence.getUser().getId(), chatFriend);
+            idToFriendMap.put(presence.getXMPPFriend().getId(), chatFriend);
         }
 
         final ChatFriend chatFriendForIncomingChat = chatFriend;
@@ -211,7 +211,7 @@ public class ChatModel {
                 return new MessageReaderImpl(chatFriendForIncomingChat);
             }
         };
-        presence.getUser().setChatListenerIfNecessary(incomingChatListener);
+        presence.getXMPPFriend().setChatListenerIfNecessary(incomingChatListener);
         chatFriend.update();
     }
 }

@@ -24,7 +24,7 @@ public class LibraryChangedNotifierFeatureInitializer implements FeatureInitiali
 
     @Override
     public void register(FeatureRegistry registry) {
-        registry.add(LibraryChangedNotifierFeature.ID, this);
+        registry.add(LibraryChangedNotifierFeature.ID, this, true);
     }
 
     @Override
@@ -35,6 +35,10 @@ public class LibraryChangedNotifierFeatureInitializer implements FeatureInitiali
     @Override
     public void removeFeature(FriendPresence friendPresence) {
         friendPresence.removeFeature(LibraryChangedNotifierFeature.ID);
+    }
+
+    @Override
+    public void cleanup() {
     }
 
     private static class LibraryChangedNotifierImpl implements LibraryChangedNotifier {

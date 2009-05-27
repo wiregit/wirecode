@@ -28,7 +28,7 @@ class MockChatFriend implements ChatFriend {
     }
     
     @Override
-    public XMPPFriend getUser() {
+    public XMPPFriend getFriend() {
         return new XMPPFriend() {
             @Override
             public String getId() {

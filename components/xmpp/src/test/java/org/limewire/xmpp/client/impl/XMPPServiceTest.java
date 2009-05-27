@@ -214,7 +214,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
     public void testChat() throws InterruptedException, FriendException, IOException {
         MessageReaderMock reader = new MessageReaderMock();
         XMPPPresence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
-        MessageWriter writer = automatedtestfriend2.getUser().createChat(reader);
+        MessageWriter writer = automatedtestfriend2.getXMPPFriend().createChat(reader);
         writer.writeMessage("hello world");
 
         Thread.sleep(SLEEP);
@@ -368,7 +368,7 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         // Simulate Alice talking to two presences of Bob
         MessageReaderMock aliceFromBob = new MessageReaderMock();
         XMPPPresence bobPresence = aliceRosterListener.getFirstPresence(USERNAME_2);
-        MessageWriter aliceToBob = bobPresence.getUser().createChat(aliceFromBob);
+        MessageWriter aliceToBob = bobPresence.getXMPPFriend().createChat(aliceFromBob);
 
         // Alice writes a message to Bob
         aliceToBob.writeMessage("Hello Bob");

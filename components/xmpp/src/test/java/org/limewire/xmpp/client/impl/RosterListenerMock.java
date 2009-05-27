@@ -3,6 +3,7 @@ package org.limewire.xmpp.client.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Collection;
 
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.feature.FeatureEvent;
@@ -16,14 +17,18 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
     private HashMap<String, XMPPFriend> users = new HashMap<String, XMPPFriend>();
     private HashMap<String, ArrayList<XMPPPresence>> roster = new HashMap<String, ArrayList<XMPPPresence>>();
     IncomingChatListenerMock listener = new IncomingChatListenerMock();
-    
+
+    @Override
     public void handleEvent(RosterEvent event) {
-        if(event.getType().equals(RosterEvent.Type.USER_ADDED)) {
-            userAdded(event.getData());
-        } else if(event.getType().equals(RosterEvent.Type.USER_DELETED)) {
-            userDeleted(event.getData().getId());
-        } else if(event.getType().equals(RosterEvent.Type.USER_UPDATED)) {
-            userUpdated(event.getData());
+        Collection<XMPPFriend> users = event.getData();
+        for (XMPPFriend user : users) {
+            if(event.getType().equals(RosterEvent.Type.FRIENDS_ADDED)) {
+                userAdded(user);
+            } else if(event.getType().equals(RosterEvent.Type.FRIENDS_DELETED)) {
+                userDeleted(user.getId());
+            } else if(event.getType().equals(RosterEvent.Type.FRIENDS_UPDATED)) {
+                userUpdated(user);
+            }
         }
     }
     
@@ -67,7 +72,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
                         }
                         if(!contains(roster.get(id), presence.getJID())) {
                             roster.get(id).add(presence);
-                            presence.getUser().setChatListenerIfNecessary(listener);
+                            presence.getXMPPFriend().setChatListenerIfNecessary(listener);
                             System.out.println("user " + presence.getJID() + " (" + name + ") available");
                         } else {
                             replace(roster.get(id), presence);

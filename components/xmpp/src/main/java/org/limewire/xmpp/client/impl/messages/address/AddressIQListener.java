@@ -61,13 +61,14 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
 
     private void handleAddressUpdate(AddressIQ iq) {
         synchronized (this) {
-            XMPPFriend user = connection.getUser(StringUtils.parseBareAddress(iq.getFrom()));
+            XMPPFriend user = connection.getFriend(StringUtils.parseBareAddress(iq.getFrom()));
             if (user != null) {
                 FriendPresence presence = user.getFriendPresences().get(iq.getFrom());
                 if(presence != null) {
-                    LOG.debugf("updating address on presence {0} to {1}", presence.getPresenceId(), iq.getAddress());
-                    addressRegistry.put(new XMPPAddress(presence.getPresenceId()), iq.getAddress());
-                    presence.addFeature(new AddressFeature(new XMPPAddress(presence.getPresenceId())));
+                    String presenceId = presence.getPresenceId();
+                    LOG.debugf("updating address on presence {0} to {1}", presenceId, iq.getAddress());
+                    addressRegistry.put(new XMPPAddress(presenceId), iq.getAddress());
+                    presence.addFeature(new AddressFeature(new XMPPAddress(presenceId)));
                 } else {
                     LOG.debugf("address {0} for presence {1} is pending", iq.getAddress(), iq.getFrom());
                     pendingAddresses.put(iq.getFrom(), iq.getAddress());
@@ -91,8 +92,8 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
             LOG.debugf("new address to publish: {0}", event);
             synchronized (AddressIQListener.this) {
                 address = event.getData();
-                for(XMPPFriend user : connection.getUsers()) {
-                    for(Map.Entry<String, FriendPresence> presenceEntry : user.getFriendPresences().entrySet()) {
+                for(XMPPFriend friend : connection.getFriends()) {
+                    for(Map.Entry<String, FriendPresence> presenceEntry : friend.getFriendPresences().entrySet()) {
                         if(presenceEntry.getValue().hasFeatures(LimewireFeature.ID)) {
                             try {
                                 sendAddress(address, presenceEntry.getKey());
@@ -118,24 +119,25 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
     private class AddressIQFeatureInitializer implements FeatureInitializer {
         @Override
         public void register(FeatureRegistry registry) {
-            registry.add(AddressFeature.ID, this);
+            registry.add(AddressFeature.ID, this, true);
         }
 
         @Override
         public void initializeFeature(FriendPresence friendPresence) {
             synchronized (AddressIQListener.this) {
+                String presenceId = friendPresence.getPresenceId();
                 if (address != null) {
                     try {
-                        sendAddress(address, friendPresence.getPresenceId());
+                        sendAddress(address, presenceId);
                     } catch (FriendException e) {
-                        LOG.debugf(e, "couldn't send address to {0}" + friendPresence.getPresenceId());
+                        LOG.debugf(e, "couldn't send address to {0}" + presenceId);
                     }
                 }
-                if (pendingAddresses.containsKey(friendPresence.getPresenceId())) {
-                    LOG.debugf("updating address on presence {0} to {1}", friendPresence.getPresenceId(), address);
-                    Address pendingAddress = pendingAddresses.remove(friendPresence.getPresenceId());
-                    addressRegistry.put(new XMPPAddress(friendPresence.getPresenceId()), pendingAddress);
-                    friendPresence.addFeature(new AddressFeature(new XMPPAddress(friendPresence.getPresenceId()))); 
+                if (pendingAddresses.containsKey(presenceId)) {
+                    LOG.debugf("updating address on presence {0} to {1}", presenceId, address);
+                    Address pendingAddress = pendingAddresses.remove(presenceId);
+                    addressRegistry.put(new XMPPAddress(presenceId), pendingAddress);
+                    friendPresence.addFeature(new AddressFeature(new XMPPAddress(presenceId)));
                 }
             }
         }
@@ -144,6 +146,10 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
         public void removeFeature(FriendPresence friendPresence) {
             addressRegistry.remove(new XMPPAddress(friendPresence.getPresenceId()));
             friendPresence.removeFeature(AddressFeature.ID);
+        }
+
+        @Override
+        public void cleanup() {
         }
     }
 }

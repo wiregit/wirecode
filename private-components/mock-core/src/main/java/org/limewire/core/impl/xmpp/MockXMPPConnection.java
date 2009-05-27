@@ -49,22 +49,22 @@ public class MockXMPPConnection implements XMPPConnection {
     }
 
     @Override
-    public ListeningFuture<Void> addUser(String id, String name) {
+    public ListeningFuture<Void> addFriend(String id, String name) {
         return new SimpleFuture<Void>((Void)null);
     }
 
     @Override
-    public ListeningFuture<Void> removeUser(String id) {
+    public ListeningFuture<Void> removeFriend(String id) {
         return new SimpleFuture<Void>((Void)null);
     }
 
     @Override
-    public XMPPFriend getUser(String id) {
+    public XMPPFriend getFriend(String id) {
         return null;
     }
 
     @Override
-    public Collection<XMPPFriend> getUsers() {
+    public Collection<XMPPFriend> getFriends() {
         return new ArrayList<XMPPFriend>();
     }
 

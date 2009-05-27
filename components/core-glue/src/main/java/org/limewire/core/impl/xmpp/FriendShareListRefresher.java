@@ -91,7 +91,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                 fileManagerLoaded.set(true);  
                 XMPPConnection connection = xmppService.getActiveConnection();
                 if(connection != null) {
-                    Collection<XMPPFriend> friends = connection.getUsers();
+                    Collection<XMPPFriend> friends = connection.getFriends();
                     for(Friend friend : friends) {
                         tracker.sentRefresh(friend.getId());
                         Map<String, FriendPresence> presences = friend.getFriendPresences();
