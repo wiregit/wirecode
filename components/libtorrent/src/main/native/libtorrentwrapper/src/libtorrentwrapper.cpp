@@ -442,8 +442,8 @@ extern "C" EXTERN_RET remove_torrent(const char* id) {
 	EXTERN_TRY_CONTAINER_BEGIN;
 
 		libtorrent::torrent_handle h = findTorrentHandle(id);
+		h.pause();
 		session->remove_torrent(h);
-
 	EXTERN_TRY_CONTAINER_END;
 }
 
