@@ -483,8 +483,9 @@ extern "C" EXTERN_RET clear_error_and_retry(const char* id) {
 	EXTERN_TRY_CONTAINER_BEGIN;
 
 		libtorrent::torrent_handle h = findTorrentHandle(id);
+		h.force_recheck();
 		h.clear_error();
-
+		h.resume();
 	EXTERN_TRY_CONTAINER_END;
 }
 
