@@ -3,7 +3,7 @@ package com.limegroup.gnutella.library;
 import java.util.List;
 
 /** A {@link SmartFileCollection} that is shared with one of more people. */
-public interface SharedFileCollection extends SmartFileCollection {
+public interface SharedFileCollection extends FileCollection {
     
     /** Gets the current name of this collection. */
     String getName();

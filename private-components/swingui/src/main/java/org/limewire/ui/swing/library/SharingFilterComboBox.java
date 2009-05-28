@@ -39,7 +39,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FriendFileList;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
@@ -222,8 +222,8 @@ public class SharingFilterComboBox extends LimeComboBox {
             if(o1 == o2) {
                 return 0;
             } else {
-                FriendFileList fileList1 = shareListManager.getOrCreateFriendShareList(o1);
-                FriendFileList fileList2 = shareListManager.getOrCreateFriendShareList(o2);
+                LocalFileList fileList1 = shareListManager.getOrCreateFriendShareList(o1);
+                LocalFileList fileList2 = shareListManager.getOrCreateFriendShareList(o2);
                 if((fileList1.size() > 0 && fileList2.size() > 0) || 
                         (fileList1.size() == 0 && fileList2.size() == 0))
                     return o1.getRenderName().compareToIgnoreCase(o2.getRenderName());

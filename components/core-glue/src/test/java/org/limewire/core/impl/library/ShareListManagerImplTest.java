@@ -16,7 +16,6 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FileList;
-import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -91,7 +90,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 coreLocalFileItemFactory, friendShareListEventBroadcaster, libraryManager, gnutellaFileCollection);
         shareListManagerImpl.register(listenerSupport);
 
-        FriendFileList testFriendFileList1 = shareListManagerImpl.getFriendShareList(friend1);
+        LocalFileList testFriendFileList1 = shareListManagerImpl.getFriendShareList(friend1);
         assertNull(testFriendFileList1);
 
         context.checking(new Expectations() {
@@ -164,11 +163,11 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 coreLocalFileItemFactory, friendShareListEventBroadcaster, libraryManager, gnutellaFileCollection);
         shareListManagerImpl.register(listenerSupport);
 
-        FriendFileList testFriendFileList1 = shareListManagerImpl
+        LocalFileList testFriendFileList1 = shareListManagerImpl
                 .getOrCreateFriendShareList(friend1);
         assertNotNull(testFriendFileList1);
 
-        final FriendFileList friendFileListForEvent = testFriendFileList1;
+        final LocalFileList friendFileListForEvent = testFriendFileList1;
         context.checking(new Expectations() {
             {
                 one(fileCollectionManager).unloadCollectionByName(friendId1);
@@ -241,11 +240,11 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 coreLocalFileItemFactory, friendShareListEventBroadcaster, libraryManager, gnutellaFileCollection);
         shareListManagerImpl.register(listenerSupport);
 
-        FriendFileList testFriendFileList1 = shareListManagerImpl
+        LocalFileList testFriendFileList1 = shareListManagerImpl
                 .getOrCreateFriendShareList(friend1);
         assertNotNull(testFriendFileList1);
 
-        final FriendFileList friendFileListForEvent = testFriendFileList1;
+        final LocalFileList friendFileListForEvent = testFriendFileList1;
 
         context.checking(new Expectations() {
             {
@@ -326,7 +325,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
                 coreLocalFileItemFactory, friendShareListEventBroadcaster, libraryManager, gnutellaFileCollection);
         shareListManagerImpl.register(listenerSupport);
 
-        FriendFileList testFriendFileList1 = shareListManagerImpl
+        LocalFileList testFriendFileList1 = shareListManagerImpl
                 .getOrCreateFriendShareList(friend1);
         assertNotNull(testFriendFileList1);
 
@@ -389,7 +388,7 @@ public class ShareListManagerImplTest extends BaseTestCase {
             }
         });
 
-        FriendFileList testFriendFileList2 = shareListManagerImpl
+        LocalFileList testFriendFileList2 = shareListManagerImpl
                 .getOrCreateFriendShareList(friend2);
         assertNotNull(testFriendFileList2);
 

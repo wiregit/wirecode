@@ -5,10 +5,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FileList;
-import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventBroadcaster;
@@ -35,7 +35,7 @@ class ShareListManagerImpl implements ShareListManager {
     
     private final CombinedShareList combinedShareList;
     
-    private final FriendFileList gnutellaFileList;    
+    private final LocalFileList gnutellaFileList;    
     
     private final ConcurrentHashMap<String, FriendFileListImpl> friendLocalFileLists;
 
@@ -98,7 +98,7 @@ class ShareListManagerImpl implements ShareListManager {
     }
 
     @Override
-    public FriendFileList getGnutellaShareList() {
+    public LocalFileList getGnutellaShareList() {
         return gnutellaFileList;
     }
     
@@ -108,17 +108,17 @@ class ShareListManagerImpl implements ShareListManager {
     }
     
     @Override
-    public FriendFileList getOrCreateFriendShareList(Friend friend) {
+    public LocalFileList getOrCreateFriendShareList(Friend friend) {
         LOG.debugf("get|Create library for friend {0}", friend.getId());
         
-        FriendFileList list = friendLocalFileLists.get(friend.getId());
+        LocalFileList list = friendLocalFileLists.get(friend.getId());
         if(list != null){
             LOG.debugf("Returning existing library for friend {0}", friend.getId());
             return list;
         }
         
         FriendFileListImpl newList = new FriendFileListImpl(coreLocalFileItemFactory, collectionManager, viewManager, friend.getId(), combinedShareList);        
-        FriendFileList existing = friendLocalFileLists.putIfAbsent(friend.getId(), newList);        
+        LocalFileList existing = friendLocalFileLists.putIfAbsent(friend.getId(), newList);        
         
         if(existing == null) {
             LOG.debugf("No existing library for friend {0}", friend.getId());
@@ -133,7 +133,7 @@ class ShareListManagerImpl implements ShareListManager {
     }
 
     @Override
-    public FriendFileList getFriendShareList(Friend friend) {
+    public LocalFileList getFriendShareList(Friend friend) {
         return friendLocalFileLists.get(friend.getId());
     }
 

@@ -43,7 +43,6 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -92,6 +91,7 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.NotImplementedException;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
 
@@ -642,25 +642,6 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
             layer.getGlassPane().removeAll(); 
             layer.getGlassPane().add(panel);
             layer.getGlassPane().setVisible(true);
-        }
-    }
-    
-    /**
-	 * Displays the Sharing Collection Message. This also locks the 
-     * underlying table and displays a gradient over the table.
-	 */
-    private void showCollectionShare(Category category, Friend friend) {
-        if(category != null) {
-            JPanel panel = new JPanel(new MigLayout("fill"));
-            panel.setOpaque(true);
-            panel.setBackground(new Color(147,170,209,80));
-            panel.add(getLockedLayer(category, friend), "align 50% 40%");
-            
-            JXLayer layer = map.get(category);
-            layer.getGlassPane().removeAll(); 
-            layer.getGlassPane().add(panel);
-            layer.getGlassPane().setVisible(true);
-            layer.getGlassPane().repaint();
         }
     }
     
@@ -1273,17 +1254,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
                     action.setEnabled(true);
                 }
             } else { //filtering on a friend
-                FriendFileList fileList;
-                if(currentFriendFilterChanger.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
-                    fileList = shareListManager.getGnutellaShareList();
-                else
-                    fileList = shareListManager.getFriendShareList(currentFriendFilterChanger.getCurrentFriend());
-                
-                // if category sharing, lock the ui
-                if( (category == Category.AUDIO || category == Category.IMAGE || category == Category.VIDEO) && 
-                        fileList != null && fileList.isCategoryAutomaticallyAdded(category)) {
-                        showCollectionShare(category, currentFriendFilterChanger.getCurrentFriend());
-                        lockMap.get(category).setLocked(true);
+                if(false) { // This used to be category sharing, which locked the UI -- no longer needed
+                    throw new NotImplementedException();
                 } else {
                     if(category == Category.PROGRAM) { // hide program category is not enabled
                         action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());

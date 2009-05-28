@@ -268,11 +268,6 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         multicaster.broadcast(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILES_CLEARED));
     }
     
-    /** Fires an event when the state of a shared collection changes*/
-    protected void fireCollectionEvent(FileViewChangeEvent.Type type, boolean value) {
-        multicaster.broadcast(new FileViewChangeEvent(this, type, value));
-    }
-    
     /**
      * Updates the list if a containing file has been renamed
      */

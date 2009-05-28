@@ -8,7 +8,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssignParameterAction;
@@ -121,129 +120,7 @@ public class FriendFileListImplTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
-    public void testClearCategory() {
-        context.checking(new Expectations() {
-            {
-                one(fileCollectionManager).getOrCreateCollectionByName(name);
-                will(returnValue(testFileCollection));
-                one(testFileCollection).addFriend(name);
-                one(testFileCollection).clearCategory(Category.AUDIO);
-            }
-        });
-        friendFileListImpl.clearCategory(Category.AUDIO);
-        context.assertIsSatisfied();
-    }
-
-    public void testAddSnapshotCategory() {
-        context.checking(new Expectations() {
-            {
-                one(fileCollectionManager).getOrCreateCollectionByName(name);
-                will(returnValue(testFileCollection));
-                one(testFileCollection).addFriend(name);
-                one(testFileCollection).addSnapshotCategory(Category.AUDIO);
-            }
-        });
-        friendFileListImpl.addSnapshotCategory(Category.AUDIO);
-        context.assertIsSatisfied();
-    }
-
-    public void testIsCategoryAutomaticallyAdded() {
-        context.checking(new Expectations() {
-            {
-                one(fileCollectionManager).getOrCreateCollectionByName(name);
-                will(returnValue(testFileCollection));
-                one(testFileCollection).addFriend(name);
-                one(testFileCollection).isAddNewAudioAlways();
-                will(returnValue(true));
-            }
-        });
-        assertTrue(friendFileListImpl.isCategoryAutomaticallyAdded(Category.AUDIO));
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).isAddNewAudioAlways();
-                will(returnValue(false));
-            }
-        });
-        assertFalse(friendFileListImpl.isCategoryAutomaticallyAdded(Category.AUDIO));
-
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).isAddNewImageAlways();
-                will(returnValue(true));
-            }
-        });
-        assertTrue(friendFileListImpl.isCategoryAutomaticallyAdded(Category.IMAGE));
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).isAddNewImageAlways();
-                will(returnValue(false));
-            }
-        });
-        assertFalse(friendFileListImpl.isCategoryAutomaticallyAdded(Category.IMAGE));
-
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).isAddNewVideoAlways();
-                will(returnValue(true));
-            }
-        });
-        assertTrue(friendFileListImpl.isCategoryAutomaticallyAdded(Category.VIDEO));
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).isAddNewVideoAlways();
-                will(returnValue(false));
-            }
-        });
-        assertFalse(friendFileListImpl.isCategoryAutomaticallyAdded(Category.VIDEO));
-        context.assertIsSatisfied();
-    }
-
-    public void testSetCategoryAutomaticallyAdded() {
-        context.checking(new Expectations() {
-            {
-                one(fileCollectionManager).getOrCreateCollectionByName(name);
-                will(returnValue(testFileCollection));
-                one(testFileCollection).addFriend(name);
-                one(testFileCollection).setAddNewAudioAlways(true);
-            }
-        });
-        friendFileListImpl.setCategoryAutomaticallyAdded(Category.AUDIO, true);
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).setAddNewAudioAlways(false);
-            }
-        });
-        friendFileListImpl.setCategoryAutomaticallyAdded(Category.AUDIO, false);
-
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).setAddNewImageAlways(true);
-            }
-        });
-        friendFileListImpl.setCategoryAutomaticallyAdded(Category.IMAGE, true);
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).setAddNewImageAlways(false);
-            }
-        });
-        friendFileListImpl.setCategoryAutomaticallyAdded(Category.IMAGE, false);
-
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).setAddNewVideoAlways(true);
-            }
-        });
-        friendFileListImpl.setCategoryAutomaticallyAdded(Category.VIDEO, true);
-        context.checking(new Expectations() {
-            {
-                one(testFileCollection).setAddNewVideoAlways(false);
-            }
-        });
-        friendFileListImpl.setCategoryAutomaticallyAdded(Category.VIDEO, false);
-
-        context.assertIsSatisfied();
-    }
-
+    
     public void testAddFile() {
         final File file1 = new File("file1");
         context.checking(new Expectations() {

@@ -160,9 +160,6 @@ abstract class LocalFileListImpl implements LocalFileList {
     protected void clearFileDescs() {
         threadSafeList.clear();
     }
-    
-    /** Notification that a collection share has changed. */
-    protected abstract void collectionUpdate(FileViewChangeEvent.Type type, boolean shared);
    
     /** Constructs a new EventListener for list change events. */
     protected EventListener<FileViewChangeEvent> newEventListener() {
@@ -181,11 +178,6 @@ abstract class LocalFileListImpl implements LocalFileList {
                     break;
                 case FILES_CLEARED:
                     clearFileDescs();
-                    break;     
-                case AUDIO_COLLECTION:
-                case VIDEO_COLLECTION:
-                case IMAGE_COLLECTION:
-                    collectionUpdate(event.getType(), event.isShared());
                     break;
                 }
             }

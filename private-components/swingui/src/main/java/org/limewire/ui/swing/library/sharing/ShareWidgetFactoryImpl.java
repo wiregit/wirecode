@@ -12,6 +12,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.friends.login.FriendActions;
+import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.impl.ThreadSafeList;
@@ -24,7 +25,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     
     private ShareWidget<File> fileShareWidget;
     
-    private ShareWidget<Category> categoryShareWidget;
+//    private ShareWidget<Category> categoryShareWidget;
 
     private ShareWidget<LocalFileItem[]> multiFileShareWidget;
     
@@ -81,10 +82,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     
     @Override
     public ShareWidget<Category> createCategoryShareWidget() {
-        if(categoryShareWidget == null){
-            categoryShareWidget = new CategoryShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog, friendActions);
-        }
-        return categoryShareWidget;
+        throw new NotImplementedException();
     }
     
     @Inject

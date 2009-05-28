@@ -20,7 +20,6 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.Library;
-import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 
 class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     private final Library managedList;
@@ -81,9 +80,5 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.removePropertyChangeListener(listener);
-    }
-    
-    @Override
-    protected void collectionUpdate(Type type, boolean shared) {
     }
 }

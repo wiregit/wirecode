@@ -14,7 +14,6 @@ import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileView;
-import com.limegroup.gnutella.library.FileViewChangeEvent.Type;
 
 public class LocalFileListImplTest extends LimeTestCase {
 
@@ -41,9 +40,6 @@ public class LocalFileListImplTest extends LimeTestCase {
         fileDesc2.putClientProperty(LocalFileListImpl.FILE_ITEM_PROPERTY, item2);
     
         LocalFileListImpl localFileList = new LocalFileListImpl(eventList, null) {
-            @Override
-            protected void collectionUpdate(Type type, boolean shared) {
-            }
             @Override
             protected FileCollection getMutableCollection() {
                 return null;

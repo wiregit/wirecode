@@ -1,14 +1,12 @@
 package com.limegroup.gnutella.library;
 
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAdds;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewExtensionTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
 
 import java.io.File;
 
 import junit.framework.Test;
 
-import org.limewire.core.api.Category;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -27,7 +25,7 @@ public class SharedFileCollectionImplTest extends LimeTestCase {
     private SharedFileCollectionImpl friendList;
     private Injector injector;
 
-    private File f1, f2, f3, f4;
+    private File f1;
     
     public SharedFileCollectionImplTest(String name) {
         super(name);
@@ -262,66 +260,4 @@ public class SharedFileCollectionImplTest extends LimeTestCase {
 //        assertFalse(friendList.contains(f3));
 //    }
    
-    /**
-     * Tests sharing a snapshot of a category
-     */
-    public void testSnapShotSharing() throws Exception {
-        friendList.setAddNewAudioAlways(false);
-        assertFalse(friendList.isAddNewAudioAlways());
-        
-        f1 = createNewExtensionTestFile(1, "wav", _scratchDir);
-        f2 = createNewExtensionTestFile(3, "txt", _scratchDir);    
-        f3 = createNewExtensionTestFile(5, "wav", _scratchDir);
-        
-        assertAdds(managedList, f1);
-        assertAdds(managedList, f2);
-        assertAdds(managedList, f3);
-        
-        assertEquals(0, friendList.size());
-        
-        friendList.addSnapshotCategory(Category.AUDIO);
-        
-        Thread.sleep(500);
-        
-        assertEquals(2, friendList.size());
-        assertTrue(friendList.contains(f1));
-        assertTrue(friendList.contains(f3));
-        
-        f4 = createNewExtensionTestFile(8, "wav", _scratchDir);
-        
-        assertAdds(managedList, f4);
-
-        Thread.sleep(500);
-        
-        assertEquals(4, managedList.size());
-        assertEquals(2, friendList.size());
-        assertFalse(friendList.contains(f4));
-    }
-
-    /**
-     * Tests clearing a shared snapshot
-     */
-    public void testClearSharing() throws Exception{
-        friendList.setAddNewAudioAlways(false);
-        assertFalse(friendList.isAddNewAudioAlways());
-        
-        f1 = createNewExtensionTestFile(1, "wav", _scratchDir);
-        f2 = createNewExtensionTestFile(3, "wav", _scratchDir);    
-        
-        assertAdds(friendList, f1);
-        assertAdds(friendList, f2);
-                
-        assertEquals(2, friendList.size());
-        assertTrue(friendList.contains(f1));
-        assertTrue(friendList.contains(f2));
-        
-        friendList.clearCategory(Category.AUDIO);
-        
-        Thread.sleep(500);
-        
-        assertEquals(0, friendList.size());
-        assertFalse(friendList.contains(f1));
-        assertFalse(friendList.contains(f2));
-    }
-    
 }

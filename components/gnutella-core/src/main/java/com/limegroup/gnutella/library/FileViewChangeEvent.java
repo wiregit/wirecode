@@ -11,7 +11,7 @@ import org.limewire.util.StringUtils;
 public class FileViewChangeEvent implements SourcedEvent<FileView> {
     
     public static enum Type {
-        FILE_ADDED, FILE_REMOVED, FILE_CHANGED, FILE_ADD_FAILED, FILE_CHANGE_FAILED, FILES_CLEARED, AUDIO_COLLECTION, VIDEO_COLLECTION, IMAGE_COLLECTION;
+        FILE_ADDED, FILE_REMOVED, FILE_CHANGED, FILE_ADD_FAILED, FILE_CHANGE_FAILED, FILES_CLEARED;
     }
     
     private final Type type;
@@ -70,17 +70,6 @@ public class FileViewChangeEvent implements SourcedEvent<FileView> {
         this.newValue = Objects.nonNull(newValue, "newValue");
         this.oldFile = Objects.nonNull(oldValue.getFile(), "oldValue.getFile()");
         this.newFile = Objects.nonNull(newValue.getFile(), "newValue.getFile()");
-    }
-    
-    public FileViewChangeEvent(FileView list, Type type, boolean state) {
-        assert type == Type.AUDIO_COLLECTION || type == Type.VIDEO_COLLECTION || type == Type.IMAGE_COLLECTION;
-        this.type = Objects.nonNull(type, "type");
-        this.list = list;
-        this.oldValue = null;
-        this.newFile = null;
-        this.oldFile = null;
-        this.newValue = null;
-        this.isShared = state;
     }
     
     @Override

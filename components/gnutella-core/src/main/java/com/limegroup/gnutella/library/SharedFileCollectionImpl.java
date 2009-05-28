@@ -1,21 +1,14 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
-import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.core.api.Category;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.SourcedEventMulticaster;
-import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent.Type;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -26,17 +19,9 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
  */
 class SharedFileCollectionImpl extends AbstractFileCollection implements SharedFileCollection {
     
-    private final int collectionId;
-    
-    private volatile boolean addNewImagesAlways = false;
-    private volatile boolean addNewAudioAlways = false;
-    private volatile boolean addNewVideoAlways = false;
-    
-    protected final LibraryFileData data;
-    
-    private final Executor executor;
-    private final HashTreeCache treeCache;
-    
+    private final int collectionId;    
+    private final LibraryFileData data;
+    private final HashTreeCache treeCache;    
     private final EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster;
 
     @Inject
@@ -47,13 +32,8 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         super(managedList, multicaster);
         this.collectionId = id;
         this.data = data;
-        this.executor = ExecutorsHelper.newProcessingQueue("SharedCollectionAdder");
         this.treeCache = treeCache;
         this.sharedBroadcaster = sharedCollectionBroadcaster;
-        
-        addNewAudioAlways = data.isCollectionSmartAddEnabled(id, Category.AUDIO);
-        addNewImagesAlways = data.isCollectionSmartAddEnabled(id, Category.IMAGE);
-        addNewVideoAlways = data.isCollectionSmartAddEnabled(id, Category.VIDEO);
     }
     
     @Override
@@ -96,12 +76,6 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     @Override
     public String toString() {
         return StringUtils.toString(this) + ", name: " + getName();
-    }
-    
-    // Raise access.
-    @Override
-    public boolean add(FileDesc fileDesc) {
-        return super.add(fileDesc);
     }
     
     @Override
@@ -187,214 +161,14 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         return true;
     }
     
-    /**
-     * Changes the smart sharing value for images. If true, all new images added to
-     * the library will be shared with this list, if false, new images added to 
-     * the library will not be automatically shared with this list but current images
-     * will not be removed.
-     */
-    @Override
-    public void setAddNewImageAlways(boolean value) {
-        if(value != addNewImagesAlways) {
-            data.setCollectionSmartAddEnabled(collectionId, Category.IMAGE, value);
-            fireCollectionEvent(FileViewChangeEvent.Type.IMAGE_COLLECTION, value);
-            addNewImagesAlways = value;
-            if(addNewImagesAlways) {
-                executor.execute(new AddCategory(Category.IMAGE));
-            }
-        }
-    }
-    
-    @Override
-    public void clearCategory(final Category category) {
-        executor.execute(new Runnable(){
-            public void run() {
-                List<FileDesc> fdList = new ArrayList<FileDesc>(size());
-                getReadLock().lock();
-                try {
-                    for(FileDesc fd : SharedFileCollectionImpl.this) {
-                        if(CategoryConverter.categoryForFile(fd.getFile()) == category) {
-                            fdList.add(fd);
-                        }
-                    }
-                } finally {
-                    getReadLock().unlock();
-                }
-        
-                for(FileDesc fd : fdList) {
-                    remove(fd);
-                }
-            }
-        });
-
-    }
-
-    @Override
-    public void addSnapshotCategory(Category category) {
-        executor.execute(new AddCategory(category, true));
-    }
-    
-    private class AddCategory implements Runnable {
-        private final Category category;
-        private final boolean isSnapshot;
-        
-        public AddCategory(Category category) {
-            this(category, false);
-        }
-        
-        public AddCategory(Category category, boolean isSnapShot) {
-            this.category = category;
-            this.isSnapshot = isSnapShot;
-        }
-        
-        @Override
-        public void run() {
-            for (FileDesc fd : library.pausableIterable()) {
-                // Only exit early if we're not doing a snapshot addition.
-                if(!isSnapshot) {
-                    // exit early if off.
-                    switch(category) {
-                    case AUDIO:
-                        if (!addNewAudioAlways) {
-                            return;
-                        }
-                        break;
-                    case IMAGE:
-                        if (!addNewImagesAlways) {
-                            return;
-                        }
-                        break;
-                    case VIDEO:
-                        if (!addNewVideoAlways) {
-                            return;
-                        }
-                        break;
-                    }
-                }
-                
-                if (CategoryConverter.categoryForFile(fd.getFile()) == category) {
-                    add(fd);
-                }
-            }
-        }
-    }
-    
-    /**
-     * Returns true if image files are being smartly shraed with this friend, false otherwise.
-     */
-    @Override
-    public boolean isAddNewImageAlways() {
-        return addNewImagesAlways;
-    }
-    
-    /**
-     * Changes the smart sharing value for audio files. If true, all new audio files added to
-     * the library will be shared with this list, if false, new audio files added to 
-     * the library will not be automatically shared with this list but current audio files
-     * will not be removed.
-     */
-    @Override
-    public void setAddNewAudioAlways(boolean value) {
-        if(value != addNewAudioAlways) {
-            data.setCollectionSmartAddEnabled(collectionId, Category.AUDIO, value);
-            fireCollectionEvent(FileViewChangeEvent.Type.AUDIO_COLLECTION, value);
-            addNewAudioAlways = value;
-            if(addNewAudioAlways) {
-                executor.execute(new AddCategory(Category.AUDIO));
-            }
-        }
-    }
-    
-    /**
-     * Returns true if audio files are being smartly shared with this friend, false otherwise.
-     */
-    @Override
-    public boolean isAddNewAudioAlways() {
-        return addNewAudioAlways;
-    }
-    
-    /**
-     * Changes the smart sharing value for videos. If true, all new videos added to
-     * the library will be shared with this list, if false, new videos added to 
-     * the library will not be automatically shared with this list but current videos
-     * will not be removed.
-     */
-    @Override
-    public void setAddNewVideoAlways(boolean value) {
-        if(value != addNewVideoAlways) {
-            data.setCollectionSmartAddEnabled(collectionId, Category.VIDEO, value);
-            fireCollectionEvent(FileViewChangeEvent.Type.VIDEO_COLLECTION, value);
-            addNewVideoAlways = value;
-            if(addNewVideoAlways) {
-                executor.execute(new AddCategory(Category.VIDEO));
-            }
-        }
-    }
-    
-    /**
-     * Returns true if videos are being smartly shared with this friend, false otherwise.
-     */
-    @Override
-    public boolean isAddNewVideoAlways() {
-        return addNewVideoAlways;
-    }
-    
     @Override
     protected boolean isPending(File file, FileDesc fd) {
-        return isSmartlySharedType(file) || data.isFileInCollection(file, collectionId);
+        return data.isFileInCollection(file, collectionId);
     }
     
     @Override
     protected void saveChange(File file, boolean added) {
         data.setFileInCollection(file, collectionId, added);      
-    }
-    
-    @Override
-    public boolean remove(FileDesc fileDesc) {
-        boolean contains = super.remove(fileDesc);
-        // to stop auto sharing on remove, must be contained in this list, not an incomplete file
-        // be of the type that is smartly shared and must still exist in the managed List
-        // (not existing in the managed list means it was removed from LW)
-        if(contains && !(fileDesc instanceof IncompleteFileDesc) && isSmartlySharedType(fileDesc.getFile()) && library.contains(fileDesc)) {
-            stopSmartSharingType(fileDesc.getFile());
-        }
-        return contains;
-    }
-    
-    /**
-     * Returns true if this file type is being smartly shared. Smartly shared file
-     * types are always added to this list.
-     */
-    protected boolean isSmartlySharedType(File file) {
-        if(addNewAudioAlways == false && addNewImagesAlways == false && addNewVideoAlways == false)
-            return false;
-        
-        String ext = FileUtils.getFileExtension(file);
-        MediaType type = MediaType.getMediaTypeForExtension(ext);
-        if (type == MediaType.getAudioMediaType() && addNewAudioAlways)
-            return true;
-        else if (type == MediaType.getVideoMediaType() && addNewVideoAlways)
-            return true;
-        else if (type == MediaType.getImageMediaType() && addNewImagesAlways)
-            return true;
-        return false;
-    }
-    
-    /**
-     * Stops smartly sharing this file type if it was being smartly shared prior.
-     */
-    private void stopSmartSharingType(File file) {
-        if(addNewAudioAlways == false && addNewImagesAlways == false && addNewVideoAlways == false)
-            return;
-        
-        String ext = FileUtils.getFileExtension(file);
-        MediaType type = MediaType.getMediaTypeForExtension(ext);
-        if (type == MediaType.getAudioMediaType() && addNewAudioAlways)
-            setAddNewAudioAlways(false);
-        else if (type == MediaType.getVideoMediaType() && addNewVideoAlways)
-            setAddNewVideoAlways(false);
-        else if (type == MediaType.getImageMediaType() && addNewImagesAlways)
-            setAddNewImageAlways(false);
     }
     
     @Override
