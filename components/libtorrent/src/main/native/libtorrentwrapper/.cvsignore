@@ -3,7 +3,12 @@ libtorrentwrapper.out
 a.out
 libtorrentwrapper.exe
 libtorrentwrapper.dll
+libtorrentwrapper.dll.manifest
+libtorrentwrapper.lib
+libtorrentwrapper.exp
+libtorrentwrapper.obj
 libtorrent-wrapper.so
 libtorrent-wrapper.out
 libtorrent-wrapper.dylib
 torrent-wrapper.dll
+include
