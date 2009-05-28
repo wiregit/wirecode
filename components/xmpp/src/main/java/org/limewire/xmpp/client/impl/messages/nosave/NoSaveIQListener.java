@@ -84,9 +84,15 @@ public class NoSaveIQListener implements PacketListener {
         for (String friendName : friends.keySet()) {
             XMPPFriend noSaveFriend = connection.getFriend(friendName);
 
-            // add feature (if necessary) to all of this friend's presences
-            for (XMPPPresence presence : noSaveFriend.getPresences().values()) {
-                addNoSaveFeatureIfNecessary(presence, friends.get(friendName));
+            // If friend is not yet known to the connection, skip it.
+            // This can occur upon login if the nosave IQ packet is processed before the roster packet is processed.
+            // It is ok to skip this friend name, because when the friend presence arrives it will automatically
+            // trigger the adding of the nosave feature if applicable.
+            if (noSaveFriend != null) {
+                // add feature (if necessary) to all of this friend's presences
+                for (XMPPPresence presence : noSaveFriend.getPresences().values()) {
+                    addNoSaveFeatureIfNecessary(presence, friends.get(friendName));
+                }
             }
         }
     }
