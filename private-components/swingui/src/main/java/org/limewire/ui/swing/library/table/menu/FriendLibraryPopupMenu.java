@@ -124,6 +124,12 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
                                                 downloadListManager.addDownload(fileItem, saveFile,
                                                         overwrite);
                                             }
+
+                                            @Override
+                                            public void downloadCanceled(SaveLocationException sle) {
+							                    //nothing to do                                                
+                                            }
+
                                         }, e, true);
                             }
                         }

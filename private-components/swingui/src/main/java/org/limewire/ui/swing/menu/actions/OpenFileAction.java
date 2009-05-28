@@ -72,6 +72,12 @@ public class OpenFileAction extends AbstractAction {
                                         downloadListManager.addTorrentDownload(
                                                 file, overwrite);
                                     }
+
+                                    @Override
+                                    public void downloadCanceled(SaveLocationException sle) {
+					                    //nothing to do                                        
+                                    }
+
                                 }, sle, false);
                     }
                 } else {

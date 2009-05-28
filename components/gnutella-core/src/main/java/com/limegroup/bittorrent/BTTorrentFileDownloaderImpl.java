@@ -47,8 +47,6 @@ import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implements
@@ -70,8 +68,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     private final File incompleteTorrentFile;
 
-    private final FileManager fileManager;
-
     /**
      * Something to shutdown if the user cancels the fetching
      */
@@ -82,11 +78,10 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     @Inject
     public BTTorrentFileDownloaderImpl(DownloadManager downloadManager,
             SaveLocationManager saveLocationManager, HttpExecutor httpExecutor,
-            ActivityCallback activityCallback, FileManager fileManager) {
+            ActivityCallback activityCallback) {
         super(saveLocationManager);
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.httpExecutor = Objects.nonNull(httpExecutor, "httpExecutor");
-        this.fileManager = Objects.nonNull(fileManager, "fileManager");
 
         this.eventListenerList = new EventListenerList<DownloadStateEvent>();
         this.incompleteTorrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), UUID
@@ -132,19 +127,15 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
                 Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
                 BTData btData = new BTDataImpl(torrentFileMap);
 
-                shareTorrentFile(btData, incompleteTorrentFile);
-
                 downloadStatus = DownloadState.COMPLETE;
 
                 // The torrent file is copied into the incomplete file
                 // directory.
                 torrentFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.get(), btData.getName()
                         + ".torrent");
-                if (incompleteTorrentFile.equals(torrentFile)) {
-                    // pass through, is ok
-                } else if (torrentFile.exists()) {
-                    throw new IOException("Torrent file already downloaded to location: "
-                            + torrentFile.getAbsolutePath());
+                if (torrentFile.exists()) {
+                    // pass through, when trying to start the BTDownloader a
+                    // savelocation exception will occur
                 } else {
                     FileUtils.forceRename(incompleteTorrentFile, torrentFile);
                 }
@@ -166,37 +157,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
         eventListenerList.broadcast(new DownloadStateEvent(this, downloadStatus));
         return false;
-    }
-
-    private File getSharedTorrentMetaDataFile(BTData btData) {
-        String fileName = btData.getName().concat(".torrent");
-        File f = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE, fileName);
-        return f;
-    }
-
-    private void shareTorrentFile(BTData btData, File torrentFile) {
-        if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()
-                && !btData.isPrivate()) {
-            final File tFile = getSharedTorrentMetaDataFile(btData);
-            fileManager.getGnutellaFileList().remove(tFile);
-
-            File backup = null;
-            if (tFile.exists()) {
-                backup = new File(tFile.getParent(), tFile.getName().concat(".bak"));
-                FileUtils.forceRename(tFile, backup);
-            }
-            if (FileUtils.copy(torrentFile, tFile)) {
-                fileManager.getGnutellaFileList().add(tFile);
-            } else {
-                if (backup != null) {
-                    // restore backup
-                    if (FileUtils.forceRename(backup, tFile)) {
-                        fileManager.getGnutellaFileList().add(tFile);
-                    }
-                }
-            }
-        }
-
     }
 
     @Override
@@ -230,7 +190,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     public long getAmountVerified() {
         return 0;
     }
-    
+
     @Override
     public List<RemoteFileDesc> getRemoteFileDescs() {
         return Collections.emptyList();

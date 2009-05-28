@@ -75,6 +75,8 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
 
         if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
             // ignore, just return because we are already downloading this file
+             downLoadAction.downloadCanceled(sle);
+             showErrorMessage(sle);
             return;
         }
 
@@ -82,12 +84,14 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         if ((sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS)
                 && (sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO)) {
             // Create user message.
+            downLoadAction.downloadCanceled(sle);
             showErrorMessage(sle);
             return;
         } else if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO
                 && !supportNewSaveDir) {
             // prevents infinite loop case where for bit torrent files we can't
             // change the save file at the moment
+            downLoadAction.downloadCanceled(sle);
             showErrorMessage(sle);
             return;
         }
@@ -109,6 +113,8 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             }
 
             if (saveFile == null) {
+                //null saveFile means user selected cancel
+                downLoadAction.downloadCanceled(sle);
                 return;
             }
         }
@@ -121,6 +127,9 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         String message = null;
 
         switch (sle.getErrorCode()) {
+        case FILE_ALREADY_DOWNLOADING:
+            message = I18n.tr("Sorry, this file is already being downloaded: {0}.", sle.getFile() != null ? sle.getFile().getName() : "");
+            break;
         case DIRECTORY_NOT_WRITEABLE:
         case DIRECTORY_DOES_NOT_EXIST:
         case NOT_A_DIRECTORY:
@@ -202,6 +211,8 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
                 dialog.dispose();
                 if (supportNewSaveDir) {
                     handleSaveLocationException(downLoadAction, sle, supportNewSaveDir);
+                } else {
+                    downLoadAction.downloadCanceled(sle);
                 }
             }
         });

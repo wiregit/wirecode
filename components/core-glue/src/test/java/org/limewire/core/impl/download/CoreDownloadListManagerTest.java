@@ -20,6 +20,8 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.download.listener.ItunesDownloadListener;
 import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
+import org.limewire.core.impl.download.listener.TorrentDownloadListener;
+import org.limewire.core.impl.download.listener.TorrentDownloadListenerFactory;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -33,7 +35,6 @@ import org.limewire.util.TestPropertyChangeListener;
 
 import ca.odell.glazedlists.EventList;
 
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -64,12 +65,13 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
-        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final SpamManager spamManager = context.mock(SpamManager.class);
         final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
                 .mock(ItunesDownloadListenerFactory.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
-
+        final TorrentDownloadListenerFactory torrentDownloadListenerFactory = context
+        .mock(TorrentDownloadListenerFactory.class);
+        
         final AtomicReference<DownloadListener> downloadListener = new AtomicReference<DownloadListener>();
 
         context.checking(new Expectations() {
@@ -80,8 +82,8 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
-                itunesDownloadListenerFactory, friendManager);
+                downloadManager, remoteFileDescFactory, spamManager,
+                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
 
         final ScheduledExecutorService backgroundExecutor = context
                 .mock(ScheduledExecutorService.class);
@@ -109,6 +111,9 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         final ItunesDownloadListener itunesDownloadListener = context
                 .mock(ItunesDownloadListener.class);
+        
+        final TorrentDownloadListener torrentDownloadListener = context
+        .mock(TorrentDownloadListener.class);
 
         final AtomicReference<DownloadItem> downloadItem1 = new AtomicReference<DownloadItem>();
         final AtomicReference<DownloadItem> downloadItem2 = new AtomicReference<DownloadItem>();
@@ -119,6 +124,9 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
             {
                 allowing(itunesDownloadListenerFactory).createListener(with(any(Downloader.class)));
                 will(returnValue(itunesDownloadListener));
+                
+                allowing(torrentDownloadListenerFactory).createListener(with(any(Downloader.class)), with(any(List.class)));
+                will(returnValue(torrentDownloadListener));
 
                 allowing(unfinishedItem1).getState();
                 will(returnValue(Downloader.DownloadState.DOWNLOADING));
@@ -237,11 +245,12 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
-        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final SpamManager spamManager = context.mock(SpamManager.class);
         final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
                 .mock(ItunesDownloadListenerFactory.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
+        final TorrentDownloadListenerFactory torrentDownloadListenerFactory = context
+        .mock(TorrentDownloadListenerFactory.class);
 
         final AtomicReference<DownloadListener> downloadListener = new AtomicReference<DownloadListener>();
 
@@ -253,8 +262,8 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
-                itunesDownloadListenerFactory, friendManager);
+                downloadManager, remoteFileDescFactory, spamManager,
+                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
 
         coreDownloadListManager.registerDownloadListener(listenerList);
 
@@ -270,10 +279,17 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         final ItunesDownloadListener itunesDownloadListener = context
                 .mock(ItunesDownloadListener.class);
+        
+        final TorrentDownloadListener torrentDownloadListener = context
+        .mock(TorrentDownloadListener.class);
+        
         context.checking(new Expectations() {
             {
                 allowing(itunesDownloadListenerFactory).createListener(with(any(Downloader.class)));
                 will(returnValue(itunesDownloadListener));
+                
+                allowing(torrentDownloadListenerFactory).createListener(with(any(Downloader.class)), with(any(List.class)));
+                will(returnValue(torrentDownloadListener));
 
                 allowing(unfinishedItem1).getState();
                 will(returnValue(Downloader.DownloadState.DOWNLOADING));
@@ -347,12 +363,13 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
-        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final SpamManager spamManager = context.mock(SpamManager.class);
         final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
                 .mock(ItunesDownloadListenerFactory.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
-
+        final TorrentDownloadListenerFactory torrentDownloadListenerFactory = context
+        .mock(TorrentDownloadListenerFactory.class);
+        
         context.checking(new Expectations() {
             {
                 one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
@@ -362,8 +379,8 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
-                itunesDownloadListenerFactory, friendManager);
+                downloadManager, remoteFileDescFactory, spamManager,
+                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
 
         coreDownloadListManager.registerDownloadListener(listenerList);
 
@@ -406,12 +423,13 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
-        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final SpamManager spamManager = context.mock(SpamManager.class);
         final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
                 .mock(ItunesDownloadListenerFactory.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
-
+        final TorrentDownloadListenerFactory torrentDownloadListenerFactory = context
+        .mock(TorrentDownloadListenerFactory.class);
+        
         context.checking(new Expectations() {
             {
                 one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
@@ -419,8 +437,8 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
-                itunesDownloadListenerFactory, friendManager);
+                downloadManager, remoteFileDescFactory, spamManager,
+                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final MagnetLinkImpl magnetLink = context.mock(MagnetLinkImpl.class);
@@ -495,12 +513,14 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
-        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final SpamManager spamManager = context.mock(SpamManager.class);
         final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
                 .mock(ItunesDownloadListenerFactory.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
 
+        final TorrentDownloadListenerFactory torrentDownloadListenerFactory = context
+        .mock(TorrentDownloadListenerFactory.class);
+        
         context.checking(new Expectations() {
             {
                 one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
@@ -508,8 +528,8 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
-                itunesDownloadListenerFactory, friendManager);
+                downloadManager, remoteFileDescFactory, spamManager,
+                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
@@ -559,12 +579,13 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
-        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final SpamManager spamManager = context.mock(SpamManager.class);
         final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
                 .mock(ItunesDownloadListenerFactory.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
-
+        final TorrentDownloadListenerFactory torrentDownloadListenerFactory = context
+        .mock(TorrentDownloadListenerFactory.class);
+        
         context.checking(new Expectations() {
             {
                 one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
@@ -572,8 +593,8 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
-                itunesDownloadListenerFactory, friendManager);
+                downloadManager, remoteFileDescFactory, spamManager,
+                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
@@ -624,12 +645,13 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
-        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final SpamManager spamManager = context.mock(SpamManager.class);
         final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
                 .mock(ItunesDownloadListenerFactory.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
-
+        final TorrentDownloadListenerFactory torrentDownloadListenerFactory = context
+        .mock(TorrentDownloadListenerFactory.class);
+        
         context.checking(new Expectations() {
             {
                 one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
@@ -637,8 +659,8 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
-                itunesDownloadListenerFactory, friendManager);
+                downloadManager, remoteFileDescFactory, spamManager,
+                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
@@ -720,12 +742,13 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final DownloadListenerList listenerList = context.mock(DownloadListenerList.class);
         final RemoteFileDescFactory remoteFileDescFactory = context
                 .mock(RemoteFileDescFactory.class);
-        final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final SpamManager spamManager = context.mock(SpamManager.class);
         final ItunesDownloadListenerFactory itunesDownloadListenerFactory = context
                 .mock(ItunesDownloadListenerFactory.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
-
+        final TorrentDownloadListenerFactory torrentDownloadListenerFactory = context
+        .mock(TorrentDownloadListenerFactory.class);
+        
         context.checking(new Expectations() {
             {
                 one(listenerList).addDownloadListener(with(any(DownloadListener.class)));
@@ -733,8 +756,8 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         });
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
-                downloadManager, remoteFileDescFactory, activityCallback, spamManager,
-                itunesDownloadListenerFactory, friendManager);
+                downloadManager, remoteFileDescFactory, spamManager,
+                itunesDownloadListenerFactory, friendManager, torrentDownloadListenerFactory);
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);

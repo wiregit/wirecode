@@ -69,6 +69,12 @@ class MagnetHandlerImpl implements MagnetHandler {
                     downloadListManager
                             .addDownload(magnet, saveFile, overwrite);
                 }
+
+                @Override
+                public void downloadCanceled(SaveLocationException sle) {
+                    //nothing to do                    
+                }
+
             }, e1, true);
         }
     }

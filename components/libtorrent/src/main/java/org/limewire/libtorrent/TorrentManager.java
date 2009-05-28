@@ -27,7 +27,7 @@ public interface TorrentManager extends Service {
      * Delegates to clear any error state and restarts the torrent.
      */
     public void recoverTorrent(Torrent torrent);
-    
+
     /**
      * Returns a list of ip addresses for the peers connected to the specified
      * torrent.
@@ -60,13 +60,21 @@ public interface TorrentManager extends Service {
     public boolean isManagedTorrent(File torrentFile);
 
     /**
-     * Returns true if the torrent manager currently has a torrent
-     * with the specified sha1.
+     * Returns true if the torrent manager currently has a torrent with the
+     * specified sha1.
      */
     public boolean isManagedTorrent(String sha1);
 
     /**
-     * Returns true if the TorrentManager loaded properly and is in a valid state. 
+     * Returns true if the TorrentManager loaded properly and is in a valid
+     * state.
      */
     public boolean isValid();
+
+    /**
+     * Returns true if the torrent manager currently had a torrent registered
+     * with the specified torrent file, and the torrent is not finished
+     * downloading yet.
+     */
+    public boolean isDownloadingTorrent(File torrentFile);
 }

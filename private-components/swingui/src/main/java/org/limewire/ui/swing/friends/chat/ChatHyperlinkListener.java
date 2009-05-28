@@ -110,6 +110,12 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
                     DownloadItem dl = downloader.addDownload(remoteFileItem, saveFile, overwrite);
                     addPropertyListener(dl, messageFileOffer);
                 }
+
+                @Override
+                public void downloadCanceled(SaveLocationException sle) {
+                    //nothing to do                    
+                }
+
             }, sle, true);
         } catch (InvalidDataException ide) {
             // this means the FileMetaData we received isn't well-formed.

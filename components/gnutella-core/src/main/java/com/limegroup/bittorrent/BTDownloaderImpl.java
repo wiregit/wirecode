@@ -22,7 +22,6 @@ import org.limewire.libtorrent.LibTorrentState;
 import org.limewire.libtorrent.LibTorrentStatus;
 import org.limewire.libtorrent.Torrent;
 import org.limewire.libtorrent.TorrentEvent;
-import org.limewire.libtorrent.TorrentManager;
 import org.limewire.listener.AsynchronousMulticaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
@@ -64,8 +63,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
-    private final Provider<TorrentManager> torrentManager;
-
     private final FileManager fileManager;
 
     private final EventMulticaster<DownloadStateEvent> listeners;
@@ -78,13 +75,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
             BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
-            Provider<TorrentManager> torrentManager, FileManager fileManager,
-            @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
+            FileManager fileManager, @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
-        this.torrentManager = torrentManager;
         this.fileManager = fileManager;
         this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(fastExecutor);
     }
@@ -138,23 +133,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         saveFile = completeFile;
     }
 
-    /**
-     * Registers the internal torrent with the torrent manager.
-     */
     @Override
     public void registerTorrentWithTorrentManager() {
-        // TODO move file creation logic to a more appropriate place
-        for (File file : torrent.getIncompleteFiles()) {
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    // non-fatal libtorrent will create them
-                }
-            }
-        }
-        torrentManager.get().registerTorrent(torrent);
+        torrent.registerWithTorrentManager();
     }
 
     /**
@@ -164,7 +145,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      */
     @Override
     public void stop() {
-        if (!isInactive() && !torrent.isFinished()) {
+        if (!torrent.isFinished()) {
             torrent.stop();
             downloadManager.remove(this, true);
         } else {
@@ -565,7 +546,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 throw new InvalidDataException("Could not initialize the BTDownloader", e1);
             }
         }
-        registerTorrentWithTorrentManager();
     }
 
     public void initFromOldMemento(BTDownloadMemento memento) throws InvalidDataException {
@@ -613,7 +593,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         } catch (IOException e) {
             throw new InvalidDataException("Could not initialize the BTDownloader", e);
         }
-        registerTorrentWithTorrentManager();
     }
 
     @Override
@@ -625,6 +604,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             initFromCurrentMemento((LibTorrentBTDownloadMemento) memento);
         }
 
+        registerTorrentWithTorrentManager();
     }
 
     /**

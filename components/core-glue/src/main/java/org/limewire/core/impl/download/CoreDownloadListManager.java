@@ -29,7 +29,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
 import org.limewire.core.impl.download.listener.RecentDownloadListener;
-import org.limewire.core.impl.download.listener.TorrentDownloadListener;
+import org.limewire.core.impl.download.listener.TorrentDownloadListenerFactory;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.CoreSearch;
@@ -52,7 +52,6 @@ import ca.odell.glazedlists.impl.ThreadSafeList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -66,10 +65,10 @@ public class CoreDownloadListManager implements DownloadListManager {
 	private EventList<DownloadItem> swingThreadDownloadItems;
 	private final DownloadManager downloadManager;
 	private final RemoteFileDescFactory remoteFileDescFactory;
-    private final ActivityCallback activityCallback;
     private final SpamManager spamManager;
     private final ItunesDownloadListenerFactory itunesDownloadListenerFactory;
     private final FriendManager friendManager;
+    private final TorrentDownloadListenerFactory torrentDownloadListenerFactory;
     
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
     /**the base list - all removing and adding must be done from here.*/
@@ -81,15 +80,16 @@ public class CoreDownloadListManager implements DownloadListManager {
 	
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
-            RemoteFileDescFactory remoteFileDescFactory, ActivityCallback activityCallback, SpamManager spamManager, 
-            ItunesDownloadListenerFactory itunesDownloadListenerFactory, FriendManager friendManager) {
+            RemoteFileDescFactory remoteFileDescFactory, SpamManager spamManager, 
+            ItunesDownloadListenerFactory itunesDownloadListenerFactory, FriendManager friendManager, 
+            TorrentDownloadListenerFactory torrentDownloadListenerFactory) {
 	    
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
-	    this.activityCallback = activityCallback;
         this.spamManager = spamManager;
         this.itunesDownloadListenerFactory = itunesDownloadListenerFactory;
         this.friendManager = friendManager;
+        this.torrentDownloadListenerFactory = torrentDownloadListenerFactory;
         
         threadSafeDownloadItems = GlazedListsFactory.threadSafeList(new BasicEventList<DownloadItem>());
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
@@ -291,7 +291,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         public void downloadAdded(Downloader downloader) {
             DownloadItem item = new CoreDownloadItem(downloader, queueTimeCalculator, friendManager);
             downloader.setAttribute(DownloadItem.DOWNLOAD_ITEM, item, false);
-            downloader.addListener(new TorrentDownloadListener(downloadManager, activityCallback, list, downloader));
+            downloader.addListener(torrentDownloadListenerFactory.createListener(downloader, list));
             downloader.addListener(new RecentDownloadListener(downloader));
             downloader.addListener(itunesDownloadListenerFactory.createListener(downloader));
             threadSafeDownloadItems.add(item);

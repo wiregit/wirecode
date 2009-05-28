@@ -145,7 +145,13 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
                     public void download(File saveFile, boolean overwrite) throws SaveLocationException {
                           // TODO: save file is ignored
                           downloadManager.downloadTorrent(torrentFile, overwrite);
-                    }  
+                    }
+
+                @Override
+                public void downloadCanceled(SaveLocationException sle) {
+                    //nothing to do
+                }
+                
                 },e,false);
             }
         }

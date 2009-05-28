@@ -446,7 +446,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
                 
             }
 
-        }, null);
+        });
         
         torrentFileDownloaderImpl.initDownloadInformation(uri, true);
         return torrentFileDownloaderImpl;

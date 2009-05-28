@@ -24,7 +24,8 @@ public interface BTDownloader extends CoreDownloader {
     File getTorrentFile();
 
     /**
-     * Registers the BTDownloaders torrent with the torrent manager.
+     * Registers the internal torrent with the torrent manager.
      */
     void registerTorrentWithTorrentManager();
+
 }

@@ -281,6 +281,12 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
                                 throws SaveLocationException {
                             downloadListManager.addDownload(file, saveFile, overwrite);
                         }
+
+                        @Override
+                        public void downloadCanceled(SaveLocationException sle) {
+		                    //nothing to do                            
+                        }
+
                     }, e, true);
                 }
             }

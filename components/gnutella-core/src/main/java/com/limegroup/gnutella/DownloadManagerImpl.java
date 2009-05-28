@@ -851,7 +851,6 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                 throw new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, saveFile);
             }
         }
-
         ret.registerTorrentWithTorrentManager();
         initializeDownload(ret, true);
         return ret;

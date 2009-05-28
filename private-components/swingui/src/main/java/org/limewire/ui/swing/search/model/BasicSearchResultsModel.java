@@ -359,6 +359,12 @@ class BasicSearchResultsModel implements SearchResultsModel {
                         di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
                         vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
                     }
+
+                    @Override
+                    public void downloadCanceled(SaveLocationException sle) {
+	                    //nothing to do                        
+                    }
+
                 }, sle, true);
             }
         }

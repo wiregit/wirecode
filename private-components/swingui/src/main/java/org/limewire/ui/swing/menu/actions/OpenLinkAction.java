@@ -86,9 +86,14 @@ public class OpenLinkAction extends AbstractAction {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {
-                            downloadListManager.addTorrentDownload(uri,
-                                    overwrite);
+                            downloadListManager.addTorrentDownload(uri, overwrite);
                         }
+
+                        @Override
+                        public void downloadCanceled(SaveLocationException sle) {
+		                    //nothing to do
+                        }
+
                     }, sle, false);
                 }
             }

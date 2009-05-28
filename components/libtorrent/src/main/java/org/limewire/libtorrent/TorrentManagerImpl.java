@@ -56,8 +56,8 @@ public class TorrentManagerImpl implements TorrentManager {
     private ScheduledFuture<?> alertFuture;
 
     /**
-     * Future for the job creating resume files.
-     * The alert job must be running for the resume files to be created properly.
+     * Future for the job creating resume files. The alert job must be running
+     * for the resume files to be created properly.
      */
     private ScheduledFuture<?> resumeFileFuture;
 
@@ -391,5 +391,19 @@ public class TorrentManagerImpl implements TorrentManager {
                 lock.readLock().unlock();
             }
         }
+    }
+
+    @Override
+    public boolean isDownloadingTorrent(File torrentFile) {
+        if (torrentFile != null) {
+            synchronized (torrents) {
+                for (Torrent torrent : torrents.values()) {
+                    if (torrentFile.equals(torrent.getTorrentFile()) && !torrent.isFinished()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

@@ -48,6 +48,11 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     private File torrentFile = null;
 
+    // TODO can't think of a way of keeping the incomplete folder
+    // clean before the download starts other than keeping a reference
+    // to the file that we want to start the download with.
+    private File initialTorrentFile = null;
+
     private volatile File fastResumeFile = null;
 
     private String sha1 = null;
@@ -57,7 +62,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     private String trackerURL = null;
 
     private long totalSize = -1;
-    
+
     private final Provider<File> torrentDownloadFolderProvider;
 
     private final AtomicBoolean started = new AtomicBoolean(false);
@@ -67,11 +72,12 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
     @Inject
-    public Torrent(TorrentManager torrentManager, 
-            @TorrentDownloadFolder Provider<File> torrentDownloadFolderProvider, @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
+    public Torrent(TorrentManager torrentManager,
+            @TorrentDownloadFolder Provider<File> torrentDownloadFolderProvider,
+            @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
         this.torrentManager = torrentManager;
         this.torrentDownloadFolderProvider = torrentDownloadFolderProvider;
-        
+
         listeners = new AsynchronousMulticaster<TorrentEvent>(fastExecutor);
         status = new AtomicReference<LibTorrentStatus>();
         paths = new ArrayList<String>();
@@ -96,8 +102,8 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
      */
     // TODO: a little messy
     public synchronized void init(String name, String sha1, long totalSize, String trackerURL,
-            List<String> paths, File fastResumeFile, File torrentFile, File saveDir, File incompleteFile) 
-        throws IOException {
+            List<String> paths, File fastResumeFile, File torrentFile, File saveDir,
+            File incompleteFile) throws IOException {
 
         assert (name != null && sha1 != null && totalSize > 0 && trackerURL != null
                 && paths != null && paths.size() > 0 && saveDir != null)
@@ -109,16 +115,10 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
             this.paths.addAll(paths);
         }
         this.totalSize = totalSize;
-
         File torrentDownloadFolder = torrentDownloadFolderProvider.get();
 
         if (name != null) {
             this.name = name;
-            
-            this.incompleteFile = incompleteFile == null ? new File(torrentDownloadFolder, name) : incompleteFile;
-            this.fastResumeFile = fastResumeFile == null ? new File(torrentDownloadFolder, name
-                    + ".fastresume") : fastResumeFile;
-            this.completeFile = new File(saveDir, name);
         }
 
         if (torrentFile != null && torrentFile.exists()) {
@@ -132,24 +132,9 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
                 if (this.name == null) {
                     this.name = btData.getName();
                 }
-                if (btData.getLength() == null) {
-                    this.totalSize = 0;
-                    if (btData.getFiles() != null) {
-                        for (BTFileData file : btData.getFiles()) {
-                            this.totalSize += file.getLength();
-                        }
-                    }
-                } else {
-                    this.totalSize = btData.getLength();
-                }
+                this.totalSize = getTotalSize(btData);
 
-                if (this.paths.size() == 0) {
-                    if (btData.getFiles() != null) {
-                        for (BTFileData fileData : btData.getFiles()) {
-                            this.paths.add(fileData.getPath());
-                        }
-                    }
-                }
+                buildPaths(btData);
 
                 if (this.trackerURL == null) {
                     this.trackerURL = btData.getAnnounce();
@@ -163,18 +148,39 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
                 IOUtils.close(fileChannel);
                 IOUtils.close(fis);
             }
-
-            this.incompleteFile = incompleteFile == null ? new File(torrentDownloadFolder, this.name) : incompleteFile;
-            this.fastResumeFile = fastResumeFile == null ? new File(torrentDownloadFolder,
-                    this.name + ".fastresume") : fastResumeFile;
-            this.completeFile = new File(saveDir, this.name);
-
-            File torrentFileCopy = new File(torrentDownloadFolder, this.name + ".torrent");
-            if (!torrentFile.equals(torrentFileCopy)) {
-                FileUtils.copy(torrentFile, torrentFileCopy);
-            }
-            this.torrentFile = torrentFileCopy;
         }
+
+        this.incompleteFile = incompleteFile == null ? new File(torrentDownloadFolder, this.name)
+                : incompleteFile;
+        this.fastResumeFile = fastResumeFile == null ? new File(torrentDownloadFolder, this.name
+                + ".fastresume") : fastResumeFile;
+        this.completeFile = new File(saveDir, this.name);
+        this.torrentFile = new File(torrentDownloadFolder, this.name + ".torrent");
+        this.initialTorrentFile = torrentFile;
+    }
+
+    private void buildPaths(BTData btData) {
+        if (this.paths.size() == 0) {
+            if (btData.getFiles() != null) {
+                for (BTFileData fileData : btData.getFiles()) {
+                    this.paths.add(fileData.getPath());
+                }
+            }
+        }
+    }
+
+    private long getTotalSize(BTData btData) {
+        long totalSize = 0;
+        if (btData.getLength() == null) {
+            if (btData.getFiles() != null) {
+                for (BTFileData file : btData.getFiles()) {
+                    totalSize += file.getLength();
+                }
+            }
+        } else {
+            totalSize = btData.getLength();
+        }
+        return totalSize;
     }
 
     /**
@@ -222,7 +228,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     public void moveTorrent(File directory) {
         torrentManager.moveTorrent(this, directory);
         int count = 0;
-        //TODO find a better way to do this.
+        // TODO find a better way to do this.
         while (!getCompleteFile().exists()) {
             if (count++ > 50) {
                 break;
@@ -248,8 +254,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     public void resume() {
         if (getStatus().isError()) {
             torrentManager.recoverTorrent(this);
-        } 
-        else { 
+        } else {
             torrentManager.resumeTorrent(this);
         }
     }
@@ -394,11 +399,9 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
      */
     public void stop() {
         if (!cancelled.getAndSet(true)) {
-            if (started.getAndSet(false)) {
-                torrentManager.removeTorrent(this);
-            }
-            listeners.broadcast(TorrentEvent.STOPPED);
+            torrentManager.removeTorrent(this);
         }
+        listeners.broadcast(TorrentEvent.STOPPED);
     }
 
     /**
@@ -493,5 +496,24 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
 
     public String getIncompleteDownloadPath() {
         return incompleteFile.getParentFile().getAbsolutePath();
+    }
+
+    public void registerWithTorrentManager() {
+        for (File file : getIncompleteFiles()) {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                try {
+                    file.createNewFile();
+                } catch (Throwable e) {
+                    // non-fatal libtorrent will create them
+                }
+            }
+        }
+
+        if (initialTorrentFile != null && !initialTorrentFile.equals(torrentFile)) {
+            FileUtils.copy(initialTorrentFile, torrentFile);
+        }
+
+        torrentManager.registerTorrent(this);
     }
 }
