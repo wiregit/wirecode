@@ -25,7 +25,7 @@ public class LimeWireFacebookModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("facebookApiKey")).toInstance("9d8c6048e08ffe11d94e9cf3880f6757");
         bind(FacebookFriendService.class);
         bind(LiveMessageHandlerRegistry.class).to(LiveMessageHandlerRegistryImpl.class);
-        bind(ChatClientFactory.class).toProvider(FactoryProvider.newFactory(ChatClientFactory.class, ChatClient.class));
+        bind(ChatListenerFactory.class).toProvider(FactoryProvider.newFactory(ChatListenerFactory.class, ChatListener.class));
         bind(PresenceListenerFactory.class).toProvider(FactoryProvider.newFactory(PresenceListenerFactory.class, PresenceListener.class));
         bind(FacebookFriendConnectionFactory.class).toProvider(FactoryProvider.newFactory(FacebookFriendConnectionFactory.class, FacebookFriendConnection.class));
         bind(AddressHandlerFactory.class).toProvider(FactoryProvider.newFactory(AddressHandlerFactory.class, AddressHandler.class));

@@ -3,17 +3,19 @@ package org.limewire.facebook.service;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.HashSet;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -34,12 +36,12 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.jivesoftware.smack.util.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.concurrent.ThreadPoolListeningExecutor;
+import org.limewire.concurrent.ScheduledListeningExecutorService;
+import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
@@ -80,22 +82,25 @@ public class FacebookFriendConnection implements FriendConnection {
     
     private final FriendConnectionConfiguration configuration;
     private final Provider<String> apiKey;
+    private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private static final String FACEBOOK_LOGIN_GET_URL = "http://coelacanth:5555/getlogin/";
     private static final String FACEBOOK_LOGIN_POST_ACTION_URL = "https://login.facebook.com/login.php?";
     private static final String FACEBOOK_GET_SESSION_URL = "http://coelacanth:5555/getsession/";
-    private static final String FACEBOOK_LOGOUT_GET_URL = "https://www.facebook.com/logout.php?";
+    private static final String FACEBOOK_CHAT_SETTINGS_URL = "https://www.facebook.com/ajax/chat/settings.php?";
     private String authToken;
     private String session;
     private String uid;
     private String secret;
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10";
-    private ThreadPoolListeningExecutor executorService;
+    private final ChatListenerFactory chatListenerFactory;
+    private ScheduledListeningExecutorService executorService;
     private final AtomicBoolean loggedIn = new AtomicBoolean(false);
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
     private final EventBroadcaster<FriendConnectionEvent> connectionBroadcaster;
     private final Map<String, FacebookFriend> friends = Collections.synchronizedMap(new TreeMap<String, FacebookFriend>(String.CASE_INSENSITIVE_ORDER));
     private volatile FacebookJsonRestClient facebookClient;
     private final CookieStore cookieStore = new BasicCookieStore();
+    private AtomicReference<String> postFormID = new AtomicReference<String>();
 
     
     /**
@@ -131,9 +136,12 @@ public class FacebookFriendConnection implements FriendConnection {
     };
 
     private final MutableFriendManager friendManager;
+    private final PresenceListenerFactory presenceListenerFactory;
     private final FacebookFriendFactory friendFactory;
 
     private final ConnectBackRequestHandler connectBackRequestHandler;
+    private volatile ChatListener chatListener;
+    private PresenceListener presenceListener;
 
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
@@ -146,19 +154,28 @@ public class FacebookFriendConnection implements FriendConnection {
                                     AuthTokenHandlerFactory authTokenHandlerFactory,
                                     ConnectBackRequestHandlerFactory connectBackRequestHandlerFactory,
                                     LibraryRefreshHandlerFactory libraryRefreshHandlerFactory,
-                                    FacebookFriendFactory friendFactory) {
+                                    PresenceListenerFactory presenceListenerFactory,
+                                    FacebookFriendFactory friendFactory,
+                                    ChatListenerFactory chatListenerFactory,
+                                    @Named("backgroundExecutor")ScheduledListeningExecutorService executorService) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
         this.featureEventBroadcaster = featureEventBroadcaster;
         this.friendPresenceBroadcaster = friendPresenceBroadcaster;
         this.friendManager = friendManager;
+        this.presenceListenerFactory = presenceListenerFactory;
         this.friendFactory = friendFactory;
-        this.executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));
+        this.chatListenerFactory = chatListenerFactory;
+        this.executorService = executorService;
         this.addressHandler = addressHandlerFactory.create(this);
         this.authTokenHandler = authTokenHandlerFactory.create(this);
         this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
         this.libraryRefreshHandler = libraryRefreshHandlerFactory.create(this);
+    }
+    
+    void setPostFormID(String postFormID) {
+        this.postFormID.set(postFormID);
     }
 
     @Override
@@ -184,12 +201,17 @@ public class FacebookFriendConnection implements FriendConnection {
     }
     
     void logoutImpl() {
+        LOG.debug("logging out from facebook...");
         loggedIn.set(false);
         try {
-            //expireSession();
             sendOfflinePresences();
             logoutFromFacebook();
             expireSession();
+            if(chatListener != null) {
+                chatListener.setDone();
+            }
+            // TODO unschedule presenceListener
+            LOG.debug("logged out from facebook.");
         } catch (IOException e) {
             LOG.debug("logout failed", e);
         } catch (FacebookException e) {
@@ -216,11 +238,22 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     private void logoutFromFacebook() throws IOException {
-        HttpGet logoutGet = new HttpGet(FACEBOOK_LOGOUT_GET_URL + "version=1.0" + "&auth_token=" + authToken + 
+        // TODO better logout
+        HttpPost httpPost = new HttpPost(FACEBOOK_CHAT_SETTINGS_URL + "version=1.0" + "&auth_token=" + authToken + 
                                         "&api_key=" + apiKey.get());
-        logoutGet.addHeader("User-Agent", USER_AGENT_HEADER);
+        httpPost.addHeader("User-Agent", USER_AGENT_HEADER);
+        
+        List <NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair("visibility", "false"));
+        String post_form_id = postFormID.get();
+        if(post_form_id != null) {
+            nvps.add(new BasicNameValuePair("post_form_id", post_form_id));
+        }
+        
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+        
         HttpClient httpClient = createHttpClient();
-        HttpResponse response = httpClient.execute(logoutGet);
+        HttpResponse response = httpClient.execute(httpPost);
         HttpEntity entity = response.getEntity();
 
         if (entity != null) {
@@ -245,6 +278,10 @@ public class FacebookFriendConnection implements FriendConnection {
             loginToFacebook();
             requestSession();
             fetchAllFriends();
+            getChannelAndPOSTFormID();
+            setVisible();
+            presenceListener = presenceListenerFactory.createPresenceListener(this);
+            executorService.scheduleAtFixedRate(presenceListener, 0, 90, TimeUnit.SECONDS);
             loggedIn.set(true);
             connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
         } catch (IOException e) {
@@ -257,7 +294,29 @@ public class FacebookFriendConnection implements FriendConnection {
             loggingIn.set(false);
         }
     }
-    
+
+    private void setVisible() throws IOException {
+        HttpPost httpPost = new HttpPost(FACEBOOK_CHAT_SETTINGS_URL);
+        httpPost.addHeader("User-Agent", USER_AGENT_HEADER);
+        
+        List <NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair("visibility", "true"));
+        String post_form_id = postFormID.get();
+        if(post_form_id != null) {
+            nvps.add(new BasicNameValuePair("post_form_id", post_form_id));
+        }
+        
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+        
+        HttpClient httpClient = createHttpClient();
+        HttpResponse response = httpClient.execute(httpPost);
+        HttpEntity entity = response.getEntity();
+
+        if (entity != null) {
+            entity.consumeContent();
+        }
+    }
+
     /**
      * Fetches all friends and adds them as known friends.
      */
@@ -326,6 +385,10 @@ public class FacebookFriendConnection implements FriendConnection {
         List <NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair("email", configuration.getUserInputLocalID()));
         nvps.add(new BasicNameValuePair("pass", configuration.getPassword()));
+        nvps.add(new BasicNameValuePair("persistent", "1"));
+        nvps.add(new BasicNameValuePair("login", "Login"));
+        nvps.add(new BasicNameValuePair("visibility", "true"));
+        nvps.add(new BasicNameValuePair("charset_test", "€,´,€,´,水,Д,Є"));
 
         httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
@@ -368,6 +431,57 @@ public class FacebookFriendConnection implements FriendConnection {
 		} else {
 		    LOG.debugf("body doesn't match regex: {0}", responseBody);
 		}
+    }
+    
+    public void getChannelAndPOSTFormID() throws FriendException {
+        try {
+            String homePage = httpGET(HOME_PAGE);
+
+            if(homePage == null){
+                throw new IOException("no response");
+            }
+            if(uid == null){
+                throw new IOException("no uid");
+            }
+
+            String channel;
+            String channelPrefix = " \"channel";
+            int channelBeginPos = homePage.indexOf(channelPrefix)
+                    + channelPrefix.length();
+            if (channelBeginPos < channelPrefix.length()){
+                channel = FacebookSettings.CHAT_CHANNEL.get();
+                // no cached value
+                if (channel.length() == 0) {
+                    throw new IOException("can't find channel");
+                }
+                LOG.debugf("using cached channel: {0}", channel);
+            }
+            else {
+                channel = homePage.substring(channelBeginPos,
+                        channelBeginPos + 2);
+                FacebookSettings.CHAT_CHANNEL.set(channel);
+            }
+
+            String post_form_id;
+            String postFormIDPrefix = "<input type=\"hidden\" id=\"post_form_id\" name=\"post_form_id\" value=\"";
+            int formIdBeginPos = homePage.indexOf(postFormIDPrefix)
+                    + postFormIDPrefix.length();
+            if (formIdBeginPos < postFormIDPrefix.length()){
+                throw new IOException("can't find post form id");
+            }
+            else {
+                post_form_id = homePage.substring(formIdBeginPos,
+                        formIdBeginPos + 32);
+            }
+            
+            setPostFormID(post_form_id);
+
+            chatListener = chatListenerFactory.createChatListener(this);
+            ThreadExecutor.startThread(chatListener, "chat-listener-thread");
+        } catch (IOException ioe)  {
+            LOG.debug("starting chat failed", ioe);
+            throw new FriendException(ioe);
+        }
     }
 
     public String httpGET(String url) throws IOException {
@@ -451,6 +565,10 @@ public class FacebookFriendConnection implements FriendConnection {
     
     public String getUID() {
         return uid;    
+    }
+    
+    public String getChannel() {
+        return FacebookSettings.CHAT_CHANNEL.get();
     }
 
     public String getPresenceId() {

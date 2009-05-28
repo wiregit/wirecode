@@ -48,7 +48,10 @@ public class MutableFriendManagerImpl implements MutableFriendManager {
             public void handleEvent(FriendConnectionEvent event) {
                 switch(event.getType()) {
                 case DISCONNECTED:
-                    for (Friend user : event.getSource().getFriends()) {
+                    for (Friend user :  availFriends.values()) {
+                        removeAvailableFriend(user);
+                    }
+                    for (Friend user :  knownFriends.values()) {
                         removeKnownFriend(user, false);
                     }
                     break;

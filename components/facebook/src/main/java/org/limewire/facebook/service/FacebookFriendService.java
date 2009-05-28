@@ -19,8 +19,8 @@ import org.limewire.facebook.service.livemessage.PresenceHandlerFactory;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -34,21 +34,18 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     
     private final ThreadPoolListeningExecutor executorService;
     private final FacebookFriendConnectionFactory connectionFactory;
-    private final ChatClientFactory chatClientFactory;
 
     private final DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory;
     private final PresenceHandlerFactory presenceHandlerFactory;
     private final FeatureRegistry featureRegistry;
-    private volatile ChatClient client;
+    private volatile ChatListener listener;
     private volatile FacebookFriendConnection connection;
 
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
-                                  ChatClientFactory chatClientFactory,
                                   DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory,
                                   PresenceHandlerFactory presenceHandlerFactory,
                                   FeatureRegistry featureRegistry) {
         this.connectionFactory = connectionFactory;
-        this.chatClientFactory = chatClientFactory;
         this.liveDiscoInfoHandlerFactory = liveDiscoInfoHandlerFactory;
         this.presenceHandlerFactory = presenceHandlerFactory;
         this.featureRegistry = featureRegistry;
@@ -60,29 +57,17 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
         registry.register(this);
     }
     
-    @Inject
-    void register(ListenerSupport<FriendConnectionEvent> listenerSupport) {
-        listenerSupport.addListener(new EventListener<FriendConnectionEvent> (){
+    public void register(ListenerSupport<FriendConnectionEvent> listenerSupport) {
+        listenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             public void handleEvent(FriendConnectionEvent event) {
-                FriendConnection connection = event.getSource();
-                if(connection instanceof FacebookFriendConnection) {
-                    FacebookFriendConnection facebookFriendConnection = (FacebookFriendConnection)connection;    
-                    if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
-                        client = chatClientFactory.createChatClient(facebookFriendConnection);
-                        try {
-                            client.start();
-                        } catch (FriendException e) {
-                            LOG.error("chat faild to start", e);
-                            // TODO disconnect
-                        }
-                    } else if(event.getType() == FriendConnectionEvent.Type.DISCONNECTED) {
-                        if(client != null) {
-                            client.setDone();
-                            client = null;
+                if(event.getType() == FriendConnectionEvent.Type.DISCONNECTED) {
+                    synchronized (FacebookFriendService.this) {
+                        if(connection != null && connection == event.getSource()) {
+                            connection = null;
                         }
                     }
-                }                 
+                }
             }
         });
     }
@@ -109,8 +94,11 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     }
     
     private void logoutImpl() {
-        if(connection != null) {
-            connection.logoutImpl();
+        synchronized (this) {
+            if(connection != null) {
+                connection.logoutImpl();
+                connection = null;
+            }
         }
     }
 
