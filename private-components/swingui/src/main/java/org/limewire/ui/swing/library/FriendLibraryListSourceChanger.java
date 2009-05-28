@@ -26,6 +26,7 @@ public class FriendLibraryListSourceChanger implements ListSourceChanger {
     
     private Friend currentFriend;
     private EventList<RemoteFileItem> filterList;
+    private ListEventListener<FriendLibrary> friendLibraryListener;
     
     public FriendLibraryListSourceChanger(PluggableList<RemoteFileItem> delegateList,
             RemoteLibraryManager remoteLibraryManager) {
@@ -42,19 +43,33 @@ public class FriendLibraryListSourceChanger implements ListSourceChanger {
      * replace the backing filter.
      */
     public void registerListeners() {
-        remoteLibraryManager.getSwingFriendLibraryList().addListEventListener(new ListEventListener<FriendLibrary>(){
-            @Override
-            public void listChanged(ListEvent<FriendLibrary> listChanges) {
-                while(listChanges.next()) {
-                    EventList<FriendLibrary> item = listChanges.getSourceList();
-                    for(FriendLibrary library : item) {
-                        if(isFriendEqual(library.getFriend())) {
-                            updateEventList();
-                        }
-                    }
-                }
-            }
-        });
+    	if (friendLibraryListener == null) {
+
+			friendLibraryListener = new ListEventListener<FriendLibrary>() {
+				@Override
+				public void listChanged(ListEvent<FriendLibrary> listChanges) {
+					while (listChanges.next()) {
+						EventList<FriendLibrary> item = listChanges.getSourceList();
+						for (FriendLibrary library : item) {
+							if (isFriendEqual(library.getFriend())) {
+								updateEventList();
+							}
+						}
+					}
+				}
+			};
+			remoteLibraryManager.getSwingFriendLibraryList().addListEventListener(friendLibraryListener);
+		}
+    }
+    
+    /**
+     * Removes listeners so that this can be garbage collected.
+     */
+    public void dispose(){
+    	if (friendLibraryListener != null){
+    		remoteLibraryManager.getSwingFriendLibraryList().removeListEventListener(friendLibraryListener);
+    	}
+    	listeners.clear();
     }
 
     /**

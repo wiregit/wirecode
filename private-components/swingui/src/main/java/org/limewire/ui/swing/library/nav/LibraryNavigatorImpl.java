@@ -640,18 +640,21 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private class FriendLibraryUpdater extends AbstractListEventListener<FriendLibrary> {
         @Override
         protected void itemAdded(FriendLibrary item, int idx, EventList<FriendLibrary> source) {
-            LOG.debugf("friend library {0} added ...", item.getFriend().getId());  
-            NavPanel panel = getPanelForFriend(item.getFriend());
-            if(panel != null) {
-                LOG.debugf("... removing existing friend library {0}", item.getFriend().getId());  
-                panel.getParentList().removePanel(panel);
-            } else {
-                LOG.debugf("... creating new friend nav panel {0}", item.getFriend().getId()); 
-                panel = createFriendNavPanel(item.getFriend());
+            if (true || !item.getFriend().isAnonymous()) {
+                //Don't add gnutella browses - temporary hack until we remove friends from nav
+                LOG.debugf("friend library {0} added ...", item.getFriend().getId());
+                NavPanel panel = getPanelForFriend(item.getFriend());
+                if (panel != null) {
+                    LOG.debugf("... removing existing friend library {0}", item.getFriend().getId());
+                    panel.getParentList().removePanel(panel);
+                } else {
+                    LOG.debugf("... creating new friend nav panel {0}", item.getFriend().getId());
+                    panel = createFriendNavPanel(item.getFriend());
+                }
+
+                limewireList.addNavPanel(panel);
+                updatePanel(item, panel);
             }
-            
-            limewireList.addNavPanel(panel);
-            updatePanel(item, panel);
         }
         
         @Override

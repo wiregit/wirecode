@@ -130,7 +130,7 @@ public class RemoteHostWidget extends JPanel {
         
             @Override
             public void actionPerformed(ActionEvent e) {
-                getRemoteHostAction().showFilesSharedBy(person);
+                getRemoteHostAction().showFilesSharedWith(person);
             }
         };
     }

@@ -8,7 +8,7 @@ import org.limewire.core.api.endpoint.RemoteHost;
 public interface RemoteHostActions {
     void chatWith(RemoteHost person);
 
-    void showFilesSharedBy(RemoteHost person);
+    void showFilesSharedWith(RemoteHost person);
 
     void viewLibraryOf(RemoteHost person);
 }

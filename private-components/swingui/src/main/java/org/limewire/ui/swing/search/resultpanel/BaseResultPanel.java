@@ -507,6 +507,11 @@ public class BaseResultPanel extends JXPanel {
             if(selectionModel != null){
                 selectionModel.dispose();
             }
+            maxSizedList.removeListEventListener(maxSizedListener);
+            maxSizedList.dispose();
+
+            resultsList.getEventTableModel().dispose();
+            resultsTable.getEventTableModel().dispose();
         }        
     }
     

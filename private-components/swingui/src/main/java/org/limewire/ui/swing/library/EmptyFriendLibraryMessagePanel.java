@@ -39,7 +39,7 @@ public class EmptyFriendLibraryMessagePanel extends JPanel implements ListEventL
     /**
      * Various states the EmptyPanel can exist in. 
      */
-    enum MessageTypes {
+    public enum MessageTypes {
         OFFLINE, ONLINE, LW_LOADING, LW_NO_FILES, LW_CONNECTION_ERROR, ALL_FRIENDS
     }
     
@@ -81,7 +81,7 @@ public class EmptyFriendLibraryMessagePanel extends JPanel implements ListEventL
      * If friend is not null, the shareList of this friend will be loaded.
      */
     public void setFriend(Friend friend) {
-        // remove listeners only if the friend was a non null/anonymouse friend
+        // remove listeners only if the friend was a non null/anonymous friend
         if(this.friend != null && !this.friend.isAnonymous() && this.friendList != null)
             this.friendList.removeListEventListener(this);
 
@@ -243,7 +243,7 @@ public class EmptyFriendLibraryMessagePanel extends JPanel implements ListEventL
          */
         private void setLWConnectionError() {
             hideShareText();
-            if(!friend.isAnonymous()) {
+            if(friend != null && !friend.isAnonymous()) {
                 firstLabel.setText(I18n.tr("There was a problem viewing {0}'s files.", friend.getRenderName()));
             } else {
                 firstLabel.setText(I18n.tr("There was a problem viewing this person's files."));

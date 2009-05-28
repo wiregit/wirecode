@@ -44,6 +44,7 @@ import com.google.inject.Provider;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.event.ListEvent;
@@ -69,8 +70,11 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     
     private FunctionList<E, Object> propertyList;
     private UniqueList<Object> uniqueList;
+    private SortedList<Object> sortedList;
+    private ListEventListener<Object> uniqueListListener;
     private EventSelectionModel<Object> selectionModel;
     private EventSelectionModel<Object> popupSelectionModel;
+    private EventListModel<Object> listModel;
     private MorePopupPanel morePopupPanel;
     
     /**
@@ -161,7 +165,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         moreButton.setVisible(uniqueList.size() > 3);
 
         // Add listener to display "more" button when needed.
-        uniqueList.addListEventListener(new ListEventListener<Object>() {
+        uniqueListListener = new ListEventListener<Object>() {
             @Override
             public void listChanged(ListEvent listChanges) {
                 if (!moreButton.isVisible() && (uniqueList.size() > 3)) {
@@ -170,13 +174,14 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
                     moreButton.setVisible(false);
                 }
             }
-        });
+        };
+        uniqueList.addListEventListener(uniqueListListener);
         
         // Create sorted list to display most popular values.
-        EventList<Object> sortedList = GlazedListsFactory.sortedList(uniqueList, new PropertyCountComparator());
+        sortedList = GlazedListsFactory.sortedList(uniqueList, new PropertyCountComparator(uniqueList));
         
         // Create list and selection models.
-        EventListModel<Object> listModel = new EventListModel<Object>(sortedList);
+        listModel = new EventListModel<Object>(sortedList);
         selectionModel = new EventSelectionModel<Object>(sortedList);
         list.setModel(listModel);
         list.setSelectionModel(selectionModel);
@@ -205,9 +210,17 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     
     @Override
     public void dispose() {
+        selectionModel.dispose();
+        listModel.dispose();
+        sortedList.dispose();
+        sortedList = null;
+        uniqueList.removeListEventListener(uniqueListListener);
+        uniqueList.dispose();
+        uniqueList = null;
         // Dispose of property list.  Since all other lists are based on the
         // property list, these will be freed for GC also.
         propertyList.dispose();
+        propertyList = null;
     }
     
     /**
@@ -282,14 +295,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
      */
     private UniqueList<Object> createUniqueList(EventList<Object> propertyList) {
         // Create list of non-null values.
-        FilterList<Object> nonNullList = GlazedListsFactory.filterList(propertyList, 
-            new Matcher<Object>() {
-                @Override
-                public boolean matches(Object item) {
-                    return (item != null);
-                }
-            }
-        );
+        FilterList<Object> nonNullList = GlazedListsFactory.filterList(propertyList, new NonNullMatcher());
         
         // Create list of unique values.
         return GlazedListsFactory.uniqueList(nonNullList, new PropertyComparator(filterType, propertyKey));
@@ -561,7 +567,12 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     /**
      * Comparator to sort property values by their result count.
      */
-    private class PropertyCountComparator implements Comparator<Object> {
+    private static class PropertyCountComparator implements Comparator<Object> {
+        private UniqueList<Object> uniqueList;
+
+        public PropertyCountComparator(UniqueList<Object> uniqueList){
+            this.uniqueList = uniqueList;
+        }
 
         @Override
         public int compare(Object o1, Object o2) {
@@ -625,6 +636,13 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
             default:
                 return null;
             }
+        }
+    }
+    
+    private static class NonNullMatcher implements Matcher<Object> {
+        @Override
+        public boolean matches(Object item) {
+            return (item != null);
         }
     }
 }

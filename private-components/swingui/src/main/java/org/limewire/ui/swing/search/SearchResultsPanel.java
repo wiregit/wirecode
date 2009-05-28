@@ -27,6 +27,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.setting.evt.SettingEvent;
@@ -37,6 +38,8 @@ import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
+import org.limewire.ui.swing.library.EmptyFriendLibraryMessagePanel;
+import org.limewire.ui.swing.library.EmptyFriendLibraryMessagePanel.MessageTypes;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
@@ -106,6 +109,10 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
 
     private boolean fullyConnected = true;
 
+    private LibraryState browseState = null;
+
+    private final EmptyFriendLibraryMessagePanel browseMessagePanel;
+
     /**
      * Constructs a SearchResultsPanel with the specified components.
      */
@@ -117,7 +124,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             AdvancedFilterPanelFactory<VisualSearchResult> filterPanelFactory,
             SearchTabItemsFactory searchTabItemsFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
-            HeaderBarDecorator headerBarDecorator) {
+            HeaderBarDecorator headerBarDecorator,
+            EmptyFriendLibraryMessagePanel browseMessagePanel) {
 
         GuiUtils.assignResources(this);
         
@@ -126,6 +134,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         this.sponsoredResultsPanel.setVisible(false);
+        this.browseMessagePanel = browseMessagePanel;
         
         // Create sort and filter components.
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
@@ -306,7 +315,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         add(classicSearchReminderPanel, "spanx 2, growx, wrap");
         add(messagePanel              , "spanx 2, growx, wrap");
         add(filterPanel, "grow");
-        add(scrollPane , "grow");
+        add(scrollPane , "hidemode 3, grow");
+        add(browseMessagePanel , "hidemode 3, grow");
 
         scrollablePanel.setScrollableTracksViewportHeight(false);
         scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0, insets 0", "[]", "[grow][]"));
@@ -413,6 +423,11 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         updateMessages();        
     }
     
+    public void setBrowseState(LibraryState browseState){
+        this.browseState = browseState;
+        updateMessages();        
+    }
+    
     /**
      * Updates the user message based on the current state of the application. 
      */
@@ -420,11 +435,22 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         if (!lifeCycleComplete) {
             messageLabel.setText(I18n.tr("LimeWire will start your search right after it finishes loading."));
             messagePanel.setVisible(true);
+            browseMessagePanel.setVisible(false);
         } else if (!fullyConnected) {
             messageLabel.setText(I18n.tr("You might not receive many results until LimeWire finishes loading..."));
             messagePanel.setVisible(true);
+            browseMessagePanel.setVisible(false);            
+        } else if (browseState == LibraryState.FAILED_TO_LOAD) {
+            browseMessagePanel.setMessageType(MessageTypes.LW_CONNECTION_ERROR);
+            browseMessagePanel.setVisible(true);
+        } else if (browseState == LibraryState.LOADING) {
+            browseMessagePanel.setMessageType(MessageTypes.LW_LOADING);
+            browseMessagePanel.setVisible(true);
         } else {
             messagePanel.setVisible(false);
+            browseMessagePanel.setVisible(false);
         }
+
+        scrollPane.setVisible(!browseMessagePanel.isVisible());
     }
 }
