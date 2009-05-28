@@ -128,7 +128,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
 
         switch (sle.getErrorCode()) {
         case FILE_ALREADY_DOWNLOADING:
-            message = I18n.tr("Sorry, this file is already being downloaded: {0}.", sle.getFile() != null ? sle.getFile().getName() : "");
+            message = I18n.tr("Sorry, this file is already being downloaded.");
             break;
         case DIRECTORY_NOT_WRITEABLE:
         case DIRECTORY_DOES_NOT_EXIST:
