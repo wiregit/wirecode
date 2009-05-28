@@ -46,6 +46,7 @@
         <dependency org="none" name="jcip-annotations" rev="${jcip-annotations.version}" conf="compile,runtime"/>
        
         <dependency org="none" name="tests/org.mortbay.jetty" rev="${org.mortbay.jetty.version}" conf="test"/>
+        <dependency org="none" name="tests/javax.servlet" rev="${javax.servlet.version}" conf="test"/>
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
         <dependency org="org.limewire" name="gnutella-core" rev="latest.integration" conf="test-common,test"/>
         <dependency org="org.limewire" name="io" rev="latest.integration" conf="test"/>
