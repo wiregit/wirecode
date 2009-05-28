@@ -1,0 +1,24 @@
+CXXFLAGS = -O2 -g -Wall -fmessage-length=0 
+
+LIB_DIR = lib/windows/dyn
+
+LIBRARY = libtorrentwrapper.dll
+OPTIONS = -DWINDOWS -D_WIN32_WINNT=0x0501
+
+OBJS = libtorrentwrapper.obj
+
+all : clean  compile
+
+libtorrentwrapper.obj: 
+	$(CXX) /EHsc /LD /MD /I include src/libtorrentwrapper.cpp $(OPTIONS) /link /LIBPATH:$(LIB_DIR) torrent.lib
+	mt -manifest libtorrentwrapper.dll.manifest -outputresource:libtorrentwrapper.dll;2
+
+	
+compile : libtorrentwrapper.obj
+
+copylib : all
+	copy /y $(LIBRARY) ..\..\..\..\..\..\lib\native\windows\torrent-wrapper.dll
+	
+clean :
+	del /f $(OBJS) $(TARGET) $(LIBRARY) a.out
+
