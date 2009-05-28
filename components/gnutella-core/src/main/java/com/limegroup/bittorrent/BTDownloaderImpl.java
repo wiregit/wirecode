@@ -111,10 +111,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 fileManager.getManagedFileList().add(completeFile);
             }
             complete.set(true);
+            lastState.set(DownloadState.COMPLETE);
             listeners.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
         } else if (TorrentEvent.STOPPED == event) {
             torrent.removeListener(this);
+            lastState.set(DownloadState.ABORTED);
             listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
         } else if (TorrentEvent.FAST_RESUME_FILE_SAVED == event) {
