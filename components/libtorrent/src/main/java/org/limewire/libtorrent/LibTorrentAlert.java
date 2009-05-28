@@ -1,6 +1,7 @@
 package org.limewire.libtorrent;
 
 import com.sun.jna.Structure;
+import com.sun.jna.WString;
 
 /**
  * Structure mapping to the wrapper_alert_info structure in the
@@ -27,7 +28,7 @@ public class LibTorrentAlert extends Structure {
      * Additional data associated with this alert. In the case of a
      * saveResumeDataAlert it is the path to the newly save fastresume file.
      */
-    public String data;
+    public WString data;
 
     /**
      * Category number of a SAVE_RESUME_DATE_ALERT

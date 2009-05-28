@@ -488,7 +488,7 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     public void alert(LibTorrentAlert alert) {
         synchronized (Torrent.this) {
             if (alert.category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && alert.data != null) {
-                fastResumeFile = new File(alert.data);
+                fastResumeFile = new File(alert.data.toString());
                 listeners.broadcast(TorrentEvent.FAST_RESUME_FILE_SAVED);
             }
         }

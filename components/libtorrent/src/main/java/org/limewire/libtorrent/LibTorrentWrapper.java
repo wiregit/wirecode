@@ -37,11 +37,12 @@ class LibTorrentWrapper {
     void initialize() {
         try {
             if (OSUtils.isWindows()) {
-                System.loadLibrary("mingwm10");
-                System.loadLibrary("boost_system-mgw34-mt-1_38");
-                System.loadLibrary("boost_date_time-mgw34-mt-1_38");
-                System.loadLibrary("boost_filesystem-mgw34-mt-1_38");
-                System.loadLibrary("boost_thread-mgw34-mt-1_38");
+                System.loadLibrary("libeay32");
+                System.loadLibrary("ssleay32");
+                System.loadLibrary("boost_date_time-vc90-mt-1_39");
+                System.loadLibrary("boost_system-vc90-mt-1_39");
+                System.loadLibrary("boost_filesystem-vc90-mt-1_39");
+                System.loadLibrary("boost_thread-vc90-mt-1_39");
                 System.loadLibrary("torrent");
             } else if (OSUtils.isLinux()) {
                 // everything compiled into libtorrent-wrapper.so
@@ -49,7 +50,6 @@ class LibTorrentWrapper {
                 // everything compiled into libtorrent-wrapper.dylib
             }
 
-            // TODO make sure right libraries are loaded on linux too.
             this.libTorrent = (LibTorrent) Native.loadLibrary("torrent-wrapper", LibTorrent.class);
 
             init();
