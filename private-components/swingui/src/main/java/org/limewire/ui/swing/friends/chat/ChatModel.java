@@ -23,12 +23,14 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * General purpose model for the chat window. Keeps track of presences, userId, etc..
  * Most EventBus chat events are now fired from within this class. Prior to firing
  * these events we ensure that the ChatPanel has been constructed. 
  */
+@Singleton
 public class ChatModel {
 	/** Reference to the heavy weight panel */
     private final ChatFramePanel chatFramePanel;
