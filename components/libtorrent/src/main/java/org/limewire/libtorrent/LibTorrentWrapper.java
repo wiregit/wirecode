@@ -54,7 +54,7 @@ class LibTorrentWrapper {
 
             init();
             loaded.set(true);
-        } catch (UnsatisfiedLinkError e) {
+        } catch (Throwable e) {
             ExceptionUtils.reportOrReturn(e);
         }
     }
