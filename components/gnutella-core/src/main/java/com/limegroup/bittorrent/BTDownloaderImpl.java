@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.SharingSettings;
@@ -66,6 +67,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final FileManager fileManager;
 
     private final EventMulticaster<DownloadStateEvent> listeners;
+    
+    private final AtomicReference<DownloadState> lastState = new AtomicReference<DownloadState>(DownloadState.QUEUED);
 
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
@@ -118,6 +121,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             // TODO kind of an ugly way to clean this up
             if (finishing.get() || complete.get() || torrent.isCancelled()) {
                 deleteIncompleteFiles();
+            }
+        } else {
+            DownloadState currentState = getState();
+            if(lastState.getAndSet(currentState) != currentState) {
+                listeners.broadcast(new DownloadStateEvent(this, currentState));
             }
         }
     };
