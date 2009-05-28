@@ -58,7 +58,10 @@ library: compile
 copylib: library
 #	strip $(LIBRARY)
 	cp $(LIBRARY) ../../../../../../lib/native/$(OS)/
-	
+
+unzip : 
+	unzip include
+
 clean:
 	rm -f $(OBJS) $(TARGET) $(LIBRARY) a.out
 
