@@ -49,7 +49,7 @@ public class AdvancedSearchBuilder {
         StringBuilder sb = new StringBuilder();
         for(FilePropertyKey key : advancedSearch.keySet()) {
             String value = advancedSearch.get(key);
-            if (value != null && value.trim().length() > 1) {
+            if (value != null && value.trim().length() > 0) {
                 sb.append(translator.translate(
                         FilePropertyKeyUtils.getUntraslatedDisplayName(key, category))
                         .toLowerCase());
@@ -89,21 +89,49 @@ public class AdvancedSearchBuilder {
      *  
      * @return null if the query could not be parsed otherwise the corresponding {@link SearchInfo}.
      */
-    public SearchInfo attemptToCreateAdvancedSearch(String query, SearchCategory searchCategory) {
-        
-        if (searchCategory == SearchCategory.ALL) { 
-            return null;
-        }
+    public SearchInfo attemptToCreateAdvancedSearch(String originalQuery, SearchCategory uiSelectedSearchCategory) {
         
         String translatedKeySeparator = getTranslatedKeySeprator();
         String untranslatedKeySeparator = UNTRANSLATED_SEPARATOR;
-        String lowerCaseUntranslatedQuery = translator.toLowerCaseEnglish(query);
-        String lowerCaseTranslatedQuery = translator.toLowerCaseCurrentLocale(query);
+        String query = originalQuery;
+        
         
         // Only attempt to parse an advanced search if the query has at least one special
         //  key separator sequence
-        if (query.indexOf(translatedKeySeparator) > -1 || query.indexOf(untranslatedKeySeparator) > -1) {
+        
+        boolean firstSeparatorIsUntranslated = true;
+        int firstSeparatorPosition = query.indexOf(untranslatedKeySeparator);
+        if (firstSeparatorPosition < 0) { 
+            firstSeparatorPosition = query.indexOf(translatedKeySeparator);
+            firstSeparatorIsUntranslated = false;
+        }
+        
+        // There should be at least one key separator and it must be forward of the first character
+        if (firstSeparatorPosition > 0) {
+            
+            SearchCategory searchCategory = uiSelectedSearchCategory;
+            
+            // Check if the first token is a SearchCategory override
+            SearchCategory querySelectedSearchCategory = attemptToParseSearchCategory(
+                    query.substring(0, firstSeparatorPosition).trim(),
+                    firstSeparatorIsUntranslated);
+            
+            // If it is then override the selected SearchCategory
+            if (querySelectedSearchCategory != null) {
+                searchCategory = querySelectedSearchCategory;
+                
+                // If there is a category override strip it out of the search string
+                query = query.substring(firstSeparatorPosition+1);
+            }
 
+            // Advanced search in the all or other category is impossible
+            if (searchCategory == SearchCategory.ALL || searchCategory == SearchCategory.OTHER) { 
+                return null;
+            }
+            
+            String lowerCaseUntranslatedQuery = translator.toLowerCaseEnglish(query);
+            String lowerCaseTranslatedQuery = translator.toLowerCaseCurrentLocale(query);
+            
             Map<FilePropertyKey,String> map = new HashMap<FilePropertyKey,String>();
 
             List<KeyPacket> foundKeys = new SortedList<KeyPacket>();
@@ -185,6 +213,29 @@ public class AdvancedSearchBuilder {
         }
         
         return null;        
+    }
+    
+    private SearchCategory attemptToParseSearchCategory(String firstTerm, boolean firstSeparatorIsUntranslated) {
+        if (firstSeparatorIsUntranslated) {
+            String candidateTerm = translator.toLowerCaseEnglish(firstTerm);
+            for ( SearchCategory category : SearchCategory.values() ) {
+                if (translator.toLowerCaseEnglish(
+                        SearchCategoryUtils.getName(category)).equals(candidateTerm)) {
+                    return category;
+                }
+            }
+        }
+        else {
+            String candidateTerm = translator.toLowerCaseCurrentLocale(firstTerm);
+            for ( SearchCategory category : SearchCategory.values() ) {
+                if (translator.toLowerCaseCurrentLocale(translator.translate(
+                        SearchCategoryUtils.getName(category))).equals(candidateTerm)) {
+                    return category;
+                }
+            }
+        }
+        
+        return null;
     }
     
     /**

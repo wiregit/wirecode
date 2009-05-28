@@ -32,7 +32,7 @@ public class AdvancedQueryStringBuilder {
     public String createSimpleCompositeQuery(Map<FilePropertyKey, String> advancedSearch) {
         StringBuilder sb = new StringBuilder();
         for(String value : advancedSearch.values()) {
-            if (value != null && value.trim().length() > 1) {
+            if (value != null && value.trim().length() > 0) {
                 sb.append(value);
                 sb.append(' ');
             }

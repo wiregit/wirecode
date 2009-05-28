@@ -272,6 +272,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 if (search == null) {
                     search = DefaultSearchInfo.createKeywordSearch(searchText,  
                         searchBar.getCategory());
+                } 
+                else {
+                    // If the search category was overridden then change it in the top bar
+                    searchBar.setCategory(search.getSearchCategory());
                 }
                 
                 if(searchHandler.doSearch(search)) {
