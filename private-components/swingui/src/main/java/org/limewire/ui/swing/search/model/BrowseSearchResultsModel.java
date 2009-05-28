@@ -8,7 +8,6 @@ import java.util.Arrays;
 import javax.swing.event.SwingPropertyChangeSupport;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.collection.glazedlists.PluggableList;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
@@ -24,13 +23,13 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.library.FriendLibraryListSourceChanger;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import com.google.inject.Provider;
 
+import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.TransformedList;
@@ -46,14 +45,13 @@ import ca.odell.glazedlists.event.ListEventListener;
  * requests to download a search result.
  */
 public class BrowseSearchResultsModel extends AbstractSearchResultsModel {
-    private final RemoteFileItemToSearchResultList searchResultList;
     private final FriendPresence friendPresence;
     private final Friend friend;
     private final RemoteLibraryManager remoteLibraryManager;
     private final FunctionList<SearchResult, VisualSearchResult> groupedResults;
+    private final EventList<SearchResult> searchResults;
     
-    private final PluggableList<RemoteFileItem> baseLibraryList;
-    private final FriendLibraryListSourceChanger currentFriendFilterChanger;
+    
     private PropertyChangeSupport changeSupport = new SwingPropertyChangeSupport(this);
     
     private LibraryState libraryState;
@@ -110,32 +108,33 @@ public class BrowseSearchResultsModel extends AbstractSearchResultsModel {
         this.remoteLibraryManager = remoteLibraryManager;   
         this.friendEventListenerSupport = availListeners;
         
-        baseLibraryList = new PluggableList<RemoteFileItem>(remoteLibraryManager.getAllFriendsFileList().getModel().getPublisher(), remoteLibraryManager.getAllFriendsFileList().getModel().getReadWriteLock());
-        currentFriendFilterChanger = new FriendLibraryListSourceChanger(baseLibraryList, remoteLibraryManager);
-        currentFriendFilterChanger.registerListeners();
 
-        searchResultList = new RemoteFileItemToSearchResultList(baseLibraryList);
-       
-        
-     // Create list of visual search results where each element represents
-        // a single group.
-        groupedResults = GlazedListsFactory.functionList(
-                searchResultList, new BrowseResultConverter(propertiableHeadings));
-               
-        initialize(searchResultList, groupedResults);
-        
-        // Initialize display category and sorted list.
-        setSelectedCategory(SearchCategory.ALL);        
+        EventList<RemoteFileItem> baseLibraryList = new BasicEventList<RemoteFileItem>();
         
         if(friendPresence != null){
             PresenceLibrary presenceLibrary = remoteLibraryManager.addPresenceLibrary(friendPresence);
-            currentFriendFilterChanger.setFriend(friend);
             libraryState = presenceLibrary.getState();     
+            baseLibraryList.addAll(presenceLibrary.getModel());
         } else {
-            currentFriendFilterChanger.setFriend(null);
+            baseLibraryList.addAll(remoteLibraryManager.getAllFriendsFileList().getModel());
             libraryState = LibraryState.LOADED;
         }
         
+       
+        searchResults = GlazedListsFactory.threadSafeList(new BasicEventList<SearchResult>());
+        for (RemoteFileItem item : baseLibraryList) {
+            searchResults.add(item.getSearchResult());
+        }
+        
+        // Create list of visual search results where each element represents
+        // a single group.
+        groupedResults = GlazedListsFactory.functionList(
+                searchResults, new BrowseResultConverter(propertiableHeadings));
+               
+        initialize(searchResults, groupedResults);
+        
+        // Initialize display category and sorted list.
+        setSelectedCategory(SearchCategory.ALL);        
     }     
    
     
@@ -198,13 +197,10 @@ public class BrowseSearchResultsModel extends AbstractSearchResultsModel {
      */
     @Override
     public void dispose() { 
-        searchResultList.dispose();
-        baseLibraryList.dispose();
-        PropertyChangeListener[] propertyChangeListeners = changeSupport.getPropertyChangeListeners();
-        for (PropertyChangeListener listener : propertyChangeListeners){
-            changeSupport.removePropertyChangeListener(listener);
+        if (searchResults instanceof TransformedList){
+            ((TransformedList)searchResults).dispose();
         }
-        currentFriendFilterChanger.dispose();
+    
         
         //remove presence library
         if (friendPresence != null) {                
@@ -231,7 +227,7 @@ public class BrowseSearchResultsModel extends AbstractSearchResultsModel {
 
     @Override
     public int getResultCount() {
-        return baseLibraryList.size();
+        return searchResults.size();
     }
     
     @Override
@@ -273,23 +269,6 @@ public class BrowseSearchResultsModel extends AbstractSearchResultsModel {
         changeSupport.removePropertyChangeListener(listener);
     }
     
-    private static class RemoteFileItemToSearchResultList extends TransformedList<RemoteFileItem, SearchResult> {
-
-        protected RemoteFileItemToSearchResultList(EventList<RemoteFileItem> source) {
-            super(source);
-            source.addListEventListener(this);
-        }
-
-        @Override
-        public void listChanged(ListEvent<RemoteFileItem> listChanges) {
-            updates.forwardEvent(listChanges);
-        }
-
-        @Override
-        public SearchResult get(int index) {
-            return source.get(index).getSearchResult();
-        }       
-    } 
     
     /**
      * A GlazedList function used to transform a search result into a VisualSearchResult with no grouping.
