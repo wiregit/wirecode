@@ -352,13 +352,16 @@ public class FacebookFriendConnection implements FriendConnection {
     private Set<String> fetchLimeWireFriends() throws FacebookException {
         JSONArray limeWireFriendIds;
         try {
-            limeWireFriendIds = (JSONArray)getClient().friends_getAppUsers();
-            LOG.debugf("limewire friends: {0}", limeWireFriendIds);
-            Set<String> limeWireIds = new HashSet<String>(limeWireFriendIds.length());
-            for (int i = 0; i < limeWireFriendIds.length(); i++) {
-                limeWireIds.add(limeWireFriendIds.getString(i));
+            Set<String> limeWireIds = new HashSet<String>();
+            Object friends = getClient().friends_getAppUsers();
+            if(friends instanceof JSONArray) { // is JSONObject when user has no friends with LW installed
+                limeWireFriendIds = (JSONArray)friends;
+                LOG.debugf("limewire friends: {0}", limeWireFriendIds);
+                for (int i = 0; i < limeWireFriendIds.length(); i++) {
+                    limeWireIds.add(limeWireFriendIds.getString(i));
+                }                
             }
-            return limeWireIds;
+            return limeWireIds;    
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
