@@ -54,8 +54,9 @@ public class AnomalousQueryFilter implements SpamFilter {
             // Count each four-byte slice of the GUID
             byte[] guid = q.getGUID();
             for(int i = 0; i < 4; i++) {
-                int slice = ByteUtils.leb2int(guid, i);
-                Long key = Long.valueOf((i << 32) + slice);
+                int slice = ByteUtils.leb2int(guid, i * 4);
+                // Pack the position and value of the slice into a long
+                Long key = ((long)i << 32) | (slice & 0xFFFFFFFFL);
                 // Count how often we've seen each slice recently
                 Integer count = sliceCounts.get(key);
                 if(count == null)
