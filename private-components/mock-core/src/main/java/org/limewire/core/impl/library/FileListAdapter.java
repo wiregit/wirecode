@@ -22,8 +22,17 @@ import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 
 public class FileListAdapter implements LocalFileList, LibraryFileList {
 
-    private final EventList<LocalFileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
-    private final EventList<LocalFileItem> swingEventList = new SwingThreadProxyEventList<LocalFileItem>(eventList);
+    private EventList<LocalFileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
+    private EventList<LocalFileItem> swingEventList = new SwingThreadProxyEventList<LocalFileItem>(eventList);
+    
+    public FileListAdapter() {
+        
+    }
+    
+    public FileListAdapter(CombinedShareList combinedShareList) {
+        eventList = combinedShareList.createMemberList();
+        swingEventList = new SwingThreadProxyEventList<LocalFileItem>(eventList);
+    }
     
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
