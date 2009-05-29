@@ -46,6 +46,7 @@ class ActiveFilterPanel extends JXPanel {
         setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
         setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
                 "[left][right]", "[center]"));
+        setOpaque(false);
         setPreferredSize(new Dimension(0, 18));
         setBackgroundPainter(new RectanglePainter(0, 0, 0, 0, 16, 16, true,
                 backgroundColor, 1.0f, borderColor));
