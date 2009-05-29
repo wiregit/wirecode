@@ -193,6 +193,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             if (renderer instanceof JLabel) {
                 // Set appearance.
                 ((JLabel) renderer).setBorder(border);
+                ((JLabel) renderer).setOpaque(false);
             }
 
             return renderer;
