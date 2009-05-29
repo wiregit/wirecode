@@ -25,18 +25,12 @@ public class LibTorrentAlert extends Structure {
     public String message;
 
     /**
-     * Additional data associated with this alert. In the case of a
-     * saveResumeDataAlert it is the path to the newly save fastresume file.
-     */
-    public WString data;
-
-    /**
      * Category number of a SAVE_RESUME_DATE_ALERT
      */
     public final static int SAVE_RESUME_DATA_ALERT = 8;
 
     @Override
     public String toString() {
-        return sha1 + " " + message + " [" + category + "] " + data;
+        return sha1 + " " + message + " [" + category + "] ";
     }
 }
