@@ -133,9 +133,9 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         filterDisplayPanel = new FilterDisplayPanel();
         
+        filterPanel.setBackground(backgroundColor);
         filterPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 3", 
                 "[grow]", ""));
-        filterPanel.setOpaque(false);
         
         upperDividerLine = Line.createHorizontalLine(dividerForegroundColor);
         lowerDividerLine = Line.createHorizontalLine(dividerBackgroundColor);
