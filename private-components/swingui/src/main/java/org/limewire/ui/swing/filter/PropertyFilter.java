@@ -552,6 +552,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 
                 // Set appearance.
                 ((JLabel) renderer).setBorder(border);
+                ((JLabel) renderer).setOpaque(false);
             }
             
             return renderer;
