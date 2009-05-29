@@ -13,6 +13,7 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -83,15 +84,21 @@ public class BrowseSearch implements Search {
         browse.start(new BrowseListener() {
             @Override
             public void browseFinished(boolean success) {
+                //TODO some kind of browse state based on this
                 System.out.println("browsefinished "+success);
             }
 
             @Override
-            public void handleBrowseResult(SearchResult searchResult) {
-                System.out.println("handle "+searchResult.getFileName());
-                for (SearchListener listener : searchListeners) {
-                    listener.handleSearchResult(BrowseSearch.this, searchResult);
-                }
+            public void handleBrowseResult(final SearchResult searchResult) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("handle " + searchResult.getFileName());
+                        for (SearchListener listener : searchListeners) {
+                            listener.handleSearchResult(BrowseSearch.this, searchResult);
+                        }
+                    }
+                });
             }
         });
     }
