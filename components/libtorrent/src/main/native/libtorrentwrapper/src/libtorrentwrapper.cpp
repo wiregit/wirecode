@@ -225,11 +225,12 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 	if (!seed) {
 		std::wstring file = libtorrent::utf8_wchar(handle.get_torrent_info().name());
 		file += L".fastresume";
-		std::wstring path = libtorrent::utf8_wchar(handle.save_path().file_string());
+		std::wstring path = libtorrent::utf8_wchar(handle.save_path().string());
 
 		boost::filesystem::wpath full_path(path);
 		full_path /= file;
-		alertInfo->data = full_path.file_string().c_str();
+		alertInfo->data = full_path.string().c_str();
+
 
 #ifdef LIME_DEBUG
 		std::cout << "(to " << alertInfo->data << ')' << std::endl;
@@ -412,17 +413,23 @@ EXTERN_HEADER EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
 
 		if (torrentPath) {
 			boost::filesystem::ifstream torrent_file(
-					WIDE_PATH(torrentPath),
+					torrentPath,
 					std::ios_base::binary);
 			if (!torrent_file.fail()) {
 				torrent_params.ti = new libtorrent::torrent_info(
 					WIDE_PATH(torrentPath));
 			}
+#ifdef LIME_DEBUG
+			else {
+				std::cout << "could not find torrent file" << std::endl;
+			}
+#endif
+			torrent_file.close();
 		}
 
 		if (fastResumePath) {
 			boost::filesystem::ifstream resume_file(
-					WIDE_PATH(fastResumePath),
+					fastResumePath,
 					std::ios_base::binary);
 
 			if (!resume_file.fail()) {
@@ -434,7 +441,13 @@ EXTERN_HEADER EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
 				std::copy(iter, ios_iter, std::back_inserter(resume_buf));
 
 				torrent_params.resume_data = &resume_buf;
+				resume_file.close();
 			}
+#ifdef LIME_DEBUG
+			else {
+				std::cout << "could not find fast resume file" << std::endl;	
+			}
+#endif
 		}
 
 		libtorrent::torrent_handle h = session->add_torrent(torrent_params);

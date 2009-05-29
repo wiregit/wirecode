@@ -21,6 +21,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.FileUtils;
+import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -488,7 +489,17 @@ public class Torrent implements ListenerSupport<TorrentEvent> {
     public void alert(LibTorrentAlert alert) {
         synchronized (Torrent.this) {
             if (alert.category == LibTorrentAlert.SAVE_RESUME_DATA_ALERT && alert.data != null) {
-                fastResumeFile = new File(alert.data.toString());
+
+                // TODO: fix me!!!!!!!!!!!
+                if (OSUtils.isWindows()) {
+                    String file = alert.data.toString();
+                    file = "c:" + file.substring(2);
+                    fastResumeFile = new File(file);
+                } 
+                else {
+                    fastResumeFile = new File(alert.data.toString());
+                }
+                    
                 listeners.broadcast(TorrentEvent.FAST_RESUME_FILE_SAVED);
             }
         }
