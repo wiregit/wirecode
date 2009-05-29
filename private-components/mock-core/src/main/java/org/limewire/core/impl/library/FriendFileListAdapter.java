@@ -6,7 +6,7 @@ import org.limewire.core.api.library.GnutellaFileList;
 
 public class FriendFileListAdapter extends FileListAdapter implements FriendFileList, GnutellaFileList {
 
-    public FriendFileListAdapter(CombinedShareList combinedShareList) {
+    public FriendFileListAdapter(MockCombinedShareList combinedShareList) {
         super(combinedShareList);
     }
     

@@ -29,7 +29,7 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
         
     }
     
-    public FileListAdapter(CombinedShareList combinedShareList) {
+    public FileListAdapter(MockCombinedShareList combinedShareList) {
         eventList = combinedShareList.createMemberList();
         swingEventList = new SwingThreadProxyEventList<LocalFileItem>(eventList);
     }
