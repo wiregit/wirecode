@@ -4,18 +4,16 @@ import static org.limewire.ui.swing.library.playlist.TransferablePlaylistData.PL
 
 import java.awt.datatransfer.Transferable;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.library.LibraryListSourceChanger;
-import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.util.DNDUtils;
+import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
@@ -23,17 +21,17 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 public class MyLibraryTransferHandler extends TransferHandler {
 
     private final EventSelectionModel<LocalFileItem> selectionModel;
-    private final LibraryFileList libraryManagedList;
-    private final ShareListManager shareListManager;
-    private final LibraryListSourceChanger listChanger;
+//    private final LibraryFileList libraryManagedList;
+//    private final SharedFileListManager shareListManager;
+//    private final LibraryListSourceChanger listChanger;
     
     public MyLibraryTransferHandler(EventSelectionModel<LocalFileItem> selectionModel,
-            LibraryFileList libraryManagedList, ShareListManager shareListManager,
+            LibraryFileList libraryManagedList, SharedFileListManager shareListManager,
             LibraryListSourceChanger listChanger) {
         this.selectionModel = selectionModel;
-        this.libraryManagedList = libraryManagedList;
-        this.shareListManager = shareListManager;
-        this.listChanger = listChanger;
+//        this.libraryManagedList = libraryManagedList;
+//        this.shareListManager = shareListManager;
+//        this.listChanger = listChanger;
     }
 
     @Override
@@ -60,35 +58,36 @@ public class MyLibraryTransferHandler extends TransferHandler {
         }
 
         // Get the string that is being dropped.
-        Transferable t = info.getTransferable();
-        final List<File> fileList;
-        try {
-            fileList = Arrays.asList(DNDUtils.getFiles(t));
-        } catch (Exception e) {
-            return false;
-        }
+//        Transferable t = info.getTransferable();
+//        final List<File> fileList;
+//        try {
+//            fileList = Arrays.asList(DNDUtils.getFiles(t));
+//        } catch (Exception e) {
+//            return false;
+//        }
 
-        for (File file : fileList) {
-            // if is a folder
-            if(file.isDirectory()) {
-                //if not in filtered mode
-                if(listChanger.getCurrentFriend() == null)
-                libraryManagedList.addFolder(file);
-                else if(listChanger.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
-                    shareListManager.getGnutellaShareList().addFolder(file);
-                else
-                    shareListManager.getFriendShareList(listChanger.getCurrentFriend()).addFolder(file);
-            } else {
-                //if not in filtered mode
-                if(listChanger.getCurrentFriend() == null)
-                libraryManagedList.addFile(file);
-                else if(listChanger.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
-                    shareListManager.getGnutellaShareList().addFile(file);
-                else
-                    shareListManager.getFriendShareList(listChanger.getCurrentFriend()).addFile(file);
-            }
-        }
-        return true;
+//        for (File file : fileList) {
+//            // if is a folder
+//            if(file.isDirectory()) {
+//                //if not in filtered mode
+//                if(listChanger.getCurrentFriend() == null)
+//                libraryManagedList.addFolder(file);
+//                else if(listChanger.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+//                    shareListManager.getGnutellaShareList().addFolder(file);
+//                else
+//                    shareListManager.getFriendShareList(listChanger.getCurrentFriend()).addFolder(file);
+//            } else {
+//                //if not in filtered mode
+//                if(listChanger.getCurrentFriend() == null)
+//                libraryManagedList.addFile(file);
+//                else if(listChanger.getCurrentFriend().getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId()))
+//                    shareListManager.getGnutellaShareList().addFile(file);
+//                else
+//                    shareListManager.getFriendShareList(listChanger.getCurrentFriend()).addFile(file);
+//            }
+//        }
+        throw new NotImplementedException();
+//        return true;
     }
 
     @Override

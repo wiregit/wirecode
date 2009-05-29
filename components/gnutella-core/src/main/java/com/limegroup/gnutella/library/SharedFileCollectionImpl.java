@@ -45,6 +45,10 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         return data.getNameForCollection(collectionId);
     }
     
+    public void setName(String name) {
+        data.setNameForCollection(collectionId, name);
+    }
+    
     @Override
     public void addFriend(String id) {
         if(data.addFriendToCollection(collectionId, id)) {

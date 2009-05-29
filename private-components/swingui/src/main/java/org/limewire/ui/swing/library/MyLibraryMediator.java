@@ -8,7 +8,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.library.nav.NavMediator;
 
@@ -23,11 +23,11 @@ public class MyLibraryMediator implements NavMediator<MyLibraryPanel> {
     private MyLibraryPanel panel;
     
     @Inject
-    public MyLibraryMediator(MyLibraryFactory myLibraryFactory, LibraryManager libraryManager, ShareListManager shareListManager) {
+    public MyLibraryMediator(MyLibraryFactory myLibraryFactory, LibraryManager libraryManager, SharedFileListManager shareListManager) {
         this.myLibraryFactory = myLibraryFactory;
         
         baseLibraryList = new PluggableList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
-        currentFriendFilterChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager, shareListManager);
+        currentFriendFilterChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager);
     }
     
     public Friend getCurrentFriend() {

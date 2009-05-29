@@ -35,7 +35,7 @@ import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -43,7 +43,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
-import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.dnd.MyLibraryNavTransferHandler;
 import org.limewire.ui.swing.friends.FriendRequestPanel;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
@@ -85,7 +84,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final MyLibraryMediator myLibraryMediator;
     private final FriendLibraryMediator friendLibraryMediator;
     
-    private final ShareListManager shareListManager;
+//    private final SharedFileListManager shareListManager;
     private final NavPanelFactory navPanelFactory;
     private final JScrollPane friendsScrollArea;
     private final FriendRequestPanel friendRequestPanel;
@@ -108,7 +107,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     LibraryNavigatorImpl(Navigator navigator,
             RemoteLibraryManager remoteLibraryManager,
             DownloadListManager downloadListManager,
-            ShareListManager shareListManager,
+            SharedFileListManager shareListManager,
             MyLibraryMediator myLibraryMediator,
             FriendLibraryMediator friendLibraryMediator,
             NavPanelFactory navPanelFactory,
@@ -121,7 +120,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         this.friendRequestPanel = friendRequestPanel;
         this.myLibraryMediator = myLibraryMediator;
         this.friendLibraryMediator = friendLibraryMediator;
-        this.shareListManager = shareListManager;
+//        this.shareListManager = shareListManager;
         this.limewireList = new NavList("LibraryNavigator.limewireList", null);
         this.onlineList = new NavList("LibraryNavigator.onlineList", SwingUiSettings.ONLINE_COLLAPSED);
         this.offlineList = new OfflineNavList("LibraryNavigator.offlineList", SwingUiSettings.OFFLINE_COLLAPSED);
@@ -155,11 +154,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
          });
         
         p2pNetwork = initializePanel(I18n.tr("P2P Network"), createP2PAction(libraryNavItem), "LibraryNavigator.p2pNetwork"); 
-        p2pNetwork.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getGnutellaShareList()));
-        try {
-            p2pNetwork.getDropTarget().addDropTargetListener(new GhostDropTargetListener(p2pNetwork,ghostPane, new FriendAdapter(I18n.tr("the P2P Network"))));
-        } catch (TooManyListenersException ignoreException) {            
-        }  
+//        p2pNetwork.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getGnutellaShareList()));
+//        try {
+//            p2pNetwork.getDropTarget().addDropTargetListener(new GhostDropTargetListener(p2pNetwork,ghostPane, new FriendAdapter(I18n.tr("the P2P Network"))));
+//        } catch (TooManyListenersException ignoreException) {            
+//        }  
         
         String friendTitle = I18n.tr("All Friends");
         friendNavItem = navigator.createNavItem(NavCategory.LIBRARY, friendTitle, friendLibraryMediator);
@@ -622,11 +621,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         navPanel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
         // don't add a transfer handler to anonymous browse hosts
         if(friend != null && !friend.isAnonymous()) {
-            navPanel.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getOrCreateFriendShareList(friend)));
-            try {
-                navPanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(navPanel,ghostPane, friend));
-            } catch (TooManyListenersException ignoreException) {            
-            }   
+//            navPanel.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getOrCreateFriendShareList(friend)));
+//            try {
+//                navPanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(navPanel,ghostPane, friend));
+//            } catch (TooManyListenersException ignoreException) {            
+//            }   
         }
         
         return navPanel;

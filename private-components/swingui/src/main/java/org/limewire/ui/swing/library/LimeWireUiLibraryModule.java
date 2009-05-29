@@ -33,8 +33,8 @@ public class LimeWireUiLibraryModule extends AbstractModule {
         bind(MyLibraryPopupMenuFactory.class).toProvider(
                 FactoryProvider.newFactory(MyLibraryPopupMenuFactory.class, MyLibraryPopupMenu.class));
         
-        bind(FriendLibraryFactory.class).toProvider(
-                FactoryProvider.newFactory(FriendLibraryFactory.class, FriendLibraryPanel.class));
+//        bind(FriendLibraryFactory.class).toProvider(
+//                FactoryProvider.newFactory(FriendLibraryFactory.class, FriendLibraryPanel.class));
 
         bind(MyLibraryFactory.class).toProvider(
                 FactoryProvider.newFactory(MyLibraryFactory.class, MyLibraryPanel.class));

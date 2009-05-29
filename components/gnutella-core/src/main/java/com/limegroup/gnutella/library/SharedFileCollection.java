@@ -8,6 +8,9 @@ public interface SharedFileCollection extends FileCollection {
     /** Gets the current name of this collection. */
     String getName();
     
+    /** Sets a new name for this collection. */
+    void setName(String name);
+    
     /** Returns the unique id of this collection. */
     int getId();
     

@@ -23,6 +23,10 @@ public class GnutellaFileCollectionStub extends AbstractFileCollectionStub imple
     public final static FileDescStub FD_STUB_TWO = new FileDescStub("other.txt");
     
     @Override
+    public void setName(String name) {
+    }
+    
+    @Override
     public void addFriend(String id) {
     }
     

@@ -3,7 +3,6 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -14,21 +13,17 @@ import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.MyLibraryPanel;
-import org.limewire.ui.swing.library.SelectAllable;
-import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
-import org.limewire.ui.swing.library.sharing.model.MultiFileShareModel;
-import org.limewire.ui.swing.library.sharing.model.MultiFileUnshareModel;
 import org.limewire.ui.swing.library.table.menu.actions.DisabledFriendLoginAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.NotImplementedException;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Provider;
@@ -56,9 +51,9 @@ public class ShareAllComboBox extends LimeComboBox {
     
     private final XMPPService xmppService;
     private final FriendsSignInPanel friendsSignInPanel;
-    private final Provider<ShareWidgetFactory> shareWidgetFactory;
+//    private final Provider<ShareWidgetFactory> shareWidgetFactory;
     private final MyLibraryPanel myLibraryPanel;
-    private final ShareListManager shareListManager;
+//    private final SharedFileListManager shareListManager;
     
     private JPopupMenu menu = new JPopupMenu();
     
@@ -69,12 +64,12 @@ public class ShareAllComboBox extends LimeComboBox {
     private AbstractAction signedOutAction;
     
     public ShareAllComboBox(XMPPService xmppService, Provider<ShareWidgetFactory> shareWidgetFactory,
-            MyLibraryPanel myLibraryPanel, FriendsSignInPanel friendsSignInPanel, ShareListManager shareListManager) {
+            MyLibraryPanel myLibraryPanel, FriendsSignInPanel friendsSignInPanel, SharedFileListManager shareListManager) {
         this.xmppService = xmppService;
         this.friendsSignInPanel = friendsSignInPanel;
-        this.shareWidgetFactory = shareWidgetFactory;
+//        this.shareWidgetFactory = shareWidgetFactory;
         this.myLibraryPanel = myLibraryPanel;
-        this.shareListManager = shareListManager;
+//        this.shareListManager = shareListManager;
                 
         GuiUtils.assignResources(this);
         
@@ -169,10 +164,10 @@ public class ShareAllComboBox extends LimeComboBox {
 	 *  If a friend is selected, opens the Multi-file share widget
 	 */
     private class ShareAllAction extends AbstractAction {    
-        private final boolean isGnutella;
+//        private final boolean isGnutella;
         
         public ShareAllAction(boolean isGnutella) {
-            this.isGnutella = isGnutella;
+//            this.isGnutella = isGnutella;
             
             if(!isGnutella) {
                 putValue(Action.NAME, I18n.tr("Share all with Friend..."));
@@ -185,30 +180,31 @@ public class ShareAllComboBox extends LimeComboBox {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            Category currentCategory = myLibraryPanel.getCategory();
-            
-            // if category sharing is enabled, show the category sharing widget
-            if((currentCategory == Category.AUDIO || currentCategory == Category.IMAGE || currentCategory == Category.VIDEO)
-                    && LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue() != true) {
-                ShareWidget<Category> shareWidget = shareWidgetFactory.get().createCategoryShareWidget();
-                shareWidget.setShareable(currentCategory);
-                shareWidget.show(GuiUtils.getMainFrame());
-            } else {  
-                SelectAllable<LocalFileItem> selectAllable = myLibraryPanel.getTable();
-                if(!isGnutella) {                
-                    selectAllable.selectAll();
-                    List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();                
-                    if (selectedItems.size() > 0) {
-                        ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.get().createMultiFileShareWidget();
-                        shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
-                        shareWidget.show(GuiUtils.getMainFrame());
-                    } 
-                } else {
-                    List<LocalFileItem> items = selectAllable.getAllItems();
-                    MultiFileShareModel model = new MultiFileShareModel(shareListManager, items.toArray(new LocalFileItem[items.size()]));
-                    model.shareFriend(SharingTarget.GNUTELLA_SHARE);
-                }
-            }
+            throw new NotImplementedException();
+//            Category currentCategory = myLibraryPanel.getCategory();
+//            
+//            // if category sharing is enabled, show the category sharing widget
+//            if((currentCategory == Category.AUDIO || currentCategory == Category.IMAGE || currentCategory == Category.VIDEO)
+//                    && LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue() != true) {
+//                ShareWidget<Category> shareWidget = shareWidgetFactory.get().createCategoryShareWidget();
+//                shareWidget.setShareable(currentCategory);
+//                shareWidget.show(GuiUtils.getMainFrame());
+//            } else {  
+//                SelectAllable<LocalFileItem> selectAllable = myLibraryPanel.getTable();
+//                if(!isGnutella) {                
+//                    selectAllable.selectAll();
+//                    List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();                
+//                    if (selectedItems.size() > 0) {
+//                        ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.get().createMultiFileShareWidget();
+//                        shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+//                        shareWidget.show(GuiUtils.getMainFrame());
+//                    } 
+//                } else {
+//                    List<LocalFileItem> items = selectAllable.getAllItems();
+//                    MultiFileShareModel model = new MultiFileShareModel(shareListManager, items.toArray(new LocalFileItem[items.size()]));
+//                    model.shareFriend(SharingTarget.GNUTELLA_SHARE);
+//                }
+//            }
         }
     }
     
@@ -217,10 +213,10 @@ public class ShareAllComboBox extends LimeComboBox {
 	 *  If a friend is selected, opens the Multi-file unshare widget
 	 */
     private class UnShareAllAction extends AbstractAction {
-        private final boolean isGnutella;
+//        private final boolean isGnutella;
         
         public UnShareAllAction(boolean isGnutella) {
-            this.isGnutella = isGnutella;
+//            this.isGnutella = isGnutella;
             
             if(!isGnutella) {
                 putValue(Action.NAME, I18n.tr("Unshare all with Friend..."));
@@ -232,30 +228,31 @@ public class ShareAllComboBox extends LimeComboBox {
         }
         
         @Override
-        public void actionPerformed(ActionEvent e) {            
-            Category currentCategory = myLibraryPanel.getCategory();
-            
-            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue() != true && 
-                    (currentCategory == Category.AUDIO || currentCategory == Category.IMAGE || currentCategory == Category.VIDEO)) {
-                ShareWidget<Category> shareWidget = shareWidgetFactory.get().createCategoryShareWidget();
-                shareWidget.setShareable(currentCategory);
-                shareWidget.show(GuiUtils.getMainFrame());
-            } else {    
-                SelectAllable<LocalFileItem> selectAllable = myLibraryPanel.getTable();
-                if(!isGnutella) {                
-                    selectAllable.selectAll();
-                    List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();                
-                    if (selectedItems.size() > 0) {
-                        ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.get().createMultiFileUnshareWidget();
-                        shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
-                        shareWidget.show(GuiUtils.getMainFrame());
-                    }
-                } else {
-                    List<LocalFileItem> items = selectAllable.getAllItems();                
-                    MultiFileUnshareModel model = new MultiFileUnshareModel(shareListManager, items.toArray(new LocalFileItem[items.size()]));
-                    model.unshareFriend(SharingTarget.GNUTELLA_SHARE);   
-                }
-            }
+        public void actionPerformed(ActionEvent e) {
+            throw new NotImplementedException();
+//            Category currentCategory = myLibraryPanel.getCategory();
+//            
+//            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue() != true && 
+//                    (currentCategory == Category.AUDIO || currentCategory == Category.IMAGE || currentCategory == Category.VIDEO)) {
+//                ShareWidget<Category> shareWidget = shareWidgetFactory.get().createCategoryShareWidget();
+//                shareWidget.setShareable(currentCategory);
+//                shareWidget.show(GuiUtils.getMainFrame());
+//            } else {    
+//                SelectAllable<LocalFileItem> selectAllable = myLibraryPanel.getTable();
+//                if(!isGnutella) {                
+//                    selectAllable.selectAll();
+//                    List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();                
+//                    if (selectedItems.size() > 0) {
+//                        ShareWidget<LocalFileItem[]> shareWidget = shareWidgetFactory.get().createMultiFileUnshareWidget();
+//                        shareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+//                        shareWidget.show(GuiUtils.getMainFrame());
+//                    }
+//                } else {
+//                    List<LocalFileItem> items = selectAllable.getAllItems();                
+//                    MultiFileUnshareModel model = new MultiFileUnshareModel(shareListManager, items.toArray(new LocalFileItem[items.size()]));
+//                    model.unshareFriend(SharingTarget.GNUTELLA_SHARE);   
+//                }
+//            }
         }
     }
     

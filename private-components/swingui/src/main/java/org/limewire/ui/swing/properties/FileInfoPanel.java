@@ -50,7 +50,7 @@ import org.limewire.core.api.library.MetaDataException;
 import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.spam.SpamManager;
@@ -66,7 +66,6 @@ import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.MagnetLinkCopier;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -76,6 +75,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -102,8 +102,8 @@ public class FileInfoPanel extends JPanel {
     private final MagnetLinkFactory magnetLinkFactory;
     private final LibraryNavigator libraryNavigator;
     private final PropertyDictionary propertyDictionary;
-    private final ShareListManager shareListManager;
-    private final FriendManager friendManager;
+//    private final SharedFileListManager shareListManager;
+//    private final FriendManager friendManager;
     private final SpamManager spamManager;
     private final MetaDataManager metaDataManager;
     
@@ -119,7 +119,7 @@ public class FileInfoPanel extends JPanel {
             Provider<IconManager> iconManager, CategoryIconManager categoryIconManager,
             ThumbnailManager thumbnailManager, MagnetLinkFactory magnetLinkFactory,
             LibraryNavigator libraryNavigator, PropertyDictionary propertyDictionary,
-            ShareListManager shareListManager, FriendManager friendManager,
+            SharedFileListManager shareListManager, FriendManager friendManager,
             SpamManager spamManager, MetaDataManager metaDataManager) {
         this.iconManager = iconManager;
         this.categoryIconManager = categoryIconManager;
@@ -127,8 +127,8 @@ public class FileInfoPanel extends JPanel {
         this.magnetLinkFactory = magnetLinkFactory;
         this.libraryNavigator = libraryNavigator;
         this.propertyDictionary = propertyDictionary;
-        this.shareListManager = shareListManager;
-        this.friendManager = friendManager;
+//        this.shareListManager = shareListManager;
+//        this.friendManager = friendManager;
         this.spamManager = spamManager;
         this.metaDataManager = metaDataManager;
         
@@ -319,17 +319,18 @@ public class FileInfoPanel extends JPanel {
                     listPanel.setBackground(backgroundColor);
                     
                     for(Friend friend : sharedWithList) {
-                        final Friend shareFriend = friend;
+//                        final Friend shareFriend = friend;
                         final JLabel friendLabel = new JLabel(friend.getRenderName());
                         final JButton friendButton = new IconButton(removeIcon, removeIconRollover, removeIconPressed);
                         friendButton.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                if(shareFriend.getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId())) {
-                                    shareListManager.getGnutellaShareList().removeFile(((LocalFileItem)propertiableFile).getFile());
-                                } else {
-                                    shareListManager.getOrCreateFriendShareList(shareFriend).removeFile(((LocalFileItem)propertiableFile).getFile());
-                                }
+                                if(true) throw new NotImplementedException();
+//                                if(shareFriend.getId().equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId())) {
+//                                    shareListManager.getGnutellaShareList().removeFile(((LocalFileItem)propertiableFile).getFile());
+//                                } else {
+//                                    shareListManager.getOrCreateFriendShareList(shareFriend).removeFile(((LocalFileItem)propertiableFile).getFile());
+//                                }
                                 listPanel.remove(friendLabel);
                                 listPanel.remove(friendButton);
                                 //make sure the friend actually disappears
@@ -717,18 +718,19 @@ public class FileInfoPanel extends JPanel {
     }
     
     private List<Friend> getSharedWithList(LocalFileItem fileItem) {
-        List<Friend> sharedWith = new ArrayList<Friend>();
-        
-        if(shareListManager.getGnutellaShareList().contains(fileItem.getFile()))
-            sharedWith.add(SharingTarget.GNUTELLA_SHARE.getFriend());
-        
-        for(Friend friend : friendManager.getKnownFriends()) {  
-            boolean isShared = shareListManager.getOrCreateFriendShareList(friend).contains(fileItem.getFile());
-            if (isShared) {
-                sharedWith.add(friend);
-            }
-        }
-        return sharedWith;
+//        List<Friend> sharedWith = new ArrayList<Friend>();
+//        
+//        if(shareListManager.getGnutellaShareList().contains(fileItem.getFile()))
+//            sharedWith.add(SharingTarget.GNUTELLA_SHARE.getFriend());
+//        
+//        for(Friend friend : friendManager.getKnownFriends()) {  
+//            boolean isShared = shareListManager.getOrCreateFriendShareList(friend).contains(fileItem.getFile());
+//            if (isShared) {
+//                sharedWith.add(friend);
+//            }
+//        }
+//        return sharedWith;
+        throw new NotImplementedException();
     }
     
     private JPanel createPanel() {

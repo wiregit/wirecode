@@ -5,22 +5,22 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.friends.login.FriendActions;
-import org.limewire.ui.swing.library.sharing.model.MultiFileUnshareModel;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.impl.ThreadSafeList;
 
 public class MultiFileUnshareWidget implements ShareWidget<LocalFileItem[]>{
     private LibrarySharePanel unsharePanel;
     private LocalFileItem[] files;
-    private ShareListManager shareListManager;
+//    private SharedFileListManager shareListManager;
     
-    public MultiFileUnshareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog, FriendActions friendActions){
+    public MultiFileUnshareWidget(SharedFileListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog, FriendActions friendActions){
         unsharePanel = new LibrarySharePanel(allFriends, shapeDialog, friendActions, true, false);
-        this.shareListManager = shareListManager;
+//        this.shareListManager = shareListManager;
 
         unsharePanel.addShareListener(new ShareListener() {
             @Override
@@ -42,7 +42,8 @@ public class MultiFileUnshareWidget implements ShareWidget<LocalFileItem[]>{
     }
     
     public void show(Component c) {
-        unsharePanel.show(null, new MultiFileUnshareModel(shareListManager, files));
+        throw new NotImplementedException();
+//        unsharePanel.show(null, new MultiFileUnshareModel(shareListManager, files));
     }
     
 

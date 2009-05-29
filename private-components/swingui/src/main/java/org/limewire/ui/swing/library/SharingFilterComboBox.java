@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -39,8 +38,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
@@ -69,13 +67,13 @@ public class SharingFilterComboBox extends LimeComboBox {
 
     private final LibraryListSourceChanger listChanger;
     private final MyLibraryPanel myLibraryPanel;
-    private final ShareListManager shareListManager;
+    private final SharedFileListManager shareListManager;
     
     private ScrollablePopupMenu menu;
     
     private JComponent subMenuText;
         
-    public SharingFilterComboBox(LibraryListSourceChanger listChanger, MyLibraryPanel myLibraryPanel, ShareListManager shareListManager) {
+    public SharingFilterComboBox(LibraryListSourceChanger listChanger, MyLibraryPanel myLibraryPanel, SharedFileListManager shareListManager) {
         this.listChanger = listChanger;
         this.myLibraryPanel = myLibraryPanel;
         this.shareListManager = shareListManager;
@@ -172,13 +170,13 @@ public class SharingFilterComboBox extends LimeComboBox {
             menu.removeAll();        
             menu.add(subMenuText);
            
-            menu.add(new MenuAction(SharingTarget.GNUTELLA_SHARE.getFriend(), shareListManager.getGnutellaShareList().size(), gnutellaIcon));
+            menu.add(new MenuAction(SharingTarget.GNUTELLA_SHARE.getFriend(), -1, gnutellaIcon));
             
             List<Friend> sharedFriends = getSharedFriends();
             if (sharedFriends.size() > 0) {
                 Collections.sort(sharedFriends, new FriendComparator(shareListManager));
                 for (Friend friend : sharedFriends) {
-                    menu.add(new MenuAction(friend, shareListManager.getOrCreateFriendShareList(friend).size(), friendIcon));
+                    menu.add(new MenuAction(friend, -1, friendIcon));
                 }
                 if (sharedFriends.size() < menuList.size()){
                     menu.addLabel(I18n.tr("<HTML>You aren't sharing<BR>with any other friends</HTML>"), null);
@@ -196,12 +194,12 @@ public class SharingFilterComboBox extends LimeComboBox {
     
     private List<Friend> getSharedFriends(){
         List<Friend> friends = new ArrayList<Friend>(menuList);
-        Iterator<Friend> iterator = friends.iterator();
-        while (iterator.hasNext()) {
-            if (shareListManager.getOrCreateFriendShareList(iterator.next()).size() == 0) {
-                iterator.remove();
-            }
-        }
+//        Iterator<Friend> iterator = friends.iterator();
+//        while (iterator.hasNext()) {
+//            if (shareListManager.getOrCreateFriendShareList(iterator.next()).size() == 0) {
+//                iterator.remove();
+//            }
+//        }
         return friends;
     }
     
@@ -211,27 +209,27 @@ public class SharingFilterComboBox extends LimeComboBox {
      * not being shared with appear below that in alphabetical order.
      */
     private static class FriendComparator implements Comparator<Friend> {
-        private final ShareListManager shareListManager;
+//        private final SharedFileListManager shareListManager;
         
-        public FriendComparator(ShareListManager shareListManager) {
-            this.shareListManager = shareListManager;
+        public FriendComparator(SharedFileListManager shareListManager) {
+//            this.shareListManager = shareListManager;
         }
         
         @Override
         public int compare(Friend o1, Friend o2) {
-            if(o1 == o2) {
+//            if(o1 == o2) {
                 return 0;
-            } else {
-                LocalFileList fileList1 = shareListManager.getOrCreateFriendShareList(o1);
-                LocalFileList fileList2 = shareListManager.getOrCreateFriendShareList(o2);
-                if((fileList1.size() > 0 && fileList2.size() > 0) || 
-                        (fileList1.size() == 0 && fileList2.size() == 0))
-                    return o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
-                else if(fileList1.size() > 0 && fileList2.size() == 0)
-                    return -1;
-                else 
-                    return 1;
-            }
+//            } else {
+//                LocalFileList fileList1 = shareListManager.getOrCreateFriendShareList(o1);
+//                LocalFileList fileList2 = shareListManager.getOrCreateFriendShareList(o2);
+//                if((fileList1.size() > 0 && fileList2.size() > 0) || 
+//                        (fileList1.size() == 0 && fileList2.size() == 0))
+//                    return o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
+//                else if(fileList1.size() > 0 && fileList2.size() == 0)
+//                    return -1;
+//                else 
+//                    return 1;
+//            }
         }
     }
     

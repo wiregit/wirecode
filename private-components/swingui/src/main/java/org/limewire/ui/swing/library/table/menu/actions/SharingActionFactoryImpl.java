@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.library.table.menu.actions;
 
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.SelectAllable;
@@ -12,12 +12,12 @@ import com.google.inject.Provider;
 
 public class SharingActionFactoryImpl implements SharingActionFactory {
 
-    private final ShareListManager shareListManager;
+    private final SharedFileListManager shareListManager;
     private final Provider<ShareWidgetFactory> shareWidgetFactory;
     private final FriendsSignInPanel friendsSignInPanel;
     
     @Inject
-    public SharingActionFactoryImpl(ShareListManager shareListManager, Provider<ShareWidgetFactory> shareWidgetFactory,
+    public SharingActionFactoryImpl(SharedFileListManager shareListManager, Provider<ShareWidgetFactory> shareWidgetFactory,
             FriendsSignInPanel friendsSignInPanel) {
         this.shareListManager = shareListManager;
         this.shareWidgetFactory = shareWidgetFactory;

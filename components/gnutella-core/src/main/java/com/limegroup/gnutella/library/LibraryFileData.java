@@ -665,6 +665,16 @@ class LibraryFileData extends AbstractSettingsGroup {
             lock.readLock().unlock();
         }
     }
+    
+    /** Sets a new name for the collection of the given id. */
+    void setNameForCollection(int collectionId, String name) {
+        lock.writeLock().lock();
+        try {
+            collectionNames.put(collectionId, name);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
 
     /** Returns an ID that will be used for a new collection with the given name. */
     int createNewCollection(String name) {

@@ -23,7 +23,6 @@ import ca.odell.glazedlists.TransformedList;
 
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
 
 //TODO: This really should only deal with collections, but
@@ -47,32 +46,28 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     /** Returns the FileCollection this should mutate. */
-    protected abstract FileCollection getMutableCollection();
-    
-    /** Returns the FileView this should view. */
-    // TODO: This will disappear when the UI starts showing collections.
-    protected abstract FileView getFileView();
+    protected abstract FileCollection getCoreCollection();
     
     @Override
     public ListeningFuture<LocalFileItem> addFile(File file) {
-        return new Wrapper((getMutableCollection().add(file)));
+        return new Wrapper((getCoreCollection().add(file)));
     }
 
     @Override
     public void removeFile(File file) {
         if(contains(file)) {
-            getMutableCollection().remove(file);
+            getCoreCollection().remove(file);
         }
     }
     
     @Override
     public ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder) {
-        return new ListWrapper((getMutableCollection().addFolder(folder)));
+        return new ListWrapper((getCoreCollection().addFolder(folder)));
     }
 
     @Override
     public boolean contains(File file) {
-        return getFileView().contains(file);
+        return getCoreCollection().contains(file);
     }
     
     @Override
@@ -85,7 +80,7 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     protected boolean containsCoreUrn(com.limegroup.gnutella.URN urn) {
-        return !getFileView().getFileDescsMatching(urn).isEmpty();
+        return !getCoreCollection().getFileDescsMatching(urn).isEmpty();
     }
 
     @Override
@@ -223,7 +218,7 @@ abstract class LocalFileListImpl implements LocalFileList {
     
     @Override
     public LocalFileItem getFileItem(File file) {
-      FileDesc fileDesc = getFileView().getFileDesc(file);
+      FileDesc fileDesc = getCoreCollection().getFileDesc(file);
       if(fileDesc != null) {
           return (LocalFileItem)fileDesc.getClientProperty(FILE_ITEM_PROPERTY);
       }

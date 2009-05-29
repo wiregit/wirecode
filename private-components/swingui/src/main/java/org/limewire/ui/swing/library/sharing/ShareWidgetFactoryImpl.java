@@ -6,7 +6,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -31,7 +31,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     
     private ShareWidget<LocalFileItem[]> multiFileUnshareWidget;
 
-    private ShareListManager shareListManager;
+    private SharedFileListManager shareListManager;
 
     private ThreadSafeList<SharingTarget> allFriendsThreadSafe;
 
@@ -41,7 +41,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     
     
     @Inject
-    public ShareWidgetFactoryImpl(ShareListManager shareListManager, ShapeDialog shapeDialog, FriendActions friendActions){
+    public ShareWidgetFactoryImpl(SharedFileListManager shareListManager, ShapeDialog shapeDialog, FriendActions friendActions){
         this.shareListManager = shareListManager;
         allFriendsThreadSafe = GlazedListsFactory.threadSafeList(new BasicEventList<SharingTarget>());
         this.shapeDialog = shapeDialog;

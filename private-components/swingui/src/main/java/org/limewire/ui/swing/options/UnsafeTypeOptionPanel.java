@@ -8,7 +8,7 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.NotImplementedException;
@@ -22,7 +22,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
 //    private final ShareListManager shareListManager;
    
     public UnsafeTypeOptionPanel(Action okButtonAction, LibraryManager libraryManager,
-            ShareListManager shareListManager) {
+            SharedFileListManager shareListManager) {
         this.libraryManager = libraryManager;
 //        this.shareListManager = shareListManager;
 

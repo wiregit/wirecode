@@ -10,15 +10,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
 
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
@@ -26,7 +26,7 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class MockLibraryManager implements ShareListManager, LibraryManager {
+public class MockLibraryManager implements SharedFileListManager, LibraryManager {
 
     private FileListAdapter allFileList;
     private FriendFileListAdapter gnutellaList;
@@ -137,28 +137,6 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     public LibraryFileList getLibraryManagedList() {
         return allFileList;
     }
-    
-    @Override
-    public FileList<LocalFileItem> getCombinedShareList() {
-        return new FileListAdapter();
-    }
-    
-    @Override
-    public LocalFileList getGnutellaShareList() {
-        return gnutellaList;
-    }        
-
-    @Override
-    public LocalFileList getOrCreateFriendShareList(Friend name) {
-        return new FriendFileListAdapter();
-    }  
-    
-    @Override
-    public LocalFileList getFriendShareList(Friend friend) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     @Override
     public LibraryData getLibraryData() {
         return libraryData;
@@ -235,5 +213,17 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
             
         }
         
+    }
+
+    @Override
+    public SharedFileList createNewSharedFileList(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public EventList<SharedFileList> getModel() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

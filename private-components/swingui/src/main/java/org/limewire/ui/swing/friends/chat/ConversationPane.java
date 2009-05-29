@@ -9,19 +9,11 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Rectangle;
-import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,14 +26,12 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.OverlayLayout;
 import javax.swing.SwingUtilities;
-import javax.swing.text.JTextComponent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import net.miginfocom.swing.MigLayout;
@@ -62,8 +52,7 @@ import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -79,7 +68,6 @@ import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.painter.GenericBarPainter;
-import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -111,7 +99,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final String loggedInID;
     private final MessageWriter writer;
     private final ChatFriend chatFriend;
-    private final ShareListManager shareListManager;
+//    private final SharedFileListManager shareListManager;
     private final Provider<IconManager> iconManager;
     private final LibraryNavigator libraryNavigator;
     private HyperlinkButton downloadlink;
@@ -135,7 +123,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     
     @Inject
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
-                            ShareListManager libraryManager, Provider<IconManager> iconManager, LibraryNavigator libraryNavigator,
+                            SharedFileListManager libraryManager, Provider<IconManager> iconManager, LibraryNavigator libraryNavigator,
                             ChatHyperlinkListenerFactory chatHyperlinkListenerFactory,
                             @Named("backgroundExecutor")ScheduledExecutorService schedExecService) {
         this.writer = writer;
@@ -143,7 +131,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         this.conversationName = chatFriend.getName();
         this.friendId = chatFriend.getID();
         this.loggedInID = loggedInID;
-        this.shareListManager = libraryManager;
+//        this.shareListManager = libraryManager;
         this.iconManager = iconManager;
         this.libraryNavigator = libraryNavigator;
         
@@ -220,8 +208,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
         PopupUtil.addPopupMenus(editor, new CopyAction(editor), new CopyAllAction());
 
-        FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, libraryManager.getOrCreateFriendShareList(chatFriend.getUser()));
-        editor.setDropTarget(friendShare.getDropTarget());
+//        FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, libraryManager.getOrCreateFriendShareList(chatFriend.getUser()));
+//        editor.setDropTarget(friendShare.getDropTarget());
 
         add(footerPanel(writer, chatFriend, schedExecService), BorderLayout.SOUTH);
 
@@ -446,9 +434,9 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         panel.add(toolbar, BorderLayout.NORTH);
         panel.add(inputPanel, BorderLayout.CENTER);
 
-        JTextComponent inputComponent = inputPanel.getInputComponent();
-        FriendShareDropTarget friendShare = new FriendShareDropTarget(inputComponent, shareListManager.getOrCreateFriendShareList(chatFriend.getUser()));
-        inputComponent.setDropTarget(friendShare.getDropTarget());
+//        JTextComponent inputComponent = inputPanel.getInputComponent();
+//        FriendShareDropTarget friendShare = new FriendShareDropTarget(inputComponent, shareListManager.getOrCreateFriendShareList(chatFriend.getUser()));
+//        inputComponent.setDropTarget(friendShare.getDropTarget());
 
         return panel;
     }
@@ -547,83 +535,83 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         });
     }
     
-    private class FriendShareDropTarget implements DropTargetListener {
-        private final DropTarget dropTarget;
-        private LocalFileList fileList;
-        
-        public FriendShareDropTarget(JComponent component, LocalFileList fileList) {
-            dropTarget = new DropTarget(component, DnDConstants.ACTION_COPY, this, true, null);
-            this.fileList = fileList;
-        }
-        
-        public void setModel(LocalFileList fileList) {
-            this.fileList = fileList;
-        }
-        
-        public DropTarget getDropTarget() {
-            return dropTarget;
-        }
-
-        @Override
-        public void dragEnter(DropTargetDragEvent dtde) {
-            checkLimewireConnected(dtde);
-        }
-        
-        @Override
-        public void dragExit(DropTargetEvent dte) {
-        }
-        
-        @Override
-        public void dragOver(DropTargetDragEvent dtde) {
-            checkLimewireConnected(dtde);
-        }
-
-        private void checkLimewireConnected(DropTargetDragEvent dtde) {
-            if (!chatFriend.isSignedInToLimewire()) {
-                dtde.rejectDrag();
-            }
-        }
-        
-        @Override
-        public void drop(DropTargetDropEvent dtde) {
-            if ((dtde.getDropAction() & DnDConstants.ACTION_COPY_OR_MOVE) != 0) {
-                // Accept the drop and get the transfer data
-                dtde.acceptDrop(dtde.getDropAction());
-                Transferable transferable = dtde.getTransferable();
-
-                try {
-                    final LocalFileList currentModel = fileList;
-                    final File[] droppedFiles = DNDUtils.getFiles(transferable); 
-              
-                    for(File file : droppedFiles) {
-                        if(file != null) {
-                            if(file.isDirectory()) {
-                                acceptedFolder(currentModel.addFolder(file));
-                            } else {
-                                acceptedFile(currentModel.addFile(file));
-                            }
-                        }
-                    }
-                    
-                    dtde.dropComplete(true);
-                } catch (Exception e) {
-                    dtde.dropComplete(false);
-                }
-              } else {
-                    dtde.rejectDrop();
-              }
-        }
-        
-        @Override
-        public void dropActionChanged(DropTargetDragEvent dtde) {
-        }
-        
-        protected void acceptedFile(ListeningFuture<LocalFileItem> future) {
-            offerFile(future);
-        }
-        
-        protected void acceptedFolder(ListeningFuture<List<ListeningFuture<LocalFileItem>>> future) {
-            offerFolder(future);
-        }
-    }
+//    private class FriendShareDropTarget implements DropTargetListener {
+//        private final DropTarget dropTarget;
+//        private LocalFileList fileList;
+//        
+//        public FriendShareDropTarget(JComponent component, LocalFileList fileList) {
+//            dropTarget = new DropTarget(component, DnDConstants.ACTION_COPY, this, true, null);
+//            this.fileList = fileList;
+//        }
+//        
+//        public void setModel(LocalFileList fileList) {
+//            this.fileList = fileList;
+//        }
+//        
+//        public DropTarget getDropTarget() {
+//            return dropTarget;
+//        }
+//
+//        @Override
+//        public void dragEnter(DropTargetDragEvent dtde) {
+//            checkLimewireConnected(dtde);
+//        }
+//        
+//        @Override
+//        public void dragExit(DropTargetEvent dte) {
+//        }
+//        
+//        @Override
+//        public void dragOver(DropTargetDragEvent dtde) {
+//            checkLimewireConnected(dtde);
+//        }
+//
+//        private void checkLimewireConnected(DropTargetDragEvent dtde) {
+//            if (!chatFriend.isSignedInToLimewire()) {
+//                dtde.rejectDrag();
+//            }
+//        }
+//        
+//        @Override
+//        public void drop(DropTargetDropEvent dtde) {
+//            if ((dtde.getDropAction() & DnDConstants.ACTION_COPY_OR_MOVE) != 0) {
+//                // Accept the drop and get the transfer data
+//                dtde.acceptDrop(dtde.getDropAction());
+//                Transferable transferable = dtde.getTransferable();
+//
+//                try {
+//                    final LocalFileList currentModel = fileList;
+//                    final File[] droppedFiles = DNDUtils.getFiles(transferable); 
+//              
+//                    for(File file : droppedFiles) {
+//                        if(file != null) {
+//                            if(file.isDirectory()) {
+//                                acceptedFolder(currentModel.addFolder(file));
+//                            } else {
+//                                acceptedFile(currentModel.addFile(file));
+//                            }
+//                        }
+//                    }
+//                    
+//                    dtde.dropComplete(true);
+//                } catch (Exception e) {
+//                    dtde.dropComplete(false);
+//                }
+//              } else {
+//                    dtde.rejectDrop();
+//              }
+//        }
+//        
+//        @Override
+//        public void dropActionChanged(DropTargetDragEvent dtde) {
+//        }
+//        
+//        protected void acceptedFile(ListeningFuture<LocalFileItem> future) {
+//            offerFile(future);
+//        }
+//        
+//        protected void acceptedFolder(ListeningFuture<List<ListeningFuture<LocalFileItem>>> future) {
+//            offerFolder(future);
+//        }
+//    }
 }

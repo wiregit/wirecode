@@ -15,7 +15,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.inject.LazySingleton;
 import org.limewire.player.api.AudioPlayer;
@@ -64,7 +64,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
     private LibraryManager libraryManager;
 
-    private ShareListManager shareListManager;
+    private SharedFileListManager shareListManager;
 
     private AudioPlayer player;
     
@@ -93,7 +93,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     @Inject
     public LibraryTableFactoryImpl(Provider<IconManager> iconManager,
             LibraryManager libraryManager, 
-            ShareListManager shareListManager, 
+            SharedFileListManager shareListManager, 
             AudioPlayer player,
             Provider<LibraryImageSubPanelFactory> factory, 
             Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler,

@@ -46,7 +46,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.core.settings.LibrarySettings;
@@ -131,7 +131,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     private final Map<Catalog, LibraryOperable<? extends LocalFileItem>> selectableMap;
     private final Provider<ShareWidgetFactory> shareFactory;    
     private final PlaylistManager playlistManager;
-    private final ShareListManager shareListManager;
+//    private final SharedFileListManager shareListManager;
     
     private PlayerPanel playerPanel = null;
     
@@ -191,7 +191,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
                           Provider<PlayerPanel> playerProvider, 
                           GhostDragGlassPane ghostPane,
                           ListenerSupport<XMPPConnectionEvent> connectionListeners,
-                          ShareListManager shareListManager,
+                          SharedFileListManager shareListManager,
                           TextFieldDecorator textFieldDecorator,
                           ComboBoxDecorator comboDecorator,
                           ButtonDecorator buttonDecorator,
@@ -213,7 +213,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         this.connectionListeners = connectionListeners;
         this.xmppService = xmppService;
         this.playlistManager = playlistManager;
-        this.shareListManager = shareListManager;
+//        this.shareListManager = shareListManager;
         this.currentFriendFilterChanger = currentFriendFilterChanger;
         
         if (selectionPanelBackgroundOverride != null) { 
@@ -302,19 +302,20 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
         });
         
         //listens for changes to shared items and calls repaint to update ui features
-        shareListManager.getCombinedShareList().getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>(){
-            @Override
-            public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                //coalesces repaint calls. Updates usually come in bulk, ie you sign on/off,
-                // share a collection, etc..
-                if(MyLibraryPanel.this.isShowing()) {
-                    if(repaintTimer.isRunning())
-                        repaintTimer.restart();
-                    else
-                        repaintTimer.start();
-                }
-            }
-        });
+// TODO: Do we need this anymore?
+//        shareListManager.getCombinedShareList().getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>(){
+//            @Override
+//            public void listChanged(ListEvent<LocalFileItem> listChanges) {
+//                //coalesces repaint calls. Updates usually come in bulk, ie you sign on/off,
+//                // share a collection, etc..
+//                if(MyLibraryPanel.this.isShowing()) {
+//                    if(repaintTimer.isRunning())
+//                        repaintTimer.restart();
+//                    else
+//                        repaintTimer.start();
+//                }
+//            }
+//        });
     }
 
     private void createAndAddPlayer() {

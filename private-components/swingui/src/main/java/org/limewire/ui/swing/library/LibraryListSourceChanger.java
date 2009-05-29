@@ -7,7 +7,6 @@ import org.limewire.collection.glazedlists.PluggableList;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
 
 /**
  * Allows My Library to be filtered based on a friend. When a friend
@@ -16,18 +15,17 @@ import org.limewire.core.api.library.ShareListManager;
  */
 public class LibraryListSourceChanger implements ListSourceChanger {
     
-    private final PluggableList<LocalFileItem> delegateList;    
-    private final LibraryManager libraryManager;
-    private final ShareListManager shareListManager;
+//    private final PluggableList<LocalFileItem> delegateList;    
+//    private final LibraryManager libraryManager;
+//    private final ShareListManager shareListManager;
     private final List<ListChangedListener> listeners = new CopyOnWriteArrayList<ListChangedListener>();
     
     private Friend currentFriend;
     
     public LibraryListSourceChanger(PluggableList<LocalFileItem> delegateList,
-            LibraryManager libraryManager, ShareListManager shareListManager) {
-        this.delegateList = delegateList;
-        this.libraryManager = libraryManager;
-        this.shareListManager = shareListManager;
+            LibraryManager libraryManager) {
+//        this.delegateList = delegateList;
+//        this.libraryManager = libraryManager;
     }
     
     public void addListener(ListChangedListener listener) {
@@ -41,13 +39,13 @@ public class LibraryListSourceChanger implements ListSourceChanger {
     public void setFriend(Friend friend) {
         currentFriend = friend;
         
-        if(friend == null || friend.getId() == null) {
-            delegateList.setSource(libraryManager.getLibraryManagedList().getSwingModel());
-        } else if(friend.getId().equals(Friend.P2P_FRIEND_ID)) {
-            delegateList.setSource(shareListManager.getGnutellaShareList().getSwingModel());
-        } else {
-            delegateList.setSource(shareListManager.getFriendShareList(friend).getSwingModel());
-        }
+//        if(friend == null || friend.getId() == null) {
+//            delegateList.setSource(libraryManager.getLibraryManagedList().getSwingModel());
+//        } else if(friend.getId().equals(Friend.P2P_FRIEND_ID)) {
+//            delegateList.setSource(shareListManager.getGnutellaShareList().getSwingModel());
+//        } else {
+//            delegateList.setSource(shareListManager.getFriendShareList(friend).getSwingModel());
+//        }
         
         for(ListChangedListener listener : listeners) {
             listener.friendChanged(currentFriend);

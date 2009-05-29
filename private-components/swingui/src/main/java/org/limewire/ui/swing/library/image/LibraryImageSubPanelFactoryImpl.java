@@ -13,7 +13,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
@@ -48,14 +48,14 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
 
-    private final ShareListManager shareListManager;
+    private final SharedFileListManager shareListManager;
     private final ComboBoxDecorator comboDecorator;
     private final MyLibraryPopupMenuFactory libraryPopupFactory;
     private final Provider<LibraryImageFolderComboBox> libraryImageComboBox;
     
     @Inject
     public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager, 
-            ShareTableRendererEditorFactory shareTableRendererEditorFactory, ShareListManager shareListManager, 
+            ShareTableRendererEditorFactory shareTableRendererEditorFactory, SharedFileListManager shareListManager, 
             ComboBoxDecorator comboDecorator, LibraryNavigator libraryNavigator, PlaylistManager playlistManager,
             FileInfoDialogFactory fileInfoFactory, MyLibraryPopupMenuFactory libraryPopupFactory,
             Provider<LibraryImageFolderComboBox> libraryImageComboBox) {

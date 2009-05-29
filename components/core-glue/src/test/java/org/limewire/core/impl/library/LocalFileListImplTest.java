@@ -13,7 +13,6 @@ import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileView;
 
 public class LocalFileListImplTest extends LimeTestCase {
 
@@ -41,11 +40,7 @@ public class LocalFileListImplTest extends LimeTestCase {
     
         LocalFileListImpl localFileList = new LocalFileListImpl(eventList, null) {
             @Override
-            protected FileCollection getMutableCollection() {
-                return null;
-            }
-            @Override
-            protected FileView getFileView() {
+            protected FileCollection getCoreCollection() {
                 return null;
             }
         };
