@@ -104,6 +104,8 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                 one(downloader).getAttribute(DownloadItem.DOWNLOAD_ITEM);
                 will(returnValue(downloadItem));
                 one(downloadManager).downloadTorrent(torrentFile, false);
+                one(torrentManager).isDownloadingTorrent(torrentFile);
+                will(returnValue(false));
             }
         });
 
@@ -148,6 +150,8 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                         with(new IsEqual<Boolean>(false)));
                 will(new DownloadActionCaller());
                 one(downloadManager).downloadTorrent(torrentFile, true);
+                one(torrentManager).isDownloadingTorrent(torrentFile);
+                will(returnValue(false));
             }
         });
 
@@ -183,6 +187,8 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                 one(downloader).getTorrentFile();
                 will(returnValue(torrentFile));
                 one(downloadManager).downloadTorrent(torrentFile, false);
+                one(torrentManager).isDownloadingTorrent(torrentFile);
+                will(returnValue(false));
             }
         });
 
@@ -227,6 +233,8 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
                         with(new IsEqual<Boolean>(false)));
                 will(new DownloadActionCaller());
                 one(downloadManager).downloadTorrent(torrentFile, true);
+                one(torrentManager).isDownloadingTorrent(torrentFile);
+                will(returnValue(false));
             }
         });
 
