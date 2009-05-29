@@ -1,0 +1,87 @@
+package org.limewire.core.impl.library;
+
+import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.SharedFileCollection;
+import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent;
+
+@Singleton
+class SharedFileListManagerImpl implements SharedFileListManager {
+    
+//    private static final Log LOG = LogFactory.getLog(ShareListManagerImpl.class);
+    
+    private final FileCollectionManager collectionManager;    
+    private final CoreLocalFileItemFactory coreLocalFileItemFactory;
+    
+    private final EventList<SharedFileList> sharedLists = GlazedListsFactory.threadSafeList(new BasicEventList<SharedFileList>());
+    private final EventList<SharedFileList> readOnlySharedLists = GlazedListsFactory.readOnlyList(sharedLists);
+    
+    @Inject
+    SharedFileListManagerImpl(FileCollectionManager collectionManager,
+            CoreLocalFileItemFactory coreLocalFileItemFactory,
+            LibraryManager libraryManager) {
+        this.collectionManager = collectionManager;
+        this.coreLocalFileItemFactory = coreLocalFileItemFactory;
+    }
+    
+    @Inject void register(ListenerSupport<SharedFileCollectionChangeEvent> support) {
+        for(SharedFileCollection collection : collectionManager.getSharedFileCollections()) {
+            collectionAdded(collection);
+        }
+        
+        support.addListener(new EventListener<SharedFileCollectionChangeEvent>() {
+            @Override
+            public void handleEvent(SharedFileCollectionChangeEvent event) {
+                switch(event.getType()) {
+                case COLLECTION_ADDED:
+                    collectionAdded(event.getSource());
+                    break;
+                case COLLECTION_REMOVED:
+                    collectionRemoved(event.getSource());
+                }
+            }
+        });
+    }
+    
+    private void collectionAdded(SharedFileCollection collection) {
+        SharedFileListImpl listImpl = new SharedFileListImpl(coreLocalFileItemFactory, collection);
+        sharedLists.add(listImpl);
+    }
+    
+    private void collectionRemoved(SharedFileCollection collection) {
+        sharedLists.getReadWriteLock().writeLock().lock();
+        try {
+            for(SharedFileList list : sharedLists) {
+                SharedFileListImpl impl = (SharedFileListImpl)list;
+                if(impl.getCoreCollection() == collection) {
+                    sharedLists.remove(list);
+                    break;
+                }
+            }
+        } finally {
+            sharedLists.getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void createNewSharedFileList(String name) {
+        collectionManager.createNewCollection(name);        
+    }
+
+    @Override
+    public EventList<SharedFileList> getModel() {
+        return readOnlySharedLists;
+    }
+    
+}

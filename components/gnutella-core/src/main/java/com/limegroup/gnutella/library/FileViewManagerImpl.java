@@ -75,7 +75,9 @@ class FileViewManagerImpl implements FileViewManager {
     @Inject void register(ListenerSupport<FileViewChangeEvent> viewListeners,
                           ListenerSupport<SharedFileCollectionChangeEvent> collectionListeners,
                           FileCollectionManager collectionManager) {
-        collectionAdded(collectionManager.getCollectionById(LibraryFileData.DEFAULT_SHARED_COLLECTION_ID));
+        for(SharedFileCollection collection : collectionManager.getSharedFileCollections()) {
+            collectionAdded(collection);
+        }
         
         viewListeners.addListener(new EventListener<FileViewChangeEvent>() {
             @Override

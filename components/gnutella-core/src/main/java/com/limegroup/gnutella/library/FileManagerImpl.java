@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.library;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -180,60 +181,18 @@ class FileManagerImpl implements FileManager, Service {
         sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));
         return collection;
     }
-    
-    @Override
-    public SharedFileCollection getOrCreateCollectionByName(String name) {
-        SharedFileCollectionImpl collection;
-        synchronized(this) {
-            for(SharedFileCollectionImpl shared : sharedCollections.values()) {
-                if(shared.getName().equals(name)) {
-                    return shared;
-                }
-            }
-            
-            collection = createNewCollectionImpl(name);
-        }
-        
-        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));
-        return collection;
-    }
-    
-    @Override
-    public void removeCollectionByName(String name) {
-        Integer idToRemove = null;
-        synchronized(this) {
-            for(Iterator<SharedFileCollectionImpl> entries = sharedCollections.values().iterator(); entries.hasNext(); ) {
-                SharedFileCollectionImpl collection = entries.next();
-                if(collection.getName().equals(name)) {
-                    idToRemove = collection.getId();
-                    break;
-                }
-            }
-        }
-        
-        if(idToRemove != null) {
-            removeCollectionById(idToRemove);
-        }
-    }
-
-    public void unloadCollectionByName(String friendName) {
-        SharedFileCollectionImpl removeFileList = null;
-        synchronized (this) {
-            removeFileList = sharedCollections.get(friendName);
-            if (removeFileList != null) {
-                sharedCollections.remove(friendName);
-            }
-        }
-        
-        if(removeFileList != null) {
-            removeFileList.unload();
-        }
-
-    }
 
     @Override
     public IncompleteFileCollection getIncompleteFileCollection() {
         return incompleteCollection;
+    }
+    
+    @Override
+    public synchronized List<SharedFileCollection> getSharedFileCollections() {
+        List<SharedFileCollection> collections = new ArrayList<SharedFileCollection>(sharedCollections.size() + 1);
+        collections.add(defaultSharedCollection);
+        collections.addAll(sharedCollections.values());
+        return collections;
     }
     
     private class Saver implements Runnable {

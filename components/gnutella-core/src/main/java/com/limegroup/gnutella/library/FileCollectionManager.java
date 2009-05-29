@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.library;
 
+import java.util.List;
+
 public interface FileCollectionManager {
 
     /**
@@ -22,10 +24,8 @@ public interface FileCollectionManager {
     
     /** Returns a new collection named the given name. */
     SharedFileCollection createNewCollection(String name);
-
-    // TODO: These methods are leftover because the UI is not fully updated.
-    SharedFileCollection getOrCreateCollectionByName(String name);
-    void removeCollectionByName(String name);
-    void unloadCollectionByName(String friendId);
+    
+    /** Returns all current shared collections. */
+    List<SharedFileCollection> getSharedFileCollections();
 
 }

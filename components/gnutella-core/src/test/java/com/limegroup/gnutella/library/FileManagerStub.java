@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.library;
 
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -38,16 +40,6 @@ public class FileManagerStub implements FileManager, FileViewManager {
     }
     
     @Override
-    public SharedFileCollection getOrCreateCollectionByName(String name) {
-        throw new UnsupportedOperationException("not supported");
-    }
-    
-    @Override
-    public void removeCollectionByName(String name) {
-        throw new UnsupportedOperationException("not supported");
-    }
-    
-    @Override
     public SharedFileCollection getCollectionById(int collectionId) {
         throw new UnsupportedOperationException("not supported");
     }
@@ -79,6 +71,12 @@ public class FileManagerStub implements FileManager, FileViewManager {
     @Override
     public FileView getIncompleteFileView() {
         return incompleteStub;
+    }
+
+    @Override
+    public List<SharedFileCollection> getSharedFileCollections() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 

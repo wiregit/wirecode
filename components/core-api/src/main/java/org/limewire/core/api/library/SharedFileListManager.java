@@ -9,7 +9,7 @@ public interface SharedFileListManager {
     
     EventList<SharedFileList> getModel();
     
-    SharedFileList createNewSharedFileList(String name);
+    void createNewSharedFileList(String name);
     
     // TODO: getSharedFileList(String name), or (int id) ?
 }
