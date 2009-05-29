@@ -50,7 +50,7 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
      * queries have been seen to identify suspicious queries reliably
      */
     public void testAllowedUntilTotalIsSufficient() {
-        final int total = AnomalousQueryFilter.PREFIXES_TO_COUNT;
+        final int total = AnomalousQueryFilter.GUIDS_TO_COUNT;
         context.checking(new Expectations() {{
             exactly(total - 1).of(query).getGUID();
             will(returnValue(makeSuspiciousGuid()));
@@ -66,14 +66,14 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
      * queries have been seen to identify suspicious queries reliably
      */
     public void testBlockedWhenTotalIsSufficient() {
-        final int total = AnomalousQueryFilter.PREFIXES_TO_COUNT;
+        final int total = AnomalousQueryFilter.GUIDS_TO_COUNT;
         context.checking(new Expectations() {{
             exactly(total).of(query).getGUID();
             will(returnValue(makeSuspiciousGuid()));
-            // These methods will be called for the last query
-            one(query).desiresOutOfBandReplies();
+            // These methods will be called for the last query, once per slice
+            exactly(4).of(query).desiresOutOfBandReplies();
             will(returnValue(false));
-            one(query).getMinSpeed();
+            exactly(4).of(query).getMinSpeed();
             will(returnValue(0));
         }});
         for(int i = 0; i < total - 1; i++) {
@@ -89,10 +89,10 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
      * make up a sufficient fraction of observed queries
      */
     public void testAllowedUntilFractionIsSufficient() {
-        final int total = AnomalousQueryFilter.PREFIXES_TO_COUNT;
+        final int total = AnomalousQueryFilter.GUIDS_TO_COUNT;
         final int suspiciousCount =
-            (int)(AnomalousQueryFilter.PREFIXES_TO_COUNT
-                    * AnomalousQueryFilter.MAX_FRACTION_PER_PREFIX);
+            (int)(AnomalousQueryFilter.GUIDS_TO_COUNT
+                    * AnomalousQueryFilter.MAX_FRACTION_PER_SLICE);
         final int innocentCount = total - suspiciousCount;
         context.checking(new Expectations() {{
             exactly(innocentCount).of(query).getGUID();
@@ -111,20 +111,20 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
      * make up a sufficient fraction of observed queries
      */
     public void testBlockedWhenFractionIsSufficient() {
-        final int total = AnomalousQueryFilter.PREFIXES_TO_COUNT;
+        final int total = AnomalousQueryFilter.GUIDS_TO_COUNT;
         final int suspiciousCount =
-            (int)(AnomalousQueryFilter.PREFIXES_TO_COUNT
-                    * AnomalousQueryFilter.MAX_FRACTION_PER_PREFIX) + 1;
+            (int)(AnomalousQueryFilter.GUIDS_TO_COUNT
+                    * AnomalousQueryFilter.MAX_FRACTION_PER_SLICE) + 1;
         final int innocentCount = total - suspiciousCount;
         context.checking(new Expectations() {{
             exactly(innocentCount).of(query).getGUID();
             will(returnValue(GUID.makeGuid()));
             exactly(suspiciousCount).of(query).getGUID();
             will(returnValue(makeSuspiciousGuid()));
-            // These methods will be called for the last query
-            one(query).desiresOutOfBandReplies();
+            // These methods will be called for the last query, once per slice
+            exactly(4).of(query).desiresOutOfBandReplies();
             will(returnValue(false));
-            one(query).getMinSpeed();
+            exactly(4).of(query).getMinSpeed();
             will(returnValue(0));
         }});
         for(int i = 0; i < total - 1; i++) {
@@ -140,18 +140,18 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
      * don't ask for out of band results
      */
     public void testAllowedIfAsksForOutOfBand() {
-        final int total = AnomalousQueryFilter.PREFIXES_TO_COUNT;
+        final int total = AnomalousQueryFilter.GUIDS_TO_COUNT;
         final int suspiciousCount =
-            (int)(AnomalousQueryFilter.PREFIXES_TO_COUNT
-                    * AnomalousQueryFilter.MAX_FRACTION_PER_PREFIX) + 1;
+            (int)(AnomalousQueryFilter.GUIDS_TO_COUNT
+                    * AnomalousQueryFilter.MAX_FRACTION_PER_SLICE) + 1;
         final int innocentCount = total - suspiciousCount;
         context.checking(new Expectations() {{
             exactly(innocentCount).of(query).getGUID();
             will(returnValue(GUID.makeGuid()));
             exactly(suspiciousCount).of(query).getGUID();
             will(returnValue(makeSuspiciousGuid()));
-            // This method will be called for the last query
-            one(query).desiresOutOfBandReplies();
+            // This method will be called for the last query, once per slice
+            exactly(4).of(query).desiresOutOfBandReplies();
             will(returnValue(true));
             // Minimum speed will never be checked
         }});
@@ -166,20 +166,20 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
      * have non-zero minimum speed
      */
     public void testAllowedIfNonZeroMinimumSpeed() {
-        final int total = AnomalousQueryFilter.PREFIXES_TO_COUNT;
+        final int total = AnomalousQueryFilter.GUIDS_TO_COUNT;
         final int suspiciousCount =
-            (int)(AnomalousQueryFilter.PREFIXES_TO_COUNT
-                    * AnomalousQueryFilter.MAX_FRACTION_PER_PREFIX) + 1;
+            (int)(AnomalousQueryFilter.GUIDS_TO_COUNT
+                    * AnomalousQueryFilter.MAX_FRACTION_PER_SLICE) + 1;
         final int innocentCount = total - suspiciousCount;
         context.checking(new Expectations() {{
             exactly(innocentCount).of(query).getGUID();
             will(returnValue(GUID.makeGuid()));
             exactly(suspiciousCount).of(query).getGUID();
             will(returnValue(makeSuspiciousGuid()));
-            // These methods will be called for the last query
-            one(query).desiresOutOfBandReplies();
+            // These methods will be called for the last query, once per slice
+            exactly(4).of(query).desiresOutOfBandReplies();
             will(returnValue(false));
-            one(query).getMinSpeed();
+            exactly(4).of(query).getMinSpeed();
             will(returnValue(QueryRequest.SPECIAL_MINSPEED_MASK));
         }});
         for(int i = 0; i < total; i++) {
