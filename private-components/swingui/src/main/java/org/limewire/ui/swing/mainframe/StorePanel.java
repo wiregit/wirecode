@@ -9,13 +9,7 @@ import javax.swing.JPanel;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.browser.Browser;
-import org.limewire.ui.swing.browser.BrowserUtils;
-import org.limewire.ui.swing.browser.UriAction;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.SwingUtils;
-import org.mozilla.browser.MozillaAutomation;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
@@ -26,7 +20,7 @@ public class StorePanel extends JPanel {
     private final Application application;
 
     @Inject
-    public StorePanel(Application application, final Navigator navigator) {
+    public StorePanel(Application application) {
         this.application = application;
         browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN, VisibilityMode.DEFAULT);
 
@@ -46,22 +40,7 @@ public class StorePanel extends JPanel {
                     browser.load("about:blank");
                 }
             }
-        });
-        
-        BrowserUtils.addTargetedUrlAction("_lwStore", new UriAction() {
-            @Override
-            public boolean uriClicked(final TargetedUri targetedUrl) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        navigator.getNavItem(NavCategory.LIMEWIRE, StoreMediator.NAME).select();
-                        load(targetedUrl.getUri());
-                    }
-                });
-                
-                return true;
-            }
-        });        
+        });     
     }
     
     public void loadDefaultUrl() {
@@ -70,11 +49,12 @@ public class StorePanel extends JPanel {
 
     public void load(String url) {
         url = application.getUniqueUrl(url);
-        if(!MozillaInitialization.isInitialized()) {
+        if(!MozillaInitialization.isInitialized()) { System.out.println("here");
             NativeLaunchUtils.openURL(url);
         } else {
+            System.out.println("here2");
             // Reset the page to blank before continuing -- blocking is OK because this is fast.
-            MozillaAutomation.blockingLoad(browser, "about:blank");
+//            MozillaAutomation.blockingLoad(browser, "about:blank");
             browser.load(url + "&isClient=true");
         }
     }

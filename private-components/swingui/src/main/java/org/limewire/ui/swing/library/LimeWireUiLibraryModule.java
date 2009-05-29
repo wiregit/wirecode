@@ -24,7 +24,9 @@ public class LimeWireUiLibraryModule extends AbstractModule {
         
         bind(LibraryTableFactory.class).toProvider(LazyBinder.newLazyProvider(
                 LibraryTableFactory.class, LibraryTableFactoryImpl.class));
-        bind(SharingActionFactory.class).to(SharingActionFactoryImpl.class);
+        bind(SharingActionFactory.class).toProvider(LazyBinder.newLazyProvider(
+                SharingActionFactory.class, SharingActionFactoryImpl.class));
+        
         bind(LibraryImageSubPanelFactory.class).to(LibraryImageSubPanelFactoryImpl.class);
         
         bind(ShareTableRendererEditorFactory.class).toProvider(

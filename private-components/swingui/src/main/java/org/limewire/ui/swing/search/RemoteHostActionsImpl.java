@@ -5,6 +5,7 @@ import javax.swing.SwingUtilities;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
@@ -13,6 +14,7 @@ import org.limewire.ui.swing.nav.Navigator;
 
 import com.google.inject.Inject;
 
+@LazySingleton
 public class RemoteHostActionsImpl implements RemoteHostActions {
     private static final Log LOG = LogFactory.getLog(RemoteHostActionsImpl.class);
 

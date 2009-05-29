@@ -67,7 +67,8 @@ public class LimeWireUiSearchModule extends AbstractModule {
                         SearchTabItemsFactory.class, SearchTabItems.class));
         
         
-        bind(RemoteHostActions.class).to(RemoteHostActionsImpl.class);
+        bind(RemoteHostActions.class).toProvider(LazyBinder.newLazyProvider(
+                RemoteHostActions.class, RemoteHostActionsImpl.class));
         
         bind(SearchHeadingDocumentBuilder.class).toProvider(LazyBinder.newLazyProvider(
                 SearchHeadingDocumentBuilder.class, SearchHeadingDocumentBuilderImpl.class));

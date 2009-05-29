@@ -18,7 +18,6 @@ import org.limewire.core.api.Application;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.home.HomeMediator;
-import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -34,7 +33,7 @@ public class SponsoredResultsPanel extends JXPanel {
   
     private final Application application;
     private final Navigator navigator;
-    private final HomePanel homePanel;
+    private final HomeMediator homeMediator;
     private final StoreMediator storeMediator;
 
     @Resource private int textWidth;
@@ -47,12 +46,12 @@ public class SponsoredResultsPanel extends JXPanel {
     @Resource private Font urlFont;
     
     @Inject
-    public SponsoredResultsPanel(Navigator navigator, StoreMediator storeMediator, HomePanel homePanel, Application application) {
+    public SponsoredResultsPanel(Navigator navigator, StoreMediator storeMediator, HomeMediator homeMediator, Application application) {
         GuiUtils.assignResources(this);
         this.application = application;
         this.navigator = navigator;
         this.storeMediator = storeMediator;
-        this.homePanel = homePanel;
+        this.homeMediator = homeMediator;
         setLayout(new VerticalLayout(10));
         setMaximumSize(new Dimension(areaWidth, Short.MAX_VALUE));
         setMinimumSize(new Dimension(areaWidth, Short.MAX_VALUE));
@@ -120,7 +119,7 @@ public class SponsoredResultsPanel extends JXPanel {
             } else {            
                 switch(result.getTarget()) {
                 case HOME:
-                    homePanel.load(result.getUrl());
+                    homeMediator.getComponent().load(result.getUrl());
                     navigator.getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
                     break;
                 case STORE:
