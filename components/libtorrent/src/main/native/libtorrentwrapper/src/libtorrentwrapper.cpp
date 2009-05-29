@@ -111,14 +111,12 @@ struct wrapper_alert_info {
 	int category;
 	char* sha1;
 	const char* message;
-	const wchar_t* data;
 
 	wrapper_alert_info() {
 		sha1 = new char[41];
 		sha1[0] = 0;
 		category = 0;
 		message = 0;
-		data = 0;
 	}
 
 	~wrapper_alert_info() {
@@ -229,8 +227,6 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 
 		boost::filesystem::wpath full_path(path);
 		full_path /= file;
-		alertInfo->data = full_path.string().c_str();
-
 
 #ifdef LIME_DEBUG
 		std::cout << "(to " << alertInfo->data << ')' << std::endl;
