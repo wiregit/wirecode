@@ -4,8 +4,8 @@ import java.util.Set;
 
 import org.limewire.io.Address;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
+import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -16,16 +16,16 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * Creates {@link XMPPRemoteFileDesc} for {@link XMPPAddress}.
+ * Creates {@link XMPPRemoteFileDesc} for {@link org.limewire.core.api.friend.address.FriendAddress}.
  */
 @Singleton
 public class XMPPRemoteFileDescCreator implements RemoteFileDescCreator {
 
     private final AddressFactory addressFactory;
-    private final XMPPAddressResolver addressResolver;
+    private final FriendAddressResolver addressResolver;
 
     @Inject
-    public XMPPRemoteFileDescCreator(AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+    public XMPPRemoteFileDescCreator(AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         this.addressFactory = addressFactory;
         this.addressResolver = addressResolver;
     }
@@ -37,7 +37,7 @@ public class XMPPRemoteFileDescCreator implements RemoteFileDescCreator {
     
     @Override
     public boolean canCreateFor(Address address) {
-        return address instanceof XMPPAddress;
+        return address instanceof FriendAddress;
     }
 
     /**
@@ -48,7 +48,7 @@ public class XMPPRemoteFileDescCreator implements RemoteFileDescCreator {
             byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
             Set<? extends URN> urns, boolean replyToMulticast, String vendor,
             long createTime, boolean http1) {
-        return new XMPPRemoteFileDesc((XMPPAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
+        return new XMPPRemoteFileDesc((FriendAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
     }
 
 }

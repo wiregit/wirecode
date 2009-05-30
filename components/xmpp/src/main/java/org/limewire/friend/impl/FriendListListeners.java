@@ -4,12 +4,12 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
+import org.limewire.core.api.friend.client.RosterEvent;
 import org.limewire.core.api.friend.impl.AbstractFriend;
 import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.client.impl.PresenceImpl;
 
 import com.google.inject.Inject;
@@ -33,7 +33,7 @@ class FriendListListeners {
         rosterListeners.addListener(new EventListener<RosterEvent>() {
             @Override
             public void handleEvent(RosterEvent event) {
-                AbstractFriend friend = event.getData();
+                Friend friend = event.getData();
 
                 switch(event.getType()) {
                 case USER_ADDED:
@@ -57,7 +57,7 @@ class FriendListListeners {
     }
 
     
-    public void addKnownFriend(AbstractFriend friend) {
+    public void addKnownFriend(Friend friend) {
         friend.addPresenceListener(presenceListener);
         friendManager.addKnownFriend(friend);
     }

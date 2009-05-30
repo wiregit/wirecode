@@ -61,6 +61,7 @@ import org.limewire.facebook.service.livemessage.ConnectBackRequestHandler;
 import org.limewire.facebook.service.livemessage.ConnectBackRequestHandlerFactory;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
+import org.limewire.inject.MutableProvider;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
@@ -94,6 +95,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private static final String USER_AGENT_HEADER = "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10";
     private final ChatListenerFactory chatListenerFactory;
     private ScheduledListeningExecutorService executorService;
+    private final MutableProvider<String> chatChannel;
     private final AtomicBoolean loggedIn = new AtomicBoolean(false);
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
     private final EventBroadcaster<FriendConnectionEvent> connectionBroadcaster;
@@ -157,7 +159,8 @@ public class FacebookFriendConnection implements FriendConnection {
                                     PresenceListenerFactory presenceListenerFactory,
                                     FacebookFriendFactory friendFactory,
                                     ChatListenerFactory chatListenerFactory,
-                                    @Named("backgroundExecutor")ScheduledListeningExecutorService executorService) {
+                                    @Named("backgroundExecutor")ScheduledListeningExecutorService executorService,
+                                    @ChatChannel MutableProvider<String> chatChannel) {
         this.configuration = configuration;
         this.apiKey = apiKey;
         this.connectionBroadcaster = connectionBroadcaster;
@@ -168,6 +171,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.friendFactory = friendFactory;
         this.chatListenerFactory = chatListenerFactory;
         this.executorService = executorService;
+        this.chatChannel = chatChannel;
         this.addressHandler = addressHandlerFactory.create(this);
         this.authTokenHandler = authTokenHandlerFactory.create(this);
         this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
@@ -452,7 +456,7 @@ public class FacebookFriendConnection implements FriendConnection {
             int channelBeginPos = homePage.indexOf(channelPrefix)
                     + channelPrefix.length();
             if (channelBeginPos < channelPrefix.length()){
-                channel = FacebookSettings.CHAT_CHANNEL.get();
+                channel = chatChannel.get();
                 // no cached value
                 if (channel.length() == 0) {
                     throw new IOException("can't find channel");
@@ -462,7 +466,7 @@ public class FacebookFriendConnection implements FriendConnection {
             else {
                 channel = homePage.substring(channelBeginPos,
                         channelBeginPos + 2);
-                FacebookSettings.CHAT_CHANNEL.set(channel);
+                chatChannel.set(channel);
             }
 
             String post_form_id;
@@ -571,7 +575,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
     
     public String getChannel() {
-        return FacebookSettings.CHAT_CHANNEL.get();
+        return chatChannel.get();
     }
 
     public String getPresenceId() {

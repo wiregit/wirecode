@@ -10,8 +10,8 @@ import org.limewire.io.Address;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
+import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -69,7 +69,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final String vendor = "EGG";
         final long createTime = 13423;
         final boolean http11 = true;
-        final XMPPAddress addressNew = context.mock(XMPPAddress.class);
+        final FriendAddress addressNew = context.mock(FriendAddress.class);
         
         testPromote(context, addressOrig, index, fileName, size, clientGUID, speed,
                 quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew,
@@ -101,7 +101,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final String vendor = null;
         final long createTime = -132;
         final boolean http11 = false;
-        final XMPPAddress addressNew = null;
+        final FriendAddress addressNew = null;
         
         testPromote(context, addressOrig, index, fileName, size, clientGUID, speed,
                 quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew,
@@ -118,7 +118,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
             }
         };
         
-        final Address addressOrig = context.mock(XMPPAddress.class);
+        final Address addressOrig = context.mock(FriendAddress.class);
         final long index = 0xFFFFFFF;
         final String fileName = "Aaaaaaaaasdasfffffffffffffffffffffffffffoiwequrfweiorwe";
         final long size = Constants.MAX_FILE_SIZE;
@@ -132,7 +132,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         final String vendor = "sadasjhdsakhfesndvcbjurfgmxcnm,xvnsdkjfhsdjkfnsdjfn";
         final long createTime = Long.MAX_VALUE;
         final boolean http11 = true;
-        final XMPPAddress addressNew = context.mock(XMPPAddress.class);
+        final FriendAddress addressNew = context.mock(FriendAddress.class);
         
         testPromote(context, addressOrig, index, fileName, size, clientGUID, speed,
                 quality, browseHost, xmlDoc, urns, replyToMuticast, vendor, createTime, http11, addressNew,
@@ -154,11 +154,11 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
             final String vendor,
             final long createTime,
             final boolean http11,
-            final XMPPAddress addressNew,
+            final FriendAddress addressNew,
             final String xmlCheckString) {
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         
         final XMPPRemoteFileDescDeserializer deserialiser
             = new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver);
@@ -231,13 +231,13 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         };
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         
         final XMPPRemoteFileDescDeserializer deserialiser
             = new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver);
                         
         final RemoteFileDesc rfdOrig = context.mock(RemoteFileDesc.class);
-        final XMPPAddress addressNew = context.mock(XMPPAddress.class);
+        final FriendAddress addressNew = context.mock(FriendAddress.class);
         
         context.checking(new Expectations() {
             {  ignoring(rfdOrig);
@@ -268,12 +268,12 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
         };
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         
         final XMPPRemoteFileDescDeserializer deserialiser
             = new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver);
                         
-        final XMPPAddress address = context.mock(XMPPAddress.class);
+        final FriendAddress address = context.mock(FriendAddress.class);
         
         context.checking(new Expectations() {
             {  // Ensure address resolver is active

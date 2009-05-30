@@ -1,4 +1,4 @@
-package org.limewire.xmpp.api.client;
+package org.limewire.core.api.friend.address;
 
 import org.limewire.io.PermanentAddress;
 import org.limewire.util.Objects;
@@ -7,10 +7,10 @@ import org.limewire.util.Objects;
  * Provides a permanent address for a full jabber id including
  * its resource.
  * 
- * An {@link XMPPAddress} is equal to another one if the full
+ * An {@link FriendAddress} is equal to another one if the full
  * id matches up to the first 5 characters in the resource part.
  */
-public class XMPPAddress implements PermanentAddress {
+public class FriendAddress implements PermanentAddress {
 
     private final String id;
     
@@ -32,11 +32,11 @@ public class XMPPAddress implements PermanentAddress {
      * 
      * @param id the full jabber id including resource
      */
-    public XMPPAddress(String id) {
+    public FriendAddress(String id) {
         this(Objects.nonNull(id, "id"), parseIdPrefix(id));
     }
     
-    XMPPAddress(String id, String idPrefix) {
+    FriendAddress(String id, String idPrefix) {
         this.id = id;
         this.idPrefix = idPrefix;
     }
@@ -96,10 +96,10 @@ public class XMPPAddress implements PermanentAddress {
 
     @Override
     public boolean equals(Object obj) {
-        if(!(obj instanceof XMPPAddress)) {
+        if(!(obj instanceof FriendAddress)) {
             return false;
         }
-        XMPPAddress other = (XMPPAddress)obj;
+        FriendAddress other = (FriendAddress)obj;
         return idPrefix.equals(other.idPrefix);
     }
 }

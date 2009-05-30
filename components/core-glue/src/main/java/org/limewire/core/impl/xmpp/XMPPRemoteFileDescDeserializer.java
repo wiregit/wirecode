@@ -4,8 +4,8 @@ import java.util.Set;
 
 import org.limewire.io.Address;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
+import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -19,10 +19,10 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 public class XMPPRemoteFileDescDeserializer implements RemoteFileDescDeserializer {
 
     private final AddressFactory addressFactory;
-    private final XMPPAddressResolver addressResolver;
+    private final FriendAddressResolver addressResolver;
 
     @Inject
-    public XMPPRemoteFileDescDeserializer(AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+    public XMPPRemoteFileDescDeserializer(AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         this.addressFactory = addressFactory;
         this.addressResolver = addressResolver;
     }
@@ -37,7 +37,7 @@ public class XMPPRemoteFileDescDeserializer implements RemoteFileDescDeserialize
     public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
             long size, byte[] clientGUID, int speed, int quality, LimeXMLDocument xmlDoc,
             Set<? extends URN> urns, String vendor, long createTime) {
-        return new XMPPRemoteFileDesc((XMPPAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
+        return new XMPPRemoteFileDesc((FriendAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
     }
 
     /**
@@ -46,7 +46,7 @@ public class XMPPRemoteFileDescDeserializer implements RemoteFileDescDeserialize
      *  
      * Not all attributes will be preserved in the promotion process.
      */
-    public RemoteFileDesc promoteRemoteFileDescAndExchangeAddress(RemoteFileDesc rfd, XMPPAddress address) {
+    public RemoteFileDesc promoteRemoteFileDescAndExchangeAddress(RemoteFileDesc rfd, FriendAddress address) {
        return new XMPPRemoteFileDesc(address, rfd.getIndex(), rfd.getFileName(), rfd.getSize(), rfd.getClientGUID(), rfd.getSpeed(), rfd.getQuality(), rfd.getXMLDocument(), rfd.getUrns(), 
                rfd.getVendor(), rfd.getCreationTime(), rfd.isHTTP11(), addressFactory, addressResolver); 
     }

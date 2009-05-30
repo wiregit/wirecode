@@ -1,11 +1,11 @@
-package org.limewire.xmpp.client.impl;
+package org.limewire.core.api.friend.address;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map.Entry;
 
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
@@ -25,19 +25,18 @@ import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
 import org.limewire.net.address.FirewalledAddress;
-import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * Resolves addresses of type {@link XMPPAddress} by looking up the full jabber id 
+ * Resolves addresses of type {@link FriendAddress} by looking up the full jabber id 
  * including resource in the logged in users.
  */
 @Singleton
-public class XMPPAddressResolver implements AddressResolver {
+public class FriendAddressResolver implements AddressResolver {
 
-    private final static Log LOG = LogFactory.getLog(XMPPAddressResolver.class, LOGGING_CATEGORY);
+    private final static Log LOG = LogFactory.getLog(FriendAddressResolver.class, LOGGING_CATEGORY);
     
     private final EventBean<FriendConnectionEvent> connectionEventBean;
 
@@ -46,17 +45,17 @@ public class XMPPAddressResolver implements AddressResolver {
     private final ConnectivyFeatureListener connectivyFeatureListener = new ConnectivyFeatureListener();
 
     private final SocketsManager socketsManager;
-    private final XMPPAddressRegistry addressRegistry;
+    private final FriendAddressRegistry addressRegistry;
 
     @Inject
-    public XMPPAddressResolver(EventBean<FriendConnectionEvent> connectionEventBean, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster,
-            SocketsManager socketsManager, XMPPAddressRegistry addressRegistry) {
+    public FriendAddressResolver(EventBean<FriendConnectionEvent> connectionEventBean, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster,
+            SocketsManager socketsManager, FriendAddressRegistry addressRegistry) {
         this.connectionEventBean = connectionEventBean;
         this.connectivityEventBroadcaster = connectivityEventBroadcaster;
         this.socketsManager = socketsManager;
         this.addressRegistry = addressRegistry;
     }
-    
+
     @Inject void register(SocketsManager socketsManager, ListenerSupport<FeatureEvent> featureSupport) {
         socketsManager.registerResolver(this);
         featureSupport.addListener(connectivyFeatureListener);
@@ -64,8 +63,8 @@ public class XMPPAddressResolver implements AddressResolver {
     
     @Override
     public boolean canResolve(Address address) {
-        if (address instanceof XMPPAddress) {
-            XMPPAddress friendIdAddress = (XMPPAddress)address;
+        if (address instanceof FriendAddress) {
+            FriendAddress friendIdAddress = (FriendAddress)address;
             FriendPresence presence = getPresence(friendIdAddress);
             if (presence == null) {
                 LOG.debugf("can not resolve remote address {0} because no presence was found}", friendIdAddress);
@@ -84,7 +83,7 @@ public class XMPPAddressResolver implements AddressResolver {
      * @return null if not presence is found for the address, i.e. the user
      * is not online for example
      */
-    public FriendPresence getPresence(XMPPAddress address) {
+    public FriendPresence getPresence(FriendAddress address) {
         String id = address.getId();
         FriendConnectionEvent connection = connectionEventBean.getLastEvent();
         if(connection == null || connection.getType() != FriendConnectionEvent.Type.CONNECTED)
@@ -109,11 +108,11 @@ public class XMPPAddressResolver implements AddressResolver {
      * 
      * Also ensures that auth-token and address feature are set.
      */
-    private FriendPresence getMatchingPresence(XMPPAddress xmppAddress, String resourceId, FriendPresence presence) {
-        if (xmppAddress.equals(new XMPPAddress(resourceId))) {
+    private FriendPresence getMatchingPresence(FriendAddress friendAddress, String resourceId, FriendPresence presence) {
+        if (friendAddress.equals(new FriendAddress(resourceId))) {
             // only return address actual address is not null and auth-token is 
             // available too, otherwise the address is worthless still
-            Address address = addressRegistry.get(xmppAddress);
+            Address address = addressRegistry.get(friendAddress);
             Feature authTokenFeature = presence.getFeature(AuthTokenFeature.ID);
             if(address != null && authTokenFeature != null) {
                 return presence;
@@ -126,13 +125,13 @@ public class XMPPAddressResolver implements AddressResolver {
     @Override
     public <T extends AddressResolutionObserver> T resolve(Address address, T observer) {
         LOG.debugf("resolving: {0}", address);
-        XMPPAddress xmppAddress = (XMPPAddress)address;
-        FriendPresence resolvedPresence = getPresence(xmppAddress);
+        FriendAddress friendAddress = (FriendAddress)address;
+        FriendPresence resolvedPresence = getPresence(friendAddress);
         if (resolvedPresence == null) {
             LOG.debugf("{0} could not be resolved", address);
             observer.handleIOException(new IOException("Could not be resolved"));
         } else {
-            Address resolvedAddress = addressRegistry.get(xmppAddress);
+            Address resolvedAddress = addressRegistry.get(friendAddress);
             // race condition, address could have been nulled in the mean time,
             // although it was checked in getPresence() 
             if (resolvedAddress == null) {
@@ -146,7 +145,7 @@ public class XMPPAddressResolver implements AddressResolver {
                     socketsManager.resolve(resolvedAddress, observer);
                 } else if (resolvedPresence.hasFeatures(ConnectBackRequestFeature.ID)) {
                     // else make it an xmpp firewalled address, so connect requests can be sent over xmpp
-                    resolvedAddress = new XMPPFirewalledAddress(xmppAddress, (FirewalledAddress)resolvedAddress);
+                    resolvedAddress = new FriendFirewalledAddress(friendAddress, (FirewalledAddress)resolvedAddress);
                     LOG.debugf("resolved {0} as xmpp firewalled address {1}", address, resolvedAddress);
                     observer.resolved(resolvedAddress);
                 } else {

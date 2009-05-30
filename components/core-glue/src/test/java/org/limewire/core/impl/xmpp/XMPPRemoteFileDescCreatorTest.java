@@ -11,8 +11,8 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
+import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -57,9 +57,9 @@ public class XMPPRemoteFileDescCreatorTest extends BaseTestCase {
         }};
         
         final Address plainAddress = context.mock(Address.class);
-        final Address xmppAddress = context.mock(XMPPAddress.class);
+        final Address xmppAddress = context.mock(FriendAddress.class);
         final Address otherAddress = context.mock(FirewalledAddress.class);
-        final Address xmppExtAddress = new XMPPAddress("asda") {
+        final Address xmppExtAddress = new FriendAddress("asda") {
             @Override
             public String getId() {
                 return "hello";
@@ -93,12 +93,12 @@ public class XMPPRemoteFileDescCreatorTest extends BaseTestCase {
         };
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         
         final XMPPRemoteFileDescCreator creator
             = new XMPPRemoteFileDescCreator(addressFactory, addressResolver);
                         
-        final XMPPAddress address = context.mock(XMPPAddress.class);
+        final FriendAddress address = context.mock(FriendAddress.class);
         
         context.checking(new Expectations() {
             {  // Ensure address resolver is active

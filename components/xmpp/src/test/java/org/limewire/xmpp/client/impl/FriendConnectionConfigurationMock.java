@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import org.limewire.listener.EventListener;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.core.api.friend.client.RosterEvent;
 import org.limewire.io.UnresolvedIpPort;
 
 public class FriendConnectionConfigurationMock implements FriendConnectionConfiguration {

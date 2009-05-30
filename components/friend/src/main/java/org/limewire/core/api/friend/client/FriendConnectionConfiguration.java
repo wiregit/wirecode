@@ -5,7 +5,7 @@ import java.util.List;
 import org.limewire.core.api.friend.Network;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.listener.EventListener;
-import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.core.api.friend.client.RosterEvent;
 
 /**
  * Allows the xmpp service user to provide configuration for xmpp login.

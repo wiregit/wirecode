@@ -45,7 +45,7 @@ import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
-import org.limewire.xmpp.api.client.XMPPAddress;
+import org.limewire.core.api.friend.address.FriendAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -536,7 +536,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     private boolean isFriendDownload(Collection<RemoteFileDesc> rfds) {
         for(RemoteFileDesc rfd : rfds) {
-            if(!(rfd.getAddress() instanceof XMPPAddress)) {
+            if(!(rfd.getAddress() instanceof FriendAddress)) {
                 // TODO Address.isAnonymous() instead?
                 return false;    
             }

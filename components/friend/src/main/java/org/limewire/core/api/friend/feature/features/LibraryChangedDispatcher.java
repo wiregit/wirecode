@@ -11,7 +11,7 @@ import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.xmpp.client.impl.features.LibraryChangedNotifierFeatureInitializer;
+import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeatureInitializer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

@@ -1,6 +1,5 @@
-package org.limewire.facebook.service;
+package org.limewire.core.settings;
 
-import org.limewire.core.settings.LimeProps;
 import org.limewire.setting.StringSetting;
 
 public class FacebookSettings extends LimeProps {

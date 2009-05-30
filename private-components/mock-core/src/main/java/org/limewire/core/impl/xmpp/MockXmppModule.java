@@ -11,6 +11,7 @@ import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.PasswordManager;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.core.api.friend.client.RosterEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
@@ -18,7 +19,6 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.xmpp.api.client.RosterEvent;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;

@@ -14,6 +14,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.friend.client.ConnectBackRequestSender;
+import org.limewire.core.api.friend.address.FriendFirewalledAddress;
 import org.limewire.core.impl.xmpp.XMPPFirewalledAddressConnector.PushedSocketConnectObserver;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
@@ -26,8 +27,7 @@ import org.limewire.rudp.AbstractNBSocketChannel;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPFirewalledAddress;
+import org.limewire.core.api.friend.address.FriendAddress;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.NetworkManager;
@@ -78,8 +78,8 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final PushDownloadManager pushDownloadManager = context.mock(PushDownloadManager.class);
                 
         final Address adressNotXmpp = context.mock(Address.class);
-        final XMPPFirewalledAddress adressCantConnect = context.mock(XMPPFirewalledAddress.class);
-        final XMPPFirewalledAddress adressCanConnect = context.mock(XMPPFirewalledAddress.class);
+        final FriendFirewalledAddress adressCantConnect = context.mock(FriendFirewalledAddress.class);
+        final FriendFirewalledAddress adressCanConnect = context.mock(FriendFirewalledAddress.class);
         
         final Address fwAddressCantConnect = context.mock(FirewalledAddress.class);
         final Address fwAddressCanConnect = context.mock(FirewalledAddress.class);
@@ -268,12 +268,12 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final Provider<SocketProcessor> socketProcessorProvider = context.mock(Provider.class);
         
         final ConnectObserver observer = context.mock(ConnectObserver.class);    
-        final XMPPFirewalledAddress address = context.mock(XMPPFirewalledAddress.class);
+        final FriendFirewalledAddress address = context.mock(FriendFirewalledAddress.class);
         
         final FirewalledAddress fwAddress = context.mock(FirewalledAddress.class);
         final GUID guid = new GUID(new byte[] {'X','x',1,2,3,4,'.','.','.',5,6,9,'n', 10,'x','X'});
         
-        final XMPPAddress xmppAddress = context.mock(XMPPAddress.class);
+        final FriendAddress friendAddress = context.mock(FriendAddress.class);
         
         final Connectable publicConnectable = context.mock(Connectable.class);
         final InetAddress inetAddr = context.mock(InetAddress.class);
@@ -320,8 +320,8 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 will(returnValue(inetSocketAddr));
                 
                 allowing(address).getXmppAddress();
-                will(returnValue(xmppAddress));
-                allowing(xmppAddress).getFullId();
+                will(returnValue(friendAddress));
+                allowing(friendAddress).getFullId();
                 will(returnValue("403"));
                 
                 allowing(networkManager).supportsFWTVersion();
@@ -400,7 +400,7 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final Provider<SocketProcessor> socketProcessorProvider = context.mock(Provider.class);
         
         final ConnectObserver observer = context.mock(ConnectObserver.class);    
-        final XMPPFirewalledAddress address = context.mock(XMPPFirewalledAddress.class);
+        final FriendFirewalledAddress address = context.mock(FriendFirewalledAddress.class);
         
         final FirewalledAddress fwAddress = context.mock(FirewalledAddress.class);
         final GUID guid = new GUID(new byte[] {'X','x',1,2,3,4,'.','.','.',5,6,9,'n', 10,'x','X'});
@@ -462,12 +462,12 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final PushDownloadManager pushDownloadManager = context.mock(PushDownloadManager.class);
         
         final ConnectObserver observer = context.mock(ConnectObserver.class);    
-        final XMPPFirewalledAddress address = context.mock(XMPPFirewalledAddress.class);
+        final FriendFirewalledAddress address = context.mock(FriendFirewalledAddress.class);
         
         final FirewalledAddress fwAddress = context.mock(FirewalledAddress.class);
         final GUID guid = new GUID(new byte[] {'X','x',1,2,3,4,'.','.','.',5,6,9,'n', 10,'x','X'});
         
-        final XMPPAddress xmppAddress = context.mock(XMPPAddress.class);
+        final FriendAddress friendAddress = context.mock(FriendAddress.class);
         
         final Connectable publicConnectable = context.mock(Connectable.class);
         final InetAddress inetAddr = context.mock(InetAddress.class);
@@ -499,8 +499,8 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 will(returnValue(inetSocketAddr));
                 
                 allowing(address).getXmppAddress();
-                will(returnValue(xmppAddress));
-                allowing(xmppAddress).getFullId();
+                will(returnValue(friendAddress));
+                allowing(friendAddress).getFullId();
                 will(returnValue("403"));
                 
                 // Assertions

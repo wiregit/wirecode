@@ -17,7 +17,7 @@ import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.core.api.friend.client.RosterEvent;
 import org.limewire.core.api.friend.client.FriendConnection;
 
 /**

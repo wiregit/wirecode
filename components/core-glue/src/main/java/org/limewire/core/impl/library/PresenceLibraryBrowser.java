@@ -14,6 +14,7 @@ import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.address.FriendAddress;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.FriendLibrary;
@@ -33,7 +34,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
-import org.limewire.xmpp.api.client.XMPPAddress;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -145,9 +145,9 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
         final Browse browse = browseFactory.createBrowse(friendPresence);
         
-        final XMPPAddress address;
+        final FriendAddress address;
         if(!friendPresence.getFriend().isAnonymous()) {
-            address = (XMPPAddress) addressFeature.getFeature();    
+            address = (FriendAddress) addressFeature.getFeature();    
         } else {
             address = null;
         }

@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.impl;
+package org.limewire.core.api.friend.address;
 
 import java.io.IOException;
 
@@ -8,16 +8,16 @@ import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
-import org.limewire.xmpp.api.client.XMPPAddress;
+import org.limewire.core.api.friend.address.FriendAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * Serializes and deserializes {@link org.limewire.xmpp.api.client.XMPPAddress} objects.
+ * Serializes and deserializes {@link FriendAddress} objects.
  */
 @Singleton
-public class XMPPAddressSerializer implements AddressSerializer {
+public class FriendAddressSerializer implements AddressSerializer {
 
     static final String JID = "JID";
     
@@ -29,7 +29,7 @@ public class XMPPAddressSerializer implements AddressSerializer {
     
     @Override
     public Class<? extends Address> getAddressClass() {
-        return XMPPAddress.class;
+        return FriendAddress.class;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class XMPPAddressSerializer implements AddressSerializer {
             String host = address.substring(atIndex + 1);
             int dotIndex = host.indexOf('.');
             if(dotIndex != -1 && dotIndex != 0 && dotIndex != host.length() - 1) {
-                return new XMPPAddress(address);
+                return new FriendAddress(address);
             }
         }
         throw new IOException();
@@ -54,7 +54,7 @@ public class XMPPAddressSerializer implements AddressSerializer {
     public Address deserialize(byte[] serializedAddress) throws IOException {
         try {
             GGEP ggep = new GGEP(serializedAddress);
-            return new XMPPAddress(ggep.getString(JID));
+            return new FriendAddress(ggep.getString(JID));
         } catch (BadGGEPBlockException e) {
             throw new IOException(e);
         } catch (BadGGEPPropertyException e) {
@@ -64,9 +64,9 @@ public class XMPPAddressSerializer implements AddressSerializer {
 
     @Override
     public byte[] serialize(Address address) throws IOException {
-        XMPPAddress xmppAddress = (XMPPAddress)address;
+        FriendAddress friendAddress = (FriendAddress)address;
         GGEP ggep = new GGEP();
-        ggep.put(JID, xmppAddress.getFullId());
+        ggep.put(JID, friendAddress.getFullId());
         return ggep.toByteArray();
     }
 

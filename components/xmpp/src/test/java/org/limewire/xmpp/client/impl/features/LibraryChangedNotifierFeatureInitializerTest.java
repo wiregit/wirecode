@@ -10,6 +10,7 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
+import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeatureInitializer;
 import org.limewire.util.BaseTestCase;
 
 public class LibraryChangedNotifierFeatureInitializerTest extends BaseTestCase {

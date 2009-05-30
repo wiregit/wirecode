@@ -25,7 +25,7 @@ import org.limewire.net.address.FirewalledAddress;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPSelectorProvider;
-import org.limewire.xmpp.client.impl.XMPPFirewalledAddress;
+import org.limewire.core.api.friend.address.FriendFirewalledAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -38,7 +38,7 @@ import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 
 /**
- * Connects an {@link XMPPFirewalledAddress} and tries to get a socket for it.
+ * Connects an {@link org.limewire.core.api.friend.address.FriendFirewalledAddress} and tries to get a socket for it.
  */
 @Singleton
 class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHandler {
@@ -81,11 +81,11 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
     
     @Override
     public boolean canConnect(Address address) {
-        if (address instanceof XMPPFirewalledAddress) {
-            XMPPFirewalledAddress xmppFirewalledAddress = (XMPPFirewalledAddress)address;
+        if (address instanceof FriendFirewalledAddress) {
+            FriendFirewalledAddress friendFirewalledAddress = (FriendFirewalledAddress)address;
             // let push download manager decide if we're locally capabable of connecting
-            boolean canConnect = pushDownloadManager.canConnect(xmppFirewalledAddress.getFirewalledAddress());
-            LOG.debugf("{0} connect remote address {1}, because PDM cannot connect {2}", (canConnect ? "can" : "can not"), address, xmppFirewalledAddress.getFirewalledAddress());
+            boolean canConnect = pushDownloadManager.canConnect(friendFirewalledAddress.getFirewalledAddress());
+            LOG.debugf("{0} connect remote address {1}, because PDM cannot connect {2}", (canConnect ? "can" : "can not"), address, friendFirewalledAddress.getFirewalledAddress());
             return canConnect;
         }
         LOG.debugf("can not connect remote address {0}", address);
@@ -95,8 +95,8 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
     @Override
     public void connect(Address address, ConnectObserver observer) {
         LOG.debug("connecting");
-        XMPPFirewalledAddress xmppFirewalledAddress = (XMPPFirewalledAddress)address;
-        FirewalledAddress firewalledAddress = xmppFirewalledAddress.getFirewalledAddress();
+        FriendFirewalledAddress friendFirewalledAddress = (FriendFirewalledAddress)address;
+        FirewalledAddress firewalledAddress = friendFirewalledAddress.getFirewalledAddress();
         GUID clientGuid = firewalledAddress.getClientGuid();
         Connectable publicAddress = networkManager.getPublicAddress();
         if (!NetworkUtils.isValidIpPort(publicAddress)) {
@@ -111,12 +111,12 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
         final PushedSocketConnectObserver pushedSocketObserver = new PushedSocketConnectObserver(firewalledAddress, observer);
         observers.add(pushedSocketObserver);
         boolean isFWT = !networkManager.acceptedIncomingConnection(); 
-        boolean canSend = connectRequestSender.send(xmppFirewalledAddress.getXmppAddress().getFullId(), new ConnectBackRequest(publicAddress, clientGuid, isFWT ? networkManager.supportsFWTVersion() : 0));
+        boolean canSend = connectRequestSender.send(friendFirewalledAddress.getXmppAddress().getFullId(), new ConnectBackRequest(publicAddress, clientGuid, isFWT ? networkManager.supportsFWTVersion() : 0));
         if (!canSend) {
             LOG.debugf("could not send xmpp connect back request {0}", address);
             // fall back on push download manager
             observers.remove(pushedSocketObserver);
-            pushDownloadManager.connect(xmppFirewalledAddress.getFirewalledAddress(), observer);
+            pushDownloadManager.connect(friendFirewalledAddress.getFirewalledAddress(), observer);
             return;
         }
         if (isFWT) {

@@ -20,8 +20,8 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressRegistry;
+import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.api.friend.address.FriendAddressRegistry;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -29,13 +29,13 @@ import com.google.inject.Singleton;
 @Singleton
 public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTransport.Handler<Address> {
     private static final Log LOG = LogFactory.getLog(AddressDispatcher.class);
-    private final XMPPAddressRegistry addressRegistry;
+    private final FriendAddressRegistry addressRegistry;
     private final Map<String, Address> pendingAddresses;
     private Address address;
     private final Set<FriendConnection> connections;
 
     @Inject
-    public AddressDispatcher(XMPPAddressRegistry addressRegistry,
+    public AddressDispatcher(FriendAddressRegistry addressRegistry,
                           FeatureRegistry featureRegistry) {
         this.addressRegistry = addressRegistry;
         this.pendingAddresses = new HashMap<String, Address>();
@@ -71,8 +71,8 @@ public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTr
                     FriendPresence presence = friend.getPresences().get(from);
                     if(presence != null) {
                         LOG.debugf("updating address on presence {0} to {1}", presence.getPresenceId(), address);
-                        addressRegistry.put(new XMPPAddress(presence.getPresenceId()), address);
-                        presence.addFeature(new AddressFeature(new XMPPAddress(presence.getPresenceId())));
+                        addressRegistry.put(new FriendAddress(presence.getPresenceId()), address);
+                        presence.addFeature(new AddressFeature(new FriendAddress(presence.getPresenceId())));
                     } else {
                         LOG.debugf("address {0} for presence {1} is pending", address, from);
                         pendingAddresses.put(from, address);
@@ -128,15 +128,15 @@ public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTr
                 if (pendingAddresses.containsKey(friendPresence.getPresenceId())) {
                     LOG.debugf("updating address on presence {0} to {1}", friendPresence.getPresenceId(), address);
                     Address pendingAddress = pendingAddresses.remove(friendPresence.getPresenceId());
-                    addressRegistry.put(new XMPPAddress(friendPresence.getPresenceId()), pendingAddress);
-                    friendPresence.addFeature(new AddressFeature(new XMPPAddress(friendPresence.getPresenceId()))); 
+                    addressRegistry.put(new FriendAddress(friendPresence.getPresenceId()), pendingAddress);
+                    friendPresence.addFeature(new AddressFeature(new FriendAddress(friendPresence.getPresenceId()))); 
                 }
             }
         }
 
         @Override
         public void removeFeature(FriendPresence friendPresence) {
-            addressRegistry.remove(new XMPPAddress(friendPresence.getPresenceId()));
+            addressRegistry.remove(new FriendAddress(friendPresence.getPresenceId()));
             friendPresence.removeFeature(AddressFeature.ID);
         }
     }

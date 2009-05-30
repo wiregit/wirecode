@@ -16,8 +16,8 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
+import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 
 
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -29,7 +29,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class XMPPRemoteFileDesc implements RemoteFileDesc {
 
-    private final XMPPAddress address;
+    private final FriendAddress address;
 
     static final String TYPE = "XMPPRFD";
 
@@ -57,14 +57,14 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     
     private boolean http11;
 
-    private final XMPPAddressResolver addressResolver;
+    private final FriendAddressResolver addressResolver;
     
     private int hashCode = -1;
     
-    public XMPPRemoteFileDesc(XMPPAddress address, long index, String filename,
+    public XMPPRemoteFileDesc(FriendAddress address, long index, String filename,
             long size, byte[] clientGUID, int speed, int quality, LimeXMLDocument xmlDoc, Set<? extends URN> urns,
             String vendor, long createTime, boolean http11,
-            AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+            AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         this.address = address;
         this.index = index;
         this.filename = filename;

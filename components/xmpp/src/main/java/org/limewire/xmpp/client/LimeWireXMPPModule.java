@@ -10,7 +10,9 @@ import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.LibraryChangedEvent;
+import org.limewire.core.api.friend.client.RosterEvent;
 import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
+import org.limewire.core.api.friend.address.FriendAddressSerializer;
 import org.limewire.friend.impl.LimeWireFriendXmppModule;
 import org.limewire.listener.AsynchronousMulticaster;
 import org.limewire.listener.BroadcastPolicy;
@@ -23,13 +25,11 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
-import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.client.impl.ConnectionConfigurationFactory;
 import org.limewire.xmpp.client.impl.DNSConnectionConfigurationFactory;
 import org.limewire.xmpp.client.impl.FallbackConnectionConfigurationFactory;
-import org.limewire.xmpp.client.impl.XMPPAddressRegistry;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
-import org.limewire.xmpp.client.impl.XMPPAddressSerializer;
+import org.limewire.core.api.friend.address.FriendAddressRegistry;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 import org.limewire.xmpp.client.impl.XMPPConnectionFactoryImpl;
 import org.limewire.xmpp.client.impl.XMPPConnectionImplFactory;
 import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
@@ -107,12 +107,12 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(LibraryChangedIQListenerFactory.class).toProvider(FactoryProvider.newFactory(LibraryChangedIQListenerFactory.class, LibraryChangedIQListener.class));
         
         // bind egearly, so it registers itself with SocketsManager
-        bind(XMPPAddressResolver.class).asEagerSingleton();
+        bind(FriendAddressResolver.class).asEagerSingleton();
         // dito
-        bind(XMPPAddressSerializer.class).asEagerSingleton();
+        bind(FriendAddressSerializer.class).asEagerSingleton();
         
         bind(DefaultFriendAuthenticator.class).asEagerSingleton();
         
-        bind(XMPPAddressRegistry.class);
+        bind(FriendAddressRegistry.class);
     }
 }

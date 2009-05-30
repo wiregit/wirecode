@@ -13,13 +13,13 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.io.GUID;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
+import org.limewire.core.api.friend.address.FriendAddress;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
@@ -40,8 +40,8 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
             }
         };
         
-        XMPPAddress address = context.mock(XMPPAddress.class);
-        XMPPAddress otherAddress = context.mock(XMPPAddress.class);
+        FriendAddress address = context.mock(FriendAddress.class);
+        FriendAddress otherAddress = context.mock(FriendAddress.class);
         
         XMPPRemoteFileDesc rfd = createRFD(address, null, null);
         XMPPRemoteFileDesc otherRfd = context.mock(XMPPRemoteFileDesc.class);
@@ -74,8 +74,8 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
             }
         };
         
-        XMPPAddress sharedAddress = context.mock(XMPPAddress.class);
-        XMPPAddress otherAddress = context.mock(XMPPAddress.class);
+        FriendAddress sharedAddress = context.mock(FriendAddress.class);
+        FriendAddress otherAddress = context.mock(FriendAddress.class);
         
         XMPPRemoteFileDesc rfdA = createRFDwithGUID1(sharedAddress, null, null);
         XMPPRemoteFileDesc rfdB = createRFDwithGUID1(sharedAddress, null, null);
@@ -99,11 +99,11 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
             }
         };
                 
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         
-        final XMPPAddress addressNullResolve = context.mock(XMPPAddress.class);
-        final XMPPAddress addressNullFeature = context.mock(XMPPAddress.class);
-        final XMPPAddress addressGood = context.mock(XMPPAddress.class);
+        final FriendAddress addressNullResolve = context.mock(FriendAddress.class);
+        final FriendAddress addressNullFeature = context.mock(FriendAddress.class);
+        final FriendAddress addressGood = context.mock(FriendAddress.class);
         
         final FriendPresence presenceNullFeature = context.mock(FriendPresence.class);
         final FriendPresence presenceGood = context.mock(FriendPresence.class);
@@ -163,11 +163,11 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
             }
         };
                 
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         
-        final XMPPAddress addressFriendOffline = context.mock(XMPPAddress.class);
-        final XMPPAddress addressGood = context.mock(XMPPAddress.class);
-        final XMPPAddress addressException = context.mock(XMPPAddress.class);
+        final FriendAddress addressFriendOffline = context.mock(FriendAddress.class);
+        final FriendAddress addressGood = context.mock(FriendAddress.class);
+        final FriendAddress addressException = context.mock(FriendAddress.class);
         
         final FriendPresence presenceGood = context.mock(FriendPresence.class);
         final FriendPresence presenceException = context.mock(FriendPresence.class);
@@ -231,23 +231,23 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
         
         
         byte[] guid1 = new byte[0];
-        final XMPPAddress address1 = context.mock(XMPPAddress.class);
+        final FriendAddress address1 = context.mock(FriendAddress.class);
         XMPPRemoteFileDesc rfd1 = createRFDwithGUIDCustom(address1, null, null, guid1);
         
         byte[] guid2 = new byte[] {1};
-        final XMPPAddress address2 = context.mock(XMPPAddress.class);
+        final FriendAddress address2 = context.mock(FriendAddress.class);
         XMPPRemoteFileDesc rfd2 = createRFDwithGUIDCustom(address2, null, null, guid2);
         
         byte[] guid3 = new byte[] {1,2,3,4};
-        final XMPPAddress address3 = context.mock(XMPPAddress.class);
+        final FriendAddress address3 = context.mock(FriendAddress.class);
         XMPPRemoteFileDesc rfd3 = createRFDwithGUIDCustom(address3, null, null, guid3);
         
         byte[] guid4 = new byte[] {5,6,9,'n',10};
-        final XMPPAddress address4 = context.mock(XMPPAddress.class);
+        final FriendAddress address4 = context.mock(FriendAddress.class);
         XMPPRemoteFileDesc rfd4 = createRFDwithGUIDCustom(address4, null, null, guid4);
         
         byte[] guid5 = new byte[] {1,2,3,4};
-        final XMPPAddress address5 = context.mock(XMPPAddress.class);
+        final FriendAddress address5 = context.mock(FriendAddress.class);
         XMPPRemoteFileDesc rfd5 = createRFDwithGUIDCustom(address5, null, null, guid3);
         
         assertTrue(rfd1.isMe(guid1));
@@ -289,7 +289,7 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
             }
         };
         
-        final XMPPAddress address = context.mock(XMPPAddress.class);
+        final FriendAddress address = context.mock(FriendAddress.class);
         
         String sha1A = "urn:sha1:NETZHKEJKTCM74ZQQALJWSLWQHQJ7N6Q";
         String sha1B = "urn:sha1:NETZHKEJKTCM74ZQ6LJWSLWQHQJ7N6Q1";
@@ -350,7 +350,7 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
         
         final String filename = "test";
         
-        final XMPPAddress address = context.mock(XMPPAddress.class);
+        final FriendAddress address = context.mock(FriendAddress.class);
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
         final AddressSerializer serialer = context.mock(AddressSerializer.class);
         
@@ -378,22 +378,22 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
         
     }
     
-    public XMPPRemoteFileDesc createRFD(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+    public XMPPRemoteFileDesc createRFD(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, new byte[] {'x'}, Integer.MIN_VALUE, Integer.MAX_VALUE, null,
                 new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFD2(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+    public XMPPRemoteFileDesc createRFD2(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, new byte[] {'y'}, Integer.MIN_VALUE, Integer.MAX_VALUE, null,
                 new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFD3(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+    public XMPPRemoteFileDesc createRFD3(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, null, -1, new byte[] {'x'}, Integer.MIN_VALUE, Integer.MAX_VALUE, null,
                 new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFD4(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+    public XMPPRemoteFileDesc createRFD4(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         
         HashSet<URN> urns = new HashSet<URN>();
         try {
@@ -405,27 +405,27 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
                 urns, null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFD5(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+    public XMPPRemoteFileDesc createRFD5(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, "huh", Long.MAX_VALUE, new byte[] {'x'}, Integer.MIN_VALUE, Integer.MAX_VALUE, null,
                 new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFDwithGUID1(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+    public XMPPRemoteFileDesc createRFDwithGUID1(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, 
                 new byte[] {'0', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15}, 
                 Integer.MIN_VALUE, Integer.MAX_VALUE, null,
                 new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFDwithGUID2(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
+    public XMPPRemoteFileDesc createRFDwithGUID2(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, 
                 new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15}, 
                 Integer.MIN_VALUE, Integer.MAX_VALUE, null,
                 new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFDwithSHA1Custom(XMPPAddress address, AddressFactory addressFactory, 
-            XMPPAddressResolver addressResolver, String... sha1) {
+    public XMPPRemoteFileDesc createRFDwithSHA1Custom(FriendAddress address, AddressFactory addressFactory, 
+            FriendAddressResolver addressResolver, String... sha1) {
         
         HashSet<URN> urns = new HashSet<URN>();
         try {
@@ -442,8 +442,8 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
                 urns, null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFDwithUrnsCustom(XMPPAddress address, AddressFactory addressFactory, 
-            XMPPAddressResolver addressResolver, Set<URN> urns) {
+    public XMPPRemoteFileDesc createRFDwithUrnsCustom(FriendAddress address, AddressFactory addressFactory, 
+            FriendAddressResolver addressResolver, Set<URN> urns) {
      
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, 
                 new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15}, 
@@ -451,14 +451,14 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
                 urns, null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFDwithGUIDCustom(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver, byte[] guid) {
+    public XMPPRemoteFileDesc createRFDwithGUIDCustom(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver, byte[] guid) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, 
                 guid, 
                 Integer.MIN_VALUE, Integer.MAX_VALUE, null,
                 new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
-    public XMPPRemoteFileDesc createRFDwithFilenameCustom(XMPPAddress address, AddressFactory addressFactory, XMPPAddressResolver addressResolver, String filename) {
+    public XMPPRemoteFileDesc createRFDwithFilenameCustom(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver, String filename) {
         return new XMPPRemoteFileDesc(address, Long.MAX_VALUE, filename, Long.MAX_VALUE, 
                 new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15},  
                 Integer.MIN_VALUE, Integer.MAX_VALUE, null,

@@ -1,4 +1,4 @@
-package org.limewire.core.api.friend.impl;
+package org.limewire.core.api.friend.feature.features;
 
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.FeatureInitializer;

@@ -13,7 +13,7 @@ import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
-import org.limewire.core.api.friend.impl.LimewireFeatureInitializer;
+import org.limewire.core.api.friend.feature.features.LimewireFeatureInitializer;
 import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
 import org.limewire.facebook.service.livemessage.PresenceHandlerFactory;
 import org.limewire.lifecycle.Asynchronous;

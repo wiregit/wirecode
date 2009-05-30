@@ -11,6 +11,10 @@
 		    conf="compile,runtime"/>
         <dependency org="org.limewire" name="io" rev="latest.integration"
 		    conf="compile,runtime"/>
+        <dependency org="org.limewire" name="nio" rev="latest.integration"
+		    conf="compile,runtime"/>
+        <dependency org="org.limewire" name="net" rev="latest.integration"
+		    conf="compile,runtime"/>
         <dependency org="org.limewire" name="http" rev="latest.integration"
 		    conf="compile,runtime"/>
         <dependency org="org.limewire" name="security"
@@ -20,7 +24,11 @@
 		    conf="compile,runtime"/>
         <dependency org="none" name="commons-codec"
 		    rev="${commons-codec.version}" conf="compile,runtime"/>
+        <dependency org="none" name="commons-logging" rev="${commons-logging.version}"
+                    conf="compile,runtime"/>
         <dependency org="none" name="httpclient" rev="${httpclient.version}"
 		    conf="compile,runtime"/>
+        <dependency org="none" name="smack" rev="${smack.version}"
+                    conf="compile,runtime"/>
     </dependencies>
 </ivy-module>

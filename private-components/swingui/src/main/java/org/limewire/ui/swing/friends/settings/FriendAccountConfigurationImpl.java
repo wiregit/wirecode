@@ -9,7 +9,7 @@ import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.listener.EventListener;
 import org.limewire.util.StringUtils;
-import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.core.api.friend.client.RosterEvent;
 
 /**
  * Stores all the information required to log into an XMPP server and

@@ -8,6 +8,7 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -15,8 +16,7 @@ import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPAddress;
-import org.limewire.xmpp.client.impl.XMPPAddressResolver;
+import org.limewire.core.api.friend.address.FriendAddress;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -41,7 +41,7 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         }};
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
         
         final long creationTime = 199400120012L;
@@ -107,7 +107,7 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         }};
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
         
         final long creationTime = 199400120012L;
@@ -115,7 +115,7 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         final FriendPresence presence = context.mock(FriendPresence.class);
         final FileMetaData fileMetaData = context.mock(FileMetaData.class);
         final RemoteFileDesc initialRFD = context.mock(RemoteFileDesc.class);
-        final XMPPAddress swapAddress = context.mock(XMPPAddress.class);
+        final FriendAddress swapAddress = context.mock(FriendAddress.class);
         
         final RemoteFileItemFactoryImpl factory
             = new RemoteFileItemFactoryImpl(
@@ -180,7 +180,7 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         }};
         
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
-        final XMPPAddressResolver addressResolver = context.mock(XMPPAddressResolver.class);
+        final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
         
         final long creationTime = 199400120012L;

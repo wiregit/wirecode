@@ -42,8 +42,8 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPAddress;
+import org.limewire.core.api.friend.client.RosterEvent;
+import org.limewire.core.api.friend.address.FriendAddress;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -278,8 +278,8 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
         private SearchResult convertToXmppCompatibleSearchResult(SearchResult gnutellaOnlySearchResult) {
             RemoteFileDescAdapter rfdAdapter = (RemoteFileDescAdapter)gnutellaOnlySearchResult;
             RemoteFileDesc oldRfd = rfdAdapter.getRfd();
-            XMPPAddress xmppAddress = new XMPPAddress(presence.getPresenceId());
-            RemoteFileDesc newRfd = searchResultToXmppAdapter.promoteRemoteFileDescAndExchangeAddress(oldRfd, xmppAddress);
+            FriendAddress friendAddress = new FriendAddress(presence.getPresenceId());
+            RemoteFileDesc newRfd = searchResultToXmppAdapter.promoteRemoteFileDescAndExchangeAddress(oldRfd, friendAddress);
             Set<IpPort> ipPort = new HashSet<IpPort>();
             ipPort.addAll(rfdAdapter.getAlts());
 
