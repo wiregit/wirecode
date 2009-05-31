@@ -67,10 +67,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             will(returnValue(friendLibraryList));
             
             exactly(1).of(listenerSupport).addListener(presenceLibraryBrowser);
-            exactly(1).of(remoteLibraryManager).removePresenceLibrary(presence);
-            exactly(1).of(remoteLibraryManager).addPresenceLibrary(presence);
             exactly(1).of(socketsManager).addListener(with(any(EventListener.class)));
             exactly(1).of(friendLibraryList).addListEventListener(with(any(ListEventListener.class)));
+            exactly(1).of(remoteLibraryManager).getPresenceLibrary(presence);
+            exactly(1).of(remoteLibraryManager).addPresenceLibrary(presence);
         }});
         
         presenceLibraryBrowser.register(listenerSupport);
@@ -299,6 +299,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             exactly(1).of(friendLibraryEventList).addListEventListener(with(listenerCollector));
             exactly(1).of(presenceLibraryEventList).addListEventListener(with(listenerCollector));
             exactly(1).of(browse).start(with(browseListenerCollector));
+            exactly(1).of(presenceLibrary).size();
             exactly(1).of(presenceLibrary).setState(LibraryState.LOADED);
         }});
         
@@ -389,6 +390,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             // Assertions
             exactly(1).of(socketsManager).resolve(with(same(address)), with(observerCollector));
             exactly(1).of(browse).start(with(browseListenerCollector));
+            exactly(1).of(presenceLibrary).size();
             
         }});
         
