@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -143,7 +144,8 @@ public class FacebookFriendConnection implements FriendConnection {
 
     private final ConnectBackRequestHandler connectBackRequestHandler;
     private volatile ChatListener chatListener;
-    private PresenceListener presenceListener;
+    private ScheduledFuture presenceListenerFuture;
+    private volatile String logoutURL;
 
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
@@ -214,7 +216,9 @@ public class FacebookFriendConnection implements FriendConnection {
             if(chatListener != null) {
                 chatListener.setDone();
             }
-            // TODO unschedule presenceListener
+            if(presenceListenerFuture != null) {
+                presenceListenerFuture.cancel(false);
+            }
             LOG.debug("logged out from facebook.");
         } catch (IOException e) {
             LOG.debug("logout failed", e);
@@ -242,22 +246,11 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     private void logoutFromFacebook() throws IOException {
-        // TODO better logout
-        HttpPost httpPost = new HttpPost(FACEBOOK_CHAT_SETTINGS_URL + "version=1.0" + "&auth_token=" + authToken + 
-                                        "&api_key=" + apiKey.get());
-        httpPost.addHeader("User-Agent", USER_AGENT_HEADER);
-        
-        List <NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair("visibility", "false"));
-        String post_form_id = postFormID.get();
-        if(post_form_id != null) {
-            nvps.add(new BasicNameValuePair("post_form_id", post_form_id));
-        }
-        
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+        HttpGet httpGet = new HttpGet(logoutURL);
+        httpGet.addHeader("User-Agent", USER_AGENT_HEADER);
         
         HttpClient httpClient = createHttpClient();
-        HttpResponse response = httpClient.execute(httpPost);
+        HttpResponse response = httpClient.execute(httpGet);
         HttpEntity entity = response.getEntity();
 
         if (entity != null) {
@@ -282,10 +275,12 @@ public class FacebookFriendConnection implements FriendConnection {
             loginToFacebook();
             requestSession();
             fetchAllFriends();
-            getChannelAndPOSTFormID();
+            readMetadataFromHomePage();
+            chatListener = chatListenerFactory.createChatListener(this);
+            ThreadExecutor.startThread(chatListener, "chat-listener-thread");
             setVisible();
-            presenceListener = presenceListenerFactory.createPresenceListener(this);
-            executorService.scheduleAtFixedRate(presenceListener, 0, 90, TimeUnit.SECONDS);
+            PresenceListener presenceListener = presenceListenerFactory.createPresenceListener(this);
+            presenceListenerFuture = executorService.scheduleAtFixedRate(presenceListener, 0, 90, TimeUnit.SECONDS);
             loggedIn.set(true);
             connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
         } catch (IOException e) {
@@ -440,7 +435,7 @@ public class FacebookFriendConnection implements FriendConnection {
 		}
     }
     
-    public void getChannelAndPOSTFormID() throws FriendException {
+    public void readMetadataFromHomePage() throws FriendException {
         try {
             String homePage = httpGET(HOME_PAGE);
 
@@ -451,43 +446,62 @@ public class FacebookFriendConnection implements FriendConnection {
                 throw new IOException("no uid");
             }
 
-            String channel;
-            String channelPrefix = " \"channel";
-            int channelBeginPos = homePage.indexOf(channelPrefix)
-                    + channelPrefix.length();
-            if (channelBeginPos < channelPrefix.length()){
-                channel = chatChannel.get();
-                // no cached value
-                if (channel.length() == 0) {
-                    throw new IOException("can't find channel");
-                }
-                LOG.debugf("using cached channel: {0}", channel);
-            }
-            else {
-                channel = homePage.substring(channelBeginPos,
-                        channelBeginPos + 2);
-                chatChannel.set(channel);
-            }
-
-            String post_form_id;
-            String postFormIDPrefix = "<input type=\"hidden\" id=\"post_form_id\" name=\"post_form_id\" value=\"";
-            int formIdBeginPos = homePage.indexOf(postFormIDPrefix)
-                    + postFormIDPrefix.length();
-            if (formIdBeginPos < postFormIDPrefix.length()){
-                throw new IOException("can't find post form id");
-            }
-            else {
-                post_form_id = homePage.substring(formIdBeginPos,
-                        formIdBeginPos + 32);
-            }
+            readChannel(homePage);
+            readPOSTFormID(homePage);
+            readLogoutURL(homePage);
             
-            setPostFormID(post_form_id);
-
-            chatListener = chatListenerFactory.createChatListener(this);
-            ThreadExecutor.startThread(chatListener, "chat-listener-thread");
         } catch (IOException ioe)  {
             LOG.debug("starting chat failed", ioe);
             throw new FriendException(ioe);
+        }
+    }
+
+    private void readLogoutURL(String homePage) throws IOException {
+        String logoutURLPrefix = "<a href=\"http://www.facebook.com/logout.php?";
+        int logoutURLBeginPos = homePage.indexOf(logoutURLPrefix);
+        int logoutURLEndPos = homePage.indexOf("\">", logoutURLBeginPos);
+        if (logoutURLBeginPos < 0){
+            throw new IOException("can't find logout URL");
+        }
+        else {
+            logoutURL = homePage.substring(logoutURLBeginPos + "<a href=\"".length(),
+                    logoutURLEndPos);
+        }
+    }
+
+    private void readPOSTFormID(String homePage) throws IOException {
+        String post_form_id;
+        String postFormIDPrefix = "<input type=\"hidden\" id=\"post_form_id\" name=\"post_form_id\" value=\"";
+        int formIdBeginPos = homePage.indexOf(postFormIDPrefix)
+                + postFormIDPrefix.length();
+        if (formIdBeginPos < postFormIDPrefix.length()){
+            throw new IOException("can't find post form id");
+        }
+        else {
+            post_form_id = homePage.substring(formIdBeginPos,
+                    formIdBeginPos + 32);
+        }
+
+        setPostFormID(post_form_id);
+    }
+
+    private void readChannel(String homePage) throws IOException {
+        String channel;
+        String channelPrefix = " \"channel";
+        int channelBeginPos = homePage.indexOf(channelPrefix)
+                + channelPrefix.length();
+        if (channelBeginPos < channelPrefix.length()){
+            channel = chatChannel.get();
+            // no cached value
+            if (channel.length() == 0) {
+                throw new IOException("can't find channel");
+            }
+            LOG.debugf("using cached channel: {0}", channel);
+        }
+        else {
+            channel = homePage.substring(channelBeginPos,
+                    channelBeginPos + 2);
+            chatChannel.set(channel);
         }
     }
 
