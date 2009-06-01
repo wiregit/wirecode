@@ -391,6 +391,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
         
         buf.append(", searchCategory=").append(searchInfo.getSearchCategory());
         buf.append(", resultCategory=").append(result.getCategory());
+        buf.append(", spam=").append(result.isSpam());
         buf.append(", unfilteredSize=").append(getUnfilteredList().size());
         buf.append(", filteredSize=").append(getFilteredList().size());
         buf.append(", EDT=").append(SwingUtilities.isEventDispatchThread());
