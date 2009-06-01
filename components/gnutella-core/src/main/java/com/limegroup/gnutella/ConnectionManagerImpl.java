@@ -127,7 +127,8 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      */
     static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
     
-    // for inspection...
+    // Note: if isSupernode() is false, the same connections will be reported
+    // for both these inspection points
     @SuppressWarnings("unused")
     @InspectionPoint("leaf connections")
     private final Inspectable LEAF = new LegacyConnectionStats(true);
@@ -2586,6 +2587,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         /** Whether to report only leaf connections or only up connections */
         private final boolean leaf;
         private LegacyConnectionStats(boolean leaf) {
+            // Note: this flag is ignored if isSupernode() is false
             this.leaf = leaf;
         }
         
