@@ -120,6 +120,10 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         this.editorList = new BasicEventList<MatcherEditor<E>>();
         this.filterManager = new FilterManager<E>(filterableSource, iconManager);
         
+        if (filterableSource.getFilterDebugger() != null) {
+            filterableSource.getFilterDebugger().initialize(filterManager);
+        }
+        
         GuiUtils.assignResources(this);
         
         setBackground(backgroundColor);
