@@ -146,6 +146,23 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         super.deactivate();
         getComponent().setVisible(true);
     }
+    
+    /**
+     * Returns a text description of the filter state.
+     */
+    @Override
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        
+        buf.append(getClass().getSimpleName()).append("[");
+        buf.append("uniqueItems=").append(sourceList.size());
+        buf.append(", active=").append(isActive());
+        EventList<SourceType> selectedList = selectionModel.getSelected();
+        buf.append(", selection=").append((selectedList.size() > 0) ? selectedList.get(0) : "null");
+        buf.append("]");
+        
+        return buf.toString();
+    }
 
     /**
      * Listener to handle selection changes to update the matcher editor.  

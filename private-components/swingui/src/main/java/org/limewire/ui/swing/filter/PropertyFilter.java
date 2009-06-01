@@ -68,6 +68,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private final HyperlinkButton moreButton = new HyperlinkButton();
     
     private FunctionList<E, Object> propertyList;
+    private FilterList<Object> nonNullList;
     private UniqueList<Object> uniqueList;
     private EventSelectionModel<Object> selectionModel;
     private EventSelectionModel<Object> popupSelectionModel;
@@ -155,7 +156,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private void initialize(EventList<E> resultsList) {
         // Create list of unique property values.
         propertyList = createPropertyList(resultsList);
-        uniqueList = createUniqueList(propertyList);
+        nonNullList = createNonNullList(propertyList);
+        uniqueList = GlazedListsFactory.uniqueList(nonNullList, new PropertyComparator(filterType, propertyKey));
         
         // Initialize "more" button.
         moreButton.setVisible(uniqueList.size() > 3);
@@ -231,6 +233,25 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     }
     
     /**
+     * Returns a text description of the filter state.
+     */
+    @Override
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        
+        buf.append(getClass().getSimpleName()).append("[");
+        buf.append("type=").append(filterType);
+        buf.append(", property=").append(propertyKey);
+        buf.append(", uniqueItems=").append(uniqueList.size());
+        buf.append(", active=").append(isActive());
+        EventList<Object> selectedList = selectionModel.getSelected();
+        buf.append(", selection=").append((selectedList.size() > 0) ? selectedList.get(0) : "null");
+        buf.append("]");
+        
+        return buf.toString();
+    }
+    
+    /**
      * Returns the text string describing the property for the current filter 
      * type and property key. 
      */
@@ -277,12 +298,12 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     }
 
     /**
-     * Returns a list of unique, non-null values in the specified list of
-     * property values.
+     * Returns a list of non-null values in the specified list of property 
+     * values.
      */
-    private UniqueList<Object> createUniqueList(EventList<Object> propertyList) {
+    private FilterList<Object> createNonNullList(EventList<Object> propertyList) {
         // Create list of non-null values.
-        FilterList<Object> nonNullList = GlazedListsFactory.filterList(propertyList, 
+        return GlazedListsFactory.filterList(propertyList, 
             new Matcher<Object>() {
                 @Override
                 public boolean matches(Object item) {
@@ -290,9 +311,6 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 }
             }
         );
-        
-        // Create list of unique values.
-        return GlazedListsFactory.uniqueList(nonNullList, new PropertyComparator(filterType, propertyKey));
     }
     
     /**

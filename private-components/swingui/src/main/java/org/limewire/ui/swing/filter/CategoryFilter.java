@@ -142,6 +142,23 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
     }
     
     /**
+     * Returns a text description of the filter state.
+     */
+    @Override
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        
+        buf.append(getClass().getSimpleName()).append("[");
+        buf.append("uniqueItems=").append(uniqueList.size());
+        buf.append(", active=").append(isActive());
+        EventList<Category> selectedList = selectionModel.getSelected();
+        buf.append(", selection=").append((selectedList.size() > 0) ? selectedList.get(0) : "null");
+        buf.append("]");
+        
+        return buf.toString();
+    }
+    
+    /**
      * Returns the number of unique categories.
      */
     public int getCategoryCount() {

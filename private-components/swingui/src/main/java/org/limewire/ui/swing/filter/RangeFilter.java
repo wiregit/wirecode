@@ -88,6 +88,22 @@ class RangeFilter<E extends FilterableItem> extends AbstractFilter<E> {
     public void dispose() {
         // Do nothing.
     }
+    
+    /**
+     * Returns a text description of the filter state.
+     */
+    @Override
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        
+        buf.append(getClass().getSimpleName()).append("[");
+        buf.append("header=").append(rangeFormat.getHeaderText());
+        buf.append(", active=").append(isActive());
+        buf.append(", selectedRange=").append(createRangeText());
+        buf.append("]");
+        
+        return buf.toString();
+    }
 
     /**
      * Creates a text string describing the current selected range.
