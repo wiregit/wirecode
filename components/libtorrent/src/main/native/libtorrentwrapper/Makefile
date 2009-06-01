@@ -1,9 +1,9 @@
-CXXFLAGS =	-O2 -g -Wall -fmessage-length=0 
+CXXFLAGS = -O2 -g -Wall -fmessage-length=0 
 
 
 #TODO make OS variable dynamic
 
-OS = "changeme"
+OS = "linux"
 
 
 ifeq ($(OS),"windows")
@@ -17,7 +17,7 @@ endif
 
 ifeq  ($(OS),"linux")
 	LIB_DIR = ./lib/linux
-	LIBS = -l ssl -l rt -l torrent-0_14_2 -l boost_date_time-gcc42-mt-1_38 -l boost_filesystem-gcc42-mt-1_38 -l boost_system-gcc42-mt-1_38 -l boost_thread-gcc42-mt-1_38
+	LIBS = -l ssl -l rt -l torrent-0_14_3 -l boost_date_time-gcc43-mt-1_39 -l boost_filesystem-gcc43-mt-1_39 -l boost_system-gcc43-mt-1_39 -l boost_thread-gcc43-mt-1_39
 	LIBRARY = libtorrent-wrapper.so
 	TARGET = libtorrent-wrapper.out
 	LINKOPTIONS = -shared
@@ -45,9 +45,6 @@ INCLUDE_DIR = ./include
 libtorrentwrapper.o: 
 	${CXX} -c src/libtorrentwrapper.cpp $(OPTIONS) -I $(INCLUDE_DIR)
 	
-
-	
-
 compile:    libtorrentwrapper.o
 
 all: library

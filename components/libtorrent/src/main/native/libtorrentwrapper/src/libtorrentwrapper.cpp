@@ -111,12 +111,14 @@ struct wrapper_alert_info {
 	int category;
 	char* sha1;
 	const char* message;
+	bool has_data;
 
 	wrapper_alert_info() {
 		sha1 = new char[41];
 		sha1[0] = 0;
 		category = 0;
 		message = 0;
+		has_data = 0;
 	}
 
 	~wrapper_alert_info() {
@@ -238,6 +240,7 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 				*alert->resume_data);
 		out.close();
 		
+		alertInfo->has_data = 1;
 	}
 }
 
@@ -337,7 +340,7 @@ EXTERN_HEADER EXTERN_RET freeze_and_save_all_fast_resume_data(
 			process_alert(alert, alertInfo);
 			alertCallback(alertInfo);
 
-			if (alertInfo->data) {
+			if (alertInfo->has_data) {
 #ifdef LIME_DEBUG
 				std::cout << "resume_found: " << std::endl;
 #endif
