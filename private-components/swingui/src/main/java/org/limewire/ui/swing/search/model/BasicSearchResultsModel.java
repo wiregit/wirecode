@@ -20,6 +20,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.DisposalListener;
+import org.limewire.ui.swing.filter.FilterDebugger;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -47,6 +48,9 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
  */
 class BasicSearchResultsModel implements SearchResultsModel {
     private final Log LOG = LogFactory.getLog(getClass());
+    
+    /** Filter debugger associated with this model. */
+    private final FilterDebugger<VisualSearchResult> filterDebugger;
 
     /** Descriptor containing search details. */
     private final SearchInfo searchInfo;
@@ -105,6 +109,9 @@ class BasicSearchResultsModel implements SearchResultsModel {
         this.search = search;
         this.downloadListManager = downloadListManager;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        
+        // Create filter debugger.
+        filterDebugger = new FilterDebugger<VisualSearchResult>();
         
         // Create list of all search results.  Must be thread safe for EventSelectionModel to work properly.
         allSearchResults = GlazedListsFactory.threadSafeList(new BasicEventList<SearchResult>());
@@ -171,6 +178,11 @@ class BasicSearchResultsModel implements SearchResultsModel {
     @Override
     public SearchCategory getFilterCategory() {
         return searchInfo.getSearchCategory();
+    }
+    
+    @Override
+    public FilterDebugger<VisualSearchResult> getFilterDebugger() {
+        return filterDebugger;
     }
     
     @Override
@@ -382,6 +394,7 @@ class BasicSearchResultsModel implements SearchResultsModel {
         buf.append(", unfilteredSize=").append(getUnfilteredList().size());
         buf.append(", filteredSize=").append(getFilteredList().size());
         buf.append(", EDT=").append(SwingUtilities.isEventDispatchThread());
+        buf.append(", filters=").append(filterDebugger.getFilterString());
         
         return buf.toString();
     }

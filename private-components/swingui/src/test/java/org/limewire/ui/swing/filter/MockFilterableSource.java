@@ -14,6 +14,7 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
  */
 public class MockFilterableSource implements FilterableSource<MockFilterableItem> {
 
+    private final FilterDebugger<MockFilterableItem> filterDebugger;
     private final EventList<MockFilterableItem> unfilteredList;
     private final FilterList<MockFilterableItem> filteredList;
     private final SearchCategory filterCategory;
@@ -21,6 +22,7 @@ public class MockFilterableSource implements FilterableSource<MockFilterableItem
     public MockFilterableSource(SearchCategory searchCategory) {
         this.filterCategory = searchCategory;
         
+        filterDebugger = new FilterDebugger<MockFilterableItem>();
         unfilteredList = new BasicEventList<MockFilterableItem>();
         filteredList = GlazedListsFactory.filterList(unfilteredList);
     }
@@ -28,6 +30,11 @@ public class MockFilterableSource implements FilterableSource<MockFilterableItem
     @Override
     public SearchCategory getFilterCategory() {
         return filterCategory;
+    }
+    
+    @Override
+    public FilterDebugger<MockFilterableItem> getFilterDebugger() {
+        return filterDebugger;
     }
 
     @Override

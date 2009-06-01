@@ -17,6 +17,11 @@ public interface FilterableSource<E extends FilterableItem> {
     SearchCategory getFilterCategory();
     
     /**
+     * Returns the filter debugger.
+     */
+    FilterDebugger<E> getFilterDebugger();
+    
+    /**
      * Returns an unfiltered list of items.
      */
     EventList<E> getUnfilteredList();
