@@ -58,7 +58,7 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
             filter.dispose();
         }
         
-        // Dispose of all filters by category.
+        // Dispose of all non-property filters by category.
         Collection<Map<FilterType, Filter<E>>> filtersByCategory = filterByCategoryMap.values();
         for (Map<FilterType, Filter<E>> filterMap : filtersByCategory) {
             filters = filterMap.values();
@@ -72,6 +72,27 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
         for (Filter<E> filter : propertyFilters) {
             filter.dispose();
         }
+    }
+    
+    /**
+     * Returns a list of all available filters.
+     */
+    public List<Filter<E>> getFiltersInUse() {
+        List<Filter<E>> filterList = new ArrayList<Filter<E>>();
+        
+        // Add all non-property filters.
+        filterList.addAll(filterMap.values());
+        
+        // Add all non-property filters by category.
+        Collection<Map<FilterType, Filter<E>>> filtersByCategory = filterByCategoryMap.values();
+        for (Map<FilterType, Filter<E>> filterMap : filtersByCategory) {
+            filterList.addAll(filterMap.values());
+        }
+        
+        // Add all property filters.
+        filterList.addAll(propertyFilterMap.values());
+        
+        return filterList;
     }
     
     /**
