@@ -1,7 +1,6 @@
 package org.limewire.libtorrent;
 
 import com.sun.jna.Structure;
-import com.sun.jna.WString;
 
 /**
  * Structure mapping to the wrapper_alert_info structure in the
