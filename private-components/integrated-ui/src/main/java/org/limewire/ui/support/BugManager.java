@@ -381,6 +381,7 @@ public final class BugManager {
 		final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), title, ModalityType.APPLICATION_MODAL);
 		final Dimension DIALOG_DIMENSION = new Dimension(DIALOG_BOX_WIDTH, DIALOG_BOX_HEIGHT);
 		DIALOG.setSize(DIALOG_DIMENSION);
+        DIALOG.setResizable(false);
 
         // make sure number of current dialogs gets decremented when user closes it 
         DIALOG.addWindowListener(new WindowAdapter() {
