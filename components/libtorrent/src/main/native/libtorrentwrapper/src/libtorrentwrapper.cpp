@@ -107,6 +107,11 @@ struct wrapper_torrent_status {
 	const char* error;
 };
 
+struct wrapper_torrent_settings {
+	int max_upload_bandwidth;
+	int max_download_bandwidth;
+};
+
 struct wrapper_alert_info {
 	int category;
 	char* sha1;
@@ -229,10 +234,6 @@ void process_save_resume_data_alert(libtorrent::torrent_handle handle,
 
 		boost::filesystem::wpath full_path(path);
 		full_path /= file;
-
-#ifdef LIME_DEBUG
-		std::cout << "(to " << alertInfo->data << ')' << std::endl;
-#endif
 
 		boost::filesystem::ofstream out(full_path, std::ios_base::binary);
 		out.unsetf(std::ios_base::skipws);
@@ -444,7 +445,7 @@ EXTERN_HEADER EXTERN_RET add_torrent(char* sha1String, char* trackerURI,
 			}
 #ifdef LIME_DEBUG
 			else {
-				std::cout << "could not find fast resume file" << std::endl;	
+				std::cout << "could not find fast resume file" << std::endl;
 			}
 #endif
 		}
@@ -489,6 +490,18 @@ EXTERN_HEADER EXTERN_RET get_torrent_status(const char* id, void* stat) {
 
 		libtorrent::torrent_handle h = findTorrentHandle(id);
 		get_wrapper_torrent_status(h, stats);
+
+	EXTERN_TRY_CONTAINER_END;
+}
+
+EXTERN_HEADER EXTERN_RET update_settings(void* setting) {
+	EXTERN_TRY_CONTAINER_BEGIN;
+
+		struct wrapper_torrent_settings* settings =
+				(struct wrapper_torrent_settings *) setting;
+
+		session->set_upload_rate_limit(settings->max_upload_bandwidth);
+		session->set_download_rate_limit(settings->max_download_bandwidth);
 
 	EXTERN_TRY_CONTAINER_END;
 }
