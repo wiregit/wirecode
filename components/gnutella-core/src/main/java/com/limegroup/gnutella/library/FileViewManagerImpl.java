@@ -21,13 +21,13 @@ import org.limewire.core.settings.MessageSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.listener.SourcedEventMulticasterImpl;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.RPNParser;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -81,7 +81,6 @@ class FileViewManagerImpl implements FileViewManager {
         
         viewListeners.addListener(new EventListener<FileViewChangeEvent>() {
             @Override
-            @BlockingEvent(queueName="FileViewManager")
             public void handleEvent(FileViewChangeEvent event) {
                 if(!(event.getSource() instanceof IncompleteFileCollection)) {                
                     switch(event.getType()) {
@@ -94,6 +93,9 @@ class FileViewManagerImpl implements FileViewManager {
                     case FILES_CLEARED:
                         collectionCleared((SharedFileCollection)event.getFileView());
                         break;
+                    case FILE_CHANGED:
+                        fileChangedInCollection(event.getFileDesc(), event.getOldValue(), (SharedFileCollection)event.getFileView());
+                        break;
                     }
                 }
             }
@@ -101,7 +103,6 @@ class FileViewManagerImpl implements FileViewManager {
         
         collectionListeners.addListener(new EventListener<SharedFileCollectionChangeEvent>() {
             @Override
-            @BlockingEvent(queueName="FileViewManager") 
             public void handleEvent(SharedFileCollectionChangeEvent event) {
                 switch(event.getType()) {
                 case COLLECTION_ADDED:
@@ -324,6 +325,46 @@ class FileViewManagerImpl implements FileViewManager {
             }
         }
     }
+    
+    private void fileChangedInCollection(FileDesc newFileDesc, FileDesc oldFileDesc, SharedFileCollection collection) {
+        List<FileView> changedViews = null;
+        List<FileView> removedViews = null;
+        
+        rwLock.writeLock().lock();
+        try {
+            for(String id : collection.getFriendList()) {
+                MultiFileView view = fileViewsPerFriend.get(id);
+                if(view != null) {
+                    if(view.fileRemovedFromView(oldFileDesc, collection)) {
+                        if(view.fileAddedFromView(newFileDesc, collection)) {
+                            if(changedViews == null) {
+                                changedViews = new ArrayList<FileView>();
+                            }
+                            changedViews.add(view);
+                        } else {
+                            if(removedViews == null) {
+                                removedViews = new ArrayList<FileView>();
+                            }
+                            removedViews.add(view);
+                        }
+                    }
+                }
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+        
+        if(changedViews != null) {
+            for(FileView view : changedViews) {
+                multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_CHANGED, oldFileDesc, newFileDesc));
+            }
+        }
+        if(removedViews != null) {
+            for(FileView view : removedViews) {
+                multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_REMOVED, oldFileDesc));
+            }
+        }
+    }
 
     private void fileAddedToCollection(FileDesc fileDesc, SharedFileCollection collection) {
         List<FileView> addedViews = null;
@@ -417,6 +458,11 @@ class FileViewManagerImpl implements FileViewManager {
         
         MultiFileView() {
             super(FileViewManagerImpl.this.library);
+        }
+        
+        @Override
+        public String toString() {
+            return StringUtils.toString(this);
         }
         
         @Override

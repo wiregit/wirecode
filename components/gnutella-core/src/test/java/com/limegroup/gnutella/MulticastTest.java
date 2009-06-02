@@ -21,13 +21,16 @@ import org.limewire.net.TLSManager;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -38,38 +41,40 @@ public class MulticastTest extends LimeTestCase {
 
     private  final int DELAY = 1000;
         
-    private  FileManager fileManager;
-    private FileViewManager fileViewManager;
+    @Inject private  FileManager fileManager;
+    @Inject private FileViewManager fileViewManager;
     
-    private  MulticastHandler M_HANDLER;
+    @Inject private  MulticastHandler M_HANDLER;
     
-    private  UnicastedHandler U_HANDLER;
+    @Inject private  UnicastedHandler U_HANDLER;
         
 	private static final String FILE_NAME =
         "com/limegroup/gnutella/metadata/metadata.mp3";
 
     private MessageRouterImpl messageRouter;
 
-    private ConnectionServices connectionServices;
+    @Inject  private ConnectionServices connectionServices;
 
-    private SearchServices searchServices;
+    @Inject private SearchServices searchServices;
 
-    private PushDownloadManager pushDownloadManager;
+    @Inject private PushDownloadManager pushDownloadManager;
 
-    private DownloadServices downloadServices;
+    @Inject private DownloadServices downloadServices;
 
-    private ForMeReplyHandler forMeReplyHandler;
+    @Inject private ForMeReplyHandler forMeReplyHandler;
 
-    private LifecycleManager lifeCycleManager;
+    @Inject private LifecycleManager lifeCycleManager;
     
-    private RemoteFileDescFactory remoteFileDescFactory;
+    @Inject private RemoteFileDescFactory remoteFileDescFactory;
     
-    private TLSManager TLSManager;
+    @Inject  private TLSManager TLSManager;
             
-    protected Injector injector;
+    @Inject protected Injector injector;
 
-    private PushEndpointFactory pushEndpointFactory;
+    @Inject private PushEndpointFactory pushEndpointFactory;
 
+    @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
+    
     public MulticastTest(String name) {
         super(name);
     }
@@ -108,20 +113,8 @@ public class MulticastTest extends LimeTestCase {
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
 
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
-        
-        fileManager = injector.getInstance(FileManager.class);
-        fileViewManager = injector.getInstance(FileViewManager.class);
-        connectionServices = injector.getInstance(ConnectionServices.class);
+        LimeTestUtils.createInjector(Stage.PRODUCTION);
         messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
-        searchServices = injector.getInstance(SearchServices.class);
-        pushDownloadManager = injector.getInstance(PushDownloadManager.class);
-        downloadServices = injector.getInstance(DownloadServices.class);
-        forMeReplyHandler = injector.getInstance(ForMeReplyHandler.class);
-        lifeCycleManager = injector.getInstance(LifecycleManager.class);
-        remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
-        TLSManager = injector.getInstance(NetworkManager.class);
-        pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
         
         lifeCycleManager.start();
 		connectionServices.connect();
@@ -139,8 +132,8 @@ public class MulticastTest extends LimeTestCase {
         FileManagerTestUtils.waitForLoad(fileManager,3000);
         
         File file = TestUtils.getResourceFile(FILE_NAME);
-        assertNotNull(fileManager.getGnutellaCollection().add(file).get());        
-        assertEquals("unexpected number of shared files", 1, fileManager.getGnutellaCollection().size() );
+        assertNotNull(gnutellaFileCollection.add(file).get());        
+        assertEquals("unexpected number of shared files", 1, gnutellaFileCollection.size() );
     }
     
     @Override

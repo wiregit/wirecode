@@ -41,10 +41,12 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
@@ -53,16 +55,16 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
     private final int PORT = 6668;
 
-    private FileManager fileManager;
-    private FileViewManager fileViewManager;
+    @Inject private FileManager fileManager;
+    @Inject private FileViewManager fileViewManager;
+    @Inject private BrowseHostHandlerManager browseHostHandlerManager;
+    @Inject private SocketsManager socketsManager;
+    @Inject private Injector injector;
+    @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
 
     private BrowseHostHandler browseHostHandler;
-
-    private SocketsManager socketsManager;
-
     private QueryReplyHandler queryReplyHandler;
-    private Injector injector;
-
+    
     public BrowseHostHandlerTest(String name) {
         super(name);
     }
@@ -85,10 +87,8 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             protected void configure() {
                 bind(ForMeReplyHandler.class).to(QueryReplyHandler.class);
             }
-        });
+        }, LimeTestUtils.createModule(this));
 
-        fileManager = injector.getInstance(FileManager.class);
-        fileViewManager = injector.getInstance(FileViewManager.class);
 
         FileManagerTestUtils.waitForLoad(fileManager, 5000);
         
@@ -99,17 +99,16 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             }
         });
         for(File file : testFiles) {
-            assertNotNull(fileManager.getGnutellaCollection().add(file).get(1, TimeUnit.SECONDS));
+            assertNotNull(gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS));
         }
         
         File testMp3 = TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3");
-        assertNotNull(fileManager.getGnutellaCollection().add(testMp3).get(1, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(testMp3).get(1, TimeUnit.SECONDS));
         
         assertGreaterThan("Not enough files to test against", 50, testFiles.length);
-        assertGreaterThan(0, fileManager.getGnutellaCollection().size());
+        assertGreaterThan(0, gnutellaFileCollection.size());
 
-        browseHostHandler = injector.getInstance(BrowseHostHandlerManager.class).createBrowseHostHandler(new GUID(), new GUID());
-        socketsManager = injector.getInstance(SocketsManager.class);
+        browseHostHandler = browseHostHandlerManager.createBrowseHostHandler(new GUID(), new GUID());
         queryReplyHandler = (QueryReplyHandler) injector.getInstance(Key.get(ReplyHandler.class, Names.named("forMeReplyHandler")));
     }
 

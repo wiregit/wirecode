@@ -198,9 +198,7 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         boolean needsClearing;
         rwLock.writeLock().lock();
         try {
-            needsClearing = getInternalIndexes().size() > 0;
-            getInternalIndexes().clear();
-            totalFileSize = 0;
+            needsClearing = clearImpl();
         } finally {
             rwLock.writeLock().unlock();
         }
@@ -208,6 +206,14 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
         if(needsClearing) {
             fireClearEvent();
         }
+    }
+    
+    /** Performs the actual clear -- returns true if anything was removed from this collection. */
+    protected boolean clearImpl() {
+        boolean needsClearing = getInternalIndexes().size() > 0;
+        getInternalIndexes().clear();
+        totalFileSize = 0;
+        return needsClearing;
     }
 
     @Override
@@ -310,7 +316,8 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
                doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name());
     }
 
-    public void dispose() {
+    void dispose() {
+        clear();
         library.removeListener(libraryListener);
         multicaster.removeListeners(this);
     }

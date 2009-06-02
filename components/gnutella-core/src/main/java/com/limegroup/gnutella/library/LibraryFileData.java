@@ -614,6 +614,25 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
     
+    /** Sets whether or not all the given files should be in the collection. */
+    void setFilesInCollection(Iterable<FileDesc> fileDescs, int collectionId, boolean contained) {
+        lock.writeLock().lock();
+        try {
+            if(contained) {
+                for(FileDesc fd : fileDescs) {
+                    dirty |= addFileToCollection(fd.getFile(), collectionId);
+                } 
+            } else {
+                for(FileDesc fd : fileDescs) {
+                    dirty |= removeFileFromCollection(fd.getFile(), collectionId);
+                }
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+    
+    /** Returns true if the file was removed from the collection, false if it wasn't in the collection. */
     private boolean removeFileFromCollection(File file, int collectionId) {
         List<Integer> collections = fileData.get(file);
         if(collections == null || collections.isEmpty()) {
@@ -624,6 +643,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         return collections.remove((Integer)collectionId);
     }
 
+    /** Returns true if file was added to the collection, false if it already was in the collection. */
     private boolean addFileToCollection(File file, int collectionId) {
         boolean changed = false;
         
@@ -667,10 +687,11 @@ class LibraryFileData extends AbstractSettingsGroup {
     }
     
     /** Sets a new name for the collection of the given id. */
-    void setNameForCollection(int collectionId, String name) {
+    boolean setNameForCollection(int collectionId, String name) {
         lock.writeLock().lock();
         try {
-            collectionNames.put(collectionId, name);
+            String oldName = collectionNames.put(collectionId, name);
+            return oldName == null || !oldName.equals(name);
         } finally {
             lock.writeLock().unlock();
         }
@@ -687,6 +708,17 @@ class LibraryFileData extends AbstractSettingsGroup {
             collectionNames.put(nextId, name);
             dirty = true;
             return nextId;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+    
+    /** Removes the collection's share data & name.  This assumes all files have already been dereferenced. */
+    void removeCollection(int collectionId) {
+        lock.writeLock().lock();
+        try {
+           dirty |= collectionNames.remove(collectionId) != null;
+           dirty |= collectionShareData.remove(collectionId) != null;
         } finally {
             lock.writeLock().unlock();
         }

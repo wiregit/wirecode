@@ -88,14 +88,14 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         someFileMatches.add(USER_TORRENT);
         someFileMatches.add(APP_TXT);        
         
-        assertNotNull(fileManager.getGnutellaCollection().add(textFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(torrentFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(userTorrentFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(appTextFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(appTorrentFile).get(1, TimeUnit.SECONDS));
-        fileManager.getGnutellaCollection().remove(berkeleyFD);
-        fileManager.getGnutellaCollection().remove(susheelFD);
-        assertEquals(5, fileViewManager.getGnutellaFileView().size());
+        assertNotNull(gnutellaFileCollection.add(textFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(torrentFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(userTorrentFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(appTextFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(appTorrentFile).get(1, TimeUnit.SECONDS));
+        gnutellaFileCollection.remove(berkeleyFD);
+        gnutellaFileCollection.remove(susheelFD);
+        assertEquals(fileViewManager.getGnutellaFileView().toString(), 5, fileViewManager.getGnutellaFileView().size());
         
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         uploadManagerStub = (UploadManagerStub) injector.getInstance(UploadManager.class);
@@ -195,8 +195,10 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     }
     
     /**
-     * tests that if only metafiles can be serviced and
-     * all results are for metafiled, nothing gets filetered
+     * Tests that no response is sent for meta-files if we're only able to service them.
+     * 
+     * <strike>USED TO TEST THIS: tests that if only metafiles can be serviced and
+     * all results are for metafiled, nothing gets filetered</strike>
      */
     public void testNoneFiltered() throws Exception {
     	uploadManagerStub.mayBeServiceable = true;
@@ -206,15 +208,17 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	testUP[0].send(query);
     	testUP[0].flush();
     	Thread.sleep(1000);
-    	QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
-    	List<Response> responses = reply.getResultsAsList();
-    	assertEquals(1, responses.size());
-    	assertEquals(OTHER_TORRENT, responses.get(0).getName());
+    	assertNull(BlockingConnectionUtils.getFirstQueryReply(testUP[0]));
+//    	List<Response> responses = reply.getResultsAsList();
+//    	assertEquals(1, responses.size());
+//    	assertEquals(OTHER_TORRENT, responses.get(0).getName());
     }
     
     /**
-     * Tests that if only metafiles can be serviced 
-     * only results about application-shared metafiles are returned. 
+     * Tests that no responses are sent for meta-files.
+     * 
+     * <strike>USED TO TEST THIS: Tests that if only metafiles can be serviced 
+     * only results about application-shared metafiles are returned.</strike>
      */
     public void testMetaFilesSent() throws Exception {
     	uploadManagerStub.isServiceable = false;
@@ -224,10 +228,10 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	testUP[0].send(query);
     	testUP[0].flush();
     	Thread.sleep(1000);
-    	QueryReply reply = BlockingConnectionUtils.getFirstQueryReply(testUP[0]);
-    	List<Response> responses = reply.getResultsAsList();
-    	assertEquals(1, responses.size());
-    	assertEquals(TORRENT_FILE, responses.get(0).getName());
+    	assertNull(BlockingConnectionUtils.getFirstQueryReply(testUP[0]));
+//    	List<Response> responses = reply.getResultsAsList();
+//    	assertEquals(1, responses.size());
+//    	assertEquals(TORRENT_FILE, responses.get(0).getName());
     }
 }
 

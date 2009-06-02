@@ -8,13 +8,14 @@ import org.limewire.listener.SourcedEvent;
 public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileCollection> {
     
     public static enum Type {
-        COLLECTION_ADDED, COLLECTION_REMOVED, FRIEND_ADDED, FRIEND_REMOVED, FRIEND_IDS_CHANGED;
+        COLLECTION_ADDED, COLLECTION_REMOVED, FRIEND_ADDED, FRIEND_REMOVED, FRIEND_IDS_CHANGED, NAME_CHANGED;
     }
     
     private final Type type;
     private final SharedFileCollection list;
     private final String shareId;
     private final Collection<String> newIds;
+    private final String newName;
     
     public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list) {
         assert type == Type.COLLECTION_ADDED || type == Type.COLLECTION_REMOVED;        
@@ -22,14 +23,16 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
         this.list = list;
         this.shareId = null;
         this.newIds = null;
+        this.newName = null;
     }
     
-    public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list, String id) {
-        assert type == Type.FRIEND_ADDED || type == Type.FRIEND_REMOVED;
+    public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list, String idOrName) {
+        assert type == Type.FRIEND_ADDED || type == Type.FRIEND_REMOVED || type == Type.NAME_CHANGED;
         this.type = type;
         this.list = list;
-        this.shareId = id;
+        this.shareId = type == Type.NAME_CHANGED ? null : idOrName;
         this.newIds = null;
+        this.newName = type == Type.NAME_CHANGED ? idOrName : null;
     }
     
     public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list, Collection<String> newIds) {
@@ -38,6 +41,7 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
         this.list = list;
         this.shareId = null;
         this.newIds = newIds;
+        this.newName = null;
     }
 
     public Type getType() {
@@ -57,4 +61,7 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
         return newIds;
     }
 
+    public String getNewName() {
+        return newName;
+    }
 }

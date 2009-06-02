@@ -54,6 +54,7 @@ import org.limewire.util.ByteUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.NetworkManager;
@@ -64,10 +65,12 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.CreationTimeCache;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -100,8 +103,10 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
     
     private SecurityToken _token;
     
-    private Injector injector;
-    private TLSManager tlsManager;
+    @Inject private Injector injector;
+    @Inject private TLSManager tlsManager;
+    @Inject private FileManager fileManager;
+    @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
 
     public QueryReplyTest(String name) {
 		super(name);
@@ -120,12 +125,11 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
     public void setUp() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	    
-	    injector = LimeTestUtils.createInjector();
+	    injector = LimeTestUtils.createInjector(LimeTestUtils.createModule(this));
 	    
         byte[] data = new byte[16];
         new Random().nextBytes(data);
         _token = new AddressSecurityToken(data, injector.getInstance(MACCalculatorRepositoryManager.class));
-        tlsManager = injector.getInstance(TLSManager.class);
     }
 		
 	/**
@@ -1486,7 +1490,6 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
     }
 
     private void addFilesToLibrary() throws Exception {
-        FileManager fileManager = injector.getInstance(FileManager.class);
         File testDir = LimeTestUtils.getDirectoryWithLotsOfFiles();
         testDir = testDir.getCanonicalFile();
         assertTrue("could not find the gnutella directory", testDir.isDirectory());
@@ -1502,10 +1505,10 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
 
         FileManagerTestUtils.waitForLoad(fileManager, 5000);
         for(File file : testFiles) {
-            fileManager.getGnutellaCollection().add(file).get(1, TimeUnit.SECONDS);
+            gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS);
         }
 
-        assertEquals("unexpected number of shared files", testFiles.length, fileManager.getGnutellaCollection().size());
+        assertEquals("unexpected number of shared files", testFiles.length, gnutellaFileCollection.size());
     }
     
     private void addAlternateLocationsToFiles() throws Exception {

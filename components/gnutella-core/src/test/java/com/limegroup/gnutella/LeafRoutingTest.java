@@ -28,7 +28,7 @@ import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
+import com.google.inject.Inject;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
@@ -37,8 +37,9 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -68,17 +69,17 @@ public class LeafRoutingTest extends LimeTestCase {
     private BlockingConnection ultrapeer2;
     private BlockingConnection old1;
 
-    private LifecycleManager lifecycleManager;
-    private ConnectionServices connectionServices;
-    private BlockingConnectionFactory connectionFactory;
-    private PingReplyFactory pingReplyFactory;
-    private SearchServices searchServices;
-    private FileManager fileManager;
-    private FileViewManager fileViewManager;
-    private QueryRequestFactory queryRequestFactory;
-    private SpamServices spamServices;
-    private UrnCache urnCache;
-    private HeadersFactory headersFactory;
+    @Inject private LifecycleManager lifecycleManager;
+    @Inject private ConnectionServices connectionServices;
+    @Inject private BlockingConnectionFactory connectionFactory;
+    @Inject private PingReplyFactory pingReplyFactory;
+    @Inject private SearchServices searchServices;
+    @Inject private FileViewManager fileViewManager;
+    @Inject private QueryRequestFactory queryRequestFactory;
+    @Inject private SpamServices spamServices;
+    @Inject private UrnCache urnCache;
+    @Inject private HeadersFactory headersFactory;
+    @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
     
     public LeafRoutingTest(String name) {
         super(name);
@@ -117,23 +118,12 @@ public class LeafRoutingTest extends LimeTestCase {
         networkManager.setPort(5454);
         networkManager.setAcceptedIncomingConnection(true);
         networkManager.setSolicitedGUID(new GUID());
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
+        LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManager);
             }
-        });
-        lifecycleManager = injector.getInstance(LifecycleManager.class);
-        connectionServices = injector.getInstance(ConnectionServices.class);
-        connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
-        pingReplyFactory = injector.getInstance(PingReplyFactory.class);
-        searchServices = injector.getInstance(SearchServices.class);
-        fileManager = injector.getInstance(FileManager.class);
-        fileViewManager = injector.getInstance(FileViewManager.class);
-        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        spamServices = injector.getInstance(SpamServices.class);
-        urnCache = injector.getInstance(UrnCache.class);
-        headersFactory = injector.getInstance(HeadersFactory.class);
+        }, LimeTestUtils.createModule(this));
         
         lifecycleManager.start();
         connectionServices.connect();
@@ -141,8 +131,8 @@ public class LeafRoutingTest extends LimeTestCase {
         // get the resource file for com/limegroup/gnutella
         File berkeley = TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        assertNotNull(fileManager.getGnutellaCollection().add(berkeley).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(susheel).get(1, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(berkeley).get(1, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(susheel).get(1, TimeUnit.SECONDS));
         
         assertEquals("unexpected port", SERVER_PORT, NetworkSettings.PORT.getValue());
         connect();

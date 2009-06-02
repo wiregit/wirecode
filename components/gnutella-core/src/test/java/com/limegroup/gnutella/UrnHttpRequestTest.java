@@ -22,14 +22,17 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpTestUtils;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
 
 /**
  * This class tests HTTP requests involving URNs, as specified in HUGE v094,
@@ -43,14 +46,15 @@ public final class UrnHttpRequestTest extends LimeTestCase {
     private static final String STATUS_404 = "HTTP/1.1 404 Not Found";
     private static final String STATUS_400 = "HTTP/1.1 400 Bad Request";
 
-    private FileManager fileManager;
-    private FileViewManager fileViewManager;
+   @Inject private FileManager fileManager;
+   @Inject private FileViewManager fileViewManager;
 
     private HTTPUploadManager uploadManager;
 
-    private LifecycleManager lifeCycleManager;
+    @Inject private LifecycleManager lifeCycleManager;
     
-    private NetworkManager networkManager;
+    @Inject private NetworkManager networkManager;
+    @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
 
     public UrnHttpRequestTest(String name) {
         super(name);
@@ -69,19 +73,12 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 
         // initialize services
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, LimeTestUtils.createModule(this));
 
         uploadManager = (HTTPUploadManager) injector.getInstance(UploadManager.class);
-        
-        networkManager = injector.getInstance(NetworkManager.class);
-        
-        // start services
-        lifeCycleManager = injector.getInstance(LifecycleManager.class);
         lifeCycleManager.start();
         
         // make sure the FileDesc objects in file manager are up-to-date
-        fileManager = injector.getInstance(FileManager.class);
-        fileViewManager = injector.getInstance(FileViewManager.class);
         FileManagerTestUtils.waitForLoad(fileManager,2000);
 
         // create shared files with random content
@@ -92,10 +89,10 @@ public final class UrnHttpRequestTest extends LimeTestCase {
             File file = new File(_scratchDir, "file" + i + ".tmp");
             FileUtils.writeObject(file, data);
             file.deleteOnExit();
-            assertNotNull(fileManager.getGnutellaCollection().add(file).get(1, TimeUnit.SECONDS));
+            assertNotNull(gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS));
         }
         
-        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fileManager.getGnutellaCollection().size());
+        assertGreaterThanOrEquals("FileManager should have loaded files", 5, gnutellaFileCollection.size());
     }
 
     @Override

@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class FileManagerStub implements FileManager, FileViewManager {
+public class FileManagerStub implements FileManager, FileCollectionManager, FileViewManager {
 
     private LibraryStub managedStub;
     private IncompleteFileCollectionStub incompleteStub;

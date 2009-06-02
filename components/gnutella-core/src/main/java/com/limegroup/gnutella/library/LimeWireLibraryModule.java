@@ -24,7 +24,7 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(CreationTimeCache.class);        
         
         bind(FileViewManager.class).to(FileViewManagerImpl.class);
-        bind(FileCollectionManager.class).to(FileManager.class);
+        bind(FileCollectionManager.class).to(FileCollectionManagerImpl.class);
         
         bind(FileManager.class).to(FileManagerImpl.class);
         bind(Library.class).to(LibraryImpl.class);

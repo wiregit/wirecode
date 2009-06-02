@@ -32,7 +32,7 @@ public class CoreGlueTestUtils {
         Module replaced = Modules.override(combinedOriginals).with(combinedReplacements);
         return Guice.createInjector(stage, replaced);
     }
-
+    
     /**
      * Creates the Guice injector with the limewire default modules and the 
      * test module that can override bindings in the former modules.

@@ -14,6 +14,7 @@ import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.BlockingConnectionUtils;
@@ -38,13 +39,14 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
 public final class LicenseSharingTest extends ClientSideTestCase {
 
-    private FileManager fileManager;
-    private FileViewManager fileViewManager;
-    private LimeXMLDocumentFactory limeXMLDocumentFactory;
-    private Injector injector;
-    private QueryRequestFactory queryRequestFactory;
     private NetworkManagerStub networkManagerStub;
-    private LimeXMLDocumentHelper limeXMLDocumentHelper;
+    
+    @Inject private FileManager fileManager;
+    @Inject private FileViewManager fileViewManager;
+    @Inject private LimeXMLDocumentFactory limeXMLDocumentFactory;
+    @Inject private Injector injector;
+    @Inject private QueryRequestFactory queryRequestFactory;
+    @Inject private LimeXMLDocumentHelper limeXMLDocumentHelper;
     
 	public LicenseSharingTest(String name) {
 		super(name);
@@ -73,11 +75,6 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	        }
 	    });
         super.setUp(injector);
-	    fileManager = injector.getInstance(FileManager.class);
-	    fileViewManager = injector.getInstance(FileViewManager.class);
-	    limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
-	    queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-	    limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
 
 	    FileManagerTestUtils.waitForLoad(fileManager, 4000);
         // get the resource file for com/limegroup/gnutella
@@ -86,13 +83,13 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         File cc3 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
         File cc4 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
         File wma5 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
-        assertNotNull(fileManager.getGnutellaCollection().add(cc1).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(cc2).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(cc3).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(cc4).get(5, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(wma5).get(5, TimeUnit.SECONDS));
-        fileManager.getGnutellaCollection().remove(berkeleyFD);
-        fileManager.getGnutellaCollection().remove(susheelFD);
+        assertNotNull(gnutellaFileCollection.add(cc1).get(5, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(cc2).get(5, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(cc3).get(5, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(cc4).get(5, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(wma5).get(5, TimeUnit.SECONDS));
+        gnutellaFileCollection.remove(berkeleyFD);
+        gnutellaFileCollection.remove(susheelFD);
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {

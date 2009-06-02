@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.limewire.listener.EventBroadcaster;
@@ -8,6 +11,7 @@ import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent.Type;
@@ -20,20 +24,27 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 class SharedFileCollectionImpl extends AbstractFileCollection implements SharedFileCollection {
     
     private final int collectionId;    
-    private final LibraryFileData data;
+    private final Provider<LibraryFileData> data;
     private final HashTreeCache treeCache;    
     private final EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster;
+    private final List<String> defaultFriendIds;
 
     @Inject
-    public SharedFileCollectionImpl(LibraryFileData data, LibraryImpl managedList, 
+    public SharedFileCollectionImpl(Provider<LibraryFileData> data, LibraryImpl managedList, 
                                     SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster,
                                     EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
-                                    @Assisted int id, HashTreeCache treeCache) {
+                                    @Assisted int id, HashTreeCache treeCache,
+                                    @Assisted String... defaultFriendIds) {
         super(managedList, multicaster);
         this.collectionId = id;
         this.data = data;
         this.treeCache = treeCache;
         this.sharedBroadcaster = sharedCollectionBroadcaster;
+        if(defaultFriendIds.length == 0) {
+            this.defaultFriendIds = Collections.emptyList();
+        } else {
+            this.defaultFriendIds = Collections.unmodifiableList(Arrays.asList(defaultFriendIds));
+        }
     }
     
     @Override
@@ -42,23 +53,25 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     }
     
     public String getName() {
-        return data.getNameForCollection(collectionId);
+        return data.get().getNameForCollection(collectionId);
     }
     
     public void setName(String name) {
-        data.setNameForCollection(collectionId, name);
+        if(data.get().setNameForCollection(collectionId, name)) {
+            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.NAME_CHANGED, this, name));
+        }
     }
     
     @Override
     public void addFriend(String id) {
-        if(data.addFriendToCollection(collectionId, id)) {
+        if(data.get().addFriendToCollection(collectionId, id)) {
             sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_ADDED, this, id));
         }
     }
     
     @Override
     public boolean removeFriend(String id) {
-        if(data.removeFriendFromCollection(collectionId, id)) {
+        if(data.get().removeFriendFromCollection(collectionId, id)) {
             sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_REMOVED, this, id));
             return true;
         } else {
@@ -68,12 +81,22 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     
     @Override
     public List<String> getFriendList() {
-        return data.getFriendsForCollection(collectionId);
+        List<String> cached = data.get().getFriendsForCollection(collectionId);
+        if(defaultFriendIds.isEmpty()) {
+            return cached;
+        } else if(cached.isEmpty()) {
+            return defaultFriendIds;
+        } else {
+            List<String> friends = new ArrayList<String>(cached.size() + defaultFriendIds.size());
+            friends.addAll(defaultFriendIds);
+            friends.addAll(cached);
+            return friends;
+        }
     }
     
     @Override
     public void setFriendList(List<String> ids) {
-        data.setFriendsForCollection(collectionId, ids);
+        data.get().setFriendsForCollection(collectionId, ids);
         sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_IDS_CHANGED, this, ids));
     }
     
@@ -130,25 +153,6 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
             library.getReadLock().unlock();
         }
     }
-
-    /**
-     * Unloading the list makes the sharing
-     * characteristics of the files in the list invisible externally (files are still in list,
-     * but do not have the appearance of being shared)
-     */
-    public void unload() {
-        // for each file in the friend list, decrement its' file share count
-        getReadLock().lock();
-        try {
-            for (FileDesc fd : this) {
-                fd.decrementSharedCollectionCount();
-            }
-        } finally {
-            getReadLock().unlock();
-        }
-        clear();
-        dispose();
-    }
     
     /**
      * Returns false if it's an {@link IncompleteFileDesc} or it's a store
@@ -167,12 +171,24 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     
     @Override
     protected boolean isPending(File file, FileDesc fd) {
-        return data.isFileInCollection(file, collectionId);
+        return data.get().isFileInCollection(file, collectionId);
     }
     
     @Override
     protected void saveChange(File file, boolean added) {
-        data.setFileInCollection(file, collectionId, added);      
+        data.get().setFileInCollection(file, collectionId, added);      
+    }
+    
+    @Override
+    protected boolean clearImpl() {
+        data.get().setFilesInCollection(this, collectionId, false);
+        return super.clearImpl();
+    }
+    
+    @Override
+    void dispose() {
+        super.dispose();
+        data.get().removeCollection(collectionId);
     }
     
     @Override

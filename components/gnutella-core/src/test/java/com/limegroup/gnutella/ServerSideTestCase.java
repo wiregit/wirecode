@@ -13,14 +13,17 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.util.EmptyResponder;
 
 /**
@@ -61,18 +64,19 @@ public abstract class ServerSideTestCase extends LimeTestCase {
      */
     protected BlockingConnection ULTRAPEER[];
 
-    private LifecycleManager lifecycleManager;
+    @Inject private LifecycleManager lifecycleManager;
 
-    private ConnectionServices connectionServices;
+    @Inject private ConnectionServices connectionServices;
 
-    protected HeadersFactory headersFactory;
+    @Inject protected HeadersFactory headersFactory;
 
-    protected BlockingConnectionFactory blockingConnectionFactory;
+    @Inject protected BlockingConnectionFactory blockingConnectionFactory;
     
-    protected Injector injector;
+    @Inject protected Injector injector;
     
-    protected FileManager fileManager;
-    protected FileViewManager fileViewManager;
+    @Inject protected FileManager fileManager;
+    @Inject protected FileViewManager fileViewManager;
+    @Inject @GnutellaFiles FileCollection gnutellaFileCollection;
     protected FileDesc berkeleyFD;
     protected FileDesc susheelFD;
 
@@ -149,13 +153,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     protected void setUp(Injector injector) throws Exception {
         doSettings();
         
-        this.injector = injector;
-        lifecycleManager = injector.getInstance(LifecycleManager.class);
-        connectionServices = injector.getInstance(ConnectionServices.class);
-        headersFactory = injector.getInstance(HeadersFactory.class);
-        blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);
-        fileManager = injector.getInstance(FileManager.class);
-        fileViewManager = injector.getInstance(FileViewManager.class);
+        injector.injectMembers(this);
 
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
 
@@ -165,9 +163,9 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
         
-        Future<FileDesc> f1 = fileManager.getGnutellaCollection().add(
+        Future<FileDesc> f1 = gnutellaFileCollection.add(
                 TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt"));
-        Future<FileDesc> f2 = fileManager.getGnutellaCollection().add(
+        Future<FileDesc> f2 = gnutellaFileCollection.add(
                 TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt"));
         
         berkeleyFD = f1.get(1, TimeUnit.SECONDS);

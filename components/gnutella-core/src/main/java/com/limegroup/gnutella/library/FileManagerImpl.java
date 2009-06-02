@@ -1,18 +1,12 @@
 package com.limegroup.gnutella.library;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.inspection.InspectionPoint;
 import org.limewire.lifecycle.Service;
-import org.limewire.listener.EventBroadcaster;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
@@ -28,18 +22,7 @@ import com.google.inject.name.Named;
 @Singleton 
 class FileManagerImpl implements FileManager, Service {
     
-    private final LibraryImpl managedFileList;
-    
-    @InspectionPoint("gnutella shared file list")
-    private final SharedFileCollectionImpl defaultSharedCollection;
-    
-    @InspectionPoint("incomplete file list")
-    private final IncompleteFileCollectionImpl incompleteCollection;
-    
-    private final SharedFileCollectionImplFactory sharedFileCollectionImplFactory;
-    
-    private final Map<Integer, SharedFileCollectionImpl> sharedCollections =
-        new HashMap<Integer,SharedFileCollectionImpl>();
+    private final LibraryImpl library;
     
     private Saver saver;
     
@@ -51,7 +34,9 @@ class FileManagerImpl implements FileManager, Service {
     /** The background executor. */
     private final ScheduledExecutorService backgroundExecutor;
     
-    private final EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster;
+    private final Provider<LibraryFileData> fileData;
+    
+    private final FileCollectionManagerImpl fileCollectionManagerImpl;
 
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
@@ -59,17 +44,12 @@ class FileManagerImpl implements FileManager, Service {
     @Inject
     public FileManagerImpl(LibraryImpl managedFileList,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            IncompleteFileCollectionImpl incompleteFileCollectionImpl,
-            SharedFileCollectionImplFactory sharedFileCollectionImplFactory,
-            EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster) {        
+            Provider<LibraryFileData> libraryFileData,
+            FileCollectionManagerImpl collectionManager) {        
         this.backgroundExecutor = backgroundExecutor;
-        this.managedFileList = managedFileList;
-        this.incompleteCollection = incompleteFileCollectionImpl;
-        this.incompleteCollection.initialize();
-        this.sharedFileCollectionImplFactory = sharedFileCollectionImplFactory;
-        this.sharedBroadcaster = sharedBroadcaster;
-        this.defaultSharedCollection = sharedFileCollectionImplFactory.createSharedFileCollectionImpl(LibraryFileData.DEFAULT_SHARED_COLLECTION_ID);
-        this.defaultSharedCollection.initialize();
+        this.library = managedFileList;
+        this.fileData = libraryFileData;
+        this.fileCollectionManagerImpl = collectionManager;
     }
 
     @Override
@@ -79,7 +59,7 @@ class FileManagerImpl implements FileManager, Service {
 
     @Override
     public void initialize() {
-        managedFileList.initialize();
+        library.initialize();
     }
     
     @Inject
@@ -91,14 +71,12 @@ class FileManagerImpl implements FileManager, Service {
     public void start() {
         LibraryConverter converter = new LibraryConverter();
         if(converter.isOutOfDate()) {
-            managedFileList.fireLoading();
-            converter.convert(managedFileList.getLibraryData());
+            library.fireLoading();
+            converter.convert(fileData.get());
         }
         
-        loadStoredCollections();        
-        defaultSharedCollection.addFriend(Friend.P2P_FRIEND_ID);
-        
-        managedFileList.loadManagedFiles();
+        fileCollectionManagerImpl.loadStoredCollections();
+        library.loadManagedFiles();
         
         synchronized (this) {
             if (saver == null) {
@@ -107,98 +85,22 @@ class FileManagerImpl implements FileManager, Service {
             }
         }
     }
-    
-    private void loadStoredCollections() {
-        for(Integer id : managedFileList.getLibraryData().getStoredCollectionIds()) {
-            if(!sharedCollections.containsKey(id)) {
-                SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(id);
-                collection.initialize();
-                synchronized(this) {
-                    sharedCollections.put(id, collection);
-                }
-                sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));
-            }
-        }
-    }
 
     @Override
     public void stop() {
-        managedFileList.save();
+        library.save();
         shutdown = true;
     }    
     
     @Override
     public Library getLibrary() {
-        return managedFileList;
-    }
-
-    @Override
-    public FileCollection getGnutellaCollection() {
-        return defaultSharedCollection;
-    }
-
-    @Override
-    public synchronized SharedFileCollection getCollectionById(int collectionId) {
-        if(collectionId == LibraryFileData.DEFAULT_SHARED_COLLECTION_ID) {
-            return defaultSharedCollection;
-        } else {
-            return sharedCollections.get(collectionId);
-        }
-    }
-
-    @Override
-    public void removeCollectionById(int collectionId) {
-        // Cannot remove the default collection.
-        if(collectionId != LibraryFileData.DEFAULT_SHARED_COLLECTION_ID) {        
-            // if it was a valid key, remove saved references to it
-            SharedFileCollectionImpl removeFileList;
-            synchronized(this) {
-                removeFileList = sharedCollections.get(collectionId);
-                if(removeFileList != null) {
-                    removeFileList.dispose();
-                    sharedCollections.remove(collectionId);
-                    // TODO: remove from library data somehow?
-                }
-            }
-            
-            if(removeFileList != null) {
-                sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_REMOVED, removeFileList));
-            }
-        }
-    }
-    
-    private synchronized SharedFileCollectionImpl createNewCollectionImpl(String name) {
-        int newId = managedFileList.getLibraryData().createNewCollection(name);
-        SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId);
-        collection.initialize();
-        sharedCollections.put(newId, collection);
-        return collection;
-    }
-    
-    @Override
-    public SharedFileCollection createNewCollection(String name) {
-        SharedFileCollectionImpl collection = createNewCollectionImpl(name);
-        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));
-        return collection;
-    }
-
-    @Override
-    public IncompleteFileCollection getIncompleteFileCollection() {
-        return incompleteCollection;
-    }
-    
-    @Override
-    public synchronized List<SharedFileCollection> getSharedFileCollections() {
-        List<SharedFileCollection> collections = new ArrayList<SharedFileCollection>(sharedCollections.size() + 1);
-        collections.add(defaultSharedCollection);
-        collections.addAll(sharedCollections.values());
-        return collections;
+        return library;
     }
     
     private class Saver implements Runnable {
         public void run() {
-            if (!shutdown && managedFileList.isLoadFinished()) {
-                managedFileList.save();
+            if (!shutdown && library.isLoadFinished()) {
+                library.save();
             }
         }
     }

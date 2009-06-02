@@ -1,5 +1,7 @@
 package org.limewire.core.impl.library;
 
+import java.util.Collection;
+
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.SharedFileList;
@@ -49,28 +51,76 @@ class SharedFileListManagerImpl implements SharedFileListManager {
                     break;
                 case COLLECTION_REMOVED:
                     collectionRemoved(event.getSource());
+                    break;
+                case FRIEND_ADDED:
+                    friendAddedToCollection(event.getSource(), event.getFriendId());
+                    break;
+                case FRIEND_IDS_CHANGED:
+                    friendsSetInCollection(event.getSource(), event.getNewFriendIds());
+                    break;
+                case FRIEND_REMOVED:
+                    friendRemoved(event.getSource(), event.getFriendId());
+                    break;
+                case NAME_CHANGED:
+                    nameChanged(event.getSource());
+                    break;
                 }
             }
         });
     }
-    
-    private void collectionAdded(SharedFileCollection collection) {
-        SharedFileListImpl listImpl = new SharedFileListImpl(coreLocalFileItemFactory, collection);
-        sharedLists.add(listImpl);
-    }
-    
-    private void collectionRemoved(SharedFileCollection collection) {
+
+    // we technically don't have to change anything here, but we want to
+    // make the list trigger an event to signify that something changed,
+    // so we get the index of where it used to be & reset it.
+    private void nameChanged(SharedFileCollection collection) {
         sharedLists.getReadWriteLock().writeLock().lock();
         try {
-            for(SharedFileList list : sharedLists) {
-                SharedFileListImpl impl = (SharedFileListImpl)list;
-                if(impl.getCoreCollection() == collection) {
-                    sharedLists.remove(list);
+            for (int i = 0; i < sharedLists.size(); i++) {
+                SharedFileListImpl impl = (SharedFileListImpl)sharedLists.get(i);
+                if (impl.getCoreCollection() == collection) {
+                    sharedLists.set(i, impl); // reset it to trigger event.
                     break;
                 }
             }
         } finally {
             sharedLists.getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    private void friendRemoved(SharedFileCollection collection, String friendId) {
+        getListForCollection(collection).friendRemoved(friendId);
+    }
+
+    private void friendsSetInCollection(SharedFileCollection collection, Collection<String> newFriendIds) {
+        getListForCollection(collection).friendsSet(newFriendIds);
+    }
+
+    private void friendAddedToCollection(SharedFileCollection collection, String friendId) {
+        getListForCollection(collection).friendAdded(friendId);
+    }    
+    
+    private void collectionAdded(SharedFileCollection collection) {
+        SharedFileListImpl listImpl = new SharedFileListImpl(coreLocalFileItemFactory, collection);
+        listImpl.friendsSet(collection.getFriendList());
+        sharedLists.add(listImpl);
+    }
+    
+    private void collectionRemoved(SharedFileCollection collection) {
+        sharedLists.remove(getListForCollection(collection));
+    }
+    
+    private SharedFileListImpl getListForCollection(SharedFileCollection collection) {
+       sharedLists.getReadWriteLock().readLock().lock();
+        try {
+            for (SharedFileList list : sharedLists) {
+                SharedFileListImpl impl = (SharedFileListImpl) list;
+                if (impl.getCoreCollection() == collection) {
+                    return impl;
+                }
+            }
+            return null;
+        } finally {
+            sharedLists.getReadWriteLock().readLock().unlock();
         }
     }
 

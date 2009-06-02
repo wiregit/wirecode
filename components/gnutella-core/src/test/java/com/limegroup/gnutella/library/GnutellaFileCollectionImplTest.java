@@ -31,6 +31,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lifecycle.ServiceRegistry;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.URN;
@@ -41,10 +42,10 @@ import com.limegroup.gnutella.messages.vendor.ContentResponse;
 
 public class GnutellaFileCollectionImplTest extends LimeTestCase {
 
-    private LibraryImpl managedList;
-    private FileCollection fileList;
-    private UrnValidator urnValidator;
-    private Injector injector;
+    @Inject private LibraryImpl managedList;
+    @Inject @GnutellaFiles private FileCollection fileList;
+    @Inject private UrnValidator urnValidator;
+    @Inject private Injector injector;
 
     private File f1, f2, f3, f4, f5;
     private List<FileDesc> sharedFiles;
@@ -59,10 +60,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
-        managedList = (LibraryImpl)injector.getInstance(FileManager.class).getLibrary();
-        fileList = injector.getInstance(FileManager.class).getGnutellaCollection();
-        urnValidator = injector.getInstance(UrnValidator.class);
+        LimeTestUtils.createInjector(Stage.PRODUCTION, LimeTestUtils.createModule(this));
         injector.getInstance(ServiceRegistry.class).initialize();
     }
 

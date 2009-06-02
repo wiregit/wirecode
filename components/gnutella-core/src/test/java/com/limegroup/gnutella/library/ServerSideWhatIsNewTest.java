@@ -26,6 +26,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.BlockingConnectionUtils;
@@ -66,14 +67,14 @@ public class ServerSideWhatIsNewTest
     private File susheel = null;
     private File tempFile1 = null;
     private File tempFile2 = null;
-    private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
-    private CapabilitiesVMFactory capabilitiesVMFactory;
-    private FileManager fileManager;
-    private FileViewManager fileViewManager;
-    private CreationTimeCache creationTimeCache;
-    private QueryRequestFactory queryRequestFactory;
-    private Injector injector;
-    private DownloadServices downloadServices;
+    @Inject private MessagesSupportedVendorMessage messagesSupportedVendorMessage;
+    @Inject private CapabilitiesVMFactory capabilitiesVMFactory;
+    @Inject private FileManager fileManager;
+    @Inject private FileViewManager fileViewManager;
+    @Inject private CreationTimeCache creationTimeCache;
+    @Inject private QueryRequestFactory queryRequestFactory;
+    @Inject private Injector injector;
+    @Inject private DownloadServices downloadServices;
     
     public ServerSideWhatIsNewTest(String name) {
         super(name);
@@ -113,16 +114,8 @@ public class ServerSideWhatIsNewTest
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
         
-        messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);
-        capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
-        fileManager = injector.getInstance(FileManager.class);
-        fileViewManager = injector.getInstance(FileViewManager.class);
-        creationTimeCache = injector.getInstance(CreationTimeCache.class);
-        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        downloadServices = injector.getInstance(DownloadServices.class);
-        
-        fileManager.getGnutellaCollection().remove(berkeleyFD);
-        fileManager.getGnutellaCollection().remove(susheelFD);
+        gnutellaFileCollection.remove(berkeleyFD);
+        gnutellaFileCollection.remove(susheelFD);
         
         berkeley = new File(_scratchDir, berkeleyFD.getFileName());
         CommonUtils.copyFile(berkeleyFD.getFile(), berkeley);
@@ -133,8 +126,8 @@ public class ServerSideWhatIsNewTest
         // Make sure mod times of each file are different.
         berkeley.setLastModified(susheel.lastModified()-1000);
         
-        berkeleyFD = fileManager.getGnutellaCollection().add(berkeley).get(1, TimeUnit.SECONDS);
-        susheelFD = fileManager.getGnutellaCollection().add(susheel).get(1, TimeUnit.SECONDS);
+        berkeleyFD = gnutellaFileCollection.add(berkeley).get(1, TimeUnit.SECONDS);
+        susheelFD = gnutellaFileCollection.add(susheel).get(1, TimeUnit.SECONDS);
         assertNotNull(berkeleyFD);
         assertNotNull(susheelFD);
         
@@ -511,8 +504,7 @@ public class ServerSideWhatIsNewTest
     // test that the FileManager.removeFileIfShared method works    
     public void testRemoveSharedFile() throws Exception {
         setupAndAddTempFiles();
-        
-        FileManager fm = fileManager;
+
         assertEquals(4,fileViewManager.getGnutellaFileView().size());
         
         
@@ -534,7 +526,7 @@ public class ServerSideWhatIsNewTest
         }
         
         // tempFile1 and 2 have the same URN
-        fm.getGnutellaCollection().remove(tempFile1);
+        gnutellaFileCollection.remove(tempFile1);
         {
             Map urnToLong = creationTimeCache.getUrnToTime();  
             assertEquals(3, urnToLong.size());
@@ -544,7 +536,7 @@ public class ServerSideWhatIsNewTest
         
         // tempFile2 should result in a removal of an URN
         // as well as a timestamp
-        fm.getGnutellaCollection().remove(tempFile2);
+        gnutellaFileCollection.remove(tempFile2);
 
         {
             Map urnToLong = creationTimeCache.getUrnToTime();
@@ -588,7 +580,7 @@ public class ServerSideWhatIsNewTest
         Map longToUrns = ctCache.getTimeToUrn();
         List<FileDesc> fds = CollectionUtils.listOf(fileViewManager.getGnutellaFileView());
         for (FileDesc fd : fds) {
-            fileManager.getGnutellaCollection().remove(fd.getFile());
+            gnutellaFileCollection.remove(fd.getFile());
         }
         longToUrns = ctCache.getTimeToUrn();
         final int UPLOADER_PORT = 10000;
@@ -624,7 +616,7 @@ public class ServerSideWhatIsNewTest
         assertTrue("state: " + downloader.getState(), downloadedLatch.await(30,TimeUnit.SECONDS));
         
         assertTrue("didn't share!", shareLatch.await(5, TimeUnit.SECONDS));
-        assertEquals( sharedBefore + 1, fileManager.getGnutellaCollection().size());
+        assertEquals( sharedBefore + 1, gnutellaFileCollection.size());
 
         File newFile = new File(_savedDir, "whatever.txt");
         assertTrue(newFile.getAbsolutePath()+" didn't exist", newFile.exists());
@@ -646,7 +638,7 @@ public class ServerSideWhatIsNewTest
         
         List<FileDesc> fds = CollectionUtils.listOf(fileViewManager.getGnutellaFileView());
         for (FileDesc fd : fds) {
-            fileManager.getGnutellaCollection().remove(fd.getFile());
+            gnutellaFileCollection.remove(fd.getFile());
         }
 
         final int UPLOADER_PORT = 20000;
@@ -762,11 +754,11 @@ public class ServerSideWhatIsNewTest
         osxDst.deleteOnExit();
         
         try {
-            assertNotNull(fileManager.getGnutellaCollection().add(winDst).get(5, TimeUnit.SECONDS));
-            assertNotNull(fileManager.getGnutellaCollection().add(linDst).get(5, TimeUnit.SECONDS));
-            assertNotNull(fileManager.getGnutellaCollection().add(osxDst).get(5, TimeUnit.SECONDS));
+            assertNotNull(gnutellaFileCollection.add(winDst).get(5, TimeUnit.SECONDS));
+            assertNotNull(gnutellaFileCollection.add(linDst).get(5, TimeUnit.SECONDS));
+            assertNotNull(gnutellaFileCollection.add(osxDst).get(5, TimeUnit.SECONDS));
             
-            assertEquals(5, fileManager.getGnutellaCollection().size());
+            assertEquals(5, gnutellaFileCollection.size());
     
             {
                 Map urnToLong = creationTimeCache.getUrnToTime();
@@ -832,9 +824,9 @@ public class ServerSideWhatIsNewTest
         assertNotEquals("couldn't set up test",tempFile2.lastModified(), previousTime);
         
         // now move them to the share dir
-        assertNotNull(fileManager.getGnutellaCollection().add(tempFile1).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaCollection().add(tempFile2).get(1, TimeUnit.SECONDS));
-        assertEquals("Files were not loaded by filemanager", 4, fileManager.getGnutellaCollection().size());
+        assertNotNull(gnutellaFileCollection.add(tempFile1).get(1, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(tempFile2).get(1, TimeUnit.SECONDS));
+        assertEquals("Files were not loaded by filemanager", 4, gnutellaFileCollection.size());
     }
 
 }

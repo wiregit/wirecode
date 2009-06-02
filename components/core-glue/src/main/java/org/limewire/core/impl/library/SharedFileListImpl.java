@@ -1,8 +1,11 @@
 package org.limewire.core.impl.library;
 
-import org.limewire.core.api.friend.Friend;
+import java.util.Collection;
+
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
+import org.limewire.util.StringUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -10,9 +13,15 @@ import ca.odell.glazedlists.EventList;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.SharedFileCollection;
 
-public class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
-   
+/**
+ * A representation of a {@link SharedFileCollection} for use with the
+ * {@link SharedFileList} API.
+ */
+class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
+
     private final SharedFileCollection coreCollection;
+    private final EventList<String> friendList = GlazedListsFactory.threadSafeList(new BasicEventList<String>());
+    private final EventList<String> readOnlyFriendList = GlazedListsFactory.readOnlyList(friendList);
 
     public SharedFileListImpl(CoreLocalFileItemFactory coreLocalFileItemFactory,
             SharedFileCollection gnutellaFileCollection) {
@@ -22,23 +31,33 @@ public class SharedFileListImpl extends LocalFileListImpl implements SharedFileL
     }
     
     @Override
+    public String toString() {
+        return StringUtils.toString(this);
+    }
+
+    @Override
     protected FileCollection getCoreCollection() {
         return coreCollection;
     }
-    
+
     @Override
-    public void addFriend(Friend friend) {
-        coreCollection.addFriend(friend.getId());
+    public void addFriend(String friendId) {
+        coreCollection.addFriend(friendId);
     }
 
     @Override
-    public EventList<Friend> getFriends() {
-        return new BasicEventList<Friend>();
+    public EventList<String> getFriendIds() {
+        return readOnlyFriendList;
     }
 
     @Override
-    public String getName() {
-        return coreCollection.getName();
+    public String getCollectionName() {
+        // TODO: do better.
+        if(coreCollection.getId() == 0) {
+            return "Shared"; // TODO: i18n?
+        } else {
+            return coreCollection.getName();
+        }
     }
 
     @Override
@@ -47,13 +66,31 @@ public class SharedFileListImpl extends LocalFileListImpl implements SharedFileL
     }
 
     @Override
-    public void removeFriend(Friend friend) {
-        coreCollection.removeFriend(friend.getId());
+    public void removeFriend(String friendId) {
+        coreCollection.removeFriend(friendId);
     }
 
     @Override
-    public void setName(String name) {
+    public void setCollectionName(String name) {
         coreCollection.setName(name);
+    }
+
+    void friendRemoved(String friendId) {
+        friendList.remove(friendId);
+    }
+
+    void friendsSet(Collection<String> newFriendIds) {
+       friendList.getReadWriteLock().writeLock().lock();
+       try {
+           friendList.clear();
+           friendList.addAll(newFriendIds);
+       } finally {
+           friendList.getReadWriteLock().writeLock().unlock();
+       }
+    }
+
+    void friendAdded(String friendId) {
+        friendList.add(friendId);
     }
 
 }

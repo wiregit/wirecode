@@ -48,15 +48,16 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.nio.NIOTestUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
-import org.limewire.nio.NIOTestUtils;
-import org.limewire.io.LimeWireIOTestModule;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Stage;
@@ -70,11 +71,14 @@ import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.library.CreationTimeCache;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.IncompleteFileCollection;
 import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -112,17 +116,19 @@ public class UploadTest extends LimeTestCase {
     /** The verifying file for the shared incomplete file */
     private VerifyingFile vf;
 
-    private LimeHttpClient client;
+    @Inject private LimeHttpClient client;
 
     protected String protocol;
 
-    private Injector injector;
+    @Inject private Injector injector;
 
-    private UploadManager uploadManager;
+    @Inject private UploadManager uploadManager;
 
-    private FileManager fileManager;
-    private FileViewManager fileViewManager;
-
+    @Inject private FileManager fileManager;
+    @Inject private FileViewManager fileViewManager;
+    @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
+    @Inject private IncompleteFileCollection incompleteFileCollection;
+    
     private String fileNameUrl;
     private String relativeFileNameUrl;
 
@@ -151,12 +157,12 @@ public class UploadTest extends LimeTestCase {
         doSettings();
 
         // initialize services
-        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeWireIOTestModule());
+        LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeWireIOTestModule(), LimeTestUtils.createModule(this));
         
         startServices();
         File testDir = TestUtils.getResourceFile(testDirName);
-        Future<FileDesc> fd1 = fileManager.getGnutellaCollection().add(new File(testDir, fileName));
-        Future<FileDesc> fd2 = fileManager.getGnutellaCollection().add(new File(testDir, otherFileName));
+        Future<FileDesc> fd1 = gnutellaFileCollection.add(new File(testDir, fileName));
+        Future<FileDesc> fd2 = gnutellaFileCollection.add(new File(testDir, otherFileName));
 
         // get urls from file manager
         FileDesc fd = fd1.get();
@@ -176,18 +182,16 @@ public class UploadTest extends LimeTestCase {
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
         vf = injector.getInstance(VerifyingFileFactory.class).createVerifyingFile(252450);
-        fileManager.getIncompleteFileCollection().addIncompleteFile(incFile, urns, incName, 1981, vf);
+        incompleteFileCollection.addIncompleteFile(incFile, urns, incName, 1981, vf);
         incompleteHashUrl = LimeTestUtils.getRequest("localhost", PORT, incompleteHash);
         
         badHashUrl = LimeTestUtils.getRequest("localhost", PORT, badHash);
 
-        assertEquals(1, fileManager.getIncompleteFileCollection().size());
-        assertEquals(2, fileManager.getGnutellaCollection().size());
+        assertEquals(1, incompleteFileCollection.size());
+        assertEquals(2, gnutellaFileCollection.size());
         assertEquals("Unexpected uploads in progress", 0, uploadManager.uploadsInProgress());
         assertEquals("Unexpected queued uploads", 0, uploadManager.getNumQueuedUploads());
 
-        client = injector.getInstance(LimeHttpClient.class);
-        
         //client = new DefaultHttpClient();
         //Scheme https = client.getConnectionManager().getSchemeRegistry().getScheme("https");
         //Scheme tls = new Scheme("tls", https.getSocketFactory(), https.getDefaultPort());
@@ -230,12 +234,9 @@ public class UploadTest extends LimeTestCase {
         HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
         httpAcceptor.start();
         
-        uploadManager = injector.getInstance(UploadManager.class);
         uploadManager.start();
         
         // make sure the FileDesc objects in file manager are up-to-date
-        fileManager = injector.getInstance(FileManager.class);
-        fileViewManager = injector.getInstance(FileViewManager.class);
         injector.getInstance(ServiceRegistry.class).initialize();
         FileManagerTestUtils.waitForLoad(fileManager, 4000);
         

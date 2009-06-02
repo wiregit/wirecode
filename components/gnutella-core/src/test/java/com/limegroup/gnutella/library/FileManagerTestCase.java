@@ -16,6 +16,7 @@ import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.Response;
@@ -47,16 +48,17 @@ public class FileManagerTestCase extends LimeTestCase {
     // protected so that subclasses can
     // use these variables as well.
     protected volatile FileManagerImpl fman = null;
-    protected FileViewManager fileViewManager;
-    protected QRPUpdater qrpUpdater = null;
+    @Inject protected FileViewManager fileViewManager;
+    @Inject protected QRPUpdater qrpUpdater = null;
     protected Object loaded = new Object();
     protected Response[] responses;
     protected List<FileDesc> sharedFiles;
-    protected Injector injector;
-    protected SharedFilesKeywordIndex keywordIndex;
-    protected LimeXMLDocumentFactory limeXMLDocumentFactory;
-    protected CreationTimeCache creationTimeCache;
-    protected QueryRequestFactory queryRequestFactory;
+    @Inject protected Injector injector;
+    @Inject protected SharedFilesKeywordIndex keywordIndex;
+    @Inject protected LimeXMLDocumentFactory limeXMLDocumentFactory;
+    @Inject protected CreationTimeCache creationTimeCache;
+    @Inject protected QueryRequestFactory queryRequestFactory;
+    @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
 
     public FileManagerTestCase(String name) {
         super(name);
@@ -75,18 +77,9 @@ public class FileManagerTestCase extends LimeTestCase {
             protected void configure() {
                 bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
             }
-        });
+        }, LimeTestUtils.createModule(this));
 
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
-        fileViewManager = injector.getInstance(FileViewManager.class);
-        keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
-        creationTimeCache = injector.getInstance(CreationTimeCache.class);
-        qrpUpdater = injector.getInstance(QRPUpdater.class);
-
-        limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
-
-        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        
         injector.getInstance(ServiceRegistry.class).initialize();
     }
 
@@ -222,7 +215,7 @@ public class FileManagerTestCase extends LimeTestCase {
     protected FileViewChangeEvent addIfShared(File f) throws Exception {
         Listener fel = new Listener();
         fileViewManager.getGnutellaFileView().addListener(fel);
-        fman.getGnutellaCollection().add(f, LimeXMLDocument.EMPTY_LIST);
+        gnutellaFileCollection.add(f, LimeXMLDocument.EMPTY_LIST);
         fel.await(5000);
         return fel.evt;
     }
@@ -230,7 +223,7 @@ public class FileManagerTestCase extends LimeTestCase {
     protected FileViewChangeEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
         Listener fel = new Listener();
         fileViewManager.getGnutellaFileView().addListener(fel);
-        fman.getGnutellaCollection().add(f, l);
+        gnutellaFileCollection.add(f, l);
         fel.await(5000);
         return fel.evt;
     }
@@ -238,7 +231,7 @@ public class FileManagerTestCase extends LimeTestCase {
     protected FileViewChangeEvent addAlways(File f) throws Exception {
         Listener fel = new Listener();
         fileViewManager.getGnutellaFileView().addListener(fel);
-        fman.getGnutellaCollection().add(f);
+        gnutellaFileCollection.add(f);
         fel.await(5000);
         return fel.evt;
     }

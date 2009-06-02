@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.library;
 
-// TODO break extends of FileCollectionManager -- it's just too much a PITA to fix right now
-public interface FileManager extends FileCollectionManager {
+public interface FileManager {
 
     /** Asynchronously loads all files by calling loadSettings. */
     void start();

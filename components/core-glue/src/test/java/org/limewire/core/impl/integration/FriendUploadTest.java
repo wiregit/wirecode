@@ -34,6 +34,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.RequestCache;
+import com.limegroup.gnutella.library.FileCollectionManager;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
@@ -52,7 +53,7 @@ public class FriendUploadTest extends LimeTestCase {
     private Injector injector;
     private Acceptor acceptor;
     private int port;
-    private FileManager fileManager;
+    private FileCollectionManager fileManager;
 
     private String relativeFileNameUrl;
 
@@ -73,8 +74,8 @@ public class FriendUploadTest extends LimeTestCase {
         acceptor = injector.getInstance(Acceptor.class);
         port = acceptor.getPort(false);
         client = injector.getInstance(LimeHttpClient.class);
-        fileManager = injector.getInstance(FileManager.class);
-        FileManagerTestUtils.waitForLoad(fileManager, 4 * 1000);
+        fileManager = injector.getInstance(FileCollectionManager.class);
+        FileManagerTestUtils.waitForLoad(injector.getInstance(FileManager.class), 4 * 1000);
         loadFiles();
     }
     
