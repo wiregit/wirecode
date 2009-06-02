@@ -20,18 +20,18 @@ import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPService;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 /**
  * Sends library changed messages to friends when:<BR>
@@ -63,8 +63,8 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
     }
 
     @Inject
-    public void register(FileManager fileManager) {
-        fileManager.getLibrary().addManagedListStatusListener(new FinishedLoadingListener());
+    public void register(Library library) {
+        library.addManagedListStatusListener(new FinishedLoadingListener());
     }
 
     @Inject

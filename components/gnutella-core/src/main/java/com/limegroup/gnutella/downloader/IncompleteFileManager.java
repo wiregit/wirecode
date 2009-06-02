@@ -28,7 +28,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.IncompleteFileCollection;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
@@ -80,7 +80,7 @@ public class IncompleteFileManager  {
     private final Map<URN, File> hashes = new HashMap<URN, File>();
     
     private final Provider<Library> library;
-    private final Provider<FileCollectionManager> fileCollectionManager;
+    private final Provider<IncompleteFileCollection> incompleteFileCollection;
     private final Provider<HashTreeCache> tigerTreeCache;
     private final VerifyingFileFactory verifyingFileFactory;
     private final Provider<TorrentManager> torrentManager;
@@ -88,11 +88,11 @@ public class IncompleteFileManager  {
     @Inject
     public IncompleteFileManager(
             Provider<Library> library,
-            Provider<FileCollectionManager> fileManager,
+            Provider<IncompleteFileCollection> incompleteFileCollection,
             Provider<HashTreeCache> tigerTreeCache,
             VerifyingFileFactory verifyingFileFactory, Provider<TorrentManager> torrentManager) {
         this.library = library;
-        this.fileCollectionManager = fileManager;
+        this.incompleteFileCollection = incompleteFileCollection;
         this.tigerTreeCache = tigerTreeCache;
         this.verifyingFileFactory = verifyingFileFactory;
         this.torrentManager = torrentManager;
@@ -456,7 +456,7 @@ public class IncompleteFileManager  {
         Set<URN> completeHashes = getAllCompletedHashes(incompleteFile);
         if( completeHashes.size() == 0 ) return;
         
-        fileCollectionManager.get().getIncompleteFileCollection().addIncompleteFile(
+        incompleteFileCollection.get().addIncompleteFile(
             incompleteFile,
             completeHashes,
             getCompletedName(incompleteFile),

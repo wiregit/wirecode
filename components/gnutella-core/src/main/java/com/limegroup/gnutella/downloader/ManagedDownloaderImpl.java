@@ -78,8 +78,9 @@ import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
@@ -421,7 +422,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private final EventMulticaster<DownloadStateEvent> listeners;
     
     protected final DownloadManager downloadManager;
-    protected final FileCollectionManager collectionManager;
+    protected final FileCollection gnutellaFileCollection;
     protected final IncompleteFileManager incompleteFileManager;
     protected final DownloadCallback downloadCallback;    
     protected final NetworkManager networkManager;
@@ -463,7 +464,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     @Inject
     protected ManagedDownloaderImpl(SaveLocationManager saveLocationManager,
-            DownloadManager downloadManager, FileCollectionManager collectionManager,
+            DownloadManager downloadManager, @GnutellaFiles FileCollection gnutellaFileCollection,
             IncompleteFileManager incompleteFileManager, DownloadCallback downloadCallback,
             NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
             RequeryManagerFactory requeryManagerFactory, QueryRequestFactory queryRequestFactory,
@@ -483,7 +484,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         super(saveLocationManager);
         this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
-        this.collectionManager = collectionManager;
+        this.gnutellaFileCollection = gnutellaFileCollection;
         this.incompleteFileManager = incompleteFileManager;
         this.downloadCallback = downloadCallback;
         this.networkManager = networkManager;
@@ -2148,7 +2149,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected void shareSavedFile(File saveFile){
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() 
 		        && !isFriendDownload)
-		    collectionManager.getGnutellaCollection().add(saveFile, getXMLDocuments());
+		    gnutellaFileCollection.add(saveFile, getXMLDocuments());
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 

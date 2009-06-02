@@ -21,9 +21,9 @@ import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.util.EmptyResponder;
 
 /**
@@ -74,8 +74,8 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     
     @Inject protected Injector injector;
     
-    @Inject protected FileManager fileManager;
-    @Inject protected FileViewManager fileViewManager;
+    @Inject protected Library library;
+    @Inject @GnutellaFiles protected FileView gnutellaFileView;
     @Inject @GnutellaFiles FileCollection gnutellaFileCollection;
     protected FileDesc berkeleyFD;
     protected FileDesc susheelFD;

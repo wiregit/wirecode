@@ -19,7 +19,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -64,8 +63,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyCallback.class, LimeTestUtils.createModule(this));
         super.setUp(injector);
         
-        FileManager fm = injector.getInstance(FileManager.class);
-        FileManagerTestUtils.waitForLoad(fm, 500);
+        FileManagerTestUtils.waitForLoad(library, 500);
         LibrarySettings.ALLOW_PROGRAMS.setValue(true);
         assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3")).get(1, TimeUnit.SECONDS));
         assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta audio.mp3")).get(1, TimeUnit.SECONDS));

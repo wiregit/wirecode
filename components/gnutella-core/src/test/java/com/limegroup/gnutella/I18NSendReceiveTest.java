@@ -28,8 +28,8 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -77,7 +77,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
     @Inject private QueryRequestFactory queryRequestFactory;
     @Inject private LifecycleManager lifecycleManager;
     @Inject private ConnectionServices connectionServices;
-    @Inject private FileManager fileManager;
+    @Inject private Library library;
     @Inject private LimeXMLDocumentFactory limeXMLDocumentFactory;
     @Inject private SchemaReplyCollectionMapper schemaReplyCollectionMapper;
     @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
@@ -285,9 +285,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
      * add the metadata
      */
     private void addMetaData(String fname, String xmlstr) throws Exception {
-        FileManager fm = fileManager;
-        FileDesc fd = 
-            fm.getLibrary().getFileDesc(new File(_scratchDir, fname));
+        FileDesc fd = library.getFileDesc(new File(_scratchDir, fname));
         
         LimeXMLDocument newDoc = 
             limeXMLDocumentFactory.createLimeXMLDocument(buildXMLString(xmlstr));

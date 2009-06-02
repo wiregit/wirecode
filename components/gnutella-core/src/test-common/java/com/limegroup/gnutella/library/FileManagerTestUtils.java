@@ -144,8 +144,8 @@ public class FileManagerTestUtils {
      * continuing. Also can specify a timeout which will throw an exception if FileManager hasn't 
      * completed in a certain amount of time.
      */
-    public static List<FileDesc> waitForLoad(FileManager fileManager, int timeout) throws Exception {
-        return assertLoads(fileManager.getLibrary(), timeout, TimeUnit.MILLISECONDS);
+    public static List<FileDesc> waitForLoad(Library library, int timeout) throws Exception {
+        return assertLoads(library, timeout, TimeUnit.MILLISECONDS);
     }
     
     public static List<FileDesc> assertLoads(Library managedList) throws Exception {

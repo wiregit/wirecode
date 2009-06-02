@@ -37,10 +37,9 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -69,8 +68,8 @@ public class DaapManager {
     
     private static final Log LOG = LogFactory.getLog(DaapManager.class);
     private final ScheduledExecutorService backgroundExecutor;
-    private final Provider<FileManager> fileManager;
-    private final FileViewManager fileViewManager;
+    private final com.limegroup.gnutella.library.Library coreLibrary;
+    private final FileView gnutellaFileView;
     private final Provider<IPFilter> ipFilter;
     private final Provider<NetworkInstanceUtils> networkInstanceUtils;
     private final Provider<ActivityCallback> activityCallback;
@@ -100,17 +99,17 @@ public class DaapManager {
     
     @Inject
     public DaapManager( @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                        Provider<FileManager> fileManager,
                         Provider<IPFilter> ipFilter,
                         Provider<NetworkInstanceUtils> networkInstanceUtils,
                         Provider<ActivityCallback> activityCallback,
-                        FileViewManager fileViewManager) {
+                        @GnutellaFiles FileView gnutellaFileView, 
+                        com.limegroup.gnutella.library.Library coreLibrary) {
         this.backgroundExecutor = backgroundExecutor;
-        this.fileManager = fileManager;
+        this.coreLibrary = coreLibrary;
         this.ipFilter = ipFilter;
         this.networkInstanceUtils = networkInstanceUtils;
         this.activityCallback = activityCallback;
-        this.fileViewManager = fileViewManager;
+        this.gnutellaFileView = gnutellaFileView;
     }
     
     @Inject
@@ -133,13 +132,13 @@ public class DaapManager {
             }
 
             public void initialize() {
-                fileManager.get().getLibrary().addManagedListStatusListener(new EventListener<LibraryStatusEvent>() {
+                coreLibrary.addManagedListStatusListener(new EventListener<LibraryStatusEvent>() {
                     @Override
                     public void handleEvent(LibraryStatusEvent event) {
                         handleManagedListStatusEvent(event);
                     }
                 });
-                fileViewManager.getGnutellaFileView().addListener(new EventListener<FileViewChangeEvent>() {
+                gnutellaFileView.addListener(new EventListener<FileViewChangeEvent>() {
                     @Override
                     public void handleEvent(FileViewChangeEvent event) {
                         handleFileListEvent(event);
@@ -474,10 +473,9 @@ public class DaapManager {
         int size = masterPlaylist.getSongCount();        
         Transaction txn = library.beginTransaction();    
    
-        FileView sharedFileList = fileViewManager.getGnutellaFileView();
-        sharedFileList.getReadLock().lock();
+        gnutellaFileView.getReadLock().lock();
         try {
-            for(FileDesc fd : sharedFileList) {
+            for(FileDesc fd : gnutellaFileView) {
                 String name = fd.getFileName().toLowerCase(Locale.US);
                 boolean audio = isSupportedAudioFormat(name);
                 
@@ -528,7 +526,7 @@ public class DaapManager {
                 }
             }
         } finally {
-            sharedFileList.getReadLock().unlock();
+            gnutellaFileView.getReadLock().unlock();
         }
         
         // See 1)

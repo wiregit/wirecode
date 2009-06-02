@@ -29,10 +29,10 @@ import com.google.inject.Inject;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -49,8 +49,8 @@ public class BrowseTest extends LimeTestCase {
 
     protected String protocol;
 
-    @Inject private FileManager fileManager;
-    @Inject private FileViewManager fileViewManager;
+    @Inject private Library library;
+    @Inject @GnutellaFiles private FileView gnutellaFileView;
     @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
     @Inject private MessageFactory messageFactory;
     
@@ -76,7 +76,7 @@ public class BrowseTest extends LimeTestCase {
 
         LimeTestUtils.createInjectorAndStart(LimeTestUtils.createModule(this));
         
-        FileManagerTestUtils.waitForLoad(fileManager,2000);
+        FileManagerTestUtils.waitForLoad(library,2000);
         File shareDir = LimeTestUtils.getDirectoryWithLotsOfFiles();
         File[] testFiles = shareDir.listFiles(new FileFilter() {
             public boolean accept(File file) {
@@ -122,15 +122,15 @@ public class BrowseTest extends LimeTestCase {
                 }
             }
 
-            assertEquals(fileViewManager.getGnutellaFileView().size(), files.size());
-            fileViewManager.getGnutellaFileView().getReadLock().lock();
+            assertEquals(gnutellaFileView.size(), files.size());
+            gnutellaFileView.getReadLock().lock();
             try {
-                for(FileDesc result : fileViewManager.getGnutellaFileView()) {
+                for(FileDesc result : gnutellaFileView) {
                     boolean contained = files.remove(result.getFileName());
                     assertTrue("File is missing in browse response: " + result.getFileName(), contained);
                 }
             } finally {
-                fileViewManager.getGnutellaFileView().getReadLock().unlock();
+                gnutellaFileView.getReadLock().unlock();
             }
             assertTrue("Browse returned more results than shared: " + files, files.isEmpty());
         } finally {

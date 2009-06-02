@@ -90,11 +90,6 @@ class FileManagerImpl implements FileManager, Service {
     public void stop() {
         library.save();
         shutdown = true;
-    }    
-    
-    @Override
-    public Library getLibrary() {
-        return library;
     }
     
     private class Saver implements Runnable {

@@ -75,9 +75,9 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
@@ -111,7 +111,7 @@ public class PushUploadTest extends LimeTestCase {
     /** The file contents. */
     private final String alphabet = "abcdefghijklmnopqrstuvwxyz";
 
-    @Inject private FileManager fm;
+    @Inject private Library library;
 
     private BufferedReader in;
 
@@ -168,7 +168,7 @@ public class PushUploadTest extends LimeTestCase {
         }, LimeTestUtils.createModule(this));
 
         // start services
-        FileManagerTestUtils.waitForLoad(fm, 1000);
+        FileManagerTestUtils.waitForLoad(library, 1000);
         File testDir = TestUtils.getResourceFile(testDirName);
         FileDesc fd = gnutellaFileCollection.add(new File(testDir, fileName)).get();
         url = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());

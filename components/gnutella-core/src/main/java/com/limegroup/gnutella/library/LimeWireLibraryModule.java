@@ -65,11 +65,11 @@ public class LimeWireLibraryModule extends AbstractModule {
         return library.getLibraryData();
     }
     
-    @Provides @GnutellaFiles FileCollection gnetFileCollection(FileCollectionManager manager) {
+    @Provides @GnutellaFiles FileCollection gnetFileCollection(FileCollectionManagerImpl manager) {
         return manager.getGnutellaCollection();
     }
     
-    @Provides @GnutellaFiles FileView gnetFileView(FileViewManager manager) {
+    @Provides @GnutellaFiles FileView gnetFileView(FileViewManagerImpl manager) {
         return manager.getGnutellaFileView();
     }
     

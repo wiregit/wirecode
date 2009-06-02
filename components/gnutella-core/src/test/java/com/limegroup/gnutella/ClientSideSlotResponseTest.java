@@ -95,7 +95,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         assertNotNull(gnutellaFileCollection.add(appTorrentFile).get(1, TimeUnit.SECONDS));
         gnutellaFileCollection.remove(berkeleyFD);
         gnutellaFileCollection.remove(susheelFD);
-        assertEquals(fileViewManager.getGnutellaFileView().toString(), 5, fileViewManager.getGnutellaFileView().size());
+        assertEquals(gnutellaFileView.toString(), 5, gnutellaFileView.size());
         
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         uploadManagerStub = (UploadManagerStub) injector.getInstance(UploadManager.class);

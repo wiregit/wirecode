@@ -67,10 +67,10 @@ import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -105,8 +105,9 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
     
     @Inject private Injector injector;
     @Inject private TLSManager tlsManager;
-    @Inject private FileManager fileManager;
+    @Inject private Library library;
     @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
+    @Inject @GnutellaFiles private FileView gnutellaFileView;
 
     public QueryReplyTest(String name) {
 		super(name);
@@ -1194,14 +1195,13 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        FileViewManager fileManager = injector.getInstance(FileViewManager.class);
         SharedFilesKeywordIndex keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         injector.getInstance(ServiceRegistry.class).initialize();
         addFilesToLibrary();
         addAlternateLocationsToFiles();
         
         boolean checked = false;
-        for(FileDesc fd : fileManager.getGnutellaFileView()) {
+        for(FileDesc fd : gnutellaFileView) {
 			Response testResponse = responseFactory.createResponse(fd);
 
             String name = fd.getFileName();
@@ -1258,13 +1258,12 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        FileViewManager fileManager = injector.getInstance(FileViewManager.class);
         SharedFilesKeywordIndex keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         injector.getInstance(ServiceRegistry.class).initialize();
         addFilesToLibrary();
         addCreationTimeToFiles();
         boolean checked = false;
-        for(FileDesc fd : fileManager.getGnutellaFileView()) {
+        for(FileDesc fd : gnutellaFileView) {
 			long expectTime = (fd.getIndex() + 1) * 10013;
 			Response testResponse = responseFactory.createResponse(fd);
 			assertEquals(fd.toString(), expectTime, testResponse.getCreateTime());
@@ -1503,7 +1502,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         assertNotNull("no files to test against", testFiles);
         assertNotEquals("no files to test against", 0, testFiles.length);
 
-        FileManagerTestUtils.waitForLoad(fileManager, 5000);
+        FileManagerTestUtils.waitForLoad(library, 5000);
         for(File file : testFiles) {
             gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS);
         }
@@ -1514,8 +1513,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
     private void addAlternateLocationsToFiles() throws Exception {
         AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
         AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
-        FileViewManager fileManager = injector.getInstance(FileViewManager.class);
-        for(FileDesc fd : fileManager.getGnutellaFileView()) {
+        for(FileDesc fd : gnutellaFileView) {
             URN urn = fd.getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
                 altLocManager.add(alternateLocationFactory.create("1.2.3." + j, urn), null);
@@ -1525,8 +1523,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
     
     private void addCreationTimeToFiles() throws Exception {
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
-        FileViewManager fileManager = injector.getInstance(FileViewManager.class);
-        for(FileDesc fd : fileManager.getGnutellaFileView()) {
+        for(FileDesc fd : gnutellaFileView) {
             long time = (fd.getIndex() + 1) * 10013;
             creationTimeCache.addTime(fd.getSHA1Urn(), time);
             creationTimeCache.commitTime(fd.getSHA1Urn());

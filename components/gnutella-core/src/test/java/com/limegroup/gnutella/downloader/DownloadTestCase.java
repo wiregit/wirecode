@@ -42,7 +42,6 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
@@ -50,14 +49,16 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.library.FileCollection;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.IncompleteFileCollection;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -122,7 +123,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
     @Inject protected AltLocManager altLocManager;
 
-    @Inject protected FileManager fileManager;
+    @Inject protected Library library;
 
     @Inject protected SourceRankerFactory sourceRankerFactory;
 
@@ -136,6 +137,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
     
     @Inject protected RemoteFileDescFactory remoteFileDescFactory;
     @Inject protected DownloadStatsTracker statsTracker;
+    @Inject @GnutellaFiles protected FileView gnutellaFileView;
     @Inject @GnutellaFiles protected FileCollection gnutellaFileCollection;
     @Inject protected IncompleteFileCollection incompleteFileCollection;
     @Inject @Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService;

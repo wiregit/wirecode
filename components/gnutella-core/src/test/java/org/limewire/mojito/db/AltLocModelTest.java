@@ -1,8 +1,8 @@
 package org.limewire.mojito.db;
 
 import java.io.File;
-import java.util.concurrent.TimeUnit;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
@@ -17,9 +17,9 @@ import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.RareFileStrategy;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -27,8 +27,8 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 public class AltLocModelTest extends LimeTestCase {
     private FileDesc fileDesc;
     private Injector injector;
-    @Inject @GnutellaFiles FileCollection gnutellaCollection;
-    @Inject FileManager fileManager;
+    @Inject @GnutellaFiles private FileCollection gnutellaCollection;
+    @Inject private Library library;
 
     public AltLocModelTest(String name) {
         super(name);
@@ -44,7 +44,7 @@ public class AltLocModelTest extends LimeTestCase {
             }
         }, LimeTestUtils.createModule(this));
         
-        FileManagerTestUtils.waitForLoad(fileManager, 5000);
+        FileManagerTestUtils.waitForLoad(library, 5000);
         
         File testMp3 = TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3");
         fileDesc = gnutellaCollection.add(testMp3).get(5, TimeUnit.SECONDS);

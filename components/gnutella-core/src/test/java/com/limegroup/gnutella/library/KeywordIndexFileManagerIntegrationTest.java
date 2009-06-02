@@ -131,7 +131,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         assertEquals(0, responses.length);
 
         // remove file
-        fman.getLibrary().remove(f1);
+        library.remove(f1);
 
         // no more matches
         responses = keywordIndex.query(queryRequestFactory.createQuery("Sammy B"));
@@ -241,7 +241,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         assertTrue(responsesContain(algebraXml, nine, eightFourSixXml));
 
         // remove a file for which "eig" matches in the metadata
-        fman.getLibrary().remove(algebraFile);
+        library.remove(algebraFile);
 
         // 9. Perform same query as before, and while the other files should still match,
         //    the removed file should no longer match

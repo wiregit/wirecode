@@ -97,7 +97,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         drainAll();
 
         // make sure leaf is sharing
-        assertEquals(2, fileViewManager.getGnutellaFileView().size());
+        assertEquals(2, gnutellaFileView.size());
 
         // send a query that should be answered
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -119,7 +119,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
     public void testHTTPRequest() throws Exception {
         FilterSettings.MAX_RESPONSES_PER_REPLY.setValue(10);
         
-        FileManagerTestUtils.waitForLoad(fileManager,2000);
+        FileManagerTestUtils.waitForLoad(library, 2000);
         // make sure more than FilterSettings.MAX_RESPONSES_PER_REPLY files
         // are shared
         for (int i = 0; i < FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() * 2; i++) {
@@ -129,7 +129,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
             assertNotNull(gnutellaFileCollection.add(f).get(1, TimeUnit.SECONDS));
         }
 
-        assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fileViewManager.getGnutellaFileView().size());
+        assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, gnutellaFileView.size());
         
         String result = null;
 

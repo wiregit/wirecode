@@ -6,9 +6,9 @@ import org.apache.http.protocol.HttpContext;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileView;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.IncompleteFiles;
 
 /**
  * Returns the file lists for public Gnutella uploads.
@@ -16,19 +16,21 @@ import com.limegroup.gnutella.library.FileViewManager;
 @Singleton
 public class GnutellaUploadFileViewProvider implements HttpRequestFileViewProvider {
 
-    private final FileViewManager fileViewManager;
-
+    private final FileView gnutellaFileView;
+    private final FileView incompleteFileView;
+    
     @Inject
-    public GnutellaUploadFileViewProvider(FileViewManager fileManager) {
-        this.fileViewManager = fileManager;
+    public GnutellaUploadFileViewProvider(@GnutellaFiles FileView gnutellaFileView,
+            @IncompleteFiles FileView incompleteFileView) {
+        this.gnutellaFileView = gnutellaFileView;
+        this.incompleteFileView = incompleteFileView;
     }
 
     /**
-     * @return {@link FileManager#getGnutellaFileView()} and {@link FileManager#getIncompleteFileCollection()}
-     * to enable sharing of incomplete files
+     * @return a combination of FileViews of files visible to gnutella & incomplete files.
      */
     @Override
     public Iterable<FileView> getFileViews(String userID, HttpContext httpContext) {
-        return Arrays.asList(fileViewManager.getGnutellaFileView(), fileViewManager.getIncompleteFileView());
+        return Arrays.asList(gnutellaFileView, incompleteFileView);
     }
 }

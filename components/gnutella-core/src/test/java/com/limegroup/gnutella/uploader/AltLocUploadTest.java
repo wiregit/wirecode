@@ -80,7 +80,6 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
@@ -128,17 +127,17 @@ public class AltLocUploadTest extends LimeTestCase {
 
     private TestUploadManager uploadManager;
 
-    private AltLocManager altLocManager;
+    @Inject private AltLocManager altLocManager;
 
     private URN hashURN;
 
-    private AlternateLocationFactory alternateLocationFactory;
+    @Inject private AlternateLocationFactory alternateLocationFactory;
 
-    private Injector injector;
+    @Inject private Injector injector;
 
-    private LifecycleManager lifecycleManager;
+    @Inject private LifecycleManager lifecycleManager;
 
-    @Inject private FileManager fileManager;
+    @Inject private Library library;
     @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
     
     public AltLocUploadTest(String name) {
@@ -168,13 +167,11 @@ public class AltLocUploadTest extends LimeTestCase {
             }
         }, LimeTestUtils.createModule(this));
 
-
-        lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
         uploadManager = (TestUploadManager) injector.getInstance(UploadManager.class);
         
        
-        FileManagerTestUtils.waitForLoad(fileManager, 2000);
+        FileManagerTestUtils.waitForLoad(library, 2000);
         File testDir = TestUtils.getResourceFile(testDirName);
         assertTrue("test directory could not be found", testDir.isDirectory());
         File testFile = new File(testDir, fileName);
@@ -182,10 +179,6 @@ public class AltLocUploadTest extends LimeTestCase {
         fd = f1.get(1, TimeUnit.SECONDS);
         assertNotNull(fd);
         
-        altLocManager = injector.getInstance(AltLocManager.class);
-
-        alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
-
         client = new DefaultHttpClient();
     }
 

@@ -58,8 +58,7 @@ class FileCollectionManagerImpl implements FileCollectionManager {
         }
     }    
 
-    @Override
-    public FileCollection getGnutellaCollection() {
+    FileCollection getGnutellaCollection() {
         return defaultSharedCollection;
     }
 
@@ -102,11 +101,6 @@ class FileCollectionManagerImpl implements FileCollectionManager {
         SharedFileCollectionImpl collection = createNewCollectionImpl(name);
         sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));
         return collection;
-    }
-
-    @Override
-    public IncompleteFileCollection getIncompleteFileCollection() {
-        return incompleteCollection;
     }
     
     @Override

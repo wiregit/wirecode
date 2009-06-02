@@ -22,7 +22,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.FileCollection;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
@@ -54,7 +55,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
     @Inject
     ResumeDownloaderImpl(SaveLocationManager saveLocationManager,
             DownloadManager downloadManager,
-            FileCollectionManager fileManager,
+            @GnutellaFiles FileCollection gnutellaFileCollection,
             IncompleteFileManager incompleteFileManager,
             DownloadCallback downloadCallback,
             NetworkManager networkManager,
@@ -81,7 +82,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
             DangerousFileChecker dangerousFileChecker,
             SpamManager spamManager,
             Library library) {
-        super(saveLocationManager, downloadManager, fileManager,
+        super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory,

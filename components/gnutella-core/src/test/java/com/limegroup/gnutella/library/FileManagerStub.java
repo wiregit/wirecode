@@ -19,18 +19,15 @@ public class FileManagerStub implements FileManager, FileCollectionManager, File
         managedStub = new LibraryStub();
     }
     
-    @Override
-    public GnutellaFileCollectionStub getGnutellaCollection() {
+    GnutellaFileCollectionStub getGnutellaCollection() {
         return gnutellaStub;
     }
     
-    @Override
-    public IncompleteFileCollectionStub getIncompleteFileCollection() {
+    IncompleteFileCollectionStub getIncompleteFileCollection() {
         return incompleteStub;
     }
     
-    @Override
-    public LibraryStub getLibrary() {
+    LibraryStub getLibrary() {
         return managedStub;
     }   
     
@@ -63,13 +60,11 @@ public class FileManagerStub implements FileManager, FileCollectionManager, File
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public FileView getGnutellaFileView() {
+    FileView getGnutellaFileView() {
         return gnutellaStub;
     }
 
-    @Override
-    public FileView getIncompleteFileView() {
+    FileView getIncompleteFileView() {
         return incompleteStub;
     }
 

@@ -38,7 +38,7 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileCollection;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -74,7 +74,7 @@ public class LeafRoutingTest extends LimeTestCase {
     @Inject private BlockingConnectionFactory connectionFactory;
     @Inject private PingReplyFactory pingReplyFactory;
     @Inject private SearchServices searchServices;
-    @Inject private FileViewManager fileViewManager;
+    @Inject @GnutellaFiles private FileView gnutellaFileView;
     @Inject private QueryRequestFactory queryRequestFactory;
     @Inject private SpamServices spamServices;
     @Inject private UrnCache urnCache;
@@ -352,7 +352,7 @@ public class LeafRoutingTest extends LimeTestCase {
         BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(fileViewManager.getGnutellaFileView().size() == 2);
+        assertTrue(gnutellaFileView.size() == 2);
 
         // send a query that should hit
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -388,7 +388,7 @@ public class LeafRoutingTest extends LimeTestCase {
         BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertEquals(2, fileViewManager.getGnutellaFileView().size());
+        assertEquals(2, gnutellaFileView.size());
 
         // get the URNS for the files
         File berkeley = 

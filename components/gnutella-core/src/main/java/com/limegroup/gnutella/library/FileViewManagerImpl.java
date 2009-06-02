@@ -47,7 +47,6 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 class FileViewManagerImpl implements FileViewManager {
     
     private final LibraryImpl library;
-    private final IncompleteFileCollectionImpl incompleteView;
     
     /** Lock held to mutate any structure in this class or to mutate a MultiFileView. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -67,9 +66,8 @@ class FileViewManagerImpl implements FileViewManager {
         new SourcedEventMulticasterImpl<FileViewChangeEvent, FileView>();
 
     @Inject
-    public FileViewManagerImpl(LibraryImpl library, IncompleteFileCollectionImpl incompleteCollection) {
+    public FileViewManagerImpl(LibraryImpl library) {
         this.library = library;
-        this.incompleteView = incompleteCollection;
     }
     
     @Inject void register(ListenerSupport<FileViewChangeEvent> viewListeners,
@@ -122,13 +120,7 @@ class FileViewManagerImpl implements FileViewManager {
         });
     }
     
-    @Override
-    public FileView getIncompleteFileView() {
-        return incompleteView;
-    }
-    
-    @Override
-    public FileView getGnutellaFileView() {
+    FileView getGnutellaFileView() {
         return getFileViewForId(Friend.P2P_FRIEND_ID);
     }
     

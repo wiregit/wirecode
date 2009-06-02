@@ -37,8 +37,8 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -70,7 +70,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
     private final HTTPUploadSessionManager sessionManager;
 
-    private final FileManager fileManager;
+    private final Library library;
 
     private final HTTPHeaderUtils httpHeaderUtils;
 
@@ -94,7 +94,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
     private final HttpRequestFileViewProvider fileListProvider;
 
-    FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager,
+    FileRequestHandler(HTTPUploadSessionManager sessionManager, Library library,
             HTTPHeaderUtils httpHeaderUtils, HttpRequestHandlerFactory httpRequestHandlerFactory,
             Provider<CreationTimeCache> creationTimeCache,
             FileResponseEntityFactory fileResponseEntityFactory, AltLocManager altLocManager,
@@ -104,7 +104,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
             HashTreeWriteHandlerFactory tigerWriteHandlerFactory, 
             HttpRequestFileViewProvider fileListProvider) {
         this.sessionManager = sessionManager;
-        this.fileManager = fileManager;
+        this.library = library;
         this.httpHeaderUtils = httpHeaderUtils;
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.creationTimeCache = creationTimeCache;
@@ -156,7 +156,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
     }
 
     /**
-     * Looks up file in {@link FileManager} and processes request headers.
+     * Looks up file and processes request headers.
      */
     private HTTPUploader findFileAndProcessHeaders(HttpRequest request, HttpResponse response,
             HttpContext context, FileRequest fileRequest) throws IOException, HttpException {
@@ -465,7 +465,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
-                fileManager.getLibrary().fileChanged(file, fd.getLimeXMLDocuments());
+                library.fileChanged(file, fd.getLimeXMLDocuments());
                 return false;
             }
         }

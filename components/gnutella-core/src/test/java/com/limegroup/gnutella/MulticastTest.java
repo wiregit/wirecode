@@ -27,10 +27,10 @@ import com.google.inject.Stage;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.library.FileCollection;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
-import com.limegroup.gnutella.library.FileViewManager;
+import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -41,8 +41,8 @@ public class MulticastTest extends LimeTestCase {
 
     private  final int DELAY = 1000;
         
-    @Inject private  FileManager fileManager;
-    @Inject private FileViewManager fileViewManager;
+    @Inject private Library library;
+    @Inject @GnutellaFiles private FileView gnutellaFileView;
     
     @Inject private  MulticastHandler M_HANDLER;
     
@@ -113,7 +113,7 @@ public class MulticastTest extends LimeTestCase {
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
 
-        LimeTestUtils.createInjector(Stage.PRODUCTION);
+        LimeTestUtils.createInjector(Stage.PRODUCTION, LimeTestUtils.createModule(this));
         messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
         
         lifeCycleManager.start();
@@ -129,7 +129,7 @@ public class MulticastTest extends LimeTestCase {
         messageRouter.addUDPMessageHandler(QueryReply.class, U_HANDLER);
         messageRouter.addUDPMessageHandler(PushRequest.class, U_HANDLER);
         
-        FileManagerTestUtils.waitForLoad(fileManager,3000);
+        FileManagerTestUtils.waitForLoad(library,3000);
         
         File file = TestUtils.getResourceFile(FILE_NAME);
         assertNotNull(gnutellaFileCollection.add(file).get());        
@@ -417,17 +417,17 @@ public class MulticastTest extends LimeTestCase {
             new File(_savedDir, "metadata.mp3").exists());
 
         // Get rid of this file, so the -Dtimes=X option works properly... =)
-        assertEquals("unexpected number of shared files", 2, fileViewManager.getGnutellaFileView().size());
+        assertEquals("unexpected number of shared files", 2, gnutellaFileView.size());
 
         File temp = new File(_savedDir, "metadata.mp3");
         if (temp.exists()) {
-            fileManager.getLibrary().remove(temp);
+            library.remove(temp);
             temp.delete();
         }
         sleep(2 * DELAY);
         assertFalse("file should have been deleted", temp.exists());
 
-        assertEquals("unexpected number of shared files", 1, fileViewManager.getGnutellaFileView().size());
+        assertEquals("unexpected number of shared files", 1, gnutellaFileView.size());
 	}
     
     private static void wipeAddress(QueryReply qr) throws Exception {

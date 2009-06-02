@@ -26,15 +26,14 @@ import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender.ScheduledLibraryRefreshSender;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 
 import com.limegroup.gnutella.MockFriend;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
 
@@ -47,9 +46,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     @SuppressWarnings("unchecked")
     public void testRegister() {
         Mockery context = new Mockery();
-
-        final FileManager fileManager = context.mock(FileManager.class);
-        final Library managedFileList = context.mock(Library.class);
+        final Library library = context.mock(Library.class);
         
         final ListenerSupport<FriendShareListEvent> listenerSupport
             = context.mock(ListenerSupport.class);
@@ -59,15 +56,11 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 exactly(1).of(listenerSupport).addListener(with(same(friendShareListRefresher)));
-                
-                allowing(fileManager).getLibrary();
-                will(returnValue(managedFileList));
-                
-                exactly(1).of(managedFileList).addManagedListStatusListener(with(any(FinishedLoadingListener.class)));
+                exactly(1).of(library).addManagedListStatusListener(with(any(FinishedLoadingListener.class)));
                 
             }});
         
-        friendShareListRefresher.register(fileManager);
+        friendShareListRefresher.register(library);
         friendShareListRefresher.register(listenerSupport);
         
         context.assertIsSatisfied();

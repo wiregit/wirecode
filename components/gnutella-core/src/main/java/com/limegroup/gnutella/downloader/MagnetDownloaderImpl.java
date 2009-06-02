@@ -33,7 +33,8 @@ import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMementoImpl;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.FileCollection;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
@@ -91,7 +92,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	@Inject
 	MagnetDownloaderImpl(SaveLocationManager saveLocationManager,
 	        DownloadManager downloadManager,
-	        FileCollectionManager fileManager,
+	        @GnutellaFiles FileCollection gnutellaFileCollection,
 	        IncompleteFileManager incompleteFileManager,
 	        DownloadCallback downloadCallback,
 	        NetworkManager networkManager,
@@ -117,7 +118,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	        @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
 	        DangerousFileChecker dangerousFileChecker,
             SpamManager spamManager, Library library) {
-	    super(saveLocationManager, downloadManager, fileManager,
+	    super(saveLocationManager, downloadManager, gnutellaFileCollection,
 	            incompleteFileManager, downloadCallback, networkManager,
 	            alternateLocationFactory, requeryManagerFactory,
 	            queryRequestFactory, onDemandUnicaster, downloadWorkerFactory,

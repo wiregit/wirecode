@@ -27,7 +27,8 @@ import com.limegroup.gnutella.downloader.serial.InNetworkDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.InNetworkDownloadMementoImpl;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.FileCollection;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.UrnCache;
@@ -53,7 +54,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
     @Inject
     InNetworkDownloaderImpl(SaveLocationManager saveLocationManager,
             DownloadManager downloadManager,
-            FileCollectionManager fileManager,
+            @GnutellaFiles FileCollection gnutellaFileCollection,
             IncompleteFileManager incompleteFileManager,
             DownloadCallback downloadCallback,
             NetworkManager networkManager,
@@ -80,7 +81,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             DangerousFileChecker dangerousFileChecker,
             SpamManager spamManager,
             Library library) throws SaveLocationException {
-        super(saveLocationManager, downloadManager, fileManager,
+        super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory,
