@@ -22,7 +22,7 @@ class DownloadCountPanel extends JXLabel {
         super("0");
         
         setName("DownloadCountPanel");
-        setBorder(BorderFactory.createEmptyBorder(0,6,0,0));
+        setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         setIconTextGap(2);
         
         final EventList<DownloadItem> unfinishedDownloads = GlazedListsFactory.filterList(downloadListManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.DONE, DownloadState.ERROR));

@@ -34,6 +34,7 @@ import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.statusbar.SharedFileCountPopupPanel;
 import org.limewire.ui.swing.statusbar.StatusPanel;
 import org.limewire.ui.swing.update.UpdatePanel;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -57,6 +58,7 @@ public class LimeWireSwingUI extends JPanel {
             SearchHandler searchHandler, ChatFramePanel chatFrame,
             AudioPlayer player,
             ShapeDialog shapeDialog, ProNagController proNagController, 
+            SharedFileCountPopupPanel connectionStatusPopup,
             MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider) {
     	GuiUtils.assignResources(this);
     	        
@@ -103,8 +105,11 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new MainPanelResizer(centerPanel));
         layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(chatFrame, JLayeredPane.PALETTE_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
+        layeredPane.addComponentListener(new PanelResizer(chatFrame));
+        layeredPane.add(connectionStatusPopup, JLayeredPane.PALETTE_LAYER);
+        layeredPane.addComponentListener(new PanelResizer(connectionStatusPopup));
         layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
+        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
         add(layeredPane, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
         EventAnnotationProcessor.subscribe(this);
@@ -121,8 +126,8 @@ public class LimeWireSwingUI extends JPanel {
 	void loadProNag() {
 	    proNagController.allowProNag(layeredPane);
 	}
-    
-    public void goHome() {
+	
+	public void goHome() {
         topPanel.goHome();
     }
 
