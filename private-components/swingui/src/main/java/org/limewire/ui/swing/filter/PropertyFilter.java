@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.filter;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -100,7 +101,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         propertyLabel.setForeground(resources.getHeaderColor());
         propertyLabel.setText(getPropertyText());
         
-        list.setCellRenderer(new PropertyCellRenderer(BorderFactory.createEmptyBorder(1, 7, 0, 7)));
+        list.setCellRenderer(new PropertyCellRenderer(resources.getBackground(),
+                BorderFactory.createEmptyBorder(1, 7, 0, 7)));
         list.setFont(resources.getRowFont());
         list.setForeground(resources.getRowColor());
         list.setOpaque(false);
@@ -395,7 +397,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 }
             });
             
-            moreList.setCellRenderer(new PropertyCellRenderer(BorderFactory.createEmptyBorder(1, 4, 0, 1)));
+            moreList.setCellRenderer(new PropertyCellRenderer(getBackground(), 
+                    BorderFactory.createEmptyBorder(1, 4, 0, 1)));
             moreList.setFont(resources.getRowFont());
             moreList.setForeground(resources.getRowColor());
             moreList.setOpaque(false);
@@ -546,9 +549,11 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * Cell renderer for property values.
      */
     private class PropertyCellRenderer extends DefaultListCellRenderer {
+        private final Color background;
         private final Border border;
         
-        public PropertyCellRenderer(Border border) {
+        public PropertyCellRenderer(Color background, Border border) {
+            this.background = background;
             this.border = border;
         }
         
@@ -569,8 +574,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 ((JLabel) renderer).setText(buf.toString());
                 
                 // Set appearance.
+                ((JLabel) renderer).setBackground(background);
                 ((JLabel) renderer).setBorder(border);
-                ((JLabel) renderer).setOpaque(false);
             }
             
             return renderer;

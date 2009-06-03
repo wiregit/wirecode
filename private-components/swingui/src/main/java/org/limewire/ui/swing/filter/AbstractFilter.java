@@ -143,6 +143,8 @@ abstract class AbstractFilter<E extends FilterableItem> implements Filter<E> {
     public static class FilterResources {
         @Resource(key="AdvancedFilter.filterWidth")
         private int filterWidth;
+        @Resource(key="AdvancedFilter.background")
+        private Color background;
         @Resource(key="AdvancedFilter.headerColor")
         private Color headerColor;
         @Resource(key="AdvancedFilter.headerFont")
@@ -178,6 +180,13 @@ abstract class AbstractFilter<E extends FilterableItem> implements Filter<E> {
          */
         public int getFilterWidth() {
             return filterWidth;
+        }
+        
+        /**
+         * Returns the background color for the filter.
+         */
+        public Color getBackground() {
+            return background;
         }
         
         /**

@@ -57,10 +57,10 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     private static final int RIGHT_INSET = 6;
 
     @Resource(key="AdvancedFilter.filterWidth") private int filterWidth;
-    @Resource private Color backgroundColor;
+    @Resource(key="AdvancedFilter.background") private Color background;
     @Resource private Color borderColor;
-    @Resource private Color dividerBackgroundColor;
-    @Resource private Color dividerForegroundColor;
+    @Resource private Color dividerBackground;
+    @Resource private Color dividerForeground;
     @Resource private Font moreTextFont;
     @Resource private Font resetTextFont;
     
@@ -126,7 +126,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         GuiUtils.assignResources(this);
         
-        setBackground(backgroundColor);
+        setBackground(background);
         setBorder(new SideLineBorder(borderColor, Side.RIGHT));
         setLayout(new MigLayout("insets 0 0 0 0, gap 0!, fill, hidemode 3"));
         
@@ -137,12 +137,12 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         filterDisplayPanel = new FilterDisplayPanel();
         
-        filterPanel.setBackground(backgroundColor);
+        filterPanel.setBackground(background);
         filterPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0!, hidemode 3", 
                 "[grow]", ""));
         
-        upperDividerLine = Line.createHorizontalLine(dividerForegroundColor);
-        lowerDividerLine = Line.createHorizontalLine(dividerBackgroundColor);
+        upperDividerLine = Line.createHorizontalLine(dividerForeground);
+        lowerDividerLine = Line.createHorizontalLine(dividerBackground);
         
         filterScrollPane.setBorder(BorderFactory.createEmptyBorder());
         filterScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.filter;
 
+import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.BorderFactory;
@@ -198,6 +199,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * Cell renderer for source values.
      */
     private class SourceCellRenderer extends DefaultListCellRenderer {
+        private final Color background = getResources().getBackground();
         private final Border border = BorderFactory.createEmptyBorder(1, 7, 0, 7);
         
         @Override
@@ -209,8 +211,8 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             
             if (renderer instanceof JLabel) {
                 // Set appearance.
+                ((JLabel) renderer).setBackground(background);
                 ((JLabel) renderer).setBorder(border);
-                ((JLabel) renderer).setOpaque(false);
             }
 
             return renderer;

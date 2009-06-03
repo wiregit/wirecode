@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.filter;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.util.Comparator;
 
@@ -238,6 +239,7 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
      * Cell renderer for category values.
      */
     private class CategoryCellRenderer extends DefaultListCellRenderer {
+        private final Color background = getResources().getBackground();
         private final Border border = BorderFactory.createEmptyBorder(1, 7, 0, 7);
         
         @Override
@@ -257,8 +259,8 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 ((JLabel) renderer).setText(buf.toString());
 
                 // Set appearance.
+                ((JLabel) renderer).setBackground(background);
                 ((JLabel) renderer).setBorder(border);
-                ((JLabel) renderer).setOpaque(false);
             }
 
             return renderer;
