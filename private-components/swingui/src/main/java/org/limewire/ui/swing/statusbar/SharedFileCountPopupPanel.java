@@ -72,6 +72,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                     resize();
                 }
                 setVisible(!isVisible());
+                sharedFileCountPanel.repaint();
             }
         });
         
