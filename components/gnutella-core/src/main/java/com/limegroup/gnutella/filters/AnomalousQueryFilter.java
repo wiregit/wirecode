@@ -12,12 +12,8 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
- * A filter that blocks anomalous queries that meet the following criteria:
- * 1) Any four-byte slice of the GUID matches a large fraction of recently
- *    seen queries
- * 2) The query does not ask for OOB replies, so the first four bytes of
- *    the GUID are not being used to encode the OOB reply address
- * 3) There are no flags set in the minimum speed field
+ * A filter that blocks anomalous queries where any four-byte slice of the GUID
+ * matches a large fraction of recently seen queries.
  */
 @Singleton
 public class AnomalousQueryFilter implements SpamFilter {
@@ -31,7 +27,7 @@ public class AnomalousQueryFilter implements SpamFilter {
 
     private int[] sliceTotals = new int[4];
     // The keys of this map contain two integer values packed into a long:
-    // the position of the slice within the GUID (0 to 3) and value of the slice
+    // the position of the slice within the GUID (0 to 3) and the slice's value
     private final LinkedHashMap<Long, Integer> sliceCounts =
         new LinkedHashMap<Long, Integer>(GUIDS_TO_COUNT * 4, 0.75f, true) {
         @Override
@@ -65,10 +61,9 @@ public class AnomalousQueryFilter implements SpamFilter {
                 sliceTotals[i]++;
                 sliceCounts.put(key, count);
                 // Drop the query if we've seen enough queries to make a
-                // judgement and it matches all the criteria 
+                // judgement and it matches a large fraction of recent queries 
                 if(sliceTotals[i] >= GUIDS_TO_COUNT &&
-                        count > sliceTotals[i] * MAX_FRACTION_PER_SLICE &&
-                        !q.desiresOutOfBandReplies() && q.getMinSpeed() == 0) {
+                        count > sliceTotals[i] * MAX_FRACTION_PER_SLICE) {
                     // Count the other slices before returning
                     shouldDrop = true;
                 }
