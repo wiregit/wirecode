@@ -20,6 +20,7 @@ public class SearchResultAdapterTest extends TestCase {
     private Provider<PropertiableHeadings> provider;
     private Mockery context;
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void setUp() {
         result = new MockSearchResult();
