@@ -63,7 +63,7 @@ public class FilterSettings extends LimeProps {
         FACTORY.createBooleanSetting("FILTER_DUPLICATES", true);
     
     /**
-	 * Sets whether or not greedy queries a filtered.
+	 * Sets whether or not greedy queries are filtered.
 	 */
     public static final BooleanSetting FILTER_GREEDY_QUERIES =
         FACTORY.createBooleanSetting("FILTER_GREEDY_QUERIES", true);
@@ -76,6 +76,12 @@ public class FilterSettings extends LimeProps {
                 true, "FilterSettings.filterAnomalousQueries");
     
     /**
+     * Local setting to override FILTER_ANOMALOUS_QUERIES for testing.
+     */
+    public static final BooleanSetting REALLY_FILTER_ANOMALOUS_QUERIES =
+        FACTORY.createBooleanSetting("REALLY_FILTER_ANOMALOUS_QUERIES", true);
+    
+    /**
 	 * An array of ip addresses that the user has banned.
 	 */    
     @InspectablePrimitive("blacklisted hosts")
@@ -83,7 +89,7 @@ public class FilterSettings extends LimeProps {
         FACTORY.createStringArraySetting("BLACK_LISTED_IP_ADDRESSES", new String[0]);
     
     /**
-	 * An array of ip addresses that the user has allowed. (Array of String!)
+	 * An array of ip addresses that the user has allowed.
 	 */  
     public static final StringArraySetting WHITE_LISTED_IP_ADDRESSES =
         FACTORY.createStringArraySetting("WHITE_LISTED_IP_ADDRESSES", new String[0]);
