@@ -108,7 +108,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
     private final EventBroadcaster<FriendConnectionEvent> connectionBroadcaster;
     private final Map<String, FacebookFriend> friends = Collections.synchronizedMap(new TreeMap<String, FacebookFriend>(String.CASE_INSENSITIVE_ORDER));
-    private volatile FacebookJsonRestClient facebookClient;
+    private FacebookJsonRestClient facebookClient;
     private final CookieStore cookieStore = new BasicCookieStore();
     private AtomicReference<String> postFormID = new AtomicReference<String>();
 
@@ -150,7 +150,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final FacebookFriendFactory friendFactory;
 
     private final ConnectBackRequestHandler connectBackRequestHandler;
-    private volatile ChatListener chatListener;
+    private ChatListener chatListener;
     private ScheduledFuture presenceListenerFuture;
     private volatile String logoutURL;
     private final ChatManager chatManager;
@@ -216,25 +216,27 @@ public class FacebookFriendConnection implements FriendConnection {
     }
     
     void logoutImpl() {
-        LOG.debug("logging out from facebook...");
-        loggedIn.set(false);
-        try {
-            sendOfflinePresences();
-            logoutFromFacebook();
-            expireSession();
-            if(chatListener != null) {
-                chatListener.setDone();
+        synchronized (this) {
+            LOG.debug("logging out from facebook...");
+            loggedIn.set(false);
+            try {
+                sendOfflinePresences();
+                logoutFromFacebook();
+                expireSession();
+                if(chatListener != null) {
+                    chatListener.setDone();
+                }
+                if(presenceListenerFuture != null) {
+                    presenceListenerFuture.cancel(false);
+                }
+                LOG.debug("logged out from facebook.");
+            } catch (IOException e) {
+                LOG.debug("logout failed", e);
+            } catch (FacebookException e) {
+                LOG.debug("logout failed", e);
             }
-            if(presenceListenerFuture != null) {
-                presenceListenerFuture.cancel(false);
-            }
-            LOG.debug("logged out from facebook.");
-        } catch (IOException e) {
-            LOG.debug("logout failed", e);
-        } catch (FacebookException e) {
-            LOG.debug("logout failed", e);
+            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));  
         }
-        connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));    
     }
 
     private void sendOfflinePresences() {
@@ -249,8 +251,10 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     private void expireSession() throws FacebookException {
-        if(facebookClient != null) {
-            facebookClient.auth_expireSession();
+        synchronized (this) {
+            if(facebookClient != null) {
+                facebookClient.auth_expireSession();
+            }
         }
     }
 
@@ -278,29 +282,30 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     synchronized void loginImpl() throws FriendException {
-      try {
-            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));
-            loggingIn.set(true);
-            loginToFacebook();
-            requestSession();
-            fetchAllFriends();
-            readMetadataFromHomePage();
-            chatListener = chatListenerFactory.createChatListener(this);
-            ThreadExecutor.startThread(chatListener, "chat-listener-thread");
-            setVisible();
-            PresenceListener presenceListener = presenceListenerFactory.createPresenceListener(this);
-            presenceListenerFuture = executorService.scheduleAtFixedRate(presenceListener, 0, 90, TimeUnit.SECONDS);
-            loggedIn.set(true);
-            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
-        } catch (IOException e) {
-            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
-            throw new FriendException(e);
-        } catch (JSONException e) {
-            connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
-            throw new FriendException(e);
-          // todo: LWC-3344: catch runtime exceptions and broadcast connect_failed.  loginPanel should listen to login completion, check error
-        } finally {
-            loggingIn.set(false);
+        synchronized (this) {
+            try {
+                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));
+                loggingIn.set(true);
+                loginToFacebook();
+                requestSession();
+                fetchAllFriends();
+                readMetadataFromHomePage();
+                chatListener = chatListenerFactory.createChatListener(this);
+                ThreadExecutor.startThread(chatListener, "chat-listener-thread");
+                setVisible();
+                PresenceListener presenceListener = presenceListenerFactory.createPresenceListener(this);
+                presenceListenerFuture = executorService.scheduleAtFixedRate(presenceListener, 0, 90, TimeUnit.SECONDS);
+                loggedIn.set(true);
+                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
+            } catch (IOException e) {
+                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
+                throw new FriendException(e);
+            } catch (JSONException e) {
+                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
+                throw new FriendException(e);
+            } finally {
+                loggingIn.set(false);
+            }
         }
     }
 
@@ -331,12 +336,12 @@ public class FacebookFriendConnection implements FriendConnection {
      */
     private void fetchAllFriends() {
         try {
-            JSONArray friends = getClient().friends_get();
+            JSONArray friends = facebookClient.friends_get();
             List<Long> friendIds = new ArrayList<Long>(friends.length());
             for (int i = 0; i < friends.length(); i++) {
                 friendIds.add(friends.getLong(i));
             }
-            JSONArray users = (JSONArray) getClient().users_getInfo(friendIds, new HashSet<CharSequence>(Arrays.asList("uid", "first_name", "name", "status")));
+            JSONArray users = (JSONArray) facebookClient.users_getInfo(friendIds, new HashSet<CharSequence>(Arrays.asList("uid", "first_name", "name", "status")));
             Set<String> limeWireFriends = fetchLimeWireFriends();
             LOG.debugf("all friends: {0}", users);
             for (int i = 0; i < users.length(); i++) {
@@ -362,7 +367,7 @@ public class FacebookFriendConnection implements FriendConnection {
         JSONArray limeWireFriendIds;
         try {
             Set<String> limeWireIds = new HashSet<String>();
-            Object friends = getClient().friends_getAppUsers();
+            Object friends = facebookClient.friends_getAppUsers();
             if(friends instanceof JSONArray) { // is JSONObject when user has no friends with LW installed
                 limeWireFriendIds = (JSONArray)friends;
                 LOG.debugf("limewire friends: {0}", limeWireFriendIds);
@@ -664,12 +669,14 @@ public class FacebookFriendConnection implements FriendConnection {
         final JSONObject message = new JSONObject(messageMap);
         executorService.submit(new Runnable() {
             public void run() {
-                try {
-                    LOG.debugf("live message {0} to {1} : {2}", type, userId, message);
-                    facebookClient.liveMessage_send(userId, type, message);
-                }
-                catch (FacebookException e) {
-                    throw new RuntimeException(e);
+                synchronized (this) {
+                    try {
+                        LOG.debugf("live message {0} to {1} : {2}", type, userId, message);
+                        facebookClient.liveMessage_send(userId, type, message);
+                    }
+                    catch (FacebookException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
@@ -708,10 +715,6 @@ public class FacebookFriendConnection implements FriendConnection {
         } catch (IOException e) {
             throw new FriendException(e);
         }
-    }
-
-    public FacebookJsonRestClient getClient() {
-        return facebookClient;
     }
     
     public Network getNetwork() {

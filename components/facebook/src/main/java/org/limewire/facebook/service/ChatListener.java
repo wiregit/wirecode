@@ -51,30 +51,27 @@ public class ChatListener implements Runnable {
         try {
             seq = getSeq();
         } catch(IOException e1){
-            e1.printStackTrace();
-            done = true;
+            LOG.debug("error getting initial sequence number", e1);
         } catch(JSONException e1){
-            e1.printStackTrace();
-            done = true;
+            throw new RuntimeException(e1);
         }
 
-        int i = 0;
-        int currentSeq = seq;
-        while(!done){
-            LOG.debugf("iteration: {0}", i++);
+        int currentSeq;
+        while(!done) {
             try {
-                //PostMessage("1190346972", "SEQ:"+seq);
                 currentSeq = getSeq();
-                if(seq > currentSeq)
+                if(seq > currentSeq) {
                     seq = currentSeq;
+                }
                 
-                while(seq <= currentSeq && !done){
+                while(seq <= currentSeq && !done) {
                     //get the old message between oldseq and seq
                     String msgResponseBody = connection.httpGET(getMessageRequestingUrl(seq));
                     if(msgResponseBody != null) {
                         String prefix = "for (;;);";
-                        if(msgResponseBody.startsWith(prefix))
+                        if(msgResponseBody.startsWith(prefix)) {
                             msgResponseBody = msgResponseBody.substring(prefix.length());
+                        }
                         JSONObject response = new JSONObject(msgResponseBody);
                         LOG.debugf("message: {0}", response);
                         if(response.getString("t").equals("msg")) {
@@ -88,12 +85,9 @@ public class ChatListener implements Runnable {
                     seq++;
                 }
             } catch (IOException e) {
-                // todo: LWC-3359: ChatListener thread dies whenever there is any exception.
-                e.printStackTrace();
-                done = true;
+                LOG.debug(e.getMessage(), e);
             } catch (JSONException e) {
-                e.printStackTrace();
-                done = true;
+                throw new RuntimeException(e);
             }
         }
     }
@@ -195,7 +189,7 @@ public class ChatListener implements Runnable {
                 LOG.debug("retrying to retrieve the seq code after 1 second...");
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOG.debug(e.getMessage(), e);
             }
         }
         return tempSeq;
@@ -209,18 +203,19 @@ public class ChatListener implements Runnable {
         if(msgResponseBody == null)
             return -1;
         String prefix = "for (;;);";
-        if(msgResponseBody.startsWith(prefix))
+        if(msgResponseBody.startsWith(prefix)) {
             msgResponseBody = msgResponseBody.substring(prefix.length());
+        }
         
-        //JSONObject body =(JSONObject) JSONValue.parse(msgResponseBody);
         JSONObject body = new JSONObject(msgResponseBody);
-        if(body.has("seq"))
+        if(body.has("seq")) {
             return body.getInt("seq");
-        else if(body.has("t") && body.getString("t").equals("refresh")) {
+        } else if(body.has("t") && body.getString("t").equals("refresh")) {
             getPOSTFormID();    
             return getSeq();
         }
-        else 
+        else {
             return -1;
+        }
     }
 }
