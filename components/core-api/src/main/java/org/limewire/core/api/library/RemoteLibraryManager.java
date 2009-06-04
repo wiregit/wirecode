@@ -15,8 +15,8 @@ public interface RemoteLibraryManager {
 
     /**
      * Adds a new presence to the list of remote libraries. If a presence with
-     * the same ID already exists, false. If the presence is the first with that
-     * particular friend, a FriendLibrary is created.
+     * the same ID already exists, returns false. If the presence is the first
+     * with that particular friend, a FriendLibrary is created and returns true.
      */
     boolean addPresenceLibrary(FriendPresence presence);
     

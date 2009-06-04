@@ -95,11 +95,5 @@ public class CoreRemoteFileItem implements RemoteFileItem, Comparable {
         }
         return getFileName().compareToIgnoreCase(((CoreRemoteFileItem) obj).getFileName());
     }
-    
-    @Override
-    public boolean equals(Object obj) {
-        CoreRemoteFileItem o = (CoreRemoteFileItem)obj;
-        return getRfd().equals(o.getRfd()) && getFileName().equals(o.getFileName());
-    }
 
 }
