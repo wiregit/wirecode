@@ -123,6 +123,9 @@ public class DiscoInfoHandler implements LiveMessageHandler {
     @Inject
     public void register(ListenerSupport<FriendPresenceEvent> availableFriends) {
         availableFriends.addListener(new EventListener<FriendPresenceEvent>() {
+            // TODO listen for known friends instead?
+            // TODO would result in exchanging disco-info's faster
+            // TODO but also lots of requests to offline friends
             @Override
             public void handleEvent(FriendPresenceEvent event) {  
                 if(event.getType() != FriendPresenceEvent.Type.ADDED) {

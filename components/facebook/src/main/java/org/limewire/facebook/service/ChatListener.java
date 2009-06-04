@@ -68,7 +68,7 @@ public class ChatListener implements Runnable {
                 if(seq > currentSeq)
                     seq = currentSeq;
                 
-                while(seq <= currentSeq){
+                while(seq <= currentSeq && !done){
                     //get the old message between oldseq and seq
                     String msgResponseBody = connection.httpGET(getMessageRequestingUrl(seq));
                     if(msgResponseBody != null) {

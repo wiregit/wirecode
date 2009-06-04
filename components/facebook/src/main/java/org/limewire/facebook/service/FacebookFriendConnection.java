@@ -91,6 +91,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final FriendConnectionConfiguration configuration;
     private final Provider<String> apiKey;
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
+    private static final String PRESENCE_POPOUT_PAGE = "http://www.facebook.com/presence/popout.php";
     private static final String FACEBOOK_LOGIN_GET_URL = "http://coelacanth:5555/getlogin/";
     private static final String FACEBOOK_LOGIN_POST_ACTION_URL = "https://login.facebook.com/login.php?";
     private static final String FACEBOOK_GET_SESSION_URL = "http://coelacanth:5555/getsession/";
@@ -455,9 +456,11 @@ public class FacebookFriendConnection implements FriendConnection {
                 throw new IOException("no uid");
             }
 
-            readChannel(homePage);
-            readPOSTFormID(homePage);
             readLogoutURL(homePage);
+            
+            String presencePopoutPage = httpGET(PRESENCE_POPOUT_PAGE);
+            readChannel(presencePopoutPage);
+            readPOSTFormID(presencePopoutPage);
             
         } catch (IOException ioe)  {
             LOG.debug("starting chat failed", ioe);
@@ -775,6 +778,7 @@ public class FacebookFriendConnection implements FriendConnection {
             if(facebookFriend != null) {
                 FriendPresence presence = facebookFriend.getPresences().get(presenceId);
                 if(presence != null) {
+                    LOG.debugf("removing presence {0}", presence.getPresenceId());
                     FacebookFriendPresence facebookFriendPresence = (FacebookFriendPresence)presence;
                     facebookFriend.removePresence(facebookFriendPresence);
                     friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(facebookFriendPresence, FriendPresenceEvent.Type.REMOVED));
@@ -787,11 +791,20 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     void removeAllPresences(FacebookFriend friend) {
+        // non-LW presenes are NOT removed b/c that introduces race-conditions between
+        // buddy-list polling and disco-info on-demand presence creation
+        LOG.debugf("removing all non-limewire presences for {0}", friend.getId());
         synchronized (presenceLock) {
             Map<String, FriendPresence> presenceMap = friend.getPresences();
             for(FriendPresence presence : presenceMap.values()) {
-                friend.removePresence((FacebookFriendPresence)presence);
-                friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.REMOVED));
+                String resource = StringUtils.parseResource(presence.getPresenceId());
+                if(resource.length() == 0) { // do no remove limewire presences; those are maintained by presence messages
+                    LOG.debugf("removing presence {0}", presence.getPresenceId());
+                    friend.removePresence((FacebookFriendPresence)presence);
+                    friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.REMOVED));
+                } else {
+                    LOG.debugf("ignoring remove presence for {0}", presence.getPresenceId());
+                }
             }
             friendManager.removeAvailableFriend(friend);            
         }
