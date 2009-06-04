@@ -70,11 +70,6 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
         context.checking(new Expectations() {{
             exactly(total).of(query).getGUID();
             will(returnValue(makeSuspiciousGuid()));
-            // These methods will be called for the last query, once per slice
-            exactly(4).of(query).desiresOutOfBandReplies();
-            will(returnValue(false));
-            exactly(4).of(query).getMinSpeed();
-            will(returnValue(0));
         }});
         for(int i = 0; i < total - 1; i++) {
             assertTrue(filter.allow(query));
@@ -121,11 +116,6 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
             will(returnValue(GUID.makeGuid()));
             exactly(suspiciousCount).of(query).getGUID();
             will(returnValue(makeSuspiciousGuid()));
-            // These methods will be called for the last query, once per slice
-            exactly(4).of(query).desiresOutOfBandReplies();
-            will(returnValue(false));
-            exactly(4).of(query).getMinSpeed();
-            will(returnValue(0));
         }});
         for(int i = 0; i < total - 1; i++) {
             assertTrue(filter.allow(query));
@@ -134,60 +124,7 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
         assertFalse(filter.allow(query));
         context.assertIsSatisfied();        
     }
-    
-    /**
-     * Tests that suspicious queries will only be blocked if they
-     * don't ask for out of band results
-     */
-    public void testAllowedIfAsksForOutOfBand() {
-        final int total = AnomalousQueryFilter.GUIDS_TO_COUNT;
-        final int suspiciousCount =
-            (int)(AnomalousQueryFilter.GUIDS_TO_COUNT
-                    * AnomalousQueryFilter.MAX_FRACTION_PER_SLICE) + 1;
-        final int innocentCount = total - suspiciousCount;
-        context.checking(new Expectations() {{
-            exactly(innocentCount).of(query).getGUID();
-            will(returnValue(GUID.makeGuid()));
-            exactly(suspiciousCount).of(query).getGUID();
-            will(returnValue(makeSuspiciousGuid()));
-            // This method will be called for the last query, once per slice
-            exactly(4).of(query).desiresOutOfBandReplies();
-            will(returnValue(true));
-            // Minimum speed will never be checked
-        }});
-        for(int i = 0; i < total; i++) {
-            assertTrue(filter.allow(query));
-        }
-        context.assertIsSatisfied();        
-    }
-    
-    /**
-     * Tests that suspicious queries will only be blocked if they
-     * have non-zero minimum speed
-     */
-    public void testAllowedIfNonZeroMinimumSpeed() {
-        final int total = AnomalousQueryFilter.GUIDS_TO_COUNT;
-        final int suspiciousCount =
-            (int)(AnomalousQueryFilter.GUIDS_TO_COUNT
-                    * AnomalousQueryFilter.MAX_FRACTION_PER_SLICE) + 1;
-        final int innocentCount = total - suspiciousCount;
-        context.checking(new Expectations() {{
-            exactly(innocentCount).of(query).getGUID();
-            will(returnValue(GUID.makeGuid()));
-            exactly(suspiciousCount).of(query).getGUID();
-            will(returnValue(makeSuspiciousGuid()));
-            // These methods will be called for the last query, once per slice
-            exactly(4).of(query).desiresOutOfBandReplies();
-            will(returnValue(false));
-            exactly(4).of(query).getMinSpeed();
-            will(returnValue(QueryRequest.SPECIAL_MINSPEED_MASK));
-        }});
-        for(int i = 0; i < total; i++) {
-            assertTrue(filter.allow(query));
-        }
-        context.assertIsSatisfied();        
-    }
-    
+       
     public void testOtherMessagesAreIgnored() throws Exception {
         context.checking(new Expectations() {{
             never(ping);
