@@ -137,13 +137,24 @@ public class BitTorrentOptionPanel extends OptionPanel {
         updateState(auto);
     }
 
-    private void updateState(boolean limeWireControl) {
-        uploadBandWidthLabel.setVisible(!limeWireControl);
-        uploadBandWidth.setVisible(!limeWireControl);
-        uploadBandWidth.setEnabled(!limeWireControl);
-        downloadBandWidthLabel.setVisible(!limeWireControl);
-        downloadBandWidth.setVisible(!limeWireControl);
-        downloadBandWidth.setEnabled(!limeWireControl);
+    /**
+     * Updates the state of the components based on whether the user has opted
+     * to control the bittorrent settings manually, or let limewire control
+     * them.
+     * 
+     * @param limewireControlled if true then the user is not managing the
+     *        settings, and the bandwidth controls should not be shown. If false
+     *        the User has opted to manually set the bandwidth settings. The
+     *        upload and download bandwidth controls should be enabled and set
+     *        visible.
+     */
+    private void updateState(boolean limewireControlled) {
+        uploadBandWidthLabel.setVisible(!limewireControlled);
+        uploadBandWidth.setVisible(!limewireControlled);
+        uploadBandWidth.setEnabled(!limewireControlled);
+        downloadBandWidthLabel.setVisible(!limewireControlled);
+        downloadBandWidth.setVisible(!limewireControlled);
+        downloadBandWidth.setEnabled(!limewireControlled);
     }
 
 }
