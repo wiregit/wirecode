@@ -3,6 +3,7 @@ package org.limewire.ui.swing.filter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.limewire.core.api.Category;
@@ -50,7 +51,7 @@ class CategoryDetector<E extends FilterableItem> {
             public void listChanged(ListEvent listChanges) {
                 int size = listChanges.getSourceList().size();
                 if (size >= RESULTS_COUNT) {
-                    fireCategoryFound();
+                    fireDelayedCategoryFound();
                 }
             }
         };
@@ -61,7 +62,7 @@ class CategoryDetector<E extends FilterableItem> {
         timerListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                fireCategoryFound();
+                fireDelayedCategoryFound();
             }
         };
         timer = new Timer(TIMER_DELAY, timerListener);
@@ -85,18 +86,30 @@ class CategoryDetector<E extends FilterableItem> {
             timerListener = null;
             timer = null;
         }
-        
-        // Remove detector listener.
-        detectorListener = null;
     }
     
     /**
-     * Notifies the listener with the default category, and stops category
-     * detection.
+     * Notifies the detector listener with the default category, and stops 
+     * category detection.  Delayed notification is performed by posting a new 
+     * event on the event queue.  We do this because the method may be invoked 
+     * in response to an EventList change, and we want to delay category 
+     * notification since further processing of the EventList chain in the same
+     * event can cause issues.
      */
-    private void fireCategoryFound() {
-        Category category = categoryFilter.getDefaultCategory();
-        detectorListener.categoryFound(category);
+    private void fireDelayedCategoryFound() {
+        // Perform delayed notification by posting Runnable on event queue.
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                if (detectorListener != null) {
+                    Category category = categoryFilter.getDefaultCategory();
+                    detectorListener.categoryFound(category);
+                    detectorListener = null;
+                }
+            }
+        });
+        
+        // Stop category detection.
         stop();
     }
 
