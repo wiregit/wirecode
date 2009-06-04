@@ -3,21 +3,26 @@ package org.limewire.ui.swing.statusbar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Panel;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HeaderBar;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -37,7 +42,16 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     @Resource private Color activeBackground = PainterUtils.TRASPARENT;
     @Resource private Color activeBorder = PainterUtils.TRASPARENT;
     @Resource private Color border = PainterUtils.TRASPARENT;
+    @Resource private Font headerFont;
     
+    private final AbstractAction closeAction = new AbstractAction(I18n.tr("Hide")) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            setVisible(false);
+            sharedFileCountPanel.repaint();
+        }
+    };
+        
     @Inject
     public SharedFileCountPopupPanel(SharedFileCountPanel sharedFileCountPanel,
             HeaderBarDecorator barDecorator) {
@@ -46,7 +60,6 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         this.sharedFileCountPanel = sharedFileCountPanel;
         
         GuiUtils.assignResources(this);
-        
         ResizeUtils.forceSize(this, new Dimension(300, 200));
         
         frame = new JXPanel(new BorderLayout());
@@ -54,8 +67,17 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
         HeaderBar bar = new HeaderBar(I18n.tr("Sharing"));
         barDecorator.decorateBasic(bar);
-        frame.add(bar, BorderLayout.NORTH);
+        bar.setFont(headerFont);
+        bar.setLayout(new BorderLayout());
+        ResizeUtils.forceHeight(bar, 18);
         
+        HyperlinkButton closeButton = new HyperlinkButton(closeAction);
+        closeButton.setFont(headerFont);
+        closeButton.setNormalForeground(Color.WHITE);
+        closeButton.setRolloverForeground(Color.WHITE);
+        bar.add(closeButton, BorderLayout.EAST);
+        
+        frame.add(bar, BorderLayout.NORTH);
         add(frame, BorderLayout.CENTER);
 
         setUpButton();
@@ -117,7 +139,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             if(SharedFileCountPopupPanel.this.isVisible()) {
                 g.setPaint(activeBackground);
                 g.fillRect(0, 0, width, height);
-                g.setPaint(activeBorder);
+                g.setPaint(border);
                 g.drawLine(0, 0, 0, height-1);
                 g.drawLine(0, height-1, width-1, height-1);
                 g.drawLine(width-1, 0, width-1, height-1);
@@ -126,6 +148,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                 g.fillRect(0, 2, width-1, height-2);
                 g.setPaint(activeBorder);
                 g.drawLine(0, 1, 0, height-1);
+                g.drawLine(width-1, 1, width-1, height-1);
             }
             else {
                 g.setPaint(dividerForeground);

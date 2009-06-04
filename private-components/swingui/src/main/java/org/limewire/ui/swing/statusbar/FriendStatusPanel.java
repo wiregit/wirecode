@@ -127,7 +127,7 @@ class FriendStatusPanel {
             if(chatFrame.isVisible()) {
                 g.setPaint(activeBackground);
                 g.fillRect(0, 0, width, height);
-                g.setPaint(activeBorder);
+                g.setPaint(border);
                 g.drawLine(0, 0, 0, height-1);
                 g.drawLine(0, height-1, width-1, height-1);
                 g.drawLine(width-1, 0, width-1, height-1);
