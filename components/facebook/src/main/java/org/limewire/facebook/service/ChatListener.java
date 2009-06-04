@@ -9,6 +9,8 @@ import org.limewire.facebook.service.livemessage.LiveMessageHandler;
 import org.limewire.facebook.service.livemessage.LiveMessageHandlerRegistry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.core.api.friend.client.MessageReader;
+import org.limewire.core.api.friend.client.ChatState;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -21,6 +23,7 @@ public class ChatListener implements Runnable {
     private final FacebookFriendConnection connection;
     private final LiveMessageHandlerRegistry handlerRegistry;
 
+    private final ChatManager chatManager;
     private final String uid;
     private final String channel;
     private int seq;
@@ -35,6 +38,7 @@ public class ChatListener implements Runnable {
         this.seq = -1;
         this.uid = connection.getUID();
         this.channel = connection.getChannel();
+        this.chatManager = connection.getChatManager();
     }
 
     void setDone() {
@@ -84,6 +88,7 @@ public class ChatListener implements Runnable {
                     seq++;
                 }
             } catch (IOException e) {
+                // todo: LWC-3359: ChatListener thread dies whenever there is any exception.
                 e.printStackTrace();
                 done = true;
             } catch (JSONException e) {
@@ -97,22 +102,53 @@ public class ChatListener implements Runnable {
         if(message.has("ms")) {
             JSONArray ms = message.getJSONArray("ms");
             final JSONObject payload = ms.getJSONObject(0);
+            String msgType = payload.getString("type");
+
             if(payload.has("event_name")) {
-                String messageType = payload.getString("event_name");
-                LiveMessageHandler handler = handlerRegistry.getHandler(messageType);
-                if(handler != null) {
-                    if(payload.has("response")) {
-                        JSONObject lwMessage = payload.getJSONObject("response");
-                        handler.handle(messageType, lwMessage);
-                    } else {
-                        LOG.debugf("no 'response' in message {0}", message);
-                    }
-                    
-                } else {
-                    LOG.debugf("no handler for type: {0}", messageType);
-                }
+                processLiveMessage(payload);
+            } else if ("msg".equals(msgType) || "typ".equals(msgType)) {
+                processChatMessage(payload, msgType);
             }
         }            
+    }
+
+    private void processLiveMessage(JSONObject payload) throws JSONException {
+        String messageType = payload.getString("event_name");
+        LiveMessageHandler handler = handlerRegistry.getHandler(messageType);
+        if (handler != null) {
+            if (payload.has("response")) {
+                JSONObject lwMessage = payload.getJSONObject("response");
+                handler.handle(messageType, lwMessage);
+            } else {
+                LOG.debugf("no 'response' in message payload: {0}", payload);
+            }
+        } else {
+            LOG.debugf("no handler for type: {0}", messageType);
+        }
+    }
+
+    private void processChatMessage(JSONObject payload, String msgType) throws JSONException {
+        String parsedSenderId = payload.getString("from");
+
+        // look up the MessageReader based on the sender (friend) id
+        if (parsedSenderId != null) {
+            MessageReader handler = chatManager.getMessageReader(parsedSenderId);
+
+            if (handler != null) {
+                if (msgType.equals("msg")) {
+                    JSONObject messageJson = payload.getJSONObject("msg");
+                    String msg = messageJson.getString("text");
+                    handler.readMessage(msg);
+                } else {
+                    ChatState state = payload.getInt("st") == 1 ? ChatState.composing : ChatState.active;
+                    handler.newChatState(state);
+                }
+            } else {
+                LOG.debugf("no handler for sender: {0}", parsedSenderId);
+            }
+        } else {
+            LOG.debugf("no 'from' in message payload: {0}", payload);
+        }
     }
 
     private void getPOSTFormID() throws IOException {
@@ -178,7 +214,7 @@ public class ChatListener implements Runnable {
         
         //JSONObject body =(JSONObject) JSONValue.parse(msgResponseBody);
         JSONObject body = new JSONObject(msgResponseBody);
-        if(body != null && body.has("seq"))
+        if(body.has("seq"))
             return body.getInt("seq");
         else if(body.has("t") && body.getString("t").equals("refresh")) {
             getPOSTFormID();    

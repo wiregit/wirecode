@@ -29,17 +29,20 @@ public class FacebookFriend extends AbstractFriend {
     
     private final boolean hasLimeWireAppInstalled;
     private final FeatureRegistry featureRegistry;
+    private final FacebookFriendConnection connection;
 
     
     @AssistedInject
     public FacebookFriend(@Assisted String id, @Assisted JSONObject friend,
                           @Assisted Network network, @Assisted boolean hasLimeWireAppInstalled,
+                          @Assisted FacebookFriendConnection connection,
                           FeatureRegistry featureRegistry) {
         this.id = id;
         this.friend = friend;
         this.network = network;
         this.hasLimeWireAppInstalled = hasLimeWireAppInstalled;
         this.featureRegistry = featureRegistry;
+        this.connection = connection;
     }
     
     @Override
@@ -69,11 +72,12 @@ public class FacebookFriend extends AbstractFriend {
 
     @Override
     public MessageWriter createChat(MessageReader reader) {
-        return null;
+        return connection.createChat(id, reader);
     }
 
     @Override
     public FriendPresence getActivePresence() {
+        // ok to return null. fb only allows 1 presence at a time to be logged in
         return null;
     }
 
@@ -113,6 +117,7 @@ public class FacebookFriend extends AbstractFriend {
 
     @Override
     public void setChatListenerIfNecessary(IncomingChatListener listener) {
+        connection.setIncomingChatListener(id, listener);
     }
 
     @Override
@@ -128,6 +133,7 @@ public class FacebookFriend extends AbstractFriend {
         for(Feature feature : features) {
             featureRegistry.get(feature.getID()).removeFeature(presence);
         }
+        connection.removeIncomingChatListener(presence.getFriend().getId());
         presenceMap.remove(presence.getPresenceId());
         
     }

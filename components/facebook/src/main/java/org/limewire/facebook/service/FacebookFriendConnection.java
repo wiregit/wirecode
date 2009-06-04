@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Random;
+import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +53,10 @@ import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.IncomingChatListener;
+import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.client.MessageReader;
+import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
@@ -146,6 +152,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private volatile ChatListener chatListener;
     private ScheduledFuture presenceListenerFuture;
     private volatile String logoutURL;
+    private final ChatManager chatManager;
 
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
@@ -178,6 +185,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.authTokenHandler = authTokenHandlerFactory.create(this);
         this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
         this.libraryRefreshHandler = libraryRefreshHandlerFactory.create(this);
+        this.chatManager = new ChatManager(this);
     }
     
     void setPostFormID(String postFormID) {
@@ -289,6 +297,7 @@ public class FacebookFriendConnection implements FriendConnection {
         } catch (JSONException e) {
             connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
             throw new FriendException(e);
+          // todo: LWC-3344: catch runtime exceptions and broadcast connect_failed.  loginPanel should listen to login completion, check error
         } finally {
             loggingIn.set(false);
         }
@@ -333,7 +342,7 @@ public class FacebookFriendConnection implements FriendConnection {
                 JSONObject user = users.getJSONObject(i);
                 String id = user.getString("uid");
                 FacebookFriend friend = friendFactory.create(id, user,
-                        getNetwork(), limeWireFriends.contains(id));
+                        getNetwork(), limeWireFriends.contains(id), this);
                 LOG.debugf("adding {0}", friend);
                 addKnownFriend(friend);
             }
@@ -600,6 +609,10 @@ public class FacebookFriendConnection implements FriendConnection {
         return secret;
     }
 
+    ChatManager getChatManager() {
+        return chatManager;
+    }
+
     private class AuthTokenInterceptingHttpClient extends DefaultHttpClient  {
         @Override
         protected RedirectHandler createRedirectHandler() {
@@ -657,6 +670,41 @@ public class FacebookFriendConnection implements FriendConnection {
                 }
             }
         });
+    }
+
+    void sendChatMessage(String userId, String message) throws FriendException {
+        List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+        nvps.add(new BasicNameValuePair("msg_text", (message == null)? "":message));
+        nvps.add(new BasicNameValuePair("msg_id", new Random().nextInt(999999999) + ""));
+        nvps.add(new BasicNameValuePair("client_time", new Date().getTime() + ""));
+        nvps.add(new BasicNameValuePair("to", userId));
+
+        String post_form_id = postFormID.get();
+        if(post_form_id != null) {
+            nvps.add(new BasicNameValuePair("post_form_id", post_form_id));
+        }
+        try {
+            String resp = httpPOST("http://www.facebook.com", "/ajax/chat/send.php", nvps);
+        } catch (IOException e) {
+            throw new FriendException(e);    
+        }
+    }
+
+    void sendChatStateUpdate(String userId, ChatState state) throws FriendException {
+
+        List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+        nvps.add(new BasicNameValuePair("typ", (state == ChatState.composing)? "1" : "0"));
+        nvps.add(new BasicNameValuePair("to", userId));
+
+        String post_form_id = postFormID.get();
+        if(post_form_id != null) {
+            nvps.add(new BasicNameValuePair("post_form_id", post_form_id));
+        }
+        try {
+            httpPOST("http://www.facebook.com", "/ajax/chat/typ.php", nvps);
+        } catch (IOException e) {
+            throw new FriendException(e);
+        }
     }
 
     public FacebookJsonRestClient getClient() {
@@ -731,7 +779,7 @@ public class FacebookFriendConnection implements FriendConnection {
                     facebookFriend.removePresence(facebookFriendPresence);
                     friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(facebookFriendPresence, FriendPresenceEvent.Type.REMOVED));
                     if(!facebookFriend.isSignedIn()) {
-                        friendManager.removeAvailableFriend(facebookFriend);            
+                        friendManager.removeAvailableFriend(facebookFriend);
                     }
                 }
             }
@@ -748,5 +796,18 @@ public class FacebookFriendConnection implements FriendConnection {
             friendManager.removeAvailableFriend(friend);            
         }
     }
- 
+
+
+    void setIncomingChatListener(String friendId, IncomingChatListener listener) {
+        chatManager.setIncomingChatListener(friendId, listener);
+
+    }
+
+    void removeIncomingChatListener(String friendId) {
+        chatManager.removeChat(friendId);
+    }
+
+    MessageWriter createChat(String friendId, MessageReader reader) {
+        return chatManager.addMessageReader(friendId, reader);
+    }
 }
