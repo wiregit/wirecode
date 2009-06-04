@@ -338,7 +338,6 @@ public class Backend extends org.limewire.gnutella.tests.LimeTestCase {
     }
     
     @Inject private ConnectionServices connectionServices;
-    @Inject private FileManager fileManager;
     @Inject private LifecycleManager lifecycleManager;
     @Inject private NetworkManager networkManager;
     @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;

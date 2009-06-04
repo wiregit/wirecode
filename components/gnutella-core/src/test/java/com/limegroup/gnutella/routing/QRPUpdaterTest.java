@@ -12,7 +12,6 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.stubs.QueryRequestStub;
@@ -21,7 +20,6 @@ public class QRPUpdaterTest extends LimeTestCase {
 
     @Inject private QRPUpdater qrpUpdater;
     @Inject private Injector injector;
-    @Inject private FileManager fileManager;
     @Inject @GnutellaFiles private FileCollection gnutellaFileCollection;
     
     public QRPUpdaterTest(String name) {
@@ -36,7 +34,6 @@ public class QRPUpdaterTest extends LimeTestCase {
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(new LibraryStubModule(), LimeTestUtils.createModule(this));
         injector.getInstance(ServiceRegistry.class).initialize();
-        fileManager.start();
     }
     
     public void testGetQRT() {
