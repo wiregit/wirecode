@@ -8,9 +8,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentAlert;
+import org.limewire.bittorrent.TorrentException;
+import org.limewire.bittorrent.TorrentManager;
+import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.logging.Log;
@@ -18,7 +25,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
@@ -33,9 +39,10 @@ public class TorrentManagerImpl implements TorrentManager {
 
     private final LibTorrentWrapper libTorrent;
 
-    private final Provider<Boolean> torrentEnabled;
-
     private final Map<String, Torrent> torrents;
+
+    private final AtomicReference<TorrentSettings> torrentSettings = new AtomicReference<TorrentSettings>(
+            null);
 
     /**
      * Used to protect from calling libtorrent code with invalid torrent data.
@@ -63,23 +70,22 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Inject
     public TorrentManagerImpl(LibTorrentWrapper torrentWrapper,
-            @TorrentEnabled Provider<Boolean> torrentEnabled,
-            @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
+            @Named("fastExecutor") ScheduledExecutorService fastExecutor,
+            @TorrentSettingsAnnotation TorrentSettings torrentSettings) {
         this.fastExecutor = fastExecutor;
-
-        this.torrentEnabled = torrentEnabled;
         this.libTorrent = torrentWrapper;
         this.torrents = new ConcurrentHashMap<String, Torrent>();
+        this.torrentSettings.set(torrentSettings);
     }
 
     private void validateLibrary() {
-        if (!torrentEnabled.get()) {
-            throw new LibTorrentException("LibTorrent is disabled (through settings)",
-                    LibTorrentException.DISABLED_EXCEPTION);
+        if (!torrentSettings.get().isTorrentsEnabled()) {
+            throw new TorrentException("LibTorrent is disabled (through settings)",
+                    TorrentException.DISABLED_EXCEPTION);
         }
         if (!isValid()) {
-            throw new LibTorrentException("The TorrentManager is invalid.",
-                    LibTorrentException.LOAD_EXCEPTION);
+            throw new TorrentException("The TorrentManager is invalid.",
+                    TorrentException.LOAD_EXCEPTION);
         }
     }
 
@@ -224,10 +230,11 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void initialize() {
-        if (torrentEnabled.get()) {
+        if (torrentSettings.get().isTorrentsEnabled()) {
             lock.writeLock().lock();
             try {
                 libTorrent.initialize();
+                updateSettings(torrentSettings.get());
             } finally {
                 lock.writeLock().unlock();
             }
@@ -319,13 +326,14 @@ public class TorrentManagerImpl implements TorrentManager {
     private class BasicAlertCallback implements AlertCallback {
 
         @Override
-        public void callback(LibTorrentAlert alert) {
+        public void callback(TorrentAlert alert) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(alert.toString());
             }
 
-            if (alert.sha1 != null) {
-                Torrent torrent = torrents.get(alert.sha1);
+            String sha1 = alert.getSha1();
+            if (sha1 != null) {
+                Torrent torrent = torrents.get(sha1);
                 if (torrent != null) {
                     torrent.alert(alert);
                 }
@@ -405,5 +413,17 @@ public class TorrentManagerImpl implements TorrentManager {
             }
         }
         return false;
+    }
+
+    @Override
+    public void updateSettings(TorrentSettings settings) {
+        torrentSettings.set(settings);
+        libTorrent.update_settings(settings);
+
+    }
+
+    @Override
+    public TorrentSettings getTorrentSettings() {
+        return torrentSettings.get();
     }
 }

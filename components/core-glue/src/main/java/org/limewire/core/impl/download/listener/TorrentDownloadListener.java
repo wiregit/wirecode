@@ -8,12 +8,12 @@ import java.util.Map;
 
 import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.BTDataImpl;
+import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.libtorrent.TorrentManager;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;

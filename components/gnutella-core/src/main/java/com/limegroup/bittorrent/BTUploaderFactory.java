@@ -1,6 +1,6 @@
 package com.limegroup.bittorrent;
 
-import org.limewire.libtorrent.Torrent;
+import org.limewire.bittorrent.Torrent;
 
 public interface BTUploaderFactory {
 

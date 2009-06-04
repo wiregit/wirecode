@@ -1,12 +1,15 @@
 package org.limewire.libtorrent;
 
+
+import org.limewire.bittorrent.TorrentAlert;
+
 import com.sun.jna.Structure;
 
 /**
  * Structure mapping to the wrapper_alert_info structure in the
  * libtorrentwrapper library.
  */
-public class LibTorrentAlert extends Structure {
+public class LibTorrentAlert extends Structure implements TorrentAlert {
 
     /**
      * Category of this alert
@@ -23,10 +26,20 @@ public class LibTorrentAlert extends Structure {
      */
     public String message;
 
-    /**
-     * Category number of a SAVE_RESUME_DATE_ALERT
-     */
-    public final static int SAVE_RESUME_DATA_ALERT = 8;
+    @Override
+    public int getCategory() {
+        return category;
+    }
+
+    @Override
+    public String getSha1() {
+        return sha1;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
 
     @Override
     public String toString() {

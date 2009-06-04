@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.bittorrent.TorrentManager;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.download.SaveLocationException;
@@ -29,7 +30,6 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
-import org.limewire.libtorrent.TorrentManager;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceStage;
 import org.limewire.listener.EventListener;

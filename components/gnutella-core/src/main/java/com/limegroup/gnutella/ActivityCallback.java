@@ -3,12 +3,12 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.libtorrent.Torrent;
 
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.messages.QueryReply;

@@ -11,10 +11,10 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
+import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.libtorrent.TorrentManager;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.bittorrent.BTTorrentFileDownloader;

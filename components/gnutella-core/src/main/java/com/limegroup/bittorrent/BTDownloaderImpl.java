@@ -12,6 +12,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentState;
+import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
@@ -19,10 +23,6 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPortImpl;
-import org.limewire.libtorrent.LibTorrentState;
-import org.limewire.libtorrent.LibTorrentStatus;
-import org.limewire.libtorrent.Torrent;
-import org.limewire.libtorrent.TorrentEvent;
 import org.limewire.listener.AsynchronousMulticaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
@@ -247,12 +247,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     @Override
     public DownloadState getState() {
-        LibTorrentStatus status = torrent.getStatus();
+        TorrentStatus status = torrent.getStatus();
         if (!torrent.isStarted() || status == null) {
             return DownloadState.QUEUED;
         }
 
-        LibTorrentState state = status.getState();
+        TorrentState state = status.getState();
 
         if (torrent.isCancelled()) {
             return DownloadState.ABORTED;
@@ -275,7 +275,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         return convertState(state);
     }
 
-    private DownloadState convertState(LibTorrentState state) {
+    private DownloadState convertState(TorrentState state) {
         switch (state) {
         case DOWNLOADING:
             if (isPaused()) {

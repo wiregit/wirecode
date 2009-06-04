@@ -6,11 +6,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentEvent;
+import org.limewire.bittorrent.TorrentState;
+import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.concurrent.ManagedThread;
-import org.limewire.libtorrent.LibTorrentState;
-import org.limewire.libtorrent.LibTorrentStatus;
-import org.limewire.libtorrent.Torrent;
-import org.limewire.libtorrent.TorrentEvent;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.ActivityCallback;
@@ -112,7 +112,7 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
             return UploadStatus.CANCELLED;
         }
 
-        LibTorrentStatus status = torrent.getStatus();
+        TorrentStatus status = torrent.getStatus();
 
         if (status == null) {
             return UploadStatus.CONNECTING;
@@ -125,7 +125,7 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
         if (status.isPaused()) {
             return UploadStatus.UPLOADING;
         } else {
-            LibTorrentState state = status.getState();
+            TorrentState state = status.getState();
 
             switch (state) {
             case DOWNLOADING:

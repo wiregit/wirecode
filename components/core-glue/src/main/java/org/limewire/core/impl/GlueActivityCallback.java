@@ -7,6 +7,7 @@ import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.callback.GuiCallback;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.download.DownloadAction;
@@ -23,7 +24,6 @@ import org.limewire.core.impl.upload.UploadListenerList;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.libtorrent.Torrent;
 import org.limewire.service.ErrorService;
 import org.limewire.service.MessageService;
 

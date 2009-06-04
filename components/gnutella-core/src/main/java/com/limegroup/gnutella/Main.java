@@ -7,11 +7,11 @@ import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.Vector;
 
+import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.libtorrent.Torrent;
 import org.limewire.net.SocketsManager.ConnectType;
 
 import com.google.inject.Guice;

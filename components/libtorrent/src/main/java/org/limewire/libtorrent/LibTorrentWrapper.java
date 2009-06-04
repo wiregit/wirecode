@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.bittorrent.TorrentException;
+import org.limewire.bittorrent.TorrentSettings;
+import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -22,6 +25,7 @@ import com.sun.jna.WString;
 class LibTorrentWrapper {
 
     private static final char MAX_LENGTH_DIGITS = 4;
+
     private static final int IP_SIZE = 16;
 
     private static final Log LOG = LogFactory.getLog(LibTorrentWrapper.class);
@@ -72,8 +76,8 @@ class LibTorrentWrapper {
     public void add_torrent(String sha1, String trackerURI, String torrentPath, String savePath,
             String fastResumePath) {
         LOG.debugf("before add_torrent: {0}", sha1);
-        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, 
-                new WString(torrentPath), new WString(savePath), new WString(fastResumePath)));
+        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, new WString(torrentPath),
+                new WString(savePath), new WString(fastResumePath)));
         LOG.debugf("after add_torrent: {0}", sha1);
     }
 
@@ -103,7 +107,7 @@ class LibTorrentWrapper {
 
     }
 
-    public void get_torrent_status(String id, LibTorrentStatus status) {
+    public void get_torrent_status(String id, TorrentStatus status) {
         LOG.debugf("before get_torrent_status: {0}", id);
         catchWrapperException(libTorrent.get_torrent_status(id, status));
         LOG.debugf("after get_torrent_status: {0}", id);
@@ -175,7 +179,14 @@ class LibTorrentWrapper {
 
     private void catchWrapperException(WrapperStatus status) {
         if (status != null) {
-            throw new LibTorrentException(status);
+            throw new TorrentException(status.message, status.type);
         }
+    }
+
+    public void update_settings(TorrentSettings torrentSettings) {
+        LOG.debugf("before update_settings: {0}", torrentSettings);
+        catchWrapperException(libTorrent.update_settings(new LibTorrentSettings(torrentSettings)));
+        LOG.debugf("after update_settings: {0}", torrentSettings);
+
     }
 }

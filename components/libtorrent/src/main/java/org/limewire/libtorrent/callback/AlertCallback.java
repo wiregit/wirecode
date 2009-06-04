@@ -1,6 +1,6 @@
 package org.limewire.libtorrent.callback;
 
-import org.limewire.libtorrent.LibTorrentAlert;
+import org.limewire.bittorrent.TorrentAlert;
 
 import com.sun.jna.Callback;
 
@@ -9,5 +9,5 @@ import com.sun.jna.Callback;
  * processing various kinds of alerts.
  */
 public interface AlertCallback extends Callback {
-    public void callback(LibTorrentAlert alert);
+    public void callback(TorrentAlert alert);
 }

@@ -1,4 +1,4 @@
-package org.limewire.libtorrent;
+package org.limewire.bittorrent;
 
 /**
  * Enum representing various events that a Torrent can send out to listeners.

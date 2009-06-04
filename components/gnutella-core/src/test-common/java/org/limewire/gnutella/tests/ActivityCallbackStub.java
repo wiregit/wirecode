@@ -3,10 +3,10 @@ package org.limewire.gnutella.tests;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.GUID;
-import org.limewire.libtorrent.Torrent;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;

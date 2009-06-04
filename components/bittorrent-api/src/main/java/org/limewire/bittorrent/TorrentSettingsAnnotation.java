@@ -1,4 +1,4 @@
-package org.limewire.libtorrent;
+package org.limewire.bittorrent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -11,11 +11,12 @@ import static java.lang.annotation.ElementType.METHOD;
 import com.google.inject.BindingAnnotation;
 
 /**
- * Annotation describing where to download torrents to. 
+ * Annotation allowing injection of a common TorrentSettings object across the
+ * various torrent classes.
  */
 @BindingAnnotation
 @Target( { FIELD, PARAMETER, METHOD })
 @Retention(RUNTIME)
-public @interface TorrentDownloadFolder {
+public @interface TorrentSettingsAnnotation {
 
 }

@@ -1,8 +1,8 @@
 package com.limegroup.gnutella;
 
+import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.UploadSettings;
-import org.limewire.libtorrent.TorrentManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

@@ -13,6 +13,7 @@ import junit.framework.Assert;
 import junit.framework.Test;
 
 import org.apache.http.params.BasicHttpParams;
+import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.settings.ConnectionSettings;
@@ -22,7 +23,6 @@ import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.libtorrent.Torrent;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;

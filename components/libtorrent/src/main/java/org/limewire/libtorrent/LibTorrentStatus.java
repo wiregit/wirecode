@@ -2,6 +2,8 @@ package org.limewire.libtorrent;
 
 import java.math.BigInteger;
 
+import org.limewire.bittorrent.TorrentState;
+import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.util.StringUtils;
 
 import com.sun.jna.Structure;
@@ -10,7 +12,7 @@ import com.sun.jna.Structure;
  * Structure used to pass data from the native code regarding a torrents state
  * back to java.
  */
-public class LibTorrentStatus extends Structure {
+public class LibTorrentStatus extends Structure implements TorrentStatus {
 
     /**
      * String containing the total amount of the torrent downloaded and
@@ -84,17 +86,47 @@ public class LibTorrentStatus extends Structure {
     public int valid;
 
     /**
-     * String containing the error message for the torrent. Null/empty if there is no error.
+     * String containing the error message for the torrent. Null/empty if there
+     * is no error.
      */
     public String error;
 
-    public LibTorrentStatus() {
-
+    @Override
+    public float getDownloadRate() {
+        return download_rate;
     }
 
-    /**
-     * Returns the total amount of the torrent downloaded and verified.
-     */
+    @Override
+    public float getUploadRate() {
+        return upload_rate;
+    }
+
+    @Override
+    public int getNumPeers() {
+        return num_peers;
+    }
+
+    @Override
+    public int getNumUploads() {
+        return num_uploads;
+    }
+
+    @Override
+    public int getNumSeeds() {
+        return num_seeds;
+    }
+
+    @Override
+    public int getNumConnections() {
+        return num_connections;
+    }
+
+    @Override
+    public float getProgress() {
+        return progress;
+    }
+
+    @Override
     public long getTotalDone() {
         if (total_done == null) {
             return -1;
@@ -104,9 +136,7 @@ public class LibTorrentStatus extends Structure {
         }
     }
 
-    /**
-     * Returns the total amount of the torrent downloaded.
-     */
+    @Override
     public long getTotalDownload() {
         if (total_download == null) {
             return -1;
@@ -116,9 +146,7 @@ public class LibTorrentStatus extends Structure {
         }
     }
 
-    /**
-     * Returns the total amount of the torrent uploaded.
-     */
+    @Override
     public long getTotalUpload() {
         if (total_upload == null) {
             return -1;
@@ -128,31 +156,42 @@ public class LibTorrentStatus extends Structure {
         }
     }
 
-    /**
-     * Returns true if the torrent is paused.
-     */
+    @Override
     public boolean isPaused() {
         return paused != 0;
     }
 
-    /**
-     * Returns true if the torrent is finished.
-     */
+    @Override
     public boolean isFinished() {
         return finished != 0;
     }
 
-    /**
-     * Returns true if the torrent is in an error state.
-     */
+    @Override
     public boolean isError() {
         return !StringUtils.isEmpty(error);
     }
 
-    /**
-     * Returns the LibTorrentState for this torrent.
-     */
-    public LibTorrentState getState() {
-        return LibTorrentState.forId(state);
+    @Override
+    public TorrentState getState() {
+        LibTorrentState libTorrentState = LibTorrentState.forId(state);
+        switch (libTorrentState) {
+        case ALLOCATING:
+            return TorrentState.ALLOCATING;
+        case CHECKING_FILES:
+            return TorrentState.CHECKING_FILES;
+        case DOWNLOADING:
+            return TorrentState.DOWNLOADING;
+        case DOWNLOADING_METADATA:
+            return TorrentState.DOWNLOADING_METADATA;
+        case FINISHED:
+            return TorrentState.FINISHED;
+        case QUEUED_FOR_CHECKING:
+            return TorrentState.QUEUED_FOR_CHECKING;
+        case SEEDING:
+            return TorrentState.SEEDING;
+        default:
+            throw new UnsupportedOperationException("No known state for id: " + state
+                    + " and libtorrent state: " + libTorrentState);
+        }
     }
 }

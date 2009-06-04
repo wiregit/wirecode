@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.limewire.bittorrent.TorrentManager;
 import org.limewire.collection.Comparators;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.InvalidDataException;
-import org.limewire.libtorrent.TorrentManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="src" output="components/bittorrent-api/build/classes" path="components/bittorrent-api/src/main/java"/>
 	<classpathentry kind="src" output="components/collection/build/classes" path="components/collection/src/main/java"/>
 	<classpathentry kind="src" output="components/collection/build/tests" path="components/collection/src/test/java"/>
 	<classpathentry kind="src" output="components/collection/src/test/resources" path="components/collection/src/test/resources"/>

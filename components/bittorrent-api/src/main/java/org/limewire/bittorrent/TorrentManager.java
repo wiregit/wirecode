@@ -1,4 +1,4 @@
-package org.limewire.libtorrent;
+package org.limewire.bittorrent;
 
 import java.io.File;
 import java.util.List;
@@ -77,4 +77,15 @@ public interface TorrentManager extends Service {
      * downloading yet.
      */
     public boolean isDownloadingTorrent(File torrentFile);
+
+    /**
+     * Updates the torrent manager with any new setting values.
+     */
+    void updateSettings(TorrentSettings settings);
+
+    /**
+     * Returns the current TorrentSettings object set on the torrent session.
+     */
+    public TorrentSettings getTorrentSettings();
+
 }
