@@ -35,10 +35,7 @@ public interface Library extends FileCollection {
     
     /** Informs the library that the file 'file' has changed. */
     ListeningFuture<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs);
-    
-    /** Returns a list of all directories that will be recursively managed. */
-    List<File> getDirectoriesToManageRecursively();
-    
+        
     /** Gets the set of default managed extensions.  This is not the current set. */
     Collection<String> getDefaultManagedExtensions();
     
@@ -46,34 +43,15 @@ public interface Library extends FileCollection {
     Map<Category, Collection<String>> getExtensionsPerCategory();
     
     /**
-     * Sets a new collection of managed extensions.
-     * Returns a Future of the list of all futures this will add
-     * as part of the extensions changing.
+     * Sets a new collection of managed extensions that will be used
+     * for when files are added from folders.
      */
-    ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedExtensions(Collection<String> extensions);
-    
+    void setManagedExtensions(Collection<String> extensions);
+        
     /**
-     * Adds manageable files in this directory and recursively all
-     * subdirectories as managed files.
-     */
-    @Override
-    ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder);
-    
-    /**
-     * Returns true if the directory is allowed to be added as a recursively
-     * managed folder.  This <b>allows</b> excluded directories.  It does
-     * not allow non-directories, banned directories, or other problematic
-     * directories.
+     * Returns true if files in this directory are allowed to be managed.
      */
     boolean isDirectoryAllowed(File folder);
-    
-    /**
-     * Returns true if the directory is excluded from recursive management.
-     */
-    boolean isDirectoryExcluded(File folder);
-    
-    /** Returns all directories that are excluded from managing. */
-    List<File> getDirectoriesToExcludeFromManaging();
     
     /** Returns all categories that should be managed. */
     Collection<Category> getManagedCategories();
@@ -82,21 +60,8 @@ public interface Library extends FileCollection {
     boolean isProgramManagingAllowed();
     
     /**
-     * Returns a collection of all directories that are not managed, but
-     * do have files that were imported into LW.
+     * Sets what categories of files will be added when a 
+     * folder is added.
      */
-    Collection<File> getDirectoriesWithImportedFiles();
-    
-    /**
-     * Sets the new options for managing directories.
-     * This includes the new directories to manage, directories to exclude,
-     * and categories to manage.
-     */
-    ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedOptions(
-            Collection<File> recursiveFoldersToManage,
-            Collection<File> foldersToExclude,
-            Collection<Category> managedCategories);
-    
-    /** Stops managing all files in the given folder. */
-    void removeFolder(File folder);
+    void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories);
 }

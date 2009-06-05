@@ -71,9 +71,9 @@ class LibraryFileData extends AbstractSettingsGroup {
     private static final String CURRENT_VERSION_KEY = "CURRENT_VERSION";
     private static final String USER_EXTENSIONS_KEY = "USER_EXTENSIONS";
     private static final String USER_REMOVED_KEY = "USER_REMOVED";
-    private static final String MANAGED_DIRECTORIES_KEY = "MANAGED_DIRECTORIES";
-    private static final String DO_NOT_MANAGE_KEY = "DO_NOT_MANAGE";
-    private static final String EXCLUDE_FILES_KEY = "EXCLUDE_FILES";
+//    private static final String MANAGED_DIRECTORIES_KEY = "MANAGED_DIRECTORIES";
+//    private static final String DO_NOT_MANAGE_KEY = "DO_NOT_MANAGE";
+//    private static final String EXCLUDE_FILES_KEY = "EXCLUDE_FILES";
     private static final String SHARE_DATA_KEY = "SHARE_DATA";
     private static final String FILE_DATA_KEY = "FILE_DATA";
     private static final String COLLECTION_NAME_KEY = "COLLECTION_NAMES";
@@ -87,9 +87,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     
     private final Set<String> userExtensions = new HashSet<String>();
     private final Set<String> userRemoved = new HashSet<String>();
-    private final Set<File> directoriesToManageRecursively = new HashSet<File>();
-    private final Set<File> directoriesNotToManage = new HashSet<File>();
-    private final Set<File> excludedFiles = new HashSet<File>();
     private final Map<File, List<Integer>> fileData = new HashMap<File, List<Integer>>();
     private final SortedMap<Integer, String> collectionNames = new TreeMap<Integer, String>();
     private final Map<Integer, List<String>> collectionShareData = new HashMap<Integer, List<String>>();
@@ -125,9 +122,6 @@ class LibraryFileData extends AbstractSettingsGroup {
             dirty = true;
             userExtensions.clear();
             userRemoved.clear();
-            directoriesToManageRecursively.clear();
-            directoriesNotToManage.clear();
-            excludedFiles.clear();
             fileData.clear();
         } finally {
             lock.writeLock().unlock();
@@ -146,9 +140,6 @@ class LibraryFileData extends AbstractSettingsGroup {
             save.put(CURRENT_VERSION_KEY, CURRENT_VERSION);
             save.put(USER_EXTENSIONS_KEY, userExtensions);
             save.put(USER_REMOVED_KEY, userRemoved);
-            save.put(MANAGED_DIRECTORIES_KEY, directoriesToManageRecursively);
-            save.put(DO_NOT_MANAGE_KEY, directoriesNotToManage);
-            save.put(EXCLUDE_FILES_KEY, excludedFiles);
             save.put(FILE_DATA_KEY, fileData);
             save.put(COLLECTION_NAME_KEY, collectionNames);
             save.put(COLLECTION_SHARE_DATA_KEY, collectionShareData);
@@ -219,9 +210,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     private void initializeFromVersion(Version version, Map<String, Object> readMap) {
         Set<String> userExtensions;
         Set<String> userRemoved;
-        Set<File> directoriesToManageRecursively;
-        Set<File> directoriesNotToManage;
-        Set<File> excludedFiles;        
         Map<File, List<Integer>> fileData;
         Map<Integer, String> collectionNames;
         Map<Integer, List<String>> collectionShareData;
@@ -230,9 +218,6 @@ class LibraryFileData extends AbstractSettingsGroup {
         case ONE:
             userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
             userRemoved = GenericsUtils.scanForSet(readMap.get(USER_REMOVED_KEY), String.class, ScanMode.REMOVE);
-            directoriesToManageRecursively = GenericsUtils.scanForSet(readMap.get(MANAGED_DIRECTORIES_KEY), File.class, ScanMode.REMOVE);
-            directoriesNotToManage = GenericsUtils.scanForSet(readMap.get(DO_NOT_MANAGE_KEY), File.class, ScanMode.REMOVE);
-            excludedFiles = GenericsUtils.scanForSet(readMap.get(EXCLUDE_FILES_KEY), File.class, ScanMode.REMOVE);
             Map<File, FileProperties> oldShareData = GenericsUtils.scanForMap(readMap.get(SHARE_DATA_KEY), File.class, FileProperties.class, ScanMode.REMOVE);
             fileData = new HashMap<File, List<Integer>>();
             collectionNames = new HashMap<Integer, String>();
@@ -242,9 +227,6 @@ class LibraryFileData extends AbstractSettingsGroup {
         case TWO:
             userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
             userRemoved = GenericsUtils.scanForSet(readMap.get(USER_REMOVED_KEY), String.class, ScanMode.REMOVE);
-            directoriesToManageRecursively = GenericsUtils.scanForSet(readMap.get(MANAGED_DIRECTORIES_KEY), File.class, ScanMode.REMOVE);
-            directoriesNotToManage = GenericsUtils.scanForSet(readMap.get(DO_NOT_MANAGE_KEY), File.class, ScanMode.REMOVE);
-            excludedFiles = GenericsUtils.scanForSet(readMap.get(EXCLUDE_FILES_KEY), File.class, ScanMode.REMOVE);
             fileData = GenericsUtils.scanForMapOfList(readMap.get(FILE_DATA_KEY), File.class, List.class, Integer.class, ScanMode.REMOVE);
             collectionNames = GenericsUtils.scanForMap(readMap.get(COLLECTION_NAME_KEY), Integer.class, String.class, ScanMode.REMOVE);
             collectionShareData = GenericsUtils.scanForMapOfList(readMap.get(COLLECTION_SHARE_DATA_KEY), Integer.class, List.class, String.class, ScanMode.REMOVE);
@@ -262,9 +244,6 @@ class LibraryFileData extends AbstractSettingsGroup {
             clear();
             this.userExtensions.addAll(lowercase(userExtensions));
             this.userRemoved.addAll(userRemoved);
-            this.directoriesToManageRecursively.addAll(directoriesToManageRecursively);
-            this.directoriesNotToManage.addAll(directoriesNotToManage);
-            this.excludedFiles.addAll(excludedFiles);
             this.fileData.putAll(fileData);
             this.collectionNames.putAll(collectionNames);
             this.collectionShareData.putAll(collectionShareData);
@@ -323,24 +302,13 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
     }
 
-    /** Returns true if the given file should be excluded from managing. */
-    boolean isFileExcluded(File file) {
-        lock.readLock().lock();
-        try {
-            return excludedFiles.contains(file);
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
     /**
      * Adds a managed file.
      */
-    // TODO: Check out uses of explicit
-    void addManagedFile(File file, boolean explicit) {
+    void addManagedFile(File file) {
         lock.writeLock().lock();
         try {
-            boolean changed = excludedFiles.remove(file);
+            boolean changed = false;
             if(!fileData.containsKey(file)) {
                 fileData.put(file, Collections.<Integer>emptyList());
                 changed = true;
@@ -352,20 +320,12 @@ class LibraryFileData extends AbstractSettingsGroup {
     }
     
     /**
-     * Removes a file from being managed.  If explicit is true, this will
-     * explicitly add it to a list of excluded files that will not be
-     * managed when a folder is scanned.
-     * 
-     * @param file
-     * @param exclude
+     * Removes a file from being managed.
      */
-    void removeManagedFile(File file, boolean explicit) {
+    void removeManagedFile(File file) {
         lock.writeLock().lock();
         try {
             boolean changed = fileData.remove(file) != null;
-            if(explicit) {
-                changed |= excludedFiles.add(file);
-            }
             dirty |= changed;
         } finally {
             lock.writeLock().unlock();
@@ -388,96 +348,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     boolean isIncompleteDirectory(File folder) {
         return FileUtils.canonicalize(SharingSettings.INCOMPLETE_DIRECTORY.get()).equals(folder);
     }
-    
-    /** Gets the list of directories to exclude from recursive management. */
-    List<File> getDirectoriesToExcludeFromManaging() {
-        lock.readLock().lock();
-        try {
-            return new ArrayList<File>(directoriesNotToManage);
-        } finally {
-            lock.readLock().unlock();
-        }
-    }    
-    
-    /** Sets the new directory to exclude from recursive management. */
-    void setDirectoriesToExcludeFromManaging(Collection<File> folders) {
-        lock.writeLock().lock();
-        try {
-            boolean changed = false;
-            if(!directoriesNotToManage.equals(folders)) {
-                changed = true;
-                directoriesNotToManage.clear();
-                directoriesNotToManage.addAll(folders);
-            }
-            changed |= directoriesToManageRecursively.removeAll(folders);
-            dirty |= changed;
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }   
-
-    /** Returns true if the given folder should be excluded. */
-    boolean isFolderExcluded(File folder) {
-        lock.readLock().lock();
-        try {
-            return directoriesNotToManage.contains(FileUtils.canonicalize(folder));
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-    
-    /** Adds a new directory to recursively manage. */
-    void addDirectoryToManageRecursively(File folder) {
-        lock.writeLock().lock();
-        try {
-            boolean changed = false;
-            changed |= directoriesToManageRecursively.add(folder);
-            changed |= directoriesNotToManage.remove(folder);
-            dirty |= changed;            
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-    
-    /** Sets the new directory to recursively manage. */
-    void setDirectoriesToManageRecursively(Collection<File> folders) {
-        lock.writeLock().lock();
-        try {
-            boolean changed = false;
-            if(!directoriesToManageRecursively.equals(folders)) {
-                changed = true;
-                directoriesToManageRecursively.clear();
-                directoriesToManageRecursively.addAll(folders);
-            }
-            changed |= directoriesNotToManage.removeAll(folders);
-            dirty |= changed;            
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    /** Returns a list of all top-level directories that should be managed recursively. */
-    List<File> getDirectoriesToManageRecursively() {
-        lock.readLock().lock();
-        try {
-            return new ArrayList<File>(directoriesToManageRecursively);
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    public Collection<File> getDirectoriesWithImportedFiles() {
-        Set<File> directories = new HashSet<File>();
-        lock.readLock().lock();
-        try {
-            for(File file : fileData.keySet()) {
-                directories.add(file.getParentFile());
-            }
-        } finally {
-            lock.readLock().unlock();
-        }
-        return directories;
-    }    
     
     /** Returns all categories that should be managed. */
     public Collection<Category> getManagedCategories() {

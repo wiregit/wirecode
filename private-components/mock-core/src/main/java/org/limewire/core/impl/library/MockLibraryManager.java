@@ -3,10 +3,8 @@ package org.limewire.core.impl.library;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
@@ -145,11 +143,6 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
     private class LibraryDataAdapter implements LibraryData {
         
         @Override
-        public List<File> getDirectoriesWithImportedFiles() {
-            return Collections.emptyList();
-        }
-        
-        @Override
         public boolean isFileManageable(File f) {
             return true;
         }
@@ -160,38 +153,13 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         }
         
         @Override
-        public void setManagedOptions(Collection<File> recursiveFoldersToManage,
-                Collection<File> foldersToExclude, Collection<Category> managedCategories) {
-        }
-        
-        @Override
-        public void removeFolders(Collection<File> folders) {
-        }
-        
-        @Override
         public Collection<Category> getManagedCategories() {
             return EnumSet.allOf(Category.class);
         }
 
         @Override
-        public List<File> getDirectoriesToExcludeFromManaging() {
-            return new ArrayList<File>();
-        }
-
-        @Override
         public boolean isDirectoryAllowed(File folder) {
             return folder.isDirectory();
-        }
-        
-        @Override
-        public boolean isDirectoryExcluded(File folder) {
-            return false;
-        }
-        
-
-        @Override
-        public List<File> getDirectoriesToManageRecursively() {
-            return new ArrayList<File>();
         }
 
         @Override
@@ -213,6 +181,11 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
             
         }
         
+        @Override
+        public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
+            // TODO Auto-generated method stub
+            
+        }
     }
 
     @Override

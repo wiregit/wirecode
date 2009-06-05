@@ -6,23 +6,18 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -31,7 +26,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.IntSet;
-import org.limewire.collection.Tuple;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningExecutorService;
@@ -41,7 +35,6 @@ import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
-import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.EventListener;
@@ -56,7 +49,6 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.auth.UrnValidator;
@@ -69,51 +61,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 class LibraryImpl implements Library, FileCollection {
     
     private static final Log LOG = LogFactory.getLog(LibraryImpl.class);
-    
-    private static enum DirectoryLoadStyle { 
-        /**
-         * Used for the initial loading of all previously managed directories.
-         * This preserves excluded files and recurses through subdirectories.
-         */
-        INITIAL_PASS(true, true, false),
-        
-        /**
-         * Used for adding a brand new folder for managing.
-         * This re-adds previously excluded files and recurses through subdirectories. 
-         */
-        ADD_FOLDER(true, false, true),
-        
-        /**
-         * Used for explicitly setting a single folder to be managed.
-         * This re-adds previously excluded files but does not recurse through subdirectories.
-         * 
-         */
-        SET_FOLDER(false, false, true)
-        
-        ;
-        
-        private final boolean recurse;
-        private final boolean validateDir;
-        private final boolean allowExcludedFiles;
-        
-        DirectoryLoadStyle(boolean recurse, boolean validateDir, boolean allowExcludedFiles) {
-            this.recurse = recurse;
-            this.validateDir = validateDir;
-            this.allowExcludedFiles = allowExcludedFiles;
-        }
-        
-        boolean shouldRecurse() {
-            return recurse;
-        }
-        
-        boolean shouldValidateDirectory() {
-            return validateDir;
-        }
-        
-        boolean shouldAddExcludedFiles() {
-            return allowExcludedFiles;
-        }
-    }
     
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster;
     private final EventMulticaster<LibraryStatusEvent> managedListListenerSupport;
@@ -167,14 +114,6 @@ class LibraryImpl implements Library, FileCollection {
     private final Set<String> extensions;
     
     /**
-     * A Set of directories that are completely managed.  Files in these
-     * directories are managed by default and will be managed unless the File is
-     * listed in the set of files not to share.
-     */
-    @InspectableForSize("number completely managed directories")
-    private final Set<File> managedDirectories;
-    
-    /**
      * The revision of the library.  Every time 'loadSettings' is called, the revision
      * is incremented.
      */
@@ -192,9 +131,6 @@ class LibraryImpl implements Library, FileCollection {
     
     /** The number of files that are pending calculation. */
     private final AtomicInteger pendingFiles = new AtomicInteger(0);
-    
-    /** The revision of the managedFolder update. */
-    private final AtomicInteger managedFolderRevision = new AtomicInteger(0);
     
     @SuppressWarnings("unused")
     @InspectableContainer
@@ -225,7 +161,6 @@ class LibraryImpl implements Library, FileCollection {
         this.fileLoader = ExecutorsHelper.newProcessingQueue("ManagedList Loader");
         this.files = new ArrayList<FileDesc>();
         this.extensions = new ConcurrentSkipListSet<String>();
-        this.managedDirectories = new HashSet<File>();
         this.urnMap = new HashMap<URN, IntSet>();
         this.fileToFileDescMap = new HashMap<File, FileDesc>();
         this.fileToUrnFuture = new HashMap<File, Future<Set<URN>>>();
@@ -379,236 +314,6 @@ class LibraryImpl implements Library, FileCollection {
         }
     }
     
-    @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedOptions(
-            Collection<File> recursiveFoldersToManage,
-            Collection<File> foldersToExclude,
-            Collection<Category> categoriesToManage) {
-        LibraryFileData libraryData = getLibraryData();
-        libraryData.setDirectoriesToManageRecursively(recursiveFoldersToManage);
-        libraryData.setDirectoriesToExcludeFromManaging(foldersToExclude);
-        libraryData.setManagedCategories(categoriesToManage);
-        
-        final int loadRevision = revision.get();
-        final int managedRevision = managedFolderRevision.incrementAndGet();
-        fireLoading();
-        return submit(new Callable<List<ListeningFuture<FileDesc>>>() {
-            @Override
-            public List<ListeningFuture<FileDesc>> call() throws Exception {
-                return setManagedOptionsImpl(loadRevision, managedRevision);                
-            }
-        });
-    }
-    
-    @Override
-    public void removeFolder(File folder) {
-        folder = FileUtils.canonicalize(folder);
-        
-        boolean managed;
-        List<FileDesc> removedFds = Collections.emptyList();
-        rwLock.writeLock().lock();
-        try {
-            managed = managedDirectories.contains(folder);
-            if(!managed) {
-                List<String> emptyExtensionList = Collections.emptyList();
-                removedFds = removeFilesInDirectoriesOrWithExtensions(Collections.singletonList(folder), emptyExtensionList);
-            }
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-        
-        // If we were able to remove above, fire the events.
-        for(FileDesc fd : removedFds) {
-            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILE_REMOVED, fd));
-        }
-        
-        if(managed) {
-            // If it was managed, we shouldn't have tried to remove.
-            assert removedFds.size() == 0;
-            LibraryFileData libraryData = getLibraryData();
-            Collection<File> manage = libraryData.getDirectoriesToManageRecursively();
-            Collection<File> exclude = libraryData.getDirectoriesToExcludeFromManaging();
-            Collection<Category> categories = libraryData.getManagedCategories();
-            if(manage.contains(folder)) {
-                manage.remove(folder);
-            } else {
-                exclude.add(folder);
-            }
-            try {
-                setManagedOptions(manage, exclude, categories).get();
-            } catch (InterruptedException e) {
-            } catch (ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-    
-    private List<ListeningFuture<FileDesc>> setManagedOptionsImpl(int loadRevision, int managedRevision) {
-        Collection<FileDesc> removedFds;
-        Collection<File> addedDirs;
-        Collection<String> addedExtensions;
-        Collection<File> preservedDirs;
-        
-        // Step 0: calculate all the new directories and subfolders to manage
-        // this should be performed outside of the lock as it may be long running
-        Set<File> newManagedDirs = calculateManagedDirs(managedRevision); 
-        
-        // if the user has changed their managed directories while calculating
-        // the subfolders, return
-        if(managedRevision != managedFolderRevision.get())
-            return Collections.emptyList();
-        
-        // Step 1: Setup new extensions & remove now-unshared files.
-        rwLock.writeLock().lock();
-        try {
-            if(loadRevision != revision.get()) {
-                return Collections.emptyList();
-            }
-            
-            //Calculate new managed dirs, what dirs were removed, and what dirs were added.
-            Set<File> oldManagedDirs = new HashSet<File>(managedDirectories);
-            Set<File> removedDirs = new HashSet<File>(oldManagedDirs);
-            removedDirs.removeAll(newManagedDirs);                
-            addedDirs = new HashSet<File>(newManagedDirs);
-            addedDirs.removeAll(oldManagedDirs);
-            managedDirectories.removeAll(removedDirs);
-            managedDirectories.addAll(addedDirs);
-            preservedDirs = new HashSet<File>(managedDirectories);
-            preservedDirs.removeAll(addedDirs);
-    
-            // Calculate what extensions were added & removed,
-            // and set extensions to the correct value.
-            Collection<String> currentExtensions = new HashSet<String>(getLibraryData().getExtensionsInManagedCategories());
-            addedExtensions = new HashSet<String>(currentExtensions);
-            addedExtensions.removeAll(extensions);
-            Collection<String> removedExtensions = new HashSet<String>(extensions);
-            removedExtensions.removeAll(currentExtensions);
-            extensions.clear();
-            extensions.addAll(currentExtensions);
-            
-            // Remove any files that need removing.
-            removedFds = removeFilesInDirectoriesOrWithExtensions(removedDirs, removedExtensions);
-            
-            if(!getLibraryData().isProgramManagingAllowed()) {
-                Collection<FileDesc> programFiles = removePrograms();
-                programFiles.removeAll(removedFds);
-                removedFds.addAll(programFiles);
-            }
-            
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-        
-        // Step 2: Dispatch all removed files.
-        for(FileDesc fd : removedFds) {
-            dispatch(new FileViewChangeEvent(LibraryImpl.this, FileViewChangeEvent.Type.FILE_REMOVED, fd));
-        }
-        
-        // Step 3: Go through all newly managed dirs & manage them.
-        List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-        for(File dir : addedDirs) {
-            addManagedDirectory(extensions, dir, loadRevision, DirectoryLoadStyle.SET_FOLDER, futures);
-        }
-        
-        // Step 4: Go through all unchanged dirs & manage new extensions.
-        if(!addedExtensions.isEmpty() && !preservedDirs.isEmpty()) {            
-            for(File directory : preservedDirs) {
-                addManagedDirectory(addedExtensions, directory, loadRevision, DirectoryLoadStyle.SET_FOLDER, futures);
-            }
-        }
-        
-        addLoadingListener(futures, loadRevision);
-        return futures;
-    }
-    
-    /**
-     * Returns a list of all files that are programs so that they can be removed.
-     */
-    private List<FileDesc> removePrograms() {
-        List<FileDesc> removed = new ArrayList<FileDesc>();
-        for(FileDesc fd : files) {
-            if(fd != null) {
-                if(Category.PROGRAM == CategoryConverter.categoryForExtension(FileUtils.getFileExtension(fd.getFile()))) {
-                    removed.add(fd);
-                }
-            }
-        }
-        return removed;
-    }
-
-    private List<FileDesc> removeFilesInDirectoriesOrWithExtensions(Collection<File> removedDirs, Collection<String> removedExtensions) {
-        List<FileDesc> removed = new ArrayList<FileDesc>();
-        if(!removedDirs.isEmpty() || !removedExtensions.isEmpty()) {
-            for(FileDesc fd : files) {
-                if(fd != null) {
-                    boolean remove = false;
-                    File parent = fd.getFile().getParentFile();
-                    String ext = FileUtils.getFileExtension(fd.getFile()).toLowerCase(Locale.US);                                
-                    if(removedDirs.contains(parent)) {
-                        remove = true;
-                    } else if(removedExtensions.contains(ext)) {
-                        remove = true;
-                    }
-                    if(remove) {
-                        removed.add(removeInternal(fd.getFile(), false));
-                    }
-                }
-            }
-        }
-        return removed;
-    }
-    
-    /** Calculates all dirs (including subdirs) that should be managed. */
-    private Set<File> calculateManagedDirs(int managedRevision) {
-        List<File> dirs = getLibraryData().getDirectoriesToManageRecursively();
-        Set<File> allManagedDirs = new HashSet<File>();
-        Queue<File> fifo = new LinkedList<File>();
-        fifo.addAll(dirs);
-        calculateManagedDirs(fifo, allManagedDirs, managedRevision);
- 
-        return allManagedDirs;
-    }
-    
-    /**
-     * Accumulator for calculating all the subfolders in a directory
-     */
-    private void calculateManagedDirs(Queue<File> fifo, Set<File> managedDirectories, int managedRevision) {
-        while(!fifo.isEmpty()) {
-            // break early if user has modified managed directories
-            if(managedRevision != managedFolderRevision.get()) {
-                return;
-            }
-            File dir = fifo.remove();
-            dir = FileUtils.canonicalize(dir);
-            
-            if(managedDirectories.contains(dir))
-                continue;
-            
-            managedDirectories.add(dir);
-          
-            File[] dirList = dir.listFiles(new ManagedDirectoryFilter());
-            fifo.addAll(Arrays.asList(dirList));
-        }
-    }
-
-    @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File f) {
-        final File folder = FileUtils.canonicalize(f);   
-        
-        getLibraryData().addDirectoryToManageRecursively(folder);
-        fireLoading();
-        return submit(new Callable<List<ListeningFuture<FileDesc>>>() {
-            @Override
-            public List<ListeningFuture<FileDesc>> call() {
-                int rev = revision.get();
-                List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-                addManagedDirectory(extensions, folder, rev, DirectoryLoadStyle.ADD_FOLDER, futures);
-                addLoadingListener(futures, rev);
-                return futures;
-            }
-        });
-    }
-    
     /** Adds this incomplete file to the list of managed files */
     void addIncompleteFile(File incompleteFile,
                            Set<? extends URN> urns,
@@ -751,94 +456,6 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedExtensions(Collection<String> newManagedExtensions) {
-        LibraryFileData data = getLibraryData();
-        data.setManagedExtensions(newManagedExtensions);
-        return setManagedOptions(data.getDirectoriesToManageRecursively(),
-                                 data.getDirectoriesToExcludeFromManaging(),
-                                 data.getManagedCategories());
-    }
-
-    @Override
-    public List<File> getDirectoriesToManageRecursively() {
-        // Make sure that things listed twice in the data are not
-        // listed twice in the returned list.  That is, if somehow
-        // the serialized user data got messed up and said,
-        // "I want to recursively share: /parent and /parent/sub
-        // We only want to return just /parent, because /parent/sub
-        // is automatically included.
-        // The catch is there are exclusions, so we have
-        // to make sure that if the listed items are:
-        // /parent, /parent/sub/sub2,
-        // but the exclusions include /parent/sub, then
-        // we don't want to filter out /parent/sub/sub2.
-        
-        List<File> managed = getLibraryData().getDirectoriesToManageRecursively();
-        List<File> excluded = getLibraryData().getDirectoriesToExcludeFromManaging();
-        managed.removeAll(excluded); // First remove any things that were duplicated.
-        
-        List<Tuple<File, File>> tuples = null;
-        for(File f1 : managed) {
-            for(File f2 : managed) {
-                if(f1 == f2) {
-                    continue;
-                }
-                if(FileUtils.isAncestor(f1, f2)) {
-                    if(tuples == null) {
-                        tuples = new ArrayList<Tuple<File,File>>();                        
-                    }
-                    tuples.add(new Tuple<File, File>(f1, f2));
-                }
-            }
-        }
-        // No ancestors, phew!
-        if(tuples == null) {
-            return managed;
-        }
-        
-        // Damn, there were some duplicate listings...
-        // Check if the child has excluded as an ancestor, the parent
-        // must *not* have excluded as an ancestor, too.
-        // Consider:
-        // managed: /parent, /parent/sub/sub1, parent/sub/sub1/sub2
-        // excluded: /parent/sub
-        // In this case, sub1 & sub2 have sub as an ancestor,
-        // but sub2 is still a duplicate.
-        for(File exclude : excluded) {
-            for(Iterator<Tuple<File, File>> tupleI = tuples.iterator(); tupleI.hasNext(); ) {
-                Tuple<File, File> tuple = tupleI.next();
-                if(FileUtils.isAncestor(exclude, tuple.getSecond()) && !FileUtils.isAncestor(exclude, tuple.getFirst())) {
-                    tupleI.remove();
-                }
-            }
-        }
-        
-        // Now that the tuples are cleaned up, go through & remove all tuples.
-        for(Tuple<File, File> tuple : tuples) {
-            managed.remove(tuple.getSecond());
-        }
-        return managed;
-        
-    }
-    
-    @Override
-    public Collection<File> getDirectoriesWithImportedFiles() {
-        Collection<File> directories = getLibraryData().getDirectoriesWithImportedFiles();
-        rwLock.readLock().lock();
-        try {
-            directories.removeAll(managedDirectories);
-        } finally {
-            rwLock.readLock().unlock();
-        }
-        return directories;
-    }
-    
-    @Override
-    public List<File> getDirectoriesToExcludeFromManaging() {
-        return getLibraryData().getDirectoriesToExcludeFromManaging();
-    }
-    
-    @Override
     public boolean add(FileDesc fileDesc) {
         // an FD should never exist unless it is already in the library
         assert contains(fileDesc);
@@ -879,12 +496,8 @@ class LibraryImpl implements Library, FileCollection {
             return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(event, FileViewChangeFailedException.Reason.CANT_CANONICALIZE));
         }
         
-        boolean explicitAdd = false;
         rwLock.readLock().lock();
         try {
-            explicitAdd = !managedDirectories.contains(file.getParentFile())
-                       || !hasManageableExtension(file);
-            
             // Exit if already added.
             if(fileToFileDescMap.containsKey(file)) {
                 LOG.debugf("Not loading because file already loaded {0}", file);
@@ -909,7 +522,7 @@ class LibraryImpl implements Library, FileCollection {
         }
         
         final File interned = new File(file.getPath().intern());
-        getLibraryData().addManagedFile(interned, explicitAdd);
+        getLibraryData().addManagedFile(interned);
 
         boolean failed = false;
         rwLock.writeLock().lock();
@@ -1042,7 +655,7 @@ class LibraryImpl implements Library, FileCollection {
         LOG.debugf("Removing file: {0}", file);                
 
         file = FileUtils.canonicalize(file);
-        FileDesc fd = removeInternal(file, true);        
+        FileDesc fd = removeInternal(file);        
         if(fd != null) {
             dispatch(new FileViewChangeEvent(this, FileViewChangeEvent.Type.FILE_REMOVED, fd));
         }
@@ -1056,12 +669,10 @@ class LibraryImpl implements Library, FileCollection {
      * 
      * The file should be canonicalized already.
      */
-    private FileDesc removeInternal(File file, boolean allowExclude) {
+    private FileDesc removeInternal(File file) {
         FileDesc fd;
-        boolean exclude;
         rwLock.writeLock().lock();
         try {
-            exclude = allowExclude && managedDirectories.contains(file.getParentFile()) && hasManageableExtension(file);
             fd = fileToFileDescMap.get(file);
             if(fd != null) {
                 removeFileDesc(file, fd);
@@ -1070,7 +681,7 @@ class LibraryImpl implements Library, FileCollection {
             rwLock.writeLock().unlock();
         }
         if(fd != null) {
-            getLibraryData().removeManagedFile(file, exclude);
+            getLibraryData().removeManagedFile(file);
         }
         return fd;
     }
@@ -1120,7 +731,7 @@ class LibraryImpl implements Library, FileCollection {
         LOG.debugf("Attempting to rename: {0} to: {1}", oldName, newName);      
         
         oldName = FileUtils.canonicalize(oldName);
-        FileDesc fd = removeInternal(oldName, false);        
+        FileDesc fd = removeInternal(oldName);        
         if (fd != null) {
             // TODO: It's dangerous to prepopulate, because we might actually
             //       be called with wrong data, giving us wrong URNs.
@@ -1138,7 +749,7 @@ class LibraryImpl implements Library, FileCollection {
         LOG.debugf("File Changed: {0}", file);
 
         file = FileUtils.canonicalize(file);
-        FileDesc fd = removeInternal(file, false);
+        FileDesc fd = removeInternal(file);
         if (fd != null) {
             urnCache.removeUrns(file); // Explicitly remove URNs to force recalculating.
             return add(file, xmlDocs, revision.get(), fd);
@@ -1182,7 +793,6 @@ class LibraryImpl implements Library, FileCollection {
             files.clear();
             urnMap.clear();
             fileToFileDescMap.clear();
-            managedDirectories.clear();
             extensions.clear();
             extensions.addAll(getLibraryData().getExtensionsInManagedCategories());
         } finally {
@@ -1250,29 +860,6 @@ class LibraryImpl implements Library, FileCollection {
         // TODO: We want to always share this stuff, not just approved extensions.
 //        addManagedDirectory(extensions, LibraryUtils.PROGRAM_SHARE, rev, false, true, true, futures);
 //        addManagedDirectory(extensions, LibraryUtils.PREFERENCE_SHARE, rev, false, true, true, futures);
-
-        List<File> directories = getLibraryData().getDirectoriesToManageRecursively();
-        // Sorting is not terribly necessary, but we'll do it anyway...
-        Collections.sort(directories, new Comparator<File>() {
-            public int compare(File a, File b) {
-                return a.toString().length()-b.toString().length();
-            }
-        });
-        
-        for(File directory : directories) {
-            if(rev != revision.get()) {
-                break;
-            }
-            addManagedDirectory(extensions, directory, rev, DirectoryLoadStyle.INITIAL_PASS, futures);        
-        }
-        
-        Set<File> managedDirs = new HashSet<File>();
-        rwLock.readLock().lock();
-        try {
-            managedDirs.addAll(managedDirectories);
-        } finally {
-            rwLock.readLock().unlock();
-        }
         
         // A listener that will remove individually managed files if they can't load.
         EventListener<FutureEvent<FileDesc>> indivListeners = new EventListener<FutureEvent<FileDesc>>() {
@@ -1287,7 +874,7 @@ class LibraryImpl implements Library, FileCollection {
                         case CANT_CREATE_FD:
                         case NOT_MANAGEABLE:
                         case PROGRAMS_NOT_MANAGEABLE:
-                            getLibraryData().removeManagedFile(ex.getEvent().getFile(), true);
+                            getLibraryData().removeManagedFile(ex.getEvent().getFile());
                             break;
                         }
                     }
@@ -1300,109 +887,13 @@ class LibraryImpl implements Library, FileCollection {
             if(rev != revision.get()) {
                 break;
             }
-            // Load files that aren't in managed dirs & aren't manageable files.
-            if(!managedDirs.contains(file.getParentFile()) || !hasManageableExtension(file)) {
-                ListeningFuture<FileDesc> future = add(file, LimeXMLDocument.EMPTY_LIST, rev, null);
-                future.addFutureListener(indivListeners);
-                futures.add(future);
-            }
+
+            ListeningFuture<FileDesc> future = add(file, LimeXMLDocument.EMPTY_LIST, rev, null);
+            future.addFutureListener(indivListeners);
+            futures.add(future);
         }
         
         return futures;
-    }
-    
-    /**
-     * Recursively adds this directory and all subdirectories to the managed
-     * directories as well as queueing their files for managing.  Does nothing
-     * if <tt>directory</tt> doesn't exist, isn't a directory, or has already
-     * been added.  This method is thread-safe.  It acquires locks on a
-     * per-directory basis.  If the current revision ever changes from the
-     * expected revision, this returns immediately.
-     */
-    private void addManagedDirectory(Collection<String> managedExts, File directory, int rev,
-            DirectoryLoadStyle loadStyle,
-            List<ListeningFuture<FileDesc>> futures) {
-        Set<File> addedFolders = new HashSet<File>();
-        addManagedDirectoryImpl(managedExts, directory, rev, loadStyle, futures, addedFolders);
-    }
-    
-    /**
-     * The implementation of {@link #addManagedDirectory(Collection, File, int, boolean, boolean, boolean, List)}.
-     */
-    private void addManagedDirectoryImpl(Collection<String> managedExts, File startDirectory, int rev,
-            DirectoryLoadStyle loadStyle,
-            List<ListeningFuture<FileDesc>> futures, Set<File> addedFolders) {    
-        LOG.debugf("Adding [{0}] to managed directories", startDirectory);
-         
-        Queue<File> fifo = new LinkedList<File>();
-        fifo.add(startDirectory);
-
-        while(!fifo.isEmpty()) {
-            File directory = fifo.remove();
-            
-             directory = FileUtils.canonicalize(directory);
-             if(!isFolderManageable(directory, true)) {
-                 LOG.debugf("Exiting because dir isn't manageable {0}", directory);
-                 continue;
-             }
-             
-             // Immediately exit if we already added this directory in this pass.
-             if(addedFolders.contains(directory)) {
-                 LOG.debugf("Exiting because already added {0} in this pass", directory);
-                 continue;
-             } else {
-                 addedFolders.add(directory);
-             }
-         
-             // Exit quickly (without doing the dir lookup) if revisions changed.
-             if(rev != revision.get()) {
-                 LOG.debugf("Exiting because revisions changed.  Expected {0}, was {1}", rev, revision.get());
-                 return;
-             }
-        
-             // STEP 1:
-             // Add directory
-             rwLock.readLock().lock();
-             try {
-                 // if it was already added, ignore.
-                 if (loadStyle.shouldValidateDirectory() && managedDirectories.contains(directory)) {
-                     LOG.debugf("Exiting because dir already managed {0}", directory);
-                     continue;
-                 } else {
-                     managedDirectories.add(directory);
-                 }
-             } finally {
-                 rwLock.readLock().unlock();
-             }
-         
-             // STEP 2:
-             // Scan subdirectory for the amount of manageable files.
-             File[] fileList = directory.listFiles(new ManageableFileFilter(managedExts, loadStyle.shouldAddExcludedFiles(), false));
-             if (fileList == null) {
-                 LOG.debugf("Exiting because of strange return value finding files in {0}", directory);
-                 continue;
-             }
-             
-             for(int i = 0; i < fileList.length && rev == revision.get(); i++) {
-                 futures.add(add(fileList[i], LimeXMLDocument.EMPTY_LIST, rev, null));
-             }
-                 
-             // Exit quickly (without doing the dir lookup) if revisions changed.
-             if(rev != revision.get()) {
-                 LOG.debugf("Exiting because revisions changed.  Expected {0}, was {1}", rev, revision.get());
-                 return;
-             }
-        
-             // STEP 3:
-             // Recursively add subdirectories.
-             if(loadStyle.shouldRecurse() && !LibraryUtils.isForcedShareDirectory(directory)) {
-                 File[] dirList = directory.listFiles(new ManagedDirectoryFilter());
-                 if(dirList != null && dirList.length > 0)
-                     fifo.addAll(Arrays.asList(dirList));
-             } else {
-                 LOG.debugf("Not recursing beyond dir {0}", directory);
-             }
-        }
     }
 
     /** Dispatches a SAVE event & tells library data to save. */
@@ -1418,10 +909,9 @@ class LibraryImpl implements Library, FileCollection {
     }
 
     /**
-     * Returns true if this folder is manageable.  If excludeExcludedDirectories is true,
-     * this will *NOT* check against the list of excluded subdirectories.
+     * Returns true if this folder is can have files from it added.
      */
-    private boolean isFolderManageable(File folder, boolean excludeExcludedDirectories) {
+    private boolean isFolderManageable(File folder) {
         folder = FileUtils.canonicalize(folder);
         
         if (!folder.isDirectory() || !folder.canRead() || !folder.exists() && folder.getParent() != null) {
@@ -1433,10 +923,6 @@ class LibraryImpl implements Library, FileCollection {
         }
 
         if (LibraryUtils.isApplicationSpecialShareDirectory(folder)) {
-            return false;
-        }
-
-        if (excludeExcludedDirectories && getLibraryData().isFolderExcluded(folder)) {
             return false;
         }
 
@@ -1514,17 +1000,12 @@ class LibraryImpl implements Library, FileCollection {
     
     /** Returns a filter used to get manageable files. */
     FileFilter newManageableFilter() {
-        return new ManageableFileFilter(extensions, true, true);
+        return new ManageableFileFilter(extensions, true);
     }
     
     @Override
     public boolean isDirectoryAllowed(File folder) {
-        return folder.isDirectory() && isFolderManageable(folder, false);
-    }
-    
-    @Override
-    public boolean isDirectoryExcluded(File folder) {
-        return getLibraryData().isFolderExcluded(folder);
+        return folder.isDirectory() && isFolderManageable(folder);
     }
     
     @Override
@@ -1535,13 +1016,11 @@ class LibraryImpl implements Library, FileCollection {
     /** A filter used to see if a file is manageable. */
     private class ManageableFileFilter implements FileFilter {
         private final Set<String> extensions;
-        private final boolean allowExcludedFiles;
         private final boolean includeContainedFiles;
         
         /** Constructs the filter with the given set of allowed extensions. */
-        public ManageableFileFilter(Collection<String> extensions, boolean allowExcludedFiles, boolean includeContainedFiles) {
+        public ManageableFileFilter(Collection<String> extensions, boolean includeContainedFiles) {
             this.extensions = new HashSet<String>(extensions);
-            this.allowExcludedFiles = allowExcludedFiles;
             this.includeContainedFiles = includeContainedFiles;
         }
         
@@ -1550,18 +1029,8 @@ class LibraryImpl implements Library, FileCollection {
             return file.isFile()
                 && (includeContainedFiles || !contains(file))
                 && LibraryUtils.isFileManagable(file)
-                && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US))
-                && (allowExcludedFiles || !getLibraryData().isFileExcluded(file));
+                && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US));
         }
-    }
-    
-    /** The filter object to use to determine directories. */
-    private class ManagedDirectoryFilter implements FileFilter {
-        @Override
-        public boolean accept(File f) {
-            return f.isDirectory()
-                && isFolderManageable(f, true);
-        }        
     }
 
     /** A simple empty callable for use in PendingFuture. */
@@ -1592,5 +1061,21 @@ class LibraryImpl implements Library, FileCollection {
         public void setException(Throwable t) {
             super.setException(t);
         }
+    }
+
+    @Override
+    public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void setManagedExtensions(Collection<String> extensions) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

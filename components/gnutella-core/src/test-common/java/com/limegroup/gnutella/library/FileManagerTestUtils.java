@@ -12,9 +12,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -22,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.limewire.collection.CollectionUtils;
-import org.limewire.core.api.Category;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -109,10 +105,6 @@ public class FileManagerTestUtils {
         }
     }
     
-    public static List<FileDesc> assertSetManagedDirectories(Library fileList, Collection<File> dirs, Collection<File> excludeDirs) throws Exception {
-        return assertFutureListFinishes(fileList.setManagedOptions(dirs, excludeDirs, EnumSet.allOf(Category.class)), 5, TimeUnit.SECONDS);
-    }
-    
     public static void assertContainsFiles(Iterable<FileDesc> iterable, File... expectedFiles) {
         assertContainsFiles(CollectionUtils.listOf(iterable), expectedFiles);
     }
@@ -133,10 +125,6 @@ public class FileManagerTestUtils {
     
     public static List<FileDesc> assertAddsFolder(FileCollection fileList, File folder) throws Exception {
         return assertFutureListFinishes(fileList.addFolder(folder), 5, TimeUnit.SECONDS);
-    }
-    
-    public static List<FileDesc> assertChangeExtensions(Library fileList, String... extensions) throws Exception {
-        return assertFutureListFinishes(fileList.setManagedExtensions(Arrays.asList(extensions)), 5, TimeUnit.SECONDS);
     }
 
     /**

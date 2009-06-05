@@ -2,7 +2,6 @@ package com.limegroup.gnutella.library;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -18,24 +17,10 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @Singleton
 public class LibraryStub extends AbstractFileCollectionStub implements Library {
-
-    @Override
-    public Collection<File> getDirectoriesWithImportedFiles() {
-        return Collections.emptySet();
-    }
-    
-    @Override
-    public void removeFolder(File folder) {
-    }
     
     @Override
     public Collection<Category> getManagedCategories() {
         return EnumSet.allOf(Category.class);
-    }
-    
-    @Override
-    public List<File> getDirectoriesToExcludeFromManaging() {
-        return new ArrayList<File>();
     }
     
     @Override
@@ -70,11 +55,6 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     }
 
     @Override
-    public List<File> getDirectoriesToManageRecursively() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public Map<Category, Collection<String>> getExtensionsPerCategory() {
         return Collections.emptyMap();
     }
@@ -89,7 +69,7 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     }
 
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedExtensions(Collection<String> extensions) {
+    public void setManagedExtensions(Collection<String> extensions) {
         throw new UnsupportedOperationException();
     }
     
@@ -97,21 +77,14 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     public boolean isDirectoryAllowed(File folder) {
         return folder.isDirectory();
     }
-    
-    @Override
-    public boolean isDirectoryExcluded(File folder) {
-        return false;
-    }
 
     @Override
     public boolean isProgramManagingAllowed() {
         return false;
     }
-
+    
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedOptions(
-            Collection<File> recursiveFoldersToManage, Collection<File> foldersToExclude,
-            Collection<Category> managedCategories) {
+    public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
         throw new UnsupportedOperationException();
     }
 }

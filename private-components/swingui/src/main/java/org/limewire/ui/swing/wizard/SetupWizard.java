@@ -6,21 +6,17 @@ import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class SetupWizard {
     
-    private final Provider<IconManager> iconManager;
     private Wizard wizard;
     
     @Inject
-    public SetupWizard(Provider<SetupComponentDecoratorFactory> decoratorFactory, 
-            Provider<IconManager> iconManager,
+    public SetupWizard(Provider<SetupComponentDecoratorFactory> decoratorFactory,
             Provider<LibraryManager> libraryManager){
-        this.iconManager = iconManager;
         
         if (shouldShowWizard()) {
             createWizard(decoratorFactory.get(), libraryManager.get().getLibraryData());
@@ -28,7 +24,7 @@ public class SetupWizard {
     }
     
     public boolean shouldShowWizard() {
-        return needsPage1() || needsPage2() || needsUpgrade();
+        return needsPage1();
     }
     
     public void showDialogIfNeeded(Frame owner) {
@@ -48,19 +44,7 @@ public class SetupWizard {
         
         if(needsPage1()){
             wizard.addPage(new SetupPage1(decorator));
-        }        
-
-        if (needsUpgrade()) {
-            wizard.addPage(new SetupPage2(decorator, iconManager, libraryData, true));
         }
-        else if(needsPage2()){
-            wizard.addPage(new SetupPage2(decorator, iconManager, libraryData));
-        }
-    }
-    
-    private boolean needsUpgrade() {
-        return !InstallSettings.UPGRADED_TO_5.getValue() 
-            && InstallSettings.SCAN_FILES.getValue();
     }
     
     private boolean needsPage1() {
@@ -77,10 +61,6 @@ public class SetupWizard {
             return GuiUtils.shouldShowStartOnStartupWindow();
         }
         return false;
-    }
-    
-    private boolean needsPage2() {
-        return !InstallSettings.SCAN_FILES.getValue();
     }
 
 }

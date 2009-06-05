@@ -22,14 +22,11 @@ public interface FileCollection extends FileView {
     boolean add(FileDesc fileDesc);
 
     /**
-     * Adds a folder to the {@link FileCollection}. Depending on the kind of collection, this
-     * may either add all current contents of the folder, or the folder itself
-     * (allowing for future items in the folder to be added).
-     * 
-     * Returns a Future from which the list of all FDs that are going to be
-     * added is returned.
+     * Adds all files from the folder that are manageable
+     * according to the current set of managed categories.
      */
     ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder);
+    
     /**
      * Asynchronously adds a file to the list. The returned Future can be used
      * to retrieve the resulting FileDesc. If there is an error adding the file,
