@@ -13,7 +13,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.bittorrent.Torrent;
-import org.limewire.bittorrent.TorrentAlert;
 import org.limewire.bittorrent.TorrentException;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentSettings;
@@ -22,6 +21,7 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -202,9 +202,9 @@ public class TorrentManagerImpl implements TorrentManager {
         try {
             String sha1 = torrent.getSha1();
             libTorrent.pause_torrent(sha1);
-            // FileUtils.forceRename(torrent.getIncompleteFile(),
-            // torrent.getCompleteFile());
+            // 
             libTorrent.move_torrent(sha1, directory.getAbsolutePath());
+            FileUtils.forceRename(torrent.getIncompleteFile(), torrent.getCompleteFile());
             libTorrent.resume_torrent(sha1);
             updateStatus(torrent);
         } finally {
@@ -322,7 +322,7 @@ public class TorrentManagerImpl implements TorrentManager {
     private class BasicAlertCallback implements AlertCallback {
 
         @Override
-        public void callback(TorrentAlert alert) {
+        public void callback(LibTorrentAlert alert) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(alert.toString());
             }
