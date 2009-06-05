@@ -15,6 +15,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 
@@ -79,20 +80,27 @@ public class BitTorrentOptionPanel extends OptionPanel {
         buttonGroup.add(limewireControl);
         buttonGroup.add(myControl);
 
-        p.add(limewireControl, "wrap");
-        p.add(myControl, "wrap");
-
         downloadBandWidthLabel = new JLabel(I18n.tr("Download bandwidth"));
         uploadBandWidthLabel = new JLabel(I18n.tr("Upload bandwidth"));
 
         uploadBandWidth = new BandWidthSlider();
         downloadBandWidth = new BandWidthSlider();
 
-        p.add(downloadBandWidthLabel, "split");
-        p.add(downloadBandWidth, "alignx right, wrap");
-        p.add(uploadBandWidthLabel, "split");
-        p.add(uploadBandWidth, "alignx right, wrap");
+        if (torrentManager.get().isValid()) {
+            p.add(limewireControl, "wrap");
+            p.add(myControl, "wrap");
 
+            p.add(downloadBandWidthLabel, "split");
+            p.add(downloadBandWidth, "alignx right, wrap");
+            p.add(uploadBandWidthLabel, "split");
+            p.add(uploadBandWidth, "alignx right, wrap");
+        } else {
+            //TODO updating text after we get the new error message from mike s.
+            p
+                    .add(new MultiLineLabel(
+                            I18n
+                                    .tr("There was an error loading the bittorrent code. You will not be use bittorrent capabilities until this is resolved."), 500));
+        }
         return p;
     }
 
@@ -109,7 +117,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         // TODO this a little weird since we are jsut using the fact that the
         // inject settings will be updated automatically by updating the
         // BittorentSettings values.
-        if(torrentManager.get().isValid()) {
+        if (torrentManager.get().isValid()) {
             torrentManager.get().updateSettings(torrentSettings);
         }
         return false;
