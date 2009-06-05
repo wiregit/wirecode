@@ -18,16 +18,16 @@ import org.limewire.bittorrent.TorrentException;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
+import org.limewire.inject.LazySingleton;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-@Singleton
+@LazySingleton
 public class TorrentManagerImpl implements TorrentManager {
 
     private static final boolean PERIODICALLY_SAVE_FAST_RESUME_DATA = true;
