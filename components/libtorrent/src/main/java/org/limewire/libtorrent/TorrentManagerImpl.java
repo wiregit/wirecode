@@ -228,7 +228,9 @@ public class TorrentManagerImpl implements TorrentManager {
             lock.writeLock().lock();
             try {
                 libTorrent.initialize();
-                updateSettings(torrentSettings.get());
+                if(libTorrent.isLoaded()) {
+                    updateSettings(torrentSettings.get());
+                }
             } finally {
                 lock.writeLock().unlock();
             }
