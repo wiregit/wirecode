@@ -120,7 +120,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final Provider<IconManager> iconManager;
     private final LibraryNavigator libraryNavigator;
     private HyperlinkButton downloadlink;
-    private HyperlinkButton sharelink;
     private HyperlinkButton nosaveLink;
     private JXPanel toolbar;
     private ResizingInputPanel inputPanel;
@@ -467,10 +466,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         downloadlink = new HyperlinkButton(new DownloadFromFriendLibraryAction());
         downloadlink.setFont(linkFont);
 
-        sharelink = new HyperlinkButton(new ShareAction());
-        sharelink.setFont(linkFont);
-        
-        
         toolbar = new JXPanel(new MigLayout("insets 0 0 0 5, gap 10, alignx right, aligny 50%"));
         ResizeUtils.forceHeight(toolbar, 22);
         
@@ -484,7 +479,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         }
 
         toolbar.add(downloadlink);
-        toolbar.add(sharelink);
 
         inputPanel = new ResizingInputPanel(writer, schedExecService);
         inputPanel.setBorder(BorderFactory.createEmptyBorder());
@@ -551,17 +545,6 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         @Override
         public void actionPerformed(ActionEvent e) {
             libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
-        }
-    }
-
-    private class ShareAction extends AbstractAction {
-        public ShareAction() {
-            super("<html><u>" + tr("What I'm Sharing") + "</u></html>");
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            libraryNavigator.selectFriendShareList(chatFriend.getFriend());
         }
     }
 

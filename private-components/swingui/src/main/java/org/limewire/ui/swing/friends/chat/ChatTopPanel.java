@@ -6,8 +6,6 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GradientPaint;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,6 +16,7 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.ToolTipManager;
 
@@ -27,12 +26,11 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.border.DropShadowBorder;
-import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.Objects;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
@@ -45,9 +43,6 @@ import com.google.inject.Inject;
  * & other controls.
  */
 public class ChatTopPanel extends JXPanel {
-    @Resource(key="ChatTopPanel.backgroundGradientTop") private Color gradientTop; 
-    @Resource(key="ChatTopPanel.backgroundGradientBottom") private Color gradientBottom; 
-    @Resource(key="ChatTopPanel.borderBottom") private Color borderBottom;
     @Resource(key="ChatTopPanel.buddyTextFont") private Font textFont;
     @Resource(key="ChatTopPanel.hideTextFont") private Font hideFont;
     @Resource(key="ChatTopPanel.textColor") private Color textColor;
@@ -59,18 +54,12 @@ public class ChatTopPanel extends JXPanel {
     private final Map<String, PropertyChangeListener> friendStatusAndModeListeners;
     
     @Inject
-    public ChatTopPanel() {        
+    public ChatTopPanel(BarPainterFactory painterFactory) {
         GuiUtils.assignResources(this);
         
-        RectanglePainter painter = new RectanglePainter();
-        painter.setFillPaint(new GradientPaint(50.0f, 0.0f, gradientTop, 50.0f, 9.5f, gradientBottom));
-        painter.setBorderPaint(null);
-        painter.setInsets(new Insets(0, 0, 0, 0));
-        painter.setBorderWidth(0.0f);
+        setBackgroundPainter(painterFactory.createHeaderBarPainter());
         
-        setBackgroundPainter(painter);
-        
-        setBorder(new DropShadowBorder(borderBottom, 1, 1.0f, 0, false, false, true, false));
+        setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, Color.BLACK));
         
         setLayout(new MigLayout("insets 3 2 0 5, fill", "[]2[][]:push[]5", "[19px, top]"));
         Dimension size = new Dimension(400, 19);

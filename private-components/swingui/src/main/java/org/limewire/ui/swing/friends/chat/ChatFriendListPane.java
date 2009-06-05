@@ -164,13 +164,11 @@ public class ChatFriendListPane extends JPanel {
     private void addPopupMenus(JComponent comp) {
         FriendContext context = new FriendContext();
         ViewLibrary viewLibrary = new ViewLibrary(context);
-        ViewSharedFiles viewSharedFiles = new ViewSharedFiles(context);
         JPopupMenu nonChattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(false, context), new OpenChat(context));
         nonChattingPopup.addSeparator();
         nonChattingPopup.add(viewLibrary);
-        nonChattingPopup.add(viewSharedFiles);
        
-        JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles);
+        JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary);
         chattingPopup.addSeparator();
         chattingPopup.add(new CloseChat(context));
     }
@@ -779,32 +777,7 @@ public class ChatFriendListPane extends JPanel {
             }
         }
     }
-    
-    private class ViewSharedFiles extends AbstractContextAction implements ItemNotifyable {
-        public ViewSharedFiles(FriendContext context) {
-            super("", context);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            ChatFriend chatFriend = context.getFriend();
-            if (chatFriend != null) {
-                libraryNavigator.selectFriendShareList(chatFriend.getFriend());
-            }
-        }
-
-        @Override
-        public void notifyItem(JMenuItem item) {
-            ChatFriend chatFriend = context.getFriend();
-            
-            if (chatFriend == null) {
-                return;
-            }
-            
-            item.setText(tr("What I'm Sharing"));
-        }
-    }
-    
+   
     private class CloseChat extends AbstractContextAction {
         public CloseChat(FriendContext context) {
             super(I18n.tr("Close conversation"), context);

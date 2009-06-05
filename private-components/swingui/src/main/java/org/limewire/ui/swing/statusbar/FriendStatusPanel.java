@@ -133,8 +133,8 @@ class FriendStatusPanel {
                 g.drawLine(width-1, 0, width-1, height-1);
                 
                 if (chatFrame.getLastSelectedConversationFriendId() != null) {
-                    g.setPaint(border);
-                    g.drawLine(0,0,width-1,0);
+                    g.setPaint(activeBorder);
+                    g.drawLine(0,0,width-2,0);
                 }
             } else if (object.getModel().isRollover()) {
                 g.setPaint(rolloverBackground);

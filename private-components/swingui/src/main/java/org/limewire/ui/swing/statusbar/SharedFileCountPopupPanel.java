@@ -13,7 +13,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 
 import org.jdesktop.application.Resource;
@@ -130,7 +129,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     private class StatusBarPopupButtonPainter extends AbstractPainter<JXButton>{
 
         public StatusBarPopupButtonPainter() {
-            setAntialiasing(true);
+            setAntialiasing(false);
             setCacheable(false);
         }
 
