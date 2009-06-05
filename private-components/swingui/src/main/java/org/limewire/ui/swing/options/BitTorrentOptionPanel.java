@@ -99,7 +99,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
             p
                     .add(new MultiLineLabel(
                             I18n
-                                    .tr("There was an error loading the bittorrent code. You will not be use bittorrent capabilities until this is resolved."), 500));
+                                    .tr("There was an error loading bittorrent. You will not be use bittorrent capabilities until this is resolved."), 500));
         }
         return p;
     }
