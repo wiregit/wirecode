@@ -109,7 +109,9 @@ public class BitTorrentOptionPanel extends OptionPanel {
         // TODO this a little weird since we are jsut using the fact that the
         // inject settings will be updated automatically by updating the
         // BittorentSettings values.
-        torrentManager.get().updateSettings(torrentSettings);
+        if(torrentManager.get().isValid()) {
+            torrentManager.get().updateSettings(torrentSettings);
+        }
         return false;
     }
 
