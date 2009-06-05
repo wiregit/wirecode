@@ -9,8 +9,8 @@ import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.libtorrent.LazyTorrentManager;
 import org.limewire.libtorrent.TorrentImpl;
-import org.limewire.libtorrent.TorrentManagerImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
@@ -60,6 +60,6 @@ public class LimeWireBittorrentModule extends AbstractModule {
                };
            }
         });
-        bind(TorrentManager.class).to(TorrentManagerImpl.class);
+        bind(TorrentManager.class).to(LazyTorrentManager.class);
     }
 }

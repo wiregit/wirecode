@@ -19,7 +19,6 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.libtorrent.callback.AlertCallback;
-import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.OSUtils;
@@ -117,11 +116,6 @@ public class TorrentManagerImpl implements TorrentManager {
         } finally {
             lock.writeLock().unlock();
         }
-    }
-
-    @Inject
-    public void register(ServiceRegistry serviceRegistry) {
-        serviceRegistry.register(this);
     }
 
     @Override
