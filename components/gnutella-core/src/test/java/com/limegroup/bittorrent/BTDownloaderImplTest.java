@@ -6,9 +6,9 @@ import java.security.NoSuchAlgorithmException;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.libtorrent.TorrentManagerImpl;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -69,6 +69,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         forceIPAddressStringBackup = ConnectionSettings.FORCED_IP_ADDRESS_STRING.get();
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.set("127.0.0.1");
+        BittorrentSettings.LIBTORRENT_ENABLED.set(true);
         fileServer = new FileServer(TEST_PORT, fileDir);
         fileServer.start();
         super.setUp();
@@ -79,6 +80,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(localIsPrivateBackup);
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(forceIPAddressBackup);
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.set(forceIPAddressStringBackup);
+        BittorrentSettings.LIBTORRENT_ENABLED.set(false);
         fileServer.stop();
         fileServer.destroy();
         FileUtils.deleteRecursive(torrentDir);
@@ -285,11 +287,9 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         CoreDownloaderFactory coreDownloaderFactory = injector
                 .getInstance(CoreDownloaderFactory.class);
-        TorrentManagerImpl torrentManager = injector.getInstance(TorrentManagerImpl.class);
-        torrentManager.initialize();
-        torrentManager.start();
         BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory
                 .createBTDownloader(torrentFile);
+        downloader.registerTorrentWithTorrentManager();
         return downloader;
     }
 
