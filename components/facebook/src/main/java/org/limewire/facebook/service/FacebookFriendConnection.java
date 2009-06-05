@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Random;
-import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -49,14 +49,14 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.IncomingChatListener;
-import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.ChatState;
+import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
@@ -78,12 +78,10 @@ import org.limewire.net.ConnectBackRequest;
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
-@Singleton
 public class FacebookFriendConnection implements FriendConnection {
     
     private static final Log LOG = LogFactory.getLog(FacebookFriendConnection.class);
@@ -795,10 +793,12 @@ public class FacebookFriendConnection implements FriendConnection {
 
     void removeAllPresences(FacebookFriend friend) {
         // non-LW presenes are NOT removed b/c that introduces race-conditions between
-        // buddy-list polling and disco-info on-demand presence creation
-        LOG.debugf("removing all non-limewire presences for {0}", friend.getId());
+        // buddy-list polling and disco-info on-demand presence creation        
         synchronized (presenceLock) {
             Map<String, FriendPresence> presenceMap = friend.getPresences();
+            if(presenceMap.size() > 0) {
+                LOG.debugf("removing all non-limewire presences for {0}", friend.getId());
+            }
             for(FriendPresence presence : presenceMap.values()) {
                 String resource = StringUtils.parseResource(presence.getPresenceId());
                 if(resource.length() == 0) { // do no remove limewire presences; those are maintained by presence messages

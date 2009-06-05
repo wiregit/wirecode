@@ -11,11 +11,9 @@ import org.json.JSONException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import com.google.inject.Singleton;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-@Singleton
 public class PresenceListener implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(PresenceListener.class);
@@ -54,11 +52,10 @@ public class PresenceListener implements Runnable {
                 }
             }
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            LOG.debug("error deserializing JSON response", e);
         } catch (IOException e) {
             LOG.debug("POST error", e);
-        }
-        
+        }        
     }
  
 }

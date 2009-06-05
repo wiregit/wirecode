@@ -53,7 +53,7 @@ public class ChatListener implements Runnable {
         } catch(IOException e1){
             LOG.debug("error getting initial sequence number", e1);
         } catch(JSONException e1){
-            throw new RuntimeException(e1);
+            LOG.debug("error parsing initial sequence number", e1);
         }
 
         int currentSeq;
@@ -80,14 +80,13 @@ public class ChatListener implements Runnable {
                             getPOSTFormID();        
                         }
                         //seq++;
-                    }
-//                        
+                    }                        
                     seq++;
                 }
             } catch (IOException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("error getting chat message", e);
             } catch (JSONException e) {
-                throw new RuntimeException(e);
+                LOG.debug("error parsing chat message", e);
             }
         }
     }
