@@ -411,6 +411,7 @@ public class TorrentManagerImpl implements TorrentManager {
 
     @Override
     public void updateSettings(TorrentSettings settings) {
+        validateLibrary();
         torrentSettings.set(settings);
         libTorrent.update_settings(settings);
 
