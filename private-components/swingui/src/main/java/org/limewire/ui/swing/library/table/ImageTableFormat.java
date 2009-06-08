@@ -17,7 +17,7 @@ public class ImageTableFormat <T extends LocalFileItem> extends AbstractLibraryF
     @Inject
     public ImageTableFormat() {
         super("LIBRARY_IMAGE_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
-                new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_FILENAME", I18n.tr("Filename"), 100, true, true),
+                new ColumnStateInfo(NAME_INDEX, "LIBRARY_IMAGE_FILENAME", I18n.tr("Filename"), 100, true, true),
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_IMAGE_SIZE", I18n.tr("Size"), 278, true, true)
         });     
     }

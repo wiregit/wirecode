@@ -202,7 +202,7 @@ public class LibraryTable extends MouseableTable {
                 setCellRenderer(VideoTableFormat.NAME_INDEX, nameRenderer.get());
                 break;
             case IMAGE:
-                setCellRenderer(ImageTableFormat.NAME_INDEX, nameRenderer.get());
+//                setCellRenderer(ImageTableFormat.NAME_INDEX, nameRenderer.get());
                 setCellRenderer(ImageTableFormat.SIZE_INDEX, fileSizeRenderer.get());
                 break;
             case DOCUMENT:

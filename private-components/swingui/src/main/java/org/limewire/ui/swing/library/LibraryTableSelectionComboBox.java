@@ -8,6 +8,7 @@ import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.AllTableFormat;
 import org.limewire.ui.swing.library.table.AudioTableFormat;
 import org.limewire.ui.swing.library.table.DocumentTableFormat;
+import org.limewire.ui.swing.library.table.ImageTableFormat;
 import org.limewire.ui.swing.library.table.OtherTableFormat;
 import org.limewire.ui.swing.library.table.ProgramTableFormat;
 import org.limewire.ui.swing.library.table.VideoTableFormat;
@@ -22,9 +23,10 @@ public class LibraryTableSelectionComboBox extends JComboBox {
     public LibraryTableSelectionComboBox(Provider<AllTableFormat<LocalFileItem>> allFormat, 
             Provider<AudioTableFormat<LocalFileItem>> audioFormat,
             Provider<VideoTableFormat> videoFormat,
+            Provider<ImageTableFormat> imageFormat,
             Provider<DocumentTableFormat> documentFormat,
             Provider<ProgramTableFormat> programFormat,
-            Provider<OtherTableFormat> imageFormat) {
+            Provider<OtherTableFormat> otherFormat) {
         
             addItem(new ComboBoxItem(I18n.tr("All"), null, allFormat));
             addItem(new ComboBoxItem(I18n.tr("Audio"), Category.AUDIO, audioFormat));
@@ -32,7 +34,7 @@ public class LibraryTableSelectionComboBox extends JComboBox {
             addItem(new ComboBoxItem(I18n.tr("Image"), Category.IMAGE, imageFormat));
             addItem(new ComboBoxItem(I18n.tr("Document"), Category.DOCUMENT, documentFormat));
             addItem(new ComboBoxItem(I18n.tr("Programs"), Category.PROGRAM, programFormat));
-            addItem(new ComboBoxItem(I18n.tr("Other"), Category.OTHER, imageFormat));
+            addItem(new ComboBoxItem(I18n.tr("Other"), Category.OTHER, otherFormat));
     }
     
     public AbstractLibraryFormat<LocalFileItem> getSelectedTabelFormat() {
