@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search;
 
+import java.util.Collection;
+
 import org.limewire.core.api.endpoint.RemoteHost;
 
 /**
@@ -11,4 +13,6 @@ public interface RemoteHostActions {
     void showFilesSharedWith(RemoteHost person);
 
     void viewLibraryOf(RemoteHost person);
+    
+    void viewLibrariesOf(Collection<RemoteHost> people);
 }
