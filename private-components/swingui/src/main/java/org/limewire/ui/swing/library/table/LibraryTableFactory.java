@@ -17,20 +17,20 @@ import ca.odell.glazedlists.EventList;
 public interface LibraryTableFactory {
     
     /**
-     * Creates a table for MyLibrary
+     * Creates a table for MyLibrary.
      */
     <T extends LocalFileItem> LibraryTable<T> createMyTable(Category category,
             EventList<T> eventList, LibraryListSourceChanger listChanger);
     
     /**
-     * Creates an image list for My Library
+     * Creates an image list for My Library.
      */
     LibraryImagePanel createMyImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, ShareWidget<File> sharePanel,
             LibraryListSourceChanger listChanger);
     
     /**
-     * Creates a table for Friends
+     * Creates a table for Friends.
      */
     <T extends RemoteFileItem> LibraryTable<T> createFriendTable(Category category, EventList<T> eventList);
 

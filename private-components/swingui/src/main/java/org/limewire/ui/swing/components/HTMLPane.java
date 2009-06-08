@@ -29,7 +29,7 @@ import org.limewire.ui.swing.util.SwingUtils;
 /**
  * An editor pane that forces synchronous page loading unless you use the
  * {@link #setPageAsynchronous(String, String)} method.
- * 
+ * <p>
  * Much of this comes from JEditorPane and had to be copied out because of package-private problems.
  */
 public class HTMLPane extends JEditorPane {
@@ -230,7 +230,7 @@ public class HTMLPane extends JEditorPane {
 
     /**
      * Updated to set the asynchronous priority to -1, although it shouldn't
-     * matter because we explicitly load documents ourselves 
+     * matter because we explicitly load documents ourselves.
      */
     private static class SynchronousEditorKit extends HTMLEditorKit {
         @Override

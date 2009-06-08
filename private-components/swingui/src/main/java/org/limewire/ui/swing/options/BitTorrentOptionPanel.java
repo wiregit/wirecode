@@ -23,7 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * BitTorrent Option View
+ * BitTorrent Option View.
  */
 public class BitTorrentOptionPanel extends OptionPanel {
 

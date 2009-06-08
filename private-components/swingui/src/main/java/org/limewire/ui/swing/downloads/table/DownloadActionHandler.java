@@ -79,7 +79,7 @@ public class DownloadActionHandler {
             if(item.getState() != DownloadState.DONE) {
                 fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
             } else {
-                // if finished downloadng, try showing all the information from the localFileItem
+                // if finished downloading, try showing all the information from the localFileItem
                 LocalFileItem localItem = libraryManager.getLibraryManagedList().getFileItem(item.getLaunchableFile());
                 if(localItem != null)
                     fileInfoFactory.createFileInfoDialog(localItem, FileInfoType.LOCAL_FILE);

@@ -38,7 +38,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * Misc Option View
+ * Misc Option View.
  */
 public class MiscOptionPanel extends OptionPanel {
 

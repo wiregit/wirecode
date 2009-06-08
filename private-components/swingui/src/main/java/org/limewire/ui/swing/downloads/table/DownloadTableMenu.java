@@ -354,7 +354,7 @@ public class DownloadTableMenu extends JPopupMenu{
     }
     
     /**
-     * An ActionListener for pausing downloads  
+     * An ActionListener for pausing downloads.  
      */
     private class PauseListener extends PopupActionListener {
         public PauseListener() {
@@ -368,7 +368,7 @@ public class DownloadTableMenu extends JPopupMenu{
     } 
     
     /**
-     * An ActionListener for cancelling downloads 
+     * An ActionListener for cancelling downloads. 
      */
     private class CancelListener extends PopupActionListener {
         public CancelListener() {
@@ -382,7 +382,7 @@ public class DownloadTableMenu extends JPopupMenu{
     } 
     
     /**
-     * An ActionListener for stalled downloads 
+     * An ActionListener for stalled downloads. 
      */
     private class TryAgainListener extends PopupActionListener {
         public TryAgainListener() {
@@ -396,7 +396,7 @@ public class DownloadTableMenu extends JPopupMenu{
     } 
     
     /**
-     * An ActionListener for resuming downloads 
+     * An ActionListener for resuming downloads. 
      */
     private class ResumeListener extends PopupActionListener {
         public ResumeListener() {

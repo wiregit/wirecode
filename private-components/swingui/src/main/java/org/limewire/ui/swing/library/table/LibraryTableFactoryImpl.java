@@ -133,7 +133,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
 
     /**
-     * Creates a table for MyLibrary
+     * Creates a table for MyLibrary.
      */
     public <T extends LocalFileItem> LibraryTable<T> createMyTable(Category category,
             EventList<T> eventList, LibraryListSourceChanger listChanger) {
@@ -187,9 +187,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         return libTable;
     }    
 
-	/**
-	 * Creates Image Library for My Library which displays thumbnails.
-	 */
+    /**
+     * Creates Image Library for My Library which displays thumbnails.
+     */
     @Override
     public LibraryImagePanel createMyImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, ShareWidget<File> sharePanel,
@@ -215,7 +215,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     }    
     
     /**
-     * Creates a table when viewing a Friend's Library or performing a BrowseHost
+     * Creates a table when viewing a Friend's Library or performing a BrowseHost.
      */
     public <T extends RemoteFileItem> LibraryTable<T> createFriendTable(Category category, EventList<T> eventList) {
 

@@ -78,7 +78,7 @@ public class AppFrame extends SingleFrameApplication {
 
     private static volatile boolean started;
 
-    /** Default background color for panels */
+    /** Default background color for panels. */
     @Resource private Color bgColor;
     @Resource private Color glassPaneColor;
     

@@ -18,7 +18,7 @@ import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import com.google.inject.Provider;
 
 /**
- * For use with RemoteFileTransferable
+ * For use with RemoteFileTransferable.
  */
 public class DownloadableTransferHandler extends TransferHandler{
     

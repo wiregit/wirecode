@@ -17,7 +17,7 @@ import org.limewire.ui.swing.util.IconManager;
 import com.google.inject.Provider;
 
 /**
- * Table format for the Document Table when it is in My Library
+ * Table format for the Document Table when it is in My Library.
  */
 public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
     static final int ACTION_INDEX = 0;
@@ -32,11 +32,11 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
     static final int UPLOAD_ATTEMPTS_INDEX = 9;
     static final int PATH_INDEX = 10;
 
-	/** Icon manager used to find native file type information. */
-	private Provider<IconManager> iconManager;
-	
-	public DocumentTableFormat(Provider<IconManager> iconManager) {
-	    super(ACTION_INDEX, "LIBRARY_DOCUMENT_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
+    /** Icon manager used to find native file type information. */
+    private Provider<IconManager> iconManager;
+
+    public DocumentTableFormat(Provider<IconManager> iconManager) {
+        super(ACTION_INDEX, "LIBRARY_DOCUMENT_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(ACTION_INDEX, "LIBRARY_DOCUMENT_ACTION", I18n.tr("Sharing"), 61, true, false),
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_DOCUMENT_NAME", "Name", 493, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "LIBRARY_DOCUMENT_TYPE", I18n.tr("Type"), 180, true, true),     
@@ -49,7 +49,7 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_DOCUMENT_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_DOCUMENT_PATH", I18n.tr("Location"), 200, false, true)
         });
-	    
+        
         this.iconManager = iconManager;
     }
 

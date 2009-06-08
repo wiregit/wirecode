@@ -17,10 +17,10 @@ import com.google.inject.Singleton;
 
 /**
  * Factory (and decorator used when extending LimeComboBox) that creates the three
- *  types of of "combo boxes" we use in the limewire ui.
+ *  types of of "combo boxes" we use in the LimeWire UI.
  *  
  *  Types:
- *  
+ *  <xmp>
  *    Full - The full combo box type with a selectable slot.  These work mostly 
  *            the same as regular JComboBoxes.  
  *            ie.  Search category dropdown.
@@ -33,13 +33,13 @@ import com.google.inject.Singleton;
  *    Dark - Use the a "dark" colour scheme.  These are usually found
  *                        ontop of dark panels such at the header bars
  *                      
- *    Light - Use a ligher colour sheme.  These are usually found ontop of 
+ *    Light - Use a ligher colour sheme.  These are usually found on top of 
  *                        lightly coloured panels.  In this case mostly 
  *                        the top search bar
  *                        
  *                        
  *                        
- *  
+ * </xmp>
  */
 @Singleton
 public class ComboBoxDecorator {

@@ -60,7 +60,7 @@ public class FriendLibraryListSourceChanger implements ListSourceChanger {
     /**
      * Set the current friend to filter with. If no filtering is
      * to occur, set friend to null.
-     * 
+     * <p>
      * This will fire an event that the filter friend has changed, only
      * if the same friend was not previously being filtered on. 
      */
@@ -113,7 +113,7 @@ public class FriendLibraryListSourceChanger implements ListSourceChanger {
     
     /**
      * Return true is this friend is equal to current friend,
-     * false otherwise
+     * false otherwise.
      */
     private boolean isFriendEqual(Friend friend) {
         if(friend == null || currentFriend == null) {
@@ -127,7 +127,7 @@ public class FriendLibraryListSourceChanger implements ListSourceChanger {
     
     /**
      * Return the current friend that is being filtered on, null if no filtering is
-     * occuring.
+     * occurring.
      */
     public Friend getCurrentFriend() {
         return currentFriend;

@@ -29,7 +29,7 @@ public enum SearchViewType {
     /**
      * Returns the search view type for the given search view id. If non match,
      * LIST type is returned by default. This is used to save values in the
-     * SearchSettings.SEARCH_VIEW_TYPE_ID
+     * SearchSettings.SEARCH_VIEW_TYPE_ID.
      */
     public static SearchViewType forId(int id) {
         SearchViewType searchViewType = modeById.get(id);

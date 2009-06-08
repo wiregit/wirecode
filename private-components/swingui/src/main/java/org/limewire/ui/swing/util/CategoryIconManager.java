@@ -66,9 +66,7 @@ public class CategoryIconManager {
     }
     
     /**
-     * Returns the limewire-specific icons for the given category
-     * @param category
-     * @return
+     * Returns the LimeWire-specific icons for the given category.
      */
     public Icon getIcon(Category category) {
         switch (category) {
@@ -102,9 +100,6 @@ public class CategoryIconManager {
     /**
      * Returns the local MIME type for files of category DOCUMENT and OTHER (if it can). For all other
      * types it returns the LimeWire icon for the file category.
-     * @param file
-     * @param iconManager
-     * @return
      */
     public Icon getIcon(PropertiableFile file) {
         switch(file.getCategory()) {

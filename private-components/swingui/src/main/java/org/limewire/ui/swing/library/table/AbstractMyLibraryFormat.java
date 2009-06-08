@@ -14,7 +14,7 @@ import org.limewire.ui.swing.table.AbstractColumnStateFormat;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 
 /**
- * Abstract table format for columns for local file items
+ * Abstract table format for columns for local file items.
  */
 public abstract class AbstractMyLibraryFormat<T extends FileItem> extends AbstractColumnStateFormat<T> implements LibraryTableFormat<T>{
     

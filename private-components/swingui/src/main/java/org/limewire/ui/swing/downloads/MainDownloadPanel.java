@@ -55,34 +55,34 @@ public class MainDownloadPanel extends JPanel {
     private DownloadTable table;
     
     
-	/**
-	 * Create the panel
-	 */
-	@Inject
-	public MainDownloadPanel(Provider<DownloadTableFactory> downloadTableFactory, 
-	        DownloadMediator downloadMediator,
-	        TrayNotifier notifier, 
-	        DownloadListManager downloadListManager,
-	        Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
-	    this.downloadMediator = downloadMediator;
-	    this.downloadTableFactory = downloadTableFactory;
-	    this.downloadListManager = downloadListManager;
-		this.notifier = notifier;
-		this.saveLocationExceptionHandler = saveLocationExceptionHandler;
-		
-		GuiUtils.assignResources(this);
-		
-		setPreferredSize(new Dimension(getPreferredSize().width, preferredHeight));
+    /**
+     * Create the panel.
+     */
+    @Inject
+    public MainDownloadPanel(Provider<DownloadTableFactory> downloadTableFactory, 
+            DownloadMediator downloadMediator,
+            TrayNotifier notifier, 
+            DownloadListManager downloadListManager,
+            Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
+        this.downloadMediator = downloadMediator;
+        this.downloadTableFactory = downloadTableFactory;
+        this.downloadListManager = downloadListManager;
+        this.notifier = notifier;
+        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+
+        GuiUtils.assignResources(this);
+
+        setPreferredSize(new Dimension(getPreferredSize().width, preferredHeight));
     }
 
-	@EventSubscriber
+    @EventSubscriber
 	public void handleSelectAndScroll(SelectAndScrollDownloadEvent event) {
-	    table.selectAndScrollTo(event.getSelectedURN());
-	    if(getVisibleRect().height < table.getRowHeight()){
-	        new DownloadVisibilityEvent(true).publish();
-	    }
-	}
-	    
+        table.selectAndScrollTo(event.getSelectedURN());
+        if(getVisibleRect().height < table.getRowHeight()){
+            new DownloadVisibilityEvent(true).publish();
+        }
+    }
+
     
     @Inject
     public void register() {              

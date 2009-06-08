@@ -38,7 +38,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * Main Dialog for the Options
+ * Main Dialog for the Options.
  */
 public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     
@@ -267,7 +267,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     }
     
     /**
-     * Lazily loads and inits a subPanel in the OptionDialog
+     * Lazily loads and inits a subPanel in the OptionDialog.
      */
     private void createPanel(String id, OptionPanel panel) {
         panel.setBackground(backgroundColor);

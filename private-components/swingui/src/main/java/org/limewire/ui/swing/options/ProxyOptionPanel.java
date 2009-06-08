@@ -21,7 +21,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 
 /**
- * Proxy Option View
+ * Proxy Option View.
  */
 public class ProxyOptionPanel extends OptionPanel {
     

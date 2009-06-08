@@ -159,7 +159,7 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
 
     
     /**
-     * Painter for the background of the header
+     * Painter for the background of the header.
      */
     private class HeaderBackgroundPainter extends AbstractPainter<JXLabel> {
 

@@ -40,7 +40,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 import com.google.inject.Inject;
 
 /**
- * Network Interface Option View
+ * Network Interface Option View.
  */
 public class NetworkInterfaceOptionPanel extends OptionPanel {
 

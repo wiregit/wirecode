@@ -196,7 +196,7 @@ public final class SwingUiSettings extends LimeProps {
     public static final FileSetting LAST_FILECHOOSER_DIRECTORY =
         FACTORY.createFileSetting("LAST_FILECHOOSER_DIR", getDefaultLastFileChooserDir()).setAlwaysSave(true);
 
-    /** Whether collecting and reporting usage stats is allowed */
+    /** Whether collecting and reporting usage stats is allowed.*/
     public static final BooleanSetting USAGE_STATS =
         FACTORY.createBooleanSetting("USAGE_STATS", false);
 
@@ -216,7 +216,7 @@ public final class SwingUiSettings extends LimeProps {
     public static final BooleanSetting PLAY_NOTIFICATION_SOUND =
         FACTORY.createBooleanSetting("PLAY_NOTIFICATION_SOUND", false);
 
-    /** User-defined custom jabber server */
+    /** User-defined custom jabber server. */
     public static final StringSetting USER_DEFINED_JABBER_SERVICENAME =
         (StringSetting)FACTORY.createStringSetting("CUSTOM_JABBER_SERVICENAME", "").setPrivate(true);
 
@@ -236,19 +236,19 @@ public final class SwingUiSettings extends LimeProps {
     public static final BooleanSetting PLAYER_ENABLED =
         FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
     
-    /** Shows an overlay on My Library first time logging in */
+    /** Shows an overlay on My Library first time logging in. */
     public static final BooleanSetting SHOW_FRIEND_OVERLAY_MESSAGE =
         FACTORY.createBooleanSetting("SHOW_FRIEND_OVERLAY_MESSAGE", true);
     
-    /** Shows an overlay on My Library first time going to My Library  */
+    /** Shows an overlay on My Library first time going to My Library.  */
     public static final BooleanSetting SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE =
         FACTORY.createBooleanSetting("SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE", true);
     
-    /** True if the user has logged into chat and viewed their library after, false otherwise */
+    /** True if the user has logged into chat and viewed their library after, false otherwise. */
     public static final BooleanSetting HAS_LOGGED_IN_AND_SHOWN_LIBRARY =
         FACTORY.createBooleanSetting("HAS_LOGGED_IN_AND_SHOWN_LIBRARY", false);
 
-    /** Setting for whether or not to resolve hostnames in Advanced Tools */
+    /** Setting for whether or not to resolve host names in Advanced Tools. */
     public static final BooleanSetting RESOLVE_CONNECTION_HOSTNAMES =
         FACTORY.createBooleanSetting("RESOLVE_CONNECTION_HOSTNAMES", true);
 

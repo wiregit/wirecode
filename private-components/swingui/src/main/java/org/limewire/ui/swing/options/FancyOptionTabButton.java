@@ -22,7 +22,7 @@ import org.limewire.ui.swing.options.actions.TabAction;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
- * Paints a main button on the Option Panel
+ * Paints a main button on the Option Panel.
  */
 public class FancyOptionTabButton extends JXButton {
     

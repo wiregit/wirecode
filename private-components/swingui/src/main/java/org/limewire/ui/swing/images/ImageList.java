@@ -28,7 +28,7 @@ import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 /**
- *	Draws a list of images. Images are displayed in a horizontal left
+ *  Draws a list of images. Images are displayed in a horizontal left
  *  to right space before wrapping to a new line. Spaces between the
  *  images are injected with the inset values list below.
  */
@@ -139,7 +139,7 @@ public class ImageList extends JXList implements Disposable, SelectAllable<Local
     }
     
     /**
-     * Returns the CellRenderer for this list
+     * Returns the CellRenderer for this list.
      */
     public ImageCellRenderer getImageCellRenderer() {
         return renderer;

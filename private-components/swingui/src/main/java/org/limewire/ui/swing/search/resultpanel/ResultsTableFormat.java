@@ -98,7 +98,7 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     /**
      * If the FromColumn is sorted, use a custom column sorter
      * otherwise it is assumed the column returns a value that 
-     * implements the Comparable interface
+     * implements the Comparable interface.
      */
     @Override
     public Comparator getColumnComparator(int index) {

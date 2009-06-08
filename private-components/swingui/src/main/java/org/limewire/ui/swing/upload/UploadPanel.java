@@ -64,7 +64,7 @@ public class UploadPanel extends JXPanel{
     
     /**
      * Start the (polling) upload monitor.  
-     * 
+     * <p>
      * Note: this only make sense if this panel is created on demand.
      */
     @Inject

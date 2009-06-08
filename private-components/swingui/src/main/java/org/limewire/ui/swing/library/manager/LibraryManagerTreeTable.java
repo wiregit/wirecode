@@ -135,7 +135,7 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
     }
     
     /**
-     * Returns the excluded children of this file
+     * Returns the excluded children of this file.
      */
     private List<File> getExcludedDescendents(File parent) {
         List<File> excludedChildren = new ArrayList<File>();

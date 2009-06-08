@@ -117,8 +117,8 @@ public class ChatPanel extends JXPanel implements Displayable {
     }
     
     /**
-	 * Starts a conversation chat with this friend.
-	 */
+     * Starts a conversation chat with this friend.
+     */
     public void fireConversationStarted(String friendId) {
         friendsPanel.fireConversationStarted(friendId);
     }

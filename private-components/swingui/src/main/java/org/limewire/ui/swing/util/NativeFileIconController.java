@@ -179,8 +179,9 @@ public class NativeFileIconController implements FileIconController {
     }
      
     /**
-     * Returns the icon assocated with the extension.
-     * TODO: Implement better.
+     * Returns the icon associated with the extension.
+     */ 
+     /* TODO: Implement better.
      */
     public Icon getIconForExtension(String ext) {
         ext = ext.trim().toLowerCase();
@@ -268,8 +269,8 @@ public class NativeFileIconController implements FileIconController {
      * The NPE catching is required because of poorly built methods in
      * javax.swing.filechooser.FileSystemView that print true
      * exceptions to System.err and return null, instead of
-     * letting the exception propogate.
-     * 
+     * letting the exception propagate.
+     * <p>
      * The ULE catching is required because of strange Swing errors
      * that can't find the native code to:
      *  sun.awt.shell.Win32ShellFolder2.getFileSystemPath(I)Ljava/lang/String;     * 

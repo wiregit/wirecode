@@ -31,7 +31,7 @@ public final class FileChooser {
     
     /**
      * Returns the last directory that was used in a FileChooser.
-     * 
+     * <p>
      * If no last directory can be found, the users home directory is returned.
      * If that cannot be found the current directory is returned.
      */
@@ -49,7 +49,7 @@ public final class FileChooser {
      * Returns the default directory for the file chooser.
      * Defaults to the users home directory if it exists,
      * otherwise the current directory is used.
-     * 
+     * <p>
      * Logic is currently duplicated from ApplicationSettings getDefaultLastFileChooserDir.
      */
     private static File getDefaultLastFileChooserDir() {

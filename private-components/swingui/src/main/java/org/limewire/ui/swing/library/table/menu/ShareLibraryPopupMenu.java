@@ -25,7 +25,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 /**
- * Popup menu implementation for Share views 
+ * Popup menu implementation for Share views.
  */
 public class ShareLibraryPopupMenu extends JPopupMenu {
 

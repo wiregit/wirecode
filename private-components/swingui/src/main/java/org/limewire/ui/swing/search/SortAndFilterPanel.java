@@ -50,7 +50,7 @@ import com.google.inject.assistedinject.Assisted;
  * This class manages the UI components for filtering and sorting
  * search results.
  * 
- * @see org.limewire.ui.swing.search.SearchResultsPanel.
+ * @see org.limewire.ui.swing.search.SearchResultsPanel
  */
 public class SortAndFilterPanel implements Disposable {
 

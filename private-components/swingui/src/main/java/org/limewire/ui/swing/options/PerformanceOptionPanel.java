@@ -17,7 +17,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 
 /**
- * Performance Option View
+ * Performance Option View.
  */
 public class PerformanceOptionPanel extends OptionPanel {
 

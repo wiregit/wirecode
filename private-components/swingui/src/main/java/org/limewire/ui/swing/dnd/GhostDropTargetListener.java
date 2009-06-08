@@ -17,7 +17,7 @@ import org.limewire.ui.swing.library.ListSourceChanger;
  * component implementing this listener, a semi-transparent image
  * will be appear next to mouse to give better feedback as to what
  * action the drop will result in.
- * 
+ * <p>
  * This class is responsible for loading the glass pane, making it
  * visible, displaying the transparent drag, and hiding the glass
  * pane when the drag exits or completes.
@@ -68,7 +68,7 @@ public class GhostDropTargetListener implements DropTargetListener {
     
     /**
      * Converts the mouse coordinates on the component, to mouse coordinates
-     * on the glass pane, positions the glass pane, then updates the image
+     * on the glass pane, positions the glass pane, then updates the image.
      */
     private void updateText(DropTargetDragEvent dtde, GhostDragGlassPane ghostPane) {
         Point p = (Point) dtde.getLocation().clone();
@@ -92,9 +92,9 @@ public class GhostDropTargetListener implements DropTargetListener {
         ghostPane.setText(currentFriend);
     }
 
-	/**
-	 * When the drag exits, hide the glass pane
-	 */
+    /**
+     * When the drag exits, hide the glass pane.
+     */
     @Override
     public void dragExit(DropTargetEvent dte) {
         if(!(getGlassPane() instanceof GhostDragGlassPane))
@@ -121,9 +121,9 @@ public class GhostDropTargetListener implements DropTargetListener {
         glassPane.repaint(glassPane.getRepaintRect());
     }
 
-	/**
-	 * When a drop occurs, hide the glass pane
-	 */
+    /**
+     * When a drop occurs, hide the glass pane.
+     */
     @Override
     public void drop(DropTargetDropEvent dtde) {
         if(!(getGlassPane() instanceof GhostDragGlassPane))

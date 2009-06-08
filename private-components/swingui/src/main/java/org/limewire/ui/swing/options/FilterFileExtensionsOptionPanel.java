@@ -21,7 +21,7 @@ import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.I18n;
 
 /**
- * Creates a table to manage which file extensions will not show up in search results
+ * Creates a table to manage which file extensions will not show up in search results.
  */
 public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
     private JButton defaultButton;
@@ -90,7 +90,7 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
     }
     
     /**
-	 * Reverts the extensions not shown in search results to the default setting
+     * Reverts the extensions not shown in search results to the default setting.
      */
     private class DefaultAction extends AbstractAction {
         public DefaultAction() {

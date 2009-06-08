@@ -34,7 +34,7 @@ import com.google.inject.assistedinject.Assisted;
 
 /**
  * HyperlinkListener for links to libraries, form submissions (file offers)
- * that come from chat
+ * that come from chat.
  */
 public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListener {
     private static final Log LOG = LogFactory.getLog(ChatHyperlinkListener.class);
@@ -82,8 +82,8 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
 
     /**
      *
-     * Download the file offer given a file ID
-     *
+     * Download the file offer given a file ID.
+     * <p>
      * package-private for testing
      *
      * @param fileId identifier to look up the file offer message

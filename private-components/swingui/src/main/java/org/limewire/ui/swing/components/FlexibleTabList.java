@@ -139,7 +139,7 @@ public class FlexibleTabList extends AbstractTabList {
      * Returns the tabs that *should* be visible, based on the currently visible
      * tabs, and the currently selected tab.  This keeps state and assumes the
      * tabs it returns will become visible.
-     * 
+     * <p>
      * The goal is to shift the minimum amount of distance possible, while
      * still keeping the selected tab in view.  If there's no selected tab,
      * this bumps everything to the left one.

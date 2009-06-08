@@ -14,7 +14,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
 
 /**
- * Table format for Programs Table for LW buddies and Browse hosts
+ * Table format for Programs Table for LW buddies and Browse hosts.
  */
 public class RemoteProgramTableFormat<T extends RemoteFileItem> extends AbstractRemoteLibraryFormat<T> {
     static final int NAME_INDEX = 0;

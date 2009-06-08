@@ -7,7 +7,7 @@ import org.limewire.core.api.friend.client.FileMetaData;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 /**
- * impl of a message containing a file offer
+ * Implementation of a message containing a file offer.
  */
 public class MessageFileOfferImpl extends AbstractMessageImpl implements MessageFileOffer {
 

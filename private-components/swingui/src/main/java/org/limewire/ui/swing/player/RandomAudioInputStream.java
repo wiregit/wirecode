@@ -55,7 +55,7 @@ public class RandomAudioInputStream extends InputStream {
     /**
      * Skip uses the RandomAccessFile seek. Note that unlike normal
      * seek on an inputStream, the value passed in here is the location
-     * from the begining of the file, not the current location in the stream.
+     * from the beginning of the file, not the current location in the stream.
      */
     @Override
     public long skip(long bytesToSkip) throws IOException { 

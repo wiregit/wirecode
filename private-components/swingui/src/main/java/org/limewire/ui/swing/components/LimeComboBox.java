@@ -57,7 +57,7 @@ public class LimeComboBox extends JXButton {
     private final List<MenuCreationListener> menuCreationListeners
         = new ArrayList<MenuCreationListener>();
     
-    /** True if you've supplied a custom menu via {@link #overrideMenu(JPopupMenu)} */
+    /** True if you've supplied a custom menu via {@link #overrideMenu(JPopupMenu)}. */
     private boolean customMenu = false;
     
     /** True if the menu has been updated since the last addition of an action. */
@@ -105,7 +105,7 @@ public class LimeComboBox extends JXButton {
     }
     
     /**
-     * A helper method for painting elements of overridden menus in the default style
+     * A helper method for painting elements of overridden menus in the default style.
      */
     public JComponent decorateMenuComponent(JComponent item) {
         item.setFont(getFont());
@@ -128,8 +128,8 @@ public class LimeComboBox extends JXButton {
     /**
      * Adds the given actions to the combobox.  The actions will
      * be rendered as items that can be chosen.
-     * 
-     * This method has no effect if the popupmenu is overriden. 
+     * <p>
+     * This method has no effect if the popupmenu is overridden. 
      */
     public void addActions(List<Action> newActions) {
         if (newActions == null) {
@@ -157,8 +157,8 @@ public class LimeComboBox extends JXButton {
     
     /** 
      * Adds a single action to the combobox.
-     *
-     * This method has no effect if the popupmenu is overriden.
+     *<p>
+     * This method has no effect if the popupmenu is overridden.
      */
     public void addAction(Action action) {
         actions.add(Objects.nonNull(action, "action"));
@@ -174,8 +174,8 @@ public class LimeComboBox extends JXButton {
 
     /** 
      * Removes all actions & any selected action.
-     * 
-     * This method has no effect if the popupmenu is overriden.
+     * <p>
+     * This method has no effect if the popupmenu is overridden.
      */
     public void removeAllActions() {
         menuDirty = true;
@@ -185,8 +185,8 @@ public class LimeComboBox extends JXButton {
     
     /**
      * Removes the specific action.  If it was the selected one, selection is lost. 
-     *  
-     * This method has no effect if the popupmenu is overriden.
+     *  <p>
+     * This method has no effect if the popupmenu is overridden.
      */
     public void removeAction(Action action) {
         menuDirty = true;
@@ -205,8 +205,8 @@ public class LimeComboBox extends JXButton {
 
     /** 
      * Selects the specific action.
-     * 
-     * This method has no effect if the popupmenu is overriden, unless
+     * <p>
+     * This method has no effect if the popupmenu is overridden, unless
      * the menu has been pre-seeded with actions that correspond to the
      * popup menu.
      */
@@ -220,8 +220,8 @@ public class LimeComboBox extends JXButton {
     
     /**
      * Returns the selected action.
-     * 
-     * This method has no effect if the popupmenu is overriden.
+     * <p>
+     * This method has no effect if the popupmenu is overridden.
      */
     public Action getSelectedAction() {
         return selectedAction;
@@ -244,7 +244,7 @@ public class LimeComboBox extends JXButton {
     }
 
     /** Manually triggers a resize of the component. 
-      *
+      * <p>
       *  Should be avoided but can be used after drastic changes to font size/border after
       *  the component is layed out.
       */
@@ -268,8 +268,8 @@ public class LimeComboBox extends JXButton {
 
     /**
      * Adds a listener to be notified when the selection changes.
-     * 
-     * This method has no effect if the popupmenu is overriden.
+     * <p>
+     * This method has no effect if the popupmenu is overridden.
      */
     public void addSelectionListener(SelectionListener listener) {
         selectionListeners.add(listener);
@@ -277,8 +277,8 @@ public class LimeComboBox extends JXButton {
     
     /**
      * Adds a listener to be notified when the popup menu is rebuilt.
-     * 
-     * This method has no effect if the popupmenu is overriden. 
+     * <p>
+     * This method has no effect if the popupmenu is overridden. 
      */
     public void addMenuCreationListener(MenuCreationListener listener) {
         menuCreationListeners.add(listener);
@@ -412,7 +412,7 @@ public class LimeComboBox extends JXButton {
                 selectedAction = action;
                 selectedComponent = (JComponent)label.getParent();
                 selectedLabel = label;
-			    fireChangeEvent(action);
+                fireChangeEvent(action);
                 repaint();
                 menu.setVisible(false);
             }

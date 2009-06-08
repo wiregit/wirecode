@@ -73,7 +73,7 @@ import org.limewire.util.CommonUtils;
 import com.google.inject.Inject;
 
 /**
- * A Console for log/any output
+ * A Console for log/any output.
  */
 public class Console extends JPanel {
 
@@ -440,7 +440,7 @@ public class Console extends JPanel {
     }
     
     /**
-     * Rebuilds the Logger ComboBox
+     * Rebuilds the Logger ComboBox.
      */
     private void refreshLoggers() {
         LoggerRepository repository = LogManager.getLoggerRepository();
@@ -520,7 +520,7 @@ public class Console extends JPanel {
     }
 
     /**
-     * Selects the Level of the currently selected Logger
+     * Selects the Level of the currently selected Logger.
      */
     private void selectLoggerLevel() {
         LoggerComboBoxModel loggerModel = (LoggerComboBoxModel) loggerComboBox.getModel();
@@ -536,7 +536,7 @@ public class Console extends JPanel {
     }
     
     /**
-     * Applies the currently selected logging level
+     * Applies the currently selected logging level.
      */
     private void applyLevel() {
         // because the user might not hit enter after
@@ -568,7 +568,7 @@ public class Console extends JPanel {
     /**
      * Appends text to the console.
      * 
-     * @param text The text to be appended
+     * @param text the text to be appended
      */
     public void appendText(final String text) {
         if (!output.isEnabled()) {
@@ -597,7 +597,7 @@ public class Console extends JPanel {
 
     /**
      * Saves the current Console output and the stack traces of
-     * all active Threads if available
+     * all active Threads if available.
      */
     public void save() {
         try {
@@ -741,7 +741,7 @@ public class Console extends JPanel {
     }
     
     /**
-     * Returns Level.OFF instead of null if logging is turned off
+     * Returns Level.OFF instead of null if logging is turned off.
      */
     private static final Level getLevel(LoggerNode logger) {
         Level level = logger.getLevel();
@@ -772,7 +772,7 @@ public class Console extends JPanel {
     }
     
     /**
-     * Logger ComboBox model
+     * Logger ComboBox model.
      */
     private static class LoggerComboBoxModel extends DefaultComboBoxModel {
         
@@ -820,7 +820,7 @@ public class Console extends JPanel {
     }
 
     /**
-     * Logging level ComboBox model
+     * Logging level ComboBox model.
      */
     private class LevelComboBoxModel extends DefaultComboBoxModel {
 
@@ -851,7 +851,7 @@ public class Console extends JPanel {
     
     /**
      * A interface to build a very simple Tree of 
-     * Packages and Classes
+     * Packages and Classes.
      */
     private interface LoggerNode {
         boolean isLeaf();

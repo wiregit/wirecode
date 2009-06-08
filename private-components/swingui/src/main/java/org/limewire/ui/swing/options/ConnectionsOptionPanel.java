@@ -22,7 +22,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 
 /**
- * Connections Option View
+ * Connections Option View.
  */
 public class ConnectionsOptionPanel extends OptionPanel {
 

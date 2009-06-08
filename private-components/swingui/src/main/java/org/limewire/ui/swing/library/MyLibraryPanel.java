@@ -137,7 +137,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     
     private PlayerPanel playerPanel = null;
     
-    /** Map of JXLayers and categories they exist in */
+    /** Map of JXLayers and categories they exist in. */
     private Map<Category, JXLayer> map = new HashMap<Category, JXLayer>();
     private Map<Category, LockableUI> lockMap = new HashMap<Category, LockableUI>();
     
@@ -146,7 +146,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     private ListenerSupport<FriendEvent> knownFriendsListeners;
 
     /**
-     * set of known friends helps keep correct share numbers
+     * Set of known friends helps keep correct share numbers.
      */
     private final Set<String> knownFriends = new HashSet<String>();
 
@@ -163,7 +163,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     
     /**
      * Set to true if the current message overlay has a clickable feature to hide it.
-     * This boolean is needed to properlly hide the message when the user doesn't
+     * This boolean is needed to properly hide the message when the user doesn't
      * close a closeable message but the program changes the message (ie changing to
      * sharing view when not sharing with that friend). 
      */
@@ -360,15 +360,15 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
     
     /**
-	 * Will programtically select a friend to filter on.
-	 */
+     * Will programmatically select a friend to filter on.
+     */
     public void showSharingState(Friend friend) {
         sharingComboBox.selectFriend(friend);
     }
     
     /**
-	 * Will cancel filtering and return My Library to a normal state.
-	 */
+     * Will cancel filtering and return My Library to a normal state.
+     */
     public void showAllFiles() {
         currentFriendFilterChanger.setFriend(null);
         showCorrectButton();
@@ -390,9 +390,9 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
     
     /**
-	 * Override the components to add in our message panel that gets displayed
+     * Override the components to add in our message panel that gets displayed
      * above the table and nav when filtering on a friend.
-	 */
+     */
     @Override
     protected void layoutComponent() {
         setLayout(new MigLayout("fill, gap 0, insets 0"));
@@ -404,8 +404,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
     
     /**
-	 * Panel to display above nav and table when filtering is enabled.
-	 */
+     * Panel to display above nav and table when filtering is enabled.
+     */
     private void addMessage() {
         messagePanel = new SharingMessagePanel();
         
@@ -633,8 +633,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }   
     
     /**
-	 * Displays the Not Sharing Message in this category.
-	 */
+     * Displays the Not Sharing Message in this category.
+     */
     private void showEmptyFriend(Category category) {
         if(category != null) {
             JPanel panel = new JPanel(new MigLayout("fill"));
@@ -648,9 +648,9 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
     
     /**
-	 * Displays the Sharing Collection Message. This also locks the 
+     * Displays the Sharing Collection Message. This also locks the 
      * underlying table and displays a gradient over the table.
-	 */
+     */
     private void showCollectionShare(Category category, Friend friend) {
         if(category != null) {
             JPanel panel = new JPanel(new MigLayout("fill"));
@@ -667,8 +667,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
     
     /**
-	 * Hides the Not Sharing Message in this particular category.
-	 */
+     * Hides the Not Sharing Message in this particular category.
+     */
     private void hideEmptyFriend(Category category) {
         if(category != null) {
             JXLayer layer = map.get(category);
@@ -679,8 +679,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
     
     /**
-	 * Hides the Not Sharing Message in all the tables.
-	 */
+     * Hides the Not Sharing Message in all the tables.
+     */
     private void hideEmptyFriend() {
         for(Category category : Category.values()) {
             JXLayer layer = map.get(category);
@@ -779,9 +779,9 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }    
     
     /**
-	 * Returns the Table that is currently shown. Returns null if a playlist
-	 * is being shown.
-	 */ 
+     * Returns the Table that is currently shown. Returns null if a playlist
+     * is being shown.
+     */ 
     @SuppressWarnings("unchecked")
     public SelectAllable<LocalFileItem> getTable() {
         Category category = getSelectedCategory();
@@ -834,8 +834,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
     
     /**
-	 * Creates a Message Component when displaying a share collection. 
-	 */
+     * Creates a Message Component when displaying a share collection. 
+     */
     public MessageComponent getLockedLayer(Category category, Friend friend) {
  
         MessageComponent messageComponent = new MessageComponent(6, 22, 18, 6);
@@ -857,7 +857,7 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     
     /**
      * Creates the MessageComponent when the user first signs in.
-	 * This message is displayed atop the table and gives helpful
+     * This message is displayed atop the table and gives helpful
      * advice about what to do
      */
     public MessageComponent getFirstTimeLoggedInMessageComponent() {
@@ -993,8 +993,8 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
     }
     
     /**
-	 * Returns the MessageComponent when not sharing with a friend.
-	 */
+     * Returns the MessageComponent when not sharing with a friend.
+     */
     public MessageComponent getEmptyLibraryMessageComponent(Friend friend) {
         NotSharingPanel notSharingPanel = new NotSharingPanel();          
         notSharingPanel.setFriend(friend);

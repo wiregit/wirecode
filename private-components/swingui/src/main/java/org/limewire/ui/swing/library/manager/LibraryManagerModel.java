@@ -34,8 +34,6 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
     /**
      * Gets the path from the root to the specified node.
      * 
-     * @param aNode
-     *            the node to query
      * @return an array of {@code LibraryManagerItem}s, where
      *         {@code arr[0].equals(getRoot())} and
      *         {@code arr[arr.length - 1].equals(aNode)}, or an empty array if
@@ -113,7 +111,7 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
      * Unexcludes all subfolders with no intermediate managed folder. When a folder
      * is removed from being managed, will remove all the children of that folder 
      * that are excluded unless that excluded folder is a child of a managed folder.
-     * 
+     * <pre>
      * A(managed) |-B
      *            |-C (Excluded)
      *   
@@ -123,10 +121,10 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
      *            |-C (Excluded)
      *              |- D (managed)
      *                 |- E (Excluded)
-     *  
+     * </pre>
      *    Removing the node A will remove C from the exclusion list
      *    but will not remove E from the exclusion list since D is
-     *    explicitly managed and D is the parent of E
+     *    explicitly managed and D is the parent of E.
      */    
     private void unexcludeUnmanagedSubfolders(File parent){
         for(Iterator<File> iter = excludedSubfolders.getExcludedFolders().iterator(); iter.hasNext(); ) {
@@ -229,7 +227,7 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
     }
     
     /**
-     * Returns a list of all the root folders
+     * Returns a list of all the root folders.
      */
     public Collection<File> getRootChildrenAsFiles() {
         Collection<File> manageRecursively = new HashSet<File>();
@@ -240,7 +238,7 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
     }
     
     /**
-     * Returns list of excluded directories
+     * Returns list of excluded directories.
      */
     public Collection<File> getAllExcludedSubfolders() {
         return excludedSubfolders.getExcludedFolders();

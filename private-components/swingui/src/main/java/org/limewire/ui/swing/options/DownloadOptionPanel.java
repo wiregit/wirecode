@@ -29,7 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * Downloads Option View
+ * Downloads Option View.
  */
 public class DownloadOptionPanel extends OptionPanel {
 

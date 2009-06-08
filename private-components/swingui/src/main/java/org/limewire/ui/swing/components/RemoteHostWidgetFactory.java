@@ -8,7 +8,7 @@ import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 public interface RemoteHostWidgetFactory {
     
     /** Creates a RemoteHostWidget. How data is displayed changes
-      * based on the type of RemoteWidgetType
+      * based on the type of RemoteWidgetType.
       */
     RemoteHostWidget create(RemoteWidgetType type);
 }

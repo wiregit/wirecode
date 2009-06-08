@@ -12,7 +12,7 @@ import org.limewire.util.CommonUtils;
 import com.google.inject.Inject;
 
 /**
- * Display the length of an audio/video file in hours:minutes:seconds
+ * Display the length of an audio/video file in hours:minutes:seconds.
  */
 @LazySingleton
 public class TimeRenderer extends DefaultLibraryRenderer {

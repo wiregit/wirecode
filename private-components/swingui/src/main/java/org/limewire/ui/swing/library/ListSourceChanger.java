@@ -19,7 +19,7 @@ public interface ListSourceChanger {
     
     /** 
      * Returns the current friend that is being filtered with, 
-     * null if no filtering is being done 
+     * null if no filtering is being done. 
      */
     public Friend getCurrentFriend();
     

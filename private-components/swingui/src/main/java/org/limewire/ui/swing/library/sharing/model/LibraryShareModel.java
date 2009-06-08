@@ -3,7 +3,7 @@ package org.limewire.ui.swing.library.sharing.model;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 
 /**
- * Must be immutable
+ * Must be immutable.
  */
 public interface LibraryShareModel {
     //TODO: refactor LibraryShareModel implementations

@@ -28,7 +28,7 @@ import com.google.inject.Inject;
 
 /**
  * A non singleton decorator class for the special components
- *  used during the setup wizard
+ *  used during the setup wizard.
  */
 public class SetupComponentDecorator {
     
@@ -124,7 +124,7 @@ public class SetupComponentDecorator {
 
     /**
      * A listener that extends toggle capability to a peer component of a check box or radio button.
-     *  Useful when using alternate components such as multiline labels to display text for
+     *  Useful when using alternate components such as multi-line labels to display text for
      *  those toggle components.
      */
     public static class ToggleExtenderListener implements MouseListener {

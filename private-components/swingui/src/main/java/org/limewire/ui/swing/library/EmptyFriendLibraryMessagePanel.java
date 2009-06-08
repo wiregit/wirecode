@@ -46,13 +46,13 @@ public class EmptyFriendLibraryMessagePanel extends JPanel implements ListEventL
     @Resource
     private Color backgroundColor;
     
-    /** Message panel that will be displayed */
+    /** Message panel that will be displayed. */
     private Message message;
     
-    /** Friend that is currently selected */
+    /** Friend that is currently selected. */
     private Friend friend;
     
-    /** EventList of files being shared with this friend */
+    /** EventList of files being shared with this friend. */
     private EventList<LocalFileItem> friendList;
     
     private final LibraryNavigator libraryNavigator;
@@ -77,11 +77,11 @@ public class EmptyFriendLibraryMessagePanel extends JPanel implements ListEventL
     /**
      * Sets the current friend which will update the name in the message panels.
      * If All Friends is selected, friend will be set to null. 
-     * 
+     * <p>
      * If friend is not null, the shareList of this friend will be loaded.
      */
     public void setFriend(Friend friend) {
-        // remove listeners only if the friend was a non null/anonymouse friend
+        // remove listeners only if the friend was a non null/anonymous friend
         if(this.friend != null && !this.friend.isAnonymous() && this.friendList != null)
             this.friendList.removeListEventListener(this);
 
@@ -164,8 +164,8 @@ public class EmptyFriendLibraryMessagePanel extends JPanel implements ListEventL
         }
         
         /**
-		 * Returns the panel that is displayed.
-	     */
+         * Returns the panel that is displayed.
+         */
         public JComponent getComponent() {
             return messageComponent;
         }

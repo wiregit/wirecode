@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.event;
 
 /**
- * Event to indicate whether or not the DownloadPanel should be shown
+ * Event to indicate whether or not the DownloadPanel should be shown.
  */
 public class DownloadVisibilityEvent extends AbstractEDTEvent {
     private boolean visibility;

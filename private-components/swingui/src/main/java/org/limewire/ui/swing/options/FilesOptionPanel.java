@@ -31,7 +31,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * Files Option View
+ * Files Option View.
  */
 public class FilesOptionPanel extends OptionPanel {
     

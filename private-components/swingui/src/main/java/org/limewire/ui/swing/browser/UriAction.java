@@ -19,7 +19,7 @@ public interface UriAction {
         }
 
         /**
-         * @return null if there is no protocol
+         * @return null if there is no protocol.
          */
         private static String extractProtocol(String url) {
             int colon = url.indexOf(':');
@@ -31,7 +31,7 @@ public interface UriAction {
         }
 
         /**
-         * @return null if uri does not contain target
+         * @return null if URI does not contain target
          */
         public String getTarget() {
             return target;
@@ -42,7 +42,7 @@ public interface UriAction {
         }
 
         /**
-         * @return null if uri didn't have one
+         * @return null if URI didn't have one
          */
         public String getProtocol() {
             return protocol;

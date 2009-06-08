@@ -13,7 +13,7 @@ import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
 
 /**
- * Table format for the Program Table when it is in My Library
+ * Table format for the Program Table when it is in My Library.
  */
 public class ProgramTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
     static final int ACTION_INDEX = 0;

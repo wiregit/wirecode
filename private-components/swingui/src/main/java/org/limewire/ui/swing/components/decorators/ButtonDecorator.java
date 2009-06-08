@@ -18,11 +18,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * Class that preps and skins JXButtons with the default
- *  lw style. 
- *  
+ * Class that prepares and skins JXButtons with the default
+ *  LimeWire style. 
+ *  <p>
  *  Mini buttons do not have a background drawn unless mouse
- *   overed or clicked, full buttons do.
+ *  over or clicked, full buttons do.
  *  
  */
 @Singleton

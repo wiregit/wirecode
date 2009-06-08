@@ -23,7 +23,7 @@ public class BrowserUtils {
     private static final LimeDomListener DOM_ADAPTER = new LimeDomListener();
 
     /**
-     * Registers a handler for urls with target = "_blank"
+     * Registers a handler for URLs with target = "_blank"
      */
     @Inject
     public static void registerBlankTarget() {
@@ -86,7 +86,7 @@ public class BrowserUtils {
     }
 
     /**
-     * Adds a {@link UriAction} for the specified uri protocol (magnet, etc..)
+     * Adds a {@link UriAction} for the specified URI protocol (magnet, etc..)
      */
     public static void addProcotolHandlerAction(String protocol, UriAction action) {
         DOM_ADAPTER.addProtocolHandlerAction(protocol, action);
@@ -114,7 +114,7 @@ public class BrowserUtils {
     }
 
     /**
-     * Adds LimeDomListener to chromeAdapter
+     * Adds LimeDomListener to chromeAdapter.
      */
     static void addDomListener(final nsIWebBrowserChrome chrome) {
         nsIDOMEventTarget eventTarget = XPCOMUtils.qi(chrome.getWebBrowser().getContentDOMWindow(),

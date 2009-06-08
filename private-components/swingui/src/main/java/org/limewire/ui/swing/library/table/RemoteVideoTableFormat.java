@@ -16,7 +16,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
 
 /**
- * Table format for the Video Table for LW buddies and Browse hosts
+ * Table format for the Video Table for LW buddies and Browse hosts.
  */
 public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRemoteLibraryFormat<T> {
     static final int NAME_INDEX = 0;

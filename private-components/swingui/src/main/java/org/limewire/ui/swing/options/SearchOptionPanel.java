@@ -25,7 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 /**
- * Search Option View
+ * Search Option View.
  */
 public class SearchOptionPanel extends OptionPanel {
 

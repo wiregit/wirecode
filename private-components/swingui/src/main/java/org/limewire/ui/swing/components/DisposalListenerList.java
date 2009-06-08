@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.components;
 
 /**
- * Alerts DisposalListeners when it is disposed
+ * Alerts DisposalListeners when it is disposed.
  */
 public interface DisposalListenerList extends Disposable{
 

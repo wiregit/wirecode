@@ -24,9 +24,9 @@ public class HeaderBar extends JXPanel {
     
     /**
      * The default height of components added to the
-     *  content pane.  Accessed with setDefaultComponentHeight(int)  
-     *  
-     * NOTE: When unset or -1 no default will be set
+     *  content pane.  Accessed with setDefaultComponentHeight(int).  
+     * <p>
+     * NOTE: When unset or -1 no default will be set.
      */
     private int defaultCompHeight = -1;
 
@@ -121,14 +121,14 @@ public class HeaderBar extends JXPanel {
     /**
      * If the titleComponent is compound and not 
      *  a JLabel this method can be used to link
-     *  the headers set text to a specific label
+     *  the headers set text to a specific label.
      */
     public void linkTextComponent(JLabel label) {
         titleTextComponent = label;
     }
     
     /**
-     * Sets the headers text, usually the title 
+     * Sets the headers text, usually the title.
      */
     public void setText(String text) {
         if (titleTextComponent != null) {

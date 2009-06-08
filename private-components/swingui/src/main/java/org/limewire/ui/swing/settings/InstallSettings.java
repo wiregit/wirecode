@@ -58,15 +58,15 @@ public final class InstallSettings extends LimeWireSettings {
     public static final BooleanSetting ANONYMOUS_DATA_COLLECTION =
         FACTORY.createBooleanSetting("ANONYMOUS_DATA_COLLECTION", false);
     
-    /** Whether the association option has been asked */
+    /** Whether the association option has been asked. */
     public static final IntSetting ASSOCIATION_OPTION =
     	FACTORY.createIntSetting("ASSOCIATION_OPTION", 0);
 
-    /** Whether the association option has been asked */
+    /** Whether the association option has been asked. */
     public static final BooleanSetting EXTENSION_OPTION =
         FACTORY.createBooleanSetting("EXTENSION_OPTION", false);
     
-    /** Whether the setup wizard has been completed on 5.0 */
+    /** Whether the setup wizard has been completed on 5. */
     public static final BooleanSetting UPGRADED_TO_5 =
         FACTORY.createBooleanSetting("UPGRADED_TO_5", false);
 }

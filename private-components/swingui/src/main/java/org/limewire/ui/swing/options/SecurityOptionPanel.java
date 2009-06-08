@@ -21,7 +21,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 
 /**
- * Security Option View
+ * Security Option View.
  */
 public class SecurityOptionPanel extends OptionPanel {
     

@@ -93,9 +93,9 @@ public class SharingFilterComboBox extends LimeComboBox {
     }
     
     /**
-	 * Selects a friend in the combo box. This is a convience method for
-	 * selecting a friend share view programatically outside of My Library.
-	 */
+     * Selects a friend in the combo box. This is a convenience method for
+     * selecting a friend share view programmatically outside of My Library.
+     */
     public void selectFriend(Friend friend) {
         listChanger.setFriend(friend);
 
@@ -104,15 +104,15 @@ public class SharingFilterComboBox extends LimeComboBox {
     }
     
     /**
-	 * Adds a friend to the list to be displayed.
-	 */
+     * Adds a friend to the list to be displayed.
+     */
     public void addFriend(Friend friend) {
         menuList.add(friend);
     }
     
     /**
-	 * Removes a friend from the list to be displayed.
-	 */
+     * Removes a friend from the list to be displayed.
+     */
     public void removeFriend(Friend friend) {
         menuList.remove(friend);
         if(menuList.size() == 0)
@@ -131,7 +131,7 @@ public class SharingFilterComboBox extends LimeComboBox {
     }
          
     /**
-     * MenuAction for a shared list
+     * MenuAction for a shared list.
      */
     private class MenuAction extends AbstractAction {
         private final Friend friend;

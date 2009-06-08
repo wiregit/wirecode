@@ -37,7 +37,7 @@ import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
- * Popup menu implementation for MyLibrary
+ * Popup menu implementation for My Library.
  */
 public class MyLibraryPopupMenu extends JPopupMenu {
 

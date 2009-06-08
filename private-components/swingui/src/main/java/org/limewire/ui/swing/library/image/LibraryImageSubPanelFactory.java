@@ -10,7 +10,7 @@ import org.limewire.ui.swing.library.sharing.ShareWidget;
 import ca.odell.glazedlists.EventList;
 
 /**
- * Creates an appropriate subpanel for images with the correct renderers/editors
+ * Creates an appropriate subpanel for images with the correct renderers/editors.
  * set
  */
 public interface LibraryImageSubPanelFactory {

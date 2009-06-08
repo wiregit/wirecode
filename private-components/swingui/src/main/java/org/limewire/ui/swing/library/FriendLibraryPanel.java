@@ -81,15 +81,15 @@ public class FriendLibraryPanel extends AbstractFileListPanel {
     private final FriendLibraryListSourceChanger currentFriendFilterChanger;
     
     /** 
-	 * Transfer library, will add dropped files to My Library and share them with the
+     * Transfer library, will add dropped files to My Library and share them with the
      * selected friend.
      */
     private final FriendLibraryTransferHandler transferHandler;
     
-    /** Friend that is currently selected, null if all files are being shown*/
+    /** Friend that is currently selected, null if all files are being shown.*/
     private Friend currentFriend;
     
-    /** Empty Panel to replace the table with if no files are to be displayed */
+    /** Empty Panel to replace the table with if no files are to be displayed. */
     private EmptyFriendLibraryMessagePanel emptyMessagePanel;
     
     @Inject
@@ -170,7 +170,7 @@ public class FriendLibraryPanel extends AbstractFileListPanel {
      * If the library of the friend that is currently selected has changed, 
      * update the library state this friend. If the friend is
      * not currently displayed, don't perform any task. 
-     * 
+     * <p>
      * This handles most of the work of updating the state of the current library. If the
      * state changed and no library is applied, the message will be immediately updated. 
      */
@@ -352,7 +352,7 @@ public class FriendLibraryPanel extends AbstractFileListPanel {
     
     /**
      * Drops with this handler will add the file to the ManagedLibrary and share
-     * with this friend
+     * with this friend.
      */
     private class FriendLibraryTransferHandler extends TransferHandler {
         private FriendLibraryPanel libraryPanel;
@@ -367,7 +367,7 @@ public class FriendLibraryPanel extends AbstractFileListPanel {
         }
 
         /**
-         * Don't allow drops on All Friends or anonymous browse hosts
+         * Don't allow drops on All Friends or anonymous browse hosts.
          */
         @Override
         public boolean canImport(TransferHandler.TransferSupport info) {

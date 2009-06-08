@@ -79,11 +79,11 @@ public final class BugManager {
     private static BugManager INSTANCE;
     
     /**
-     * the width of the internal error dialog box
+     * The width of the internal error dialog box.
      */
     private final int DIALOG_BOX_WIDTH = 300;
     /**
-     * the height of the internal error dialog box
+     * The height of the internal error dialog box.
      */
     private final int DIALOG_BOX_HEIGHT = 100;
     
@@ -98,56 +98,56 @@ public final class BugManager {
                         return t;
                     }
                 });
-	
-	/**
-	 * A mapping of stack traces (String) to next allowed time (long)
-	 * that the bug can be reported.
-	 *
-	 * Used only if reporting the bug to the servlet.
-	 */
-	private final Map<String, Long> BUG_TIMES = Collections.synchronizedMap(new HashMap<String, Long>());
-	
-	/**
-	 * A lock to be used when writing to the logfile, if the log is to be
-	 * recorded locally.
-	 */
-	private final Object WRITE_LOCK = new Object();
-	
-	/**
-	 * A separator between bug reports.
-	 */
-	// saved to local file system only, so use platform encoding
-	private final byte[] SEPARATOR = "-----------------\n".getBytes();
-	
-	/**
-	 * The next time we're allowed to send any bug.
-	 *
-	 * Used only if reporting the bug to the servlet.
-	 */
-	private volatile long _nextAllowedTime = 0;
-	
-	/**
-	 * The number of bug dialogs currently showing.
-	 */
-	private volatile int _dialogsShowing = 0;
-	
-	/**
-	 * The maximum number of dialogs we're allowed to show.
-	 */
-	private final int MAX_DIALOGS = 3;
-	
-	/**
-	 * Whether or not we have dirty data after the last save.
-	 */
-	private boolean dirty = false;
-	
-	public static synchronized BugManager instance() {
-	    if(INSTANCE == null)
-	        INSTANCE = new BugManager();
-	    return INSTANCE;
-	}
     
-    /** Inspectable to allow pulling of bug reports */
+    /**
+     * A mapping of stack traces (String) to next allowed time (long)
+     * that the bug can be reported.
+     *
+     * Used only if reporting the bug to the servlet.
+     */
+    private final Map<String, Long> BUG_TIMES = Collections.synchronizedMap(new HashMap<String, Long>());
+    
+    /**
+     * A lock to be used when writing to the logfile, if the log is to be
+     * recorded locally.
+     */
+    private final Object WRITE_LOCK = new Object();
+    
+    /**
+     * A separator between bug reports.
+     */
+    // saved to local file system only, so use platform encoding
+    private final byte[] SEPARATOR = "-----------------\n".getBytes();
+    
+    /**
+     * The next time we're allowed to send any bug.
+     *
+     * Used only if reporting the bug to the servlet.
+     */
+    private volatile long _nextAllowedTime = 0;
+    
+    /**
+     * The number of bug dialogs currently showing.
+     */
+    private volatile int _dialogsShowing = 0;
+    
+    /**
+     * The maximum number of dialogs we're allowed to show.
+     */
+    private final int MAX_DIALOGS = 3;
+    
+    /**
+     * Whether or not we have dirty data after the last save.
+     */
+    private boolean dirty = false;
+    
+    public static synchronized BugManager instance() {
+        if(INSTANCE == null)
+            INSTANCE = new BugManager();
+        return INSTANCE;
+    }
+    
+    /** Inspectable to allow pulling of bug reports. */
     @SuppressWarnings("unused")
     @InspectionPoint("bug report")
     private static final Inspectable INSPECTABLE = new Inspectable() {
@@ -178,26 +178,26 @@ public final class BugManager {
     public void shutdown() {
         writeBugsToDisk();
     }
-	
-	/**
-	 * Handles a single bug report.
-	 * If bug is a ThreadDeath, rethrows it.
-	 * If the user wants to ignore all bugs, this effectively does nothing.
-	 * The the server told us to stop reporting this (or any) bug(s) for
-	 * awhile, this effectively does nothing.
-	 * Otherwise, it will either send the bug directly to the servlet
-	 * or ask the user to review it before sending.
-	 */
-	public void handleBug(Throwable bug, String threadName, String detail) {
+    
+    /**
+     * Handles a single bug report.
+     * If bug is a ThreadDeath, rethrows it.
+     * If the user wants to ignore all bugs, this effectively does nothing.
+     * The the server told us to stop reporting this (or any) bug(s) for
+     * awhile, this effectively does nothing.
+     * Otherwise, it will either send the bug directly to the servlet
+     * or ask the user to review it before sending.
+     */
+    public void handleBug(Throwable bug, String threadName, String detail) {
         if( bug instanceof ThreadDeath ) // must rethrow.
-	        throw (ThreadDeath)bug;
-	        
+            throw (ThreadDeath)bug;
+        
         // Try to dispatch the bug to a friendly handler.
         if (bug instanceof IOException
                 && IOUtils.handleException((IOException) bug, IOUtils.ErrorType.GENERIC)) {
             return; // handled already.
         }   
-	    
+        
         bug.printStackTrace();
         
         // Build the LocalClientInfo out of the info ...
@@ -210,10 +210,10 @@ public final class BugManager {
         boolean sent = false;
         // never ignore bugs or auto-send when developing.
         if(!LimeWireUtils.isTestingVersion()) {
-    	    if(!BugSettings.REPORT_BUGS.getValue() ) {
-    	        return; // ignore.
-    	    }
-    	        
+            if(!BugSettings.REPORT_BUGS.getValue() ) {
+                return; // ignore.
+            }
+            
             // If we have already sent information about this bug, leave.
             if( !shouldInform(info) ) {
                return; // ignore.
@@ -222,13 +222,13 @@ public final class BugManager {
             // If the user wants to automatically send to the servlet, do so.
             // Otherwise, display it for review.
             if( isSendableVersion()) {
-            	if (LimeWireUtils.isAlphaRelease() || !BugSettings.SHOW_BUGS.getValue()) {
-            		sent = true;
-            	}
+                if (LimeWireUtils.isAlphaRelease() || !BugSettings.SHOW_BUGS.getValue()) {
+                    sent = true;
+                }
             }
             
             if (sent) { 
-            	sendToServlet(info);
+                sendToServlet(info);
             }
         }
         
@@ -378,9 +378,9 @@ public final class BugManager {
         _dialogsShowing++;
         
         String title = notImplemented ? I18n.tr("Oops!") : I18n.tr("A problem occurred...");
-		final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), title, ModalityType.APPLICATION_MODAL);
-		final Dimension DIALOG_DIMENSION = new Dimension(DIALOG_BOX_WIDTH, DIALOG_BOX_HEIGHT);
-		DIALOG.setSize(DIALOG_DIMENSION);
+        final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), title, ModalityType.APPLICATION_MODAL);
+        final Dimension DIALOG_DIMENSION = new Dimension(DIALOG_BOX_WIDTH, DIALOG_BOX_HEIGHT);
+        DIALOG.setSize(DIALOG_DIMENSION);
         DIALOG.setResizable(false);
         DIALOG.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
@@ -397,7 +397,7 @@ public final class BugManager {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         mainPanel.setLayout(new GridBagLayout());
 
-		boolean sendable = isSendableVersion();
+        boolean sendable = isSendableVersion();
 
         String msg;
         if(notImplemented) {
@@ -499,19 +499,19 @@ public final class BugManager {
 
         JButton sendButton = new JButton(I18n.tr("Send Bug"));
         sendButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 // if "always use this answer" is checked, then set SHOW_BUGS to false
                 if (alwaysuseThisAnswer.isSelected()) {
                     BugSettings.SHOW_BUGS.setValue(false);
                 }
                 String userComments = userCommentsTextArea.getText();
-			    if(!userComments.equals(defaultDesc))
-			        info.addUserComments(userComments);
-			    sendToServlet(info);
-				DIALOG.dispose();
-				_dialogsShowing--;
-			}
-		});
+                if(!userComments.equals(defaultDesc))
+                    info.addUserComments(userComments);
+                sendToServlet(info);
+                DIALOG.dispose();
+                _dialogsShowing--;
+            }
+        });
 
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
@@ -550,12 +550,12 @@ public final class BugManager {
         
         mainPanel.validate();
         DIALOG.getContentPane().add(mainPanel);
-		DIALOG.pack();
-		sendButton.requestFocusInWindow();
-		DIALOG.setLocationRelativeTo(GuiUtils.getMainFrame());
+        DIALOG.pack();
+        sendButton.requestFocusInWindow();
+        DIALOG.setLocationRelativeTo(GuiUtils.getMainFrame());
 
-		try {
-		    DIALOG.setVisible(true);
+        try {
+            DIALOG.setVisible(true);
         } catch(InternalError ie) {
             //happens occasionally, ignore.
         } catch(ArrayIndexOutOfBoundsException npe) {
@@ -571,34 +571,34 @@ public final class BugManager {
     private void servletSendFailed(final LocalClientInfo info) {
         _dialogsShowing++;
 
-		final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), I18n.tr("Internal Error"), ModalityType.APPLICATION_MODAL);
-		final Dimension DIALOG_DIMENSION = new Dimension(350, 300);
-		final Dimension ERROR_DIMENSION = new Dimension(300, 200);
-		DIALOG.setSize(DIALOG_DIMENSION);
+        final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), I18n.tr("Internal Error"), ModalityType.APPLICATION_MODAL);
+        final Dimension DIALOG_DIMENSION = new Dimension(350, 300);
+        final Dimension ERROR_DIMENSION = new Dimension(300, 200);
+        DIALOG.setSize(DIALOG_DIMENSION);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
         MultiLineLabel label = new MultiLineLabel(I18n.tr("LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click \'Support\'. Thank you."), 400);
-		JPanel labelPanel = new JPanel();
-		JPanel innerPanel = new JPanel();
-		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));
-		innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
-		innerPanel.add(label);
-		innerPanel.add(Box.createVerticalStrut(6));
-		labelPanel.add(innerPanel);
-		labelPanel.add(Box.createHorizontalGlue());
-		
-		// Add 'FILES IN CURRENT DIRECTORY [text]
-		//      SIZE: 0'
-		// So that the script processing the emails still
-		// works correctly.  [It uses the info as markers
-		// of when to stop reading -- if it wasn't present
-		// it failed processing the email correctly.]
-		String bugInfo = info.toBugReport().trim() + "\n\n" + 
-		                 "FILES IN CURRENT DIRECTORY NOT LISTED.\n" +
-		                 "SIZE: 0";
+        JPanel labelPanel = new JPanel();
+        JPanel innerPanel = new JPanel();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));
+        innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
+        innerPanel.add(label);
+        innerPanel.add(Box.createVerticalStrut(6));
+        labelPanel.add(innerPanel);
+        labelPanel.add(Box.createHorizontalGlue());
+        
+        // Add 'FILES IN CURRENT DIRECTORY [text]
+        //      SIZE: 0'
+        // So that the script processing the emails still
+        // works correctly.  [It uses the info as markers
+        // of when to stop reading -- if it wasn't present
+        // it failed processing the email correctly.]
+        String bugInfo = info.toBugReport().trim() + "\n\n" + 
+            "FILES IN CURRENT DIRECTORY NOT LISTED.\n" +
+            "SIZE: 0";
         final JTextArea textArea = new JTextArea(bugInfo);
         textArea.selectAll();
         textArea.copy();        
@@ -611,19 +611,19 @@ public final class BugManager {
         JPanel buttonPanel = new JPanel();
         JButton copyButton = new JButton(I18n.tr("Copy Report"));
         copyButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			    textArea.selectAll();
-				textArea.copy();
-				textArea.setCaretPosition(0);
-			}
-		});
+            public void actionPerformed(ActionEvent e) {
+                textArea.selectAll();
+                textArea.copy();
+                textArea.setCaretPosition(0);
+            }
+        });
         JButton quitButton = new JButton(I18n.tr("OK"));
         quitButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e){
-				DIALOG.dispose();
-				_dialogsShowing--;
-			}
-		});
+            public void actionPerformed(ActionEvent e){
+                DIALOG.dispose();
+                _dialogsShowing--;
+            }
+        });
         buttonPanel.add(copyButton);
         buttonPanel.add(quitButton);
 
@@ -633,14 +633,14 @@ public final class BugManager {
 
         DIALOG.getContentPane().add(mainPanel);
         try {
-		    DIALOG.pack();
+            DIALOG.pack();
         } catch(OutOfMemoryError oome) {
             // we couldn't put this dialog together, discard it entirely.
             return;
         }
 
         DIALOG.setLocationRelativeTo(GuiUtils.getMainFrame());
-		DIALOG.setVisible(true);
+        DIALOG.setVisible(true);
     }    
     
     /**

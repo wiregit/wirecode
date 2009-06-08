@@ -3,7 +3,7 @@ package org.limewire.ui.swing.event;
 import org.limewire.core.api.URN;
 
 /**
- * Event to indicate that an item being downloaded should be selected 
+ * Event to indicate that an item being downloaded should be selected. 
  */
 public class SelectAndScrollDownloadEvent extends AbstractEDTEvent {
     private URN file;

@@ -23,7 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * Really Advanced Option View
+ * Really Advanced Option View.
  */
 public class ReallyAdvancedOptionPanel extends OptionPanel {
 

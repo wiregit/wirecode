@@ -19,7 +19,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertyUtils;
 
 /**
- * Table format for the Audio Table when it is in My Library
+ * Table format for the Audio Table when it is in My Library.
  */
 public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
 
@@ -139,7 +139,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     }
     
     /**
-     * Compares the title field in the NAME_COLUMN
+     * Compares the title field in the NAME_COLUMN.
      */
     private class NameComparator implements Comparator<FileItem> {
         @Override

@@ -36,10 +36,8 @@ public class DNDUtils {
     }
 
     /**
-     * Returns array of uris extracted from transferable.
+     * Returns array of URIs extracted from transferable.
      * 
-     * @param transferable
-     * @return
      * @throws UnsupportedFlavorException
      * @throws IOException
      */
@@ -65,7 +63,7 @@ public class DNDUtils {
 
     /**
      * Checks for {@link DataFlavor#javaFileListFlavor} and
-     * {@link DNDUtils#URIFlavor} for unix systems.
+     * {@link DNDUtils#URIFlavor} for Unix systems.
      */
     public static boolean containsFileFlavors(TransferSupport transferSupport) {
         for(DataFlavor dataFlavor : getFileFlavors()) {
@@ -86,7 +84,6 @@ public class DNDUtils {
     /**
      * Extracts the array of files from a transferable
      * 
-     * @param transferable
      * @return an empty array if the transferable does not contain any data that
      *         can be interpreted as a list of files
      */
@@ -105,9 +102,9 @@ public class DNDUtils {
     }
 
     /**
-     * Returns array of files for uris that denote local paths.
+     * Returns array of files for URIs that denote local paths.
      * 
-     * @return empty array if no uri denotes a local file
+     * @return empty array if no URI denotes a local file
      */
     public static File[] getFiles(URI[] uris) {
         ArrayList<File> files = new ArrayList<File>(uris.length);

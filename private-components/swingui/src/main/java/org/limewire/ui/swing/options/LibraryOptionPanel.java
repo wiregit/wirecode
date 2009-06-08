@@ -60,7 +60,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
-/** Library Option View */
+/** Library Option View. */
 public class LibraryOptionPanel extends OptionPanel {
 
     private final Provider<IconManager> iconManager;    
@@ -115,7 +115,7 @@ public class LibraryOptionPanel extends OptionPanel {
     }    
     
     /**
-     * Share Category Panel
+     * Share Category Panel.
      */
     private class ShareCategoryPanel extends OptionPanel {
 
@@ -202,7 +202,7 @@ public class LibraryOptionPanel extends OptionPanel {
     }
     
     /**
-     * Library Manager Panel
+     * Library Manager Panel.
      */
     public class LibraryManagerOptionPanel extends OptionPanel {
 
@@ -362,7 +362,7 @@ public class LibraryOptionPanel extends OptionPanel {
         }    
     }
     
-    /** The manual import panel */
+    /** The manual import panel. */
     private class ManualImportPanel extends OptionPanel {
         private final Collection<File> initialList;
         private final LibraryData libraryData;

@@ -100,7 +100,7 @@ public final class FileTypeOptionPanelManager {
     }
     
     /**
-     * Switches the active media panel to the one of the given key
+     * Switches the active media panel to the one of the given key.
      */
     private void switchPanel(Category mediaKey) {
 
@@ -111,21 +111,21 @@ public final class FileTypeOptionPanelManager {
     
     
     /** 
-     * Repaints the side panel (to update comment text)
+     * Repaints the side panel (to update comment text).
      */
     private void refreshSidePanel() {
         this.sidePanel.update();
     }
     
     /**
-     * Sets the enabled setting of a panel of a given key
+     * Sets the enabled setting of a panel of a given key.
      */
     private void setPanelEnabled(Category mediaKey, boolean enabled) {
        this.panels.get(mediaKey).setEnabled(enabled);
     }
 
     /**
-     * Returns the panel that this class is used to produce
+     * Returns the panel that this class is used to produce.
      */
     public Container getContainer() {
         return this.mainContainer;

@@ -16,7 +16,7 @@ import org.jdesktop.swingx.decorator.CompoundHighlighter;
  * Paints the grid and background colors for empty rows if the the ViewPort
  * is larger than the number of rows to display.
  * <p>
- * If vertical and or horizontal grid lines are turned off, the corrosponding grid
+ * If vertical and or horizontal grid lines are turned off, the corresponding grid
  * line for empty rows will not be painted either. 
  * <p>
  * There's the assumption that to paint the alternating effect, a HighLighter is being
@@ -53,8 +53,7 @@ public class StripedJXTable extends JXTable {
     }
     
     /**
-     * Paints fake rows to fill the viewport
-     * @param g
+     * Paints fake rows to fill the viewport.
      */
     protected void paintEmptyRows(Graphics g) {
         final int rowCount = getRowCount();
@@ -92,8 +91,8 @@ public class StripedJXTable extends JXTable {
     /**
      * Gets the background color for the row. This is assuming 1) there's no row highlighter or
      * 2) there's only an alternate row highlighter. Anything else and the behaviour is unknown
-     * @param row - row to paint
-     * @return - Color to paint with
+     * @param row row to paint
+     * @return Color to paint with
      */
     protected Color getColorForRow(int row) {
       return (row % 2 == 0) ? getHighlighterColor(0) : getHighlighterColor(1);

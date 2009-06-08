@@ -40,45 +40,45 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 public class MouseableTable extends StripedJXTable {
 
-	private TablePopupHandler popupHandler;
+    private TablePopupHandler popupHandler;
 
-	private TableDoubleClickHandler rowDoubleClickHandler;
-	
-	private TableColumnDoubleClickHandler columnDoubleClickHandler;
-	
-	private TableColors colors = newTableColors();
-	
-	private boolean stripesPainted = false;
-	
-	private TableCellHeaderRenderer defaultRenderer;
-	
-	protected MouseMotionListener mouseOverEditorListener;
-	
-	public MouseableTable() {
-		initialize();
-	}
-	
-	protected TableColors newTableColors() {
+    private TableDoubleClickHandler rowDoubleClickHandler;
+
+    private TableColumnDoubleClickHandler columnDoubleClickHandler;
+
+    private TableColors colors = newTableColors();
+
+    private boolean stripesPainted = false;
+
+    private TableCellHeaderRenderer defaultRenderer;
+
+    protected MouseMotionListener mouseOverEditorListener;
+
+    public MouseableTable() {
+        initialize();
+    }
+
+    protected TableColors newTableColors() {
         return new TableColors();
     }
-	
-	public TableColors getTableColors() {
-	    return colors;
-	}
-	
-	public MouseableTable(TableModel model) {
-		super(model);
-		initialize();
-	}
 
-	public void setPopupHandler(TablePopupHandler popupHandler) {
-		this.popupHandler = popupHandler;
-	}
-	
-	public void setDoubleClickHandler(TableDoubleClickHandler tableDoubleClickHandler) {
-		this.rowDoubleClickHandler = tableDoubleClickHandler;
-	}
-	
+    public TableColors getTableColors() {
+        return colors;
+    }
+
+    public MouseableTable(TableModel model) {
+        super(model);
+        initialize();
+    }
+
+    public void setPopupHandler(TablePopupHandler popupHandler) {
+        this.popupHandler = popupHandler;
+    }
+
+    public void setDoubleClickHandler(TableDoubleClickHandler tableDoubleClickHandler) {
+        this.rowDoubleClickHandler = tableDoubleClickHandler;
+    }
+
 	public void setColumnDoubleClickHandler(TableColumnDoubleClickHandler columnDoubleClickHandler) {
         this.columnDoubleClickHandler = columnDoubleClickHandler;
     }
@@ -124,31 +124,31 @@ public class MouseableTable extends StripedJXTable {
         TableCellRenderer tcr = getCellRenderer(row, col);
         return (JComponent) tcr.getTableCellRendererComponent(this, value, false, false, row, col);
     }
-	      
+      
 
-	
-	protected void initialize() {	
-		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);        
-		setCellSelectionEnabled(false);
-		setRowSelectionAllowed(true);
-	    setTableHeaderRenderer();
-	    setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-	    setFont(colors.getTableFont());
-	    getActionMap().remove("find");
-		// See http://sites.google.com/site/glazedlists/documentation/swingx		
-		getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
-		//Default java behavior for the enter key is the same as the down arrow.  We don't want this.
-		setEnterKeyAction(null);
-		
-		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
-		setHighlighters(colors.getEvenHighlighter(), 
-		                colors.getOddHighlighter(),
-		                new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
-		
-		setGridColor(colors.getGridColor());
-		
-		//so that mouseovers will work within table		
-		mouseOverEditorListener = new MouseMotionAdapter() {
+
+    protected void initialize() {	
+        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);        
+        setCellSelectionEnabled(false);
+        setRowSelectionAllowed(true);
+        setTableHeaderRenderer();
+        setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        setFont(colors.getTableFont());
+        getActionMap().remove("find");
+        // See http://sites.google.com/site/glazedlists/documentation/swingx		
+        getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
+        //Default java behavior for the enter key is the same as the down arrow.  We don't want this.
+        setEnterKeyAction(null);
+
+        //HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
+        setHighlighters(colors.getEvenHighlighter(), 
+                colors.getOddHighlighter(),
+                new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
+
+        setGridColor(colors.getGridColor());
+
+        //so that mouseovers will work within table		
+        mouseOverEditorListener = new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
                 // Get the table cell that the mouse is over.
@@ -165,21 +165,21 @@ public class MouseableTable extends StripedJXTable {
             }
         };
         
-		addMouseMotionListener(mouseOverEditorListener);
-		
-		addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {//adding this to editor messes up popups
+        addMouseMotionListener(mouseOverEditorListener);
 
-				int col = columnAtPoint(e.getPoint());
-				int row = rowAtPoint(e.getPoint());
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {//adding this to editor messes up popups
 
-				if (row >= 0 && col >= 0) {
-					if (rowDoubleClickHandler != null || columnDoubleClickHandler != null) {
-						Component component = e.getComponent();
-						//launch file on double click unless the click is on a button
-						if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)
-								&& !(component.getComponentAt(e.getPoint()) instanceof JButton)) {
+                int col = columnAtPoint(e.getPoint());
+                int row = rowAtPoint(e.getPoint());
+
+                if (row >= 0 && col >= 0) {
+                    if (rowDoubleClickHandler != null || columnDoubleClickHandler != null) {
+                        Component component = e.getComponent();
+                        //launch file on double click unless the click is on a button
+                        if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)
+                                && !(component.getComponentAt(e.getPoint()) instanceof JButton)) {
                             if (rowDoubleClickHandler != null) {
                                 rowDoubleClickHandler.handleDoubleClick(row);
                             }
@@ -187,17 +187,17 @@ public class MouseableTable extends StripedJXTable {
                                 columnDoubleClickHandler.handleDoubleClick(col);
                             }
                         }
-					}					
-				}
-			}
-			
+                    }
+                }
+            }
+            
 
-			@Override
-			public void mouseExited(MouseEvent e) {
-			    maybeCancelEditing();
-			}
-			
-			@Override
+            @Override
+            public void mouseExited(MouseEvent e) {
+                maybeCancelEditing();
+            }
+
+            @Override
             public void mouseReleased(MouseEvent e) {
                 maybeShowPopup(e);
             }
@@ -231,20 +231,20 @@ public class MouseableTable extends StripedJXTable {
                 }
             }
 
-		});
-	}
-	
+        });
+    }
+
     //Don't set the cell value when editing is cancelled
-	@Override
+    @Override
     public void editingStopped(ChangeEvent e) {
         TableCellEditor editor = getCellEditor();
         if (editor != null) {          
             removeEditor();
         }
     }
-	
-	public void setStripeHighlighterEnabled(boolean striped){
-	    if (striped) {
+
+    public void setStripeHighlighterEnabled(boolean striped){
+        if (striped) {
             // HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
             setHighlighters(
                     colors.getEvenHighlighter(),
@@ -262,7 +262,7 @@ public class MouseableTable extends StripedJXTable {
                             colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
 
         }
-	}
+    }
 
     // gets rid of default editor color so that editors are colored by highlighters and selection color is shown
     @Override
@@ -289,9 +289,9 @@ public class MouseableTable extends StripedJXTable {
     }
     
     /**
-	 * Fills in the top right corner if a scrollbar appears
-     * with an empty table header
- 	 */
+     * Fills in the top right corner if a scrollbar appears
+     * with an empty table header.
+     */
     @Override
     protected void configureEnclosingScrollPane() {
         super.configureEnclosingScrollPane();
@@ -318,7 +318,7 @@ public class MouseableTable extends StripedJXTable {
             }
         }
     }
-	          
+          
     /**
      * @return whether or not a popup menu is showing on the row
      */
@@ -334,30 +334,30 @@ public class MouseableTable extends StripedJXTable {
         if (row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0) {
             return false;
         }
-    	return getColumnModel().getColumn(col).getCellEditor() != null;
+        return getColumnModel().getColumn(col).getCellEditor() != null;
     }
 
-	/**
-	 * Does this row have a popup menu showing?
-	 */
-	private static class MenuHighlightPredicate implements HighlightPredicate {
+    /**
+     * Does this row have a popup menu showing?
+     */
+    private static class MenuHighlightPredicate implements HighlightPredicate {
 
-		private MouseableTable table;
+        private MouseableTable table;
 
-		public MenuHighlightPredicate(MouseableTable table) {
-			this.table = table;
-		}
+        public MenuHighlightPredicate(MouseableTable table) {
+            this.table = table;
+        }
 
-		public boolean isHighlighted(Component renderer,
-				ComponentAdapter adapter) {
-			if (!adapter.getComponent().isEnabled())
-				return false;
+        public boolean isHighlighted(Component renderer,
+                ComponentAdapter adapter) {
+            if (!adapter.getComponent().isEnabled())
+                return false;
 
-			return table.isMenuShowing(adapter.row);
-		}
-	}
-	
-	@Override
+            return table.isMenuShowing(adapter.row);
+        }
+    }
+
+    @Override
     public void setDefaultEditor(Class clazz, TableCellEditor editor) {
         boolean usesEventTableModel = getModel() instanceof EventTableModel;
         boolean usesAdvancedTableFormat = false;

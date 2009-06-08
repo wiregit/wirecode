@@ -49,30 +49,30 @@ public class ChatModel {
     }
     
     /**
-	 * Returns an EventList of chatFriends
-	 */
+     * Returns an EventList of chatFriends.
+     */
     public EventList<ChatFriend> getChatFriendList() {
         return chatFriends;
     }
     
     /** 
-	 * Returns the ChatFriend associated with this friendId. 
+     * Returns the ChatFriend associated with this friendId. 
      * Returns null if no ChatFriend exists for this friendId.
-	 */
+     */
     public ChatFriend getChatFriend(String friendId) {
         return idToFriendMap.get(friendId);
     }
     
     /**
-	 * Removes this chatFriendId.
-	 */
+     * Removes this chatFriendId.
+     */
     public ChatFriend removeChatFriend(String friendId) {
         return idToFriendMap.remove(friendId);
     }
     
     /**
-	 * Returns the id of the user currently signed into chat.
-	 */
+     * Returns the id of the user currently signed into chat.
+     */
     public String getLoggedInId() {
         return myId;
     }
@@ -125,9 +125,9 @@ public class ChatModel {
     }
     
     /**
-	 * Handles an file offer from a presence. Ensures that ChatPanel has been created
-	 * prior to firing the MessageRecieved event.
-	 */
+     * Handles an file offer from a presence. Ensures that ChatPanel has been created
+     * prior to firing the MessageRecieved event.
+     */
     private void handleIncomingFileOffer(FileMetaData metadata, String fromJID) {
         int slashIndex = fromJID.indexOf("/");
         String fromFriendId = (slashIndex < 0) ? fromJID : fromJID.substring(0, slashIndex);
@@ -146,8 +146,8 @@ public class ChatModel {
     }
     
     /**
-	 * Updates the list of ChatFriends as presences sign on and off.
-	 */
+     * Updates the list of ChatFriends as presences sign on and off.
+     */
     private void handlePresenceEvent(FriendPresenceEvent event) {
         final XMPPPresence presence = (XMPPPresence)event.getData();
         final XMPPFriend user = presence.getXMPPFriend();
@@ -174,10 +174,10 @@ public class ChatModel {
     
     /**
      * Remove from the friends list only when:
-     *
+     * <pre>
      * 1. The user (buddy) associated with the chatfriend is no longer signed in, AND
      * 2. The chat has been closed (by clicking on the "x" on the friend in the friend's list)
-     *
+     * </pre>
      * @param chatFriend the ChatFriend to decide whether to remove (no null check)
      * @return true if chatFriend should be removed.
      */
@@ -187,11 +187,11 @@ public class ChatModel {
     
     /**
      * Adds a friend to the list of friends that can be chatted with. Also
-	 * adds a listener to this friend presence that listens for incoming messages
+     * adds a listener to this friend presence that listens for incoming messages
      * from this presence. 
-	 *
-	 * This listener ensures that the ChatPanel has been created prior to 
-	 * firing a ConversationEvent.
+     * <p>
+     * This listener ensures that the ChatPanel has been created prior to 
+     * firing a ConversationEvent.
      */
     private void addFriend(ChatFriend chatFriend, final XMPPPresence presence) {
         if(chatFriend == null) {

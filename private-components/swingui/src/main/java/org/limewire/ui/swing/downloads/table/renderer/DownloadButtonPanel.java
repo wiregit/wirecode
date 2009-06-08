@@ -18,11 +18,11 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 /**
- * Used by DownloadButtonRendererEditor
+ * Used by DownloadButtonRendererEditor.
  */
 public class DownloadButtonPanel extends JPanel {
-		
-	private final JButton pauseButton;
+
+    private final JButton pauseButton;
     private final JButton cancelButton;
     private final JButton resumeButton;
     private final JButton tryAgainButton;
@@ -40,23 +40,23 @@ public class DownloadButtonPanel extends JPanel {
     public DownloadButtonPanel() {
         this(null);
     }
-	/**
-	 * Create the panel
-	 */
-	public DownloadButtonPanel(ActionListener actionListener) {
-	    super(new MigLayout("insets 0 0 0 0, gap 0, novisualpadding, fill, aligny center"));
-	    
-	    GuiUtils.assignResources(this);		
-	    
-	    setOpaque(false);
-	    
-	    Font font = new DownloadRendererProperties().getFont();
+    /**
+     * Create the panel.
+     */
+    public DownloadButtonPanel(ActionListener actionListener) {
+        super(new MigLayout("insets 0 0 0 0, gap 0, novisualpadding, fill, aligny center"));
+        
+        GuiUtils.assignResources(this);		
 
-		pauseButton = new HyperlinkButton(I18n.tr("Pause"));
-		pauseButton.setActionCommand(DownloadActionHandler.PAUSE_COMMAND);
-		pauseButton.addActionListener(actionListener);
-		pauseButton.setToolTipText(I18n.tr("Pause download"));		
-		pauseButton.setFont(font);
+        setOpaque(false);
+
+        Font font = new DownloadRendererProperties().getFont();
+
+        pauseButton = new HyperlinkButton(I18n.tr("Pause"));
+        pauseButton.setActionCommand(DownloadActionHandler.PAUSE_COMMAND);
+        pauseButton.addActionListener(actionListener);
+        pauseButton.setToolTipText(I18n.tr("Pause download"));		
+        pauseButton.setFont(font);
 
         cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
         cancelButton.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
@@ -74,38 +74,38 @@ public class DownloadButtonPanel extends JPanel {
         tryAgainButton.setToolTipText(I18n.tr("Try again"));    
         tryAgainButton.setFont(font);
 
-		resumeButton =  new HyperlinkButton(I18n.tr("Resume"));;
-		resumeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
-		resumeButton.addActionListener(actionListener);
-		resumeButton.setVisible(false);
+        resumeButton =  new HyperlinkButton(I18n.tr("Resume"));;
+        resumeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
+        resumeButton.addActionListener(actionListener);
+        resumeButton.setVisible(false);
         resumeButton.setToolTipText(I18n.tr("Resume download"));    
         resumeButton.setFont(font);
-		
-		
-		add(resumeButton, "hidemode 3, push");
+
+
+        add(resumeButton, "hidemode 3, push");
         add(pauseButton, "hidemode 3, push");
-        add(tryAgainButton, "hidemode 1, push");		
-	
-		add(cancelButton, "hidemode 3, gapright 6");
-		add(removeButton, "hidemode 3, gapright 6");
-	}	
-	
-	public void addActionListener(ActionListener actionListener){
-	    pauseButton.addActionListener(actionListener);
+        add(tryAgainButton, "hidemode 1, push");
+
+        add(cancelButton, "hidemode 3, gapright 6");
+        add(removeButton, "hidemode 3, gapright 6");
+    }
+    
+    public void addActionListener(ActionListener actionListener){
+        pauseButton.addActionListener(actionListener);
         cancelButton.addActionListener(actionListener);
         resumeButton.addActionListener(actionListener);
         removeButton.addActionListener(actionListener);
         tryAgainButton.addActionListener(actionListener);
-	}
+    }
 
-	
 
-	public void updateButtons(DownloadState state) {
-		pauseButton.setVisible(state == DownloadState.DOWNLOADING);  //used to be connecting also. keeping consistent with tray
-		resumeButton.setVisible(state.isResumable());
+
+    public void updateButtons(DownloadState state) {
+        pauseButton.setVisible(state == DownloadState.DOWNLOADING);  //used to be connecting also. keeping consistent with tray
+        resumeButton.setVisible(state.isResumable());
         cancelButton.setVisible(state != DownloadState.DONE);
         removeButton.setVisible(state == DownloadState.DONE);
         tryAgainButton.setVisible(state == DownloadState.STALLED);
-	}
+    }
 
 }

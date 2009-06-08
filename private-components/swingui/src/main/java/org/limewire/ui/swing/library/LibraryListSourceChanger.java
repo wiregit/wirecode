@@ -56,7 +56,7 @@ public class LibraryListSourceChanger implements ListSourceChanger {
     
     /**
      * Return the current friend that is being filtered on, null if no filtering is
-     * occuring.
+     * occurring.
      */
     public Friend getCurrentFriend() {
         return currentFriend;

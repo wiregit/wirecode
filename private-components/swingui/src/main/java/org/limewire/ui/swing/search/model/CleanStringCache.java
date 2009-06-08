@@ -29,8 +29,8 @@ public class CleanStringCache {
     
     /**
      * Removes all symbols and spaces in the string. 
-     * Also removes any leaf elements on the name. file1.txt
-     * file1(1).txt, file1(2).txt
+     * Also removes any leaf elements on the name, for example: file1.txt
+     * file1(1).txt, file1(2).txt.
      */
     public String cleanString(String string) {
         Matcher matcher = pattern.matcher(string);

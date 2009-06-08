@@ -36,7 +36,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 
 /**
- * Filtering Option View
+ * Filtering Option View.
  */
 public class FilteringOptionPanel extends OptionPanel {
     

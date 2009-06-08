@@ -32,7 +32,7 @@ import com.google.inject.Singleton;
  * Panel which gets installed as the glass pane of a Window. 
  * This glass pane creates and displays semi-transparent images
  * over the main application.
- * 
+ * <p>
  * It is the responsibility of drag listeners to update the positioning,
  * image and visibility of this glass pane.
  */
@@ -65,7 +65,7 @@ public class GhostDragGlassPane extends JPanel {
     }
     
     /**
-     * Updates the image properlly based on the type of Friend.
+     * Updates the image properly based on the type of Friend.
 	 * If friend is null, a default adding to My Library message
      * is displayed, otherwise the friend's name is included in
      * the shared message.
@@ -85,8 +85,8 @@ public class GhostDragGlassPane extends JPanel {
     }
     
     /**
-	 * Returns the friend in the ghost pane, null if no friend is selected.
-	 */
+     * Returns the friend in the ghost pane, null if no friend is selected.
+     */
     public Friend getCurrentFriend() {
         return currentFriend;
     }
@@ -105,7 +105,6 @@ public class GhostDragGlassPane extends JPanel {
      * Relocates the image to this point. The image is displayed
      * to the right of this location and 50% above/below the 
      * y coordinate of this location.
-     * @param location
      */
     public void setPoint(Point location) {
         this.oldLocation = this.location;
@@ -113,7 +112,7 @@ public class GhostDragGlassPane extends JPanel {
     }
     
     /**
-     * Returns the rectangle of where changes have occured
+     * Returns the rectangle of where changes have occurred
      * on the glass pane. This can greatly improve performance
      * by not repainting the entire glass pane.
      */
@@ -183,7 +182,7 @@ public class GhostDragGlassPane extends JPanel {
         
         public void setText(Friend friend) {
             if(friend == null) {
-            	label.setText(I18n.tr("Add to My Library"));
+                label.setText(I18n.tr("Add to My Library"));
             } else {
                 String renderName = friend.getRenderName();
                 if(!StringUtils.isEmpty(renderName)) {

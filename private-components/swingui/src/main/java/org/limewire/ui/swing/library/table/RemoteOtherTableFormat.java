@@ -17,7 +17,7 @@ import org.limewire.util.FileUtils;
 import com.google.inject.Provider;
 
 /**
- * Table format for Other Table for LW buddies and Browse hosts
+ * Table format for Other Table for LW buddies and Browse hosts.
  */
 public class RemoteOtherTableFormat<T extends RemoteFileItem> extends AbstractRemoteLibraryFormat<T> {
     static final int NAME_INDEX = 0;

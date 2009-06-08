@@ -26,7 +26,7 @@ public interface ExcludedFolderCollectionManager {
     Collection<File> getExcludedFolders();
     
     /**
-     * unexcludes all currently excluded folders and excludes the folders in excludedFolders
+     * unexcludes all currently excluded folders and excludes the folders in excludedFolders.
      */
     void setExcludedFolders(Collection<File> excludedFolders);
 

@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 @LazySingleton
 public class IconManager {
     
-    /** The original basic file icon controller **/
+    /** The original basic file icon controller. **/
     private final FileIconController originalFileController;
     
     /** The current FileIconController. */
@@ -32,7 +32,7 @@ public class IconManager {
     @Inject
     IconManager(NonBlockFileIconController nonBlockFileIconController) {
         // Always begin with the basic controller,
-        // whose contruction can never block.
+        // whose construction can never block.
         this.originalFileController = nonBlockFileIconController;
         fileController = this.originalFileController;
         
@@ -56,7 +56,7 @@ public class IconManager {
     }
     
     /**
-     * Function to create, cache, and provide an empty 16 by 16 icon
+     * Function to create, cache, and provide an empty 16 by 16 icon.
      */
     public Icon getBlankIcon() {
         
@@ -94,7 +94,7 @@ public class IconManager {
     }
     
     /**
-     * Returns the icon assocated with the extension.
+     * Returns the icon associated with the extension.
      * TODO: Implement better.
      */
     public Icon getIconForExtension(String ext) {
@@ -104,7 +104,7 @@ public class IconManager {
     
     /**
      * Returns the icon associated with the extension for this PropertiableFile.
-	 */
+     */
     public Icon getIconForPropertiableFile(PropertiableFile file) {
         return getIconForExtension(getExtension(file));
     }
@@ -116,14 +116,14 @@ public class IconManager {
     }
     
     /**
-     * Returns a text description of the MIME type for the given PropertiableFile's extension
+     * Returns a text description of the MIME type for the given PropertiableFile's extension.
      */
     public String getMIMEDescription(PropertiableFile propertiable) {
         return getMIMEDescription(getExtension(propertiable));
     }
     
     /**
-     * Returns a text description of the MIME type for the given file extension
+     * Returns a text description of the MIME type for the given file extension.
      */
     public String getMIMEDescription(String extension) {
         if (extension == null) {
@@ -156,7 +156,7 @@ public class IconManager {
     /**
      * Reverts the IconController to a basic controller if at any point
      * in time the controller becomes invalid.
-     * 
+     * <p>
      * Returns true if the current controller is already valid.
      */
     private void validate() {

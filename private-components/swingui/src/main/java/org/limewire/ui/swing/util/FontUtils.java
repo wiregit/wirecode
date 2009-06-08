@@ -76,7 +76,7 @@ public class FontUtils {
     
     /**
      * Determines if a font can display up to a point in the string.
-     *
+     * <p>
      * Returns -1 if it can display the whole string.
      */
     public static boolean canDisplay(Font f, String s) {

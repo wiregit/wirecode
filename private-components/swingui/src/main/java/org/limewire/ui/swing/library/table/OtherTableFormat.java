@@ -16,7 +16,7 @@ import org.limewire.ui.swing.util.IconManager;
 import com.google.inject.Provider;
 
 /**
- * Table format for the Other Table when it is in My Library
+ * Table format for the Other Table when it is in My Library.
  */
 public class OtherTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
     static final int ACTION_INDEX = 0;

@@ -30,7 +30,7 @@ public class ColumnStateInfo {
     }
     
     /**
-     * Returns the model index for this column
+     * Returns the model index for this column.
      */
     public int getModelIndex() {
         return modelIndex;
@@ -46,14 +46,14 @@ public class ColumnStateInfo {
     }
     
     /**
-     *	Unique identifier to read/write to disk with
-	 */
+     *  Unique identifier to read/write to disk with.
+     */
     public String getId() {
         return id;
     }
     
     /**
-     * Name to display in the column header
+     * Name to display in the column header.
      */
     public String getName() {
         return name;
@@ -64,21 +64,21 @@ public class ColumnStateInfo {
     }
     
     /**
-     * Returns the current visiblity state of this column
+     * Returns the current visibility state of this column.
      */
     public boolean isShown() {
         return isShownAtStartup;
     }
     
     /**
-     * Returns true if this column can be hidden, false otherwise
+     * Returns true if this column can be hidden, false otherwise.
      */
     public boolean isHideable() {
         return isHideable;
     }
     
     /**
-     * Returns the default visiblity state for this column
+     * Returns the default visibility state for this column.
      */
     public boolean isDefaultlyShown() {
         return isDefaultlyShown;

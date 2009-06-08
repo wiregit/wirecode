@@ -16,7 +16,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 
 /**
- * Spam Option View
+ * Spam Option View.
  */
 public class SpamOptionPanel extends OptionPanel {
     
