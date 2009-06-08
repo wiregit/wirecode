@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -49,6 +50,7 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.address.FriendAddress;
 import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
@@ -74,6 +76,7 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequest;
+import org.limewire.security.SecurityUtils;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -153,6 +156,13 @@ public class FacebookFriendConnection implements FriendConnection {
     private volatile String logoutURL;
     private final ChatManager chatManager;
 
+    /**
+     * Session id as part of the full presence id. Follows the lifetime of
+     * the connection object. A new connection object should have a new
+     * session id.
+     */
+    private final String sessionId;
+    
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
                                     @Named("facebookApiKey") Provider<String> apiKey,
@@ -185,6 +195,13 @@ public class FacebookFriendConnection implements FriendConnection {
         this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
         this.libraryRefreshHandler = libraryRefreshHandlerFactory.create(this);
         this.chatManager = new ChatManager(this);
+        this.sessionId = createSessionId();
+    }
+    
+    private static String createSessionId() {
+        byte[] sessionId = new byte[8];
+        SecurityUtils.createSecureRandomNoBlock().nextBytes(sessionId);
+        return org.limewire.util.StringUtils.getUTF8String(Base64.encodeBase64(sessionId));
     }
     
     void setPostFormID(String postFormID) {
@@ -608,13 +625,9 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     public String getPresenceId() {
-        return uid + "/" + configuration.getResource();
+        return uid + "/" + configuration.getResource() + sessionId;
     }
     
-    public String getSecret() {
-        return secret;
-    }
-
     ChatManager getChatManager() {
         return chatManager;
     }
@@ -693,6 +706,7 @@ public class FacebookFriendConnection implements FriendConnection {
         }
         try {
             String resp = httpPOST("http://www.facebook.com", "/ajax/chat/send.php", nvps);
+            LOG.debugf("chat status {0}", resp);
         } catch (IOException e) {
             throw new FriendException(e);    
         }
@@ -748,8 +762,17 @@ public class FacebookFriendConnection implements FriendConnection {
             FacebookFriend facebookFriend = getFriend(friendId);
             if(facebookFriend != null) {
                 Map<String, FriendPresence> presences = facebookFriend.getPresences();
-                if(!presences.containsKey(presenceId)) { 
-                    boolean firstPresence = presences.size() == 0;
+                if(!presences.containsKey(presenceId)) {
+                    // remove old presence with same resource prefix
+                    String newResourcePrefix = FriendAddress.parseIdPrefix(presenceId);
+                    for (String id : presences.keySet()) {
+                        String fullResource = StringUtils.parseResource(id);
+                        if (fullResource.startsWith(newResourcePrefix)) {
+                            LOG.debugf("found old presence to replace: {0}, new id: {1}", id, presenceId);
+                            removePresence(id);
+                        }
+                    }
+                    boolean firstPresence = facebookFriend.getPresences().isEmpty();
                     LOG.debugf("new friend is available: {0}", presenceId);
                     newPresence = new FacebookFriendPresence(presenceId, facebookFriend, featureEventBroadcaster);
                     if (facebookFriend.hasLimeWireAppInstalled()) {

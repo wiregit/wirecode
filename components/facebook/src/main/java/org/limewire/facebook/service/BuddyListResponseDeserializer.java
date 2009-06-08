@@ -12,7 +12,6 @@ import org.limewire.logging.LogFactory;
 
 import com.google.inject.Singleton;
 
-@Singleton
 public class BuddyListResponseDeserializer {
     
     private static final Log LOG = LogFactory.getLog(BuddyListResponseDeserializer.class);

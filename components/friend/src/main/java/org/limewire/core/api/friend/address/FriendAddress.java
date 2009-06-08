@@ -19,7 +19,7 @@ public class FriendAddress implements PermanentAddress {
      */
     private final String idPrefix;
 
-    private static String parseIdPrefix(String id) {
+    public static String parseIdPrefix(String id) {
         int slash = id.indexOf('/');
         if (slash == -1) {
             return id;
