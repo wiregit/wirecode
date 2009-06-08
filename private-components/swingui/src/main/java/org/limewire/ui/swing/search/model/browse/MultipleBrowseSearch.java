@@ -1,41 +1,41 @@
-package org.limewire.ui.swing.search.model;
+package org.limewire.ui.swing.search.model.browse;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.ui.swing.search.model.BrowseStatusListener;
 
-public class MultipleBrowseSearch extends AbstractBrowseSearch {
-    
+class MultipleBrowseSearch extends AbstractBrowseSearch {
+
     private final CombinedSearchListener combinedSearchListener = new CombinedSearchListener();
+    private final CombinedBrowseStatusListener combinedBrowseStatusListener = new CombinedBrowseStatusListener();
     
-    private final RemoteLibraryManager remoteLibraryManager;
-    private final BrowseFactory browseFactory;
     private List<BrowseSearch> browses;
+
+    private final BrowseSearchFactory browseSearchFactory;
+
     /**
      * @param hosts the people to be browsed. Can not be null.
      */
-    public MultipleBrowseSearch(RemoteLibraryManager remoteLibraryManager, BrowseFactory browseFactory,
+    public MultipleBrowseSearch(BrowseSearchFactory browseSearchFactory,
             Collection<RemoteHost> hosts) {
-        this.browseFactory = browseFactory;
-        this.remoteLibraryManager = remoteLibraryManager;
-        
+        this.browseSearchFactory = browseSearchFactory;
         initialize(hosts);
     }
-    
+
     private void initialize(Collection<RemoteHost> hosts){
         browses = new ArrayList<BrowseSearch>(hosts.size());
         for(RemoteHost host : hosts){
-            BrowseSearch browseSearch = new SingleBrowseSearch(remoteLibraryManager, browseFactory, host.getFriendPresence());
+            BrowseSearch browseSearch = browseSearchFactory.createBrowseSearch(host);
             browseSearch.addSearchListener(combinedSearchListener);
+            browseSearch.addBrowseStatusListener(combinedBrowseStatusListener);
             browses.add(browseSearch);
         }
     }
@@ -87,8 +87,7 @@ public class MultipleBrowseSearch extends AbstractBrowseSearch {
                     listener.searchStopped(MultipleBrowseSearch.this);
                 }
             }
-        }
-        
+        }        
     }
     
     private class CombinedBrowseStatusListener implements BrowseStatusListener {

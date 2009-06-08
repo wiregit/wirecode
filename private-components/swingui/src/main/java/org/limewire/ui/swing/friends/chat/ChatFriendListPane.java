@@ -62,6 +62,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -98,6 +99,7 @@ public class ChatFriendListPane extends JPanel {
     private final ChatModel chatModel;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final LibraryNavigator libraryNavigator;
+    private final RemoteHostActions remoteHostActions;
 
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
@@ -116,11 +118,13 @@ public class ChatFriendListPane extends JPanel {
     @Resource private Icon awayIcon;
 
     @Inject
-    public ChatFriendListPane(LibraryNavigator libraryNavigator, ChatModel chatModel) {
+    public ChatFriendListPane(LibraryNavigator libraryNavigator, ChatModel chatModel, 
+            RemoteHostActions remoteHostActions) {
         super(new BorderLayout());
         this.chatModel = chatModel;
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
         this.libraryNavigator = libraryNavigator;
+        this.remoteHostActions = remoteHostActions;
         
         this.chatFriends = chatModel.getChatFriendList();
         
@@ -775,7 +779,7 @@ public class ChatFriendListPane extends JPanel {
         public void actionPerformed(ActionEvent e) {
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
-                libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
+                remoteHostActions.viewLibraryOf(chatFriend.getFriend());
             }
         }
     }

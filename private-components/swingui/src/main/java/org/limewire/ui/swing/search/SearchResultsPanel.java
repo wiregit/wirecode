@@ -10,6 +10,7 @@ import java.awt.Rectangle;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,7 +28,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.RectanglePainter;
-import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.setting.evt.SettingEvent;
@@ -42,6 +42,7 @@ import org.limewire.ui.swing.library.EmptyFriendLibraryMessagePanel;
 import org.limewire.ui.swing.library.EmptyFriendLibraryMessagePanel.MessageTypes;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.model.browse.BrowseStatus;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
@@ -109,7 +110,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
 
     private boolean fullyConnected = true;
 
-    private LibraryState browseState = null;
+    private BrowseStatus browseStatus = null;
 
     private final EmptyFriendLibraryMessagePanel browseMessagePanel;
 
@@ -239,6 +240,13 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     }
     
     /**
+     * @param title The title displayed at the top of the panel
+     */
+    public void setTitle(String title){
+        searchTitleLabel.setText(title);
+    }
+    
+    /**
      * Updates the column header component in the scroll pane.  This depends on
      * the current results view and whether the sponsored results are visible. 
      */
@@ -308,9 +316,15 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         tabHighlight.setBorderPaint(null);
         
         HeaderBar header = new HeaderBar(searchTitleLabel);
+        header.setLayout(new MigLayout("nogrid, hidemode 3, insets 0 0 0 0, gap 0!"));
+        header.add(new JButton("WarningButton"));
+        header.add(new JButton("Refresh, push"));
         headerBarDecorator.decorateBasic(header);
         
-        sortAndFilterPanel.layoutComponents(header);
+        JPanel sortPanel = new JPanel();
+        sortPanel.setOpaque(false);
+        sortAndFilterPanel.layoutComponents(sortPanel);
+        header.add(sortPanel, "growx, east");
         add(header                    , "spanx 2, growx, wrap");
         add(classicSearchReminderPanel, "spanx 2, growx, wrap");
         add(messagePanel              , "spanx 2, growx, wrap");
@@ -423,8 +437,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         updateMessages();        
     }
     
-    public void setBrowseState(LibraryState browseState){
-        this.browseState = browseState;
+    public void setBrowseStatus(BrowseStatus browseStatus){
+        this.browseStatus = browseStatus;
         updateMessages();        
     }
     
@@ -440,10 +454,10 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             messageLabel.setText(I18n.tr("You might not receive many results until LimeWire finishes loading..."));
             messagePanel.setVisible(true);
             browseMessagePanel.setVisible(false);            
-        } else if (browseState == LibraryState.FAILED_TO_LOAD) {
+        } else if (browseStatus == BrowseStatus.FAILED) {
             browseMessagePanel.setMessageType(MessageTypes.LW_CONNECTION_ERROR);
             browseMessagePanel.setVisible(true);
-        } else if (browseState == LibraryState.LOADING) {
+        } else if (browseStatus == BrowseStatus.PARTIAL_FAIL) {
             browseMessagePanel.setMessageType(MessageTypes.LW_LOADING);
             browseMessagePanel.setVisible(true);
         } else {
