@@ -99,7 +99,7 @@ class FileCollectionManagerImpl implements FileCollectionManager {
     @Override
     public SharedFileCollection createNewCollection(String name) {
         SharedFileCollectionImpl collection = createNewCollectionImpl(name);
-        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection)); System.out.println("done");
+        sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(SharedFileCollectionChangeEvent.Type.COLLECTION_ADDED, collection));
         return collection;
     }
     
