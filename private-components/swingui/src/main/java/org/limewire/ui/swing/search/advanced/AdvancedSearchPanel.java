@@ -31,7 +31,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
-import org.limewire.ui.swing.search.AdvancedSearchBuilder;
+import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.util.FontUtils;
@@ -45,7 +45,7 @@ import com.google.inject.Inject;
 public class AdvancedSearchPanel extends JXPanel {
         
     private final FriendAutoCompleterFactory friendAutoCompleterFactory;
-    private final AdvancedSearchBuilder advancedSearchBuilder;
+    private final KeywordAssistedSearchBuilder advancedSearchBuilder;
     private final PropertyDictionary propertyDictionary;
     private final ButtonDecorator buttonDecorator;
     
@@ -64,7 +64,7 @@ public class AdvancedSearchPanel extends JXPanel {
     
     @Inject
     public AdvancedSearchPanel(PropertyDictionary propertyDictionary, FriendAutoCompleterFactory friendAutoCompleterFactory,
-            HeaderBarDecorator headerDecorator, ButtonDecorator buttonDecorator, AdvancedSearchBuilder advancedSearchBuilder) {
+            HeaderBarDecorator headerDecorator, ButtonDecorator buttonDecorator, KeywordAssistedSearchBuilder advancedSearchBuilder) {
         
         this.propertyDictionary = propertyDictionary;
         this.friendAutoCompleterFactory = friendAutoCompleterFactory;

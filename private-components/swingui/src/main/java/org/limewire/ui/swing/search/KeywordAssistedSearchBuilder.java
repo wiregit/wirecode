@@ -17,7 +17,7 @@ import com.google.inject.Inject;
  * Used to generate {@link SearchInfo} objects for a search based on an advanced search defined by
  *  a map of key/value or an encoded search string. 
  */
-public class AdvancedSearchBuilder {
+public class KeywordAssistedSearchBuilder {
 
     private static final String UNTRANSLATED_SEPARATOR = I18nMarker.marktr(":");
     
@@ -35,7 +35,7 @@ public class AdvancedSearchBuilder {
     
     
     @Inject
-    AdvancedSearchBuilder(Translator translator) {
+    KeywordAssistedSearchBuilder(Translator translator) {
         this.translator = translator;
     }
     
@@ -231,6 +231,90 @@ public class AdvancedSearchBuilder {
         }
         
         return null;
+    }
+    
+    
+    public CategoryOverride parseCategoryOverride(String query) {
+        String translatedKeySeparator = getTranslatedKeySeprator();
+        String untranslatedKeySeparator = UNTRANSLATED_SEPARATOR;
+        
+        // Only attempt to parse an advanced search if the query has at least one special
+        //  key separator sequence
+        
+        boolean firstSeparatorIsUntranslated = true;
+        int firstSeparatorPosition = query.indexOf(untranslatedKeySeparator);
+        if (firstSeparatorPosition < 0) { 
+            firstSeparatorPosition = query.indexOf(translatedKeySeparator);
+            firstSeparatorIsUntranslated = false;
+        }
+        
+        SearchCategory querySelectedSearchCategory = null;
+        
+        // There should be at least one key separator and it must be forward of the first character
+        if (firstSeparatorPosition > 0) {
+            
+            // Check if the first token is a SearchCategory override
+            querySelectedSearchCategory = attemptToParseSearchCategory(
+                    query.substring(0, firstSeparatorPosition).trim(),
+                    firstSeparatorIsUntranslated);
+        
+            // If the users language uses the same "colon" as English check again for an override in the 
+            //  other language
+            if (querySelectedSearchCategory == null && !translator.isCurrentLanguageEnglish()
+                    && translatedKeySeparator == untranslatedKeySeparator) {
+                
+                    querySelectedSearchCategory = attemptToParseSearchCategory(
+                            query.substring(0, firstSeparatorPosition).trim(),
+                            !firstSeparatorIsUntranslated);
+            } 
+        }
+        
+        if (querySelectedSearchCategory == null) {
+            return null;
+        } 
+        else {
+            return new CategoryOverride(querySelectedSearchCategory,
+                query.substring((firstSeparatorPosition+1)));
+        }
+    }
+    
+    private SearchCategory attemptToParseSearchCategory(String firstTerm, boolean firstSeparatorIsUntranslated) {
+        if (firstSeparatorIsUntranslated) {
+            String candidateTerm = translator.toLowerCaseEnglish(firstTerm);
+            for ( SearchCategory category : SearchCategory.values() ) {
+                if (translator.toLowerCaseEnglish(
+                        SearchCategoryUtils.getUntranslatedName(category)).equals(candidateTerm)) {
+                    return category;
+                }
+            }
+        }
+        else {
+            String candidateTerm = translator.toLowerCaseCurrentLocale(firstTerm);
+            for ( SearchCategory category : SearchCategory.values() ) {
+                if (translator.toLowerCaseCurrentLocale(translator.translate(
+                        SearchCategoryUtils.getUntranslatedName(category))).equals(candidateTerm)) {
+                    return category;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    public static class CategoryOverride {
+        private final SearchCategory category;
+        private final String cutQuery;
+        
+        public CategoryOverride(SearchCategory category, String cutQuery) {
+            this.category = category;
+            this.cutQuery = cutQuery;
+        }
+        public SearchCategory getCategory() {
+            return category;
+        }
+        public String getCutQuery() {
+            return cutQuery;
+        }
     }
     
     /**

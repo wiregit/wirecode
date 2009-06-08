@@ -19,6 +19,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
@@ -40,15 +41,16 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.painter.factories.SearchTabPainterFactory;
-import org.limewire.ui.swing.search.AdvancedSearchBuilder;
 import org.limewire.ui.swing.search.AdvancedSearchMediator;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchBar;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.search.SearchResultMediator;
+import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.mozilla.browser.MozillaInitialization;
@@ -64,7 +66,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final FlexibleTabList searchList;
     private final Navigator navigator;        
     private final NavItem homeNav;
-    private final AdvancedSearchBuilder advancedSearchBuilder;
+    private final KeywordAssistedSearchBuilder keywordAssistedSearchBuilder;
         
     @Inject
     public TopPanel(final SearchHandler searchHandler,
@@ -78,13 +80,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryNavigator libraryNavigator,
                     AdvancedSearchMediator advancedSearchMediator,
-                    AdvancedSearchBuilder advancedSearchBuilder) {        
+                    KeywordAssistedSearchBuilder keywordAssistedSearchBuilder) {        
         GuiUtils.assignResources(this);
         
         this.searchBar = searchBar;
         this.navigator = navigator;
         this.searchBar.addSearchActionListener(new Searcher(searchHandler));        
-        this.advancedSearchBuilder = advancedSearchBuilder;
+        this.keywordAssistedSearchBuilder = keywordAssistedSearchBuilder;
         
         setName("WireframeTop");
         
@@ -264,18 +266,31 @@ class TopPanel extends JXPanel implements SearchNavigator {
             String searchText = searchBar.getSearchText();
             if (!searchText.isEmpty()) {
                 
+                SearchCategory category = searchBar.getCategory();
+                String query = searchText;
+                
+                // Check if the category was overridden by a keyword 
+                CategoryOverride categoryOverride = keywordAssistedSearchBuilder.parseCategoryOverride(query);
+                
+                // Do not allow searches in the Other category
+                if (categoryOverride != null && categoryOverride.getCategory() != SearchCategory.OTHER) {
+                    
+                    // Set new category and trim the category text out of the search string
+                    //  for the actual search
+                    category = categoryOverride.getCategory();
+                    query = categoryOverride.getCutQuery();
+
+                    // Update the UI with the new category
+                    searchBar.setCategory(category);
+                }
+                    
                 // Attempt to parse an advanced search from the search query
-                SearchInfo search = advancedSearchBuilder.attemptToCreateAdvancedSearch(
-                        searchText, searchBar.getCategory());
+                SearchInfo search = keywordAssistedSearchBuilder.attemptToCreateAdvancedSearch(
+                        query, category);
                 
                 // Fall back on the normal search
                 if (search == null) {
-                    search = DefaultSearchInfo.createKeywordSearch(searchText,  
-                        searchBar.getCategory());
-                } 
-                else {
-                    // If the search category was overridden then change it in the top bar
-                    searchBar.setCategory(search.getSearchCategory());
+                    search = DefaultSearchInfo.createKeywordSearch(query, category);
                 }
                 
                 if(searchHandler.doSearch(search)) {

@@ -14,7 +14,7 @@ import org.limewire.ui.swing.util.Translator;
 import org.limewire.util.BaseTestCase;
 
 /**
- * Tests for {@link AdvancedSearchBuilder}.
+ * Tests for {@link KeywordAssistedSearchBuilder}.
  */
 public class AdvancedSearchBuilderTest extends BaseTestCase {
     
@@ -33,7 +33,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
      
         final Translator translator = context.mock(Translator.class);
         
-        final AdvancedSearchBuilder searchBuilder = new AdvancedSearchBuilder(translator); 
+        final KeywordAssistedSearchBuilder searchBuilder = new KeywordAssistedSearchBuilder(translator); 
      
         context.checking(new Expectations() {{
             allowing(translator).translateWithComment(with(any(String.class)), with(equal(":")));
@@ -45,7 +45,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
 
     
     /**
-     * Tests {@link AdvancedSearchBuilder#createCompositeQuery(Map)}.
+     * Tests {@link KeywordAssistedSearchBuilder#createCompositeQuery(Map)}.
      */
     public void testCreateCompositeQueryBasic() {
         Mockery context = new Mockery() {{
@@ -54,7 +54,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
      
         final Translator translator = context.mock(Translator.class);
         
-        final AdvancedSearchBuilder searchBuilder = new AdvancedSearchBuilder(translator); 
+        final KeywordAssistedSearchBuilder searchBuilder = new KeywordAssistedSearchBuilder(translator); 
      
         context.checking(new Expectations() {{
             allowing(translator).translate(
@@ -112,7 +112,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
      
         final Translator translator = context.mock(Translator.class);
         
-        final AdvancedSearchBuilder searchBuilder = new AdvancedSearchBuilder(translator); 
+        final KeywordAssistedSearchBuilder searchBuilder = new KeywordAssistedSearchBuilder(translator); 
      
         context.checking(new Expectations() {{
             allowing(translator).translate(
@@ -207,7 +207,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
     */
     
     /**
-     * Test the entirety of {@link AdvancedSearchBuilder#createAdvancedSearch(Map, SearchCategory)}. 
+     * Test the entirety of {@link KeywordAssistedSearchBuilder#createAdvancedSearch(Map, SearchCategory)}. 
      */
     public void testCreateAdvancedSearch() {
         Mockery context = new Mockery() {{
@@ -216,7 +216,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
      
         final Translator translator = context.mock(Translator.class);
         
-        final AdvancedSearchBuilder searchBuilder = new AdvancedSearchBuilder(translator); 
+        final KeywordAssistedSearchBuilder searchBuilder = new KeywordAssistedSearchBuilder(translator); 
      
         context.checking(new Expectations() {{
             allowing(translator).translate(
@@ -237,7 +237,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
     }
     
     /**
-     * Test {@link AdvancedSearchBuilder#attemptToCreateAdvancedSearch(String, SearchCategory)
+     * Test {@link KeywordAssistedSearchBuilder#attemptToCreateAdvancedSearch(String, SearchCategory)
      */
     public void testAttemptToCreateAdvancedSearchSingleTuple() {
         Mockery context = new Mockery() {{
@@ -247,7 +247,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
         final Translator mockedTranslator = context.mock(Translator.class);
         final Translator translator = new MockableTranslator(mockedTranslator);        
         
-        final AdvancedSearchBuilder searchBuilder = new AdvancedSearchBuilder(translator); 
+        final KeywordAssistedSearchBuilder searchBuilder = new KeywordAssistedSearchBuilder(translator); 
      
         context.checking(new Expectations() {{
             allowing(mockedTranslator).isCurrentLanguageEnglish();
@@ -320,8 +320,8 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
         final Translator mockedTranslator2 = context.mock(Translator.class);
         final Translator translator2 = new MockableTranslator(mockedTranslator2);
         
-        final AdvancedSearchBuilder searchBuilder1 = new AdvancedSearchBuilder(translator1);
-        final AdvancedSearchBuilder searchBuilder2 = new AdvancedSearchBuilder(translator2);
+        final KeywordAssistedSearchBuilder searchBuilder1 = new KeywordAssistedSearchBuilder(translator1);
+        final KeywordAssistedSearchBuilder searchBuilder2 = new KeywordAssistedSearchBuilder(translator2);
      
         context.checking(new Expectations() {{
             allowing(mockedTranslator1).isCurrentLanguageEnglish();
@@ -383,7 +383,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
     }
     
     /**
-     * Tests {@link AdvancedSearchBuilder#attemptToCreateAdvancedSearch(String, SearchCategory)} with
+     * Tests {@link KeywordAssistedSearchBuilder#attemptToCreateAdvancedSearch(String, SearchCategory)} with
      *  queries including multi character separators and multi token keys.
      */
     public void testAttemptToCreateAdvancedSearchWithComplexSeparatorsAndKeys() {
@@ -394,7 +394,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
         final Translator mockedTranslator1 = context.mock(Translator.class);
         final Translator translator1 = new MockableTranslator(mockedTranslator1);        
         
-        final AdvancedSearchBuilder searchBuilder1 = new AdvancedSearchBuilder(translator1);
+        final KeywordAssistedSearchBuilder searchBuilder1 = new KeywordAssistedSearchBuilder(translator1);
 
      
         context.checking(new Expectations() {{
@@ -425,7 +425,7 @@ public class AdvancedSearchBuilderTest extends BaseTestCase {
      */
     public void testAttemptToCreateAdvancedSearchMultiKeyQuery() {
      
-       final AdvancedSearchBuilder searchBuilder1 = new AdvancedSearchBuilder(new Translator() {
+       final KeywordAssistedSearchBuilder searchBuilder1 = new KeywordAssistedSearchBuilder(new Translator() {
            @Override
            public boolean isCurrentLanguageEnglish() {
                return true;
