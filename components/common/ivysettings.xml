@@ -13,7 +13,7 @@
 	          defaultConflictManager="all"/>
 	
 	<caches defaultCacheDir="${ivy.default.ivy.user.dir}/defaultCache"
-	        repositoryCacheDir="${ivy.default.ivy.user.dir}/repositoryCache"
+	        repositoryCacheDir="${limewire.home}/.ivy2/repositoryCache"
 	        resolutionCacheDir="${limewire.home}/.ivy2/resolutionCache"
 	        lockStrategy="artifact-lock"
 	        useOrigin="true"/>
