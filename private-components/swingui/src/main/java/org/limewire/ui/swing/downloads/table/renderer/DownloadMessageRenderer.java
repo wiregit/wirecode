@@ -50,7 +50,7 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
         case CANCELLED:
             return I18n.tr("Cancelled");
         case FINISHING:
-            return I18n.tr("Finishing download...");
+            return I18n.tr("Finishing...");
         case DONE:
             return I18n.tr("Done");
         case CONNECTING:
@@ -59,7 +59,7 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
             // {0}: current size
             // {1}: total size
             // {2}: download speed
-            return I18n.tr("Downloading {0} of {1} ({2})",
+            return I18n.tr("{0} of {1} ({2})",
                     GuiUtils.toUnitbytes(item.getCurrentSize()), 
                     GuiUtils.toUnitbytes(item.getTotalSize()),
                     GuiUtils.rate2speed(item.getDownloadSpeed()), 
@@ -93,18 +93,18 @@ public class DownloadMessageRenderer extends DefaultTableCellRenderer {
     
     private String getTryAgainMessage(long tryingAgainTime) {
         if(tryingAgainTime == DownloadItem.UNKNOWN_TIME){
-            return I18n.tr("Searching for people with this file...");                
+            return I18n.tr("Looking for file...");                
         } else {
-            return I18n.tr("Searching for people with this file... ({0} left)", CommonUtils.seconds2time(tryingAgainTime));
+            return I18n.tr("Looking for file ({0} left)", CommonUtils.seconds2time(tryingAgainTime));
         }
     }
     
     private String getQueueTimeMessage(long queueTime){
-        if(queueTime == DownloadItem.UNKNOWN_TIME){
-            return I18n.tr("Waiting - remaining time unknown");                
-        } else {
-            return I18n.tr("Waiting - Starting in {0}", CommonUtils.seconds2time(queueTime));
-        }
+        //if(queueTime == DownloadItem.UNKNOWN_TIME){
+            return I18n.tr("Waiting...");                
+        //} else {
+        //    return I18n.tr("Waiting...", CommonUtils.seconds2time(queueTime));
+        //}
     }
 
 }
