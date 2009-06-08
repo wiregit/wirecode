@@ -32,6 +32,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -595,6 +596,15 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     private String getHostAddress() {
+        Address address = rfdContext.getAddress();
+        // if we're connecting to a connectable, use the unresolved address
+        // as host name, to allow virtual hosts to work which don't know 
+        // what to do with the resolved ip address from the socket, this mainly
+        // addresses magnet downloads from webservers
+        if (address instanceof Connectable) {
+            Connectable connectable = (Connectable)address;
+            return connectable.getAddress() + ":" + connectable.getPort();
+        }
         Socket socket = _socket;
         return socket != null ? socket.getInetAddress().getHostAddress() + ":" + socket.getPort() : "unknown host";
     }
