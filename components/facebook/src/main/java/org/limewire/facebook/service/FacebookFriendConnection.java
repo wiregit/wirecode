@@ -809,7 +809,9 @@ public class FacebookFriendConnection implements FriendConnection {
                     LOG.debugf("ignoring remove presence for {0}", presence.getPresenceId());
                 }
             }
-            friendManager.removeAvailableFriend(friend);            
+            if(!friend.isSignedIn()) {
+                friendManager.removeAvailableFriend(friend);
+            }
         }
     }
 
