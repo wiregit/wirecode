@@ -381,7 +381,10 @@ public class NativeFileIconController implements FileIconController {
             
             // Similarly, with the My Documents folder, the icon is only valid if it's
             // retrieved as the child from the root.
-            if(OSUtils.isWindows() && roots.length == 1) {
+            // Do not execute this code on windows 7. The default logic works fine. 
+            // On windows 7 this breaks because View.getRoots only returns one root,
+            // the path to the Desktop folder.
+            if(OSUtils.isWindows() && !OSUtils.isWindows7() && roots.length == 1) {
                 String path = SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS);
                 if(path != null) {
                     File documents = new File(path);

@@ -31,6 +31,11 @@ public class OSUtils {
      * Variable for whether or not we're on Windows XP.
      */
     private static boolean _isWindowsXP;
+    
+    /** 
+     * Variable for whether or not we're on Windows 7.
+     */
+    private static boolean _isWindows7;
 
     /** 
      * Variable for whether or not we're on Windows 95.
@@ -90,6 +95,7 @@ public class OSUtils {
     	_isWindowsVista = false;
     	_isWindowsNT = false;
     	_isWindowsXP = false;
+    	_isWindows7 = false;
     	_isWindows95 = false;
     	_isWindows98 = false;
     	_isWindowsMe = false;
@@ -99,26 +105,37 @@ public class OSUtils {
     	_isMacOSX = false;
     
     	String os = System.getProperty("os.name").toLowerCase(Locale.US);
-    
+    	String version = System.getProperty("os.version").toLowerCase(Locale.US);
+    	
     	// set the operating system variables
     	_isWindows = os.indexOf("windows") != -1;
     	
-    	if (os.indexOf("windows nt") != -1)
+    	if (os.indexOf("windows nt") != -1) {
     		_isWindowsNT = true;
-    	if (os.indexOf("windows xp") != -1) 
+    	} else if (os.indexOf("windows xp") != -1) { 
     		_isWindowsXP = true;
-        if (os.indexOf("windows vista") != -1)
+    	} else if(os.indexOf("windows 7") != -1) {
+            _isWindows7 = true;
+        } else if (os.indexOf("windows vista") != -1 && version.startsWith("6.1")) {
+            //In jdk 1.6 before update 14 the os.name system property still returns Windows Vista
+            //The version number is set to 6.1 however, so we can check for that and windows vista 
+            //together to determine if it is windows 7
+            _isWindows7 = true;        
+        } else if (os.indexOf("windows vista") != -1) {
             _isWindowsVista = true;        
-    	if(os.indexOf("windows 95") != -1)
+    	} else if(os.indexOf("windows 95") != -1) {
     	   _isWindows95 = true;
-    	if(os.indexOf("windows 98") != -1)
+    	} else if(os.indexOf("windows 98") != -1) {
     	   _isWindows98 = true;
-    	if(os.indexOf("windows me") != -1)
+    	} else if(os.indexOf("windows me") != -1) {
     	   _isWindowsMe = true;
-        
-    	_isSolaris = os.indexOf("solaris") != -1;
-    	_isLinux   = os.indexOf("linux")   != -1;
-        _isOS2     = os.indexOf("os/2")    != -1;
+    	} else if(os.indexOf("solaris") != -1) {
+    	    _isSolaris = true;    
+    	} else if(os.indexOf("linux")   != -1) {
+    	    _isLinux   = true;    
+    	} else if(os.indexOf("os/2")    != -1) {
+    	    _isOS2     = true;    
+    	}
         
         if(_isWindows || _isLinux)
             _supportsTray = true;
@@ -177,6 +194,16 @@ public class OSUtils {
      */
     public static boolean isWindowsXP() {
     	return _isWindowsXP;
+    }
+    
+    /**
+     * Returns whether or not the OS is Windows 7..
+     *
+     * @return <tt>true</tt> if the application is running on Windows 7,
+     *  <tt>false</tt> otherwise
+     */
+    public static boolean isWindows7() {
+        return _isWindows7;
     }
     
     /**
