@@ -93,9 +93,9 @@ class LibraryImpl implements Library, FileCollection {
     private final Map<File, FileDesc> fileToFileDescMap;
     
     /**
-     * The map of pending URNs for each File.
+     * The map of pending calculations for each File.
      */
-    private final Map<File, Future<Set<URN>>> fileToUrnFuture;
+    private final Map<File, Future> fileToFutures;
  
     /**
      * A map of appropriately case-normalized URN strings to the
@@ -163,7 +163,7 @@ class LibraryImpl implements Library, FileCollection {
         this.extensions = new ConcurrentSkipListSet<String>();
         this.urnMap = new HashMap<URN, IntSet>();
         this.fileToFileDescMap = new HashMap<File, FileDesc>();
-        this.fileToUrnFuture = new HashMap<File, Future<Set<URN>>>();
+        this.fileToFutures = new HashMap<File, Future>();
         this.urnValidator = urnValidator;
         this.changeSupport = new SwingSafePropertyChangeSupport(this);
         this.dangerousFileChecker = dangerousFileChecker;
@@ -541,20 +541,39 @@ class LibraryImpl implements Library, FileCollection {
         } else {
             final PendingFuture task = new PendingFuture();
             ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheUrns(interned);
-            rwLock.writeLock().lock();
-            try {
-                fileToUrnFuture.put(interned, urnFuture);
-            } finally {
-                rwLock.writeLock().unlock();
+            if(!urnFuture.isDone()) {
+                rwLock.writeLock().lock();
+                try {
+                    fileToFutures.put(interned, urnFuture);
+                } finally {
+                    rwLock.writeLock().unlock();
+                }
             }
+            
             urnFuture.addFutureListener(new EventListener<FutureEvent<Set<URN>>>() {
                 @Override
-                public void handleEvent(FutureEvent<Set<URN>> event) {
+                public void handleEvent(final FutureEvent<Set<URN>> event) {
                     // Report the exception, if one happened, so we know about it.
                     if(event.getException() != null) {
                         ExceptionUtils.reportOrReturn(event.getException());
                     }
-                    finishLoadingFileDesc(interned, event, metadata, rev, oldFileDesc, task);
+                    rwLock.writeLock().lock();
+                    try {
+                        if(rev != revision.get()) {
+                            FileViewChangeEvent fileEvent = dispatchFailure(interned, oldFileDesc);
+                            task.setException(new FileViewChangeFailedException(fileEvent, FileViewChangeFailedException.Reason.REVISIONS_CHANGED));
+                        } else {
+                            fileToFutures.remove(interned);
+                            fileToFutures.put(interned, fileLoader.submit(new Runnable() {
+                                @Override
+                                public void run() {
+                                    finishLoadingFileDesc(interned, event, metadata, rev, oldFileDesc, task);
+                                }
+                            }));
+                        }
+                    } finally {
+                        rwLock.writeLock().unlock();
+                    }
                 }
             });
             return task;
@@ -579,7 +598,7 @@ class LibraryImpl implements Library, FileCollection {
                 revchange = true;
                 LOG.warn("Revisions changed, dropping share.");
             } else {
-                fileToUrnFuture.remove(file);
+                fileToFutures.remove(file);
                 
                 // Only load the file if we were able to calculate URNs 
                 // assume the fd is being shared
@@ -785,11 +804,11 @@ class LibraryImpl implements Library, FileCollection {
     private List<ListeningFuture<FileDesc>> loadSettingsInternal(int rev) {
         LOG.debugf("Loading Library Revision: {0}", rev);
         
-        List<Future<Set<URN>>> urnFutures;
+        List<Future> fileFutures;
         rwLock.writeLock().lock();
         try {
-            urnFutures = new ArrayList<Future<Set<URN>>>(fileToUrnFuture.values());
-            fileToUrnFuture.clear();
+            fileFutures = new ArrayList<Future>(fileToFutures.values());
+            fileToFutures.clear();
             files.clear();
             urnMap.clear();
             fileToFileDescMap.clear();
@@ -799,7 +818,7 @@ class LibraryImpl implements Library, FileCollection {
             rwLock.writeLock().unlock();
         }
         
-        for(Future<Set<URN>> future : urnFutures) {
+        for(Future future : fileFutures) {
             future.cancel(true);
         }
         
