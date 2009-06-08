@@ -3,7 +3,7 @@ package org.limewire.ui.swing.upload.table;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
@@ -20,14 +20,14 @@ public class UploadActionHandler {
     public final static String PROPERTIES_COMMAND = "properties";
     
     
-    private UploadListManager uploadListManager;
-    private FileInfoDialogFactory fileInfoFactory;
-    private LibraryNavigator libraryNavigator;
+    private final UploadListManager uploadListManager;
+    private final FileInfoDialogFactory fileInfoFactory;
+    private final LibraryMediator libraryMediator;
     
-    public UploadActionHandler(UploadListManager uploadListManager, LibraryNavigator libraryNavigator,
+    public UploadActionHandler(UploadListManager uploadListManager, LibraryMediator libraryMediator,
             FileInfoDialogFactory fileInfoFactory){
         this.uploadListManager = uploadListManager;
-        this.libraryNavigator = libraryNavigator;
+        this.libraryMediator = libraryMediator;
         this.fileInfoFactory = fileInfoFactory;
     }
 
@@ -45,7 +45,7 @@ public class UploadActionHandler {
         } else if (actionCommmand == REMOVE_COMMAND){
             uploadListManager.remove(item);
         } else if (actionCommmand == LIBRARY_COMMAND){
-            libraryNavigator.selectInLibrary(item.getFile(), item.getCategory());
+            libraryMediator.selectInLibrary(item.getFile(), item.getCategory());
         } else if (actionCommmand == LAUNCH_COMMAND){
             NativeLaunchUtils.safeLaunchFile(item.getFile());
         } else if (actionCommmand == PLAY_COMMAND){

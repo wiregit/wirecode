@@ -19,9 +19,9 @@ import com.google.inject.Inject;
 public class ViewMenu extends MnemonicMenu {
 
     @Inject
-    public ViewMenu(final LeftPanel leftPanel, final ChatFrame chatFrame) {
+    public ViewMenu(final ChatFrame chatFrame) {
         super(I18n.tr("&View"));
-        add(buildShowHideAction(leftPanel, I18n.tr("Hide &Sidebar"), I18n.tr("Show &Sidebar")));
+//        add(buildShowHideAction(leftPanel, I18n.tr("Hide &Sidebar"), I18n.tr("Show &Sidebar")));
         add(buildShowHideAction(chatFrame, I18n.tr("Hide &Chat Window"), I18n.tr("Show &Chat Window")));
     }
 

@@ -5,6 +5,8 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -64,8 +66,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ThumbnailManager;
-import org.limewire.ui.swing.library.MagnetLinkCopier;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -100,7 +101,7 @@ public class FileInfoPanel extends JPanel {
     private final CategoryIconManager categoryIconManager;
     private final ThumbnailManager thumbnailManager;
     private final MagnetLinkFactory magnetLinkFactory;
-    private final LibraryNavigator libraryNavigator;
+    private final LibraryMediator libraryMediator;
     private final PropertyDictionary propertyDictionary;
 //    private final SharedFileListManager shareListManager;
 //    private final FriendManager friendManager;
@@ -118,14 +119,14 @@ public class FileInfoPanel extends JPanel {
     public FileInfoPanel(@Assisted FileInfoType type, @Assisted PropertiableFile propertiableFile, 
             Provider<IconManager> iconManager, CategoryIconManager categoryIconManager,
             ThumbnailManager thumbnailManager, MagnetLinkFactory magnetLinkFactory,
-            LibraryNavigator libraryNavigator, PropertyDictionary propertyDictionary,
+            PropertyDictionary propertyDictionary, LibraryMediator libraryMediator,
             SharedFileListManager shareListManager, FriendManager friendManager,
             SpamManager spamManager, MetaDataManager metaDataManager) {
         this.iconManager = iconManager;
         this.categoryIconManager = categoryIconManager;
         this.thumbnailManager = thumbnailManager;
         this.magnetLinkFactory = magnetLinkFactory;
-        this.libraryNavigator = libraryNavigator;
+        this.libraryMediator = libraryMediator;
         this.propertyDictionary = propertyDictionary;
 //        this.shareListManager = shareListManager;
 //        this.friendManager = friendManager;
@@ -168,7 +169,8 @@ public class FileInfoPanel extends JPanel {
                 copyToClipboard.setAction(new AbstractAction(I18n.tr("Copy Link")) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        new MagnetLinkCopier().copyLinkToClipBoard((LocalFileItem)propertiableFile, magnetLinkFactory);
+                        StringSelection sel = new StringSelection(magnetLinkFactory.createMagnetLink((LocalFileItem)propertiableFile));
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(sel, sel);
                     }
                 });
             }
@@ -223,7 +225,7 @@ public class FileInfoPanel extends JPanel {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             setVisible(false);
-                            libraryNavigator.selectInLibrary(((LocalFileItem)propertiableFile).getFile(), propertiableFile.getCategory());
+                            libraryMediator.selectInLibrary(((LocalFileItem)propertiableFile).getFile(), propertiableFile.getCategory());
                         }
                     });
                 
@@ -291,7 +293,7 @@ public class FileInfoPanel extends JPanel {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             setVisible(false);
-                            libraryNavigator.selectInLibrary(((DownloadItem)propertiableFile).getDownloadingFile(), propertiableFile.getCategory());
+                            libraryMediator.selectInLibrary(((DownloadItem)propertiableFile).getDownloadingFile(), propertiableFile.getCategory());
                         }
                     });
                 

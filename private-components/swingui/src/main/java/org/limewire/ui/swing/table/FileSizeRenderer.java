@@ -22,7 +22,7 @@ public class FileSizeRenderer extends DefaultLibraryRenderer {
             boolean isSelected, boolean hasFocus, int row, int column) {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
-        if (value != null) {
+        if (value instanceof Long) {
             setText(GuiUtils.toUnitbytes((Long)value)); 
         } else 
             setText("");

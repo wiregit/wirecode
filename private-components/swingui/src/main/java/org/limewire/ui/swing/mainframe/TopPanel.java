@@ -29,13 +29,11 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.home.HomeMediator;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.library.nav.NavMediator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.NavSelectable;
-import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
@@ -64,6 +62,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final FlexibleTabList searchList;
     private final Navigator navigator;        
     private final NavItem homeNav;
+    private final NavItem libraryNav;
     private final AdvancedSearchBuilder advancedSearchBuilder;
         
     @Inject
@@ -71,12 +70,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     Navigator navigator,
                     final HomeMediator homeMediator,
                     final StoreMediator storeMediator,
-                    final LeftPanel leftPanel,
+//                    final LeftPanel leftPanel,
                     SearchBar searchBar,
                     FlexibleTabListFactory tabListFactory,
                     BarPainterFactory barPainterFactory,
                     SearchTabPainterFactory tabPainterFactory,
-                    final LibraryNavigator libraryNavigator,
+//                    final LibraryNavigator libraryNavigator,
+                    final LibraryMediator myLibraryMediator,
                     AdvancedSearchMediator advancedSearchMediator,
                     AdvancedSearchBuilder advancedSearchBuilder) {        
         GuiUtils.assignResources(this);
@@ -93,18 +93,19 @@ class TopPanel extends JXPanel implements SearchNavigator {
         // add advanced search into the navigator, for use elsewhere.
         navigator.createNavItem(NavCategory.LIMEWIRE, AdvancedSearchMediator.NAME, advancedSearchMediator);
         
-        homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME, homeMediator);      
-        JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
-        homeButton.setName("WireframeTop.homeButton");
-        homeButton.setToolTipText(I18n.tr("Home"));
-        homeButton.setText(null);
-        homeButton.setIconTextGap(1);
-        homeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                homeMediator.getComponent().loadDefaultUrl();
-            }
-        });
+        homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME, homeMediator);   
+        libraryNav = navigator.createNavItem(NavCategory.LIBRARY, I18n.tr("My Library"), myLibraryMediator);
+        JButton libraryButton = new IconButton(NavigatorUtils.getNavAction(libraryNav));
+        libraryButton.setName("WireframeTop.homeButton");
+        libraryButton.setToolTipText(I18n.tr("Library"));
+        libraryButton.setText(null);
+        libraryButton.setIconTextGap(1);
+//        homeButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                homeMediator.getComponent().loadDefaultUrl();
+//            }
+//        });
         
         JButton storeButton;
         if(MozillaInitialization.isInitialized()) {
@@ -135,7 +136,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setTabInsets(new Insets(0,10,2,10));
 
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
-        add(homeButton, "gapbottom 2, gaptop 0");
+        add(libraryButton, "gapbottom 2, gaptop 0");
         add(storeButton, "gapbottom 2, gaptop 0");
 
         add(searchBar, "gapleft 70, gapbottom 2, gaptop 0");
@@ -146,19 +147,19 @@ class TopPanel extends JXPanel implements SearchNavigator {
             storeButton.setVisible(false);
         }
         
-        navigator.addNavigationListener(new NavigationListener() {
-            @Override
-            public void categoryRemoved(NavCategory category) {
-                if(category == NavCategory.SEARCH_RESULTS) {
-                    libraryNavigator.selectLibrary();
-                }
-            }
-            
-            @Override public void categoryAdded(NavCategory category) {}
-            @Override public void itemAdded(NavCategory category, NavItem navItem) {}
-            @Override public void itemRemoved(NavCategory category, NavItem navItem) {}
-            @Override public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, NavMediator navMediator) {}
-      ;  });
+//        navigator.addNavigationListener(new NavigationListener() {
+//            @Override
+//            public void categoryRemoved(NavCategory category) {
+//                if(category == NavCategory.SEARCH_RESULTS) {
+//                    libraryNavigator.selectLibrary();
+//                }
+//            }
+//            
+//            @Override public void categoryAdded(NavCategory category) {}
+//            @Override public void itemAdded(NavCategory category, NavItem navItem) {}
+//            @Override public void itemRemoved(NavCategory category, NavItem navItem) {}
+//            @Override public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, NavMediator navMediator) {}
+//      ;  });
     };
 
     @Override

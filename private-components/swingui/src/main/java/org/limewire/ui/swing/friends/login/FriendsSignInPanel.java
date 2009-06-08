@@ -28,7 +28,6 @@ import com.google.inject.Singleton;
 
 import net.miginfocom.swing.MigLayout;
 
-@Singleton
 public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
     private final HyperlinkButton shareLabel;

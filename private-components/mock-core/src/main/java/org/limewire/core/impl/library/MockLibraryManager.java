@@ -197,4 +197,9 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public SharedFileList getSharedFileList(String name) {
+        return null;
+    }
 }

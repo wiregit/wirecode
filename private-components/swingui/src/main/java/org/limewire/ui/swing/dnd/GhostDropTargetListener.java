@@ -80,9 +80,9 @@ public class GhostDropTargetListener implements DropTargetListener {
         
         Friend currentFriend;
         //if filtering, set drop target name to friend filtering on
-        if(listChanger != null)
-            currentFriend = listChanger.getCurrentFriend();
-        else
+//        if(listChanger != null)
+//            currentFriend = listChanger.getCurrentFriend();
+//        else
             currentFriend = friend;
         
         // if friend is already set in ghost pane, don't update image

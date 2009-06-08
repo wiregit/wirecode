@@ -9,7 +9,6 @@ import org.limewire.ui.swing.downloads.LimeWireUiDownloadsModule;
 import org.limewire.ui.swing.friends.LimeWireUiFriendsModule;
 import org.limewire.ui.swing.images.LimeWireUiImagesModule;
 import org.limewire.ui.swing.library.LimeWireUiLibraryModule;
-import org.limewire.ui.swing.library.sharing.LimeWireUiLibrarySharingModule;
 import org.limewire.ui.swing.mainframe.LimeWireUiMainframeModule;
 import org.limewire.ui.swing.nav.LimeWireUiNavModule;
 import org.limewire.ui.swing.options.LimeWireUiOptionsModule;
@@ -46,7 +45,6 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiPlayerModule());
         install(new LimeWireUiImagesModule());
         install(new LimeWireUiLibraryModule());
-        install(new LimeWireUiLibrarySharingModule());
         install(new LimeWireUiDownloadsModule());
         install(new LimeWireUiOptionsModule());
         install(new LimeWireUiStatusbarModule());

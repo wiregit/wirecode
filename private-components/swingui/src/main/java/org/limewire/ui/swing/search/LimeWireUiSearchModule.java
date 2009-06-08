@@ -9,6 +9,8 @@ import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactoryImpl;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
+import org.limewire.ui.swing.search.resultpanel.DownloadHandlerFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilderImpl;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
@@ -65,6 +67,10 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(SearchTabItemsFactory.class).toProvider(
                 FactoryProvider.newFactory(
                         SearchTabItemsFactory.class, SearchTabItems.class));
+        
+//        bind(DownloadHandlerFactory.class).toProvider(
+//                FactoryProvider.newFactory(
+//                        DownloadHandlerFactory.class, DownloadHandler.class));
         
         
         bind(RemoteHostActions.class).to(RemoteHostActionsImpl.class);

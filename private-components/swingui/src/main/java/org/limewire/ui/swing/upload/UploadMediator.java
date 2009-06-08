@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.upload;
 
 import org.limewire.inject.LazySingleton;
-import org.limewire.ui.swing.library.nav.NavMediator;
+import org.limewire.ui.swing.nav.NavMediator;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

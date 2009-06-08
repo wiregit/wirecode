@@ -45,7 +45,7 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         support.addListener(new EventListener<SharedFileCollectionChangeEvent>() {
             @Override
             public void handleEvent(SharedFileCollectionChangeEvent event) {
-                switch(event.getType()) {
+                switch(event.getType()) { 
                 case COLLECTION_ADDED:
                     collectionAdded(event.getSource());
                     break;
@@ -132,6 +132,21 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     @Override
     public EventList<SharedFileList> getModel() {
         return readOnlySharedLists;
+    }
+
+    @Override
+    public SharedFileList getSharedFileList(String name) {
+        // TODO: this needs to be in a different thread.
+        sharedLists.getReadWriteLock().readLock().lock();
+        try {
+            for(SharedFileList fileList : sharedLists) {
+                if(fileList.getCollectionName().equals(name))
+                    return fileList;
+            }
+        } catch(Exception e) {
+            sharedLists.getReadWriteLock().readLock().unlock();
+        }
+        return null;
     }
     
 }

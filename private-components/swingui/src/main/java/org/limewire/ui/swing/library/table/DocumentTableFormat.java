@@ -14,30 +14,31 @@ import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
  * Table format for the Document Table when it is in My Library
  */
-public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
-    static final int ACTION_INDEX = 0;
-    static final int NAME_INDEX = 1;
-    static final int TYPE_INDEX = 2;
-    static final int CREATED_INDEX = 3;
-    static final int SIZE_INDEX = 4;
-    static final int AUTHOR_INDEX = 5;
-    static final int DESCRIPTION_INDEX = 6;
-    static final int HIT_INDEX = 7;
-    static final int UPLOADS_INDEX = 8;
-    static final int UPLOAD_ATTEMPTS_INDEX = 9;
-    static final int PATH_INDEX = 10;
+public class DocumentTableFormat<T extends LocalFileItem> extends AbstractLibraryFormat<T> {
+
+    static final int NAME_INDEX = 0;
+    static final int TYPE_INDEX = 1;
+    static final int CREATED_INDEX = 2;
+    static final int SIZE_INDEX = 3;
+    static final int AUTHOR_INDEX = 4;
+    static final int DESCRIPTION_INDEX = 5;
+    static final int HIT_INDEX = 6;
+    static final int UPLOADS_INDEX = 7;
+    static final int UPLOAD_ATTEMPTS_INDEX = 8;
+    static final int PATH_INDEX = 9;
 
 	/** Icon manager used to find native file type information. */
 	private Provider<IconManager> iconManager;
 	
+	@Inject
 	public DocumentTableFormat(Provider<IconManager> iconManager) {
-	    super(ACTION_INDEX, "LIBRARY_DOCUMENT_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_DOCUMENT_ACTION", I18n.tr("Sharing"), 61, true, false),
+	    super("LIBRARY_DOCUMENT_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_DOCUMENT_NAME", "Name", 493, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "LIBRARY_DOCUMENT_TYPE", I18n.tr("Type"), 180, true, true),     
                 new ColumnStateInfo(CREATED_INDEX, "LIBRARY_DOCUMENT_CREATED", I18n.tr("Date Created"), 100, false, true), 
@@ -62,7 +63,6 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
              return (creationTime >= 0) ? new Date(creationTime) : null;
          case DESCRIPTION_INDEX: return "";
          case NAME_INDEX: return baseObject;
-         case ACTION_INDEX: return baseObject;
          case SIZE_INDEX: return baseObject.getSize();
          case TYPE_INDEX:
              // Use icon manager to return MIME description.

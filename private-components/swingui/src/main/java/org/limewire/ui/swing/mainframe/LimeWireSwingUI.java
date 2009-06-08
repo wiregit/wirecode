@@ -24,8 +24,6 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
-import org.limewire.ui.swing.components.PanelResizer;
-import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.downloads.DownloadHeaderPanel;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
@@ -52,11 +50,12 @@ public class LimeWireSwingUI extends JPanel {
     
 	@Inject
     public LimeWireSwingUI(
-            TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
+            TopPanel topPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel chatFrame,
             AudioPlayer player,
-            ShapeDialog shapeDialog, ProNagController proNagController, 
+//            ShapeDialog shapeDialog, 
+            ProNagController proNagController, 
             MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider) {
     	GuiUtils.assignResources(this);
     	        
@@ -84,13 +83,13 @@ public class LimeWireSwingUI extends JPanel {
         centerPanel.add(topPanel, gbc);
                 
         // The left panel
-        gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.weightx = 0;
-        gbc.weighty = 1;
-        gbc.gridwidth = 1;
-        gbc.gridheight = 3;
-        centerPanel.add(leftPanel, gbc);
+//        gbc.fill = GridBagConstraints.VERTICAL;
+//        gbc.anchor = GridBagConstraints.WEST;
+//        gbc.weightx = 0;
+//        gbc.weighty = 1;
+//        gbc.gridwidth = 1;
+//        gbc.gridheight = 3;
+//        centerPanel.add(leftPanel, gbc);
         
         // The main panel
         gbc.fill = GridBagConstraints.BOTH;
@@ -103,8 +102,8 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new MainPanelResizer(centerPanel));
         layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(chatFrame, JLayeredPane.PALETTE_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
-        layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
+//        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
+//        layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
         add(layeredPane, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
         EventAnnotationProcessor.subscribe(this);

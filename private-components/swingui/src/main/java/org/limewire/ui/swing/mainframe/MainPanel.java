@@ -11,10 +11,10 @@ import javax.swing.JPanel;
 
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.library.nav.NavMediator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavComponent;
 import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.NavMediator;
 import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavSelectable;

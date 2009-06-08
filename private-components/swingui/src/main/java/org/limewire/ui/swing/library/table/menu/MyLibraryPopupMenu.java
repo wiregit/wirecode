@@ -16,15 +16,13 @@ import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.Catalog;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.SelectAllable;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.menu.actions.DeleteAction;
 import org.limewire.ui.swing.library.table.menu.actions.LaunchFileAction;
 import org.limewire.ui.swing.library.table.menu.actions.LocateFileAction;
 import org.limewire.ui.swing.library.table.menu.actions.PlayAction;
 import org.limewire.ui.swing.library.table.menu.actions.RemoveAction;
-import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.library.table.menu.actions.ViewFileInfoAction;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
@@ -33,7 +31,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -45,8 +42,8 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private final Category category;
     private final FileInfoDialogFactory fileInfoFactory;
     private final XMPPService xmppService;
-    private final Provider<SharingActionFactory> sharingActionFactoryProvider;   
-    private final LibraryNavigator libraryNavigator;
+//    private final Provider<SharingActionFactory> sharingActionFactoryProvider;   
+    private final LibraryMediator libraryMediator;
     private final PlaylistManager playlistManager;
 
     private SelectAllable<LocalFileItem> librarySelectable;
@@ -56,13 +53,14 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     @Inject
     public MyLibraryPopupMenu(@Assisted Category category, LibraryManager libraryManager,
-            Provider<SharingActionFactory> sharingActionFactory, XMPPService xmppService, LibraryNavigator libraryNavigator, 
+//            Provider<SharingActionFactory> sharingActionFactory, 
+            XMPPService xmppService, LibraryMediator libraryMediator, 
             PlaylistManager playlistManager, FileInfoDialogFactory fileInfoFactory) {
         this.libraryManager = libraryManager;
-        this.sharingActionFactoryProvider = sharingActionFactory;
+//        this.sharingActionFactoryProvider = sharingActionFactory;
         this.category = category;
         this.xmppService = xmppService;
-        this.libraryNavigator = libraryNavigator;
+        this.libraryMediator = libraryMediator;
         this.playlistManager = playlistManager;
         this.fileInfoFactory = fileInfoFactory;
         
@@ -122,7 +120,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         switch (category) {
         case AUDIO:
         case VIDEO:
-            add(new PlayAction(libraryNavigator, new Catalog(category), firstItem)).setEnabled(playActionEnabled);
+//            add(new PlayAction(libraryMediator, new Catalog(category), firstItem)).setEnabled(playActionEnabled);
             break;
         case IMAGE:
         case DOCUMENT:
@@ -150,21 +148,21 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         addSeparator();
 
-        SharingActionFactory sharingActionFactory = sharingActionFactoryProvider.get();
+//        SharingActionFactory sharingActionFactory = sharingActionFactoryProvider.get();
         
-        boolean isDocumentSharingAllowed = isGnutellaShareAllowed(category) & shareActionEnabled;
-        add(sharingActionFactory.createShareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
-        add(sharingActionFactory.createUnshareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
-        
-        addSeparator();
-        
-        if(xmppService.isLoggedIn()) {
-            add(sharingActionFactory.createShareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
-            add(sharingActionFactory.createUnshareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
-        } else {
-            add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Share with Friend"))));
-            add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Unshare with Friend"))));
-        }
+//        boolean isDocumentSharingAllowed = isGnutellaShareAllowed(category) & shareActionEnabled;
+//        add(sharingActionFactory.createShareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
+//        add(sharingActionFactory.createUnshareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
+//        
+//        addSeparator();
+//        
+//        if(xmppService.isLoggedIn()) {
+//            add(sharingActionFactory.createShareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
+//            add(sharingActionFactory.createUnshareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
+//        } else {
+//            add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Share with Friend"))));
+//            add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Unshare with Friend"))));
+//        }
         
         addSeparator();
         if (category != Category.PROGRAM && category != Category.OTHER) {

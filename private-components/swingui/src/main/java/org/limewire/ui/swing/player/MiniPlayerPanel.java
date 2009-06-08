@@ -27,7 +27,7 @@ import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.MarqueeButton;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -59,14 +59,14 @@ public class MiniPlayerPanel extends JPanel {
     private MarqueeButton statusButton;
     
     private final AudioPlayer player;
-    private final LibraryNavigator libraryNavigator;
+    private final LibraryMediator libraryMediator;
 
     @Inject
-    public MiniPlayerPanel(AudioPlayer player, LibraryNavigator libraryNavigator) {
+    public MiniPlayerPanel(AudioPlayer player, LibraryMediator libraryMediator) {
         GuiUtils.assignResources(this);
         
         this.player = player;
-        this.libraryNavigator = libraryNavigator;
+        this.libraryMediator = libraryMediator;
         
         setLayout(new MigLayout("insets 0", "4[][]", "0[]0"));
         setOpaque(false);
@@ -118,7 +118,7 @@ public class MiniPlayerPanel extends JPanel {
             AudioSource currentSource = player.getCurrentSong();
             
             if (currentSource != null) { 
-                libraryNavigator.selectInLibrary(currentSource.getFile(), Category.AUDIO);
+                libraryMediator.selectInLibrary(currentSource.getFile(), Category.AUDIO);
             }
         }
     }

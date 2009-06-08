@@ -5,7 +5,6 @@ import java.io.File;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.library.LibraryListSourceChanger;
-import org.limewire.ui.swing.library.sharing.ShareWidget;
 
 import ca.odell.glazedlists.EventList;
 
@@ -17,5 +16,6 @@ public interface LibraryImageSubPanelFactory {
 
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
-            ShareWidget<File> shareWidget, LibraryListSourceChanger listChanger);
+//            ShareWidget<File> shareWidget, 
+            LibraryListSourceChanger listChanger);
 }

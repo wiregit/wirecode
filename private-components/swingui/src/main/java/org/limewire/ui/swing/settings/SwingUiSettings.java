@@ -26,11 +26,11 @@ public final class SwingUiSettings extends LimeProps {
     public static final FileArraySetting VISTA_WARN_DIRECTORIES =
         FACTORY.createFileArraySetting("VISTA_WARN_DIRECTORIES", new File[0]);
     
-    /**
-     * This setting is used to track whether or not the user wants to show offline buddies in the left panel.
-     */
-    public static final BooleanSetting XMPP_SHOW_OFFLINE =
-        (BooleanSetting)FACTORY.createBooleanSetting("XMPP_SHOW_OFFLINE", true).setPrivate(true);
+//    /**
+//     * This setting is used to track whether or not the user wants to show offline buddies in the left panel.
+//     */
+//    public static final BooleanSetting XMPP_SHOW_OFFLINE =
+//        (BooleanSetting)FACTORY.createBooleanSetting("XMPP_SHOW_OFFLINE", true).setPrivate(true);
 
     /**
      * Whether or not 'REMEMBER_ME' is checked -- this has nothing to do with

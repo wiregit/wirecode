@@ -19,5 +19,10 @@ public interface SharedFileListManager {
      */
     void createNewSharedFileList(String name);
 
+    /**
+     * Returns the SharedFileList with this name or null if no SharedFileList
+     * exists with that name.
+     */
+    SharedFileList getSharedFileList(String name);
     // TODO: getSharedFileList(String name), or (int id) ?
 }

@@ -6,7 +6,7 @@ public class LimeWireUiFriendsLoginModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(FriendActions.class).to(FriendsSignInPanel.class);
+        bind(FriendActions.class).to(FriendActionsTemp.class);
     }
 
 }

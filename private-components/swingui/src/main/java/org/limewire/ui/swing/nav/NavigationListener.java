@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.nav;
 
-import org.limewire.ui.swing.library.nav.NavMediator;
 
 
 

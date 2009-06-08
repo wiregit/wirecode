@@ -21,31 +21,29 @@ import org.limewire.ui.swing.util.PropertyUtils;
 /**
  * Table format for the Audio Table when it is in My Library
  */
-public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
+public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFormat<T> {
 
     static final int PLAY_INDEX = 0;
-    static final int ACTION_INDEX = 1;
-    static final int TITLE_INDEX = 2;
-    static final int ARTIST_INDEX = 3;
-    static final int ALBUM_INDEX = 4;
-    static final int LENGTH_INDEX = 5;
-    static final int GENRE_INDEX = 6;
-    static final int BITRATE_INDEX = 7;
-    static final int SIZE_INDEX = 8;
-    static final int FILENAME_INDEX = 9;
-    static final int TRACK_INDEX = 10;
-    static final int YEAR_INDEX = 11;
-    static final int QUALITY_INDEX = 12;
-    static final int DESCRIPTION_INDEX = 13;
-    static final int HIT_INDEX = 14;
-    static final int UPLOADS_INDEX = 15;
-    static final int UPLOAD_ATTEMPTS_INDEX = 16;
-    static final int PATH_INDEX = 17;
+    static final int TITLE_INDEX = 1;
+    static final int ARTIST_INDEX = 2;
+    static final int ALBUM_INDEX = 3;
+    static final int LENGTH_INDEX = 4;
+    static final int GENRE_INDEX = 5;
+    static final int BITRATE_INDEX = 6;
+    static final int SIZE_INDEX = 7;
+    static final int FILENAME_INDEX = 8;
+    static final int TRACK_INDEX = 9;
+    static final int YEAR_INDEX = 10;
+    static final int QUALITY_INDEX = 11;
+    static final int DESCRIPTION_INDEX = 12;
+    static final int HIT_INDEX = 13;
+    static final int UPLOADS_INDEX = 14;
+    static final int UPLOAD_ATTEMPTS_INDEX = 15;
+    static final int PATH_INDEX = 16;
     
     public AudioTableFormat() {
-        super(ACTION_INDEX, "LIBRARY_AUDIO_TABLE", ARTIST_INDEX, true, new ColumnStateInfo[] {
+        super("LIBRARY_AUDIO_TABLE", ARTIST_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(PLAY_INDEX, "LIBRARY_AUDIO_PLAY", "", 25, true, false), 
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_AUDIO_ACTION", I18n.tr("Sharing"), 61, true, false),
                 new ColumnStateInfo(TITLE_INDEX, "LIBRARY_AUDIO_TITLE", I18n.tr("Name"), 278, true, true),     
                 new ColumnStateInfo(ARTIST_INDEX, "LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 120, true, true), 
                 new ColumnStateInfo(ALBUM_INDEX, "LIBRARY_AUDIO_ALBUM", I18n.tr("Album"), 180, true, true), 
@@ -81,7 +79,6 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
         case YEAR_INDEX: return baseObject.getProperty(FilePropertyKey.YEAR);
         case QUALITY_INDEX: return baseObject;
         case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
-        case ACTION_INDEX: return baseObject;
         case HIT_INDEX: return baseObject.getNumHits();
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
         case UPLOADS_INDEX: return baseObject.getNumUploads();
@@ -93,7 +90,6 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     @Override
     public Class getColumnClass(int column) {
         switch(column) {
-            case ACTION_INDEX:
             case PLAY_INDEX:
             case TITLE_INDEX:
                 return FileItem.class;
@@ -105,7 +101,6 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     public Comparator getColumnComparator(int column) {
         switch(column) {
             case TITLE_INDEX: return new NameComparator();
-            case ACTION_INDEX: return new ActionComparator();
             case QUALITY_INDEX: return new QualityComparator();
             case TRACK_INDEX: return new TrackComparator();
         }

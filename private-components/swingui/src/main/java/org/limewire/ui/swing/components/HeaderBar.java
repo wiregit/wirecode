@@ -35,15 +35,9 @@ public class HeaderBar extends JXPanel {
     }
     
     public HeaderBar(String title) {
-        this(title, true);
-    }
-    
-    public HeaderBar(String title, boolean hasShadow) {
         JXLabel headerLabel = new JXLabel(title);
-        
-        if (hasShadow) {
-            headerLabel.setForegroundPainter(new TextShadowPainter());
-        }
+
+        headerLabel.setForegroundPainter(new TextShadowPainter());
         
         this.titleComponent = headerLabel;
         this.componentContainer = new JPanel();

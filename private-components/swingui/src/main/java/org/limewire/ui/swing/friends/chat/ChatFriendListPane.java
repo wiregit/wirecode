@@ -61,7 +61,6 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -97,7 +96,6 @@ public class ChatFriendListPane extends JPanel {
     private final JTable friendsTable;
     private final ChatModel chatModel;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
-    private final LibraryNavigator libraryNavigator;
 
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
@@ -116,11 +114,10 @@ public class ChatFriendListPane extends JPanel {
     @Resource private Icon awayIcon;
 
     @Inject
-    public ChatFriendListPane(LibraryNavigator libraryNavigator, ChatModel chatModel) {
+    public ChatFriendListPane(ChatModel chatModel) {
         super(new BorderLayout());
         this.chatModel = chatModel;
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
-        this.libraryNavigator = libraryNavigator;
         
         this.chatFriends = chatModel.getChatFriendList();
         
@@ -774,9 +771,10 @@ public class ChatFriendListPane extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             ChatFriend chatFriend = context.getFriend();
-            if (chatFriend != null) {
-                libraryNavigator.selectFriendLibrary(chatFriend.getUser());
-            }
+            throw new IllegalStateException("Action doesn't exist");
+//            if (chatFriend != null) {
+//                libraryNavigator.selectFriendLibrary(chatFriend.getUser());
+//            }
         }
     }
     
@@ -788,9 +786,10 @@ public class ChatFriendListPane extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             ChatFriend chatFriend = context.getFriend();
-            if (chatFriend != null) {
-                libraryNavigator.selectFriendShareList(chatFriend.getUser());
-            }
+            throw new IllegalStateException("Action doesn't exists");
+//            if (chatFriend != null) {
+//                libraryNavigator.selectFriendShareList(chatFriend.getUser());
+//            }
         }
 
         @Override

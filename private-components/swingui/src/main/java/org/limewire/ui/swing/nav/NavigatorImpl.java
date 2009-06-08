@@ -9,7 +9,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.library.nav.NavMediator;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Singleton;

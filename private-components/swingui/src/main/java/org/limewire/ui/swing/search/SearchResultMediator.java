@@ -2,7 +2,7 @@ package org.limewire.ui.swing.search;
 
 import javax.swing.JComponent;
 
-import org.limewire.ui.swing.library.nav.NavMediator;
+import org.limewire.ui.swing.nav.NavMediator;
 
 public class SearchResultMediator implements NavMediator<JComponent> {
 

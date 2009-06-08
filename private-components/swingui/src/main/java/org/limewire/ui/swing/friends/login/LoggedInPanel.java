@@ -105,7 +105,7 @@ class LoggedInPanel extends JXPanel {
         
         
         final JCheckBoxMenuItem showOfflineFriends = new JCheckBoxMenuItem();
-        showOfflineFriends.setSelected(SwingUiSettings.XMPP_SHOW_OFFLINE.getValue());
+//        showOfflineFriends.setSelected(SwingUiSettings.XMPP_SHOW_OFFLINE.getValue());
         showOfflineFriends.setAction(new AbstractAction(I18n.tr("Offline Friends")) {
             {
                 putValue(Action.SMALL_ICON, offlineIcon);
@@ -113,7 +113,7 @@ class LoggedInPanel extends JXPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                SwingUiSettings.XMPP_SHOW_OFFLINE.setValue(showOfflineFriends.isSelected());
+//                SwingUiSettings.XMPP_SHOW_OFFLINE.setValue(showOfflineFriends.isSelected());
             }
         });
         

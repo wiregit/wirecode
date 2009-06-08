@@ -39,7 +39,7 @@ import org.limewire.ui.swing.components.MarqueeButton;
 import org.limewire.ui.swing.components.VolumeSlider;
 import org.limewire.ui.swing.components.decorators.SliderBarDecorator;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -107,7 +107,7 @@ public class PlayerPanel extends JXPanel {
     private final MarqueeButton titleLabel;
     
     private final AudioPlayer player;
-    private final LibraryNavigator libraryNavigator;
+    private final LibraryMediator libraryMediator;
 
     /**
      * Pointer to the last opened song's file
@@ -129,10 +129,10 @@ public class PlayerPanel extends JXPanel {
     private static final String VOLUME = "VOLUME";
 
     @Inject
-    public PlayerPanel(AudioPlayer player, LibraryNavigator libraryNavigator, 
+    public PlayerPanel(AudioPlayer player, LibraryMediator libraryMediator, 
             SliderBarDecorator sliderBarDecorator) {
         this.player = player;
-        this.libraryNavigator = libraryNavigator;
+        this.libraryMediator = libraryMediator;
 
         GuiUtils.assignResources(this);
         
@@ -279,7 +279,7 @@ public class PlayerPanel extends JXPanel {
     private void previousSong() {
         if (file != null) {
             player.stop();
-            file = libraryNavigator.getPreviousInLibrary(file);
+            file = libraryMediator.getPreviousInLibrary(file);
             if (file != null) {
                 player.loadSong(file);
                 player.playSong();
@@ -294,7 +294,7 @@ public class PlayerPanel extends JXPanel {
     private void nextSong() {
         if (file != null) {
             player.stop();
-            file = libraryNavigator.getNextInLibrary(file);
+            file = libraryMediator.getNextInLibrary(file);
             if (file != null) {
                 player.loadSong(file);
                 player.playSong();

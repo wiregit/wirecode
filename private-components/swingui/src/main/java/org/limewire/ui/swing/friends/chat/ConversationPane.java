@@ -66,7 +66,6 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
@@ -101,7 +100,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     private final ChatFriend chatFriend;
 //    private final SharedFileListManager shareListManager;
     private final Provider<IconManager> iconManager;
-    private final LibraryNavigator libraryNavigator;
+//    private final LibraryNavigator libraryNavigator;
     private HyperlinkButton downloadlink;
     private HyperlinkButton sharelink;
     private ResizingInputPanel inputPanel;
@@ -123,7 +122,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
     
     @Inject
     public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
-                            SharedFileListManager libraryManager, Provider<IconManager> iconManager, LibraryNavigator libraryNavigator,
+                            SharedFileListManager libraryManager, Provider<IconManager> iconManager,
                             ChatHyperlinkListenerFactory chatHyperlinkListenerFactory,
                             @Named("backgroundExecutor")ScheduledExecutorService schedExecService) {
         this.writer = writer;
@@ -133,7 +132,7 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         this.loggedInID = loggedInID;
 //        this.shareListManager = libraryManager;
         this.iconManager = iconManager;
-        this.libraryNavigator = libraryNavigator;
+//        this.libraryNavigator = libraryNavigator;
         
         GuiUtils.assignResources(this);
 
@@ -455,7 +454,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            libraryNavigator.selectFriendLibrary(chatFriend.getUser());
+            throw new IllegalStateException("action doesn't exist");
+//            libraryNavigator.selectFriendLibrary(chatFriend.getUser());
         }
     }
 
@@ -466,7 +466,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            libraryNavigator.selectFriendShareList(chatFriend.getUser());
+            throw new IllegalStateException("action doesn't exist");
+//            libraryNavigator.selectFriendShareList(chatFriend.getUser());
         }
     }
 
