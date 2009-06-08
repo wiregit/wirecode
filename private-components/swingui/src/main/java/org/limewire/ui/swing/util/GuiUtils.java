@@ -536,4 +536,18 @@ public class GuiUtils {
         else
             return false;
     }
+    
+    /**
+     * Iterates over all the windows owned by this process then hides and 
+     *  disposes them.
+     */
+    public static void hideAndDisposeAllWindows() {
+        for(Window window : Window.getWindows()) {
+            try {
+                window.setVisible(false);
+                window.dispose();
+            } catch(Throwable ignored) {}
+        }
+    }
+
 }
