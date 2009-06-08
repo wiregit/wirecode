@@ -27,7 +27,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
     private LibraryPanel libraryPanel;
     
     @Inject
-    public LibraryMediator(Provider<LibraryPanel> libraryProvider, LibraryManager libraryManager, SharedFileListManager shareListManager) {
+    public LibraryMediator(Provider<LibraryPanel> libraryProvider, LibraryManager libraryManager) {
         this.libraryProvider = libraryProvider;
         
 //        baseLibraryList = new PluggableList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());

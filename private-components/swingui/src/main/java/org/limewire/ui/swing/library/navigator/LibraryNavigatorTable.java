@@ -45,7 +45,10 @@ public class LibraryNavigatorTable extends JXTable {
     }
     
     public LibraryNavItem getSelectedItem() {
-        return eventList.get(getSelectedRow());
+        if(getSelectedRow() >= 0)
+            return eventList.get(getSelectedRow());
+        else
+            return null;
     }
     
     private void initialize() {

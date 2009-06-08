@@ -21,8 +21,11 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
+import com.jacob.com.NotImplementedException;
 
 @LazySingleton
 public class LibraryNavigatorPanel extends JXPanel {
@@ -63,6 +66,26 @@ public class LibraryNavigatorPanel extends JXPanel {
         add(createListButton, "wrap, grow");
         
         initData();
+        
+        registerListeners();
+    }
+    
+    public void registerListeners() {
+        sharedFileListManager.getModel().addListEventListener(new ListEventListener<SharedFileList>(){
+
+            @Override
+            public void listChanged(ListEvent<SharedFileList> listChanges) {
+                while(listChanges.next()) {
+                    SharedFileList list = listChanges.getSourceList().get(listChanges.getIndex());
+                    if(listChanges.getType() == ListEvent.INSERT) {
+                        table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName());
+                    } else if(listChanges.getType() == ListEvent.DELETE){
+                        //TODO: handle delete
+                        throw new NotImplementedException("delete of shard list not implemened");
+                    }
+                }
+            }
+        });
     }
     
     private void initData() {
@@ -76,7 +99,7 @@ public class LibraryNavigatorPanel extends JXPanel {
             for(SharedFileList fileList : playLists) {
                 table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName());
             }
-        } catch(Exception e) {
+        } finally {
             playLists.getReadWriteLock().readLock().unlock();
         }
         

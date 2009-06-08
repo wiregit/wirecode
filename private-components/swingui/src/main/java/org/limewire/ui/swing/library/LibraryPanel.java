@@ -21,6 +21,7 @@ import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryTable;
@@ -114,9 +115,11 @@ public class LibraryPanel extends JPanel {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 //TODO: this locks should be in a different thread
-                SharedFileList fileList = sharedFileListManager.getSharedFileList(navigatorComponent.getSelectedNavItem().getTabID());
-                if(fileList != null) {
+                LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
+
+                if(navItem != null && navItem.getTabID() != null) {
 //                    setEventList(fileList.getSwingModel());
+                    SharedFileList fileList = sharedFileListManager.getSharedFileList(navItem.getTabID());
                     eventList = fileList.getSwingModel();
                     selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
                 } else {

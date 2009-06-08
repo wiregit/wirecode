@@ -143,7 +143,7 @@ class SharedFileListManagerImpl implements SharedFileListManager {
                 if(fileList.getCollectionName().equals(name))
                     return fileList;
             }
-        } catch(Exception e) {
+        } finally {
             sharedLists.getReadWriteLock().readLock().unlock();
         }
         return null;
