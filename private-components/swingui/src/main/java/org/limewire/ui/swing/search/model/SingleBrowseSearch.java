@@ -88,9 +88,6 @@ public class SingleBrowseSearch extends AbstractBrowseSearch {
     }
 
     private void startAnonymousBrowse() {
-
-        System.out.println(friendPresence.getPresenceId());
-
         browse.set(browseFactory.createBrowse(friendPresence));
         browse.get().start(new BrowseEventForwarder());
     }
@@ -134,20 +131,17 @@ public class SingleBrowseSearch extends AbstractBrowseSearch {
 
         @Override
         public void browseFinished(final boolean success) {
-            // TODO some kind of browse state based on this to show
-            // browse failure
-            System.out.println("browsefinished " + success);
-
             for (SearchListener listener : searchListeners) {
                 listener.searchStopped(SingleBrowseSearch.this);
             }
-
+            
+            for (BrowseStatusListener listener : browseStatusListeners) {
+                listener.statusChanged();
+            }
         }
 
         @Override
-        public void handleBrowseResult(final SearchResult searchResult) {            
-            System.out.println("handle " + searchResult.getFileName());
-            
+        public void handleBrowseResult(final SearchResult searchResult) {              
             for (SearchListener listener : searchListeners) {
                 listener.handleSearchResult(SingleBrowseSearch.this, searchResult);
             }

@@ -3,22 +3,18 @@ package org.limewire.ui.swing.search.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.Search;
-import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.util.NotImplementedException;
 
 public class MultipleBrowseSearch extends AbstractBrowseSearch {
     
-    private final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
     private final CombinedSearchListener combinedSearchListener = new CombinedSearchListener();
     
     private final RemoteLibraryManager remoteLibraryManager;
@@ -45,17 +41,6 @@ public class MultipleBrowseSearch extends AbstractBrowseSearch {
     }
  
     @Override
-    public SearchCategory getCategory() {
-        return SearchCategory.ALL;
-    }
-
-    @Override
-    public void repeat() {
-        throw new NotImplementedException("BrowseSearch.repeat() not implemented");
-
-    }
-
-    @Override
     public void start() {
         for (BrowseSearch browse: browses){
             browse.start();
@@ -69,15 +54,6 @@ public class MultipleBrowseSearch extends AbstractBrowseSearch {
         }
     }
     
-    @Override
-    public void addSearchListener(SearchListener searchListener) {
-        searchListeners.add(searchListener);
-    }
-
-    @Override
-    public void removeSearchListener(SearchListener searchListener) {
-        searchListeners.remove(searchListener);
-    }
     
     private class CombinedSearchListener implements SearchListener {
         private AtomicInteger stoppedBrowses = new AtomicInteger(0);
@@ -111,6 +87,16 @@ public class MultipleBrowseSearch extends AbstractBrowseSearch {
                     listener.searchStopped(MultipleBrowseSearch.this);
                 }
             }
+        }
+        
+    }
+    
+    private class CombinedBrowseStatusListener implements BrowseStatusListener {
+
+        @Override
+        public void statusChanged() {
+            // TODO handle the status changes
+            
         }
         
     }
