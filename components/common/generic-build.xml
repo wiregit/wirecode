@@ -216,7 +216,7 @@
             <ivy:retrieve conf="*"
                           pattern="${build.limewire.components.this.lib}/[conf]/[type]/[artifact](-[revision]).[ext]"
                           sync="true"
-                          symlink="true"
+                          symlink="false"
                           log="quiet"/>
                           
             <!-- because ivy:retrieve has sync==true, if there are no dependencies, the dir will be removed.
