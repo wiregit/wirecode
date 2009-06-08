@@ -89,46 +89,20 @@ public class AdvancedSearchBuilder {
      *  
      * @return null if the query could not be parsed otherwise the corresponding {@link SearchInfo}.
      */
-    public SearchInfo attemptToCreateAdvancedSearch(String originalQuery, SearchCategory uiSelectedSearchCategory) {
+    public SearchInfo attemptToCreateAdvancedSearch(String query, SearchCategory searchCategory) {
+
+        // Advanced search in the all or other category is impossible
+        if (searchCategory == SearchCategory.ALL || searchCategory == SearchCategory.OTHER) { 
+            return null;
+        }
         
         String translatedKeySeparator = getTranslatedKeySeprator();
         String untranslatedKeySeparator = UNTRANSLATED_SEPARATOR;
-        String query = originalQuery;
-        
         
         // Only attempt to parse an advanced search if the query has at least one special
         //  key separator sequence
-        
-        boolean firstSeparatorIsUntranslated = true;
-        int firstSeparatorPosition = query.indexOf(untranslatedKeySeparator);
-        if (firstSeparatorPosition < 0) { 
-            firstSeparatorPosition = query.indexOf(translatedKeySeparator);
-            firstSeparatorIsUntranslated = false;
-        }
-        
-        // There should be at least one key separator and it must be forward of the first character
-        if (firstSeparatorPosition > 0) {
-            
-            SearchCategory searchCategory = uiSelectedSearchCategory;
-            
-            // Check if the first token is a SearchCategory override
-            SearchCategory querySelectedSearchCategory = attemptToParseSearchCategory(
-                    query.substring(0, firstSeparatorPosition).trim(),
-                    firstSeparatorIsUntranslated);
-            
-            // If it is then override the selected SearchCategory
-            if (querySelectedSearchCategory != null) {
-                searchCategory = querySelectedSearchCategory;
-                
-                // If there is a category override strip it out of the search string
-                query = query.substring(firstSeparatorPosition+1);
-            }
+        if (query.indexOf(translatedKeySeparator) > 0 || query.indexOf(untranslatedKeySeparator) > 0) {
 
-            // Advanced search in the all or other category is impossible
-            if (searchCategory == SearchCategory.ALL || searchCategory == SearchCategory.OTHER) { 
-                return null;
-            }
-            
             String lowerCaseUntranslatedQuery = translator.toLowerCaseEnglish(query);
             String lowerCaseTranslatedQuery = translator.toLowerCaseCurrentLocale(query);
             
@@ -213,29 +187,6 @@ public class AdvancedSearchBuilder {
         }
         
         return null;        
-    }
-    
-    private SearchCategory attemptToParseSearchCategory(String firstTerm, boolean firstSeparatorIsUntranslated) {
-        if (firstSeparatorIsUntranslated) {
-            String candidateTerm = translator.toLowerCaseEnglish(firstTerm);
-            for ( SearchCategory category : SearchCategory.values() ) {
-                if (translator.toLowerCaseEnglish(
-                        SearchCategoryUtils.getName(category)).equals(candidateTerm)) {
-                    return category;
-                }
-            }
-        }
-        else {
-            String candidateTerm = translator.toLowerCaseCurrentLocale(firstTerm);
-            for ( SearchCategory category : SearchCategory.values() ) {
-                if (translator.toLowerCaseCurrentLocale(translator.translate(
-                        SearchCategoryUtils.getName(category))).equals(candidateTerm)) {
-                    return category;
-                }
-            }
-        }
-        
-        return null;
     }
     
     /**
