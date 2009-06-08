@@ -792,7 +792,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     void removeAllPresences(FacebookFriend friend) {
-        // non-LW presenes are NOT removed b/c that introduces race-conditions between
+        // LW presences are NOT removed b/c that introduces race-conditions between
         // buddy-list polling and disco-info on-demand presence creation        
         synchronized (presenceLock) {
             Map<String, FriendPresence> presenceMap = friend.getPresences();
