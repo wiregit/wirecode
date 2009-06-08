@@ -9,18 +9,17 @@ import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.listener.EventListener;
 
 /**
- * Represents a user ("friend") in a persons roster
+ * Represents a user ("friend") in a persons roster.
  */
 public interface XMPPFriend extends Friend {
 
     /**
-     * Allows the xmpp service user to register a listener for presence changes of this user
-     * @param presenceListener
+     * Allows the XMPP service user to register a listener for presence changes of this user.
      */
     public void addPresenceListener(EventListener<PresenceEvent> presenceListener);
 
     /**
-     * Used to initiate a new chat
+     * Used to initiate a new chat.
      * @param reader the <code>MessageReader</code> used to process incoming messages
      * @return the <code>MessageWriter</code> used to send outgoing messages
      */
@@ -43,7 +42,7 @@ public interface XMPPFriend extends Friend {
 
     /**
      * The active presence is the presence currently
-     * chatting with (sending msgs to) me
+     * chatting with (sending msgs to) me.
      *
      * @return presence the active presence.  null if 
      */
@@ -57,13 +56,13 @@ public interface XMPPFriend extends Friend {
 
 
     /**
-     * Returns whether or not this user is signed in to chat
+     * Returns whether or not this user is signed in to chat.
      * @return true if this user is signed in with at least 1 presence
      */
     public boolean isSignedIn();
     
     /**
-     * An analague to {@link Friend#getFriendPresences()},
+     * An analogue to {@link Friend#getFriendPresences()},
      * except returns a Map of {@link XMPPPresence}, the keys being
      * the {@link XMPPPresence#getJID()}.
      */
@@ -72,15 +71,15 @@ public interface XMPPFriend extends Friend {
     /**
      * Returns whether the current login is subscribed to this user.
      * This information is in the roster packet.
-     * 
+     * <p>
      * For instance, if a user sends the current login a friend
      * add request, and the current login accepts, this method
      * will return true.
-     *
+     * <p>
      * In the following roster packet, my-mutually-accepted-friend is subscribed,
      * and friend-i-rejected-previously and friend-i-requested-but-has-not-responded
      * are not subscribed.
-     *
+     * <xmp>
      * <iq to="limebuddytest@gmail.com/WuXLh6tmNLC3320061" id="0Qj6D-15" type="result">
      *   <query xmlns="jabber:iq:roster">
      *     <item jid="my-mutually-accepted-friend@gmail.com" subscription="both" name="Lime Friend">
@@ -88,9 +87,9 @@ public interface XMPPFriend extends Friend {
      *     <item jid="friend-i-requested-but-has-not-responded@gmail.com" subscription="none"/>
      *   </query>
      * </iq>
-     *
+     * </xmp>
      * @return true if the roster entry for this user has
-     * a subscription attriburte equal to "both" or "to"
+     * a subscription attribute equal to "both" or "to"
      * Returns false otherwise ("from" or "none")
      */
     public boolean isSubscribed();

@@ -62,10 +62,10 @@ public interface SearchResultHandler {
     public int getNumResultsForQuery(GUID guid);
     
     /** 
-	 * Handles the given query reply. Only one thread may call it at a time.
+     * Handles the given query reply. Only one thread may call it at a time.
      *      
-	 * @return <tt>true</tt> if the GUI will (probably) display the results,
-	 *  otherwise <tt>false</tt> 
+     * @return <tt>true</tt> if the GUI will (probably) display the results,
+     *  otherwise <tt>false</tt> 
      */
     public void handleQueryReply(final QueryReply qr);
     

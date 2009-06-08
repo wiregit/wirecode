@@ -108,7 +108,7 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
     }
     
     /**
-     * Ensure ready sockets are delegated to the correct observers 
+     * Ensure ready sockets are delegated to the correct observers.
      */
     public void testAcceptPushedSocket() throws IOException {
         Mockery context = new Mockery() {
@@ -250,10 +250,10 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
     
     /**
      * Go through the simply success case of XMPPFirewalledAddressConnector::connect() 
-     *  and confirm the basic interactions.
-     *  
+     * and confirm the basic interactions.
+     * <p>
      * After manually fire some of the exception handling code and make sure the events
-     *  are processed correctly. 
+     * are processed correctly. 
      */
     @SuppressWarnings("unchecked")
     public void testConnectSimple() throws IOException {
@@ -384,7 +384,7 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
  
     
     /**
-     * Attempt to connect using an invalid public ip.  Ensure this is 
+     * Attempt to connect using an invalid public IP.  Ensure this is 
      *  handled gracefully and an IOE is passed to the ConnectObserver 
      */
     @SuppressWarnings("unchecked")

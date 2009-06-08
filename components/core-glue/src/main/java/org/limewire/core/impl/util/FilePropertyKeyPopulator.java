@@ -86,19 +86,19 @@ public class FilePropertyKeyPopulator {
         }
     }
 
-    /**
+    /*
      * TODO use a better analysis to map bit rates and file types to quality,
      * for now using the following articles as a guide for now.
-     * 
+     * <p>
      * http://www.extremetech.com/article2/0,2845,1560793,00.asp
-     * 
+     * <p>
      * http://www.cdburner.ca/digital-audio-formats-article/digital-audio-
      * comparison.htm
-     * 
+     * <p>
      * http://ipod.about.com/od/introductiontoitunes/a/sound_qual_test.htm
-     * 
+     * <p>
      * Returns 1 of 4 quality scores.
-     * 
+     * <p>
      * null - unscored 1 - poor 2 - good 3 - excellent
      */
     private static Long toAudioQualityScore(String fileExtension, Long fileSize, Long bitrate,
@@ -162,14 +162,14 @@ public class FilePropertyKeyPopulator {
         return quality;
     }
 
-    /**
+    /*
      * TODO use a better analysis to map video attributes to quality for now
      * using the following articles as a guide for now.
-     * 
+     * <p>
      * Right now the scoring is somewhat arbitrary.
-     * 
+     * <p>
      * Returns 1 of 4 quality scores.
-     * 
+     * <p>
      * null - unscored 1 - poor 2 - good 3 - excellent
      */
     private static Long toVideoQualityScore(String fileExtension, Long fileSize, Long bitrate,

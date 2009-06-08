@@ -56,7 +56,7 @@ public class RatingTable implements Service {
      * a set so that we can retrieve a stored token by using an equivalent
      * token as a key. This allows us to use a token without rating data to
      * retrieve an equivalent token that has rating data.
-     * 
+     * <p>
      * The size of the map is limited. Entries are discarded in
      * least-recently-used order when the map is full, on the assumption that
      * the least-recently-used token is the least important to keep. Tokens
@@ -135,7 +135,7 @@ public class RatingTable implements Service {
     }
 
     /**
-     * Returns the combined rating for a set of tokens
+     * Returns the combined rating for a set of tokens.
      * 
      * @param tokens a set of tokens to be rated
      * @return the combined rating for the tokens
@@ -148,7 +148,7 @@ public class RatingTable implements Service {
     }
 
     /**
-     * Assigns the given rating to an array of RemoteFileDescs
+     * Assigns the given rating to an array of RemoteFileDescs.
      * 
      * @param descs an array of RemoteFileDescs to be rated
      * @param rating a rating between 0 (not spam) and 1 (spam)
@@ -158,7 +158,7 @@ public class RatingTable implements Service {
     }
 
     /**
-     * Assigns the given rating to a QueryReply, ignoring keyword tokens
+     * Assigns the given rating to a QueryReply, ignoring keyword tokens.
      * 
      * @param qr a QueryReply to be rated
      * @param rating a rating between 0 (not spam) and 1 (spam)
@@ -169,7 +169,7 @@ public class RatingTable implements Service {
 
     /**
      * Clears the ratings of the tokens associated with a QueryRequest and
-     * ignores them for the rest of the session
+     * ignores them for the rest of the session.
      * 
      * @param qr the QueryRequest to clear
      */
@@ -185,7 +185,7 @@ public class RatingTable implements Service {
     /**
      * Assigns the given rating to a set of tokens, storing any that have
      * non-zero ratings after being updated and removing from the map any that
-     * have zero ratings after being updated
+     * have zero ratings after being updated.
      * 
      * @param tokens a set of tokens to be rated
      * @param rating a rating between 0 (not spam) and 1 (spam)
@@ -225,7 +225,7 @@ public class RatingTable implements Service {
 
     /**
      * Returns an equivalent previously stored token if any such token exists,
-     * otherwise returns the token that was passed in
+     * otherwise returns the token that was passed in.
      * 
      * @param token the token to look up
      * @return the same token or a previously stored equivalent
@@ -236,7 +236,7 @@ public class RatingTable implements Service {
     }
 
     /**
-     * Loads ratings from disk
+     * Loads ratings from disk.
      */
     private void load() {
         tokenMap.clear();
@@ -270,7 +270,7 @@ public class RatingTable implements Service {
     }
 
     /**
-     * Saves ratings to disk (called whenever the user marks a search result)
+     * Saves ratings to disk (called whenever the user marks a search result).
      */
     public void save() {
         ArrayList<Token> list;

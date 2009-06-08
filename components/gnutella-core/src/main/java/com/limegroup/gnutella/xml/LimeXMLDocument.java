@@ -53,12 +53,12 @@ public class LimeXMLDocument implements StringLookup {
      */
     private static final int CURRENT_VERSION = 3;
 
-	/**
-	 * Cached hash code for this instance.
-	 */
-	private volatile int hashCode = 0;
+    /**
+     * Cached hash code for this instance.
+     */
+    private volatile int hashCode = 0;
 
-	/**
+    /**
      * Map of canonical attribute name -> value.
      */
     private Map<String, String> fieldToValue = new HashMap<String, String>();
@@ -128,7 +128,7 @@ public class LimeXMLDocument implements StringLookup {
      * @param map Map with keys in canonicalized
      * form and corresponding values that will be used to create the 
      * new instance
-     * @param schemaURI The schema URI for the LimeXMLDocument to be
+     * @param schemaURI the schema URI for the LimeXMLDocument to be
      * created
      */    
     LimeXMLDocument(Map<String, String> map, String schemaURI, String keyPrefix,
@@ -152,7 +152,7 @@ public class LimeXMLDocument implements StringLookup {
 
     /**
      * Constructs a new LimeXMLDocument
-     * @param nameValueList List (of Map.Entry) of fieldnames (in canonicalized
+     * @param nameValueList List (of Map.Entry) of field names (in canonicalized
      * form) and corresponding values that will be used to create the 
      * new instance
      * @param schemaURI The schema URI for the LimeXMLDocument to be
@@ -169,7 +169,7 @@ public class LimeXMLDocument implements StringLookup {
         //set the schema URI
         this.schemaUri = schemaURI;
                 
-        //iterate over the passed list of fieldnames & values
+        //iterate over the passed list of field names & values
         for(Map.Entry<String, String> next : nameValueList)
             fieldToValue.put(next.getKey().trim(), next.getValue());
         
@@ -218,7 +218,7 @@ public class LimeXMLDocument implements StringLookup {
      * elements of the returned list may be "Some comment-blah".
      * QRP code may want to split this into the QRP keywords
      * "Some", "comment", and "blah".
-     *
+     * <p>
      * Indivisible keywords are not returned.  To retrieve those,
      * use getIndivisibleKeywords().  Indivisible keywords are
      * those which QRP will not split up.
@@ -264,7 +264,7 @@ public class LimeXMLDocument implements StringLookup {
 
     /**
      * Returns the unique identifier which identifies the schema this XML
-     * document conforms to
+     * document conforms to.
      */
     public String getSchemaURI() {
         return schemaUri;
@@ -291,7 +291,7 @@ public class LimeXMLDocument implements StringLookup {
     /**
      * Returns the name of the file that the data in this XML document 
      * corresponds to. If the meta-data does not correspond to any file
-     * in the file system, this method will rerurn a null.
+     * in the file system, this method will return a null.
      */
     public File getIdentifier() {
         return fileId;
@@ -333,11 +333,13 @@ public class LimeXMLDocument implements StringLookup {
      * In case of multiple structured values with same name,
      * as might occur while using + or * in the regular expressions in schema,
      * those should be represented as using the array index using the __
-     * notation (withouth the square brackets)
-     * for e.g. myarray[0].name ==> myarray__0__name
-     *
-     * attribute names for an element in the XML schema should be postfixed 
+     * notation (without the square brackets)
+     * <p>
+     * For e.g. myarray[0].name ==> myarray__0__name
+     * <p>
+     * Attribute names for an element in the XML schema should be postfixed 
      * with __ (double underscore).
+     * <p>
      * So element.attribute ==> element__attribute__
      *
      * @return a Set of Map.Entry, where each key-value corresponds to a
@@ -442,7 +444,7 @@ public class LimeXMLDocument implements StringLookup {
     
     /**
      * Returns the attribute string with the given index.
-     *
+     * <p>
      * For example, this will return:
      *   <thing att1="value1" att2="value2" att3="value3" index="4"/>
      */
@@ -508,65 +510,61 @@ public class LimeXMLDocument implements StringLookup {
         return tag.toString();
     }
 
-	/**
-	 * Overrides equals to check for equality of all xml document fields.
-	 *
-	 * @param o the object to compare
-	 * @return <tt>true</tt> if the objects are equal, <tt>false</tt>
-	 *  otherwise
-	 */
-	@Override
+    /**
+     * Overrides equals to check for equality of all xml document fields.
+     * 
+     * @param o the object to compare
+     * @return <tt>true</tt> if the objects are equal, <tt>false</tt> otherwise
+     */
+    @Override
     public boolean equals(Object o) {
-		if(o == this)
-		    return true;
-		if(o == null)
-		    return false;
-		if(!(o instanceof LimeXMLDocument))
-		    return false;
+        if (o == this)
+            return true;
+        if (o == null)
+            return false;
+        if (!(o instanceof LimeXMLDocument))
+            return false;
 
-		LimeXMLDocument xmlDoc = (LimeXMLDocument)o;
-		return ((schemaUri == null ? xmlDoc.schemaUri == null :
-				 schemaUri.equals(xmlDoc.schemaUri)) &&
-				(action == null ? xmlDoc.action == null :
-				 action.equals(xmlDoc.action)) &&
-                 (actionDetail == null ? xmlDoc.actionDetail == null :
-                     actionDetail.equals(xmlDoc.actionDetail)) &&
-				(fieldToValue == null ? xmlDoc.fieldToValue == null : 
-				 fieldToValue.equals(xmlDoc.fieldToValue)) &&
-				 version == xmlDoc.version);
-	}
-
-	/**
-	 * Overrides <tt>Object.hashCode</tt> to satisfy the contract for
-	 * hashCode, given that we're overriding equals.
-	 *
-	 * @return a hashcode for this object for use in hash-based collections
-	 */
-	@Override
-    public int hashCode() {
-		if(hashCode == 0) {
-			int result = 17;
-			if(fieldToValue != null)
-				result = 37*result + fieldToValue.hashCode();
-			if(schemaUri != null)
-				result = 37*result + schemaUri.hashCode();
-			if(action != null)
-				result = 37*result + action.hashCode();
-            if (actionDetail != null)
-                result = 37*result + actionDetail.hashCode();
-			hashCode = result;
-		} 
-		return hashCode;
-	}
-	
-	/**
-	 * Returns the XML identifier for the string.
-	 */
-	@Override
-    public String toString() {
-	    return getXMLString();
+        LimeXMLDocument xmlDoc = (LimeXMLDocument) o;
+        return ((schemaUri == null ? xmlDoc.schemaUri == null : schemaUri.equals(xmlDoc.schemaUri))
+                && (action == null ? xmlDoc.action == null : action.equals(xmlDoc.action))
+                && (actionDetail == null ? xmlDoc.actionDetail == null : actionDetail
+                        .equals(xmlDoc.actionDetail))
+                && (fieldToValue == null ? xmlDoc.fieldToValue == null : fieldToValue
+                        .equals(xmlDoc.fieldToValue)) && version == xmlDoc.version);
     }
-    
+
+    /**
+     * Overrides <tt>Object.hashCode</tt> to satisfy the contract for hashCode,
+     * given that we're overriding equals.
+     * 
+     * @return a hashcode for this object for use in hash-based collections
+     */
+    @Override
+    public int hashCode() {
+        if (hashCode == 0) {
+            int result = 17;
+            if (fieldToValue != null)
+                result = 37 * result + fieldToValue.hashCode();
+            if (schemaUri != null)
+                result = 37 * result + schemaUri.hashCode();
+            if (action != null)
+                result = 37 * result + action.hashCode();
+            if (actionDetail != null)
+                result = 37 * result + actionDetail.hashCode();
+            hashCode = result;
+        }
+        return hashCode;
+    }
+
+    /**
+     * Returns the XML identifier for the string.
+     */
+    @Override
+    public String toString() {
+        return getXMLString();
+    }
+
     /**
      * Looks in the fields for the ACTION, IDENTIFIER, and INDEX, and a license.
      * Action is stored, index & identifier are removed.

@@ -21,13 +21,13 @@ public class ManagedListStatusEvent {
         
         /**
          * Called after load_finishing and prior to load_complete. Allows 
-         * anything to write to disk.  It is also called periodially
+         * anything to write to disk.  It is also called periodically
          * if FileManager has any changed that should be written to disk.
          */
         SAVE,
         
         /**
-         * Called after FileManager has completely finished loading
+         * Called after FileManager has completely finished loading.
          */
         LOAD_COMPLETE,
         

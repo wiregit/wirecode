@@ -15,7 +15,7 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
 /**
  *  A composite of audio data for marshalling it to and from disk. When loading
  *  meta-data from audio files to LimeXMLDocuments and when writing LimeXMLDocument
- *  updates to disk
+ *  updates to disk.
  */
 public class AudioMetaData implements MetaData {
 
@@ -38,7 +38,7 @@ public class AudioMetaData implements MetaData {
     private boolean isVBR = false;
     
     /**
-     * @return the XML schema this data represents
+     * @return the XML schema this data represents.
      */
     public String getSchemaURI() {
         return LimeXMLNames.AUDIO_SCHEMA;

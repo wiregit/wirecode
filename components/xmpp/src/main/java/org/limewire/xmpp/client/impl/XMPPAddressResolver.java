@@ -106,7 +106,7 @@ public class XMPPAddressResolver implements AddressResolver {
      * Returns presence if presence is {@link FriendPresence} and the resource
      * id matches the one in <code>address</code> and the address is available in
      * the presence.
-     * 
+     * <p>
      * Also ensures that auth-token and address feature are set.
      */
     private FriendPresence getMatchingPresence(XMPPAddress xmppAddress, String resourceId, FriendPresence presence) {

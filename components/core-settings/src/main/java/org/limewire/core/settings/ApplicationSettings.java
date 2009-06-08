@@ -11,14 +11,14 @@ import org.limewire.util.OSUtils;
 
 
 /**
- * Settings for LimeWire application
+ * Settings for LimeWire application.
  */
 public class ApplicationSettings extends LimeProps {
 
     private ApplicationSettings() {}
     
     /**
-     * The Client ID number
+     * The Client ID number.
      */
     public static final StringSetting CLIENT_ID = 
         FACTORY.createStringSetting("CLIENT_ID", "");

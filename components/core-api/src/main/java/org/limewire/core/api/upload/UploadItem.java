@@ -8,7 +8,7 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
 
 /**
- * A single upload
+ * A single upload.
  */
 public interface UploadItem extends PropertiableFile {
     
@@ -20,7 +20,7 @@ public interface UploadItem extends PropertiableFile {
     public enum BrowseType {FRIEND, P2P, NONE}
 
     /**
-     * cancels the upload
+     * Cancels the upload.
      */
     public void cancel();
 

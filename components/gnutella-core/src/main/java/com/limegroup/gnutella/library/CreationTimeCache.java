@@ -44,44 +44,43 @@ import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
  * This class contains a systemwide File creation time cache that persists these
- * times across sessions.  Very similar to UrnCache but less complex.
- *
- * This class is needed because we don't want to consult
- * File.lastModifiedTime() all the time.  We want to preserve creation times
- * across the Gnutella network.
- *
+ * times across sessions. Very similar to UrnCache but less complex.
+ * <p>
+ * This class is needed because we don't want to consult File.lastModifiedTime()
+ * all the time. We want to preserve creation times across the Gnutella network.
+ * <p>
  * In order to be speedy, this class maintains two data structures - one for
  * fast URN to creation time lookup, another for fast 'youngest' file lookup.
- * <br>
+ * <p>
  * IMPLEMENTATION NOTES:
- * The two data structures do not reflect each other's internal representation
- * - specifically, the URN->Time lookup may have more URNs than the
- * Time->URNSet lookup.  This is a consequence of partial file sharing.  It is
- * the case that the URNs in the sets of the Time->URNSet lookup are a subset
- * of the URNs in the URN->Time lookup.  For more details, see addTime and
- * commitTime.
- * 
+ * <p>
+ * The two data structures do not reflect each other's internal representation -
+ * specifically, the URN->Time lookup may have more URNs than the Time->URNSet
+ * lookup. This is a consequence of partial file sharing. It is the case that
+ * the URNs in the sets of the Time->URNSet lookup are a subset of the URNs in
+ * the URN->Time lookup. For more details, see addTime and commitTime.
  */
 @Singleton
 public class CreationTimeCache {
-    
+
     private static final Log LOG = LogFactory.getLog(CreationTimeCache.class);
-    
+
     /**
      * File where creation times for files are stored.
      */
-    private final File CTIME_CACHE_FILE = 
-        new File(CommonUtils.getUserSettingsDir(), "createtimes.cache");
-    
+    private final File CTIME_CACHE_FILE = new File(CommonUtils.getUserSettingsDir(),
+            "createtimes.cache");
+
     /**
      * Whether or not data is dirty since the last time we saved.
      */
     private volatile boolean dirty = false;
-    
-    private final ExecutorService deserializeQueue = ExecutorsHelper.newProcessingQueue("CreationTimeCacheDeserializer");
-    
+
+    private final ExecutorService deserializeQueue = ExecutorsHelper
+            .newProcessingQueue("CreationTimeCacheDeserializer");
+
     private final FileManager fileManager;
-    
+
     private final Future<Maps> deserializer;
 
     @Inject
@@ -94,63 +93,73 @@ public class CreationTimeCache {
                 return new Maps(urnToTime, timeToUrn);
             }
         });
-	}
-    
-    @Inject void register(ServiceRegistry registry) {
+    }
+
+    @Inject
+    void register(ServiceRegistry registry) {
         registry.register(new Service() {
             @Override
             public String getServiceName() {
                 return "What's New Manager";
             }
+
             @Override
             public void initialize() {
-               CreationTimeCache.this.initialize();
+                CreationTimeCache.this.initialize();
             }
+
             @Override
             public void start() {
             }
+
             @Override
             public void stop() {
             }
         });
     }
-    
+
     void initialize() {
-        fileManager.getManagedFileList().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
-            @Override
-            public void handleEvent(ManagedListStatusEvent event) {
-                handleManagedListStatusEvent(event);
-            }
-        });
-        //TODO Currently creation time cache is used to get creation times for CoreLocalFileItem. 
-        //By only registering events for gnutella share list changes in CreationTimeCache, the creation time field for Non gnutella shared files is being set to -1. 
-        //In the future we will probably want to register for events on the managed fileList instead
-        fileManager.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
-            @Override
-            public void handleEvent(FileListChangedEvent event) {
-                handleFileListEvent(event);
-            }
-        });
+        fileManager.getManagedFileList().addManagedListStatusListener(
+                new EventListener<ManagedListStatusEvent>() {
+                    @Override
+                    public void handleEvent(ManagedListStatusEvent event) {
+                        handleManagedListStatusEvent(event);
+                    }
+                });
+        // TODO Currently creation time cache is used to get creation times for
+        // CoreLocalFileItem.
+        // By only registering events for gnutella share list changes in
+        // CreationTimeCache, the creation time field for Non gnutella shared
+        // files is being set to -1.
+        // In the future we will probably want to register for events on the
+        // managed fileList instead
+        fileManager.getGnutellaFileList().addFileListListener(
+                new EventListener<FileListChangedEvent>() {
+                    @Override
+                    public void handleEvent(FileListChangedEvent event) {
+                        handleFileListEvent(event);
+                    }
+                });
     }
-    
+
     /**
      * Package private for testing.
      */
     Map<URN, Long> getUrnToTime() {
         return getMaps().getUrnToTime();
     }
-    
+
     /**
      * Package private for testing.
      */
     SortedMap<Long, Set<URN>> getTimeToUrn() {
         return getMaps().getTimeToUrn();
     }
-    
+
     private Maps getMaps() {
         boolean interrupted = false;
         try {
-            while(true) {
+            while (true) {
                 try {
                     return deserializer.get();
                 } catch (InterruptedException tryAgain) {
@@ -164,51 +173,53 @@ public class CreationTimeCache {
                 Thread.currentThread().interrupt();
         }
     }
-    
+
     /** Returns the number of URNS stored. */
     public synchronized int getSize() {
         return getUrnToTime().size();
     }
-    
+
     /**
      * Get the Creation Time of the file.
-	 * @param urn <tt>URN<tt> to look up Creation Time for
-	 * @return A Long that represents the creation time of the urn.  Null if
-     * there is no association.
+     * 
+     * @param urn <tt>URN</tt> to look up Creation Time for
+     * @return A Long that represents the creation time of the urn. Null if
+     *         there is no association.
      */
     public synchronized Long getCreationTime(URN urn) {
-		return getUrnToTime().get(urn);
+        return getUrnToTime().get(urn);
     }
-    
+
     /**
      * Get the Creation Time of the file.
-	 * @param urn <tt>URN<tt> to look up Creation Time for
-	 * @return A long that represents the creation time of the urn. -1
-	 *         if no time exists.
+     * 
+     * @param urn <tt>URN</tt> to look up Creation Time for
+     * @return A long that represents the creation time of the urn. -1 if no
+     *         time exists.
      */
     public long getCreationTimeAsLong(URN urn) {
         Long l = getCreationTime(urn);
-        if(l == null)
+        if (l == null)
             return -1;
         else
             return l.longValue();
-    }    
-    
+    }
+
     /**
      * Removes the CreationTime that is associated with the specified URN.
      */
     synchronized void removeTime(URN urn) {
         Long time = getUrnToTime().remove(urn);
         removeURNFromURNSet(urn, time);
-        if(time != null)
+        if (time != null)
             dirty = true;
     }
 
-
     /**
      * Clears away any URNs for files that do not exist anymore.
+     * 
      * @param shouldClearURNSetMap true if you want to clear TIME_TO_URNSET_MAP
-     * too
+     *        too
      */
     private void pruneTimes(boolean shouldClearURNSetMap) {
         synchronized (this) {
@@ -217,10 +228,11 @@ public class CreationTimeCache {
                 Map.Entry<URN, Long> currEntry = iter.next();
                 URN currURN = currEntry.getKey();
                 Long cTime = currEntry.getValue();
-                
+
                 // check to see if file still exists
-                // NOTE: technically a URN can map to multiple FDs, but I only want
-                // to know about one.  getFileDescForUrn prefers FDs over iFDs.
+                // NOTE: technically a URN can map to multiple FDs, but I only
+                // want
+                // to know about one. getFileDescForUrn prefers FDs over iFDs.
                 FileDesc fd = fileManager.getGnutellaFileList().getFileDesc(currURN);
                 if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
                     dirty = true;
@@ -232,7 +244,6 @@ public class CreationTimeCache {
         }
     }
 
-    
     /**
      * Clears away any URNs for files that do not exist anymore.
      */
@@ -240,18 +251,16 @@ public class CreationTimeCache {
         pruneTimes(true);
     }
 
-
     /**
-     * Add a CreationTime for the specified <tt>URN</tt> instance.  Can be 
-     * called for any type of file (complete or partial).  Partial files
-     * should be committed upon completion via commitTime.
-	 *
-	 * @param urn the <tt>URN</tt> instance containing Time to store
+     * Add a CreationTime for the specified <tt>URN</tt> instance. Can be called
+     * for any type of file (complete or partial). Partial files should be
+     * committed upon completion via commitTime.
+     * 
+     * @param urn the <tt>URN</tt> instance containing Time to store
      * @param time The creation time of the urn.
      * @throws IllegalArgumentException If urn is null or time is invalid.
      */
-    public synchronized void addTime(URN urn, long time) 
-      throws IllegalArgumentException {
+    public synchronized void addTime(URN urn, long time) throws IllegalArgumentException {
         if (urn == null)
             throw new IllegalArgumentException("Null URN.");
         if (time <= 0)
@@ -260,27 +269,27 @@ public class CreationTimeCache {
 
         // populate urn to time
         Long existing = getUrnToTime().get(urn);
-        if(existing == null || !existing.equals(cTime)) {
+        if (existing == null || !existing.equals(cTime)) {
             dirty = true;
             getUrnToTime().put(urn, cTime);
         }
     }
 
     /**
-     * Commits the CreationTime for the specified <tt>URN</tt> instance.  Should
-     * be called for complete files that are shared.  addTime() for the input
-     * URN should have been called first (otherwise you'll get a
+     * Commits the CreationTime for the specified <tt>URN</tt> instance. Should
+     * be called for complete files that are shared. addTime() for the input URN
+     * should have been called first (otherwise you'll get a
      * IllegalArgumentException)
-	 *
-	 * @param urn the <tt>URN</tt> instance containing Time to store
+     * 
+     * @param urn the <tt>URN</tt> instance containing Time to store
      * @throws IllegalArgumentException If urn is null or the urn was never
-     * added in addTime();
+     *         added in addTime();
      */
-    public synchronized void commitTime(URN urn) 
-        throws IllegalArgumentException {
-        if (urn == null) throw new IllegalArgumentException("Null URN.");
+    public synchronized void commitTime(URN urn) throws IllegalArgumentException {
+        if (urn == null)
+            throw new IllegalArgumentException("Null URN.");
         Long cTime = getUrnToTime().get(urn);
-        if  (cTime == null) 
+        if (cTime == null)
             throw new IllegalArgumentException("Never added URN via addTime()");
 
         // populate time to set of urns
@@ -292,50 +301,51 @@ public class CreationTimeCache {
         urnSet.add(urn);
     }
 
-
     /**
      * Returns an List of URNs, from 'youngest' to 'oldest'.
-     * @param max the maximum number of URNs you want returned.  if you
-     * want all, give Integer.MAX_VALUE.
+     * 
+     * @param max the maximum number of URNs you want returned. if you want all,
+     *        give Integer.MAX_VALUE.
      * @return a List ordered by younger URNs.
      */
-    public Collection<URN> getFiles(final int max)
-        throws IllegalArgumentException {
+    public Collection<URN> getFiles(final int max) throws IllegalArgumentException {
         return getFiles(null, max);
-    }    
+    }
 
     /**
      * Returns an List of URNs, from 'youngest' to 'oldest'.
-     * @param max the maximum number of URNs you want returned.  if you
-     * want all, give Integer.MAX_VALUE.
-     * @param request in case the query has meta-flags, you can give it to
-     * me. null is fine though.
+     * 
+     * @param request in case the query has meta-flags, you can give it to me.
+     *        null is fine though.
+     * @param max the maximum number of URNs you want returned. if you want all,
+     *        give Integer.MAX_VALUE.
      * @return a List ordered by younger URNs.
      */
     public Collection<URN> getFiles(final QueryRequest request, final int max)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
         synchronized (this) {
             if (max < 1)
                 throw new IllegalArgumentException("bad max = " + max);
-            MediaTypeAggregator.Aggregator filter = request == null ?
-                            null : MediaTypeAggregator.getAggregator(request);
+            MediaTypeAggregator.Aggregator filter = request == null ? null : MediaTypeAggregator
+                    .getAggregator(request);
 
             // may be non-null at loop end
             List<URN> toRemove = null;
             Set<URN> urnList = new LinkedHashSet<URN>();
-            
-            // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the
+
+            // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns
+            // the
             // entries in descending order....
-            for(Set<URN> urns : getTimeToUrn().values()) {
-                if(urnList.size() >= max) {
+            for (Set<URN> urns : getTimeToUrn().values()) {
+                if (urnList.size() >= max) {
                     break;
                 }
-                
-                for(URN currURN : urns) {
-                    if(urnList.size() >= max) {
+
+                for (URN currURN : urns) {
+                    if (urnList.size() >= max) {
                         break;
                     }
-                    
+
                     // we only want shared FDs
                     FileDesc fd = fileManager.getGnutellaFileList().getFileDesc(currURN);
                     if (fd == null) {
@@ -352,7 +362,8 @@ public class CreationTimeCache {
                 }
             }
 
-            // clear any ifd's or unshared files that may have snuck into structures
+            // clear any ifd's or unshared files that may have snuck into
+            // structures
             if (toRemove != null) {
                 for (URN currURN : toRemove) {
                     removeTime(currURN);
@@ -363,40 +374,42 @@ public class CreationTimeCache {
         }
     }
 
-
-    /** Returns all of the files URNs, from youngest to oldest.
+    /**
+     * Returns all of the files URNs, from youngest to oldest.
      */
     public Collection<URN> getFiles() {
         return getFiles(Integer.MAX_VALUE);
     }
-    
-        
+
     /**
      * Write cache so that we only have to calculate them once.
      */
     synchronized void persistCache() {
-        if(!dirty)
+        if (!dirty)
             return;
-        
-        //It's not ideal to hold a lock while writing to disk, but I doubt think
-        //it's a problem in practice.
+
+        // It's not ideal to hold a lock while writing to disk, but I doubt
+        // think
+        // it's a problem in practice.
         ObjectOutputStream oos = null;
         try {
-            oos = new ObjectOutputStream(
-                    new BufferedOutputStream(new FileOutputStream(CTIME_CACHE_FILE)));
+            oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(
+                    CTIME_CACHE_FILE)));
             oos.writeObject(getUrnToTime());
         } catch (IOException e) {
             LOG.error("Unable to write creation cache", e);
         } finally {
             IOUtils.close(oos);
         }
-        
+
         dirty = false;
     }
 
-    /** Evicts the urn from the TIME_TO_URNSET_MAP.
-     *  @param if refTime is non-null, will try to eject from set referred to
-     *  by refTime.  otherwise will do an iterative search.
+    /**
+     * Evicts the urn from the TIME_TO_URNSET_MAP.
+     * 
+     * @param refTime if is non-null, will try to eject from set referred to by
+     *        refTime. Otherwise will do an iterative search.
      */
     private synchronized void removeURNFromURNSet(URN urn, Long refTime) {
         if (refTime != null) {
@@ -408,7 +421,7 @@ public class CreationTimeCache {
             // find the urn in the map:
             // 1) get rid of it
             // 2) get rid of the empty set if it exists
-            for(Iterator<Set<URN>> i = getTimeToUrn().values().iterator(); i.hasNext(); ) {
+            for (Iterator<Set<URN>> i = getTimeToUrn().values().iterator(); i.hasNext();) {
                 Set<URN> urnSet = i.next();
                 if (urnSet.contains(urn)) {
                     urnSet.remove(urn); // 1)
@@ -419,19 +432,19 @@ public class CreationTimeCache {
             }
         }
     }
-    
 
     /**
      * Constructs the TIME_TO_URNSET_MAP, which is based off the entries in the
      * URN_TO_TIME_MAP.
      */
     private SortedMap<Long, Set<URN>> constructURNMap(Map<URN, Long> urnToTime) {
-        SortedMap<Long, Set<URN>> timeToUrn = new TreeMap<Long, Set<URN>>(Comparators.inverseLongComparator());
-        
-        for(Map.Entry<URN, Long> currEntry : urnToTime.entrySet()) {
+        SortedMap<Long, Set<URN>> timeToUrn = new TreeMap<Long, Set<URN>>(Comparators
+                .inverseLongComparator());
+
+        for (Map.Entry<URN, Long> currEntry : urnToTime.entrySet()) {
             // for each entry, get the creation time and the urn....
             Long cTime = currEntry.getValue();
-            URN urn = currEntry.getKey();    
+            URN urn = currEntry.getKey();
 
             // put the urn in a set of urns that have that creation time....
             Set<URN> urnSet = timeToUrn.get(cTime);
@@ -440,13 +453,12 @@ public class CreationTimeCache {
                 // populate the reverse mapping
                 timeToUrn.put(cTime, urnSet);
             }
-            
+
             urnSet.add(urn);
         }
-        
+
         return timeToUrn;
     }
-
 
     /**
      * Loads values from cache file, if available.
@@ -457,40 +469,42 @@ public class CreationTimeCache {
             return new HashMap<URN, Long>();
         }
         ObjectInputStream ois = null;
-		try {
-            ois = new ConverterObjectInputStream(new BufferedInputStream(
-                            new FileInputStream(CTIME_CACHE_FILE)));
-            Map<URN, Long> map = GenericsUtils.scanForMap(ois.readObject(), URN.class, Long.class, GenericsUtils.ScanMode.REMOVE);
+        try {
+            ois = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(
+                    CTIME_CACHE_FILE)));
+            Map<URN, Long> map = GenericsUtils.scanForMap(ois.readObject(), URN.class, Long.class,
+                    GenericsUtils.ScanMode.REMOVE);
             return map;
-	    } catch(Throwable t) {
+        } catch (Throwable t) {
             dirty = true;
-	        LOG.error("Unable to read creation time file", t);
-	        return new HashMap<URN, Long>();
-	    } finally {
+            LOG.error("Unable to read creation time file", t);
+            return new HashMap<URN, Long>();
+        } finally {
             IOUtils.close(ois);
         }
-	}
-    
+    }
+
     private static class Maps {
         /** URN -> Creation Time (Long) */
-       private final Map<URN, Long> urnToTime;
-       /**  Creation Time (Long) -> Set of URNs */
-       private final SortedMap<Long, Set<URN>> timeToUrn;
-       
-       Maps(Map<URN, Long> urnToTime, SortedMap<Long, Set<URN>> timeToUrn) {
-           this.urnToTime = urnToTime;
-           this.timeToUrn = timeToUrn;
-           }
-    
+        private final Map<URN, Long> urnToTime;
+
+        /** Creation Time (Long) -> Set of URNs */
+        private final SortedMap<Long, Set<URN>> timeToUrn;
+
+        Maps(Map<URN, Long> urnToTime, SortedMap<Long, Set<URN>> timeToUrn) {
+            this.urnToTime = urnToTime;
+            this.timeToUrn = timeToUrn;
+        }
+
         public SortedMap<Long, Set<URN>> getTimeToUrn() {
             return timeToUrn;
         }
-    
+
         public Map<URN, Long> getUrnToTime() {
             return urnToTime;
         }
     }
-    
+
     private void fileAdded(File file, URN urn) {
         synchronized (this) {
             Long cTime = getCreationTime(urn);
@@ -508,41 +522,41 @@ public class CreationTimeCache {
             }
         }
     }
-    
-    private void fileChanged(URN oldUrn, URN newUrn ) {
+
+    private void fileChanged(URN oldUrn, URN newUrn) {
         // re-populate the ctCache
         synchronized (this) {
             long creationTime = getCreationTimeAsLong(oldUrn);
             removeTime(oldUrn);
-            if(creationTime != -1) {
+            if (creationTime != -1) {
                 addTime(newUrn, creationTime);
                 commitTime(newUrn);
             }
-        }   
+        }
     }
 
     /**
-     * Listens for events from the FileManager
+     * Listens for events from the FileManager.
      */
     private void handleManagedListStatusEvent(ManagedListStatusEvent evt) {
-        switch(evt.getType()) {
-            case LOAD_FINISHING:
-                pruneTimes();          
-                break;
-            case SAVE:
-                persistCache();
-                break;
+        switch (evt.getType()) {
+        case LOAD_FINISHING:
+            pruneTimes();
+            break;
+        case SAVE:
+            persistCache();
+            break;
         }
     }
-    
+
     private void handleFileListEvent(FileListChangedEvent evt) {
-        switch(evt.getType()) {
+        switch (evt.getType()) {
         case ADDED:
             // Commit the time in the CreactionTimeCache, but don't share
-            // the installer.  We populate free LimeWire's with free installers
+            // the installer. We populate free LimeWire's with free installers
             // so we have to make sure we don't influence the what is new
             // result set.
-            if (!LibraryUtils.isForcedShare(evt.getFileDesc())) {     
+            if (!LibraryUtils.isForcedShare(evt.getFileDesc())) {
                 fileAdded(evt.getFileDesc().getFile(), evt.getFileDesc().getSHA1Urn());
             }
             break;
@@ -550,8 +564,7 @@ public class CreationTimeCache {
             removeTime(evt.getFileDesc().getSHA1Urn());
             break;
         case CHANGED:
-            fileChanged(evt.getOldValue().getSHA1Urn(),
-                        evt.getFileDesc().getSHA1Urn());
+            fileChanged(evt.getOldValue().getSHA1Urn(), evt.getFileDesc().getSHA1Urn());
             break;
         }
     }

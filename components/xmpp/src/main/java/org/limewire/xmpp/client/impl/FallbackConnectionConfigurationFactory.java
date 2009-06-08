@@ -8,7 +8,7 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
 /**
  * Uses the list of default servers in the XMPPConnectionConfiguration to return
- * a ConnectionConfiguration 
+ * a ConnectionConfiguration. 
  */
 public class FallbackConnectionConfigurationFactory implements ConnectionConfigurationFactory {
 

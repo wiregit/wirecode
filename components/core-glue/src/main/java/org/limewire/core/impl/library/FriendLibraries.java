@@ -165,7 +165,7 @@ public class FriendLibraries {
 
         /**
          * Indexes properties in both the suggestions and properties indexes.
-         * 
+         * <p>
          * The suggestions index only indexes the phrase as a whole. While the
          * filename indexes the phrase by breaking it apart into all the words
          * within.

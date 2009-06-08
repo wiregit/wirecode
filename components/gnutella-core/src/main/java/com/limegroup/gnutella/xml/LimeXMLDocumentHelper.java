@@ -26,18 +26,17 @@ public final class LimeXMLDocumentHelper{
 
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
 
-	/**
-	 * Private constructor to ensure that this class can never be
-	 * instantiated.
-	 */
+    /**
+     * Private constructor to ensure that this class can never be instantiated.
+     */
     @Inject
-	public LimeXMLDocumentHelper(LimeXMLDocumentFactory limeXMLDocumentFactory) {
+    public LimeXMLDocumentHelper(LimeXMLDocumentFactory limeXMLDocumentFactory) {
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
-	}
+    }
 
     /**
-     * TO be used when a Query Reply comes with a chunk of meta-data
-     * we want to get LimeXMLDocuments out of it
+     * To be used when a Query Reply comes with a chunk of meta-data
+     * we want to get LimeXMLDocuments out of it.
      */
     public List<LimeXMLDocument[]> getDocuments(String aggregatedXML, int totalResponseCount) {
         if(aggregatedXML==null || aggregatedXML.equals("") || totalResponseCount <= 0)

@@ -98,7 +98,7 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
     }
     
     /**
-     * Try to create a normal RemoteFileItem
+     * Try to create a normal RemoteFileItem.
      */
     @SuppressWarnings("unchecked")
     public void testCreateWithAddressFeature() throws SaveLocationException, InvalidDataException {
@@ -171,7 +171,7 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
     
     /**
      * Try to create a RemoteFileItem but with an invalid URN list.  Ensure the error 
-     *  is caught and handled properly.
+     * is caught and handled properly.
      */
     @SuppressWarnings("unchecked")
     public void testCreateWithBadURN() throws SaveLocationException {

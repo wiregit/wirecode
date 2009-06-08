@@ -37,7 +37,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
     /**
      * Ensure the periodic refresher is registered and the manager is
      *  registered as a listener to the upload listeners list.
-     *  
+     *  <p>
      *  Try to execute the associated runnable to ensure functionality. 
      */
     public void testRegister() {
@@ -70,7 +70,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
     
     /** 
      * Add a browse host upload to the manager, ensure it is accessible,
-     *  signal completion, and ensure it is removed
+     *  signal completion, and ensure it is removed.
      */
     public void testUploaderAddAndRemove() {
         
@@ -119,7 +119,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
     
     /**
      * Test various conditions where adding and removing an uploader will have no effect.
-     * 
+     * <p>
      * Add an internal uploader, remove an incomplete upload, remove an upload with the 
      *  setting disabled. 
      */
@@ -336,7 +336,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         manager.clearFinished();
         assertEmpty(items);
         
-        // Second pass: Do a clear with uncomplete uploads;
+        // Second pass: Do a clear with incomplete uploads;
         items.add(uploadUploading1);
         items.add(uploadUploading2);
         manager.clearFinished();

@@ -42,7 +42,7 @@ public class XmppPresenceLibraryAdderTest extends BaseTestCase {
     }
     
     /**
-     * Test the added event and make sure the presence is added when it has features
+     * Test the added event and make sure the presence is added when it has features.
      */
     public void testHandleEventWithAdded() {
         Mockery context = new Mockery();
@@ -73,7 +73,7 @@ public class XmppPresenceLibraryAdderTest extends BaseTestCase {
     }
     
     /**
-     * Test the removed event and make sure the presence is removed when it has not features
+     * Test the removed event and make sure the presence is removed when it has not features.
      */
     public void testHandleEventWithRemoved() {
         Mockery context = new Mockery();
@@ -105,7 +105,7 @@ public class XmppPresenceLibraryAdderTest extends BaseTestCase {
     
     /**
      * Fire the event handler with a forced null event and ensure no actions
-     *  are made on presences
+     * are made on presences.
      */
     public void testHandleEventWithOther() {
         

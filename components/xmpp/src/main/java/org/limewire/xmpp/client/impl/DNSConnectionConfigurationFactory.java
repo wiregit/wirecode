@@ -12,8 +12,8 @@ import org.xbill.DNS.SRVRecord;
 import org.xbill.DNS.Type;
 
 /**
- * uses a <code>XMPPConnectionConfiguration</code> to look up the
- * xmpp host and port in DNS.  Then creates a smack <code>ConnectionConfiguration</code>
+ * Uses a <code>XMPPConnectionConfiguration</code> to look up the
+ * XMPP host and port in DNS.  Then creates a smack <code>ConnectionConfiguration</code>
  * based on the data in the DNS entry.
  */
 public class DNSConnectionConfigurationFactory implements ConnectionConfigurationFactory {
@@ -22,7 +22,7 @@ public class DNSConnectionConfigurationFactory implements ConnectionConfiguratio
     
     /**
      * The max number of times to attempt looking up
-     * the xmpp host in DNS
+     * the XMPP host in DNS.
      */
     private static final int MAX_XMPP_HOST_LOOKUPS = 3;
 

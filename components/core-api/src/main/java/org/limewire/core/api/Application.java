@@ -4,8 +4,8 @@ package org.limewire.core.api;
 public interface Application {
 
     /**
-     * Returns a URL that is uniquified according to the unique properties of
-     * the running app.
+     * Returns a URL that is unique according to the unique properties of
+     * the running application.
      */
     String getUniqueUrl(String baseUrl);
 

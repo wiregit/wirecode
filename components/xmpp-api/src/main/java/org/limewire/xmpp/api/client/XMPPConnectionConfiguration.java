@@ -7,7 +7,7 @@ import org.limewire.io.UnresolvedIpPort;
 import org.limewire.listener.EventListener;
 
 /**
- * Allows the xmpp service user to provide configuration for xmpp login.
+ * Allows the XMPP service user to provide configuration for XMPP login.
  */
 public interface XMPPConnectionConfiguration extends Network {
     
@@ -18,7 +18,7 @@ public interface XMPPConnectionConfiguration extends Network {
     public boolean isDebugEnabled();
     
     /** Returns the username this configuration will use,
-     * as entered by the user; not canonicalized */
+     * as entered by the user; not canonicalized. */
     public String getUserInputLocalID();
     
     /** Returns the password this configuration will use. */

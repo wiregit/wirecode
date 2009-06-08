@@ -111,7 +111,7 @@ public class LibrarySettings extends LimeProps {
     /**
      * Removes a friend from the list of names to always share files with. This friend
      * will no longer automatically share new files of this type that are added to the library.
-     * @param id - friend to remove
+     * @param id friend to remove
      */
     public static final void removeFiendShareNewFiles(StringArraySetting stringArray, String id) {
         String[] names = stringArray.get();
@@ -123,7 +123,8 @@ public class LibrarySettings extends LimeProps {
         }
     }
     
-    /**True, only takes a snapshot of your current files, false enables current and future files to be automatically shared */
+    /**True, only takes a snapshot of your current files, false enables 
+     * current and future files to be automatically shared. */
     public static final BooleanSetting SNAPSHOT_SHARING_ENABLED =
         FACTORY.createBooleanSetting("SNAPSHOT_SHARING_ENABLED", true);
     

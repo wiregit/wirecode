@@ -24,11 +24,11 @@ public interface GnutellaFileList extends FriendFileList {
     /**
      * Returns a list of all the file descriptors in this list that exist 
      * in the given directory, in any order.
-     * 
+     * <p>
      * Returns null if directory is not shared, or a zero-length array if it is
      * shared but contains no files.  This method is not recursive; files in 
      * any of the directory's children are not returned.
-     * 
+     * <p>
      * This operation is <b>not</b> efficient, and should not be done often.
      */
     List<FileDesc> getFilesInDirectory(File directory);

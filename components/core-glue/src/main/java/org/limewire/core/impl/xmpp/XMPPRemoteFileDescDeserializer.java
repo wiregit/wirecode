@@ -43,7 +43,7 @@ public class XMPPRemoteFileDescDeserializer implements RemoteFileDescDeserialize
     /**
      * Creates an XMPPRemoteFileDesc clone of a RemoteFileDesc replacing the address, XMPP vitals, and 
      *  linking as necessary.
-     *  
+     * <p>
      * Not all attributes will be preserved in the promotion process.
      */
     public RemoteFileDesc promoteRemoteFileDescAndExchangeAddress(RemoteFileDesc rfd, XMPPAddress address) {

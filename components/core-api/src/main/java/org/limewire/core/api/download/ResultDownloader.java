@@ -15,13 +15,13 @@ public interface ResultDownloader {
      * must all be for the same item, otherwise an
      * {@link IllegalArgumentException} may be thrown.
      * 
-     * @param search The search that triggered these results. This may be null.
-     * @param coreSearchResults The results for the file that should be
+     * @param search the search that triggered these results. This may be null.
+     * @param coreSearchResults the results for the file that should be
      *        downloaded. A list is used to indicate that multiple sources can
      *        be swarmed from at the same time. The list is not intended to
      *        provide different downloads.
-     * @param saveFile The location to save this file to.
-     * @param overwrite Whether or not to automatically overwrite any other files at the saveFileLocation
+     * @param saveFile the location to save this file to.
+     * @param overwrite whether or not to automatically overwrite any other files at the saveFileLocation
      */
     public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults, File saveFile, boolean overwrite)
         throws SaveLocationException;
@@ -31,8 +31,8 @@ public interface ResultDownloader {
      * must all be for the same item, otherwise an
      * {@link IllegalArgumentException} may be thrown.
      * 
-     * @param search The search that triggered these results. This may be null.
-     * @param coreSearchResults The results for the file that should be
+     * @param search the search that triggered these results. This may be null.
+     * @param coreSearchResults the results for the file that should be
      *        downloaded. A list is used to indicate that multiple sources can
      *        be swarmed from at the same time. The list is not intended to
      *        provide different downloads.
@@ -41,7 +41,7 @@ public interface ResultDownloader {
             throws SaveLocationException;
 
     /**
-     * Adds a download specified by the given RemoteFileItem
+     * Adds a download specified by the given RemoteFileItem.
      * 
      * @throws IOException if an error occurs while downloading and saving the
      *         file
@@ -51,14 +51,11 @@ public interface ResultDownloader {
     
 
     /**
-     * Adds a download specified by the given RemoteFileItem
+     * Adds a download specified by the given RemoteFileItem.
      * 
      * @param saveFile, if non null this file is used as the file name to save as.
      * @param overwrite if true the downloader will overwrite preexisting downloads with the same name.
      * @throws SaveLocationException 
-     * 
-     * @throws IOException if an error occurs while downloading and saving the
-     *         file
      * 
      */
     public DownloadItem addDownload(RemoteFileItem file, File saveFile, boolean overwrite) throws SaveLocationException;

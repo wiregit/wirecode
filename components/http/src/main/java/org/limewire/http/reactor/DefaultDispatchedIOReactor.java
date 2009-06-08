@@ -22,7 +22,7 @@ import org.limewire.nio.channel.ThrottleWriter;
 /**
  * An implementation of {@link DispatchedIOReactor} interface that
  * establishes connections through LimeWire's NIO layer.
- * 
+ * <p>
  * This is analogous to {@link ListeningIOReactor}.
  */
 public class DefaultDispatchedIOReactor implements DispatchedIOReactor {

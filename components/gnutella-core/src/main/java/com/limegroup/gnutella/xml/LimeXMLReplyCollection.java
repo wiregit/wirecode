@@ -56,7 +56,7 @@ public class LimeXMLReplyCollection {
     
     /**
      * A map of File -> LimeXMLDocument for each shared file that contains XML.
-     *
+     * <p>
      * SYNCHRONIZATION: Synchronize on LOCK when accessing, 
      *  adding or removing.
      */
@@ -64,7 +64,7 @@ public class LimeXMLReplyCollection {
     
     /**
      * The old map that was read off disk.
-     *
+     * <p>
      * Used while initially processing FileDescs to add.
      */
     private final Map<?, LimeXMLDocument> oldMap;
@@ -72,10 +72,10 @@ public class LimeXMLReplyCollection {
     /**
      * A mapping of fields in the LimeXMLDocument to a Trie
      * that has a lookup table for the values of that field.
-     *
+     * <p>
      * The Trie value is a mapping of keywords in LimeXMLDocuments
      * to the list of documents that have that keyword.
-     *
+     * <p>
      * SYNCHRONIZATION: Synchronize on LOCK when accessing,
      *  adding or removing.
      */
@@ -119,7 +119,7 @@ public class LimeXMLReplyCollection {
      * Creates a new LimeXMLReplyCollection.  The reply collection
      * will retain only those XMLDocs that match the given schema URI.
      *
-     * @param URI This collection's schema URI
+     * @param URI this collection's schema URI
      * @param path directory where the xml documents are stored
      * @param fileManager guice provider used for {@link FileManager}
      * @param limeXMLDocumentFactory factory object for {@link LimeXMLDocument}
@@ -218,11 +218,12 @@ public class LimeXMLReplyCollection {
     
     /**
      * Validates a LimeXMLDocument.
-     *
+     * <pre>
      * This checks:
      * 1) If it's current (if not, it attempts to reparse.  If it can't, keeps the old one).
      * 2) If it's valid (if not, attempts to reparse it.  If it can't, drops it).
      * 3) If it's corrupted (if so, fixes & writes the fixed one to disk).
+     * </pre>
      */
     private LimeXMLDocument validate(LimeXMLDocument doc, FileDesc fd) {
         if(!doc.isCurrent()) {
@@ -393,13 +394,13 @@ public class LimeXMLReplyCollection {
     }
     
     /**
-     * Determines if the XMLDocument is from the LWS
+     * Determines if the XMLDocument is from the LWS.
      * @return true if this document contains a LWS license, false otherwise
      */
     public boolean isLWSDoc(LimeXMLDocument doc) {
-    	if( doc != null && doc.getLicenseString() != null && doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.toString()))
-    		return true;
-    	return false;
+        if( doc != null && doc.getLicenseString() != null && doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.toString()))
+            return true;
+        return false;
     }
 
     /**
@@ -414,8 +415,9 @@ public class LimeXMLReplyCollection {
     /**
      * Returns all documents that match the particular query.
      * If no documents match, this returns an empty list.
-     *
+     * <p>
      * This goes through the following methodology:
+     * <pre>
      * 1) Looks in the index trie to determine if ANY
      *    of the values in the query's document match.
      *    If they do, adds the document to a set of
@@ -427,6 +429,7 @@ public class LimeXMLReplyCollection {
      *    matching techniques.
      * 4) Returns an empty list if nothing matched or
      *    a list of the matching documents.
+     * </pre>
      */    
     public Set<LimeXMLDocument> getMatchingDocuments(LimeXMLDocument query) {
         // First get a list of anything that could possibly match.
@@ -561,8 +564,8 @@ public class LimeXMLReplyCollection {
      * @return the older document, which is being replaced. Can be null.
      */
     public LimeXMLDocument replaceDoc(FileDesc fd, LimeXMLDocument newDoc) {
-    	assert getSchemaURI().equals(newDoc.getSchemaURI());
-    	
+        assert getSchemaURI().equals(newDoc.getSchemaURI());
+
         if(LOG.isTraceEnabled())
             LOG.trace("Replacing doc in FD (" + fd + ") with new doc (" + newDoc + ")");
         
@@ -572,8 +575,8 @@ public class LimeXMLReplyCollection {
             oldDoc = mainMap.put(new FileAndUrn(fd),newDoc);
             assert oldDoc != null : "attempted to replace doc that did not exist!!";
             removeKeywords(oldDoc);
-	        if(!isLWSDoc(newDoc))
-            	addKeywords(newDoc);
+            if(!isLWSDoc(newDoc))
+                addKeywords(newDoc);
         }
        
         boolean replaced = fd.replaceLimeXMLDocument(oldDoc, newDoc);
@@ -628,11 +631,11 @@ public class LimeXMLReplyCollection {
 
     /**
      * Determines whether or not this LimeXMLDocument can or should be
-     * commited to disk to replace the ID3 tags in the audioFile.
+     * committed to disk to replace the ID3 tags in the audioFile.
      * If the ID3 tags in the file are the same as those in document,
      * this returns null (indicating no changes required).
      * @return An Editor to use when committing or null if nothing 
-     *  should be editted.
+     *  should be edited.
      */
     private MetaDataWriter getEditorIfNeeded(File file, LimeXMLDocument doc) {
         // check if an editor exists for this file, if no editor exists

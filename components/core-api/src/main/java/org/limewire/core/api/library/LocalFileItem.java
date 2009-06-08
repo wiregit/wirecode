@@ -6,7 +6,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.friend.client.FileMetaData;
 
 /**
- * A File that is displayed in a library
+ * A File that is displayed in a library.
  */
 public interface LocalFileItem extends FileItem {
     /** Returns the file this is based on. */
@@ -24,7 +24,7 @@ public interface LocalFileItem extends FileItem {
     /** Determines if this file is sharable. */
     boolean isShareable();
     
-    /**True if the file is incomplete**/
+    /**True if the file is incomplete.**/
     boolean isIncomplete();
     
     /**

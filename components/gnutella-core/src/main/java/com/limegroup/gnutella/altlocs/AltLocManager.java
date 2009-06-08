@@ -30,7 +30,7 @@ public class AltLocManager implements EventListener<FileListChangedEvent> {
     private final Map<URN, URNData> urnMap = Collections.synchronizedMap(new HashMap<URN, URNData>());
     
     /**
-     * adds a given altloc to the manager
+     * Adds a given altloc to the manager.
      * @return whether the manager already knew about this altloc
      */
     public boolean add(AlternateLocation al, Object source) {
@@ -93,7 +93,7 @@ public class AltLocManager implements EventListener<FileListChangedEvent> {
     }
     
     /**
-     * removes the given altloc (implementations may demote)
+     * Removes the given altloc (implementations may demote).
      */
     public boolean remove(AlternateLocation al, Object source) {
         URN sha1 = al.getSHA1Urn();
@@ -234,7 +234,7 @@ public class AltLocManager implements EventListener<FileListChangedEvent> {
     }
     
     /**
-     * Listens for events from FileManager
+     * Listens for events from FileManager.
      */
     public void handleEvent(FileListChangedEvent evt) {
         switch(evt.getType()) {

@@ -134,7 +134,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
         goodHosts = newGood;
     }
     
-    /** Determiens if any blacklisted hosts exist. */
+    /** Determines if any blacklisted hosts exist. */
     public boolean hasBlacklistedHosts() {
         return 
           (FilterSettings.USE_NETWORK_FILTER.getValue() && hostileNetworkFilter.hasBlacklistedHosts())

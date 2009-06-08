@@ -52,9 +52,11 @@ public class CoreSearch implements Search {
 
     /**
      * A search is considered processed when it is acted upon (started or stopped)
+     * <pre>
      * -cannot repeat a search that has not yet been processed
      * -cannot start a search that has already been processed
      * -stopping a search only stops searches that have already been processed.
+     * </pre>
      */
     final AtomicBoolean processingStarted = new AtomicBoolean(false);
 
@@ -67,7 +69,7 @@ public class CoreSearch implements Search {
     private final AdvancedQueryStringBuilder compositeQueryBuilder;
     
     /**
-     * The guid of the last active search
+     * The guid of the last active search.
      */
     volatile byte[] searchGuid;
 

@@ -83,7 +83,7 @@ public class CoreUploadItemTest extends BaseTestCase {
     }
     
     /**
-     * equals() is overridden to check if uploaders are equal
+     * equals() is overridden to check if uploaders are equal.
      */
     public void testEquals() {
         Mockery context = new Mockery();

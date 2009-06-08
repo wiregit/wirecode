@@ -10,7 +10,7 @@ public interface FriendFileList extends LocalFileList {
     /** Clears the FileList of all items in the category. */
     void clearCategory(Category category);
     
-    /** Adds all the Managed Files from this category into this FileList*/
+    /** Adds all the Managed Files from this category into this FileList.*/
     void addSnapshotCategory(Category category);
     
     /** Returns true if files in this category will automatically be added to this list. */

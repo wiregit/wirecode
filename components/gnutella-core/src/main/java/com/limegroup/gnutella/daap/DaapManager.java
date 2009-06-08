@@ -150,7 +150,7 @@ public class DaapManager {
     }
     
     /**
-     * Starts the DAAP Server
+     * Starts the DAAP Server.
      */
     public synchronized void start() throws IOException {
         
@@ -235,7 +235,7 @@ public class DaapManager {
     }
 
     /**
-     * Stops the DAAP Server and releases all resources
+     * Stops the DAAP Server and releases all resources.
      */
     public synchronized void stop() {
 
@@ -263,11 +263,11 @@ public class DaapManager {
      * to:
      * <p>
      * 
-     * <code>
+     * <pre>
      * stop();
      * start();
      * init();
-     * </code>
+     * </pre>
      */
     public synchronized void restart() throws IOException {
         if (isServerRunning())
@@ -286,7 +286,7 @@ public class DaapManager {
     }
 
     /**
-     * Updates the mDNS servive info
+     * Updates the mDNS service info.
      */
     public synchronized void updateService() throws IOException {
 
@@ -318,7 +318,7 @@ public class DaapManager {
     }
 
     /**
-     * Disconnects all clients
+     * Disconnects all clients.
      */
     public synchronized void disconnectAll() {
         if (isServerRunning()) {
@@ -327,7 +327,7 @@ public class DaapManager {
     }
 
     /**
-     * Returns <tt>true</tt> if server is running
+     * Returns <tt>true</tt> if server is running.
      */
     public synchronized boolean isServerRunning() {
         if (server != null) {
@@ -489,7 +489,7 @@ public class DaapManager {
                     
                 // Check if URN is already in the tmpMap.
                 // If so do nothing as we don't want add 
-                // the same file multible times...
+                // the same file multiple times...
                 if(tmpUrnToSong.containsKey(urn)) {
                     continue;
                 }
@@ -544,7 +544,7 @@ public class DaapManager {
     
     /**
      * Create a Song and sets its meta data with
-     * the data which is retrieved from the FileDesc
+     * the data which is retrieved from the FileDesc.
      */
     private Song createSong(FileDesc desc, boolean audio) {
         
@@ -704,7 +704,7 @@ public class DaapManager {
     }
     
     /**
-     * Sets the audio meta data
+     * Sets the audio meta data.
      */
     private boolean updateSongAudioMeta(Transaction txn, Song song, FileDesc desc) {
         
@@ -847,7 +847,7 @@ public class DaapManager {
     }
     
     /**
-     * Handles the audio stream
+     * Handles the audio stream.
      */
     private final class LimeStreamSource implements DaapStreamSource {
         
@@ -862,7 +862,7 @@ public class DaapManager {
     }
     
     /**
-     * Implements the DaapAuthenticator
+     * Implements the DaapAuthenticator.
      */
     private final class LimeAuthenticator implements DaapAuthenticator {
         
@@ -904,7 +904,7 @@ public class DaapManager {
     }
     
     /**
-     * The DAAP Library should be only accessable from the LAN
+     * The DAAP Library should be only accessible from the LAN
      * as we can not guarantee for the required bandwidth and it
      * could be used to bypass Gnutella etc. Note: iTunes can't
      * connect to DAAP Libraries outside of the LAN but certain
@@ -926,7 +926,7 @@ public class DaapManager {
     }
 
     /**
-     * A LimeWire specific implementation of DaapConfig
+     * A LimeWire specific implementation of DaapConfig.
      */
     private final class LimeConfig extends DaapConfig {
 
@@ -968,7 +968,7 @@ public class DaapManager {
     }
 
     /**
-     * Helps us to publicize and update the DAAP Service via mDNS
+     * Helps us to publicize and update the DAAP Service via mDNS.
      */
     private final class BonjourService {
 
@@ -1010,7 +1010,7 @@ public class DaapManager {
             // iTunes 4.2 is still widespread...
             props.put(VERSION, Integer.toString(DaapUtil.DAAP_VERSION_3));
 
-            // This is the inital share name
+            // This is the initial share name
             props.put(MACHINE_NAME, name);
 
             // shows the small lock if Service is protected
@@ -1069,7 +1069,7 @@ public class DaapManager {
     }
 
     /**
-     * Listens for events from FileManager
+     * Listens for events from FileManager.
      */
     private void handleManagedListStatusEvent(final ManagedListStatusEvent evt) {
         

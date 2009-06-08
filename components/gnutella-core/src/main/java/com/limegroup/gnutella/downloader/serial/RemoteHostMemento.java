@@ -64,7 +64,7 @@ public class RemoteHostMemento implements Serializable {
     }
 
     /**
-     * Encodes address as address-type:utf8(base64(serialized-address))
+     * Encodes address as address-type:utf8(base64(serialized-address)).
      */
     public static String serializeAddress(Address address, AddressFactory addressFactory) {
         AddressSerializer serializer = addressFactory.getSerializer(address.getClass());

@@ -352,7 +352,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
    /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown.
      */    
     static public void assertNotEquals(long expected, long actual) {
@@ -360,7 +360,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertNotEquals(String msg, long expected, long actual) {
@@ -368,7 +368,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown.
      */    
     static public void assertNotEquals(short expected, short actual) {
@@ -376,7 +376,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertNotEquals(String msg, short expected, short actual) {
@@ -384,7 +384,7 @@ public abstract class AssertComparisons extends TestCase {
     }
 
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown.
      */    
     static public void assertNotEquals(int expected, int actual) {
@@ -392,7 +392,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertNotEquals(String msg, int expected, int actual) {
@@ -400,7 +400,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown.
      */    
     static public void assertNotEquals(double expected, double actual) {
@@ -408,7 +408,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertNotEquals(String msg, double expected, double actual) {
@@ -416,7 +416,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown.
      */    
     static public void assertNotEquals(float expected, float actual) {
@@ -424,7 +424,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertNotEquals(String msg, float expected, float actual) {
@@ -432,7 +432,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown.
      */    
     static public void assertNotEquals(byte expected, byte actual) {
@@ -440,7 +440,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is not equal to expected.  if they are equal,
+     * Asserts that actual is not equal to expected.  if they are equal,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertNotEquals(String msg, byte expected, byte actual) {
@@ -672,7 +672,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */
     static public void assertGreaterThan(Object expected, Object actual) {
@@ -680,7 +680,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */
     static public void assertGreaterThan(String msg, Object expected, Object actual) {
@@ -688,7 +688,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThan(long expected, long actual) {
@@ -696,7 +696,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThan(String msg, long expected, long actual) {
@@ -704,7 +704,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThan(short expected, short actual) {
@@ -712,7 +712,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThan(String msg, short expected, short actual) {
@@ -720,7 +720,7 @@ public abstract class AssertComparisons extends TestCase {
     }
 
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThan(int expected, int actual) {
@@ -728,7 +728,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThan(String msg, int expected, int actual) {
@@ -736,7 +736,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThan(double expected, double actual) {
@@ -744,7 +744,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThan(String msg, double expected, double actual) {
@@ -752,7 +752,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThan(float expected, float actual) {
@@ -760,7 +760,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThan(String msg, float expected, float actual) {
@@ -768,7 +768,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThan(byte expected, byte actual) {
@@ -776,7 +776,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than expected.  If it isn't,
+     * Asserts that actual is greater than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThan(String msg, byte expected, byte actual) {
@@ -784,7 +784,7 @@ public abstract class AssertComparisons extends TestCase {
     }
 
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThan(Object expected, Object actual) {
@@ -792,7 +792,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThan(String msg, Object expected, Object actual) {
@@ -800,7 +800,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThan(long expected, long actual) {
@@ -808,7 +808,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThan(String msg, long expected, long actual) {
@@ -816,7 +816,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThan(short expected, short actual) {
@@ -824,7 +824,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThan(String msg, short expected, short actual) {
@@ -832,7 +832,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThan(int expected, int actual) {
@@ -840,7 +840,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThan(String msg, int expected, int actual) {
@@ -848,7 +848,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThan(double expected, double actual) {
@@ -856,7 +856,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThan(String msg, double expected, double actual) {
@@ -864,7 +864,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThan(float expected, float actual) {
@@ -872,7 +872,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThan(String msg, float expected, float actual) {
@@ -880,7 +880,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThan(byte expected, byte actual) {
@@ -888,7 +888,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than expected.  If it isn't,
+     * Asserts that actual is less than expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThan(String msg, byte expected, byte actual) {
@@ -896,7 +896,7 @@ public abstract class AssertComparisons extends TestCase {
     }
 
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */
     static public void assertGreaterThanOrEquals(Object expected, Object actual) {
@@ -904,7 +904,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThanOrEquals(String msg, Object expected, Object actual) {
@@ -912,7 +912,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThanOrEquals(long expected, long actual) {
@@ -920,7 +920,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThanOrEquals(String msg, long expected, long actual) {
@@ -928,7 +928,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThanOrEquals(short expected, short actual) {
@@ -936,7 +936,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThanOrEquals(String msg, short expected, short actual) {
@@ -944,7 +944,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThanOrEquals(int expected, int actual) {
@@ -952,7 +952,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThanOrEquals(String msg, int expected, int actual) {
@@ -960,7 +960,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThanOrEquals(double expected, double actual) {
@@ -968,7 +968,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThanOrEquals(String msg, double expected, double actual) {
@@ -976,7 +976,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThanOrEquals(float expected, float actual) {
@@ -984,7 +984,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThanOrEquals(String msg, float expected, float actual) {
@@ -992,7 +992,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertGreaterThanOrEquals(byte expected, byte actual) {
@@ -1000,7 +1000,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is greater than or equal to expected.  If it isn't,
+     * Asserts that actual is greater than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertGreaterThanOrEquals(String msg, byte expected, byte actual) {
@@ -1008,7 +1008,7 @@ public abstract class AssertComparisons extends TestCase {
     }
 
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThanOrEquals(Object expected, Object actual) {
@@ -1016,7 +1016,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThanOrEquals(String msg, Object expected, Object actual) {
@@ -1024,7 +1024,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThanOrEquals(long expected, long actual) {
@@ -1032,7 +1032,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThanOrEquals(String msg, long expected, long actual) {
@@ -1040,7 +1040,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThanOrEquals(short expected, short actual) {
@@ -1048,7 +1048,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThanOrEquals(String msg, short expected, short actual) {
@@ -1056,7 +1056,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThanOrEquals(int expected, int actual) {
@@ -1064,7 +1064,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThanOrEquals(String msg, int expected, int actual) {
@@ -1072,7 +1072,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThanOrEquals(double expected, double actual) {
@@ -1080,7 +1080,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThanOrEquals(String msg, double expected, double actual) {
@@ -1088,7 +1088,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThanOrEquals(float expected, float actual) {
@@ -1096,7 +1096,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThanOrEquals(String msg, float expected, float actual) {
@@ -1104,7 +1104,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown.
      */    
     static public void assertLessThanOrEquals(byte expected, byte actual) {
@@ -1112,7 +1112,7 @@ public abstract class AssertComparisons extends TestCase {
     }
     
     /**
-     * Assertes that actual is less than or equal to expected.  If it isn't,
+     * Asserts that actual is less than or equal to expected.  If it isn't,
      * an AssertionFailedError is thrown with the given message.
      */    
     static public void assertLessThanOrEquals(String msg, byte expected, byte actual) {

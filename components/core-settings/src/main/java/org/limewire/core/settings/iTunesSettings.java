@@ -6,7 +6,7 @@ import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
 /**
- * Settings for iTunes
+ * Settings for iTunes.
  */
 public class iTunesSettings extends LimeProps {
     
@@ -20,13 +20,13 @@ public class iTunesSettings extends LimeProps {
 
     
     /**
-     * The name of the Playlist where songs shall be imported
+     * The name of the Playlist where songs shall be imported.
      */
     public static StringSetting ITUNES_PLAYLIST = 
         FACTORY.createStringSetting("ITUNES_PLAYLIST", "LimeWire");
     
     /**
-     * Supported file types
+     * Supported file types.
      */
     public static StringArraySetting ITUNES_SUPPORTED_FILE_TYPES = 
         FACTORY.createStringArraySetting("ITUNES_SUPPORTED_FILE_TYPES", 

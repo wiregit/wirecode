@@ -14,9 +14,9 @@ import org.limewire.i18n.I18nMarker;
  * A generic type of media, i.e., "video" or "audio".
  * Many different file formats can be of the same media type.
  * MediaType's are immutable.
- *
- * // See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
- * 
+ *<p>
+ * See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
+ * <p>
  * Implementation note: Since MediaType implements serialization and there
  * are inner anonymous classes be careful where to add new inner classes
  * and fields.
@@ -46,7 +46,7 @@ public class MediaType implements Serializable {
     public static final String OTHER = I18nMarker.marktr("Other");
 
     /**
-     * Type for 'any file'
+     * Type for 'any file'.
      */
     private static final MediaType TYPE_ANY = 
         new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE, null) {
@@ -61,7 +61,7 @@ public class MediaType implements Serializable {
     };
        
     /**
-     * Type for 'documents'
+     * Type for 'documents'.
      */
 
     private static final MediaType TYPE_DOCUMENTS = 
@@ -103,7 +103,7 @@ public class MediaType implements Serializable {
             });            
         
     /**
-     * Type for 'programs'
+     * Type for 'programs'.
      */
     private static final MediaType TYPE_PROGRAMS =
         new MediaType(SCHEMA_PROGRAMS, PROGRAMS, 
@@ -112,7 +112,7 @@ public class MediaType implements Serializable {
         );
         
     /**
-     * Type for 'audio'
+     * Type for 'audio'.
      */
     private static final MediaType TYPE_AUDIO =
         new MediaType(SCHEMA_AUDIO, AUDIO,
@@ -129,7 +129,7 @@ public class MediaType implements Serializable {
             });
         
     /**
-     * Type for 'video'
+     * Type for 'video'.
      */
     private static final MediaType TYPE_VIDEO =
         new MediaType(SCHEMA_VIDEO, VIDEO,
@@ -146,7 +146,7 @@ public class MediaType implements Serializable {
             });
         
     /**
-     * Type for 'images'
+     * Type for 'images'.
      */
     private static final MediaType TYPE_IMAGES =
         new MediaType(SCHEMA_IMAGES, IMAGES,
@@ -164,7 +164,7 @@ public class MediaType implements Serializable {
             });
     
     /**
-     * Type for 'other'
+     * Type for 'other'.
      */
     private static final MediaType TYPE_OTHER = 
         new MediaType(SCHEMA_OTHER, OTHER, null) {
@@ -223,7 +223,7 @@ public class MediaType implements Serializable {
      * @param schema a MIME compliant non-localizable identifier,
      *  that matches file categories (and XSD schema names).
      * @param descriptionKey a media identifier that can be used
-     *  to retreive a localizable descriptive text.
+     *  to retrieve a localizable descriptive text.
      * @param extensions a list of all file extensions of this
      *  type.  Must be all lowercase.  If null, this matches
      *  any file.
@@ -266,7 +266,7 @@ public class MediaType implements Serializable {
     
     /** 
      * Returns this' media-type (a MIME content-type category)
-     * (previously returned a description key)
+     * (previously returned a description key).
      */
     @Override
     public String toString() {
@@ -275,7 +275,7 @@ public class MediaType implements Serializable {
     
     /** 
      * Returns this' description key in localizable resources
-     * (now distinct from the result of the toString method)
+     * (now distinct from the result of the toString method).
      */
     public String getDescriptionKey() {
         return descriptionKey;
@@ -361,7 +361,7 @@ public class MediaType implements Serializable {
     }
         
     /*
-     * We canoncialize the default mediatypes, but since MediaType has
+     * We canonicalize the default mediatypes, but since MediaType has
      * a public constructor only 'equals' comparisons should be used.
      */
     Object readResolve() throws ObjectStreamException {
@@ -415,7 +415,7 @@ public class MediaType implements Serializable {
     }
     
     /**
-     * Retrives the program type specific for OS X & Linux.
+     * Retrieves the program type specific for OS X & Linux.
      */
     public static MediaType getOsxAndLinuxProgramMediaType() {
         return TYPE_LINUX_OSX_PROGRAMS;

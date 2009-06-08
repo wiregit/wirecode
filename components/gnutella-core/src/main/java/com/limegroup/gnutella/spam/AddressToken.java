@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.spam;
 
 /**
- * A token representing an IP address
+ * A token representing an IP address.
  */
 public class AddressToken extends KeywordToken {
 

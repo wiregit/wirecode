@@ -51,10 +51,10 @@ public interface IPFilter extends SpamFilter {
     
     /**
      * Checks if the address is of type {@link Connectable} and checks
-     * if the ip address is banned.
-     * 
+     * if the IP address is banned.
+     * <p>
      * Can be extended to handle other address types if they have the notion
-     * of a public/unique ip address.
+     * of a public/unique IP address.
      * 
      * @return if this host is allowed or the type of address can't be filtered,
      *  false if it is banned or we are unable to create correct IP address out of it.

@@ -18,13 +18,14 @@ import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * IQ to be send to request the other peer to open a connection back to this peer.
- * 
+ * <p>
  * The connection can be of two types:
- * 
+ * <pre>
  * 1) a regular TCP connection, in this case {@link #getSupportedFWTVersion()} is 0
  * 2) a reliable udp connection, in this case {@link #getSupportedFWTVersion()} conveys 
  *    the supported protocol version
- * In both cases a valid address for connecting needs to be provided
+ * In both cases a valid address for connecting needs to be provided.
+ * </pre>
  */
 public class ConnectBackRequestIQ extends IQ {
 
@@ -98,7 +99,6 @@ public class ConnectBackRequestIQ extends IQ {
     /**
      * 
      * @param address needs to be a valid address, otherwise will throw {@link IllegalArgumentException}
-     * @param clientGuid
      * @param supportedFWTVersion 0 if fwt is not supported
      */
     public ConnectBackRequestIQ(Connectable address, GUID clientGuid, int supportedFWTVersion) {

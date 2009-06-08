@@ -31,7 +31,7 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
     }
 
     /**
-     * Tests the various conditions of XMPPRemoteFileDesc.equals()
+     * Tests the various conditions of XMPPRemoteFileDesc.equals().
      */
     public void testEquals() {
 
@@ -65,7 +65,7 @@ public class XMPPRemoteFileDescTest extends BaseTestCase{
     }
     
     /**
-     * Tests the hash function for uniqueness and consistency 
+     * Tests the hash function for uniqueness and consistency. 
      */
     public void testHashCode() {
         

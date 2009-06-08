@@ -6,9 +6,9 @@ import org.limewire.logging.Log;
 
 /**
  * A Multicaster that caches the last event it handles or broadcasts.
- *
+ *<p>
  * The cached event is used for two purposes:
- *
+ * <pre>
  * 1. New listeners who are added will have their handleEvent(E event)
  * method called with the cached event
  *
@@ -16,8 +16,7 @@ import org.limewire.logging.Log;
  * on the CacheingEventMulticaster, the event is only broadcast
  * if it is not equal to the cached event.  Event classes should override equals()
  * for this to provide any meaningful implementation
- *
- * @param <E>
+ * </pre>
  */
 public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E> {
     
@@ -45,9 +44,9 @@ public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E
     }
     
     /**
-     * @param broadcastPolicy The {@link BroadcastPolicy} to use when broadcasting events.
-     * @param multicaster The {@link EventMulticaster} this delegates to when broadcasting events.
-     * @param listenerContext The {@link EventListenerListContext} to use when broadcasting events directly.
+     * @param broadcastPolicy the {@link BroadcastPolicy} to use when broadcasting events.
+     * @param multicaster the {@link EventMulticaster} this delegates to when broadcasting events.
+     * @param listenerContext the {@link EventListenerListContext} to use when broadcasting events directly.
      */
     public CachingEventMulticasterImpl(BroadcastPolicy broadcastPolicy, EventMulticaster<E> multicaster, EventListenerListContext listenerContext) {
         this.broadcastPolicy = broadcastPolicy;

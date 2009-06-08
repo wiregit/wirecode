@@ -147,7 +147,7 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
     public int getHitCount();
 
     /**
-     * Increase & return the new attempted uploads
+     * Increase & return the new attempted uploads.
      * @return the new attempted upload count
      */
     public int incrementAttemptedUploads();
@@ -158,12 +158,12 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
     public int getAttemptedUploads();
 
     /**
-     * Returns the time when the last upload attempt was made
+     * Returns the time when the last upload attempt was made.
      */
     public long getLastAttemptedUploadTime();
 
     /**
-     * Increase & return the new completed uploads
+     * Increase & return the new completed uploads.
      * @return the new completed upload count
      */
     public int incrementCompletedUploads();

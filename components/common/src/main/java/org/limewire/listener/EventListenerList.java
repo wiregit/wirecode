@@ -53,7 +53,7 @@ public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaste
      * annotations and dispatches in the correct thread, according to the
      * annotation.
      * 
-     * @param context The {@link EventListenerListContext} context to dispatch the
+     * @param context the {@link EventListenerListContext} context to dispatch the
      *        event with. Usually retrieved by
      *        {@link EventListenerList#getContext()}. The context may be null,
      *        which will result in context not being used.
@@ -65,7 +65,7 @@ public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaste
     
     /**
      * Returns the context which can be used to dispatch events via
-     * {@link EventListenerList#dispatch(EventListener, Object, org.limewire.listener.EventListenerList.EventListenerListContext)}
+     * {@link EventListenerList#dispatch(EventListener, Object, org.limewire.listener.EventListenerList.EventListenerListContext)}.
      */
     public EventListenerListContext getContext() {
         return context; 

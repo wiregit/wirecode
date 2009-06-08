@@ -39,7 +39,7 @@ public interface FileList extends Iterable<FileDesc> {
      * Adds a folder to the FileList. Depending on the kind of FileList, this
      * may either add all current contents of the folder, or the folder itself
      * (allowing for future items in the folder to be added).
-     * 
+     * <p>
      * Returns a Future from which the list of all FDs that are going to be
      * added is returned.
      */
@@ -112,12 +112,12 @@ public interface FileList extends Iterable<FileDesc> {
     void clear();
 
     /**
-     * Adds a listener to this list
+     * Adds a listener to this list.
      */
     void addFileListListener(EventListener<FileListChangedEvent> listener);
 
     /**
-     * Removes a listener from this list
+     * Removes a listener from this list.
      */
     void removeFileListListener(EventListener<FileListChangedEvent> listener);
 

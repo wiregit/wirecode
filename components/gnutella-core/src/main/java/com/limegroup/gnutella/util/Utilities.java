@@ -10,9 +10,9 @@ import java.util.Set;
 public class Utilities 
 {
     /**
-     * Determines if two sets have non-void intersection
-     * @param set1 First set
-     * @param set2 Second set
+     * Determines if two sets have non-void intersection.
+     * @param set1 first set
+     * @param set2 second set
      * @return true, if two sets have non-void intersection, false otherwise
      */
     public static boolean hasIntersection(Set set1, Set set2)

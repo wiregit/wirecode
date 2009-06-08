@@ -17,13 +17,13 @@ public class LibraryUtils {
     
     // TODO: refactor back into filemanger for test mocking... use instances.
     
-    /** Subdirectory that is always shared */
+    /** Subdirectory that is always shared. */
     public static final File PROGRAM_SHARE;
 
     /** Subdirectory that also is always shared. */
     public static final File PREFERENCE_SHARE;
 
-    /** Subdirectory used to share special application files */
+    /** Subdirectory used to share special application files. */
     public static final File APPLICATION_SPECIAL_SHARE;
 
     static {
@@ -50,7 +50,6 @@ public class LibraryUtils {
     }
 
     /** 
-     * @param file
      * @return <code>isFilePhysicallyManagable(file) && isFileAllowedToBeManaged(file))</code>
      */
     public static boolean isFileManagable(File file) {
@@ -60,7 +59,7 @@ public class LibraryUtils {
     /**
      * Returns true if this file is not too large, not too small,
      * not null, not a directory, not unreadable, not hidden.
-     * 
+     * <p>
      * Returns false otherwise.
      */
     public static boolean isFilePhysicallyManagable(File file) {
@@ -78,7 +77,7 @@ public class LibraryUtils {
 
     /**
      * Checks to see if this file is an program; if it is, and it's also not
-     * a forrced share, this returns false.  For all other files types
+     * a forced share, this returns false.  For all other files types
      * it return true.
      */
     public static boolean isFileAllowedToBeManaged(File file) {

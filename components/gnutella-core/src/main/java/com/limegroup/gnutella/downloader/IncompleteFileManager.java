@@ -72,8 +72,8 @@ public class IncompleteFileManager  {
      * key set of blocks that are not in the value set of hashes.  This happens
      * if we received RemoteFileDesc's without hashes, or when loading old
      * downloads.dat files without hash info.       
-     *
-     * INVARIANT: the range (value set) of hashes contains no duplicates.  
+     * <p>
+     * INVARIANT: the range (value set) of hashes contains no duplicates.  <p>
      * INVARIANT: for all keys k in hashes, k.isSHA1() 
      */
     private final Map<URN, File> hashes = new HashMap<URN, File>();
@@ -210,6 +210,7 @@ public class IncompleteFileManager  {
 
     /**
      * Same as getFile(String, urn, int), except taking the values from the RFD.
+     * <p>
      *    getFile(rfd) == getFile(rfd.getFileName(), rfd.getSHA1Urn(), rfd.getSize());
      */
     public synchronized File getFile(RemoteFileDesc rfd) throws IOException {
@@ -241,7 +242,7 @@ public class IncompleteFileManager  {
      * </pre>
      *
      * It is imperative that the files are compared as in their canonical
-     * formats to preserve the integrity of the filesystem.  Otherwise,
+     * formats to preserve the integrity of the file system.  Otherwise,
      * multiple downloads could be downloading to "FILE A", and "file a",
      * although only "file a" exists on disk and is being written to by
      * both.
@@ -254,10 +255,10 @@ public class IncompleteFileManager  {
         File baseFile = null;
         File canonFile = null;
         
-		//make sure its created.. (the user might have deleted it)
-		dirsMade = incDir.mkdirs();
-		
-		String convertedName = CommonUtils.convertFileName(name);
+        // make sure its created.. (the user might have deleted it)
+        dirsMade = incDir.mkdirs();
+
+        String convertedName = CommonUtils.convertFileName(name);
 
         try {
 
@@ -329,8 +330,6 @@ public class IncompleteFileManager  {
     /** 
      * Returns the unqualified file name for a file with the given name
      * and size, with an optional suffix to make it unique.
-     * @param count a suffix to attach before the file extension in parens
-     *  before the file extension, or 1 for none. 
      */
     private static String tempName(String filename, long size, int suffix) {
         if (suffix<=1) {

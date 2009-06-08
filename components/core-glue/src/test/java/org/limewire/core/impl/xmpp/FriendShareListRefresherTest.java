@@ -146,7 +146,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     
     /**
      * Fire handleEvent() of the FinishedLoadingListener with SAVE and LOAD_FINISHING.
-     * 
+     * <p>
      * Confirm that nothing happens
      */
     public void testFinishedLoadingListenerWithOtherEvents() {
@@ -180,9 +180,9 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     
     
     /**
-     * Fire handleEvent() of the FinishedLoadingListener
-     * 
-     * Ensure that refreshes are sent to all friend and presences
+     * Fire handleEvent() of the FinishedLoadingListener.
+     * <p>
+     * Ensure that refreshes are sent to all friend and presences.
      */
     @SuppressWarnings("unchecked")
     public void testFinishedLoadingListenerWithLoadComplete() {
@@ -266,9 +266,9 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     }
     
     /**
-     * Fire handleEvent() of the FinishedLoadingListener
-     * 
-     * Ensure that null connections and features are are handled correctly 
+     * Fire handleEvent() of the FinishedLoadingListener.
+     * <p>
+     * Ensure that null connections and features are are handled correctly.
      */
     @SuppressWarnings("unchecked")
     public void testFinishedLoadingListenerWithNulls() {
@@ -446,8 +446,8 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     
     /**
      * Force fire a refresh action with the last browse time before the 
-     *  last refresh time, therefore with no notifications necessary.
-     *  
+     * last refresh time, therefore with no notifications necessary.
+     * <p>
      * Ensure no notifications are made.
      */
     public void testScheduledLibraryRefreshSenderWithNoRefreshNeeded() {
@@ -519,10 +519,10 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     
     /**
      * Force fire a refresh action with the last browse time after the 
-     *  last refresh time, therefore with notifications necessary.  Also,
-     *  force one of the feature lookups to return null and make sure the 
-     *  failure is handled correctly.
-     *  
+     * last refresh time, therefore with notifications necessary.  Also,
+     * force one of the feature lookups to return null and make sure the 
+     * failure is handled correctly.
+     * <p>
      * Ensure that the browse tracker and friend presence notifications are made.  
      */
     @SuppressWarnings("unchecked")

@@ -9,7 +9,7 @@ public interface XMPPConnection {
     public XMPPConnectionConfiguration getConfiguration();
 
     /**
-     * logs a user into the xmpp server.
+     * Logs a user into the XMPP server.
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
@@ -18,7 +18,7 @@ public interface XMPPConnection {
     public ListeningFuture<Void> login();
     
     /**
-     * logs a user out of the xmpp server.
+     * Logs a user out of the XMPP server.
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
@@ -43,7 +43,7 @@ public interface XMPPConnection {
      * notified of completion.
      * 
      * The ExecutionException will be to an XMPPException
-     * if there is an error sending the xmpp message
+     * if there is an error sending the XMPP message.
      */
     public ListeningFuture<Void> setMode(XMPPPresence.Mode mode);
 
@@ -55,7 +55,7 @@ public interface XMPPConnection {
      * notified of completion.
      * 
      * The ExecutionException will be to an XMPPException
-     * if there is an error sending the xmpp message
+     * if there is an error sending the XMPP message.
      */
     public ListeningFuture<Void> addFriend(String id, String name);
     
@@ -66,7 +66,7 @@ public interface XMPPConnection {
      * notified of completion.
      * 
      * The ExecutionException will be to an XMPPException
-     * if there is an error sending the xmpp message.
+     * if there is an error sending the XMPP message.
      */
     public ListeningFuture<Void> removeFriend(String id);
 

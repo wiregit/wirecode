@@ -3,7 +3,7 @@ package org.limewire.xmpp.api.client;
 import org.limewire.listener.DefaultDataTypeEvent;
 
 /**
- * This event is dispatched when a chat presence is added or updated
+ * This event is dispatched when a chat presence is added or updated.
  */
 public class PresenceEvent extends DefaultDataTypeEvent<XMPPPresence, PresenceEvent.Type> {
 

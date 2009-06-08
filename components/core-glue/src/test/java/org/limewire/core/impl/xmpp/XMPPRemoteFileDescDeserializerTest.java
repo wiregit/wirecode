@@ -46,7 +46,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
     }
     
     /**
-     * Tests the clone method with some random inputs
+     * Tests the clone method with some random inputs.
      */
     public void testPromoteSimple() {
         
@@ -109,7 +109,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
     }
     
     /**
-     * Tests the clone function with large values
+     * Tests the clone function with large values.
      */
     public void testPromoteMaxBound() {
         
@@ -221,7 +221,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
     
     /**
      * Confirm XMPPAddressResolver is properly stored and functional 
-     *  after a clone
+     * after a clone.
      */
     public void testPromoteWithAddressResolver() {
 
@@ -258,7 +258,7 @@ public class XMPPRemoteFileDescDeserializerTest extends BaseTestCase {
     
     /**
      * Confirm XMPPAddressResolver is properly stored and functional 
-     *  after a clone
+     * after a clone.
      */
     public void testCreateWithAddressResolver() {
 

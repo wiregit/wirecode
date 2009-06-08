@@ -32,7 +32,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
     }
 
     /**
-     * Testing that downloaders with null save fiels do not have their values
+     * Testing that downloaders with null save files do not have their values
      * added to the RecentDownloads setting.
      */
     public void testNonTorrentFileNotAdded() {

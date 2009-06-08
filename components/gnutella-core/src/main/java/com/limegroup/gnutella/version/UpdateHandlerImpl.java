@@ -78,7 +78,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Manager for version updates.
- *
+ * <p>
  * Handles queueing new data for parsing and keeping track of which current
  * version is stored in memory & on disk.
  */
@@ -89,7 +89,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     
     private static final long THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
     
-    /** If we haven't had new updates in this long, schedule http failover */
+    /** If we haven't had new updates in this long, schedule HTTP failover */
     private static final long ONE_MONTH = 10L * THREE_DAYS;
     
     /**
@@ -132,8 +132,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     
     /**
      * The bytes to send on the wire.
-     *
-     * TODO: Don't store in memory.
+     */
+     /* TODO: Don't store in memory.
      */
     private volatile byte[] _lastBytes;
     
@@ -288,7 +288,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     
     /**
      * Notification that a new message has arrived.
-     *
+     * <p>
      * (The actual processing is passed of to be run in a different thread.
      *  All notifications are processed in the same thread, sequentially.)
      */
@@ -320,7 +320,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     
     /**
      * Handles processing a newly arrived message. Package access for testing.
-     *
+     * <p>
      * (Processes the data immediately.)
      */
     protected void handleDataInternal(byte[] data, UpdateType updateType, ReplyHandler handler) {
@@ -483,7 +483,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     }
 
     /**
-     * begins an http failover.
+     * Begins an HTTP failover.
      */
     private void checkForStaleUpdateAndMaybeDoHttpFailover() {
         LOG.debug("checking for timeout http failover");
@@ -533,7 +533,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     }
 
     /**
-     * Launches an http update to the failover url.
+     * Launches an HTTP update to the failover url.
      */
     private void launchHTTPUpdate(String url) throws URISyntaxException {
         if (!httpRequestControl.isRequestPending())
@@ -551,7 +551,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     }
     
     /**
-     * replaces tokens in the update command with info about the specific system
+     * Replaces tokens in the update command with info about the specific system,
      * i.e. <PATH> -> C:\Documents And Settings.... 
      */
     private static void prepareUpdateCommand(UpdateData info) {
@@ -640,13 +640,13 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     }
     
     /**
-     * kills all in-network downloaders whose URNs are not listed in the list of updates.
+     * Kills all in-network downloaders whose URNs are not listed in the list of updates.
      * Deletes any files in the folder that are not listed in the update message.
      */
     private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
-    	if (!downloadManager.get().isSavedDownloadsLoaded() || !fileManager.get().getManagedFileList().isLoadFinished())
-    		return;
-    	
+        if (!downloadManager.get().isSavedDownloadsLoaded() || !fileManager.get().getManagedFileList().isLoadFinished())
+            return;
+
         if (_killingObsoleteNecessary) {
             _killingObsoleteNecessary = false;
             downloadManager.get().killDownloadersNotListed(toDownload);
@@ -741,8 +741,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     
     /**
      * Notifies this that an update with the given URN has finished downloading.
-     * 
-     * If this was our update, we notify the gui.  Its ok if the user restarts
+     * <p>
+     * If this was our update, we notify the GUI.  It's OK if the user restarts
      * as the rest of the updates will be downloaded the next session.
      */
     public void inNetworkDownloadFinished(final URN urn, final boolean good) {
@@ -845,7 +845,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     }
     
     /**
-     * a functor that repeatedly tries to download updates at a variable
+     * A functor that repeatedly tries to download updates at a variable
      * interval. 
      */
     private class Poller implements Runnable {
@@ -994,7 +994,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     }
 
     /**
-     * Listens for events from FileManager
+     * Listens for events from FileManager.
      */
     @Override
     public void handleEvent(ManagedListStatusEvent evt) {

@@ -35,7 +35,7 @@ public class DownloadSerializerImpl implements DownloadSerializer {
     
     /**
      * Reads all saved downloads from disk.
-     * 
+     * <p>
      * This works by first attempting to read from the save file described in the settings,
      * and then attempting to read from the backup file if there were any errors while
      * reading the normal file.  If both files fail, this returns an empty list.

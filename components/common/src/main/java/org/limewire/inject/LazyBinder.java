@@ -21,7 +21,7 @@ import com.google.inject.spi.BindingScopingVisitor;
  * creating the implementation class.  The implementation class can be
  * injected directly, and it will not be constructed until at least
  * one method is called on the implementation.
- * 
+ * <p>
  * This enforces that all bindings are done on implementations scoped
  * to a {@code @}{@link Singleton} or {@code @}{@link LazySingleton},
  * to ensure that methods are called on the same underlying instance

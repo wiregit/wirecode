@@ -18,7 +18,7 @@ public interface XMPPService {
      *
      * @return a {@link ListeningFuture} of {@link XMPPConnection}
      * 
-     * The ExecutionException will be to an XMPPException if an error occurs
+     * The ExecutionException will be to an XMPPException if an error occurs.
      */
     public ListeningFuture<XMPPConnection> login(XMPPConnectionConfiguration configuration);
 
@@ -27,7 +27,7 @@ public interface XMPPService {
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      *
-     * The ExecutionException will be to an XMPPException if an error occurs
+     * The ExecutionException will be to an XMPPException if an error occurs.
      */
     public ListeningFuture<Void> logout();
 
@@ -49,14 +49,14 @@ public interface XMPPService {
     
     /**
      * Sets a new <code>&lt;presence&gt;</code> mode (i.e., status)
-     * for every XMPPConnection
+     * for every XMPPConnection.
      * 
      * @param mode the new mode to set
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
      * The ExecutionException will be to an XMPPException
-     * if there is an error sending the xmpp message
+     * if there is an error sending the XMPP message
      */
     ListeningFuture<Void> setMode(Mode mode);
 }

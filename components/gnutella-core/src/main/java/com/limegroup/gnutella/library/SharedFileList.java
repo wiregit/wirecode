@@ -22,7 +22,7 @@ public interface SharedFileList extends FileList {
     /**
      * Adds this directory to the ManagedFileList and adds all 
      * manageable files in the given folder to this list.
-     * 
+     * <p>
      * This has the effect of adding recursively adding all
      * manageable files from this folder as managed files, and
      * adding the files in the folder (non-recursively) to 

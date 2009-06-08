@@ -16,7 +16,7 @@ public interface FriendFileList extends SharedFileList {
     void setAddNewImageAlways(boolean value);
     
     /**
-     * Returns true if image files are being smartly shraed with this friend, false otherwise.
+     * Returns true if image files are being smartly shared with this friend, false otherwise.
      */
     boolean isAddNewImageAlways();
     

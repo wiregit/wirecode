@@ -3,7 +3,7 @@ package org.limewire.inspection;
 import java.io.File;
 
 /**
- * Inspector based on a human-readable key
+ * Inspector based on a human-readable key.
  */
 public interface Inspector {
     /**

@@ -15,8 +15,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * The list of all files that this library is managing.
  * This list can include files that are shared, are not shared,
- * are files from the store, are shared with friends, are incomplete, etc...
- * 
+ * are files from the store, are shared with friends, are incomplete, etc.
+ * <p>
  * Inclusion in this list means only that LimeWire knows about this file.
  */
 public interface ManagedFileList extends FileList {

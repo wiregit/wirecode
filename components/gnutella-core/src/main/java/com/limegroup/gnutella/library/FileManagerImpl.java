@@ -59,9 +59,9 @@ class FileManagerImpl implements FileManager, Service {
     /** The treeCache. */
     private final HashTreeCache treeCache;
 
-	/**
-	 * Creates a new <tt>FileManager</tt> instance.
-	 */
+    /**
+     * Creates a new <tt>FileManager</tt> instance.
+     */
     @Inject
     public FileManagerImpl(ManagedFileListImpl managedFileList, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, HashTreeCache treeCache) {
         this.backgroundExecutor = backgroundExecutor;

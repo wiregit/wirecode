@@ -13,7 +13,7 @@ public interface LocalFileList extends FileList<LocalFileItem> {
     
     /**
      * Adds the given file to the list.
-     * 
+     * <p>
      * Returns a {@link ListeningFuture} that will notify
      * when a LocalFileItem has been created out of this file.
      */
@@ -24,7 +24,7 @@ public interface LocalFileList extends FileList<LocalFileItem> {
     
     /**
      * Adds all files in the folder to the list.
-     * 
+     * <p>
      * Returns a {@link ListeningFuture} that will notify
      * when a List of potential {@link LocalFileItem LocalFileItems}
      * have been created from this folder.

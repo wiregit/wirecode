@@ -51,8 +51,8 @@ public interface RemoteLibraryManager {
     FileList<RemoteFileItem> getAllFriendsFileList();
     
     /** 
-	 * Returns the FriendLibrary for this friend if one exists, null 
-	 * if one does not exist 
-	 */
+     * Returns the FriendLibrary for this friend if one exists, null 
+     * if one does not exist. 
+     */
     FriendLibrary getFriendLibrary(Friend friend);
 }

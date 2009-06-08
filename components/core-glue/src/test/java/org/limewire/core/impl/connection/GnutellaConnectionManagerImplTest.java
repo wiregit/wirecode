@@ -279,7 +279,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
     /**
      * Tests the ConnectionLifecycleEvent code under various conditions.  Ensure
      *  ConnectionItems are created, added, updated, and removed according according to
-     *  the differnt event types.
+     *  the different event types.
      */
     public void testHandleConnectionLifecycleEvent() {
         
