@@ -67,6 +67,9 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     /** Filterable data source. */
     private final FilterableSource<E> filterableSource;
 
+    /** Manager for friend services. */
+    private final FriendActions friendManager;
+
     /** List of editors being used for filtering. */
     private final EventList<MatcherEditor<E>> editorList;
 
@@ -80,7 +83,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     private final CategoryFilter<E> categoryFilter;
     
     /** Filter for file source. */
-    private final Filter<E> sourceFilter;
+    private final SourceFilter<E> sourceFilter;
     
     /** Text field for text filter. */
     private final PromptTextField filterTextField = new PromptTextField(I18n.tr("Refine results..."));
@@ -117,6 +120,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             Provider<IconManager> iconManager) {
         
         this.filterableSource = filterableSource;
+        this.friendManager = friendManager;
         this.editorList = new BasicEventList<MatcherEditor<E>>();
         this.filterManager = new FilterManager<E>(filterableSource, iconManager);
         
@@ -171,8 +175,16 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         // Create source filter and display component.
         sourceFilter = filterManager.getSourceFilter();
-        JComponent sourceComp = sourceFilter.getComponent();
-        sourceComp.setVisible(friendManager.isSignedIn());
+        sourceFilter.getComponent().setVisible(false);
+        sourceFilter.addFriendListener(new SourceFilter.FriendListener() {
+            @Override
+            public void friendFound(boolean found) {
+                if (!sourceFilter.isActive()) {
+                    sourceFilter.getComponent().setVisible(found && 
+                            AdvancedFilterPanel.this.friendManager.isSignedIn());
+                }
+            }
+        });
         
         // Layout components.
         add(filterTextField   , "gap 6 6 6 6, growx, wrap");
