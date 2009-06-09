@@ -45,6 +45,7 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
     
     private Category selectedCategory;
     private FunctionList<E, Category> categoryList;
+    private UniqueListFactory<Category> uniqueListFactory;
     private UniqueList<Category> uniqueList;
     private EventListModel<Category> listModel;
     private EventSelectionModel<Category> selectionModel;
@@ -90,7 +91,9 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private void initialize(EventList<E> resultsList) {
         // Create list of unique category values.
         categoryList = createCategoryList(resultsList);
-        uniqueList = GlazedListsFactory.uniqueList(categoryList, new CategoryComparator());
+        uniqueListFactory = new UniqueListFactory<Category>(categoryList, new CategoryComparator());
+        uniqueListFactory.setName(I18n.tr("Categories"));
+        uniqueList = uniqueListFactory.getUniqueList();
         
         // Create list and selection models.
         listModel = new EventListModel<Category>(uniqueList);
@@ -117,8 +120,8 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
     
     @Override
     public void dispose() {
-        // Dispose of category list.  Since all other lists are based on the
-        // category list, these should be freed for GC also.
+        // Dispose of category list.
+        uniqueListFactory.dispose();
         categoryList.dispose();
     }
     
