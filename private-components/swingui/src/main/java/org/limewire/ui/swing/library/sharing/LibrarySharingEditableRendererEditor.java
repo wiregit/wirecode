@@ -38,7 +38,7 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
     
     @Inject
     public LibrarySharingEditableRendererEditor() {
-        super(new MigLayout("debug, filly, insets 0, gap 0"));
+        super(new MigLayout("filly, insets 0, gap 0"));
 //        super(new FlowLayout());
         GuiUtils.assignResources(this);
        
@@ -57,16 +57,15 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
         add(checkBox, "aligny center");
         add(nameLabel, "growx, alignx left, aligny center, wrap");
         
-        setOpaque(false);
+//        setOpaque(false);
     }
     
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
         
-        if(value instanceof Friend) {
-            Friend friend = (Friend) value;
-            nameLabel.setText(friend.getRenderName());
+        if(value instanceof String) {
+            nameLabel.setText((String) value);
         } else {
             nameLabel.setText("");
             checkBox.setSelected(false);
@@ -78,9 +77,8 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        if(value instanceof Friend) {
-            Friend friend = (Friend) value;
-            nameLabel.setText(friend.getRenderName());
+        if(value instanceof String) {
+            nameLabel.setText((String) value);
         } else {
             nameLabel.setText("");
             checkBox.setSelected(false);

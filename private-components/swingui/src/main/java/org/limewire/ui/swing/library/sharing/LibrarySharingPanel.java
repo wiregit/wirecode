@@ -12,11 +12,13 @@ import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.SharedFileList;
+import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+@LazySingleton
 public class LibrarySharingPanel {
 
     @Resource private Color backgroundColor;
@@ -48,7 +50,12 @@ public class LibrarySharingPanel {
                 
         GuiUtils.assignResources(this);
         
-        component = new JPanel();
+        component = new JPanel();//{
+//            @Override
+//            public Dimension getPreferredSize() {
+//                return new Dimension(125, super.getPreferredSize().height);
+//            }
+//        };
         component.setBackground(backgroundColor);
         
 //        component.setMaximumSize(new Dimension(125, Integer.MAX_VALUE));
@@ -59,6 +66,8 @@ public class LibrarySharingPanel {
                
         component.setLayout(layout);
     }
+    
+
     
     public void showLoginView() {
         if(!layoutMap.containsKey(LOGIN_VIEW)) {
@@ -84,12 +93,14 @@ public class LibrarySharingPanel {
             component.add(newComponent, NONEDITABLE_VIEW);
             layoutMap.put(NONEDITABLE_VIEW, newComponent);
         }         
+        nonEditablePanel.get().setSharedFileList(currentList);
         layout.show(component, NONEDITABLE_VIEW);
     }
     
     public void setSharedFileList(SharedFileList currentFileList) {
         this.currentList = currentList;
-        showLoginView();
+//        showLoginView();
+        showNonEditableView();
     }
     
     public JComponent getComponent() {

@@ -11,6 +11,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.library.sharing.actions.ApplySharingAction;
+import org.limewire.ui.swing.library.sharing.actions.CancelSharingAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -34,8 +36,9 @@ public class LibrarySharingEditablePanel {
     @Inject
     public LibrarySharingEditablePanel(Provider<LibrarySharingTable> sharingTableProvider,
             Provider<LibrarySharingEditableRendererEditor> renderer,
-            Provider<LibrarySharingEditableRendererEditor> editor) {
-        component = new JPanel(new MigLayout("insets 0, gap 0, fill", "", ""));
+            Provider<LibrarySharingEditableRendererEditor> editor,
+            ApplySharingAction applyAction, CancelSharingAction cancelAction) {
+        component = new JPanel(new MigLayout("insets 0, gap 0, fillx", "[125!]", ""));
         
         this.sharingTableProvider = sharingTableProvider;
         this.renderer = renderer;
@@ -43,30 +46,31 @@ public class LibrarySharingEditablePanel {
         
         component.setOpaque(false);
         
-        component.add(new JLabel(I18n.tr("Share list with...")), "dock north, gapleft 5, gaptop 5");
+        component.add(new JLabel(I18n.tr("Share list with...")), "gapleft 5, gaptop 5, wrap");
         
-        filterTextField = new PromptTextField(I18n.tr("Find..."), 10);
+        filterTextField = new PromptTextField(I18n.tr("Find..."));
         
-        component.add(filterTextField, "dock north, gapleft 5, gaptop 5, gapright 5");
+        component.add(filterTextField, "gapleft 5, gaptop 5, wmax 115, wrap");
 
-        component.add(new JLabel(I18n.tr("Select")), "dock north, gapleft 5, gaptop 5");
+        component.add(new JLabel(I18n.tr("Select")), "gapleft 5, gaptop 5, wrap");
         allButton = new HyperlinkButton(I18n.tr("all"));
         noneButton = new HyperlinkButton(I18n.tr("none"));
-        component.add(allButton, "dock north, gapleft 15, gaptop 5");
-        component.add(noneButton, "dock north, gapleft 15, gaptop 5");
+        component.add(allButton, "gapleft 15, gaptop 5, wrap");
+        component.add(noneButton, "gapleft 15, gaptop 5, wrap");
         
         //TODO: this needs to be created lazily
         initTable();
         
-        applyButton = new JXButton(I18n.tr("Apply"));
-        cancelButton = new HyperlinkButton(I18n.tr("Cancel"));
+        applyButton = new JXButton(applyAction);
+        cancelButton = new HyperlinkButton(cancelAction);
         
-        component.add(applyButton, "split 1, alignx center, growx");
-        component.add(cancelButton, "alignx center, wrap");
+        component.add(applyButton, "split 2, gaptop 5, gapright unrelated, alignx center");
+        component.add(cancelButton, "gaptop 5, wrap");
     }
     
     private void initTable() {
         sharingTable = sharingTableProvider.get();
+        sharingTable.enableEditing(true);
                 
         JScrollPane scrollPane = new JScrollPane(sharingTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder()); 
@@ -74,7 +78,7 @@ public class LibrarySharingEditablePanel {
         sharingTable.getColumnModel().getColumn(0).setCellRenderer(renderer.get());
         sharingTable.getColumnModel().getColumn(0).setCellEditor(editor.get());
         
-        component.add(scrollPane, "growx, dock north, gaptop 5");
+        component.add(scrollPane, "growx, gaptop 5, wrap");
     }
     
     public JComponent getComponent() {

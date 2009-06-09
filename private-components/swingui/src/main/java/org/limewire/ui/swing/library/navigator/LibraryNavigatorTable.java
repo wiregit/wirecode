@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.navigator;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -135,6 +136,11 @@ public class LibraryNavigatorTable extends JXTable {
             }
 
         });
+    }
+    
+    @Override
+    public Dimension getPreferredScrollableViewportSize() {
+        return new Dimension(super.getPreferredScrollableViewportSize().width, getModel().getRowCount() * getRowHeight());
     }
     
     public void setPopupHandler(TablePopupHandler popupHandler) {

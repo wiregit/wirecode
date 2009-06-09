@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.navigator;
 
 import java.awt.Color;
+import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
@@ -31,6 +32,7 @@ public class LibraryNavigatorPanel extends JXPanel {
 
     @Resource private Color backgroundColor;
     @Resource private Color borderColor;
+    @Resource private Font createListFont;
     
     private final LibraryNavigatorTable table;
     private final CreateListAction createAction;
@@ -59,10 +61,10 @@ public class LibraryNavigatorPanel extends JXPanel {
         table.getColumnModel().getColumn(0).setCellRenderer(renderer);
         table.setPopupHandler(popupHandler);
         
-        add(scrollPane, "growx, growy, dock north");
+        add(scrollPane, "growx, growy, wrap");
 
         createCreateListButton();
-        add(createListButton, "dock north, alignx center, gaptop 5");
+        add(createListButton, "aligny top, gaptop 5, alignx center, wrap");
         
         initData();
         
@@ -111,6 +113,7 @@ public class LibraryNavigatorPanel extends JXPanel {
     
     private void createCreateListButton() {
         createListButton = new HyperlinkButton("Create List", createAction);
+        createListButton.setFont(createListFont);
     }
     
     public void addTableSelectionListener(ListSelectionListener listener) {
