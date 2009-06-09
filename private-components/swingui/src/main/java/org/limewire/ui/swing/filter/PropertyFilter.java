@@ -1,11 +1,8 @@
 package org.limewire.ui.swing.filter;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Comparator;
@@ -18,14 +15,10 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -40,8 +33,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.Objects;
 
-import com.google.inject.Provider;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.FunctionList;
@@ -52,6 +43,8 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
+
+import com.google.inject.Provider;
 
 /**
  * Filter component to select items according to a collection of property 
@@ -73,7 +66,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private UniqueList<Object> uniqueList;
     private EventSelectionModel<Object> selectionModel;
     private EventSelectionModel<Object> popupSelectionModel;
-    private MorePopupPanel morePopupPanel;
+    private FilterPopupPanel morePopupPanel;
     
     /**
      * Constructs a PropertyFilter using the specified results list,
@@ -316,13 +309,36 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     }
     
     /**
+     * Creates a popup to display the complete list of property values.
+     */
+    private FilterPopupPanel createMorePopup() {
+        FilterPopupPanel popupPanel = new FilterPopupPanel(getResources(), getPropertyText());
+        
+        // Set list cell renderer.
+        popupPanel.setListCellRenderer(new PropertyCellRenderer(popupPanel.getBackground(),
+                BorderFactory.createEmptyBorder(1, 4, 0, 1)));
+        
+        // Set list and selection models.  We use the unique list directly
+        // to display values alphabetically.
+        EventListModel<Object> listModel = new EventListModel<Object>(uniqueList);
+        popupSelectionModel = new EventSelectionModel<Object>(uniqueList);
+        popupPanel.setListModel(listModel);
+        popupPanel.setListSelectionModel(popupSelectionModel);
+        
+        // Add selection listener to update filter.
+        popupSelectionModel.addListSelectionListener(new SelectionListener(popupSelectionModel));
+        
+        return popupPanel;
+    }
+    
+    /**
      * Displays the "more" popup that lists all property values.
      */
     private void showMorePopup() {
         if (morePopupPanel == null) {
-            morePopupPanel = new MorePopupPanel();
+            morePopupPanel = createMorePopup();
         }
-        morePopupPanel.showPopup();
+        morePopupPanel.showPopup(moreButton, list.getWidth() - 12, propertyLabel.getY() - moreButton.getY());
     }
     
     /**
@@ -352,158 +368,6 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
             } else {
                 morePopupPanel.setPopupReady(true);
             }
-        }
-    }
-    
-    /**
-     * Display panel for "more" popup component. 
-     */
-    private class MorePopupPanel extends JPanel {
-        private final int MAX_VISIBLE_ROWS = 18;
-        
-        private final JPanel titlePanel = new JPanel();
-        private final JLabel titleLabel = new JLabel();
-        private final JButton closeButton = new JButton();
-        private final JXList moreList = new JXList();
-        private final JScrollPane scrollPane = new JScrollPane();
-        private final JPopupMenu popupMenu = new JPopupMenu();
-        
-        private boolean popupReady;
-        private boolean popupTriggered;
-        
-        public MorePopupPanel() {
-            FilterResources resources = getResources();
-            
-            setBorder(BorderFactory.createLineBorder(resources.getPopupBorderColor(), 2));
-            setLayout(new BorderLayout());
-            
-            titlePanel.setBackground(resources.getPopupHeaderBackground());
-            titlePanel.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 1));
-            titlePanel.setLayout(new BorderLayout());
-            
-            titleLabel.setForeground(resources.getPopupHeaderForeground());
-            titleLabel.setFont(resources.getPopupHeaderFont());
-            titleLabel.setText(I18n.tr("All {0}", getPropertyText()));
-            
-            closeButton.setBorder(BorderFactory.createEmptyBorder(0, 3, 3, 3));
-            closeButton.setContentAreaFilled(false);
-            closeButton.setForeground(resources.getPopupHeaderForeground());
-            closeButton.setIcon(resources.getPopupCloseIcon());
-            closeButton.addMouseListener(new RolloverCursorListener());
-            closeButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    hidePopup();
-                }
-            });
-            
-            moreList.setCellRenderer(new PropertyCellRenderer(getBackground(), 
-                    BorderFactory.createEmptyBorder(1, 4, 0, 1)));
-            moreList.setFont(resources.getRowFont());
-            moreList.setForeground(resources.getRowColor());
-            moreList.setOpaque(false);
-            moreList.setRolloverEnabled(true);
-            moreList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            
-            // Add highlighter for rollover.
-            moreList.setHighlighters(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
-                    resources.getHighlightBackground(), resources.getHighlightForeground()));
-            
-            // Add listener to show cursor on mouse over.
-            moreList.addMouseListener(new RolloverCursorListener());
-            
-            // Set list and selection models.  We use the unique list directly
-            // to display values alphabetically.
-            EventListModel<Object> listModel = new EventListModel<Object>(uniqueList);
-            popupSelectionModel = new EventSelectionModel<Object>(uniqueList);
-            moreList.setModel(listModel);
-            moreList.setSelectionModel(popupSelectionModel);
-            
-            // Add selection listener to update filter.
-            popupSelectionModel.addListSelectionListener(new SelectionListener(popupSelectionModel));
-            
-            scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            scrollPane.setViewportView(moreList);
-            
-            popupMenu.setBorder(BorderFactory.createEmptyBorder());
-            popupMenu.setFocusable(false);
-            popupMenu.addPopupMenuListener(new PopupMenuListener() {
-                @Override
-                public void popupMenuCanceled(PopupMenuEvent e) {
-                }
-
-                @Override
-                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                    if (popupTriggered) {
-                        popupReady = false;
-                    } else {
-                        popupReady = true;
-                    }
-                }
-
-                @Override
-                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-                    popupTriggered = true;
-                }
-            });
-            
-            add(titlePanel, BorderLayout.NORTH);
-            add(scrollPane, BorderLayout.CENTER);
-            titlePanel.add(titleLabel, BorderLayout.CENTER);
-            titlePanel.add(closeButton, BorderLayout.EAST);
-            popupMenu.add(this);
-        }
-        
-        /**
-         * Returns true if the popup is ready to be displayed.  The return 
-         * value will be false if the popup is about to be hidden due to a 
-         * triggering event.  
-         */
-        public boolean isPopupReady() {
-            return popupReady;
-        }
-        
-        /**
-         * Sets an indicator that determines whether the popup is ready to be 
-         * displayed.
-         */
-        public void setPopupReady(boolean popupReady) {
-            this.popupReady = popupReady;
-        }
-        
-        /**
-         * Sets an indicator that determines whether a triggering event is
-         * about to occur that affects popup visibility.
-         */
-        public void setPopupTriggered(boolean popupTriggered) {
-            this.popupTriggered = popupTriggered;
-        }
-        
-        /**
-         * Displays this panel in a popup window.
-         */
-        public void showPopup() {
-            // Adjust popup list height.
-            moreList.setVisibleRowCount(Math.min(moreList.getModel().getSize(), MAX_VISIBLE_ROWS));
-            
-            // Limit popup width.
-            if (popupMenu.getPreferredSize().width > 275) {
-                popupMenu.setPreferredSize(new Dimension(275, popupMenu.getPreferredSize().height));
-            }
-            
-            // Display popup next to property label.  Coordinates are relative
-            // to the invoker, so we adjust the horizontal position to align
-            // with the list, and the vertical position to align with the 
-            // filter label.
-            popupMenu.show(moreButton, list.getWidth() - 12, propertyLabel.getY() - moreButton.getY());
-        }
-        
-        /**
-         * Hides the popup window.
-         */
-        public void hidePopup() {
-            popupMenu.setVisible(false);
         }
     }
     
