@@ -15,6 +15,7 @@ import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.SearchResultsModelFactory;
 import org.limewire.ui.swing.search.model.browse.BrowseSearch;
 import org.limewire.ui.swing.search.model.browse.BrowseSearchFactory;
+import org.limewire.ui.swing.search.model.browse.BrowseStatus;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -165,9 +166,9 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
         
         search.addBrowseStatusListener(new BrowseStatusListener(){
             @Override
-            public void statusChanged() {
-                // TODO change status of panel
-                //searchPanel.setBrowseStatus();
+            public void statusChanged(BrowseStatus status) {
+                searchPanel.setBrowseStatus(status);
+                
             }            
         });
 

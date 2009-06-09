@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.search.model.BrowseStatusListener;
+import org.limewire.ui.swing.search.model.browse.BrowseStatus.BrowseState;
 
 class MultipleBrowseSearch extends AbstractBrowseSearch {
 
@@ -54,6 +56,16 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         }
     }
     
+
+    @Override
+    public void repeat() {        
+        combinedBrowseStatusListener.clear();
+        combinedSearchListener.clear();
+        
+        for (BrowseSearch browseSearch : browses){
+            browseSearch.repeat();
+        }
+    }
     
     private class CombinedSearchListener implements SearchListener {
         private AtomicInteger stoppedBrowses = new AtomicInteger(0);
@@ -63,6 +75,10 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
             for (SearchListener listener : searchListeners) {
                 listener.handleSearchResult(MultipleBrowseSearch.this, searchResult);
             }
+        }
+
+        public void clear() {
+            stoppedBrowses.set(0);
         }
 
         @Override
@@ -91,13 +107,55 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
     }
     
     private class CombinedBrowseStatusListener implements BrowseStatusListener {
-
+        private List<Friend> failedList = new ArrayList<Friend>();
+        private boolean hasUpdated;
+        private boolean hasLoaded;
+        
         @Override
-        public void statusChanged() {
-            // TODO handle the status changes
+        public void statusChanged(BrowseStatus status) {
+            if(status.getState() == BrowseState.FAILED){
+                failedList.addAll(status.getFailed());
+            } else if(status.getState() == BrowseState.UPDATED){
+                hasUpdated = true;
+            } else if (status.getState() == BrowseState.LOADED){
+                hasLoaded = true;
+            }
             
+           BrowseState state = getReleventMultipleBrowseState(status);
+           
+           if (state != null){
+               BrowseStatus browseStatus = new BrowseStatus(MultipleBrowseSearch.this, state, failedList.toArray(new Friend[failedList.size()]));
+               for (BrowseStatusListener listener : browseStatusListeners){
+                   listener.statusChanged(browseStatus);
+               }
+           }
+        }        
+        
+        public void clear(){
+            hasUpdated = false;
+            hasLoaded = false;
+            failedList.clear();
         }
         
+        /**
+         * @return can be null
+         */
+        private BrowseState getReleventMultipleBrowseState(BrowseStatus status){
+            if(failedList.size() == browses.size()){
+                return BrowseState.FAILED;
+            } else if(failedList.size() > 0){
+                if(hasLoaded){
+                    if(hasUpdated){
+                        return BrowseState.UPDATED_PARTIAL_FAIL;
+                    } else {
+                        return BrowseState.PARTIAL_FAIL;
+                    }
+                }
+            } else if (hasUpdated){
+                return BrowseState.UPDATED;
+            }
+            return null;
+        }
     }
     
 }

@@ -5,7 +5,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.ui.swing.search.model.BrowseStatusListener;
-import org.limewire.util.NotImplementedException;
 
 abstract class AbstractBrowseSearch implements BrowseSearch {
     protected final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
@@ -35,11 +34,6 @@ abstract class AbstractBrowseSearch implements BrowseSearch {
     @Override
     public SearchCategory getCategory() {
         return SearchCategory.ALL;
-    }
-
-    @Override
-    public void repeat() {
-        throw new NotImplementedException("BrowseSearch.repeat() not implemented");
     }
 
 }

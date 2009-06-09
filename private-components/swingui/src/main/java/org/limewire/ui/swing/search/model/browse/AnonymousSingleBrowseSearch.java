@@ -9,6 +9,7 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.search.model.BrowseStatusListener;
+import org.limewire.ui.swing.search.model.browse.BrowseStatus.BrowseState;
 
 class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
    
@@ -64,12 +65,16 @@ class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
 
         @Override
         public void browseFinished(final boolean success) {
+            BrowseStatus status = success? 
+                    new BrowseStatus(AnonymousSingleBrowseSearch.this, BrowseState.LOADED): 
+                    new BrowseStatus(AnonymousSingleBrowseSearch.this, BrowseState.FAILED, friendPresence.getFriend());
+            
             for (SearchListener listener : searchListeners) {
                 listener.searchStopped(AnonymousSingleBrowseSearch.this);
             }
-            
+           
             for (BrowseStatusListener listener : browseStatusListeners) {
-                listener.statusChanged();
+                listener.statusChanged(status);
             }
         }
 
@@ -80,6 +85,13 @@ class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
             }
 
         }
+    }
+
+
+    @Override
+    public void repeat() {
+        stopAnonymousBrowse();
+        start();
     }
 
 }
