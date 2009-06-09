@@ -11,6 +11,7 @@ import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.lifecycle.MockLifeCycleModule;
 import org.limewire.core.api.magnet.MockMagnetModule;
+import org.limewire.core.impl.bittorrent.MockBittorrentModule;
 import org.limewire.core.impl.browse.MockBrowseModule;
 import org.limewire.core.impl.callback.MockGuiCallbackService;
 import org.limewire.core.impl.connection.MockConnectionModule;
@@ -79,6 +80,7 @@ public class MockModule extends AbstractModule {
         install(new MockNetModule());
         install(new MockUploadModule());
         install(new MockUpdatesModule());
+        install(new MockBittorrentModule());
                        
         EventMulticaster<XmppActivityEvent> activityMulticaster = new EventMulticasterImpl<XmppActivityEvent>(); 
         bind(new TypeLiteral<EventBroadcaster<XmppActivityEvent>>(){}).toInstance(activityMulticaster);
