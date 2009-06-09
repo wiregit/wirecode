@@ -44,7 +44,7 @@ import com.limegroup.gnutella.library.ManagedListStatusEvent;
 @Singleton
 class FriendShareListRefresher implements RegisteringEventListener<FriendShareListEvent> {
 
-    private static Log LOG = LogFactory.getLog(FriendShareListRefresher.class);
+    private static final Log LOG = LogFactory.getLog(FriendShareListRefresher.class);
     
     private final BrowseTracker tracker;
     private final EventBean<FriendConnectionEvent> connectionEventBean;
@@ -77,11 +77,13 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
 
     public void handleEvent(final FriendShareListEvent event) {
         if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED) {
+            LOG.debugf("friend share list added {0}", event);
             LibraryChangedSender listener = new LibraryChangedSender(event.getFriend());
             listener.scheduleSendRefreshCheck();
             listeners.put(event.getFriend().getId(), listener);
             event.getFileList().getModel().addListEventListener(listener);
         } else if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED) {
+            LOG.debugf("friend share list removed {0}", event);
             event.getFileList().getModel().removeListEventListener(listeners.remove(event.getFriend().getId()));
         }
     }
@@ -148,11 +150,13 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                 Date lastBrowseTime = browseTracker.lastBrowseTime(friend.getId());
                 Date lastRefreshTime = browseTracker.lastRefreshTime(friend.getId());
                 if(lastBrowseTime != null && (lastRefreshTime == null || lastBrowseTime.after(lastRefreshTime))) {
+                    LOG.debugf("send scheduled refresh to {0}", friend);
                     browseTracker.sentRefresh(friend.getId());
                     Map<String,FriendPresence> presences = friend.getPresences();
                     for(FriendPresence presence : presences.values()) {
                         Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);
                         if(notifier != null) {
+                            LOG.debugf("sending refresh to presence: {0}", presence);
                             FeatureTransport<LibraryChangedNotifier> notifierFeatureTransport = presence.getTransport(LibraryChangedNotifierFeature.class);
                             try {
                                 notifierFeatureTransport.sendFeature(presence, notifier.getFeature());

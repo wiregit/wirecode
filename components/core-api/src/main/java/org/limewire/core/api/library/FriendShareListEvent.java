@@ -36,8 +36,4 @@ public class FriendShareListEvent {
         return StringUtils.toString(this);
     }
     
-    
-    
-    
-
 }

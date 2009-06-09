@@ -236,6 +236,12 @@ public class FacebookFriendConnection implements FriendConnection {
             loggedIn.set(false);
             try {
                 sendOfflinePresences();
+                synchronized (friends) {
+                    for (FacebookFriend friend : friends.values()) {
+                        removeAllPresences(friend);
+                    }
+                    friends.clear();
+                }
                 logoutFromFacebook();
                 expireSession();
                 if(chatListener != null) {
@@ -253,7 +259,7 @@ public class FacebookFriendConnection implements FriendConnection {
             connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));  
         }
     }
-
+    
     private void sendOfflinePresences() {
         for(FacebookFriend friend : friends.values()) {
             if(friend.hasLimeWireAppInstalled() && friend.isSignedIn()) { // TODO check for LW feature
@@ -825,26 +831,15 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     void removeAllPresences(FacebookFriend friend) {
-        // LW presences are NOT removed b/c that introduces race-conditions between
-        // buddy-list polling and disco-info on-demand presence creation        
         synchronized (presenceLock) {
             Map<String, FriendPresence> presenceMap = friend.getPresences();
-            if(presenceMap.size() > 0) {
-                LOG.debugf("removing all non-limewire presences for {0}", friend.getId());
-            }
+            LOG.debugf("removing all presences for {0}", friend.getId());
             for(FriendPresence presence : presenceMap.values()) {
-                String resource = StringUtils.parseResource(presence.getPresenceId());
-                if(resource.length() == 0) { // do no remove limewire presences; those are maintained by presence messages
-                    LOG.debugf("removing presence {0}", presence.getPresenceId());
-                    friend.removePresence((FacebookFriendPresence)presence);
-                    friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.REMOVED));
-                } else {
-                    LOG.debugf("ignoring remove presence for {0}", presence.getPresenceId());
-                }
+                LOG.debugf("removing presence {0}", presence);
+                friend.removePresence((FacebookFriendPresence)presence);
+                friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.REMOVED));
             }
-            if(!friend.isSignedIn()) {
-                friendManager.removeAvailableFriend(friend);
-            }
+            friendManager.removeAvailableFriend(friend);
         }
     }
 

@@ -73,10 +73,13 @@ public class MutableFriendManagerImpl implements MutableFriendManager {
     @Override
     public void removeKnownFriend(Friend friend, boolean delete) {
         if (knownFriends.remove(friend.getId()) != null) {
+            LOG.debugf("removed known friend: {0}", friend);
             if(delete) {
                 knownBroadcaster.broadcast(new FriendEvent(friend, FriendEvent.Type.DELETE));
             }
             knownBroadcaster.broadcast(new FriendEvent(friend, FriendEvent.Type.REMOVED));
+        } else {
+            LOG.debugf("known friend {0} already removed", friend);
         }
     }
     
@@ -129,7 +132,10 @@ public class MutableFriendManagerImpl implements MutableFriendManager {
     @Override
     public void removeAvailableFriend(Friend friend) {
         if (availFriends.remove(friend.getId()) != null) {
+            LOG.debugf("removed avail friend: {0}", friend);
             availableBroadcaster.broadcast(new FriendEvent(friend, FriendEvent.Type.REMOVED));
+        } else {
+            LOG.debugf("avail friend {0} already removed", friend);
         }
     }
 

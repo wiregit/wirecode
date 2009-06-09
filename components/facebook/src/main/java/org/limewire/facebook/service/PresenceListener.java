@@ -2,6 +2,7 @@ package org.limewire.facebook.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -20,6 +21,7 @@ public class PresenceListener implements Runnable {
     
     private final FacebookFriendConnection connection;
     private final BuddyListResponseDeserializer deserializer = new BuddyListResponseDeserializer();
+    private Set<String> lastOnlineFriends = Collections.emptySet();
 
     @AssistedInject
     PresenceListener(@Assisted FacebookFriendConnection connection) {
@@ -47,10 +49,16 @@ public class PresenceListener implements Runnable {
             for (FacebookFriend friend : connection.getFriends()) {
                 if (onlineFriendIds.contains(friend.getId())) {
                     connection.addPresence(friend.getId());
-                } else {
+                } else if (lastOnlineFriends.contains(friend.getId())) {
+                    LOG.debugf("removing formerly online friend: {0}", friend);
+                    // TODO also check we didn't receive a disc info from him
+                    // in the mean time
                     connection.removeAllPresences(friend);
+                } else {
+                    LOG.debugf("friend was not online yet: {0}", friend);
                 }
             }
+            lastOnlineFriends = onlineFriendIds;
         } catch (JSONException e) {
             LOG.debug("error deserializing JSON response", e);
         } catch (IOException e) {
