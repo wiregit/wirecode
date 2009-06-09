@@ -64,7 +64,8 @@ public class DownloadProgressRenderer extends JXPanel implements TableCellRender
     
     private void updateProgress(DownloadState state, int percentComplete) {
         progressBar.setValue(percentComplete);
-        progressBar.setVisible(state == DownloadState.DOWNLOADING);
+        progressBar.setVisible(state == DownloadState.DOWNLOADING || state == DownloadState.PAUSED);
+        progressBar.setEnabled(state != DownloadState.PAUSED);
     }
     
     private void updateTime(DownloadState state, DownloadItem item){
