@@ -11,17 +11,17 @@ import org.json.JSONException;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
-import org.limewire.core.api.friend.FriendEvent;
-import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.impl.LimeWireFriendModule;
+import org.limewire.http.auth.LimeWireHttpAuthModule;
 import org.limewire.inject.AbstractModule;
-import org.limewire.listener.EventBroadcaster;
-import org.limewire.listener.EventMulticaster;
+import org.limewire.inject.MutableProvider;
+import org.limewire.inject.MutableProviderImpl;
+import org.limewire.lifecycle.LimeWireCommonLifecycleModule;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.net.address.AddressFactory;
-import org.limewire.net.address.AddressFactoryImpl;
+import org.limewire.net.LimeWireNetTestModule;
+import org.limewire.net.address.AddressEvent;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.inject.Guice;
@@ -40,42 +40,19 @@ public class FacebookFriendConnectionTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireFacebookModule(),
+        injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireHttpAuthModule(),
+                new LimeWireFriendModule(),
+                new LimeWireCommonLifecycleModule(),
+                new LimeWireNetTestModule(),
+                new LimeWireFacebookModule(),
                 new AbstractModule() {
                     @Override
                     protected void configure() {
-                        EventMulticaster<FriendEvent> knownMulticaster = new EventMulticasterImpl<FriendEvent>(FriendEvent.class);
-                        EventMulticaster<FriendEvent> availMulticaster = new EventMulticasterImpl<FriendEvent>();
-                        EventMulticaster<FriendPresenceEvent> presenceMulticaster = new EventMulticasterImpl<FriendPresenceEvent>();
-                        EventMulticaster<FeatureEvent> featureMulticaster = new EventMulticasterImpl<FeatureEvent>();
-                        
-                        bind(new TypeLiteral<ListenerSupport<FriendEvent>>(){}).annotatedWith(Names.named("known")).toInstance(knownMulticaster);
-                        bind(new TypeLiteral<EventBroadcaster<FriendEvent>>(){}).annotatedWith(Names.named("known")).toInstance(knownMulticaster);
-                        
-                        bind(new TypeLiteral<ListenerSupport<FriendEvent>>(){}).annotatedWith(Names.named("available")).toInstance(availMulticaster);
-                        bind(new TypeLiteral<EventBroadcaster<FriendEvent>>(){}).annotatedWith(Names.named("available")).toInstance(availMulticaster);
-                        
-                        bind(new TypeLiteral<ListenerSupport<FriendPresenceEvent>>(){}).toInstance(presenceMulticaster);
-                        bind(new TypeLiteral<EventBroadcaster<FriendPresenceEvent>>(){}).toInstance(presenceMulticaster);
-                    
-                        bind(new TypeLiteral<ListenerSupport<FeatureEvent>>(){}).toInstance(featureMulticaster);
-                        bind(new TypeLiteral<EventMulticaster<FeatureEvent>>(){}).toInstance(featureMulticaster);
-                        
-                        bind(AddressFactory.class).to(AddressFactoryImpl.class);
-                        
                         bindAll(Names.named("backgroundExecutor"), ScheduledListeningExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class, ScheduledExecutorService.class);
-                                        
-                        bind(String.class).annotatedWith(Names.named("facebookEmail")).toInstance("");
-                        bind(String.class).annotatedWith(Names.named("facebookPassword")).toInstance("");
-                        bind(String.class).annotatedWith(Names.named("facebookApiKey")).toInstance("");
+                        bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).toInstance(new EventMulticasterImpl<AddressEvent>());
+                        bind(new TypeLiteral<MutableProvider<String>>(){}).annotatedWith(ChatChannel.class).toInstance(new MutableProviderImpl<String>(""));
                     }
-                }
-                /*, new LimeWireHttpModule(), new LimeWireNetModule(), new LimeWireIOModule(), new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bindAll(Names.named("backgroundExecutor"), ScheduledListeningExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class, ScheduledExecutorService.class);
-                    }
-                }*/);
+                });
     }
 
     public void testLogin() throws IOException, FacebookException, JSONException, InterruptedException, FriendException {
