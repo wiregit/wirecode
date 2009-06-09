@@ -11,6 +11,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.search.SearchResult;
 
 public class MockVisualSearchResult implements VisualSearchResult {
@@ -34,6 +35,11 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
+    public boolean isAnonymous() {
+        return true;
+    }
+    
+    @Override
     public Category getCategory() {
         return Category.AUDIO;
     }
@@ -51,6 +57,12 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public String getFileExtension() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection<Friend> getFriends() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -1,12 +1,14 @@
 package org.limewire.ui.swing.filter;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
-import org.limewire.ui.swing.filter.FilterableItem;
+import org.limewire.core.api.friend.Friend;
 
 /**
  * Test implementation of FilterableItem.
@@ -26,8 +28,18 @@ public class MockFilterableItem implements FilterableItem {
     }
     
     @Override
+    public boolean isAnonymous() {
+        return true;
+    }
+    
+    @Override
     public String getFileExtension() {
         return null;
+    }
+    
+    @Override
+    public Collection<Friend> getFriends() {
+        return Collections.emptySet();
     }
 
     @Override
