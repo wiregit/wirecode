@@ -141,7 +141,12 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     public String toString() {
         return org.limewire.util.StringUtils.toString(this, configuration, connection);
     }
-    
+
+    @Override
+    public boolean supportsMode() {
+        return true;
+    }
+
     public ListeningFuture<Void> setMode(final FriendPresence.Mode mode) {
         return executorService.submit(new Callable<Void>() {
             @Override
@@ -411,6 +416,10 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         }
     }
 
+    @Override
+    public boolean supportsAddRemoveFriend() {
+        return true;
+    }
 
     @Override
     public ListeningFuture<Void> addNewFriend(final String id, final String name) {

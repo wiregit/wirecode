@@ -39,6 +39,11 @@ public interface FriendConnection {
     public boolean isLoggingIn();
 
     /**
+     * @return If this connection supports the <code>#setMode(FriendPresence.Mode)</code> method
+     */
+    boolean supportsMode();
+
+    /**
      * Sets a new <code>&lt;presence&gt;</code> mode (i.e., status)
      * @param mode the new mode to set
      * @return a {@link ListeningFuture} if callers wish to be
@@ -46,8 +51,15 @@ public interface FriendConnection {
      * 
      * The ExecutionException will be to an XMPPException
      * if there is an error sending the xmpp message
+     * @throws UnsupportedOperationException if <code>#supportsMode()</code> is false
      */
     public ListeningFuture<Void> setMode(FriendPresence.Mode mode);
+
+    /**
+     * @return if this connection supports the <code>#addFriend(String, String)</code>
+     * and <code>#removeFriend(String)</code> methods.
+     */
+    boolean supportsAddRemoveFriend();
 
     /**
      * Adds a new friend who is not a friend yet to the list of friends.
@@ -56,8 +68,9 @@ public interface FriendConnection {
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
-     * The ExecutionException will be to an XMPPException
+     * @throws The ExecutionException will be to an XMPPException
      * if there is an error sending the xmpp message
+     * @throws UnsupportedOperationException if <code>#supportsAddRemoveFriend()</code> returns false
      */
     public ListeningFuture<Void> addNewFriend(String id, String name);
     
@@ -67,8 +80,9 @@ public interface FriendConnection {
      * @return a {@link ListeningFuture} if callers wish to be
      * notified of completion.
      * 
-     * The ExecutionException will be to an XMPPException
+     * @throws The ExecutionException will be to an XMPPException
      * if there is an error sending the xmpp message
+     * @throws UnsupportedOperationException if <code>#supportsAddRemoveFriend()</code> returns false
      */
     public ListeningFuture<Void> removeFriend(String id);
 

@@ -153,7 +153,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final ConnectBackRequestHandler connectBackRequestHandler;
     private ChatListener chatListener;
     private ScheduledFuture presenceListenerFuture;
-    private volatile String logoutURL;
+    private String logoutURL;
     private final ChatManager chatManager;
 
     /**
@@ -582,18 +582,28 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     @Override
+    public boolean supportsMode() {
+        return false;
+    }
+
+    @Override
     public ListeningFuture<Void> setMode(FriendPresence.Mode mode) {
-        return null;
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean supportsAddRemoveFriend() {
+        return false;
     }
 
     @Override
     public ListeningFuture<Void> addNewFriend(String id, String name) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public ListeningFuture<Void> removeFriend(String id) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

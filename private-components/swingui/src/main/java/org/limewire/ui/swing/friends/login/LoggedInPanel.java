@@ -62,6 +62,7 @@ class LoggedInPanel extends JXPanel {
     @Resource private Font itemFont;
     @Resource private Color headingColor;
     @Resource private Color itemColor;
+    private AbstractAction addFriendAction;
 
     @Inject
     LoggedInPanel(ComboBoxDecorator comboDecorator,
@@ -93,7 +94,7 @@ class LoggedInPanel extends JXPanel {
                                 final EventBean<FriendConnectionEvent> connectionEventBean) {
         JPopupMenu optionsMenu = new JPopupMenu(); 
         optionsMenu.setLayout(new VerticalLayout());
-        optionsMenu.add(decorateItem(optionsBox.createMenuItem(new AbstractAction(I18n.tr("Add Friend")) {
+        addFriendAction = new AbstractAction(I18n.tr("Add Friend")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 FriendConnectionEvent connection = connectionEventBean.getLastEvent();
@@ -102,7 +103,8 @@ class LoggedInPanel extends JXPanel {
                         connection.getSource());
                 }
             }
-        })));
+        };
+        optionsMenu.add(decorateItem(optionsBox.createMenuItem(addFriendAction)));
         
         
         final JCheckBoxMenuItem showOfflineFriends = new JCheckBoxMenuItem();
@@ -187,6 +189,9 @@ class LoggedInPanel extends JXPanel {
                 case CONNECTED:
                 case CONNECTING:
                     currentUser.setIcon(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue() ? iconLibrary.getDoNotDisturb() : iconLibrary.getAvailable());
+                    if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
+                        addFriendAction.setEnabled(event.getSource().supportsAddRemoveFriend());
+                    }
                     break;
                 case CONNECT_FAILED:
                 case DISCONNECTED:

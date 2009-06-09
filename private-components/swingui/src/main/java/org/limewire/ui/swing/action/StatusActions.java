@@ -135,9 +135,11 @@ public class StatusActions {
                 switch (event.getType()) {
                 case CONNECTED:
                 case CONNECTING:
-                    availableAction.setEnabled(true);
-                    doNotDisturbAction.setEnabled(true);
-                    updateSelections();
+                    if(event.getSource().supportsMode()) {
+                        availableAction.setEnabled(true);
+                        doNotDisturbAction.setEnabled(true);
+                    }
+                    updateSelections(); // TODO move inside the if(...) ?
                     break;
                 case CONNECT_FAILED:
                 case DISCONNECTED:

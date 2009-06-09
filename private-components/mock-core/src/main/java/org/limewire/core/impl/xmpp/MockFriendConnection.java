@@ -44,8 +44,18 @@ public class MockFriendConnection implements FriendConnection {
     }
 
     @Override
+    public boolean supportsMode() {
+        return true;
+    }
+
+    @Override
     public ListeningFuture<Void> setMode(FriendPresence.Mode mode) {
         return new SimpleFuture<Void>((Void)null);
+    }
+
+    @Override
+    public boolean supportsAddRemoveFriend() {
+        return true;
     }
 
     @Override
