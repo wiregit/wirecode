@@ -149,6 +149,6 @@
 	<classpathentry kind="lib" path="lib/jars/swingx-0.9.7.jar" sourcepath="lib/sources/swingx-0.9.7-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/hsqldb-1.8.0.10.jar" sourcepath="lib/sources/hsqldb-1.8.0.10-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/jna-3.1.0.jar" sourcepath="lib/sources/jna-3.1.0-src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/tests/inspTool-0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jars/tests/inspTool-0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

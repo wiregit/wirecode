@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.limewire.inject.LazySingleton;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Injector;
@@ -205,14 +206,14 @@ public class InspectionUtils {
             
             // check if this is an enclosed class
             if (data.lookupClass == null) {
-                if (data.containerClass.getAnnotation(Singleton.class) == null && !data.containerClass.isInterface()) {
-                    throw new InspectionException("must have singleton annotation or be interface!");
+                if (data.containerClass.getAnnotation(Singleton.class) == null && data.containerClass.getAnnotation(LazySingleton.class) == null && !data.containerClass.isInterface()) {
+                    throw new InspectionException("must have singleton or lazysingleton annotation or be interface!");
                 }
                 data.containerInstance = injector.getInstance(data.containerClass);
             } else {            
                 // inner classes must be annotated properly
-                if (data.lookupClass.getAnnotation(Singleton.class) == null && !data.lookupClass.isInterface()) {
-                    throw new InspectionException("lookup class must be singleton or interface!");
+                if (data.lookupClass.getAnnotation(Singleton.class) == null && data.lookupClass.getAnnotation(LazySingleton.class) == null && !data.lookupClass.isInterface()) {
+                    throw new InspectionException("lookup class must be singleton, lazysingleton or interface!");
                 }
                 if (data.containerClass.getAnnotation(InspectableContainer.class) == null) {
                     throw new InspectionException("container must be annotated with InspectableContainer");
