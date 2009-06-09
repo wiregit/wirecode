@@ -62,6 +62,7 @@ import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.facebook.service.livemessage.AddressHandler;
 import org.limewire.facebook.service.livemessage.AddressHandlerFactory;
 import org.limewire.facebook.service.livemessage.AuthTokenHandler;
@@ -196,6 +197,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.libraryRefreshHandler = libraryRefreshHandlerFactory.create(this);
         this.chatManager = new ChatManager(this);
         this.sessionId = createSessionId();
+        System.out.println("connection id: " + sessionId);
     }
     
     private static String createSessionId() {
@@ -262,11 +264,12 @@ public class FacebookFriendConnection implements FriendConnection {
     
     private void sendOfflinePresences() {
         for(FacebookFriend friend : friends.values()) {
-            if(friend.hasLimeWireAppInstalled() && friend.isSignedIn()) { // TODO check for LW feature
-                Map<String, String> message = new HashMap<String, String>();
-                message.put("from", getPresenceId());
-                message.put("type", "unavailable");
-                sendLiveMessage(Long.parseLong(friend.getId()), "presence", message);
+            for (FriendPresence presence : friend.getPresences().values()) {
+                if (presence.hasFeatures(LimewireFeature.ID)) {
+                    Map<String, Object> message = new HashMap<String, Object>();
+                    message.put("type", "unavailable");
+                    sendLiveMessage(presence, "presence", message);
+                }
             }
         }
     }
@@ -688,11 +691,13 @@ public class FacebookFriendConnection implements FriendConnection {
         }
     }
 
-    public void sendLiveMessage(FriendPresence presence, String type, Map<String, ?> messageMap) {
+    public void sendLiveMessage(FriendPresence presence, String type, Map<String, Object> messageMap) {
+        messageMap.put("to", presence.getPresenceId());
         sendLiveMessage(Long.parseLong(presence.getFriend().getId()), type, messageMap);
     }
     
-    public void sendLiveMessage(final Long userId, final String type, Map<String, ?> messageMap) {
+    private void sendLiveMessage(final Long userId, final String type, Map<String, Object> messageMap) {
+        messageMap.put("from", getPresenceId());
         final JSONObject message = new JSONObject(messageMap);
         executorService.submit(new Runnable() {
             public void run() {

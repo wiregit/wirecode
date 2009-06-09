@@ -106,15 +106,26 @@ public class ChatListener implements Runnable {
     }
 
     private void processLiveMessage(JSONObject payload) throws JSONException {
+        if (!payload.has("response")) {
+            LOG.debugf("no 'response' in message payload: {0}", payload);
+            return;
+        }
+        
+        JSONObject lwMessage = payload.getJSONObject("response");
+        
+        String presenceId = lwMessage.getString("from");
+        connection.addPresence(presenceId);
+            
+        String to = lwMessage.getString("to");
+        if (!to.equals(connection.getPresenceId())) {
+            LOG.debugf("message not for us: {0}", payload);
+            return;
+        }
+        
         String messageType = payload.getString("event_name");
         LiveMessageHandler handler = handlerRegistry.getHandler(messageType);
         if (handler != null) {
-            if (payload.has("response")) {
-                JSONObject lwMessage = payload.getJSONObject("response");
-                handler.handle(messageType, lwMessage);
-            } else {
-                LOG.debugf("no 'response' in message payload: {0}", payload);
-            }
+            handler.handle(messageType, lwMessage);
         } else {
             LOG.debugf("no handler for type: {0}", messageType);
         }

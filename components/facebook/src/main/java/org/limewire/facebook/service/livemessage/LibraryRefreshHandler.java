@@ -1,7 +1,6 @@
 package org.limewire.facebook.service.livemessage;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.json.JSONObject;
 import org.limewire.core.api.friend.FriendPresence;
@@ -42,8 +41,6 @@ public class LibraryRefreshHandler implements FeatureTransport<LibraryChangedNot
 
     @Override
     public void sendFeature(FriendPresence presence, LibraryChangedNotifier localFeature) throws FriendException {
-        Map<String, String> message = new HashMap<String, String>();
-        message.put("from", connection.getPresenceId());
-        connection.sendLiveMessage(presence, TYPE, message);
+        connection.sendLiveMessage(presence, TYPE, new HashMap<String, Object>());
     }
 }

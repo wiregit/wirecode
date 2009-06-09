@@ -10,8 +10,6 @@ import org.json.JSONObject;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import com.google.inject.Singleton;
-
 public class BuddyListResponseDeserializer {
     
     private static final Log LOG = LogFactory.getLog(BuddyListResponseDeserializer.class);

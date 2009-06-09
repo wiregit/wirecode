@@ -66,8 +66,7 @@ public class AddressHandler implements LiveMessageHandler, FeatureTransport<Addr
 
     @Override
     public void sendFeature(FriendPresence presence, Address localFeature) throws FriendException {
-        Map<String, String> message = new HashMap<String, String>();
-        message.put("from", connection.getPresenceId());
+        Map<String, Object> message = new HashMap<String, Object>();
         try {
             AddressSerializer serializer = addressFactory.getSerializer(localFeature.getClass());
             message.put("address-type", serializer.getAddressType());

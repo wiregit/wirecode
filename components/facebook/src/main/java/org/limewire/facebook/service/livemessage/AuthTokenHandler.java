@@ -50,8 +50,7 @@ public class AuthTokenHandler implements LiveMessageHandler, FeatureTransport<Au
     
     @Override
     public void sendFeature(FriendPresence presence, AuthToken localFeature) throws FriendException {
-        Map<String, String> message = new HashMap<String, String>();
-        message.put("from", connection.getPresenceId());
+        Map<String, Object> message = new HashMap<String, Object>();
         message.put("auth-token", StringUtils.toUTF8String(Base64.encodeBase64(localFeature.getToken())));
         connection.sendLiveMessage(presence, TYPE, message);
     }

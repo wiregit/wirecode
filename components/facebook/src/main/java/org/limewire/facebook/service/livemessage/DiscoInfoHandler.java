@@ -61,7 +61,6 @@ public class DiscoInfoHandler implements LiveMessageHandler {
             LOG.debugf("no friend for id {0}", friendId);
             return;
         }
-        connection.addPresence(from);
         FriendPresence presence = friend.getPresences().get(from);
         if(presence != null) {
             initializePresenceFeatures(presence, features);
@@ -78,10 +77,6 @@ public class DiscoInfoHandler implements LiveMessageHandler {
             LOG.debugf("disc info from non-friend: {0}", friendId);
             return;
         }
-        // this is the first unconditional message received, so the friend
-        // might not be in list of online friends yet, mark friend as available
-        // to obtain presence
-        connection.addPresence(from);
         FriendPresence presence = friend.getPresences().get(from);
         if(presence != null) {
             List<String> supported = new ArrayList<String>();
@@ -127,7 +122,8 @@ public class DiscoInfoHandler implements LiveMessageHandler {
             // TODO would result in exchanging disco-info's faster
             // TODO but also lots of requests to offline friends
             @Override
-            public void handleEvent(FriendPresenceEvent event) {  
+            public void handleEvent(FriendPresenceEvent event) {
+                LOG.debugf("friend presence event: {0}", event);
                 if(event.getType() != FriendPresenceEvent.Type.ADDED) {
                     return;
                 }
@@ -140,9 +136,7 @@ public class DiscoInfoHandler implements LiveMessageHandler {
                     LOG.debugf("not a limewire friend: {0}", facebookFriend);
                     return;
                 }
-                Map<String, String> message = new HashMap<String, String>();
-                message.put("from", connection.getPresenceId());
-                connection.sendLiveMessage(friendPresence, REQUEST_TYPE, message);
+                connection.sendLiveMessage(friendPresence, REQUEST_TYPE, new HashMap<String, Object>());
             }
         });
     }
