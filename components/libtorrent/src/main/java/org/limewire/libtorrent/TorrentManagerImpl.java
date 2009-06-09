@@ -1,7 +1,6 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +18,6 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentSettings;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.inject.LazySingleton;
-import org.limewire.inspection.Inspectable;
-import org.limewire.inspection.InspectableContainer;
-import org.limewire.inspection.InspectionPoint;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -71,39 +67,39 @@ public class TorrentManagerImpl implements TorrentManager {
      */
     private ScheduledFuture<?> resumeFileFuture;
 
-    @SuppressWarnings("unused")
-    @InspectableContainer
-    private class LazyInspectableContainer {
-        @InspectionPoint("torrent manager")
-        private final Inspectable inspectable = new Inspectable() {
-            @Override
-            public Object inspect() {
-                Map<String, Object> data = new HashMap<String, Object>();
-                int active = 0;
-                int seeding = 0;
-                int starting = 0;
-
-                lock.readLock().lock();
-                try {
-                    for (Torrent torrent : torrents.values()) {
-                        if (!torrent.isStarted()) {
-                            starting++;
-                        } else if (torrent.isFinished()) {
-                            seeding++;
-                        } else {
-                            active++;
-                        }
-                    }
-                } finally {
-                    lock.readLock().unlock();
-                }
-                data.put("active", active);
-                data.put("seeding", seeding);
-                data.put("starting", starting);
-                return data;
-            }
-        };
-    }
+//    @SuppressWarnings("unused")
+//    @InspectableContainer
+//    private class LazyInspectableContainer {
+//        @InspectionPoint("torrent manager")
+//        private final Inspectable inspectable = new Inspectable() {
+//            @Override
+//            public Object inspect() {
+//                Map<String, Object> data = new HashMap<String, Object>();
+//                int active = 0;
+//                int seeding = 0;
+//                int starting = 0;
+//
+//                lock.readLock().lock();
+//                try {
+//                    for (Torrent torrent : torrents.values()) {
+//                        if (!torrent.isStarted()) {
+//                            starting++;
+//                        } else if (torrent.isFinished()) {
+//                            seeding++;
+//                        } else {
+//                            active++;
+//                        }
+//                    }
+//                } finally {
+//                    lock.readLock().unlock();
+//                }
+//                data.put("active", active);
+//                data.put("seeding", seeding);
+//                data.put("starting", starting);
+//                return data;
+//            }
+//        };
+//    }
 
     @Inject
     public TorrentManagerImpl(LibTorrentWrapper torrentWrapper,
