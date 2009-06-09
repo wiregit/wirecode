@@ -309,7 +309,7 @@ public class FacebookFriendConnection implements FriendConnection {
                 ThreadExecutor.startThread(chatListener, "chat-listener-thread");
                 setVisible();
                 PresenceListener presenceListener = presenceListenerFactory.createPresenceListener(this);
-                presenceListenerFuture = executorService.scheduleAtFixedRate(presenceListener, 0, 90, TimeUnit.SECONDS);
+                presenceListenerFuture = executorService.scheduleAtFixedRate(presenceListener, 0, 60, TimeUnit.SECONDS);
                 loggedIn.set(true);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
             } catch (IOException e) {
