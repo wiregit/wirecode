@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
@@ -23,6 +22,7 @@ import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
+import org.limewire.ui.swing.library.sharing.LibrarySharingPanel;
 import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryTable;
 
@@ -37,7 +37,7 @@ public class LibraryPanel extends JPanel {
     private final HeaderBar headerBar = new HeaderBar();
     private final LibraryTable libraryTable;
     private final LibraryNavigatorPanel navigatorComponent;
-    private final JComponent sharingComponent;
+    private final LibrarySharingPanel librarySharingPanel;
     private final SharedFileListManager sharedFileListManager;
     private final LibraryManager libraryManager;
     
@@ -60,7 +60,7 @@ public class LibraryPanel extends JPanel {
         
         this.navigatorComponent = navPanel;
         this.libraryTable = libraryTable;
-        this.sharingComponent = sharingPanel;
+        this.librarySharingPanel = sharingPanel;
         this.tableSelectionComboBox = selectionComobBox;
         this.sharedFileListManager = sharedFileListManager;
         this.libraryManager = libraryManager;
@@ -96,7 +96,7 @@ public class LibraryPanel extends JPanel {
         
         add(navigatorComponent, "dock west, growy");
         add(headerBar, "dock north, growx");
-        add(sharingComponent, "dock west, growy, hidemode 3");
+        add(librarySharingPanel.getComponent(), "dock west, growy, hidemode 3");
         add(libraryScrollPane, "grow");
         
     }
@@ -121,15 +121,26 @@ public class LibraryPanel extends JPanel {
 //                    setEventList(fileList.getSwingModel());
                     SharedFileList fileList = sharedFileListManager.getSharedFileList(navItem.getTabID());
                     eventList = fileList.getSwingModel();
+                    selectSharing(fileList);
                     selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
                 } else {
 //                    setEventList(libraryManager.getLibraryManagedList().getSwingModel());
 //                currentFriendFilterChanger.setCurrentList(navigatorComponent.getSelectedNavItem().getTabID());
                     eventList = libraryManager.getLibraryManagedList().getSwingModel();
+                    selectSharing(null);
                     selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
                 }
             }
         });
+    }
+    
+    private void selectSharing(SharedFileList fileList) {
+        librarySharingPanel.setSharedFileList(fileList);
+        librarySharingPanel.getComponent().setVisible(showSharingPanel(fileList));
+    }
+    
+    private boolean showSharingPanel(SharedFileList fileList) {
+        return fileList != null && !fileList.getCollectionName().equals("Shared");
     }
     
     private void selectTable(AbstractLibraryFormat<LocalFileItem> libraryTableFormat, Category category) {

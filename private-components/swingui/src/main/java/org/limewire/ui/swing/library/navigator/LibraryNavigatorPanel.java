@@ -15,7 +15,7 @@ import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.library.CreatePlayListAction;
+import org.limewire.ui.swing.library.actions.CreateListAction;
 import org.limewire.ui.swing.library.popup.LibraryNavPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -25,7 +25,6 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
-import com.jacob.com.NotImplementedException;
 
 @LazySingleton
 public class LibraryNavigatorPanel extends JXPanel {
@@ -34,16 +33,16 @@ public class LibraryNavigatorPanel extends JXPanel {
     @Resource private Color borderColor;
     
     private final LibraryNavigatorTable table;
-    private final CreatePlayListAction createAction;
+    private final CreateListAction createAction;
     private final SharedFileListManager sharedFileListManager;
     
     private HyperlinkButton createListButton;
     
     @Inject
     public LibraryNavigatorPanel(LibraryNavigatorTable table, LibraryNavTableRenderer renderer,
-            LibraryNavPopupHandler popupHandler, LibraryManager libraryManager, CreatePlayListAction createAction,
+            LibraryNavPopupHandler popupHandler, LibraryManager libraryManager, CreateListAction createAction,
             SharedFileListManager sharedFileListManager) {
-        super(new MigLayout("insets 0, gap 0, fill", "[125!]", ""));
+        super(new MigLayout("insets 0, gap 0, fillx", "[125!]", ""));
         
         this.table = table;
         this.sharedFileListManager = sharedFileListManager;
@@ -60,13 +59,14 @@ public class LibraryNavigatorPanel extends JXPanel {
         table.getColumnModel().getColumn(0).setCellRenderer(renderer);
         table.setPopupHandler(popupHandler);
         
-        add(scrollPane, "growx, dock north");
+        add(scrollPane, "growx, growy, dock north");
 
         createCreateListButton();
-        add(createListButton, "wrap, grow");
+        add(createListButton, "dock north, alignx center, gaptop 5");
         
         initData();
         
+        //TODO: move this out of the constructor
         registerListeners();
     }
     
@@ -78,10 +78,9 @@ public class LibraryNavigatorPanel extends JXPanel {
                 while(listChanges.next()) {
                     SharedFileList list = listChanges.getSourceList().get(listChanges.getIndex());
                     if(listChanges.getType() == ListEvent.INSERT) {
-                        table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName());
+                        table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName(), true);
                     } else if(listChanges.getType() == ListEvent.DELETE){
-                        //TODO: handle delete
-                        throw new NotImplementedException("delete of shard list not implemened");
+                        table.removeLibraryNavItem(list.getCollectionName());
                     }
                 }
             }
@@ -89,7 +88,7 @@ public class LibraryNavigatorPanel extends JXPanel {
     }
     
     private void initData() {
-        table.addLibraryNavItem(null, I18n.tr("Library"));
+        table.addLibraryNavItem(null, I18n.tr("Library"), false);
 
         EventList<SharedFileList> playLists = sharedFileListManager.getModel();
 
@@ -97,7 +96,11 @@ public class LibraryNavigatorPanel extends JXPanel {
         playLists.getReadWriteLock().readLock().lock();
         try {
             for(SharedFileList fileList : playLists) {
-                table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName());
+                //TODO: this is a bit hacky, really need a value within fileList
+                if(fileList.getCollectionName().equals("Shared"))
+                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), false);
+                else
+                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), true);
             }
         } finally {
             playLists.getReadWriteLock().readLock().unlock();

@@ -26,8 +26,7 @@ public class LibraryNavigatorTable extends JXTable {
     @Resource private Color backgroundColor;
     
     private TablePopupHandler popupHandler;
-    private EventList<LibraryNavItem> eventList;
-    
+    private final EventList<LibraryNavItem> eventList;
     
     @Inject
     public LibraryNavigatorTable() {        
@@ -40,8 +39,20 @@ public class LibraryNavigatorTable extends JXTable {
         setModel(new EventTableModel<LibraryNavItem>(eventList, new NavTableFormat()));
     }
     
-    public void addLibraryNavItem(String name, String id) {
-        eventList.add(new LibraryNavItem(name, id));
+    public void addLibraryNavItem(String name, String id, boolean canRemove) {
+        eventList.add(new LibraryNavItem(name, id, canRemove));
+    }
+    
+    public void removeLibraryNavItem(String id) {
+        eventList.getReadWriteLock().writeLock().lock();
+        try {
+            for(LibraryNavItem item : eventList) {
+                if(item.getTabID().equals(id) && item.canRemove())
+                    eventList.remove(item);
+            }
+        } finally {
+            eventList.getReadWriteLock().writeLock().unlock();
+        }
     }
     
     public LibraryNavItem getSelectedItem() {

@@ -8,7 +8,7 @@ import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 
        
-public abstract class DefaultLibraryRenderer extends DefaultTableCellRenderer {
+public class DefaultLibraryRenderer extends DefaultTableCellRenderer {
 
     private Border border;
     

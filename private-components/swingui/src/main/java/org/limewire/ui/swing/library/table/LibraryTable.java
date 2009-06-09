@@ -41,7 +41,7 @@ public class LibraryTable extends MouseableTable {
     private ColumnStateHandler columnStateHandler;
     private MousePopupListener mousePopupListener;
     
-    private Provider<DefaultTableCellRenderer> defaultCellRenderer;
+    private Provider<DefaultLibraryRenderer> defaultCellRenderer;
     private final Provider<TimeRenderer> timeRenderer;
     private final Provider<FileSizeRenderer> fileSizeRenderer;
     private final Provider<CalendarRenderer> calendarRenderer;
@@ -51,7 +51,7 @@ public class LibraryTable extends MouseableTable {
     private final IconLabelRenderer iconLabelRenderer;
     
     @Inject
-    public LibraryTable(Provider<DefaultTableCellRenderer> defaultCellRenderer,
+    public LibraryTable(Provider<DefaultLibraryRenderer> defaultCellRenderer,
             Provider<TimeRenderer> timeRenderer,
             Provider<FileSizeRenderer> fileSizeRenderer,
             Provider<CalendarRenderer> calendarRenderer,
@@ -220,6 +220,8 @@ public class LibraryTable extends MouseableTable {
             default:
                 throw new IllegalArgumentException("Unknown category:" + category);
             }
+        } else {
+            setCellRenderer(AllTableFormat.SIZE_INDEX, fileSizeRenderer.get());
         }
     }
     
