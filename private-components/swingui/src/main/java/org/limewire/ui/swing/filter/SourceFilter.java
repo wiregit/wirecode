@@ -2,9 +2,18 @@ package org.limewire.ui.swing.filter;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -19,11 +28,20 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.RolloverCursorListener;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.Objects;
 
-import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.CollectionList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.UniqueList;
+import ca.odell.glazedlists.FunctionList.Function;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
@@ -32,35 +50,34 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
  * Filter component to select items according to their sources.
  */
 class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
-    /** Source types for search results. */
-    public enum SourceType {
-        P2P(I18n.tr("P2P Network")), 
-        FRIENDS(I18n.tr("All Friends"));
-        
-        private String displayName;
-        
-        SourceType(String displayName) {
-            this.displayName = displayName;
-        }
-        
-        @Override
-        public String toString() {
-            return displayName;
-        }
-    }
 
     private final JPanel panel = new JPanel();
     private final JLabel label = new JLabel();
     private final JXList list = new JXList();
+    private final HyperlinkButton friendButton = new HyperlinkButton();
+    private final List<FriendListener> friendListenerList = new ArrayList<FriendListener>();
     
-    private final EventList<SourceType> sourceList = new BasicEventList<SourceType>();
+    private EventList<SourceItem> sourceList;
+    //private UniqueListFactory<SourceItem> uniqueSourceListFactory; TODO
+    private UniqueList<SourceItem> uniqueSourceList;
     
-    private EventSelectionModel<SourceType> selectionModel;
+    private EventList<SourceItem> friendList;
+    //private UniqueListFactory<SourceItem> uniqueFriendListFactory; TODO
+    private UniqueList<SourceItem> uniqueFriendList;
+    
+    private UniqueList<SourceItem> currentUniqueList;
+    private EventListModel<SourceItem> listModel;
+    private EventSelectionModel<SourceItem> selectionModel;
+    private EventSelectionModel<SourceItem> popupSelectionModel;
+    private SelectionListener selectionListener;
+    private FilterPopupPanel filterPopupPanel;
 
+    private boolean anyFriendFound;
+    
     /**
-     * Constructs a SourceFilter.
+     * Constructs a SourceFilter using the specified results list.
      */
-    public SourceFilter() {
+    public SourceFilter(EventList<E> resultsList) {
         FilterResources resources = getResources();
         
         // Set up visual components.
@@ -72,7 +89,8 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         label.setForeground(resources.getHeaderColor());
         label.setText(I18n.tr("From"));
         
-        list.setCellRenderer(new SourceCellRenderer());
+        list.setCellRenderer(new SourceCellRenderer(resources.getBackground(), 
+                BorderFactory.createEmptyBorder(1, 7, 0, 7), false));
         list.setFont(resources.getRowFont());
         list.setForeground(resources.getRowColor());
         list.setOpaque(false);
@@ -86,29 +104,94 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         // Add listener to show cursor on mouse over.
         list.addMouseListener(new RolloverCursorListener());
         
-        panel.add(label, "gap 6 6, wrap");
-        panel.add(list , "grow");
+        friendButton.setAction(new FriendAction());
+        friendButton.setBorder(BorderFactory.createEmptyBorder(0, 1, 1, 1));
+        friendButton.setContentAreaFilled(false);
+        friendButton.setFocusPainted(false);
+        friendButton.setFont(resources.getRowFont());
+        friendButton.setHorizontalTextPosition(JButton.LEADING);
         
-        initialize();
+        // Add listener to set popup trigger indicator.  This activates logic
+        // so that pressing "friend" a second time closes an open popup.
+        friendButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (filterPopupPanel != null) {
+                    filterPopupPanel.setPopupTriggered(true);
+                }
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (filterPopupPanel != null) {
+                    filterPopupPanel.setPopupTriggered(false);
+                }
+            }
+        });
+        
+        // Apply results list to filter.
+        initialize(resultsList);
+        
+        // Calculate max list height.
+        list.setPrototypeCellValue("Type");
+        int listHeight = 3 * list.getFixedCellHeight();
+        
+        panel.add(label       , "gap 6 6, wrap");
+        panel.add(list        , "hmax " + listHeight + ", grow, wrap");
+        panel.add(friendButton, "gap 6 6");
     }
     
     /**
-     * Initializes the filter.
+     * Initializes the filter using the specified list of search results.
      */
-    private void initialize() {
-        // Create list of sources.
-        for (SourceType type : SourceType.values()) {
-            sourceList.add(type);
-        }
+    private void initialize(EventList<E> resultsList) {
+        // Create list of unique source values.
+        sourceList = createSourceList(resultsList);
+        //uniqueSourceListFactory = new UniqueListFactory<SourceItem>(sourceList, new SourceItemComparator());
+        //uniqueSourceListFactory.setName(I18n.tr("Sources"));
+        //uniqueSourceList = uniqueSourceListFactory.getUniqueList(); TODO
+        uniqueSourceList = GlazedListsFactory.uniqueList(sourceList, new SourceItemComparator());
         
-        // Create list and selection models.
-        EventListModel<SourceType> listModel = new EventListModel<SourceType>(sourceList);
-        selectionModel = new EventSelectionModel<SourceType>(sourceList);
-        list.setModel(listModel);
-        list.setSelectionModel(selectionModel);
+        // Create list of unique friend values.
+        friendList = createFriendList(resultsList);
+        //uniqueFriendListFactory = new UniqueListFactory<SourceItem>(friendList, new SourceItemComparator());
+        //uniqueFriendListFactory.setName(I18n.tr("Friends"));
+        //uniqueFriendList = uniqueFriendListFactory.getUniqueList(); TODO
+        uniqueFriendList = GlazedListsFactory.uniqueList(friendList, new SourceItemComparator());
         
-        // Add selection listener to update filter.
-        list.addListSelectionListener(new SelectionListener());
+        // Add listener to update unique list in use.
+        uniqueSourceList.addListEventListener(new ListEventListener<SourceItem>() {
+            @Override
+            public void listChanged(ListEvent<SourceItem> listChanges) {
+                updateAnonymousFound();
+                updateAnyFriendFound();
+            }
+        });
+        
+        // Update current unique list.
+        updateAnonymousFound();
+    }
+    
+    /**
+     * Adds the specified listener to the list that is notified when the
+     * <code>anyFriendFound</code> state changes.
+     */
+    public void addFriendListener(FriendListener listener) {
+        friendListenerList.add(listener);
+    }
+    
+    /**
+     * Removes the specified listener from the list that is notified when the
+     * <code>anyFriendFound</code> state changes.
+     */
+    public void removeFriendListener(FriendListener listener) {
+        friendListenerList.remove(listener);
+    }
+    
+    /**
+     * Returns an indicator that is true if any friend sources are found.
+     */
+    public boolean isAnyFriendFound() {
+        return anyFriendFound;
     }
     
     @Override
@@ -118,14 +201,24 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
     @Override
     public void reset() {
-        selectionModel.clearSelection();
+        // Clear selections.
+        if (selectionModel != null) {
+            selectionModel.clearSelection();
+        }
+        if (popupSelectionModel != null) {
+            popupSelectionModel.clearSelection();
+        }
         // Deactivate filter.
         deactivate();
     }
     
     @Override
     public void dispose() {
-        // Do nothing.
+        // Dispose of source and friend lists.
+        //uniqueSourceListFactory.dispose(); TODO
+        //uniqueFriendListFactory.dispose(); TODO
+        ((TransformedList) sourceList).dispose();
+        ((TransformedList) friendList).dispose();
     }
     
     /**
@@ -156,19 +249,187 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         StringBuilder buf = new StringBuilder();
         
         buf.append(getClass().getSimpleName()).append("[");
-        buf.append("uniqueItems=").append(sourceList.size());
+        buf.append("uniqueItems=").append(currentUniqueList.size());
         buf.append(", active=").append(isActive());
-        EventList<SourceType> selectedList = selectionModel.getSelected();
+        EventList<SourceItem> selectedList = selectionModel.getSelected();
         buf.append(", selection=").append((selectedList.size() > 0) ? selectedList.get(0) : "null");
         buf.append("]");
         
         return buf.toString();
     }
+    
+    /**
+     * Returns a list of SourceItem objects that represent the sources for the 
+     * elements in the specified results list.
+     */
+    private EventList<SourceItem> createSourceList(EventList<E> resultsList) {
+        // Create collection list model.
+        CollectionList.Model<E, SourceItem> model = new CollectionList.Model<E, SourceItem>() {
+            @Override
+            public List<SourceItem> getChildren(E parent) {
+                List<SourceItem> list = new ArrayList<SourceItem>();
+                if (parent.isAnonymous()) {
+                    list.add(SourceItem.ANONYMOUS_SOURCE);
+                }
+                if (parent.getFriends().size() > 0) {
+                    list.add(SourceItem.ANY_FRIEND_SOURCE);
+                }
+                return list;
+            }
+        };
+        
+        // Create collection list.
+        return GlazedListsFactory.collectionList(resultsList, model);
+    }
+    
+    /**
+     * Returns a list of SourceItem objects that represent the friends for the 
+     * elements in the specified results list.
+     */
+    private EventList<SourceItem> createFriendList(EventList<E> resultsList) {
+        // Create collection list model for friends.
+        CollectionList.Model<E, Friend> model = new CollectionList.Model<E, Friend>() {
+            @Override
+            public List<Friend> getChildren(E parent) {
+                Collection<Friend> friends = parent.getFriends();
+                return new ArrayList<Friend>(friends);
+            }
+        };
+        
+        // Create collection list for friends.
+        CollectionList<E, Friend> collectionList = GlazedListsFactory.collectionList(resultsList, model);
+        
+        // Create function list.
+        return GlazedListsFactory.functionList(collectionList, new SourceItemFriendFunction());
+    }
+    
+    /**
+     * Determines whether anonymous sources are found, and updates the current
+     * unique list being displayed.  When anonymous sources are found, the
+     * P2P Network/Any Friends list is used; otherwise, the friends-only list
+     * is used.
+     */
+    private void updateAnonymousFound() {
+        // Determine if anonymous sources are found.
+        boolean found = false;
+        if (uniqueSourceList.contains(SourceItem.ANONYMOUS_SOURCE)) {
+            found = (uniqueSourceList.getCount(SourceItem.ANONYMOUS_SOURCE) > 0);
+        }
+        
+        // Update current unique list if necessary.
+        UniqueList<SourceItem> newList = found ? uniqueSourceList : uniqueFriendList;
+        if (currentUniqueList == newList) return;
+        currentUniqueList = newList;
+        
+        // Dispose of old list models.
+        if (selectionListener != null) list.removeListSelectionListener(selectionListener);
+        if (listModel != null) listModel.dispose();
+        if (selectionModel != null) selectionModel.dispose();
+        
+        // Create list and selection models.
+        listModel = new EventListModel<SourceItem>(currentUniqueList);
+        selectionModel = new EventSelectionModel<SourceItem>(currentUniqueList);
+        list.setSelectionModel(selectionModel);
+        list.setModel(listModel);
+        
+        // Add selection listener to update filter.
+        selectionListener = new SelectionListener(selectionModel);
+        list.addListSelectionListener(selectionListener);
+    }
+    
+    /**
+     * Determines whether any friend sources are found, and notifies listeners
+     * when the state changes.
+     */
+    private void updateAnyFriendFound() {
+        // Determine if any friend sources are found.
+        boolean found = false;
+        if (uniqueSourceList.contains(SourceItem.ANY_FRIEND_SOURCE)) {
+            found = (uniqueSourceList.getCount(SourceItem.ANY_FRIEND_SOURCE) > 0);
+        }
+        
+        // Update indicator if necessary.
+        if (anyFriendFound == found) return;
+        anyFriendFound = found;
+        
+        // Notify listeners about state change.
+        for (int i = 0, size = friendListenerList.size(); i < size; i++) {
+            friendListenerList.get(i).friendFound(found);
+        }
+    }
+    
+    /**
+     * Creates a popup to display the complete list of friends.
+     */
+    private FilterPopupPanel createFriendPopup() {
+        FilterPopupPanel popupPanel = new FilterPopupPanel(getResources(), I18n.tr("Friends"));
+        
+        // Set list cell renderer.
+        popupPanel.setListCellRenderer(new SourceCellRenderer(popupPanel.getBackground(), 
+                BorderFactory.createEmptyBorder(1, 4, 0, 1), true));
+        
+        // Set list and selection models.  We use the unique list directly
+        // to display values alphabetically.
+        EventListModel<SourceItem> listModel = new EventListModel<SourceItem>(uniqueFriendList);
+        popupSelectionModel = new EventSelectionModel<SourceItem>(uniqueFriendList);
+        popupPanel.setListModel(listModel);
+        popupPanel.setListSelectionModel(popupSelectionModel);
+        
+        // Add selection listener to update filter.
+        popupSelectionModel.addListSelectionListener(new SelectionListener(popupSelectionModel));
+        
+        return popupPanel;
+    }
+    
+    /**
+     * Displays the "friend" popup that lists all friends.
+     */
+    private void showFriendPopup() {
+        if (filterPopupPanel == null) {
+            filterPopupPanel = createFriendPopup();
+        }
+        filterPopupPanel.showPopup(friendButton, list.getWidth() - 12, label.getY() - friendButton.getY());
+    }
+    
+    /**
+     * Hides the "friend" popup that lists all friends.
+     */
+    private void hideFriendPopup() {
+        if (filterPopupPanel != null) {
+            filterPopupPanel.hidePopup();
+        }
+    }
+    
+    /**
+     * Action to display list of all friends in popup window.
+     */
+    private class FriendAction extends AbstractAction {
 
+        public FriendAction() {
+            super(I18n.tr("more"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (filterPopupPanel == null) {
+                showFriendPopup();
+            } else if (filterPopupPanel.isPopupReady()) {
+                showFriendPopup();
+            } else {
+                filterPopupPanel.setPopupReady(true);
+            }
+        }
+    }
+    
     /**
      * Listener to handle selection changes to update the matcher editor.  
      */
     private class SelectionListener implements ListSelectionListener {
+        private final EventSelectionModel<SourceItem> selectionModel;
+        
+        public SelectionListener(EventSelectionModel<SourceItem> selectionModel) {
+            this.selectionModel = selectionModel;
+        }
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
@@ -178,9 +439,9 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             }
             
             // Get list of selected values.
-            EventList<SourceType> selectedList = selectionModel.getSelected();
+            EventList<SourceItem> selectedList = selectionModel.getSelected();
             if (selectedList.size() > 0) {
-                SourceType value = selectedList.get(0);
+                SourceItem value = selectedList.get(0);
                 // Create new matcher and activate.
                 Matcher<E> newMatcher = new SourceMatcher<E>(value);
                 activate(value.toString(), newMatcher);
@@ -190,17 +451,27 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 deactivate();
             }
             
+            // Hide popup if showing.
+            hideFriendPopup();
+            
             // Notify filter listeners.
             fireFilterChanged(SourceFilter.this);
         }
     }
     
     /**
-     * Cell renderer for source values.
+     * Cell renderer for SourceItem values.
      */
     private class SourceCellRenderer extends DefaultListCellRenderer {
-        private final Color background = getResources().getBackground();
-        private final Border border = BorderFactory.createEmptyBorder(1, 7, 0, 7);
+        private final Color background;
+        private final Border border;
+        private final boolean useFriend;
+        
+        public SourceCellRenderer(Color background, Border border, boolean useFriend) {
+            this.background = background;
+            this.border = border;
+            this.useFriend = useFriend;
+        }
         
         @Override
         public Component getListCellRendererComponent(JList list, Object value, 
@@ -209,7 +480,17 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             Component renderer = super.getListCellRendererComponent(list, value,
                     index, isSelected, cellHasFocus);
             
-            if (renderer instanceof JLabel) {
+            if ((renderer instanceof JLabel) && (value instanceof SourceItem)) {
+                // Get count.
+                int count = useFriend ? uniqueFriendList.getCount((SourceItem) value) :
+                    currentUniqueList.getCount((SourceItem) value);
+                
+                // Set text.
+                StringBuilder buf = new StringBuilder();
+                buf.append(((SourceItem) value).getName());
+                buf.append(" (").append(count).append(")");
+                ((JLabel) renderer).setText(buf.toString());
+                
                 // Set appearance.
                 ((JLabel) renderer).setBackground(background);
                 ((JLabel) renderer).setBorder(border);
@@ -217,5 +498,50 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
             return renderer;
         }
+    }
+    
+    /**
+     * A Comparator for SourceItem values.
+     */
+    private static class SourceItemComparator implements Comparator<SourceItem> {
+
+        @Override
+        public int compare(SourceItem item1, SourceItem item2) {
+            if (item1.getType() == item2.getType()) {
+                String name1 = item1.getName();
+                String name2 = item2.getName();
+                return Objects.compareToNullIgnoreCase(name1, name2, false);
+                
+            } else if (item1.getType() == SourceItem.Type.ANONYMOUS) {
+                return 1;
+            } else if (item2.getType() == SourceItem.Type.ANONYMOUS) {
+                return -1;
+            } else if (item1.getType() == SourceItem.Type.ANY_FRIEND) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+    }
+    
+    /**
+     * A function to transform a list of friends into a list of source 
+     * items.
+     */
+    private static class SourceItemFriendFunction implements Function<Friend, SourceItem> {
+
+        @Override
+        public SourceItem evaluate(Friend sourceValue) {
+            return new SourceItem(SourceItem.Type.FRIEND, sourceValue.getName());
+        }
+    }
+    
+    /**
+     * Defines a listener for friend found events. 
+     */
+    public static interface FriendListener {
+        
+        void friendFound(boolean found);
+        
     }
 }
