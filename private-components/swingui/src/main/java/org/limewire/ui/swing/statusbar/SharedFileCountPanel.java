@@ -1,22 +1,20 @@
 package org.limewire.ui.swing.statusbar;
 
-import javax.swing.BorderFactory;
-
-import org.jdesktop.swingx.JXLabel;
+import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-class SharedFileCountPanel extends JXLabel {
+@Singleton
+class SharedFileCountPanel extends JXButton {
         
     @Inject
     SharedFileCountPanel(SharedFileListManager shareListManager) {
         super(I18n.tr("Sharing {0} files", "????"));
         
         this.setName("SharedFileCountPanel");
-        
-        this.setBorder(BorderFactory.createEmptyBorder(0,8,0,0));
         
 //        shareListManager.getCombinedShareList().getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>() {
 //            @Override

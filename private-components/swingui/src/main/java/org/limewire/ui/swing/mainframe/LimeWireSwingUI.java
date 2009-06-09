@@ -24,6 +24,7 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
+import org.limewire.ui.swing.components.PanelResizer;
 import org.limewire.ui.swing.downloads.DownloadHeaderPanel;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
@@ -32,6 +33,7 @@ import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.statusbar.SharedFileCountPopupPanel;
 import org.limewire.ui.swing.statusbar.StatusPanel;
 import org.limewire.ui.swing.update.UpdatePanel;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -54,6 +56,7 @@ public class LimeWireSwingUI extends JPanel {
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel chatFrame,
             AudioPlayer player,
+            SharedFileCountPopupPanel sharedFileCountPopup,
 //            ShapeDialog shapeDialog, 
             ProNagController proNagController, 
             MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider) {
@@ -102,6 +105,9 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new MainPanelResizer(centerPanel));
         layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(chatFrame, JLayeredPane.PALETTE_LAYER);
+        layeredPane.addComponentListener(new PanelResizer(chatFrame));
+        layeredPane.add(sharedFileCountPopup, JLayeredPane.PALETTE_LAYER);
+        layeredPane.addComponentListener(new PanelResizer(sharedFileCountPopup));
 //        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
 //        layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
         add(layeredPane, BorderLayout.CENTER);
