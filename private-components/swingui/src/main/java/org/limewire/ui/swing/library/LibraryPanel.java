@@ -25,6 +25,7 @@ import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.sharing.LibrarySharingPanel;
 import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryTable;
+import org.limewire.ui.swing.player.PlayerPanel;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -55,7 +56,7 @@ public class LibraryPanel extends JPanel {
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, LibraryManager libraryManager,
-            SharedFileListManager sharedFileListManager) {
+            SharedFileListManager sharedFileListManager, PlayerPanel playerPanel) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.navigatorComponent = navPanel;
@@ -76,19 +77,20 @@ public class LibraryPanel extends JPanel {
         sortedList = GlazedListsFactory.sortedList(eventList);
         filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
         
-        layoutComponents(headerBarDecorator);
+        layoutComponents(headerBarDecorator, playerPanel);
         
         libraryTable.setEventList(sortedList, tableSelectionComboBox.getSelectedTabelFormat());
         
     }
     
-    private void layoutComponents(HeaderBarDecorator headerBarDecorator) {
+    private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel) {
         headerBarDecorator.decorateBasic(headerBar);
         
-        headerBar.setLayout(new MigLayout("insets 0, gap 0"));
+        headerBar.setLayout(new MigLayout("insets 0, gap 0, fill"));
+        headerBar.setDefaultComponentHeight(-1);
         createAddFilesButton();
-        headerBar.add(addFilesButton, "push");
-        
+        headerBar.add(addFilesButton);
+        headerBar.add(playerPanel, "grow, align 50%");
         headerBar.add(tableSelectionComboBox, "alignx right, gapright 5");
         
         JScrollPane libraryScrollPane = new JScrollPane(libraryTable);

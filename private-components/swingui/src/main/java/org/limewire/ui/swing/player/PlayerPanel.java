@@ -27,27 +27,23 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeSliderBar;
 import org.limewire.ui.swing.components.MarqueeButton;
 import org.limewire.ui.swing.components.VolumeSlider;
 import org.limewire.ui.swing.components.decorators.SliderBarDecorator;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
+import com.jacob.com.NotImplementedException;
 
 /**
  * NOTE: This class should be treated as a singleton and the only proper media player (except the mini player)
@@ -106,8 +102,8 @@ public class PlayerPanel extends JXPanel {
     
     private final MarqueeButton titleLabel;
     
-    private final AudioPlayer player;
-    private final LibraryMediator libraryMediator;
+//    private final AudioPlayer player;
+//    private final LibraryMediator libraryMediator;
 
     /**
      * Pointer to the last opened song's file
@@ -129,10 +125,10 @@ public class PlayerPanel extends JXPanel {
     private static final String VOLUME = "VOLUME";
 
     @Inject
-    public PlayerPanel(AudioPlayer player, LibraryMediator libraryMediator, 
+    public PlayerPanel(//AudioPlayer player, //LibraryMediator libraryMediator, 
             SliderBarDecorator sliderBarDecorator) {
-        this.player = player;
-        this.libraryMediator = libraryMediator;
+//        this.player = player;
+//        this.libraryMediator = libraryMediator;
 
         GuiUtils.assignResources(this);
         
@@ -205,14 +201,14 @@ public class PlayerPanel extends JXPanel {
         innerPanel.add(statusPanel, "gapbottom 2, hidemode 2");
         innerPanel.add(volumeButton, "gapleft 2");
         
-        innerPanel.setVisible(false);
+//        innerPanel.setVisible(false);
         add(innerPanel, "gaptop 2, gapbottom 2");
                 
         EventAnnotationProcessor.subscribe(this);
 
         VolumeController volumeController = new VolumeController();
         volumeSlider.addChangeListener(volumeController);
-        player.addAudioPlayerListener(new PlayerListener());      
+//        player.addAudioPlayerListener(new PlayerListener());      
         
         volumeControlPopup.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -229,17 +225,17 @@ public class PlayerPanel extends JXPanel {
         });
         
         //stop player and hide player if setting disabled
-        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
-            @Override
-            public void settingChanged(SettingEvent evt) {
-                SwingUtilities.invokeLater(new Runnable(){
-                    public void run() {
-                        PlayerPanel.this.player.stop();
-                        PlayerPanel.this.innerPanel.setVisible(false);
-                    }
-                });
-            }
-        });
+//        SwingUiSettings.PLAYER_ENABLED.addSettingListener(new SettingListener(){
+//            @Override
+//            public void settingChanged(SettingEvent evt) {
+//                SwingUtilities.invokeLater(new Runnable(){
+//                    public void run() {
+////                        PlayerPanel.this.player.stop();
+////                        PlayerPanel.this.innerPanel.setVisible(false);
+//                    }
+//                });
+//            }
+//        });
     }
     
     private void initProgressControl() {
@@ -278,31 +274,32 @@ public class PlayerPanel extends JXPanel {
     
     private void previousSong() {
         if (file != null) {
-            player.stop();
-            file = libraryMediator.getPreviousInLibrary(file);
-            if (file != null) {
-                player.loadSong(file);
-                player.playSong();
-                return;
-            }
+//            player.stop();
+//            file = libraryMediator.getPreviousInLibrary(file);
+//            if (file != null) {
+//                player.loadSong(file);
+//                player.playSong();
+//                return;
+//            }
         }
-        
+        throw new NotImplementedException("Player logic needs to move");
         // If there is no next song because we are past the start of the list
-        innerPanel.setVisible(false);
+//        innerPanel.setVisible(false);
     }
     
     private void nextSong() {
         if (file != null) {
-            player.stop();
-            file = libraryMediator.getNextInLibrary(file);
-            if (file != null) {
-                player.loadSong(file);
-                player.playSong();
-                return;
-            }
+//            player.stop();
+//            file = libraryMediator.getNextInLibrary(file);
+//            if (file != null) {
+//                player.loadSong(file);
+//                player.playSong();
+//                return;
+//            }
         }
+        throw new NotImplementedException("Player logic needs to move");
         // If there is no next song because we are at the end of the list
-        innerPanel.setVisible(false);
+//        innerPanel.setVisible(false);
     }
     
     private class ButtonListener implements ActionListener {
@@ -315,32 +312,33 @@ public class PlayerPanel extends JXPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getActionCommand() == PLAY){
-                player.unpause();
-            } else if (e.getActionCommand() == PAUSE){
-                player.pause();
-            } else if (e.getActionCommand() == FORWARD) {
-                nextSong();
-            } else if (e.getActionCommand() == BACK) {
-                if ((double)progressSlider.getValue() / (double)progressSlider.getMaximum() < .1) {
-                    previousSong();
-                }
-                else {
-                    player.stop();
-                    
-                    // If somehow the user is able to press the back button
-                    //  when no song is loaded do not attempt to load an empty
-                    //  deck
-                    if (file != null) {
-                        player.loadSong(file);
-                        player.playSong();
-                    }
-                }
-            } else if (e.getActionCommand() == VOLUME) {
-                if (System.currentTimeMillis() - menuInvizTime > 250f) {
-                    volumeControlPopup.show(volumeButton, 0, 14);
-                }
-            }
+            throw new NotImplementedException("Player logic needs to move");
+//            if (e.getActionCommand() == PLAY){
+//                player.unpause();
+//            } else if (e.getActionCommand() == PAUSE){
+//                player.pause();
+//            } else if (e.getActionCommand() == FORWARD) {
+//                nextSong();
+//            } else if (e.getActionCommand() == BACK) {
+//                if ((double)progressSlider.getValue() / (double)progressSlider.getMaximum() < .1) {
+//                    previousSong();
+//                }
+//                else {
+//                    player.stop();
+//                    
+//                    // If somehow the user is able to press the back button
+//                    //  when no song is loaded do not attempt to load an empty
+//                    //  deck
+//                    if (file != null) {
+//                        player.loadSong(file);
+//                        player.playSong();
+//                    }
+//                }
+//            } else if (e.getActionCommand() == VOLUME) {
+//                if (System.currentTimeMillis() - menuInvizTime > 250f) {
+//                    volumeControlPopup.show(volumeButton, 0, 14);
+//                }
+//            }
         }
     }
   
@@ -382,8 +380,8 @@ public class PlayerPanel extends JXPanel {
                     final long skipBytes = Math.round((Integer) audioProperties
                             .get(AUDIO_LENGTH_BYTES)
                             * percent);
-
-                    player.seekLocation(skipBytes);
+                    throw new NotImplementedException("Player logic needs to move");
+//                    player.seekLocation(skipBytes);
                 }
             }
         }
@@ -398,7 +396,8 @@ public class PlayerPanel extends JXPanel {
     }
     
     private void setVolumeValue() {
-        player.setVolume(((float) volumeSlider.getValue()) / volumeSlider.getMaximum());
+        throw new NotImplementedException("Player logic needs to move");
+//        player.setVolume(((float) volumeSlider.getValue()) / volumeSlider.getMaximum());
     }
     
     private class PlayerListener implements AudioPlayerListener {
@@ -411,9 +410,9 @@ public class PlayerPanel extends JXPanel {
                         .intValue();
 
                 float progressUpdate = bytesread * 1.0f / byteslength * 1.0f;
-
-                if (!(progressSlider.getValueIsAdjusting() || player.getStatus() == PlayerState.SEEKING))
-                    setProgressValue((int) (progressSlider.getMaximum() * progressUpdate));
+                throw new NotImplementedException("Player logic needs to move");
+//                if (!(progressSlider.getValueIsAdjusting() || player.getStatus() == PlayerState.SEEKING))
+//                    setProgressValue((int) (progressSlider.getMaximum() * progressUpdate));
             }
         }
 
@@ -435,9 +434,9 @@ public class PlayerPanel extends JXPanel {
            
            setVolumeValue();
            
-           if (player.getCurrentSong() != null) {
-               file = player.getCurrentSong().getFile();
-           }
+//           if (player.getCurrentSong() != null) {
+//               file = player.getCurrentSong().getFile();
+//           }
             
            String songText = null;
            
@@ -478,17 +477,17 @@ public class PlayerPanel extends JXPanel {
                 setVolumeValue();
             }
             
-            if (player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY){
-                playButton.setVisible(false);
-                pauseButton.setVisible(true);
-            } else if(player.getStatus() == PlayerState.STOPPED){
-                innerPanel.setVisible(false);
-                titleLabel.stop();
-            } else {
-                playButton.setVisible(true);
-                pauseButton.setVisible(false);
-                titleLabel.stop();
-            }            
+//            if (player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY){
+//                playButton.setVisible(false);
+//                pauseButton.setVisible(true);
+//            } else if(player.getStatus() == PlayerState.STOPPED){
+//                innerPanel.setVisible(false);
+//                titleLabel.stop();
+//            } else {
+//                playButton.setVisible(true);
+//                pauseButton.setVisible(false);
+//                titleLabel.stop();
+//            }            
         }
         
     }

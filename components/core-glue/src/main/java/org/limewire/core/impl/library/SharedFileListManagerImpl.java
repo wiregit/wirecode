@@ -14,6 +14,7 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.jacob.com.NotImplementedException;
 import com.limegroup.gnutella.library.FileCollectionManager;
 import com.limegroup.gnutella.library.SharedFileCollection;
 import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent;
@@ -148,5 +149,10 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         }
         return null;
     }
-    
+
+
+    @Override
+    public void deleteSharedFileList(String name) {
+        throw new NotImplementedException("Deletion of filelists not implemented");
+    }
 }

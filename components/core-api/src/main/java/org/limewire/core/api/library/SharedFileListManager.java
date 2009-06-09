@@ -25,4 +25,9 @@ public interface SharedFileListManager {
      */
     SharedFileList getSharedFileList(String name);
     // TODO: getSharedFileList(String name), or (int id) ?
+    
+    /**
+     * Deletes the SharedFileList with this name.
+     */
+    void deleteSharedFileList(String name);
 }

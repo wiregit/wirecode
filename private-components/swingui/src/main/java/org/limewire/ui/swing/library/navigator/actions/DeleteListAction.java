@@ -28,13 +28,12 @@ public class DeleteListAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        LibraryNavItem item = table.get().getSelectedItem();
+        final LibraryNavItem item = table.get().getSelectedItem();
         if(item != null && item.canRemove()) {
             BackgroundExecutorService.execute(new Runnable() {
                 @Override
                 public void run() {
-                    //TODO: need remove API
-//                    sharedFileListManager.get().
+                    sharedFileListManager.get().deleteSharedFileList(item.getTabID());
                 }
             });
         }
