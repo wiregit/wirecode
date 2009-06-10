@@ -258,14 +258,14 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return DownloadState.ABORTED;
         }
 
+        if (torrent.isFinished()) {
+            return DownloadState.COMPLETE;
+        }
+        
         // TODO: This currently shows stalled which will probably
         // be inaccurate.
         if (status.isError()) {
             return DownloadState.GAVE_UP;
-        }
-
-        if (torrent.isFinished()) {
-            return DownloadState.COMPLETE;
         }
 
         if (finishing.get()) {
