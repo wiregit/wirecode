@@ -176,11 +176,14 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         // Create source filter and display component.
         sourceFilter = filterManager.getSourceFilter();
         sourceFilter.getComponent().setVisible(false);
+        
+        // Add listener to show source filter when friend results are received.
         sourceFilter.addFriendListener(new SourceFilter.FriendListener() {
             @Override
             public void friendFound(boolean found) {
                 if (!sourceFilter.isActive()) {
                     sourceFilter.getComponent().setVisible(found && 
+                            (AdvancedFilterPanel.this.friendManager != null) &&
                             AdvancedFilterPanel.this.friendManager.isSignedIn());
                 }
             }
