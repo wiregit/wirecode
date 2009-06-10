@@ -221,6 +221,7 @@ public class LibraryTable extends MouseableTable {
                 throw new IllegalArgumentException("Unknown category:" + category);
             }
         } else {
+            setCellRenderer(AllTableFormat.NAME_INDEX, iconLabelRenderer);
             setCellRenderer(AllTableFormat.SIZE_INDEX, fileSizeRenderer.get());
         }
     }

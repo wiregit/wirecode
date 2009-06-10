@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -14,6 +15,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
@@ -27,6 +29,7 @@ import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.player.PlayerPanel;
 
+import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
@@ -68,19 +71,9 @@ public class LibraryPanel extends JPanel {
         
         categoryMatcher = new LibraryCategoryMatcher();
         
-        eventList = libraryManager.getLibraryManagedList().getSwingModel();
-        //TODO: SharedFileLists use a different lock so we can't create a pluggable list with them
-//        baseLibraryList = new PluggableList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
-//        currentFriendFilterChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager, sharedFileListManager);
-
-        
-        sortedList = GlazedListsFactory.sortedList(eventList);
-        filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
-        
         layoutComponents(headerBarDecorator, playerPanel);
-        
-        libraryTable.setEventList(sortedList, tableSelectionComboBox.getSelectedTabelFormat());
-        
+
+        setEventList(new BasicEventList<LocalFileItem>());
     }
     
     private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel) {
@@ -103,7 +96,25 @@ public class LibraryPanel extends JPanel {
         
     }
     
-    public void registerListeners() {
+    @Inject
+    void register() {
+//        eventList = libraryManager.getLibraryManagedList().getSwingModel();
+        //TODO: SharedFileLists use a different lock so we can't create a pluggable list with them
+//        baseLibraryList = new PluggableList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
+//        currentFriendFilterChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager, sharedFileListManager);
+
+        
+//        sortedList = GlazedListsFactory.sortedList(eventList);
+//        filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
+//        
+//        libraryTable.setEventList(sortedList, tableSelectionComboBox.getSelectedTabelFormat());
+        final LibraryFileList libraryList = libraryManager.getLibraryManagedList();
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                setEventList(libraryList.getSwingModel());
+            }
+        });
+        
         // listen for selection changes in the combo box and filter the table
         // replacing the table header as you do.
         tableSelectionComboBox.addActionListener(new ActionListener(){
@@ -145,13 +156,9 @@ public class LibraryPanel extends JPanel {
         return fileList != null && !fileList.getCollectionName().equals("Shared");
     }
     
-    private void selectTable(AbstractLibraryFormat<LocalFileItem> libraryTableFormat, Category category) {
-        //TODO: get appropriate filtered list
-        // Create sorted list and set table model.
-       
+    private void selectTable(AbstractLibraryFormat<LocalFileItem> libraryTableFormat, Category category) {       
         categoryMatcher.setCategoryFilter(category);
         setEventList(eventList);
-//        libraryTable.setTableFormat(libraryTableFormat);
         libraryTable.setupCellRenderers(category, libraryTableFormat);
         
         libraryTable.applySavedColumnSettings();
@@ -166,5 +173,4 @@ public class LibraryPanel extends JPanel {
         filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
         libraryTable.setEventList(filteredList, tableSelectionComboBox.getSelectedTabelFormat());
     }
-
 }

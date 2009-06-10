@@ -21,7 +21,6 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -36,10 +35,12 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
     private final JCheckBox checkBox;
     private final JLabel nameLabel;
     
+    private EditableSharingData data;
+    
     @Inject
     public LibrarySharingEditableRendererEditor() {
         super(new MigLayout("filly, insets 0, gap 0"));
-//        super(new FlowLayout());
+
         GuiUtils.assignResources(this);
        
         checkBox = new JCheckBox();
@@ -48,6 +49,8 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
             @Override
             public void actionPerformed(ActionEvent e) {
                 cancelCellEditing();
+                if(data != null)
+                    data.setIsSelected(checkBox.isSelected());
             }
         });
         nameLabel = new JLabel();
@@ -56,16 +59,20 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
         
         add(checkBox, "aligny center");
         add(nameLabel, "growx, alignx left, aligny center, wrap");
-        
-//        setOpaque(false);
+    }
+    
+    public boolean isSelected() {
+        return checkBox.isSelected();
     }
     
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
-        
-        if(value instanceof String) {
-            nameLabel.setText((String) value);
+
+        if(value instanceof EditableSharingData) {
+            data = (EditableSharingData) value;
+            nameLabel.setText(data.getName());
+            checkBox.setSelected(data.isSelected());
         } else {
             nameLabel.setText("");
             checkBox.setSelected(false);
@@ -77,8 +84,10 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        if(value instanceof String) {
-            nameLabel.setText((String) value);
+        if(value instanceof EditableSharingData) {
+            EditableSharingData data = (EditableSharingData) value;
+            nameLabel.setText(data.getName());
+            checkBox.setSelected(data.isSelected());
         } else {
             nameLabel.setText("");
             checkBox.setSelected(false);

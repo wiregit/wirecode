@@ -72,7 +72,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
     public LibraryPanel getComponent() {
         if(libraryPanel == null) {
             libraryPanel = libraryProvider.get();
-            libraryPanel.registerListeners();
+//            libraryPanel.registerListeners();
         }
 //        if(panel == null)
 //            panel = myLibraryFactory.createMyLibraryPanel(baseLibraryList, currentFriendFilterChanger);

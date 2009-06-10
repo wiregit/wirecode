@@ -2,8 +2,9 @@ package org.limewire.ui.swing.library.sharing;
 
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Dimension;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -50,24 +51,13 @@ public class LibrarySharingPanel {
                 
         GuiUtils.assignResources(this);
         
-        component = new JPanel();//{
-//            @Override
-//            public Dimension getPreferredSize() {
-//                return new Dimension(125, super.getPreferredSize().height);
-//            }
-//        };
+        component = new JPanel();
         component.setBackground(backgroundColor);
-        
-//        component.setMaximumSize(new Dimension(125, Integer.MAX_VALUE));
-//        component.setPreferredSize(component.getMaximumSize());
-//        component.setMinimumSize(new Dimension(125, 0));
         
         component.setBorder(BorderFactory.createMatteBorder(0,0,0,1, borderColor));
                
         component.setLayout(layout);
     }
-    
-
     
     public void showLoginView() {
         if(!layoutMap.containsKey(LOGIN_VIEW)) {
@@ -84,6 +74,7 @@ public class LibrarySharingPanel {
             component.add(newComponent, EDITABLE_VIEW);
             layoutMap.put(EDITABLE_VIEW, newComponent);
         }         
+        editablePanel.get().updateTableModel(Collections.unmodifiableList(currentList.getFriendIds()));
         layout.show(component, EDITABLE_VIEW);
     }
     
@@ -97,8 +88,22 @@ public class LibrarySharingPanel {
         layout.show(component, NONEDITABLE_VIEW);
     }
     
+    public void updateFriends(List<String> friends) {
+        List<String> currentFriends = Collections.unmodifiableList(currentList.getFriendIds());
+        for(String id : currentFriends) {
+            if(!friends.contains(id))
+                currentList.removeFriend(id);
+        }
+        for(String id: friends) {
+            if(!currentList.getFriendIds().contains(id))
+                currentList.addFriend(id);
+        }
+    }
+    
     public void setSharedFileList(SharedFileList currentFileList) {
-        this.currentList = currentList;
+        if(this.currentList == currentFileList)
+            return;
+        this.currentList = currentFileList;
 //        showLoginView();
         showNonEditableView();
     }

@@ -14,11 +14,11 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
 
-public class LibrarySharingTable extends JXTable {
+public class LibrarySharingTable<T> extends JXTable {
 
     @Resource private Color backgroundColor;
     
-    private EventList<String> eventList;
+    private EventList<T> eventList;
     
     private boolean isEditable = false;
     
@@ -28,17 +28,14 @@ public class LibrarySharingTable extends JXTable {
     public LibrarySharingTable() {
         GuiUtils.assignResources(this);
         
-        eventList = new BasicEventList<String>();        
-        eventList.add("test");
-        eventList.add("test 2");
-        eventList.add("test 3");
+        eventList = new BasicEventList<T>();        
         setEventList(eventList);
         
         initialize();
     }
     
-    public void setEventList(EventList<String> eventList) {
-        setModel(new EventTableModel<String>(eventList, new SharingTableFormat()));
+    public void setEventList(EventList<T> eventList) {
+        setModel(new EventTableModel<T>(eventList, new SharingTableFormat()));
     }
     
     public void enableEditing(boolean isEditable) {
@@ -46,8 +43,6 @@ public class LibrarySharingTable extends JXTable {
     }
     
     private void initialize() {
-//        setPreferredScrollableViewportSize(new Dimension(100,50));
-//        setFillsViewportHeight(true);
         setBackground(backgroundColor);
         setShowGrid(false, false);
         setTableHeader(null);
@@ -67,7 +62,7 @@ public class LibrarySharingTable extends JXTable {
         return true;
     }
     
-    private class SharingTableFormat implements TableFormat<String> {
+    private class SharingTableFormat implements TableFormat<T> {
 
         @Override
         public int getColumnCount() {
@@ -80,7 +75,7 @@ public class LibrarySharingTable extends JXTable {
         }
 
         @Override
-        public Object getColumnValue(String baseObject, int column) {
+        public Object getColumnValue(T baseObject, int column) {
             return baseObject;
         }
     }
