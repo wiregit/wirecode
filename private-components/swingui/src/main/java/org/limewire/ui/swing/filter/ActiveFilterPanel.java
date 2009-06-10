@@ -24,6 +24,7 @@ import org.limewire.ui.swing.util.GuiUtils;
  * Display panel for an active filter.
  */
 class ActiveFilterPanel extends JXPanel {
+    private static final int HORIZ_INSET = 12;
 
     @Resource(key="AdvancedFilter.filterWidth") private int filterWidth;
     @Resource private Color backgroundColor;
@@ -51,7 +52,7 @@ class ActiveFilterPanel extends JXPanel {
         setBackgroundPainter(new RectanglePainter(0, 0, 0, 0, 16, 16, true,
                 backgroundColor, 1.0f, borderColor));
         
-        label.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
+        label.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 3));
         label.setFont(textFont);
         label.setForeground(textColor);
         label.setHorizontalAlignment(JLabel.LEADING);
@@ -81,7 +82,7 @@ class ActiveFilterPanel extends JXPanel {
         });
         
         // Determine max label width.
-        int maxWidth = filterWidth - removeButton.getPreferredSize().width - 6;
+        int maxWidth = filterWidth - removeButton.getPreferredSize().width - HORIZ_INSET;
         
         add(removeButton, "gap 0 0");
         add(label       , "wmax " + maxWidth);
