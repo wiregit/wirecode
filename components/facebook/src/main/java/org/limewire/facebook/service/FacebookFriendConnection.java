@@ -321,9 +321,11 @@ public class FacebookFriendConnection implements FriendConnection {
                 loggedIn.set(true);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
             } catch (IOException e) {
+                LOG.debug("login error", e);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw new FriendException(e);
             } catch (JSONException e) {
+                LOG.debug("login error", e);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw new FriendException(e);
             } finally {

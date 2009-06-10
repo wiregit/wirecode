@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.util.Set;
 
@@ -16,13 +16,13 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @Singleton
-public class XMPPRemoteFileDescDeserializer implements RemoteFileDescDeserializer {
+public class FriendRemoteFileDescDeserializer implements RemoteFileDescDeserializer {
 
     private final AddressFactory addressFactory;
     private final FriendAddressResolver addressResolver;
 
     @Inject
-    public XMPPRemoteFileDescDeserializer(AddressFactory addressFactory, FriendAddressResolver addressResolver) {
+    public FriendRemoteFileDescDeserializer(AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         this.addressFactory = addressFactory;
         this.addressResolver = addressResolver;
     }
@@ -30,14 +30,14 @@ public class XMPPRemoteFileDescDeserializer implements RemoteFileDescDeserialize
     @Override
     @Inject
     public void register(RemoteFileDescFactory remoteFileDescFactory) {
-        remoteFileDescFactory.register(XMPPRemoteFileDesc.TYPE, this);
+        remoteFileDescFactory.register(FriendRemoteFileDesc.TYPE, this);
     }
     
     @Override
     public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
             long size, byte[] clientGUID, int speed, int quality, LimeXMLDocument xmlDoc,
             Set<? extends URN> urns, String vendor, long createTime) {
-        return new XMPPRemoteFileDesc((FriendAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
+        return new FriendRemoteFileDesc((FriendAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
     }
 
     /**
@@ -47,7 +47,7 @@ public class XMPPRemoteFileDescDeserializer implements RemoteFileDescDeserialize
      * Not all attributes will be preserved in the promotion process.
      */
     public RemoteFileDesc promoteRemoteFileDescAndExchangeAddress(RemoteFileDesc rfd, FriendAddress address) {
-       return new XMPPRemoteFileDesc(address, rfd.getIndex(), rfd.getFileName(), rfd.getSize(), rfd.getClientGUID(), rfd.getSpeed(), rfd.getQuality(), rfd.getXMLDocument(), rfd.getUrns(), 
+       return new FriendRemoteFileDesc(address, rfd.getIndex(), rfd.getFileName(), rfd.getSize(), rfd.getClientGUID(), rfd.getSpeed(), rfd.getQuality(), rfd.getXMLDocument(), rfd.getUrns(), 
                rfd.getVendor(), rfd.getCreationTime(), rfd.isHTTP11(), addressFactory, addressResolver); 
     }
 }

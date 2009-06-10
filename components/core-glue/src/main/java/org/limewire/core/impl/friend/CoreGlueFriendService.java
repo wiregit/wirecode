@@ -1,5 +1,6 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
+import org.limewire.core.impl.xmpp.FriendFileListProvider;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -11,7 +12,7 @@ import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 
 @Singleton
-public class CoreGlueXMPPService implements Service {
+public class CoreGlueFriendService implements Service {
 
     private final Provider<HTTPAcceptor> httpAcceptor;
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
@@ -24,7 +25,7 @@ public class CoreGlueXMPPService implements Service {
     final static String FRIEND_DOWNLOAD_PATTERN = FRIEND_DOWNLOAD_PREFIX + "*";
 
     @Inject
-    public CoreGlueXMPPService(Provider<HTTPAcceptor> httpAcceptor, HttpRequestHandlerFactory httpRequestHandlerFactory,
+    public CoreGlueFriendService(Provider<HTTPAcceptor> httpAcceptor, HttpRequestHandlerFactory httpRequestHandlerFactory,
            Provider<FriendFileListProvider> authenticatingBrowseFriendListProvider) {
         this.httpAcceptor = httpAcceptor;
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;

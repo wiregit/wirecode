@@ -85,7 +85,7 @@ public interface Friend {
      * The active presence is the presence currently
      * chatting with (sending msgs to) me
      *
-     * @return presence the active presence.  null if
+     * @return presence the active presence.  null if there is no active presence
      */
     FriendPresence getActivePresence();
 
@@ -111,15 +111,15 @@ public interface Friend {
     /**
      * Returns whether the current login is subscribed to this user.
      * This information is in the roster packet.
-     *
+     * <p>
      * For instance, if a user sends the current login a friend
      * add request, and the current login accepts, this method
      * will return true.
-     *
+     * <p>
      * In the following roster packet, my-mutually-accepted-friend is subscribed,
      * and friend-i-rejected-previously and friend-i-requested-but-has-not-responded
      * are not subscribed.
-     *
+     * <p>
      * <iq to="limebuddytest@gmail.com/WuXLh6tmNLC3320061" id="0Qj6D-15" type="result">
      *   <query xmlns="jabber:iq:roster">
      *     <item jid="my-mutually-accepted-friend@gmail.com" subscription="both" name="Lime Friend">

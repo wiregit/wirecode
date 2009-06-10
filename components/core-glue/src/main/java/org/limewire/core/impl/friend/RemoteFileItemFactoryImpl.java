@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -25,11 +25,11 @@ import com.limegroup.gnutella.util.DataUtils;
 
 @Singleton
 public class RemoteFileItemFactoryImpl implements RemoteFileItemFactory {
-    private final XMPPRemoteFileDescDeserializer remoteFileDescDeserializer;
+    private final FriendRemoteFileDescDeserializer remoteFileDescDeserializer;
     private final RemoteFileDescFactory remoteFileDescFactory;
 
     @Inject
-    public RemoteFileItemFactoryImpl(XMPPRemoteFileDescDeserializer remoteFileDescDeserializer, RemoteFileDescFactory remoteFileDescFactory) {
+    public RemoteFileItemFactoryImpl(FriendRemoteFileDescDeserializer remoteFileDescDeserializer, RemoteFileDescFactory remoteFileDescFactory) {
         this.remoteFileDescDeserializer = remoteFileDescDeserializer;
         this.remoteFileDescFactory = remoteFileDescFactory;
     }

@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -9,6 +9,8 @@ import java.util.Set;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
@@ -16,9 +18,6 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
-import org.limewire.core.api.friend.address.FriendAddress;
-import org.limewire.core.api.friend.address.FriendAddressResolver;
-
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
@@ -27,7 +26,7 @@ import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public class XMPPRemoteFileDesc implements RemoteFileDesc {
+public class FriendRemoteFileDesc implements RemoteFileDesc {
 
     private final FriendAddress address;
 
@@ -61,7 +60,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     
     private int hashCode = -1;
     
-    public XMPPRemoteFileDesc(FriendAddress address, long index, String filename,
+    public FriendRemoteFileDesc(FriendAddress address, long index, String filename,
             long size, byte[] clientGUID, int speed, int quality, LimeXMLDocument xmlDoc, Set<? extends URN> urns,
             String vendor, long createTime, boolean http11,
             AddressFactory addressFactory, FriendAddressResolver addressResolver) {
@@ -86,10 +85,10 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof XMPPRemoteFileDesc)) {
+        if (!(obj instanceof FriendRemoteFileDesc)) {
             return false;
         }
-        XMPPRemoteFileDesc other = (XMPPRemoteFileDesc)obj;
+        FriendRemoteFileDesc other = (FriendRemoteFileDesc)obj;
         if (!Arrays.equals(clientGUID, other.clientGUID)) {
             return false;
         }
@@ -158,7 +157,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
             return HTTPConstants.URI_RES_N2R + sha1Urn.httpStringValue();
         }
         try {
-            return CoreGlueXMPPService.FRIEND_DOWNLOAD_PREFIX + URLEncoder.encode(presence.getFriend().getNetwork().getCanonicalizedLocalID(), "UTF-8") + HTTPConstants.URI_RES_N2R + sha1Urn.httpStringValue();
+            return CoreGlueFriendService.FRIEND_DOWNLOAD_PREFIX + URLEncoder.encode(presence.getFriend().getNetwork().getCanonicalizedLocalID(), "UTF-8") + HTTPConstants.URI_RES_N2R + sha1Urn.httpStringValue();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

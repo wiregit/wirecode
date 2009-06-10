@@ -115,8 +115,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     
     /**
      * Sets the connection mode to idle (extended away) after receiving activity
-     * events triggered by periods of inactivity
-     * @param listenerSupport
+     * events triggered by periods of inactivity.
      */
     @Inject
     void register(ListenerSupport<XmppActivityEvent> listenerSupport) {

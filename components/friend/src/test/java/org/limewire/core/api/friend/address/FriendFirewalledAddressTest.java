@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.impl;
+package org.limewire.core.api.friend.address;
 
 import junit.framework.Test;
 
@@ -10,14 +10,14 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.core.api.friend.address.FriendAddress;
 import org.limewire.core.api.friend.address.FriendFirewalledAddress;
 
-public class XMPPFirewalledAddressTest extends BaseTestCase {
+public class FriendFirewalledAddressTest extends BaseTestCase {
 
-    public XMPPFirewalledAddressTest(String name) {
+    public FriendFirewalledAddressTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(XMPPFirewalledAddressTest.class);
+        return buildTestSuite(FriendFirewalledAddressTest.class);
     }
     
     public void testFieldsAreSetCorrectlyInConstructor() throws Exception {

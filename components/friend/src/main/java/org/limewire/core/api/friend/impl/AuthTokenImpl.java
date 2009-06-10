@@ -1,5 +1,7 @@
 package org.limewire.core.api.friend.impl;
 
+import java.util.Arrays;
+
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.util.Objects;
 
@@ -19,4 +21,11 @@ public class AuthTokenImpl implements AuthToken {
         return token;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AuthToken) {
+            return Arrays.equals(token, ((AuthToken)obj).getToken());
+        }
+        return false;
+    }
 }

@@ -67,8 +67,6 @@ class ChatManager {
      * A MessageReader will get associated with the friendId upon a chat being
      * initiated by the friend.
      *
-     * @param friendId
-     * @param listener
      */
     synchronized void setIncomingChatListener(String friendId, IncomingChatListener listener) {
         incomingChats.put(friendId, listener);

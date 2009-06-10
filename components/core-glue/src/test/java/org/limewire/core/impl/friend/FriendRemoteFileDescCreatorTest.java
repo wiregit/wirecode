@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,6 +13,7 @@ import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.BaseTestCase;
 import org.limewire.core.api.friend.address.FriendAddress;
 import org.limewire.core.api.friend.address.FriendAddressResolver;
+import org.limewire.core.impl.friend.FriendRemoteFileDescCreator;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -23,9 +24,9 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A series of tests for XMPPRemoteFileDescCreator.
  */
-public class XMPPRemoteFileDescCreatorTest extends BaseTestCase {
+public class FriendRemoteFileDescCreatorTest extends BaseTestCase {
 
-    public XMPPRemoteFileDescCreatorTest(String name) {
+    public FriendRemoteFileDescCreatorTest(String name) {
         super(name);
     }
     
@@ -37,7 +38,7 @@ public class XMPPRemoteFileDescCreatorTest extends BaseTestCase {
     
         final RemoteFileDescFactory remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
         
-        final XMPPRemoteFileDescCreator creator = new XMPPRemoteFileDescCreator(null, null);
+        final FriendRemoteFileDescCreator creator = new FriendRemoteFileDescCreator(null, null);
         
         context.checking(new Expectations() {{
             exactly(1).of(remoteFileDescFactory).register(creator);
@@ -66,7 +67,7 @@ public class XMPPRemoteFileDescCreatorTest extends BaseTestCase {
             }
         };
         
-        final XMPPRemoteFileDescCreator creator = new XMPPRemoteFileDescCreator(null, null);
+        final FriendRemoteFileDescCreator creator = new FriendRemoteFileDescCreator(null, null);
         
         context.checking(new Expectations() {{
             // None
@@ -95,8 +96,8 @@ public class XMPPRemoteFileDescCreatorTest extends BaseTestCase {
         final AddressFactory addressFactory = context.mock(AddressFactory.class);
         final FriendAddressResolver addressResolver = context.mock(FriendAddressResolver.class);
         
-        final XMPPRemoteFileDescCreator creator
-            = new XMPPRemoteFileDescCreator(addressFactory, addressResolver);
+        final FriendRemoteFileDescCreator creator
+            = new FriendRemoteFileDescCreator(addressFactory, addressResolver);
                         
         final FriendAddress address = context.mock(FriendAddress.class);
         

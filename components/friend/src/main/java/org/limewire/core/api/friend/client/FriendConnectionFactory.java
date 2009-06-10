@@ -18,7 +18,6 @@ public interface FriendConnectionFactory {
      *
      * @return a {@link ListeningFuture} of {@link FriendConnection}
      * 
-     * The ExecutionException will be to an XMPPException if an error occurs
      */
     public ListeningFuture<FriendConnection> login(FriendConnectionConfiguration configuration);
 

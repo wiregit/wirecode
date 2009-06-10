@@ -17,6 +17,8 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.BaseTestCase;
 import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
+import org.limewire.core.impl.friend.RemoteFileItemFactoryImpl;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -52,7 +54,7 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         
         final RemoteFileItemFactoryImpl factory
             = new RemoteFileItemFactoryImpl(
-                    new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver),
+                    new FriendRemoteFileDescDeserializer(addressFactory, addressResolver),
                     remoteFileDescFactory);
         
         context.checking(new Expectations() {{
@@ -119,7 +121,7 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         
         final RemoteFileItemFactoryImpl factory
             = new RemoteFileItemFactoryImpl(
-                    new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver),
+                    new FriendRemoteFileDescDeserializer(addressFactory, addressResolver),
                     remoteFileDescFactory);
         
         context.checking(new Expectations() {{
@@ -191,7 +193,7 @@ public class RemoteFileItemFactoryImplTest extends BaseTestCase {
         
         final RemoteFileItemFactoryImpl factory
             = new RemoteFileItemFactoryImpl(
-                    new XMPPRemoteFileDescDeserializer(addressFactory, addressResolver),
+                    new FriendRemoteFileDescDeserializer(addressFactory, addressResolver),
                     remoteFileDescFactory);
         
         context.checking(new Expectations() {{

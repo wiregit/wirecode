@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -41,9 +41,9 @@ import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
  * Connects an {@link org.limewire.core.api.friend.address.FriendFirewalledAddress} and tries to get a socket for it.
  */
 @Singleton
-class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHandler {
+class FriendFirewalledAddressConnector implements AddressConnector, PushedSocketHandler {
 
-    private static final Log LOG = LogFactory.getLog(XMPPFirewalledAddressConnector.class, LOGGING_CATEGORY);
+    private static final Log LOG = LogFactory.getLog(FriendFirewalledAddressConnector.class, LOGGING_CATEGORY);
     
     private final PushDownloadManager pushDownloadManager;
     private final NetworkManager networkManager;
@@ -57,7 +57,7 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
     private final Provider<SocketProcessor> socketProcessor;
 
     @Inject
-    public XMPPFirewalledAddressConnector(ConnectBackRequestSender connectRequestSender, PushDownloadManager pushDownloadManager,
+    public FriendFirewalledAddressConnector(ConnectBackRequestSender connectRequestSender, PushDownloadManager pushDownloadManager,
             NetworkManager networkManager, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<UDPSelectorProvider> udpSelectorProvider,
             Provider<SocketProcessor> socketProcessor) {

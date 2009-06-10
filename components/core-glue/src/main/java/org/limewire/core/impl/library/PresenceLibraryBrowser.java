@@ -23,8 +23,8 @@ import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
-import org.limewire.core.impl.xmpp.XMPPRemoteFileDescDeserializer;
 import org.limewire.io.Address;
 import org.limewire.io.IpPortSet;
 import org.limewire.listener.EventListener;
@@ -58,7 +58,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      */
     final Set<PresenceLibrary> librariesToBrowse = Collections.synchronizedSet(new HashSet<PresenceLibrary>());
 
-    private final XMPPRemoteFileDescDeserializer remoteFileDescDeserializer;
+    private final FriendRemoteFileDescDeserializer remoteFileDescDeserializer;
     
     /**
      * Is incremented when a new connectivity change event is received, should
@@ -75,7 +75,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
     @Inject
     public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManager remoteLibraryManager,
-            SocketsManager socketsManager, XMPPRemoteFileDescDeserializer remoteFileDescDeserializer) {
+            SocketsManager socketsManager, FriendRemoteFileDescDeserializer remoteFileDescDeserializer) {
         this.browseFactory = browseFactory;
         this.remoteLibraryManager = remoteLibraryManager;
         this.socketsManager = socketsManager;

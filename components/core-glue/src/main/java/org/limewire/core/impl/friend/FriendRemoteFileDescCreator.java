@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.util.Set;
 
@@ -16,16 +16,16 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * Creates {@link XMPPRemoteFileDesc} for {@link org.limewire.core.api.friend.address.FriendAddress}.
+ * Creates {@link FriendRemoteFileDesc} for {@link org.limewire.core.api.friend.address.FriendAddress}.
  */
 @Singleton
-public class XMPPRemoteFileDescCreator implements RemoteFileDescCreator {
+public class FriendRemoteFileDescCreator implements RemoteFileDescCreator {
 
     private final AddressFactory addressFactory;
     private final FriendAddressResolver addressResolver;
 
     @Inject
-    public XMPPRemoteFileDescCreator(AddressFactory addressFactory, FriendAddressResolver addressResolver) {
+    public FriendRemoteFileDescCreator(AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         this.addressFactory = addressFactory;
         this.addressResolver = addressResolver;
     }
@@ -48,7 +48,7 @@ public class XMPPRemoteFileDescCreator implements RemoteFileDescCreator {
             byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
             Set<? extends URN> urns, boolean replyToMulticast, String vendor,
             long createTime, boolean http1) {
-        return new XMPPRemoteFileDesc((FriendAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
+        return new FriendRemoteFileDesc((FriendAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
     }
 
 }

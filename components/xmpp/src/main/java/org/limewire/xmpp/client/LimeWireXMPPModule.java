@@ -5,14 +5,10 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.core.api.friend.address.FriendAddressRegistry;
-import org.limewire.core.api.friend.address.FriendAddressResolver;
-import org.limewire.core.api.friend.address.FriendAddressSerializer;
 import org.limewire.core.api.friend.client.ConnectBackRequestSender;
 import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.RosterEvent;
-import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
 import org.limewire.friend.impl.LimeWireFriendXmppModule;
 import org.limewire.listener.AsynchronousMulticaster;
 import org.limewire.listener.BroadcastPolicy;
@@ -89,13 +85,5 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(ConnectBackRequestIQListenerFactory.class).toProvider(FactoryProvider.newFactory(ConnectBackRequestIQListenerFactory.class, ConnectBackRequestIQListener.class));
         bind(LibraryChangedIQListenerFactory.class).toProvider(FactoryProvider.newFactory(LibraryChangedIQListenerFactory.class, LibraryChangedIQListener.class));
         
-        // bind egearly, so it registers itself with SocketsManager
-        bind(FriendAddressResolver.class).asEagerSingleton();
-        // dito
-        bind(FriendAddressSerializer.class).asEagerSingleton();
-        
-        bind(DefaultFriendAuthenticator.class).asEagerSingleton();
-        
-        bind(FriendAddressRegistry.class);
     }
 }

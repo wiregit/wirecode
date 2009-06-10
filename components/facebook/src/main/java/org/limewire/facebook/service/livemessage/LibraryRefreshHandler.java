@@ -36,7 +36,9 @@ public class LibraryRefreshHandler implements FeatureTransport<LibraryChangedNot
     @Override
     public void handle(String messageType, JSONObject message) {
         String from = message.optString("from", null);
-        handler.featureReceived(from, new LibraryChangedNotifier(){});
+        if (from != null) {
+            handler.featureReceived(from, new LibraryChangedNotifier(){});
+        }
     }
 
     @Override

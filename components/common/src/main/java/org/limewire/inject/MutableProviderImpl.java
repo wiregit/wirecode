@@ -2,7 +2,7 @@ package org.limewire.inject;
 
 /**
  * Simple default implementation of {@link MutableProvider}.
- * 
+ * <p>
  * Threadsafe.
  */
 public class MutableProviderImpl<T> implements MutableProvider<T> {

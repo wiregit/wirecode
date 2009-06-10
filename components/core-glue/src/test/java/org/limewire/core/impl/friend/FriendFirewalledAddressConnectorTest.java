@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.core.impl.friend;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,12 +13,14 @@ import java.util.concurrent.TimeUnit;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.core.api.friend.client.ConnectBackRequestSender;
+import org.limewire.core.api.friend.address.FriendAddress;
 import org.limewire.core.api.friend.address.FriendFirewalledAddress;
-import org.limewire.core.impl.xmpp.XMPPFirewalledAddressConnector.PushedSocketConnectObserver;
+import org.limewire.core.api.friend.client.ConnectBackRequestSender;
+import org.limewire.core.impl.friend.FriendFirewalledAddressConnector.PushedSocketConnectObserver;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
+import org.limewire.net.ConnectBackRequest;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.nio.AbstractNBSocket;
@@ -27,7 +29,6 @@ import org.limewire.rudp.AbstractNBSocketChannel;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
-import org.limewire.core.api.friend.address.FriendAddress;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.NetworkManager;
@@ -35,9 +36,9 @@ import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 
-public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
+public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
 
-    public XMPPFirewalledAddressConnectorTest(String name) {
+    public FriendFirewalledAddressConnectorTest(String name) {
         super(name);
     }
 
@@ -52,8 +53,8 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final SocketsManager socketsManager = context.mock(SocketsManager.class);
         final PushedSocketHandlerRegistry pushedSocketHandlerRegistry = context.mock(PushedSocketHandlerRegistry.class);
         
-        final XMPPFirewalledAddressConnector connector 
-            = new XMPPFirewalledAddressConnector(null, null, null, null, null, null);
+        final FriendFirewalledAddressConnector connector 
+            = new FriendFirewalledAddressConnector(null, null, null, null, null, null);
         
         context.checking(new Expectations() {
             {   exactly(1).of(socketsManager).registerConnector(connector);
@@ -84,8 +85,8 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final Address fwAddressCantConnect = context.mock(FirewalledAddress.class);
         final Address fwAddressCanConnect = context.mock(FirewalledAddress.class);
         
-        final XMPPFirewalledAddressConnector connector 
-            = new XMPPFirewalledAddressConnector(null, pushDownloadManager, null, null, null, null);
+        final FriendFirewalledAddressConnector connector 
+            = new FriendFirewalledAddressConnector(null, pushDownloadManager, null, null, null, null);
         
         context.checking(new Expectations() {
             {   allowing(adressCantConnect).getFirewalledAddress();
@@ -137,8 +138,8 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final InputStream isWithIOE = context.mock(InputStream.class);
         final OutputStream osWithIOE = context.mock(OutputStream.class);
         
-        final XMPPFirewalledAddressConnector connector 
-            = new XMPPFirewalledAddressConnector(null, null, null, null, null, null);
+        final FriendFirewalledAddressConnector connector 
+            = new FriendFirewalledAddressConnector(null, null, null, null, null, null);
         
         context.checking(new Expectations() {
             {
@@ -294,8 +295,8 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
     
         final MatchAndCopy<Runnable> runnableCollector = new MatchAndCopy<Runnable>(Runnable.class);
         
-        final XMPPFirewalledAddressConnector connector 
-            = new XMPPFirewalledAddressConnector(connectRequestSender, null, networkManager,
+        final FriendFirewalledAddressConnector connector 
+            = new FriendFirewalledAddressConnector(connectRequestSender, null, networkManager,
                     backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
         
         context.checking(new Expectations() {
@@ -341,7 +342,7 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 exactly(1).of(networkManager).acceptedIncomingConnection();
                 will(returnValue(false));
                 
-                exactly(1).of(connectRequestSender).send("403", null);
+                exactly(1).of(connectRequestSender).send("403", new ConnectBackRequest(publicConnectable, guid, 407));
                 will(returnValue(true));
                 
                 exactly(1).of(socket).connect(with(same(inetSocketAddr)),
@@ -409,8 +410,8 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final InetAddress inetAddr = context.mock(InetAddress.class);
         final InetSocketAddress inetSocketAddr = context.mock(InetSocketAddress.class);
         
-        final XMPPFirewalledAddressConnector connector 
-            = new XMPPFirewalledAddressConnector(connectRequestSender, null, networkManager,
+        final FriendFirewalledAddressConnector connector 
+            = new FriendFirewalledAddressConnector(connectRequestSender, null, networkManager,
                 backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
         
         context.checking(new Expectations() {
@@ -473,8 +474,8 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
         final InetAddress inetAddr = context.mock(InetAddress.class);
         final InetSocketAddress inetSocketAddr = context.mock(InetSocketAddress.class);
     
-        final XMPPFirewalledAddressConnector connector 
-            = new XMPPFirewalledAddressConnector(connectRequestSender, pushDownloadManager, networkManager,
+        final FriendFirewalledAddressConnector connector 
+            = new FriendFirewalledAddressConnector(connectRequestSender, pushDownloadManager, networkManager,
                     backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
         
         context.checking(new Expectations() {
@@ -507,10 +508,10 @@ public class XMPPFirewalledAddressConnectorTest extends BaseTestCase {
                 exactly(2).of(networkManager).acceptedIncomingConnection();
                 will(returnValue(true));
                 
-                exactly(1).of(connectRequestSender).send("403", null);
+                exactly(1).of(connectRequestSender).send("403", new ConnectBackRequest(publicConnectable, guid, 0));
                 will(returnValue(false));
                 
-                exactly(1).of(connectRequestSender).send("403", null);
+                exactly(1).of(connectRequestSender).send("403", new ConnectBackRequest(publicConnectable, guid, 0));
                 will(returnValue(true));
                 
                 exactly(1).of(pushDownloadManager).connect(fwAddress, observer);

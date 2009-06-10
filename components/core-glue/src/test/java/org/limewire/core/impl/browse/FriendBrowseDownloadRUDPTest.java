@@ -31,9 +31,9 @@ import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.CoreGlueModule;
+import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
-import org.limewire.core.impl.xmpp.XMPPRemoteFileDescDeserializer;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.IpPort;
 import org.limewire.io.UnresolvedIpPort;
@@ -251,12 +251,12 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
 
         private final Map<String, SearchResult> searchResults;
         private final CountDownLatch latch;
-        private final XMPPRemoteFileDescDeserializer searchResultToXmppAdapter;
+        private final FriendRemoteFileDescDeserializer searchResultToXmppAdapter;
         private final FriendPresence presence;
 
         BrowseStatistics(FriendPresence presence) {
             this.presence = presence;
-            this.searchResultToXmppAdapter = injector.getInstance(XMPPRemoteFileDescDeserializer.class);
+            this.searchResultToXmppAdapter = injector.getInstance(FriendRemoteFileDescDeserializer.class);
             this.searchResults = new ConcurrentHashMap<String, SearchResult>();
             this.latch = new CountDownLatch(1);
         }

@@ -10,6 +10,9 @@ import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendManager;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
+import org.limewire.core.api.friend.address.FriendAddressRegistry;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
+import org.limewire.core.api.friend.address.FriendAddressSerializer;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
@@ -87,7 +90,16 @@ public class LimeWireFriendModule extends AbstractModule {
         
         EventMulticaster<LibraryChangedEvent> libraryChangedMulticaster = new EventMulticasterImpl<LibraryChangedEvent>();
         bind(new TypeLiteral<EventBroadcaster<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
-        bind(new TypeLiteral<ListenerSupport<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);        
+        bind(new TypeLiteral<ListenerSupport<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
+        
+        // bind egearly, so it registers itself with SocketsManager
+        bind(FriendAddressResolver.class).asEagerSingleton();
+        // dito
+        bind(FriendAddressSerializer.class).asEagerSingleton();
+        
+        bind(DefaultFriendAuthenticator.class).asEagerSingleton();
+        
+        bind(FriendAddressRegistry.class);
     }
     
     @Provides @Named("known") Collection<Friend> knownFriendsList(MutableFriendManagerImpl friendManager) {
