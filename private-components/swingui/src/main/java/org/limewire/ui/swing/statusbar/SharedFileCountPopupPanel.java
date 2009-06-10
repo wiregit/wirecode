@@ -204,14 +204,15 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     
     @Override
     public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        
         if (table == null && visible) {
             initContent();
         }
         
-        super.setVisible(visible);
-        
         if (visible) {
             resize();
+            frame.repaint();
         }
     }
     
