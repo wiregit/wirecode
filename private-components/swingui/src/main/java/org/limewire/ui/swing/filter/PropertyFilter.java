@@ -63,6 +63,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     
     private FunctionList<E, Object> propertyList;
     private FilterList<Object> nonNullList;
+    private UniqueListFactory<Object> uniqueListFactory;
     private UniqueList<Object> uniqueList;
     private EventSelectionModel<Object> selectionModel;
     private EventSelectionModel<Object> popupSelectionModel;
@@ -152,7 +153,9 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
         // Create list of unique property values.
         propertyList = createPropertyList(resultsList);
         nonNullList = createNonNullList(propertyList);
-        uniqueList = GlazedListsFactory.uniqueList(nonNullList, new PropertyComparator(filterType, propertyKey));
+        uniqueListFactory = new UniqueListFactory<Object>(nonNullList, new PropertyComparator(filterType, propertyKey));
+        uniqueListFactory.setName(getPropertyText());
+        uniqueList = uniqueListFactory.getUniqueList();
         
         // Initialize "more" button.
         moreButton.setVisible(uniqueList.size() > 3);
@@ -202,8 +205,8 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
     
     @Override
     public void dispose() {
-        // Dispose of property list.  Since all other lists are based on the
-        // property list, these will be freed for GC also.
+        // Dispose of property list.
+        uniqueListFactory.dispose();
         propertyList.dispose();
     }
     
