@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -18,6 +20,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -51,7 +54,8 @@ class ConnectionStatusPanel extends JXPanel {
     @Resource private Font font;
 
     @Inject
-    ConnectionStatusPanel(final GnutellaConnectionManager gnutellaConnectionManager) {
+    ConnectionStatusPanel(final GnutellaConnectionManager gnutellaConnectionManager,
+            final LoginPopupPanel panelz) {
         
         GuiUtils.assignResources(this);
         
@@ -73,6 +77,13 @@ class ConnectionStatusPanel extends JXPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 gnutellaConnectionManager.restart();
+            }
+        });
+        
+        connectionStrengthLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                panelz.setVisible(!panelz.isVisible());
             }
         });
         

@@ -30,6 +30,7 @@ import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
+import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -57,6 +58,7 @@ public class LimeWireSwingUI extends JPanel {
             SearchHandler searchHandler, ChatFramePanel chatFrame,
             AudioPlayer player,
             SharedFileCountPopupPanel sharedFileCountPopup,
+            LoginPopupPanel loginPopup,
 //            ShapeDialog shapeDialog, 
             ProNagController proNagController, 
             MainDownloadPanel mainDownloadPanel, Provider<DownloadHeaderPanel> downloadHeaderPanelProvider) {
@@ -107,6 +109,8 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.add(chatFrame, JLayeredPane.PALETTE_LAYER);
         layeredPane.addComponentListener(new PanelResizer(chatFrame));
         layeredPane.add(sharedFileCountPopup, JLayeredPane.PALETTE_LAYER);
+        layeredPane.addComponentListener(new PanelResizer(sharedFileCountPopup));
+        layeredPane.add(loginPopup, JLayeredPane.POPUP_LAYER);
         layeredPane.addComponentListener(new PanelResizer(sharedFileCountPopup));
 //        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
 //        layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);

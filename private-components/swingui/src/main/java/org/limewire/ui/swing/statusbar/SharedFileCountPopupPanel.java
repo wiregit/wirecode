@@ -109,6 +109,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
         frame = new JXPanel(new BorderLayout());
         frame.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border));
+        frame.setPreferredSize(new Dimension(300, 200));
         
         HeaderBar bar = new HeaderBar(I18n.tr("Sharing"));
         barDecorator.decorateBasic(bar);
@@ -193,13 +194,6 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         frame.add(scrollPane, BorderLayout.CENTER);
 
         add(frame, BorderLayout.CENTER);
-        
-        frame.setPreferredSize(new Dimension(300, 200));
-        
-        frame.validate();
-        frame.invalidate();
-        validate();
-        invalidate();
     }
     
     @Override
@@ -212,6 +206,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
         if (visible) {
             resize();
+            validate();
             frame.repaint();
         }
     }
