@@ -120,7 +120,12 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
     private void discoverFeatures(String entityName) {
         try {
             ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(smackConnection);
-            serviceDiscoveryManager.discoverInfo(entityName);
+
+            // check for null due to race condition between whoever is doing feature discovery
+            // and smack connection shutting down.  if shut down, no features worth discovering.
+            if (serviceDiscoveryManager != null) {
+                serviceDiscoveryManager.discoverInfo(entityName);
+            }
         } catch (org.jivesoftware.smack.XMPPException exception) {
             if (exception.getXMPPError() != null &&
                     !exception.getXMPPError().getCondition().
