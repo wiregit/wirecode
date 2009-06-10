@@ -11,7 +11,7 @@ dnsjava.version=2.0.6
 EventBus.version=1.2b
 gettext-commons.version=
 glazedlists.version=1.7.0_java15
-guice.version=snapshot20090512
+guice.version=2.0-snapshot-20090610
 guice-assistedinject.version=snapshot20090512
 hamcrest-core.version
 hamcrest-library.version=

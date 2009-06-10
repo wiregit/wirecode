@@ -13,7 +13,6 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
-import com.google.inject.internal.BytecodeGen;
 import com.google.inject.spi.BindingScopingVisitor;
 
 /**
@@ -89,7 +88,7 @@ public class LazyBinder<T> implements Provider<T> {
     }
     
     private static <T> T createProxy(Class<T> expected, final Provider<? extends T> provider) {
-        ClassLoader classLoader = BytecodeGen.getClassLoader(expected);
+        ClassLoader classLoader = expected.getClassLoader();
         return expected.cast(Proxy.newProxyInstance(classLoader, new Class[] { expected },
                 new InvocationHandler() {
                     @Override

@@ -4,10 +4,8 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.EventObject;
-import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
@@ -29,7 +27,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
-import org.limewire.inject.Modules;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
@@ -295,17 +292,14 @@ public class AppFrame extends SingleFrameApplication {
                 bind(AppFrame.class).toInstance(AppFrame.this);
             }
         };
+        Injector childInjector;
         if (injector == null) {
             LimeMozillaInitializer.initialize();
-            injector = Guice.createInjector(Stage.PRODUCTION, new MockModule(), new LimeWireSwingUiModule(false), thiz);
-            return injector;
+            childInjector = Guice.createInjector(Stage.PRODUCTION, new MockModule(), new LimeWireSwingUiModule(false), thiz);
         } else {
-            List<Module> modules = new ArrayList<Module>();
-            modules.add(thiz);
-            modules.add(new LimeWireSwingUiModule(injector.getInstance(Application.class).isProVersion()));
-            modules.add(Modules.providersFrom(injector)); // Add all the parent bindings
-            return Guice.createInjector(Stage.PRODUCTION, modules);
-        }
+            childInjector = injector.createChildInjector(thiz, new LimeWireSwingUiModule(injector.getInstance(Application.class).isProVersion()));
+        }        
+        return childInjector;
     }
     
     /**
