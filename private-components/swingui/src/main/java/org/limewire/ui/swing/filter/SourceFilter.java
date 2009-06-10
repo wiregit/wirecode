@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -19,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -55,15 +57,15 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private final JPanel panel = new JPanel();
     private final JLabel label = new JLabel();
     private final JXList list = new JXList();
-    private final HyperlinkButton friendButton = new HyperlinkButton();
+    private final HyperlinkButton moreButton = new HyperlinkButton();
     private final List<FriendListener> friendListenerList = new ArrayList<FriendListener>();
     
     private EventList<SourceItem> sourceList;
-    //private UniqueListFactory<SourceItem> uniqueSourceListFactory; TODO
+    private UniqueListFactory<SourceItem> uniqueSourceListFactory;
     private UniqueList<SourceItem> uniqueSourceList;
     
     private EventList<SourceItem> friendList;
-    //private UniqueListFactory<SourceItem> uniqueFriendListFactory; TODO
+    private UniqueListFactory<SourceItem> uniqueFriendListFactory;
     private UniqueList<SourceItem> uniqueFriendList;
     
     private UniqueList<SourceItem> currentUniqueList;
@@ -106,16 +108,16 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         // Add listener to show cursor on mouse over.
         list.addMouseListener(new RolloverCursorListener());
         
-        friendButton.setAction(new FriendAction());
-        friendButton.setBorder(BorderFactory.createEmptyBorder(0, 1, 1, 1));
-        friendButton.setContentAreaFilled(false);
-        friendButton.setFocusPainted(false);
-        friendButton.setFont(resources.getRowFont());
-        friendButton.setHorizontalTextPosition(JButton.LEADING);
+        moreButton.setAction(new MoreAction());
+        moreButton.setBorder(BorderFactory.createEmptyBorder(0, 1, 1, 1));
+        moreButton.setContentAreaFilled(false);
+        moreButton.setFocusPainted(false);
+        moreButton.setFont(resources.getRowFont());
+        moreButton.setHorizontalTextPosition(JButton.LEADING);
         
         // Add listener to set popup trigger indicator.  This activates logic
-        // so that pressing "friend" a second time closes an open popup.
-        friendButton.addMouseListener(new MouseAdapter() {
+        // so that pressing "more" a second time closes an open popup.
+        moreButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
                 if (filterPopupPanel != null) {
@@ -137,9 +139,9 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         list.setPrototypeCellValue("Type");
         int listHeight = 3 * list.getFixedCellHeight();
         
-        panel.add(label       , "gap 6 6, wrap");
-        panel.add(list        , "hmax " + listHeight + ", grow, wrap");
-        panel.add(friendButton, "gap 6 6");
+        panel.add(label     , "gap 6 6, wrap");
+        panel.add(list      , "hmax " + listHeight + ", grow, wrap");
+        panel.add(moreButton, "gap 6 6");
     }
     
     /**
@@ -148,17 +150,15 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private void initialize(EventList<E> resultsList) {
         // Create list of unique source values.
         sourceList = createSourceList(resultsList);
-        //uniqueSourceListFactory = new UniqueListFactory<SourceItem>(sourceList, new SourceItemComparator());
-        //uniqueSourceListFactory.setName(I18n.tr("Sources"));
-        //uniqueSourceList = uniqueSourceListFactory.getUniqueList(); TODO
-        uniqueSourceList = GlazedListsFactory.uniqueList(sourceList, new SourceItemComparator());
+        uniqueSourceListFactory = new UniqueListFactory<SourceItem>(sourceList, new SourceItemComparator());
+        uniqueSourceListFactory.setName(I18n.tr("Sources"));
+        uniqueSourceList = uniqueSourceListFactory.getUniqueList();
         
         // Create list of unique friend values.
         friendList = createFriendList(resultsList);
-        //uniqueFriendListFactory = new UniqueListFactory<SourceItem>(friendList, new SourceItemComparator());
-        //uniqueFriendListFactory.setName(I18n.tr("Friends"));
-        //uniqueFriendList = uniqueFriendListFactory.getUniqueList(); TODO
-        uniqueFriendList = GlazedListsFactory.uniqueList(friendList, new SourceItemComparator());
+        uniqueFriendListFactory = new UniqueListFactory<SourceItem>(friendList, new SourceItemComparator());
+        uniqueFriendListFactory.setName(I18n.tr("Friends"));
+        uniqueFriendList = uniqueFriendListFactory.getUniqueList();
         
         // Add listener to update unique list in use.
         uniqueSourceList.addListEventListener(new ListEventListener<SourceItem>() {
@@ -169,8 +169,33 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             }
         });
         
-        // Update current unique list.
-        updateAnonymousFound();
+        // Set unique list for filter.
+        currentUniqueList = uniqueFriendList;
+        updateFilterList();
+    }
+    
+    /**
+     * Updates the filter list using the current unique list.
+     */
+    private void updateFilterList() {
+        // Dispose of old models and lists.
+        if (selectionListener != null) list.removeListSelectionListener(selectionListener);
+        if (listModel != null) listModel.dispose();
+        if (selectionModel != null) selectionModel.dispose();
+        if (sortedList != null) sortedList.dispose();
+        
+        // Create sorted list using current unique list.
+        sortedList = GlazedListsFactory.sortedList(currentUniqueList, new SourceItemCountComparator());
+        
+        // Create list and selection models.
+        listModel = new EventListModel<SourceItem>(sortedList);
+        selectionModel = new EventSelectionModel<SourceItem>(sortedList);
+        list.setSelectionModel(selectionModel);
+        list.setModel(listModel);
+        
+        // Add selection listener to update filter.
+        selectionListener = new SelectionListener(selectionModel);
+        list.addListSelectionListener(selectionListener);
     }
     
     /**
@@ -187,13 +212,6 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
      */
     public void removeFriendListener(FriendListener listener) {
         friendListenerList.remove(listener);
-    }
-    
-    /**
-     * Returns an indicator that is true if any friend sources are found.
-     */
-    public boolean isAnyFriendFound() {
-        return anyFriendFound;
     }
     
     @Override
@@ -217,8 +235,8 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     @Override
     public void dispose() {
         // Dispose of source and friend lists.
-        //uniqueSourceListFactory.dispose(); TODO
-        //uniqueFriendListFactory.dispose(); TODO
+        uniqueSourceListFactory.dispose();
+        uniqueFriendListFactory.dispose();
         ((TransformedList) sourceList).dispose();
         ((TransformedList) friendList).dispose();
     }
@@ -240,7 +258,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     @Override
     protected void deactivate() {
         super.deactivate();
-        getComponent().setVisible(true);
+        getComponent().setVisible(anyFriendFound);
     }
     
     /**
@@ -318,29 +336,23 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             found = (uniqueSourceList.getCount(SourceItem.ANONYMOUS_SOURCE) > 0);
         }
         
-        // Update current unique list if necessary.
+        // Update current unique list only if changed.
         UniqueList<SourceItem> newList = found ? uniqueSourceList : uniqueFriendList;
         if (currentUniqueList == newList) return;
         currentUniqueList = newList;
         
-        // Dispose of old list models.
-        if (selectionListener != null) list.removeListSelectionListener(selectionListener);
-        if (listModel != null) listModel.dispose();
-        if (selectionModel != null) selectionModel.dispose();
-        if (sortedList != null) sortedList.dispose();
+        // Update button label.
+        moreButton.getAction().putValue(Action.NAME, found ? I18n.tr("friends") : I18n.tr("more"));
         
-        // Create sorted list.
-        sortedList = GlazedListsFactory.sortedList(currentUniqueList, new SourceItemCountComparator());
-        
-        // Create list and selection models.
-        listModel = new EventListModel<SourceItem>(sortedList);
-        selectionModel = new EventSelectionModel<SourceItem>(sortedList);
-        list.setSelectionModel(selectionModel);
-        list.setModel(listModel);
-        
-        // Add selection listener to update filter.
-        selectionListener = new SelectionListener(selectionModel);
-        list.addListSelectionListener(selectionListener);
+        // Post Runnable on event queue to update list.  Because this method is
+        // handling a listChanged event, we need to post a new event to modify
+        // the list.
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                updateFilterList();
+            }
+        });
     }
     
     /**
@@ -394,7 +406,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         if (filterPopupPanel == null) {
             filterPopupPanel = createFriendPopup();
         }
-        filterPopupPanel.showPopup(friendButton, list.getWidth() - 12, label.getY() - friendButton.getY());
+        filterPopupPanel.showPopup(moreButton, list.getWidth() - 12, label.getY() - moreButton.getY());
     }
     
     /**
@@ -409,9 +421,9 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     /**
      * Action to display list of all friends in popup window.
      */
-    private class FriendAction extends AbstractAction {
+    private class MoreAction extends AbstractAction {
 
-        public FriendAction() {
+        public MoreAction() {
             super(I18n.tr("more"));
         }
         
@@ -466,7 +478,9 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     }
     
     /**
-     * Cell renderer for SourceItem values.
+     * Cell renderer for SourceItem values.  Note that the filter list uses the
+     * current unique list, while the popup list always uses the unique friend
+     * list.
      */
     private class SourceCellRenderer extends DefaultListCellRenderer {
         private final Color background;
