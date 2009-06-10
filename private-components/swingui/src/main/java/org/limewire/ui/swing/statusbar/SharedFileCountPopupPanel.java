@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -18,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.Timer;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
@@ -53,9 +55,10 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     @Resource private Font headerFont;
     
     private final SharedFileCountPanel sharedFileCountPanel;
+    private final HeaderBarDecorator barDecorator;
     private final SharedFileListManager shareListManager;
     
-    private final JXPanel frame;
+    private JXPanel frame = null;
     private JTable table = null;
     
     private final AbstractAction closeAction = new AbstractAction(I18n.tr("Hide")) {
@@ -72,30 +75,11 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
+        this.barDecorator = barDecorator;
         this.shareListManager = shareListManager;
         
         GuiUtils.assignResources(this);
         
-        ResizeUtils.forceSize(this, new Dimension(300, 200));
-        
-        frame = new JXPanel(new BorderLayout());
-        frame.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border));
-        
-        HeaderBar bar = new HeaderBar(I18n.tr("Sharing"));
-        barDecorator.decorateBasic(bar);
-        bar.setFont(headerFont);
-        bar.setLayout(new BorderLayout());
-        ResizeUtils.forceHeight(bar, 18);
-        
-        HyperlinkButton closeButton = new HyperlinkButton(closeAction);
-        closeButton.setFont(headerFont);
-        closeButton.setNormalForeground(Color.WHITE);
-        closeButton.setRolloverForeground(Color.WHITE);
-        bar.add(closeButton, BorderLayout.EAST);
-        
-        frame.add(bar, BorderLayout.NORTH);
-        add(frame, BorderLayout.CENTER);
-
         setUpButton();
         
         setVisible(false);
@@ -106,9 +90,6 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         sharedFileCountPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (!isVisible()) {
-                    resize();
-                }
                 setVisible(!isVisible());
                 sharedFileCountPanel.repaint();
             }
@@ -126,6 +107,23 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     
     private void initContent() {
         
+        frame = new JXPanel(new BorderLayout());
+        frame.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border));
+        
+        HeaderBar bar = new HeaderBar(I18n.tr("Sharing"));
+        barDecorator.decorateBasic(bar);
+        bar.setFont(headerFont);
+        bar.setLayout(new BorderLayout());
+        ResizeUtils.forceHeight(bar, 18);
+        
+        HyperlinkButton closeButton = new HyperlinkButton(closeAction);
+        closeButton.setFont(headerFont);
+        closeButton.setNormalForeground(Color.WHITE);
+        closeButton.setRolloverForeground(Color.WHITE);
+        bar.add(closeButton, BorderLayout.EAST);
+        
+        frame.add(bar, BorderLayout.NORTH);
+
         JPanel contentPanel = new JPanel(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         
@@ -170,24 +168,22 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         table.setFocusable(false);
         table.setCellSelectionEnabled(false);
 
-        final ListEventListener<LocalFileItem> repaintListener = new ListEventListener<LocalFileItem>() {
-            @Override
-            public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                table.repaint();
-            }
-        };
+        final ListEventListener<LocalFileItem> repaintListener = new RepaintListener();
+            
+ 
         
         for ( SharedFileList item : shareListManager.getModel() ) {
             item.getSwingModel().addListEventListener(repaintListener);
         }
         
-        // TODO: Swing safe?
         shareListManager.getModel().addListEventListener(new ListEventListener<SharedFileList>() {
             @Override
             public void listChanged(ListEvent<SharedFileList> listChanges) {
                 while(listChanges.next()) {
-                    listChanges.getSourceList().get(listChanges.getIndex()).
-                        getModel().addListEventListener(repaintListener);
+                    if (listChanges.getType() == ListEvent.INSERT) {
+                        listChanges.getSourceList().get(listChanges.getIndex()).
+                            getModel().addListEventListener(repaintListener);
+                    }
                 }
             }
         });
@@ -195,22 +191,34 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         contentPanel.add(table, BorderLayout.CENTER);
 
         frame.add(scrollPane, BorderLayout.CENTER);
+
+        add(frame, BorderLayout.CENTER);
         
+        frame.setPreferredSize(new Dimension(300, 200));
+        
+        frame.validate();
         frame.invalidate();
+        validate();
+        invalidate();
     }
     
     @Override
     public void setVisible(boolean visible) {
-        if (table == null && visible && frame!= null) {
+        if (table == null && visible) {
             initContent();
         }
+        
         super.setVisible(visible);
+        
+        if (visible) {
+            resize();
+        }
     }
     
     @Override
     public void resize() {
         Rectangle parentBounds = getParent().getBounds();
-        Dimension childPreferredSize = getPreferredSize();
+        Dimension childPreferredSize = frame.getPreferredSize();
         int w = (int) childPreferredSize.getWidth();
         int h = (int) childPreferredSize.getHeight();
         setBounds((int)sharedFileCountPanel.getBounds().getX(),
@@ -255,5 +263,26 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                 g.drawLine(width-1, 3, width-1, height-4);
             }
         }    
+    }
+    
+    private class RepaintListener implements ListEventListener<LocalFileItem> {
+            
+        private final Timer repaintTimer; 
+            
+        public RepaintListener() {
+        
+            repaintTimer = new Timer(15, new ActionListener() {
+                   @Override
+                   public void actionPerformed(ActionEvent e) {
+                       table.repaint();
+                   }
+            });
+            repaintTimer.setRepeats(false);
+        } 
+            
+        @Override
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+            repaintTimer.start();
+        }
     }
 }
