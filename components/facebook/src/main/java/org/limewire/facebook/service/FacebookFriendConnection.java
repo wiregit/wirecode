@@ -360,6 +360,11 @@ public class FacebookFriendConnection implements FriendConnection {
     private void fetchAllFriends() {
         try {
             JSONArray friends = facebookClient.friends_get();
+
+            // friends is null when i have no friends
+            if (friends == null) {
+                return;
+            }
             List<Long> friendIds = new ArrayList<Long>(friends.length());
             for (int i = 0; i < friends.length(); i++) {
                 friendIds.add(friends.getLong(i));
