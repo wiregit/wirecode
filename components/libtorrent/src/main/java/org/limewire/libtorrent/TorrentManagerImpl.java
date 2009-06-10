@@ -25,7 +25,6 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -239,11 +238,7 @@ public class TorrentManagerImpl implements TorrentManager {
         lock.writeLock().lock();
         try {
             String sha1 = torrent.getSha1();
-            libTorrent.pause_torrent(sha1);
-            // 
             libTorrent.move_torrent(sha1, directory.getAbsolutePath());
-            FileUtils.forceRename(torrent.getIncompleteFile(), torrent.getCompleteFile());
-            libTorrent.resume_torrent(sha1);
             updateStatus(torrent);
         } finally {
             lock.writeLock().unlock();
