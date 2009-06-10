@@ -14,11 +14,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.JTable;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -29,19 +32,26 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.swing.EventTableModel;
+
 import com.google.inject.Inject;
 
 public class SharedFileCountPopupPanel extends Panel implements Resizable {
    
-    private final SharedFileCountPanel sharedFileCountPanel;
-    private final JXPanel frame;
-    
     @Resource private Color dividerForeground = PainterUtils.TRASPARENT;;
     @Resource private Color rolloverBackground = PainterUtils.TRASPARENT;
     @Resource private Color activeBackground = PainterUtils.TRASPARENT;
     @Resource private Color activeBorder = PainterUtils.TRASPARENT;
     @Resource private Color border = PainterUtils.TRASPARENT;
     @Resource private Font headerFont;
+    
+    private final SharedFileCountPanel sharedFileCountPanel;
+    private final SharedFileListManager shareListManager;
+    
+    private final JXPanel frame;
+        
+    private boolean inited = false;
     
     private final AbstractAction closeAction = new AbstractAction(I18n.tr("Hide")) {
         @Override
@@ -53,12 +63,14 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
     @Inject
     public SharedFileCountPopupPanel(SharedFileCountPanel sharedFileCountPanel,
-            HeaderBarDecorator barDecorator) {
+            HeaderBarDecorator barDecorator, SharedFileListManager shareListManager) {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
+        this.shareListManager = shareListManager;
         
         GuiUtils.assignResources(this);
+        
         ResizeUtils.forceSize(this, new Dimension(300, 200));
         
         frame = new JXPanel(new BorderLayout());
@@ -84,6 +96,42 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         setVisible(false);
     }
     
+    private void initContent() {
+        
+        
+        
+        JTable table = new JTable(new EventTableModel<SharedFileList>(shareListManager.getModel(),
+                new TableFormat<SharedFileList>() {
+                    @Override
+                    public int getColumnCount() {
+                        return 2;
+                    }
+
+                    @Override
+                    public String getColumnName(int column) {
+                        if (column == 0) {
+                            return "name";
+                        } 
+                        else {
+                            return "files";
+                        }
+                            
+                    }
+
+                    @Override
+                    public Object getColumnValue(SharedFileList baseObject, int column) {
+                        if (column == 0) {
+                            return baseObject.getCollectionName();
+                        } 
+                        else {
+                            return baseObject.size();
+                        }
+                    }
+        }));
+        
+        frame.add(table, BorderLayout.CENTER);
+    }
+    
     @Inject
     public void register() {
         sharedFileCountPanel.addMouseListener(new MouseAdapter() {
@@ -105,6 +153,15 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                 }
             }
         });
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        if (!inited && visible && frame!= null) {
+            initContent();
+            inited = true;
+        }
+        super.setVisible(visible);
     }
     
     @Override
