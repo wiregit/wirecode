@@ -24,6 +24,7 @@ import org.limewire.ui.swing.util.GuiUtils;
  * Display panel for an active filter.
  */
 class ActiveFilterPanel extends JXPanel {
+    private static final int PREF_HEIGHT = 18;
     private static final int HORIZ_INSET = 12;
 
     @Resource(key="AdvancedFilter.filterWidth") private int filterWidth;
@@ -48,19 +49,19 @@ class ActiveFilterPanel extends JXPanel {
         setLayout(new MigLayout("insets 0 0 0 0, gap 0!", 
                 "[left][right]", "[center]"));
         setOpaque(false);
-        setPreferredSize(new Dimension(0, 18));
         setBackgroundPainter(new RectanglePainter(0, 0, 0, 0, 16, 16, true,
                 backgroundColor, 1.0f, borderColor));
         
-        label.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 3));
+        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 3));
         label.setFont(textFont);
         label.setForeground(textColor);
         label.setHorizontalAlignment(JLabel.LEADING);
         label.setVerticalAlignment(JLabel.CENTER);
         label.setText((String) removeAction.getValue(Action.NAME));
+        label.setPreferredSize(new Dimension(label.getPreferredSize().width, PREF_HEIGHT));
         
         removeButton.setAction(removeAction);
-        removeButton.setBorder(BorderFactory.createEmptyBorder(5, 5, 3, 5));
+        removeButton.setBorder(BorderFactory.createEmptyBorder(4, 5, 4, 5));
         removeButton.setContentAreaFilled(false);
         removeButton.setFocusPainted(false);
         removeButton.setIcon(removeDefaultIcon);
@@ -85,7 +86,7 @@ class ActiveFilterPanel extends JXPanel {
         int maxWidth = filterWidth - removeButton.getPreferredSize().width - HORIZ_INSET;
         
         add(removeButton, "gap 0 0");
-        add(label       , "wmax " + maxWidth);
+        add(label       , "wmax " + maxWidth + ", hmin " + PREF_HEIGHT);
     }
     
 }
