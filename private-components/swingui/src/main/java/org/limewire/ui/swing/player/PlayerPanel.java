@@ -43,6 +43,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.jacob.com.NotImplementedException;
 
 /**
@@ -124,9 +125,12 @@ public class PlayerPanel extends JXPanel {
     private static final String FORWARD = "FORWARD";
     private static final String VOLUME = "VOLUME";
 
+    private final Provider<PlayerMediator> playerMediator;
+    
     @Inject
-    public PlayerPanel(//AudioPlayer player, //LibraryMediator libraryMediator, 
+    public PlayerPanel(Provider<PlayerMediator> playerMediator,//AudioPlayer player, //LibraryMediator libraryMediator, 
             SliderBarDecorator sliderBarDecorator) {
+        this.playerMediator = playerMediator;
 //        this.player = player;
 //        this.libraryMediator = libraryMediator;
 

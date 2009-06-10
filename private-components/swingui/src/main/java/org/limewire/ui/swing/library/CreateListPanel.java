@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JDialog;
 import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
@@ -10,6 +11,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -30,19 +32,26 @@ public class CreateListPanel extends JXPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(nameTextField != null && nameTextField.getText().trim().length() > 0) {
-
-                    //TODO: move to executor
-                    Thread t = new Thread(new Runnable(){
-                        public void run() { 
+                    BackgroundExecutorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
                           shareManager.get().createNewSharedFileList(nameTextField.getText());
                         }
                     });
-                    t.start();
+                    hideDialog();
                 }
             }
         });
         
         add(nameTextField, "span");
         add(createButton, "skip 1, alignx right");
+    }
+    
+    private void hideDialog() {
+        getTopLevelAncestor().setVisible(false);
+        nameTextField.setText("");
+        if(getTopLevelAncestor() instanceof JDialog) {
+            ((JDialog)getTopLevelAncestor()).dispose();
+        }
     }
 }

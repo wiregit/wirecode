@@ -20,6 +20,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
@@ -36,6 +37,7 @@ import ca.odell.glazedlists.SortedList;
 
 import com.google.inject.Inject;
 
+@LazySingleton
 public class LibraryPanel extends JPanel {
 
     private final HeaderBar headerBar = new HeaderBar();
