@@ -37,6 +37,7 @@ import org.limewire.util.Objects;
 
 import ca.odell.glazedlists.CollectionList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.FunctionList.Function;
@@ -66,6 +67,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
     private UniqueList<SourceItem> uniqueFriendList;
     
     private UniqueList<SourceItem> currentUniqueList;
+    private SortedList<SourceItem> sortedList;
     private EventListModel<SourceItem> listModel;
     private EventSelectionModel<SourceItem> selectionModel;
     private EventSelectionModel<SourceItem> popupSelectionModel;
@@ -325,10 +327,14 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
         if (selectionListener != null) list.removeListSelectionListener(selectionListener);
         if (listModel != null) listModel.dispose();
         if (selectionModel != null) selectionModel.dispose();
+        if (sortedList != null) sortedList.dispose();
+        
+        // Create sorted list.
+        sortedList = GlazedListsFactory.sortedList(currentUniqueList, new SourceItemCountComparator());
         
         // Create list and selection models.
-        listModel = new EventListModel<SourceItem>(currentUniqueList);
-        selectionModel = new EventSelectionModel<SourceItem>(currentUniqueList);
+        listModel = new EventListModel<SourceItem>(sortedList);
+        selectionModel = new EventSelectionModel<SourceItem>(sortedList);
         list.setSelectionModel(selectionModel);
         list.setModel(listModel);
         
@@ -521,6 +527,20 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             } else {
                 return -1;
             }
+        }
+    }
+    
+    /**
+     * A Comparator to sort SourceItem values by their result count.
+     */
+    private class SourceItemCountComparator implements Comparator<SourceItem> {
+
+        @Override
+        public int compare(SourceItem item1, SourceItem item2) {
+            int count1 = currentUniqueList.getCount(item1);
+            int count2 = currentUniqueList.getCount(item2);
+            // Return inverse value to sort in descending order.
+            return (count1 < count2) ? 1 : ((count1 > count2) ? -1 : 0);
         }
     }
     
