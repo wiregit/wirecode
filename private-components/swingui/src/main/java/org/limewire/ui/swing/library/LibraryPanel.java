@@ -23,6 +23,7 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.library.actions.AddFileAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.sharing.LibrarySharingPanel;
@@ -61,7 +62,7 @@ public class LibraryPanel extends JPanel {
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, LibraryManager libraryManager,
-            SharedFileListManager sharedFileListManager, PlayerPanel playerPanel) {
+            SharedFileListManager sharedFileListManager, PlayerPanel playerPanel, AddFileAction addFileAction) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.navigatorComponent = navPanel;
@@ -73,17 +74,17 @@ public class LibraryPanel extends JPanel {
         
         categoryMatcher = new LibraryCategoryMatcher();
         
-        layoutComponents(headerBarDecorator, playerPanel);
+        layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 
         setEventList(new BasicEventList<LocalFileItem>());
     }
     
-    private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel) {
+    private void layoutComponents(HeaderBarDecorator headerBarDecorator, PlayerPanel playerPanel, AddFileAction addFileAction) {
         headerBarDecorator.decorateBasic(headerBar);
         
         headerBar.setLayout(new MigLayout("insets 0, gap 0, fill"));
         headerBar.setDefaultComponentHeight(-1);
-        createAddFilesButton();
+        createAddFilesButton(addFileAction);
         headerBar.add(addFilesButton);
         headerBar.add(playerPanel, "grow, align 50%");
         headerBar.add(tableSelectionComboBox, "alignx right, gapright 5");
@@ -167,8 +168,8 @@ public class LibraryPanel extends JPanel {
         libraryTable.applySavedColumnSettings();
     }
     
-    private void createAddFilesButton() {
-        addFilesButton = new JXButton("Add Files");
+    private void createAddFilesButton(AddFileAction addFileAction) {
+        addFilesButton = new JXButton(addFileAction);
     }
     
     private void setEventList(EventList<LocalFileItem> eventList) {
