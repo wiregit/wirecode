@@ -148,6 +148,9 @@ public class ChatListener implements Runnable {
                     handler.newChatState(state);
                 }
             } else {
+                // this can happen, when we just signed off and removed all friend presences
+                // but the friend is currently typing to us an the connection is not
+                // closed yet, it's ok in this case
                 LOG.debugf("no handler for sender: {0}", parsedSenderId);
             }
         } else {

@@ -197,7 +197,6 @@ public class FacebookFriendConnection implements FriendConnection {
         this.libraryRefreshHandler = libraryRefreshHandlerFactory.create(this);
         this.chatManager = new ChatManager(this);
         this.sessionId = createSessionId();
-        System.out.println("connection id: " + sessionId);
     }
     
     private static String createSessionId() {
@@ -714,12 +713,12 @@ public class FacebookFriendConnection implements FriendConnection {
         });
     }
 
-    void sendChatMessage(String userId, String message) throws FriendException {
+    void sendChatMessage(String friendId, String message) throws FriendException {
         List <NameValuePair> nvps = new ArrayList <NameValuePair>();
         nvps.add(new BasicNameValuePair("msg_text", (message == null)? "":message));
         nvps.add(new BasicNameValuePair("msg_id", new Random().nextInt(999999999) + ""));
         nvps.add(new BasicNameValuePair("client_time", new Date().getTime() + ""));
-        nvps.add(new BasicNameValuePair("to", userId));
+        nvps.add(new BasicNameValuePair("to", friendId));
 
         String post_form_id = postFormID.get();
         if(post_form_id != null) {
@@ -727,26 +726,51 @@ public class FacebookFriendConnection implements FriendConnection {
         }
         try {
             String resp = httpPOST("http://www.facebook.com", "/ajax/chat/send.php", nvps);
-            LOG.debugf("chat status {0}", resp);
+            handleChatResponseError(friendId, resp);
         } catch (IOException e) {
             throw new FriendException(e);    
         }
     }
 
-    void sendChatStateUpdate(String userId, ChatState state) throws FriendException {
+    void sendChatStateUpdate(String friendId, ChatState state) throws FriendException {
 
         List <NameValuePair> nvps = new ArrayList <NameValuePair>();
         nvps.add(new BasicNameValuePair("typ", (state == ChatState.composing)? "1" : "0"));
-        nvps.add(new BasicNameValuePair("to", userId));
+        nvps.add(new BasicNameValuePair("to", friendId));
 
         String post_form_id = postFormID.get();
         if(post_form_id != null) {
             nvps.add(new BasicNameValuePair("post_form_id", post_form_id));
         }
         try {
-            httpPOST("http://www.facebook.com", "/ajax/chat/typ.php", nvps);
+            String resp = httpPOST("http://www.facebook.com", "/ajax/chat/typ.php", nvps);
+            handleChatResponseError(friendId, resp);
         } catch (IOException e) {
             throw new FriendException(e);
+        }
+    }
+    
+    private void handleChatResponseError(String friendId, String response) {
+        String prefix = "for (;;);";
+        if (response.startsWith(prefix)) {
+            response = response.substring(prefix.length());
+        }
+        try {
+            JSONObject json = new JSONObject(response);
+            int error = json.getInt("error");
+            if (error == 1356003) {
+                LOG.debugf("friend offline: {0}, full response: {1}", friendId, response);
+                FacebookFriend friend = getFriend(friendId);
+                if (friend != null) {
+                    removeAllPresences(friend);
+                } else {
+                    LOG.debug("friend already removed");
+                }
+            } else if (error != 0) {
+                LOG.debugf("unhandled error: {0}", response);
+            }
+        } catch (JSONException e) {
+            LOG.debugf(e, "error parsing chat response {0}", response);
         }
     }
     
@@ -830,7 +854,11 @@ public class FacebookFriendConnection implements FriendConnection {
                     if(!facebookFriend.isSignedIn()) {
                         friendManager.removeAvailableFriend(facebookFriend);
                     }
+                } else {
+                    LOG.debugf("remove presence, no presence to remove: {0}", presenceId);
                 }
+            } else {
+                LOG.debugf("remove presence, no friend found for id {0}", presenceId);
             }
         }     
     }
