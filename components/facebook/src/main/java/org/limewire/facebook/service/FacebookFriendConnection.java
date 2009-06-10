@@ -501,6 +501,7 @@ public class FacebookFriendConnection implements FriendConnection {
         int logoutURLBeginPos = homePage.indexOf(logoutURLPrefix);
         int logoutURLEndPos = homePage.indexOf("\">", logoutURLBeginPos);
         if (logoutURLBeginPos < 0){
+            LOG.debugf("logout url not in homepage: {0}", homePage);
             throw new IOException("can't find logout URL");
         }
         else {
