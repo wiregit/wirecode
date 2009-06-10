@@ -111,7 +111,8 @@ public class LibraryPanel extends JPanel {
         final LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {
-                setEventList(libraryList.getSwingModel());
+                eventList = libraryList.getSwingModel();
+                selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
             }
         });
         
