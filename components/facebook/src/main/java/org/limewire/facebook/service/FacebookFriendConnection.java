@@ -98,6 +98,8 @@ public class FacebookFriendConnection implements FriendConnection {
     private static final String FACEBOOK_LOGIN_POST_ACTION_URL = "https://login.facebook.com/login.php?";
     private static final String FACEBOOK_GET_SESSION_URL = "http://coelacanth:5555/getsession/";
     private static final String FACEBOOK_CHAT_SETTINGS_URL = "https://www.facebook.com/ajax/chat/settings.php?";
+    private static final String INCORRECT_LOGIN_INDICATOR_TEXT = "Incorrect Email/Password Combination";
+    private static final String INVALID_LOGIN_HTTP_RESPONSE = "Invalid HTTP login response";
     private String authToken;
     private String session;
     private String uid;
@@ -411,7 +413,7 @@ public class FacebookFriendConnection implements FriendConnection {
         }
     }
 
-    private void loginToFacebook() throws IOException {   
+    private void loginToFacebook() throws IOException {
         LOG.debugf("getting facebook login URL from {0}...", FACEBOOK_LOGIN_GET_URL);
         HttpGet loginGet = new HttpGet(FACEBOOK_LOGIN_GET_URL);
         loginGet.addHeader("User-Agent", USER_AGENT_HEADER);
@@ -440,11 +442,7 @@ public class FacebookFriendConnection implements FriendConnection {
         httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
         HttpResponse responsePost = httpClient.execute(httpost);
-        entity = responsePost.getEntity();
-
-        if (entity != null) {
-            entity.consumeContent();
-        }
+        validateLoginResponse(responsePost);
     }
 
     private void requestSession() throws IOException, JSONException {
@@ -455,6 +453,22 @@ public class FacebookFriendConnection implements FriendConnection {
         parseSessionResponse(response);        
     }
 
+    private void validateLoginResponse(HttpResponse responsePost) throws IOException {
+        // validate http response code
+        if (responsePost.getStatusLine().getStatusCode() != 200) {
+            throw new IOException(INVALID_LOGIN_HTTP_RESPONSE);
+        }
+        HttpEntity entity = responsePost.getEntity();
+
+        if (entity != null) {
+            String response = EntityUtils.toString(entity);
+            if (response.contains(INCORRECT_LOGIN_INDICATOR_TEXT)) {
+                throw new IOException("authentication failure due to invalid username and/or password.");
+            }
+            entity.consumeContent();
+        }
+    }
+
     private void parseSessionResponse(HttpResponse response) throws IOException, JSONException {
         String responseBody = EntityUtils.toString(response.getEntity());        
 		if (responseBody.matches( "[\\{\\[].*[\\}\\]]")) {
@@ -463,7 +477,7 @@ public class FacebookFriendConnection implements FriendConnection {
                 json = new JSONObject(responseBody);
             } else {
                 LOG.debugf("body doesn't match inner regex: {0}", responseBody);
-                //json = new JSONArray(responseBody);
+                throw new IOException(INVALID_LOGIN_HTTP_RESPONSE);
             }
             session = json.getString("session_key");
             secret = json.getString("secret");
@@ -477,6 +491,7 @@ public class FacebookFriendConnection implements FriendConnection {
             }
 		} else {
 		    LOG.debugf("body doesn't match regex: {0}", responseBody);
+            throw new IOException(INVALID_LOGIN_HTTP_RESPONSE);
 		}
     }
     
