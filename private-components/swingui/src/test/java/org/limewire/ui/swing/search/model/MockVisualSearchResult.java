@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search.model;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +64,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public Collection<Friend> getFriends() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
