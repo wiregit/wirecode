@@ -424,4 +424,13 @@ public class TorrentImpl implements Torrent {
         }
         torrentManager.registerTorrent(this);
     }
+
+    @Override
+    public int getNumConnections() {
+        TorrentStatus status = getStatus();
+        if(status != null) {
+            return status.getNumConnections();
+        }
+        return 0; 
+    }
 }

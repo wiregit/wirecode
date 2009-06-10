@@ -215,4 +215,9 @@ public interface Torrent {
      */
     void addListener(EventListener<TorrentEvent> listener);
 
+    /**
+     * Returns the number of connections this torrent has. 
+     */
+    public int getNumConnections();
+
 }

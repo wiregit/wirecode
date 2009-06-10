@@ -266,7 +266,7 @@ public class BTUploader implements Uploader,  EventListener<TorrentEvent> {
 
     @Override
     public int getNumUploadConnections() {
-        return torrent.getNumUploads();
+        return torrent.getNumConnections();
     }
 
     @Override
