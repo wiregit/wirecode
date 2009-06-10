@@ -1,9 +1,10 @@
 package org.limewire.ui.swing.filter;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -18,6 +19,7 @@ public class MockFilterableItem implements FilterableItem {
     private Category category;
     private String name;
     private HashMap<FilePropertyKey, Object> properties = new HashMap<FilePropertyKey, Object>();
+    private Set<Friend> friends = new HashSet<Friend>();
     
     public MockFilterableItem(Category category) {
         this.category = category;
@@ -39,7 +41,7 @@ public class MockFilterableItem implements FilterableItem {
     
     @Override
     public Collection<Friend> getFriends() {
-        return Collections.emptySet();
+        return friends;
     }
 
     @Override
@@ -85,5 +87,9 @@ public class MockFilterableItem implements FilterableItem {
     @Override
     public URN getUrn() {
         return null;
+    }
+    
+    public void addFriend(Friend friend) {
+        friends.add(friend);
     }
 }
