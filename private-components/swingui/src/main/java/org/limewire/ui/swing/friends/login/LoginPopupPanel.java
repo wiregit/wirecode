@@ -20,6 +20,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -78,7 +79,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
         });
         
         headerBar.add(titleBarLabel, "gapleft 3, gapbottom 3, dock west, growx");
-        headerBar.add(closeButton, "gapright 3, gaptop 0, dock east, growx");
+        headerBar.add(closeButton, "gapright 2, gaptop 0, dock east, aligny top, pad -2 0 0 0");
         
         contentPanel = new JPanel(new BorderLayout());
         contentPanel.setOpaque(false);
@@ -116,6 +117,11 @@ public class LoginPopupPanel extends Panel implements Resizable {
         setBounds((int)parentBounds.getWidth()/2-w/2,
                 (int)parentBounds.getHeight()/2-h/2+20,
                 w, h);
+    }
+    
+    
+    public void setSelectedService(XMPPAccountConfiguration config) {
+        System.out.println(config.getLabel());
     }
 
 }

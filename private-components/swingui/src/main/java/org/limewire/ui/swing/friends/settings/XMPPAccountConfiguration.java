@@ -16,6 +16,12 @@ public interface XMPPAccountConfiguration extends XMPPConnectionConfiguration {
     public Icon getIcon();
     
     /**
+     * Returns a large icon associated with the account, such as the logo of the
+     * service provider. May be null.
+     */
+    public Icon getLargeIcon();
+    
+    /**
      * Sets the label that the UI will display to identify the account.
      */
     public void setLabel(String label);

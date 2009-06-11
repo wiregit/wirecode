@@ -22,6 +22,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     private final boolean modifyUser;
     private final boolean requiresDomain;
     private final Icon icon;
+    private final Icon largeIcon;
     
     private volatile String serviceName;
     private volatile String label;
@@ -35,16 +36,16 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     private final List<UnresolvedIpPort> defaultServers;
     
     /** Constructs an XMPPAccountConfiguration with the following parameters. */
-    public XMPPAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers) {
-        this(requireDomain, serviceName, label, icon, resource, defaultServers, true);
+    public XMPPAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, Icon largeIcon, String resource, List<UnresolvedIpPort> defaultServers) {
+        this(requireDomain, serviceName, label, icon, largeIcon, resource, defaultServers, true);
     }
     
     /** Constructs a basic XMPPAccountConfiguration that cannot modify the serviceName. */
     public XMPPAccountConfigurationImpl(String serviceName, String label, String resource) {
-        this(false, serviceName, label, null, resource, UnresolvedIpPort.EMPTY_LIST, false);
+        this(false, serviceName, label, null, null, resource, UnresolvedIpPort.EMPTY_LIST, false);
     }
     
-    private XMPPAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers, boolean modifyUser) {
+    private XMPPAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, Icon largeIcon, String resource, List<UnresolvedIpPort> defaultServers, boolean modifyUser) {
         this.resource = resource;
         this.modifyUser = modifyUser;
         this.isDebugEnabled = false;
@@ -55,6 +56,11 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
             this.icon = icon;
         } else {
             this.icon = new EmptyIcon(16, 16);
+        }
+        if(largeIcon != null) {
+            this.largeIcon = largeIcon;
+        } else {
+            this.largeIcon = new EmptyIcon(32, 32);
         }
         this.username = "";
         this.canonicalId = "";
@@ -90,6 +96,11 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     @Override
     public Icon getIcon() {
         return icon;
+    }
+    
+    @Override
+    public Icon getLargeIcon() {
+        return largeIcon;
     }
 
     @Override

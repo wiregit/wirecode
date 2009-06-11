@@ -4,24 +4,33 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
+import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
-
-import net.miginfocom.swing.MigLayout;
 
 import com.google.inject.Inject;
 
 public class ServiceSelectionLoginPanel extends JPanel {
     
+    private static final String CONFIG = "limewire.configProperty";
+    
+    private final LoginPopupPanel parent;
+    
     @Inject
-    public ServiceSelectionLoginPanel() {
+    public ServiceSelectionLoginPanel(LoginPopupPanel parent, XMPPAccountConfigurationManager accountManager) {
         super(new BorderLayout());
         setOpaque(false);
+    
+        this.parent = parent;        
         
         JPanel topPanel = new JPanel(new MigLayout("insets 0, gap 0, alignx center, flowy"));
         
@@ -60,14 +69,35 @@ public class ServiceSelectionLoginPanel extends JPanel {
         
         JPanel selectionPanel = new JPanel(new MigLayout("gap 0, insets 0, alignx center, filly"));
         selectionPanel.setOpaque(false);
-        selectionPanel.add(new JButton("Facebook"), "gaptop 10, gapafter 30");
-        selectionPanel.add(new JButton("Gmail"), "wrap");
-        selectionPanel.add(new JButton("LiveJournal"), "gaptop 30");
-        selectionPanel.add(new JButton(I18n.tr("Other")));
+        selectionPanel.add(new JButton("Facebook"), "gaptop 10, gapright 30");
+        selectionPanel.add(new JButton(new ServiceAction(accountManager.getConfig("Gmail"))), "wrap");
+        selectionPanel.add(new JButton(new ServiceAction(accountManager.getConfig("LiveJournal"))), "gapright 30, gaptop 30");
+        selectionPanel.add(new JButton(new ServiceAction(I18n.tr("Other"), accountManager.getConfig("Jabber"))));
         bottomPanel.add(selectionPanel);
         
         add(topPanel, BorderLayout.NORTH);
         add(bottomPanel, BorderLayout.CENTER);
+        
+    }
+    
+    private class ServiceAction extends org.limewire.ui.swing.action.AbstractAction {
+
+        public ServiceAction(XMPPAccountConfiguration config) {
+            super(config.getLabel(), config.getLargeIcon());
+            putValue(CONFIG, config);
+        }
+        
+        public ServiceAction(String nameOverride, XMPPAccountConfiguration config) {
+            super(nameOverride, config.getLargeIcon());
+            this.
+            putValue(CONFIG, config);
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            parent.setSelectedService((XMPPAccountConfiguration)getValue(CONFIG));
+        }
+        
     }
 
 }

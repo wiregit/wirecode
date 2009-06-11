@@ -97,9 +97,9 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
 
     private void loadWellKnownServers() {
         XMPPAccountConfiguration gmail =
-            new XMPPAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, resource, getGTalkServers());
+            new XMPPAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, null, resource, getGTalkServers());
         XMPPAccountConfiguration livejournal =
-            new XMPPAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, resource, getLiveJournalServers());
+            new XMPPAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, null, resource, getLiveJournalServers());
 
         configs.put(gmail.getLabel(), gmail);
         configs.put(livejournal.getLabel(), livejournal);
