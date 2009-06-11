@@ -187,7 +187,7 @@ public class BrowseStatusPanel extends JXPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            new BrowserRefresher(status.getBrowseSearch(), searchResultsModel).refresh();
+            new BrowseSearchRefresher(status.getBrowseSearch(), searchResultsModel).refresh();
         }        
     }
   

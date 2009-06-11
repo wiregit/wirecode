@@ -68,7 +68,7 @@ public class BrowseFailedMessagePanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 BrowseFailedMessagePanel.this.setVisible(false);
-                new BrowserRefresher(browseSearch, searchResultsModel).refresh();
+                new BrowseSearchRefresher(browseSearch, searchResultsModel).refresh();
             }
         });
         messageComponent.decorateHeaderLink(refresh);
