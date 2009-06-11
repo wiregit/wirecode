@@ -197,17 +197,30 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 loggedIn.set(true);
                 connectionMulticaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTED));
             } catch (org.jivesoftware.smack.XMPPException e) {
-                connectionMulticaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
-                if(connection != null && connection.isConnected()) {
-                    connection.disconnect();
-                }
-                org.jivesoftware.smack.XMPPConnection.removeConnectionCreationListener(smackConnectionListener);
-                connection = null;
+                handleLoginError(e);
                 throw new FriendException(e);
+            } catch (RuntimeException e) {
+                handleLoginError(e);
+                throw e;
             } finally {
                 loggingIn.set(false);
             }
         }
+    }
+
+    /**
+     * Unwind upon login error - broadcast login failed, remove conn creation
+     * listener from smack, set conn to null, disconnect if need be, etc
+     *
+     * @param e Exception which occurred during login
+     */
+    private synchronized void handleLoginError(Exception e) {
+        connectionMulticaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
+        if (connection != null && connection.isConnected()) {
+            connection.disconnect();
+        }
+        org.jivesoftware.smack.XMPPConnection.removeConnectionCreationListener(smackConnectionListener);
+        connection = null;
     }
 
     private void connect() throws org.jivesoftware.smack.XMPPException {

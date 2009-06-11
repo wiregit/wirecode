@@ -207,6 +207,10 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                 connections.remove(connection);
                 LOG.debug(e.getMessage(), e);
                 throw new FriendException(e);
+            } catch (RuntimeException e) {
+                connections.remove(connection);
+                LOG.debug(e.getMessage(), e);
+                throw e;
             }
         }
     }
