@@ -330,6 +330,10 @@ public class FacebookFriendConnection implements FriendConnection {
                 LOG.debug("login error", e);
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw new FriendException(e);
+            } catch (RuntimeException e) {
+                LOG.debug("unexpected login error; probable bug", e);
+                connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
+                throw e;
             } finally {
                 loggingIn.set(false);
             }
@@ -386,8 +390,10 @@ public class FacebookFriendConnection implements FriendConnection {
             }
         } catch (FacebookException e) {
             LOG.debug("friend error", e);
+            throw new RuntimeException("FIX ME!", e);
         } catch (JSONException e) {
             LOG.debug("json error", e);
+            throw new RuntimeException("FIX ME!", e);
         }
     }
     
@@ -409,7 +415,7 @@ public class FacebookFriendConnection implements FriendConnection {
             }
             return limeWireIds;    
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("FIX ME!",e);
         }
     }
 
