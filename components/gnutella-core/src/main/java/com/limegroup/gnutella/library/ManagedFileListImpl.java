@@ -577,7 +577,10 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             managedDirectories.add(dir);
           
             File[] dirList = dir.listFiles(new ManagedDirectoryFilter());
-            fifo.addAll(Arrays.asList(dirList));
+            if(dirList == null)
+                LOG.debugf("Could not list contents of {0}", dir);
+            else
+                fifo.addAll(Arrays.asList(dirList));
         }
     }
 
