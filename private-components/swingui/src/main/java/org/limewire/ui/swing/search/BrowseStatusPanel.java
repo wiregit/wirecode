@@ -2,24 +2,30 @@ package org.limewire.ui.swing.search;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.VerticalLayout;
+import org.jdesktop.swingx.painter.Painter;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.search.model.browse.BrowseSearch;
 import org.limewire.ui.swing.search.model.browse.BrowseStatus;
 import org.limewire.ui.swing.search.model.browse.BrowseStatus.BrowseState;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -32,9 +38,22 @@ public class BrowseStatusPanel extends JXPanel {
     private JButton warningButton;
     private JXPanel refreshPanel;
     private JButton refreshButton;
+    private JLabel updatesLabel;
     
-    @Resource
-    private Icon warningIcon;
+    @Resource private Icon warningIcon;    
+    @Resource private int arcWidth;
+    @Resource private int arcHeight;
+    @Resource private Color innerBorder;
+    @Resource private Color innerBackground;
+    @Resource private Color bevelLeft;
+    @Resource private Color bevelTop1;
+    @Resource private Color bevelTop2;
+    @Resource private Color bevelRight;
+    @Resource private Color bevelBottom;
+    @Resource private Font font;
+    @Resource private Color foreground;
+    @Resource private Color headerForeground;
+    @Resource private Font headerFont;
 
     private SearchResultsModel searchResultsModel;
     
@@ -45,26 +64,32 @@ public class BrowseStatusPanel extends JXPanel {
         setOpaque(false);        
         initializeComponents();        
         layoutComponents();
-        setInitialVisibility();
-    }
-
-    private void setInitialVisibility() {
-        warningButton.setVisible(false);
-        refreshPanel.setVisible(false);        
+        update();
     }
 
     private void initializeComponents() {        
         warningButton = new IconButton(warningIcon);
-        warningButton.setAction(new WarningAction());
+        warningButton.addActionListener(new WarningAction());
         
         refreshPanel = new JXPanel();
+        refreshPanel.setOpaque(false);
+        refreshPanel.setBackgroundPainter(createRefreshBackgroundPainter());
+        
+        updatesLabel = new JLabel(I18n.tr("There are updates!"));
+        updatesLabel.setFont(font);
+        updatesLabel.setForeground(foreground);
+        
         refreshButton = new HyperlinkButton(new RefreshAction());
+        refreshButton.setFont(font);
     }
 
-    private void layoutComponents() {        
-        refreshPanel.add(new JLabel(I18n.tr("There are updates!")));
-        refreshPanel.add(refreshButton);
+    private void layoutComponents() {    
+        refreshPanel.setLayout(new MigLayout("insets 6 8 6 8, gap 0, novisualpadding, aligny 50%, fill"));        
         
+        refreshPanel.add(updatesLabel);
+        refreshPanel.add(refreshButton, "gapleft 3");
+        
+        setLayout(new MigLayout("insets 0, gap 0, novisualpadding, filly"));
         add(warningButton);
         add(refreshPanel);
     }
@@ -83,43 +108,78 @@ public class BrowseStatusPanel extends JXPanel {
         //TODO: present this properly
         List<String> friends = new ArrayList<String>();
         List<String> p2pUsers = new ArrayList<String>();
-        for(Friend person : status.getFailed()){
+        
+        for(Friend person : status.getFailedFriends()){
             if(person.isAnonymous()){
                 p2pUsers.add(person.getRenderName());
             } else {
                 friends.add(person.getRenderName());
             }            
         }
+        
+        final JPopupMenu popup = new JPopupMenu();
+        popup.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        
         JXPanel titlePanel = new JXPanel(); 
         titlePanel.setBackground(Color.BLACK);
-        titlePanel.add(new JLabel(I18n.tr("Failed Browses")));
-        //TODO close button
+        JLabel title = new JLabel(I18n.tr("Failed Browses"));
+        title.setForeground(Color.WHITE);
+        //TODO: close icon
+        JButton closeButton = new JButton("X");
+        closeButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                popup.setVisible(false);
+            }            
+        });      
         
-        JXPanel centerPanel = new JXPanel(new VerticalLayout());
+        titlePanel.add(title);
+        titlePanel.add(closeButton);
+        
+        JXPanel centerPanel = new JXPanel(new MigLayout("insets 0 5 5 5, gap 0, novisualpadding, fill"));
         if(friends.size() > 0){
-            centerPanel.add(new JLabel(I18n.tr("Friends")));
+            centerPanel.add(createHeaderLabel(I18n.tr("Friends")), "gaptop 5, wrap");
         }
         for (String name : friends){
-            centerPanel.add(new JLabel(name));
+            centerPanel.add(createItemLabel(name), "wrap");
         }
         
         if(p2pUsers.size() > 0){
-            centerPanel.add(new JLabel(I18n.tr("P2P Users")));
+            centerPanel.add(createHeaderLabel(I18n.tr("P2P Users")), "gaptop 5, wrap");
         }
         for (String name : p2pUsers){
-            centerPanel.add(new JLabel(name));
+            centerPanel.add(createItemLabel(name), "wrap");
         }
         
         JXPanel mainPanel = new JXPanel(new BorderLayout());
         mainPanel.add(titlePanel, BorderLayout.NORTH);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         
-        JPopupMenu popup = new JPopupMenu();
         popup.setLayout(new BorderLayout());
         popup.add(mainPanel);
         popup.show(warningButton, 0, 0);
     }
     
+    private JLabel createHeaderLabel(String text){
+        JLabel header = new JLabel(text);
+        header.setForeground(headerForeground);
+        header.setFont(headerFont);
+        return header;
+    }
+    
+    private JLabel createItemLabel(String text){
+        JLabel item = new JLabel(text);
+        item.setForeground(foreground);
+        item.setFont(font);
+        return item;
+    }
+    
+    private Painter<JXPanel> createRefreshBackgroundPainter() {
+        return new ComponentBackgroundPainter<JXPanel>(innerBackground, innerBorder, bevelLeft, bevelTop1, 
+                bevelTop2, bevelRight,bevelBottom, arcWidth, arcHeight,
+                AccentType.NONE);
+    }
+        
     private class RefreshAction extends AbstractAction {
         public RefreshAction(){
             super(I18n.tr("Refresh"));
@@ -127,12 +187,7 @@ public class BrowseStatusPanel extends JXPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            BrowseSearch browseSearch = status.getBrowseSearch();
-            
-            browseSearch.stop();
-            searchResultsModel.clear();
-            setBrowseStatus(null);
-            browseSearch.repeat();
+            new BrowserRefresher(status.getBrowseSearch(), searchResultsModel).refresh();
         }        
     }
   

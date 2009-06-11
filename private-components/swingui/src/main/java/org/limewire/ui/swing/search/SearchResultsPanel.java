@@ -37,8 +37,6 @@ import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
-import org.limewire.ui.swing.library.EmptyFriendLibraryMessagePanel;
-import org.limewire.ui.swing.library.EmptyFriendLibraryMessagePanel.MessageTypes;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.model.browse.BrowseStatus;
@@ -116,7 +114,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      */
     private BrowseStatusPanel browseStatusPanel;
 
-    private final EmptyFriendLibraryMessagePanel browseFailedPanel;
+    private final BrowseFailedMessagePanel browseFailedPanel;
 
     /**
      * Constructs a SearchResultsPanel with the specified components.
@@ -129,8 +127,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             AdvancedFilterPanelFactory<VisualSearchResult> filterPanelFactory,
             SearchTabItemsFactory searchTabItemsFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
-            HeaderBarDecorator headerBarDecorator,
-            EmptyFriendLibraryMessagePanel browseMessagePanel) {
+            HeaderBarDecorator headerBarDecorator) {
 
         GuiUtils.assignResources(this);
         
@@ -139,7 +136,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         this.sponsoredResultsPanel.setVisible(false);
-        this.browseFailedPanel = browseMessagePanel;
+        this.browseFailedPanel = new BrowseFailedMessagePanel(searchResultsModel);
         
         // Create sort and filter components.
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
@@ -322,14 +319,15 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         tabHighlight.setBorderPaint(null);
         
         HeaderBar header = new HeaderBar(searchTitleLabel);
-        header.setLayout(new MigLayout("nogrid, hidemode 3, insets 0 0 0 0, gap 0!"));
-        header.add(browseStatusPanel);
+        header.setLayout(new MigLayout("nogrid, hidemode 3, novisualpadding, insets 0, gap 0!, filly"));
+        header.add(browseStatusPanel, "growx, pushx");
         headerBarDecorator.decorateBasic(header);
         
         JPanel sortPanel = new JPanel();
         sortPanel.setOpaque(false);
         sortAndFilterPanel.layoutComponents(sortPanel);
-        header.add(sortPanel, "growx, east");
+        header.add(sortPanel);
+        
         add(header                    , "spanx 2, growx, wrap");
         add(classicSearchReminderPanel, "spanx 2, growx, wrap");
         add(messagePanel              , "spanx 2, growx, wrap");
@@ -462,7 +460,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             messagePanel.setVisible(true);
             browseFailedPanel.setVisible(false);            
         } else if (browseStatus != null && browseStatus.getState() == BrowseState.FAILED) {
-            browseFailedPanel.setMessageType(MessageTypes.LW_CONNECTION_ERROR);
+            browseFailedPanel.update(browseStatus.getBrowseSearch(), browseStatus.getFailedFriends());
             browseFailedPanel.setVisible(true);
         } else {
             messagePanel.setVisible(false);

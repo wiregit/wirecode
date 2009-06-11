@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search.model.browse;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
@@ -16,8 +14,7 @@ class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
     private final FriendPresence friendPresence;
     private final BrowseFactory browseFactory;
 
-    //TODO if start and stop are only called in the EDT, AtomicReference isn't necessary here
-    private final AtomicReference<Browse> browse = new AtomicReference<Browse>();
+    private Browse browse;
 
     /**
      * @param friendPresence the person to be browsed - must be anonymous and can not be null; 
@@ -48,13 +45,13 @@ class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
 
 
     private void startAnonymousBrowse() {
-        browse.set(browseFactory.createBrowse(friendPresence));
-        browse.get().start(new BrowseEventForwarder());
+        browse = browseFactory.createBrowse(friendPresence);
+        browse.start(new BrowseEventForwarder());
     }
 
     private void stopAnonymousBrowse() {
-        assert (browse.get() != null);
-        browse.get().stop();
+        assert (browse != null);
+        browse.stop();
     }
 
 

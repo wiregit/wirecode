@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.search.model.browse;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import org.limewire.core.api.friend.Friend;
 
@@ -25,7 +25,7 @@ public class BrowseStatus {
         return state;
     }
     
-    public Collection<Friend> getFailed(){
+    public List<Friend> getFailedFriends(){
         return Arrays.asList(failedFriends);
     }
 

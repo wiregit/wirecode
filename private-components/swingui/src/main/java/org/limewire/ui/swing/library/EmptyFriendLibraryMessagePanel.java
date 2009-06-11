@@ -40,7 +40,7 @@ public class EmptyFriendLibraryMessagePanel extends JPanel implements ListEventL
      * Various states the EmptyPanel can exist in. 
      */
     public enum MessageTypes {
-        OFFLINE, ONLINE, LW_LOADING, LW_NO_FILES, LW_CONNECTION_ERROR, ALL_FRIENDS
+        OFFLINE, ONLINE, LW_LOADING, LW_NO_FILES, LW_CONNECTION_ERROR, ALL_FRIENDS, BROWSE_FAILED
     }
     
     @Resource

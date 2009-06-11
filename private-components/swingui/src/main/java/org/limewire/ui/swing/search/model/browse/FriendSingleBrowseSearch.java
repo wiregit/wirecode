@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.model.browse;
 
-import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -109,7 +108,6 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     }
     
     private void removeListener(){
-        //why does this throw java.lang.IllegalArgumentException: Cannot remove nonexistent listener?
         remoteLibraryManager.getSwingFriendLibraryList().removeListEventListener(friendLibraryListEventListener);  
         if (currentLibrary != null) {
             currentLibrary.removePropertyChangeListener(libraryPropertyChangeListener);
@@ -123,13 +121,10 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
     private class FriendLibraryListEventListener implements ListEventListener<FriendLibrary> {
         @Override
         public void listChanged(ListEvent listChanges) {
-            //this is added to SwingFriendLibraryList so updates are on EDT
-            assert EventQueue.isDispatchThread();
             while (listChanges.next()) {
                 if (listChanges.getType() == ListEvent.INSERT) {
                     FriendLibrary newLibrary = (FriendLibrary) listChanges.getSourceList().get(listChanges.getIndex());
                     if (newLibrary.getFriend().getId().equals(friend.getId())) {
-                        System.out.println("library inserted");
                         currentLibrary = newLibrary;
                         currentLibrary.addPropertyChangeListener(libraryPropertyChangeListener);
                     }

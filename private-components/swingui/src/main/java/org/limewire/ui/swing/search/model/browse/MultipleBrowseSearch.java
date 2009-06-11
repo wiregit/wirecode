@@ -114,7 +114,7 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         @Override
         public void statusChanged(BrowseStatus status) {
             if(status.getState() == BrowseState.FAILED){
-                failedList.addAll(status.getFailed());
+                failedList.addAll(status.getFailedFriends());
             } else if(status.getState() == BrowseState.UPDATED){
                 hasUpdated = true;
             } else if (status.getState() == BrowseState.LOADED){

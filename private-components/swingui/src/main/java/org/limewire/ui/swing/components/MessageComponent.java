@@ -12,15 +12,17 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.ui.swing.painter.GreenMessagePainter;
+import org.limewire.ui.swing.painter.MessagePainter;
+import org.limewire.ui.swing.painter.MessagePainter.Type;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * Creates a Lime Message Component. Currently
- * this is painted green and has a triangle, chat arrow
+ * this is painted green by default and has a triangle, chat arrow
  * attached to the bottom of it.
  */
 public class MessageComponent extends JPanel {
+    //TODO we need a gray arrow too
     @Resource
     private Icon arrowIcon;
     @Resource
@@ -30,17 +32,29 @@ public class MessageComponent extends JPanel {
     @Resource
     private Font subFont;
     
+    public enum MessageBackground {GREEN, GRAY}
+    
     /**
      * Contains the actual subComponents.
      */
     private JXPanel messageContainer;
     
     public MessageComponent() {
-        this(18, 22, 18, 22);
+        this(MessageBackground.GREEN);
     }
     
+    public MessageComponent(MessageBackground background) {
+        this(18, 22, 18, 22, background);
+    }
+        
+        
     // TODO: top, left, right, bottom does not seem to map correctly
     public MessageComponent(int topInset, int leftInset, int rightInset, int bottomInset) {
+        this(topInset, leftInset, rightInset, bottomInset, MessageBackground.GREEN);
+    }
+    
+
+    public MessageComponent(int topInset, int leftInset, int rightInset, int bottomInset, MessageBackground background) {
         GuiUtils.assignResources(this);
         
         setLayout(new MigLayout("insets 0 0 " + (arrowIcon.getIconHeight()-2) + " 0, gap 0"));
@@ -48,10 +62,11 @@ public class MessageComponent extends JPanel {
         
         messageContainer = new JXPanel(new MigLayout("insets " + topInset + " " + leftInset + " " + rightInset + " " + bottomInset + ", hidemode 3"));
         messageContainer.setOpaque(false);
-        messageContainer.setBackgroundPainter(new GreenMessagePainter());
+        messageContainer.setBackgroundPainter(new MessagePainter(background == MessageBackground.GREEN ? Type.GREEN : Type.GRAY));
         
         add(new JLabel(arrowIcon), "pos (messageContainer.x + 25) 0.99al");
         add(messageContainer, "wrap");
+    
     }
     
     public void addComponent(JComponent component, String layout) {
@@ -61,6 +76,10 @@ public class MessageComponent extends JPanel {
     public void decorateHeaderLabel(JComponent component) {
         component.setFont(headingFont);
         component.setForeground(fontColor);
+    }
+    
+    public void decorateHeaderLink(HyperlinkButton link) {
+        link.setFont(headingFont);
     }
     
     public void decorateSubLabel(JLabel component) {
