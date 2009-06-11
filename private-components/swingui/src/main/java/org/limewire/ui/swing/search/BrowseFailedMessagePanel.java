@@ -87,7 +87,7 @@ public class BrowseFailedMessagePanel extends JPanel {
         if (friends.size() == 1) {
             return I18n.tr("There was a problem browsing {0}.", friends.get(0).getRenderName());
         } else {
-            return I18n.tr("There was a problem viewing this person's files.");
+            return I18n.tr("There was a problem viewing these people.");
         }
     }
 
