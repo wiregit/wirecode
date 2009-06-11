@@ -7,6 +7,9 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
@@ -20,12 +23,18 @@ import com.google.inject.Provider;
 public class AddFileAction extends AbstractAction {
 
     private final Provider<LibraryNavigatorPanel> libraryNavigatorPanel;
+    private final Provider<SharedFileListManager> sharedFileListManager;
+    private final Provider<LibraryManager> libraryManager;
     
     @Inject
-    public AddFileAction(Provider<LibraryNavigatorPanel> libraryNavigatorPanel) {
+    public AddFileAction(Provider<LibraryNavigatorPanel> libraryNavigatorPanel,
+            Provider<SharedFileListManager> sharedFileListManager,
+            Provider<LibraryManager> libraryManager) {
         super(I18n.tr("Add Files"));
         
         this.libraryNavigatorPanel = libraryNavigatorPanel;
+        this.sharedFileListManager = sharedFileListManager;
+        this.libraryManager = libraryManager;
     }
     
     @Override
@@ -47,10 +56,19 @@ public class AddFileAction extends AbstractAction {
 
         if (files != null) {
             LibraryNavItem item = libraryNavigatorPanel.get().getSelectedNavItem();
+            SharedFileList sharedFileList = sharedFileListManager.get().getSharedFileList(item.getTabID());
+            
             for(File file : files) {
                 if(file.isDirectory()) {
+                    if(sharedFileList != null) 
+                        sharedFileList.addFolder(file);
+                    else
+                        libraryManager.get().getLibraryManagedList().addFolder(file);
                 } else {
-                    
+                    if(sharedFileList != null) 
+                        sharedFileList.addFile(file);
+                    else
+                        libraryManager.get().getLibraryManagedList().addFile(file);
                 }
             }
         }
