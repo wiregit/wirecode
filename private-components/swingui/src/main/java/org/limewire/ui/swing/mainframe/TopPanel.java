@@ -28,8 +28,10 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.friends.actions.FriendButtonPopupListener;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.friends.login.SignInAction;
 import org.limewire.ui.swing.home.HomeMediator;
@@ -86,7 +88,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     final LibraryMediator myLibraryMediator,
                     AdvancedSearchMediator advancedSearchMediator,
                     AdvancedSearchBuilder advancedSearchBuilder,
-                    SignInAction signInAction) {        
+                    SignInAction signInAction, FriendButtonPopupListener friendListener) {        
         GuiUtils.assignResources(this);
         
         this.searchBar = searchBar;
@@ -115,12 +117,14 @@ class TopPanel extends JXPanel implements SearchNavigator {
 //            }
 //        });
         
-        JButton friendButton = new IconButton(signInAction);
+//        JButton friendButton = new IconButton(signInAction);
+        LimeComboBox friendButton = new LimeComboBox();
         friendButton.setIcon(friendIcon);
         friendButton.setName("WireframeTop.friendButton");
         friendButton.setToolTipText(I18n.tr("Friend Login"));
         friendButton.setText(null);
         friendButton.setIconTextGap(1);
+        friendButton.getPopupMenu().addPopupMenuListener(friendListener);
         
         JButton storeButton;
         if(MozillaInitialization.isInitialized()) {

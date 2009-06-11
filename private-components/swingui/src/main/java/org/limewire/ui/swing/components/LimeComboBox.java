@@ -152,6 +152,8 @@ public class LimeComboBox extends JXButton {
      * menu, any modifications made to this menu will be lost.
      */
     public JPopupMenu getPopupMenu() {
+        if(menu == null)
+            createPopupMenu();
         return menu;
     }
     
