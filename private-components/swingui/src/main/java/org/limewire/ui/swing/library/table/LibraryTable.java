@@ -141,7 +141,6 @@ public class LibraryTable extends MouseableTable {
     }
     
     public void setTableFormat(AbstractLibraryFormat<LocalFileItem> tableFormat) {
-     
         uninstallListeners();
         
         this.fileItemFormat = tableFormat;

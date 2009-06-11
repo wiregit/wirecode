@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -17,6 +18,7 @@ import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
@@ -28,6 +30,8 @@ import org.limewire.ui.swing.components.FlexibleTabListFactory;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
+import org.limewire.ui.swing.friends.login.SignInAction;
 import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -52,10 +56,13 @@ import org.limewire.ui.swing.util.I18n;
 import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
 class TopPanel extends JXPanel implements SearchNavigator {
+    
+    @Resource Icon friendIcon;
     
     private final SearchBar searchBar;
     
@@ -64,7 +71,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final NavItem homeNav;
     private final NavItem libraryNav;
     private final AdvancedSearchBuilder advancedSearchBuilder;
-        
+            
     @Inject
     public TopPanel(final SearchHandler searchHandler,
                     Navigator navigator,
@@ -78,7 +85,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
 //                    final LibraryNavigator libraryNavigator,
                     final LibraryMediator myLibraryMediator,
                     AdvancedSearchMediator advancedSearchMediator,
-                    AdvancedSearchBuilder advancedSearchBuilder) {        
+                    AdvancedSearchBuilder advancedSearchBuilder,
+                    SignInAction signInAction) {        
         GuiUtils.assignResources(this);
         
         this.searchBar = searchBar;
@@ -106,6 +114,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
 //                homeMediator.getComponent().loadDefaultUrl();
 //            }
 //        });
+        
+        JButton friendButton = new IconButton(signInAction);
+        friendButton.setIcon(friendIcon);
+        friendButton.setName("WireframeTop.friendButton");
+        friendButton.setToolTipText(I18n.tr("Friend Login"));
+        friendButton.setText(null);
+        friendButton.setIconTextGap(1);
         
         JButton storeButton;
         if(MozillaInitialization.isInitialized()) {
@@ -137,6 +152,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
         add(libraryButton, "gapbottom 2, gaptop 0");
+        add(friendButton, "gapbottom 2, gaptop 0");
         add(storeButton, "gapbottom 2, gaptop 0");
 
         add(searchBar, "gapleft 70, gapbottom 2, gaptop 0");
