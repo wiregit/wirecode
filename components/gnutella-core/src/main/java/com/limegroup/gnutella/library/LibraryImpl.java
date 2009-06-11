@@ -46,6 +46,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -1084,17 +1085,16 @@ class LibraryImpl implements Library, FileCollection {
 
     @Override
     public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
-        // TODO Auto-generated method stub
+       throw new NotImplementedException();
     }
 
     @Override
     public void setManagedExtensions(Collection<String> extensions) {
-        // TODO Auto-generated method stub
+        throw new NotImplementedException();
     }
 
     @Override
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new NotImplementedException();
     }
 }
