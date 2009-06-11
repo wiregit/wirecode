@@ -478,37 +478,40 @@ public class MyLibraryPanel extends AbstractFileListPanel implements EventListen
             SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true) {
             connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
                 @Override
-                @SwingEDTEvent
-                public void handleEvent(XMPPConnectionEvent event) {
-                    switch(event.getType()) { 
-                    case CONNECTED:
-                        if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true && 
-                           SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true) {
-                            JPanel panel = new JPanel(new MigLayout("fill"));
-                            panel.setOpaque(false);
-                            panel.add(getFirstTimeMyLibraryMessageAndSignedInComponent(), "align 50% 40%");
-                            JXLayer layer = map.get(category);
-                            layer.getGlassPane().removeAll();
-                            layer.getGlassPane().add(panel);
-                            layer.getGlassPane().setVisible(true);
-                            if(!SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.getValue()) {
-                                libraryNavigator.selectLibrary();
-                                SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
-                            }
-                        } else if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
-                            JPanel panel = new JPanel(new MigLayout("fill"));
-                            panel.setOpaque(false);
-                            panel.add(getFirstTimeLoggedInMessageComponent(), "align 50% 40%");
-                            JXLayer layer = map.get(category);
-                            layer.getGlassPane().removeAll();
-                            layer.getGlassPane().add(panel);
-                            layer.getGlassPane().setVisible(true);
-                            if(!SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.getValue()) {
-                                libraryNavigator.selectLibrary();
-                                SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
+                public void handleEvent(final XMPPConnectionEvent event) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            switch(event.getType()) { 
+                            case CONNECTED:
+                                if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true && 
+                                        SwingUiSettings.SHOW_FIRST_TIME_LIBRARY_OVERLAY_MESSAGE.getValue() == true) {
+                                    JPanel panel = new JPanel(new MigLayout("fill"));
+                                    panel.setOpaque(false);
+                                    panel.add(getFirstTimeMyLibraryMessageAndSignedInComponent(), "align 50% 40%");
+                                    JXLayer layer = map.get(category);
+                                    layer.getGlassPane().removeAll();
+                                    layer.getGlassPane().add(panel);
+                                    layer.getGlassPane().setVisible(true);
+                                    if(!SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.getValue()) {
+                                        libraryNavigator.selectLibrary();
+                                        SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
+                                    }
+                                } else if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
+                                    JPanel panel = new JPanel(new MigLayout("fill"));
+                                    panel.setOpaque(false);
+                                    panel.add(getFirstTimeLoggedInMessageComponent(), "align 50% 40%");
+                                    JXLayer layer = map.get(category);
+                                    layer.getGlassPane().removeAll();
+                                    layer.getGlassPane().add(panel);
+                                    layer.getGlassPane().setVisible(true);
+                                    if(!SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.getValue()) {
+                                        libraryNavigator.selectLibrary();
+                                        SwingUiSettings.HAS_LOGGED_IN_AND_SHOWN_LIBRARY.setValue(true);
+                                    }
+                                }
                             }
                         }
-                    }
+                    });
                 }
             });
             

@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 @LazySingleton
 public class MyLibraryMediator implements NavMediator<MyLibraryPanel> {
 
+    private boolean initializing;
     private final MyLibraryFactory myLibraryFactory;
     private final PluggableList<LocalFileItem> baseLibraryList;
     private final LibraryListSourceChanger currentFriendFilterChanger;
@@ -60,8 +61,13 @@ public class MyLibraryMediator implements NavMediator<MyLibraryPanel> {
     
     @Override
     public MyLibraryPanel getComponent() {
-        if(panel == null)
+        if(panel == null) {
+            if(initializing) {
+                throw new IllegalStateException("this method is not reentrant");
+            }
+            initializing = true;
             panel = myLibraryFactory.createMyLibraryPanel(baseLibraryList, currentFriendFilterChanger);
+        }
         return panel;
     }
     
