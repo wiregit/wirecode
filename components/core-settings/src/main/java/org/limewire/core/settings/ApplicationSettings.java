@@ -19,6 +19,7 @@ public class ApplicationSettings extends LimeProps {
     /**
      * The Client ID number.
      */
+    @InspectablePrimitive("client id")
     public static final StringSetting CLIENT_ID = 
         FACTORY.createStringSetting("CLIENT_ID", "");
 
