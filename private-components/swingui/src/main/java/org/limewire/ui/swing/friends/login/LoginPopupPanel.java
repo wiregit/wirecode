@@ -43,13 +43,17 @@ public class LoginPopupPanel extends Panel implements Resizable {
     @Resource private Icon closeIconPressed;   
     
     private final Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider;
+    private final XMPPUserEntryLoginPanelFactory xmppUserEntryLoginPanelFactory;
     
     private JXPanel frame = null;
     private JPanel contentPanel = null;
     
     @Inject
-    public LoginPopupPanel(Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider) {
+    public LoginPopupPanel(Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider,
+            XMPPUserEntryLoginPanelFactory generalUserEntryLoginPanelFactory) {
+        
         this.serviceSelectionLoginPanelProvider = serviceSelectionLoginPanelProvider;
+        this.xmppUserEntryLoginPanelFactory = generalUserEntryLoginPanelFactory;
         
         GuiUtils.assignResources(this);
         
@@ -89,7 +93,6 @@ public class LoginPopupPanel extends Panel implements Resizable {
         
         contentPanel.add(serviceSelectionLoginPanelProvider.get(), BorderLayout.CENTER);
         
-        
         add(frame, BorderLayout.CENTER);
     }
     
@@ -120,8 +123,20 @@ public class LoginPopupPanel extends Panel implements Resizable {
     }
     
     
+    /**
+     * Reports back a non xmmp service selection, (ie. facebook)
+     */
+    public void setSelectedService() {
+        
+    }
+    
+    /**
+     * Reports back an XMMP service selection
+     */
     public void setSelectedService(XMPPAccountConfiguration config) {
-        System.out.println(config.getLabel());
+        contentPanel.removeAll();
+        contentPanel.add(xmppUserEntryLoginPanelFactory.create(config), BorderLayout.CENTER);
+        contentPanel.repaint();
     }
 
 }
