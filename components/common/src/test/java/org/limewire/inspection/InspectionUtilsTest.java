@@ -37,6 +37,7 @@ public class InspectionUtilsTest extends BaseTestCase {
                 bind(SyncListInterface.class).to(SyncList.class);
                 bind(OutterI.class).to(Outter.class);
                 bind(Parent.class).to(ConcreteChild.class);
+                bind(IConcrete.class).to(Concrete.class);
             }
         };
         injector = Guice.createInjector(m);
@@ -106,13 +107,18 @@ public class InspectionUtilsTest extends BaseTestCase {
     }
     
     public void testContainer() throws Exception {
-        Object ret = InspectionUtils.inspectValue(nameOf(org.limewire.inspection.InspectionUtilsTest.Outter.Inner.class) + ",inspectable", injector);
+        Object ret = InspectionUtils.inspectValue(nameOf(Outter.Inner.class) + ",inspectable", injector);
         assertEquals("asdf",ret);
     }
     
     public void testContainerInParent() throws Exception {
-        Object ret = InspectionUtils.inspectValue(nameOf(Parent.class) + "|" + nameOf(org.limewire.inspection.InspectionUtilsTest.AbstractParent.Inner.class) + ",inspectable", injector);
+        Object ret = InspectionUtils.inspectValue(nameOf(Parent.class) + "|" + nameOf(AbstractParent.Inner.class) + ",inspectable", injector);
         assertEquals("abcd", ret);
+    }
+    
+    public void testAbstractPoints() throws Exception {
+        Object ret = InspectionUtils.inspectValue(nameOf(IConcrete.class) + "|" + nameOf(Abstract.class) + ",inspectableA", injector);
+        assertEquals("qqqq", ret);
     }
     
     public void testRequirements() throws Exception {
@@ -349,6 +355,14 @@ public class InspectionUtilsTest extends BaseTestCase {
         @InspectionPoint("insp")
         static Inspectable inspectable;
     }
+    
+    private static interface IConcrete {}
+    
+    private static abstract class Abstract implements IConcrete {
+        @InspectablePrimitive("point") String inspectableA = "qqqq";
+    }
+    
+    @Singleton private static class Concrete extends Abstract {}
 
     private static interface Parent {
     }

@@ -27,6 +27,9 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
+import org.limewire.inject.LimeWireInjectModule;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.Inspector;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
@@ -295,9 +298,27 @@ public class AppFrame extends SingleFrameApplication {
         Injector childInjector;
         if (injector == null) {
             LimeMozillaInitializer.initialize();
-            childInjector = Guice.createInjector(Stage.PRODUCTION, new MockModule(), new LimeWireSwingUiModule(false), thiz);
+            childInjector = Guice.createInjector(Stage.PRODUCTION,
+                    new MockModule(),
+                    new LimeWireInjectModule(),
+                    new LimeWireSwingUiModule(false),
+                    thiz);
         } else {
-            childInjector = injector.createChildInjector(thiz, new LimeWireSwingUiModule(injector.getInstance(Application.class).isProVersion()));
+            childInjector = injector.createChildInjector(
+                    thiz,
+                    new LimeWireSwingUiModule(injector.getInstance(Application.class).isProVersion()),
+                    new AbstractModule() {
+                        @Override
+                        protected void configure() {                            
+                            // Make sure that the inspector is inspecting on the correct injector.
+                            requestInjection(new Object() {
+                               @SuppressWarnings("unused")
+                               @Inject void setInspectorInjector(Inspector inspector, Injector injector) {
+                                    inspector.setInjector(injector);
+                               }
+                            });   
+                        }
+                    });
         }        
         return childInjector;
     }

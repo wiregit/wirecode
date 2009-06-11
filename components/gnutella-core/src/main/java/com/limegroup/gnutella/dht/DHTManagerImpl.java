@@ -47,6 +47,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.DebugRunnable;
@@ -758,9 +759,15 @@ public class DHTManagerImpl implements DHTManager, Service {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Writer w = new OutputStreamWriter(baos, Charset.forName("UTF-8"));
                 try {
-                    getMojitoDHT().getDHTStats().dump(w, false);
-                    w.flush();
-                    return baos.toByteArray();
+                    MojitoDHT dht = getMojitoDHT();
+                    if(dht != null) {
+                        DHTStats stats = dht.getDHTStats();
+                        stats.dump(w, false);
+                        w.flush();
+                        return baos.toByteArray();
+                    } else {
+                        return null;
+                    }
                 } catch (IOException impossible) {
                     return impossible.getMessage();
                 }

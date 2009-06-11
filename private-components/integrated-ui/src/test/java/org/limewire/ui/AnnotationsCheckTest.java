@@ -3,14 +3,19 @@ package org.limewire.ui;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.SwingUtilities;
 
 import junit.framework.Test;
 
+import org.limewire.inspection.InspectionException;
 import org.limewire.inspection.InspectionTool;
-import org.limewire.ui.swing.LimeWireModule;
+import org.limewire.inspection.Inspector;
+import org.limewire.ui.swing.AllLimeWireModules__DO_NOT_USE;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
@@ -58,18 +63,35 @@ public class AnnotationsCheckTest extends BaseTestCase {
         //      build/          component/      components/      limewire/   
         f = f.getParentFile().getParentFile().getParentFile().getParentFile();
         
-        List<File> paths = new ArrayList<File>();
+        final List<File> paths = new ArrayList<File>();
         paths.addAll(getClasses(new File(f, "components")));
         paths.addAll(getClasses(new File(f, "private-components")));        
         assertGreaterThan(paths.toString(), 10, paths.size()); // make sure we got enough components
 
-        Injector injector = Guice.createInjector(new LimeWireModule()); 
-        Map<String, String> results = new HashMap<String, String>();
-        for(File path : paths) {
-            results.putAll(InspectionTool.generateMappings(path, injector, new String[0]));
-        }
+        final Map<String, String> results = new ConcurrentHashMap<String, String>();
+        final AtomicReference<Injector> injectorRef = new AtomicReference<Injector>();
+        // This is explicitly using the DoNotUse module because that's what the build uses.
+        SwingUtilities.invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                injectorRef.set(Guice.createInjector(new AllLimeWireModules__DO_NOT_USE())); 
+                for(File path : paths) {
+                    results.putAll(InspectionTool.generateMappings(path, injectorRef.get(), new String[0]));
+                }
+            }
+        });
         assertFalse(results.isEmpty());
         assertGreaterThan(100, results.size()); // make sure we got some good # of inspections
+        
+        // and run through them all and make sure they work!
+        Inspector inspector = injectorRef.get().getInstance(Inspector.class);
+        for(String key : results.keySet()) {
+            try {
+                inspector.inspect(results.get(key));
+            } catch(InspectionException ie) {
+                throw new RuntimeException("invalid key: " + key + ", value: " + results.get(key), ie);
+            }
+        }
     }
 }
 

@@ -9,11 +9,23 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.limewire.inject.LazySingleton;
+import org.limewire.inject.MoreScopes;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Binding;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
+import com.google.inject.Scopes;
+import com.google.inject.spi.BindingScopingVisitor;
+import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.ConstructorBinding;
+import com.google.inject.spi.ConvertedConstantBinding;
+import com.google.inject.spi.ExposedBinding;
+import com.google.inject.spi.InstanceBinding;
+import com.google.inject.spi.LinkedKeyBinding;
+import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.ProviderKeyBinding;
+import com.google.inject.spi.UntargettedBinding;
 
 
 /**
@@ -34,9 +46,9 @@ public class InspectionUtils {
         Field field;
         List<Annotation> annotations;
         Class<?> lookupClass;
-        Class<?> containerClass;
-        Object containerInstance;
-        Object instance;
+        Class<?> actualClass;
+        Object fieldContainerInstance;
+        Object fieldValue;
     }
 
     /**
@@ -66,8 +78,8 @@ public class InspectionUtils {
         try {
             InspectionData data = createInspectionData(encodedField);
             validateField(data);
-            setContainerInstance(data, injector);
-            setFieldInstance(data);
+            setFieldContainerInstance(data, injector);
+            setFieldValue(data);
             return inspect(data);
         } catch (Throwable e) {
             if (e instanceof InspectionException) {
@@ -103,7 +115,7 @@ public class InspectionUtils {
         InspectionData data = new InspectionData();
         data.encodedField = encodedField;
         data.isStatic = true;
-        data.instance = clazz;
+        data.fieldValue = clazz;
         data.field = field;
         return data;
     }
@@ -131,7 +143,7 @@ public class InspectionUtils {
         
         data.encodedField = encodedField;
         data.lookupClass = lookupClass;
-        data.containerClass = clazz;
+        data.actualClass = clazz;
         data.field = field;
         return data;
     }
@@ -183,64 +195,123 @@ public class InspectionUtils {
         }
     }
     
-    private static void setContainerInstance(InspectionData data, Injector injector) throws Throwable {
+    private static void setFieldContainerInstance(InspectionData data, Injector injector) throws Throwable {
         // no container instance for static data.
         if(!data.isStatic) {
-            if(data.lookupClass != null) {
-                // Verify that there's an enclosing class.
-                if(data.containerClass.getEnclosingClass() == null) {
-                    throw new InspectionException("must be a container!");
-                }
-                // Verify that the enclosing class is assignable from
-                // our lookup class.
-                if(!data.lookupClass.isAssignableFrom(data.containerClass.getEnclosingClass())) {
-                    throw new InspectionException("wrong container!");  
-                }
-            } else {
+            if(data.lookupClass == null) {
                 // if the container had an enclosing class and it's not static, make sure the lookup
                 // points to the enclosing class.
-                if(data.containerClass.getEnclosingClass() != null && !Modifier.isStatic(data.containerClass.getModifiers())) {
-                    data.lookupClass = data.containerClass.getEnclosingClass();
+                if(data.actualClass.getEnclosingClass() != null && !Modifier.isStatic(data.actualClass.getModifiers())) {
+                    data.lookupClass = data.actualClass.getEnclosingClass();
                 }
-            }        
+            }
             
             // check if this is an enclosed class
             if (data.lookupClass == null) {
-                if (data.containerClass.getAnnotation(Singleton.class) == null && data.containerClass.getAnnotation(LazySingleton.class) == null && !data.containerClass.isInterface()) {
-                    throw new InspectionException("must have singleton or lazysingleton annotation or be interface!");
-                }
-                data.containerInstance = injector.getInstance(data.containerClass);
+                Binding<?> binding = injector.getBinding(data.actualClass);
+                validateBindingIsSingleton(injector, binding);
+                data.fieldContainerInstance = binding.getProvider().get();
             } else {            
                 // inner classes must be annotated properly
-                if (data.lookupClass.getAnnotation(Singleton.class) == null && data.lookupClass.getAnnotation(LazySingleton.class) == null && !data.lookupClass.isInterface()) {
-                    throw new InspectionException("lookup class must be singleton, lazysingleton or interface!");
-                }
-                if (data.containerClass.getAnnotation(InspectableContainer.class) == null) {
-                    throw new InspectionException("container must be annotated with InspectableContainer");
+                Binding<?> binding = injector.getBinding(data.lookupClass);
+                validateBindingIsSingleton(injector, binding);
+                Object lookupObj = binding.getProvider().get();
+
+                // If this was an enclosed class, validate that it has InspectableContainer.
+                if(data.actualClass.getEnclosingClass() != null && !Modifier.isStatic(data.actualClass.getModifiers())) {
+                    if (data.actualClass.getAnnotation(InspectableContainer.class) == null) {
+                        throw new InspectionException("container must be annotated with InspectableContainer");
+                    }
+                    Constructor[] constructors = data.actualClass.getDeclaredConstructors();
+                    if (constructors.length != 1) {
+                        throw new InspectionException("wrong constructors length: " + constructors.length);
+                    }
+                    Class[] parameters = constructors[0].getParameterTypes();
+                    if (parameters.length != 1 || !data.lookupClass.isAssignableFrom(parameters[0])) {
+                        throw new InspectionException("wrong parameter count or type for constructor");
+                    }
+                    constructors[0].setAccessible(true);
+                    data.fieldContainerInstance = constructors[0].newInstance(lookupObj);
+                } else {
+                    data.fieldContainerInstance = lookupObj;
                 }
                 
-                // if inner, create one
-                Object enclosingObj = injector.getInstance(data.lookupClass);
-                Constructor[] constructors = data.containerClass.getDeclaredConstructors();
-                if (constructors.length != 1) {
-                    throw new InspectionException("wrong constructors length: " + constructors.length);
-                }
-                Class[] parameters = constructors[0].getParameterTypes();
-                if (parameters.length != 1 || !data.lookupClass.isAssignableFrom(parameters[0])) {
-                    throw new InspectionException("wrong parameter count or type for constructor");
-                }
-                constructors[0].setAccessible(true);
-                data.containerInstance = constructors[0].newInstance(enclosingObj);
             }
         }
     }
     
-    private static void setFieldInstance(InspectionData data) throws Throwable {        
+    private static void setFieldValue(InspectionData data) throws Throwable {        
         if (data.isStatic) {
-            data.instance = data.field.get(null);
+            data.fieldValue = data.field.get(null);
         } else {
-            data.instance = data.field.get(data.containerInstance);
+            data.fieldValue = data.field.get(data.fieldContainerInstance);
         }
+    }
+    
+    private static void validateBindingIsSingleton(Injector injector, Binding<?> binding) throws InspectionException {
+        binding = resolveBinding(injector, binding);
+        boolean singleton = binding.acceptScopingVisitor(new BindingScopingVisitor<Boolean>() {
+            public Boolean visitEagerSingleton() { return true; }
+            public Boolean visitNoScoping() { return false; }
+            public Boolean visitScope(com.google.inject.Scope scope) { return scope == Scopes.SINGLETON || scope == MoreScopes.LAZY_SINGLETON; }
+            public Boolean visitScopeAnnotation(java.lang.Class<? extends Annotation> scopeAnnotation) { return false; }
+        });
+            
+        if(!singleton) {
+            throw new InspectionException("must be singleton or lazysingleton annotation or be interface!");
+        }
+    }
+    
+    /** Resolves a binding to the ultimate destination, ensuring we can check the scope of the proper link. */
+    private static Binding<?> resolveBinding(final Injector injector, final Binding<?> binding) {
+        return binding.acceptTargetVisitor(new BindingTargetVisitor<Object, Binding<?>>() {
+
+            @Override
+            public Binding<?> visit(InstanceBinding<? extends Object> link) {
+                return binding;
+            }
+
+            @Override
+            public Binding<?> visit(ProviderInstanceBinding<? extends Object> link) {
+                return binding;
+            }
+
+            @Override
+            public Binding<?> visit(ProviderKeyBinding<? extends Object> link) {
+                return resolveBinding(injector, injector.getBinding(link.getProviderKey()));
+            }
+
+            @Override
+            public Binding<?> visit(LinkedKeyBinding<? extends Object> link) {
+                return resolveBinding(injector, injector.getBinding(link.getLinkedKey()));
+            }
+
+            @Override
+            public Binding<?> visit(ExposedBinding<? extends Object> link) {
+                return binding;
+            }
+
+            @Override
+            public Binding<?> visit(UntargettedBinding<? extends Object> link) {
+                return binding;
+            }
+
+            @Override
+            public Binding<?> visit(ConstructorBinding<? extends Object> link) {
+                return binding;
+            }
+
+            @Override
+            public Binding<?> visit(ConvertedConstantBinding<? extends Object> link) {
+                return binding;
+            }
+
+            @Override
+            public Binding<?> visit(ProviderBinding<? extends Object> link) {
+                return resolveBinding(injector, injector.getBinding(link.getProvidedKey()));
+            }
+            
+        });
     }
     
     /**
@@ -253,22 +324,22 @@ public class InspectionUtils {
      * String.valueOf or size() depending on the annotation or type of the field.
      */
     private static Object inspect(InspectionData data) throws Exception {
-        if (data.instance instanceof Inspectable) {
-            Inspectable i = (Inspectable)data.instance;
+        if (data.fieldValue instanceof Inspectable) {
+            Inspectable i = (Inspectable)data.fieldValue;
             return i.inspect();
         }
         
         for (Annotation a : data.annotations) {
             if (a instanceof InspectablePrimitive)
-                return String.valueOf(data.instance);
+                return String.valueOf(data.fieldValue);
 
             if (a instanceof InspectableForSize) {
-                Method m = data.instance.getClass().getMethod("size", new Class[0]);
+                Method m = data.fieldValue.getClass().getMethod("size", new Class[0]);
                 m.setAccessible(true);
-                return m.invoke(data.instance).toString();
+                return m.invoke(data.fieldValue).toString();
             }
         }
         
-        throw new InspectionException();
+        throw new InspectionException("no valid Inspectable annotation!");
     }
 }
