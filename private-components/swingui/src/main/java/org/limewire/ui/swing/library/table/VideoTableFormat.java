@@ -32,10 +32,11 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
     static final int UPLOADS_INDEX = 10;
     static final int UPLOAD_ATTEMPTS_INDEX = 11;
     static final int PATH_INDEX = 12;
+    static final int ACTION_INDEX = 13;
     
     @Inject
     public VideoTableFormat() {
-        super("LIBRARY_VIDEO_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
+        super(ACTION_INDEX, "LIBRARY_VIDEO_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_VIDEO_NAME", I18n.tr("Name"), 611, true, true), 
                 new ColumnStateInfo(LENGTH_INDEX, "LIBRARY_VIDEO_LENGTH", I18n.tr("Length"), 62, true, true), 
                 new ColumnStateInfo(MISC_INDEX, "LIBRARY_VIDEO_MISC", I18n.tr("Misc"), 100, false, true), 
@@ -49,6 +50,7 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_VIDEO_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_VIDEO_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_VIDEO_PATH", I18n.tr("Location"), 200, false, true),
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_VIDEO_ACTION", "", 40, true, false)
         });
     }
 
@@ -72,6 +74,7 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
         case UPLOADS_INDEX: return baseObject.getNumUploads();
         case PATH_INDEX: return baseObject.getProperty(FilePropertyKey.LOCATION);
+        case ACTION_INDEX: return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

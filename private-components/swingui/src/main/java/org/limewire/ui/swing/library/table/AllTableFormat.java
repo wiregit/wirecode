@@ -27,13 +27,14 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
     static final int UPLOADS_INDEX = 5;
     static final int UPLOAD_ATTEMPTS_INDEX = 6;
     static final int PATH_INDEX = 7;
+    static final int ACTION_INDEX = 8;
     
     /** Icon manager used to find native file type information. */
     private Provider<IconManager> iconManager;
     
     @Inject
     public AllTableFormat(Provider<IconManager> iconManager) {
-        super("LIBRARY_ALL_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
+        super(ACTION_INDEX, "LIBRARY_ALL_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_ALL_NAME", "Name", 493, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "LIBRARY_ALL_TYPE", I18n.tr("Type"), 180, true, true),     
                 new ColumnStateInfo(CREATED_INDEX, "LIBRARY_ALL_CREATED", I18n.tr("Date Created"), 100, false, true), 
@@ -41,7 +42,8 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
                 new ColumnStateInfo(HIT_INDEX, "LIBRARY_ALL_HITS", I18n.tr("Hits"), 100, false, true), 
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_ALL_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_ALL_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
-                new ColumnStateInfo(PATH_INDEX, "LIBRARY_ALL_PATH", I18n.tr("Location"), 200, false, true)
+                new ColumnStateInfo(PATH_INDEX, "LIBRARY_ALL_PATH", I18n.tr("Location"), 200, false, true),
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_ALL_ACTION", "", 40, true, false)
         });     
         
         this.iconManager = iconManager;
@@ -64,6 +66,7 @@ public class AllTableFormat <T extends LocalFileItem> extends AbstractLibraryFor
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
         case UPLOADS_INDEX: return baseObject.getNumUploads();
         case PATH_INDEX: return baseObject.getProperty(FilePropertyKey.LOCATION);
+        case ACTION_INDEX: return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

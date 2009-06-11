@@ -28,10 +28,11 @@ public class ProgramTableFormat<T extends LocalFileItem> extends AbstractLibrary
     static final int UPLOADS_INDEX = 6;
     static final int UPLOAD_ATTEMPTS_INDEX = 7;
     static final int PATH_INDEX = 8;
+    static final int ACTION_INDEX = 9;
     
     @Inject
     public ProgramTableFormat() {
-        super("LIBRARY_PROGRAM_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
+        super(ACTION_INDEX, "LIBRARY_PROGRAM_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_PROGRAM_NAME", I18n.tr("Name"), 493, true, true), 
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_PROGRAM_SIZE", I18n.tr("Size"), 60, false, true),
                 new ColumnStateInfo(PLATFORM_INDEX, "LIBRARY_PROGRAM_PLATFORM", I18n.tr("Platform"), 120, false, true), 
@@ -41,6 +42,7 @@ public class ProgramTableFormat<T extends LocalFileItem> extends AbstractLibrary
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_PROGRAM_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_PROGRAM_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_PROGRAM_PATH", I18n.tr("Location"), 200, false, true),
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_PROGRAM_ACTION", "", 40, true, false)
         });
     }
 
@@ -56,6 +58,7 @@ public class ProgramTableFormat<T extends LocalFileItem> extends AbstractLibrary
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
         case UPLOADS_INDEX: return baseObject.getNumUploads();
         case PATH_INDEX: return baseObject.getProperty(FilePropertyKey.LOCATION);
+        case ACTION_INDEX: return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

@@ -28,12 +28,13 @@ public class OtherTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
     static final int UPLOADS_INDEX = 4;
     static final int UPLOAD_ATTEMPTS_INDEX = 5;
     static final int PATH_INDEX = 6;
+    static final int ACTION_INDEX = 7;
     
     private Provider<IconManager> iconManager;
     
     @Inject
     public OtherTableFormat(Provider<IconManager> iconManager) {
-        super("LIBRARY_OTHER_TALBE", NAME_INDEX, true, new ColumnStateInfo[] {
+        super(ACTION_INDEX, "LIBRARY_OTHER_TALBE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_OTHER_NAME", I18n.tr("Name"), 493, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "LIBRARY_OTHER_TYPE", I18n.tr("Type"), 180, true, true),     
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_OTHER_SIZE", I18n.tr("Size"), 60, false, true),
@@ -41,6 +42,7 @@ public class OtherTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_OTHER_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_OTHER_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_OTHER_PATH", I18n.tr("Location"), 200, false, true),
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_OTHER_ACTION", "", 40, true, false)
         });
         this.iconManager = iconManager;
     }
@@ -59,6 +61,7 @@ public class OtherTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
         case UPLOADS_INDEX: return baseObject.getNumUploads();
         case PATH_INDEX: return baseObject.getProperty(FilePropertyKey.LOCATION);
+        case ACTION_INDEX: return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

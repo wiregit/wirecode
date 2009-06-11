@@ -4,8 +4,8 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JPopupMenu;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.limewire.core.api.Category;
@@ -47,7 +47,9 @@ public class LibraryTable extends MouseableTable {
     private final Provider<QualityRenderer> qualityRenderer;
     private final Provider<NameRenderer> nameRenderer;
     private final Provider<IconManager> iconManager;
+    private final Provider<RemoveRenderer> removeRenderer;
     private final IconLabelRenderer iconLabelRenderer;
+    private final RemoveEditor removeEditor;
     
     @Inject
     public LibraryTable(Provider<DefaultLibraryRenderer> defaultCellRenderer,
@@ -58,15 +60,19 @@ public class LibraryTable extends MouseableTable {
             Provider<NameRenderer> nameRenderer,
             Provider<IconManager> iconManager,
             Provider<LibraryPopupMenu> libraryPopupMenu,
-            IconLabelRendererFactory iconLabelRendererFactory) {
+            Provider<RemoveRenderer> removeRenderer,
+            IconLabelRendererFactory iconLabelRendererFactory,
+            RemoveEditor removeEditor) {
         this.defaultCellRenderer = defaultCellRenderer;
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
         this.calendarRenderer = calendarRenderer;
         this.qualityRenderer = qualityRenderer;
         this.nameRenderer = nameRenderer;
+        this.removeRenderer = removeRenderer;
         this.iconManager = iconManager;
         this.iconLabelRenderer = iconLabelRendererFactory.createIconRenderer(false);
+        this.removeEditor = removeEditor;
         
         initTable();
         
@@ -192,27 +198,39 @@ public class LibraryTable extends MouseableTable {
                 setCellRenderer(AudioTableFormat.LENGTH_INDEX, timeRenderer.get());
                 setCellRenderer(AudioTableFormat.QUALITY_INDEX, qualityRenderer.get());
                 setCellRenderer(AudioTableFormat.TITLE_INDEX, nameRenderer.get());
+                setCellRenderer(AudioTableFormat.ACTION_INDEX, removeRenderer.get());
+                setCellEditor(AudioTableFormat.ACTION_INDEX, removeEditor);
                 break;
             case VIDEO:
                 setCellRenderer(VideoTableFormat.LENGTH_INDEX, timeRenderer.get());
                 setCellRenderer(VideoTableFormat.SIZE_INDEX, fileSizeRenderer.get());
                 setCellRenderer(VideoTableFormat.NAME_INDEX, nameRenderer.get());
+                setCellRenderer(VideoTableFormat.ACTION_INDEX, removeRenderer.get());
+                setCellEditor(VideoTableFormat.ACTION_INDEX, removeEditor);
                 break;
             case IMAGE:
 //                setCellRenderer(ImageTableFormat.NAME_INDEX, nameRenderer.get());
                 setCellRenderer(ImageTableFormat.SIZE_INDEX, fileSizeRenderer.get());
+                setCellRenderer(ImageTableFormat.ACTION_INDEX, removeRenderer.get());
+                setCellEditor(ImageTableFormat.ACTION_INDEX, removeEditor);
                 break;
             case DOCUMENT:
                 setCellRenderer(DocumentTableFormat.NAME_INDEX, iconLabelRenderer);
                 setCellRenderer(DocumentTableFormat.SIZE_INDEX, fileSizeRenderer.get());
+                setCellRenderer(DocumentTableFormat.ACTION_INDEX, removeRenderer.get());
+                setCellEditor(DocumentTableFormat.ACTION_INDEX, removeEditor);
                 break;
             case PROGRAM:
                 setCellRenderer(ProgramTableFormat.NAME_INDEX, iconLabelRenderer);
                 setCellRenderer(ProgramTableFormat.SIZE_INDEX, fileSizeRenderer.get());
+                setCellRenderer(ProgramTableFormat.ACTION_INDEX, removeRenderer.get());
+                setCellEditor(ProgramTableFormat.ACTION_INDEX, removeEditor);
                 break;
             case OTHER:
                 setCellRenderer(OtherTableFormat.NAME_INDEX, iconLabelRenderer);
                 setCellRenderer(OtherTableFormat.SIZE_INDEX, fileSizeRenderer.get());
+                setCellRenderer(OtherTableFormat.ACTION_INDEX, removeRenderer.get());
+                setCellEditor(OtherTableFormat.ACTION_INDEX, removeEditor);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown category:" + category);
@@ -220,10 +238,16 @@ public class LibraryTable extends MouseableTable {
         } else {
             setCellRenderer(AllTableFormat.NAME_INDEX, iconLabelRenderer);
             setCellRenderer(AllTableFormat.SIZE_INDEX, fileSizeRenderer.get());
+            setCellRenderer(AllTableFormat.ACTION_INDEX, removeRenderer.get());
+            setCellEditor(AllTableFormat.ACTION_INDEX, removeEditor);
         }
     }
     
     private void setCellRenderer(int column, TableCellRenderer renderer) {
         getColumnModel().getColumn(column).setCellRenderer(renderer);
+    }
+    
+    private void setCellEditor(int column, TableCellEditor editor) {
+        getColumnModel().getColumn(column).setCellEditor(editor);
     }
 }

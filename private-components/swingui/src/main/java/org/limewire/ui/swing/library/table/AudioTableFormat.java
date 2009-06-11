@@ -40,9 +40,10 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
     static final int UPLOADS_INDEX = 14;
     static final int UPLOAD_ATTEMPTS_INDEX = 15;
     static final int PATH_INDEX = 16;
+    static final int ACTION_INDEX = 17;
     
     public AudioTableFormat() {
-        super("LIBRARY_AUDIO_TABLE", ARTIST_INDEX, true, new ColumnStateInfo[] {
+        super(ACTION_INDEX, "LIBRARY_AUDIO_TABLE", ARTIST_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(PLAY_INDEX, "LIBRARY_AUDIO_PLAY", "", 25, true, false), 
                 new ColumnStateInfo(TITLE_INDEX, "LIBRARY_AUDIO_TITLE", I18n.tr("Name"), 278, true, true),     
                 new ColumnStateInfo(ARTIST_INDEX, "LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 120, true, true), 
@@ -59,7 +60,8 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
                 new ColumnStateInfo(HIT_INDEX, "LIBRARY_AUDIO_HITS", I18n.tr("Hits"), 100, false, true), 
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_AUDIO_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_AUDIO_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
-                new ColumnStateInfo(PATH_INDEX, "LIBRARY_AUDIO_PATH", I18n.tr("Location"), 200, false, true)
+                new ColumnStateInfo(PATH_INDEX, "LIBRARY_AUDIO_PATH", I18n.tr("Location"), 200, false, true),
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_AUDIO_ACTION", "", 40, true, false)
         });
     }
 
@@ -83,6 +85,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();
         case UPLOADS_INDEX: return baseObject.getNumUploads();
         case PATH_INDEX: return baseObject.getProperty(FilePropertyKey.LOCATION);
+        case ACTION_INDEX: return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

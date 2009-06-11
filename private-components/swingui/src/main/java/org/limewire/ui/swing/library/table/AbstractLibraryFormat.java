@@ -21,12 +21,14 @@ public abstract class AbstractLibraryFormat<T extends FileItem> extends Abstract
     private final String sortID;
     private final int sortedColumn;
     private final boolean isAscending;
+    private final int actionIndex;
     
-    public AbstractLibraryFormat(String sortID, int sortedColumn, boolean isAscending, ColumnStateInfo... columnInfo) {
+    public AbstractLibraryFormat(int actionIndex, String sortID, int sortedColumn, boolean isAscending, ColumnStateInfo... columnInfo) {
         super(columnInfo);
         this.sortID = sortID;
         this.sortedColumn = sortedColumn;
         this.isAscending = isAscending;
+        this.actionIndex = actionIndex;
     }
     
     @Override
@@ -36,7 +38,7 @@ public abstract class AbstractLibraryFormat<T extends FileItem> extends Abstract
     
     @Override
     public boolean isEditable(T baseObject, int column) {
-        return false;
+        return column == actionIndex;
     }
         
     @Override
