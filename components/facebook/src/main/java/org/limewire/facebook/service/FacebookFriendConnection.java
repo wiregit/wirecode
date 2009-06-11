@@ -755,8 +755,15 @@ public class FacebookFriendConnection implements FriendConnection {
         }
     }
 
-    void sendChatStateUpdate(String friendId, ChatState state) throws FriendException {
-
+    /**
+     * Sends a chat state update to a friend.
+     * <p>
+     * Side effect: If the friend is offline, all presences of the friend are 
+     * removed and he's no longer available.
+     * 
+     * @return true if the friend is online, false otherwise
+     */
+    boolean sendChatStateUpdate(String friendId, ChatState state) throws FriendException {
         List <NameValuePair> nvps = new ArrayList <NameValuePair>();
         nvps.add(new BasicNameValuePair("typ", (state == ChatState.composing)? "1" : "0"));
         nvps.add(new BasicNameValuePair("to", friendId));
@@ -767,13 +774,28 @@ public class FacebookFriendConnection implements FriendConnection {
         }
         try {
             String resp = httpPOST("http://www.facebook.com", "/ajax/chat/typ.php", nvps);
-            handleChatResponseError(friendId, resp);
+            return handleChatResponseError(friendId, resp);
         } catch (IOException e) {
+            LOG.debug("error sending chat update", e);
             throw new FriendException(e);
         }
     }
     
-    private void handleChatResponseError(String friendId, String response) {
+    /**
+     * Sends a chat state update which causes a friend to be removed from available
+     * friends if he's no longer online. This is a blocking call.
+     * 
+     * @return false if the friend is offline, true otherwise
+     */
+    public boolean sendFriendIsOnline(String friendId) throws FriendException {
+        return sendChatStateUpdate(friendId, ChatState.active);
+    }
+    
+    /**
+     * @return false if the friend is offline, otherwise true, also true in other
+     * error cases
+     */
+    private boolean handleChatResponseError(String friendId, String response) {
         String prefix = "for (;;);";
         if (response.startsWith(prefix)) {
             response = response.substring(prefix.length());
@@ -789,12 +811,14 @@ public class FacebookFriendConnection implements FriendConnection {
                 } else {
                     LOG.debug("friend already removed");
                 }
+                return false;
             } else if (error != 0) {
                 LOG.debugf("unhandled error: {0}", response);
             }
         } catch (JSONException e) {
             LOG.debugf(e, "error parsing chat response {0}", response);
         }
+        return true;
     }
     
     public Network getNetwork() {

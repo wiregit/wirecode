@@ -9,6 +9,7 @@ import java.util.Set;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
+import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -50,12 +51,19 @@ public class PresenceListener implements Runnable {
                 if (onlineFriendIds.contains(friend.getId())) {
                     connection.addPresence(friend.getId());
                 } else if (lastOnlineFriends.contains(friend.getId())) {
-                    LOG.debugf("removing formerly online friend: {0}", friend);
-                    // TODO also check we didn't receive a disc info from him
-                    // in the mean time
-                    connection.removeAllPresences(friend);
+                    try {
+                        // the check implicitly removes the friend if he's offline
+                        boolean online = connection.sendFriendIsOnline(friend.getId());
+                        if (online) {
+                            // re-add friend to the set of online friends, so a recheck 
+                            // happens the next time he's reported offline
+                            onlineFriendIds.add(friend.getId());
+                        }
+                    } catch (FriendException e) {
+                        LOG.debug("error checking online state", e);
+                    }
                 } else {
-                    LOG.debugf("friend was not online yet: {0}", friend);
+                    LOG.debugf("friend not online yet or buddy list out of date: {0}", friend);
                 }
             }
             lastOnlineFriends = onlineFriendIds;

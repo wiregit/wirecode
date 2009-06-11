@@ -10,7 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class PresenceHandler implements LiveMessageHandler{
+public class PresenceHandler implements LiveMessageHandler {
 
     private static final String TYPE = "presence";
 
@@ -31,11 +31,10 @@ public class PresenceHandler implements LiveMessageHandler{
 
     @Override
     public void handle(String messageType, JSONObject message) throws JSONException {
-        String from = message.optString("from", null);
-        String type = message.optString("type", null);
-        if(type != null && type.equals("unavailable")) {
+        String from = message.getString("from");
+        String type = message.getString("type");
+        if (type.equals("unavailable")) {
             connection.removePresence(from);
         }
-        // TODO "available"
     }
 }
