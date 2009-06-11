@@ -178,26 +178,15 @@ public class ChatListener implements Runnable {
     private int getSeq() throws IOException, JSONException {
         int tempSeq = -1;
         while (tempSeq == -1) {
-            //for (;;);{"t":"refresh", "seq":0}
-            String seqResponseBody;
-
-            seqResponseBody = connection.httpGET(getMessageRequestingUrl(-1));
-//                String prefix = "for (;;);";
-//                if(seqResponseBody != null && seqResponseBody.startsWith(prefix)) {
-//                    seqResponseBody = seqResponseBody.substring(prefix.length());
-//                    JSONObject body = new JSONObject(seqResponseBody);
-//                    if(body != null && body.has("t") && body.getString("t").equals("refresh")) {
-//                        getPOSTFormID(); 
-//                        return getSeq();
-//                    }
-//                }
-            
+            String seqResponseBody = connection.httpGET(getMessageRequestingUrl(-1));
+            if (seqResponseBody == null) {
+                LOG.debug("null response for seq");
+                continue;
+            }
             tempSeq = parseSeq(seqResponseBody);
-
             if(tempSeq >= 0){
                 return tempSeq;
             }
-
             try {
                 LOG.debug("retrying to retrieve the seq code after 1 second...");
                 Thread.sleep(1000);
@@ -212,9 +201,12 @@ public class ChatListener implements Runnable {
         return "http://0.channel" + channel + ".facebook.com/x/0/false/p_" + uid + "=" + seq;
     }
     
+    /**
+     * @return -1 if sequence number could not be parsed
+     */
     private int parseSeq(String msgResponseBody) throws JSONException, IOException {
-        if(msgResponseBody == null)
-            return -1;
+        LOG.debugf("parsing seq from: {0}", msgResponseBody);
+        //for (;;);{"t":"refresh", "seq":0}
         String prefix = "for (;;);";
         if(msgResponseBody.startsWith(prefix)) {
             msgResponseBody = msgResponseBody.substring(prefix.length());
@@ -224,8 +216,9 @@ public class ChatListener implements Runnable {
         if(body.has("seq")) {
             return body.getInt("seq");
         } else if(body.has("t") && body.getString("t").equals("refresh")) {
+            LOG.debug("refreshing post form id");
             getPOSTFormID();    
-            return getSeq();
+            return -1;
         }
         else {
             return -1;
