@@ -11,7 +11,6 @@ import javax.swing.table.TableCellRenderer;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.ui.swing.dnd.LibraryTransferHandler;
 import org.limewire.ui.swing.library.popup.LibraryPopupHandler;
 import org.limewire.ui.swing.library.popup.LibraryPopupMenu;
 import org.limewire.ui.swing.listener.MousePopupListener;
@@ -59,7 +58,6 @@ public class LibraryTable extends MouseableTable {
             Provider<NameRenderer> nameRenderer,
             Provider<IconManager> iconManager,
             Provider<LibraryPopupMenu> libraryPopupMenu,
-            LibraryTransferHandler libraryTransferHandler,
             IconLabelRendererFactory iconLabelRendererFactory) {
         this.defaultCellRenderer = defaultCellRenderer;
         this.timeRenderer = timeRenderer;
@@ -82,7 +80,6 @@ public class LibraryTable extends MouseableTable {
         }; 
 
         setPopupHandler(new LibraryPopupHandler(this, libraryPopupMenu));
-        setTransferHandler(libraryTransferHandler);
     }
     
     private void initTable() {

@@ -3,22 +3,17 @@ package org.limewire.ui.swing.library.image;
 import java.awt.Dimension;
 import java.io.File;
 
-import javax.swing.TransferHandler;
-
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
-import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
-import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -66,19 +61,19 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
 //        panel.setPopupHandler(new MyImageLibraryPopupHandler(panel, libraryPopupFactory.createMyLibraryPopupMenu(Category.IMAGE)));
         comboBox.setSelectAllable(panel);
 
-        ImageList list = panel.getImageList();
+//        ImageList list = panel.getImageList();
 //        list.setImageCellRenderer(enableMyLibraryRenderer(list));
 //        panel.setImageEditor(enableMyLibraryEditor(panel));
-        TransferHandler transferHandler = new MyLibraryTransferHandler(getSelectionModel(list), libraryManager.getLibraryManagedList(), shareListManager, listChanger);
-        list.setTransferHandler(transferHandler);
-        panel.setTransferHandler(transferHandler);
+//        TransferHandler transferHandler = new MyLibraryTransferHandler(getSelectionModel(list), libraryManager.getLibraryManagedList(), shareListManager, listChanger);
+//        list.setTransferHandler(transferHandler);
+//        panel.setTransferHandler(transferHandler);
         return panel;
     }
     
-    @SuppressWarnings("unchecked")
-    private EventSelectionModel<LocalFileItem> getSelectionModel(ImageList list){
-        return (EventSelectionModel<LocalFileItem>) list.getSelectionModel();
-    }
+//    @SuppressWarnings("unchecked")
+//    private EventSelectionModel<LocalFileItem> getSelectionModel(ImageList list){
+//        return (EventSelectionModel<LocalFileItem>) list.getSelectionModel();
+//    }
     
 //    private ImageCellRenderer enableMyLibraryRenderer(ImageList imageList) {
 //        ImageCellRenderer renderer = new LibraryImageCellRenderer(imageList.getFixedCellWidth(), imageList.getFixedCellHeight() - 2, thumbnailManager);

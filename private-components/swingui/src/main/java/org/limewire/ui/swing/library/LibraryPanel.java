@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -23,6 +24,7 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.actions.AddFileAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
@@ -134,17 +136,17 @@ public class LibraryPanel extends JPanel {
                 //TODO: this locks should be in a different thread
                 LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
 
-                if(navItem != null && navItem.getTabID() != null) {
-//                    setEventList(fileList.getSwingModel());
+                if(isLibrarySelected(navItem)) {
+//                  setEventList(libraryManager.getLibraryManagedList().getSwingModel());
+//                  currentFriendFilterChanger.setCurrentList(navigatorComponent.getSelectedNavItem().getTabID());                   
+                    eventList = libraryManager.getLibraryManagedList().getSwingModel();
+                    selectSharing(null);
+                    selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
+                } else {
+//                  setEventList(fileList.getSwingModel());           
                     SharedFileList fileList = sharedFileListManager.getSharedFileList(navItem.getTabID());
                     eventList = fileList.getSwingModel();
                     selectSharing(fileList);
-                    selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
-                } else {
-//                    setEventList(libraryManager.getLibraryManagedList().getSwingModel());
-//                currentFriendFilterChanger.setCurrentList(navigatorComponent.getSelectedNavItem().getTabID());
-                    eventList = libraryManager.getLibraryManagedList().getSwingModel();
-                    selectSharing(null);
                     selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
                 }
             }
@@ -176,5 +178,25 @@ public class LibraryPanel extends JPanel {
         sortedList = GlazedListsFactory.sortedList(eventList);
         filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
         libraryTable.setEventList(filteredList, tableSelectionComboBox.getSelectedTabelFormat());
+        setTransferHandler();
+    }
+
+    private void setTransferHandler() {
+        LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
+        ListSelectionModel selectionModel = libraryTable.getSelectionModel();
+        if(isLibrarySelected(navItem)) {
+            libraryTable.setTransferHandler(new LocalFileListTransferHandler(selectionModel, libraryManager.getLibraryManagedList()));
+        } else {
+            SharedFileList fileList = sharedFileListManager.getSharedFileList(navItem.getTabID());
+            if(fileList != null) {
+                libraryTable.setTransferHandler(new LocalFileListTransferHandler(selectionModel, fileList));
+            } else {
+                libraryTable.setTransferHandler(null);
+            }
+        }
+    }
+
+    private boolean isLibrarySelected(LibraryNavItem navItem) {
+        return navItem == null || navItem.getTabID() == null;
     }
 }
