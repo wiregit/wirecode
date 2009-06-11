@@ -28,7 +28,6 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
 import org.limewire.inject.LimeWireInjectModule;
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.Inspector;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
