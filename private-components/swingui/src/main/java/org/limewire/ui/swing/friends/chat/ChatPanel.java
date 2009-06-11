@@ -31,10 +31,12 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Main Chat window. This is the parent container for the chat window.
  */
+@Singleton
 public class ChatPanel extends JXPanel implements Displayable {
     private static final Log LOG = LogFactory.getLog(ChatPanel.class);
     private final ConversationPaneFactory conversationFactory;

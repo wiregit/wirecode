@@ -28,6 +28,7 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
 import org.limewire.inject.LimeWireInjectModule;
+import org.limewire.inject.Modules;
 import org.limewire.inspection.Inspector;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -303,7 +304,11 @@ public class AppFrame extends SingleFrameApplication {
                     new LimeWireSwingUiModule(false),
                     thiz);
         } else {
-            childInjector = injector.createChildInjector(
+            // TODO: We want to use child injectors, but weird things happen
+            //       with circular dependencies...
+            childInjector = Guice.createInjector(Stage.PRODUCTION,
+                    Modules.providersFrom(injector),
+                    new LimeWireInjectModule(),
                     thiz,
                     new LimeWireSwingUiModule(injector.getInstance(Application.class).isProVersion()),
                     new AbstractModule() {
