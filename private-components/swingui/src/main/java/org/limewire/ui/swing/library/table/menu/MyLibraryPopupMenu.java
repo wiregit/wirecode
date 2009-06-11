@@ -124,11 +124,11 @@ public class MyLibraryPopupMenu extends JPopupMenu {
             break;
         case IMAGE:
         case DOCUMENT:
-            add(new LaunchFileAction(I18n.tr("View"), firstItem)).setEnabled(launchActionEnabled);
+//            add(new LaunchFileAction(I18n.tr("View"), firstItem)).setEnabled(launchActionEnabled);
             break;
         case PROGRAM:
         case OTHER:
-            add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
+//            add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
         }
 
         // Create playlist sub-menu for audio files.
@@ -165,16 +165,16 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 //        }
         
         addSeparator();
-        if (category != Category.PROGRAM && category != Category.OTHER) {
-            add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
-        }
-
-        add(new RemoveAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(removeActionEnabled);
-        
-        add(new DeleteAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(deleteActionEnabled);
-
-        addSeparator();
-        add(new ViewFileInfoAction(firstItem, fileInfoFactory)).setEnabled(viewFileInfoEnabled);
+//        if (category != Category.PROGRAM && category != Category.OTHER) {
+//            add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
+//        }
+//
+//        add(new RemoveAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(removeActionEnabled);
+//        
+//        add(new DeleteAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(deleteActionEnabled);
+//
+//        addSeparator();
+//        add(new ViewFileInfoAction(firstItem, fileInfoFactory)).setEnabled(viewFileInfoEnabled);
     }
 
     private boolean isGnutellaShareAllowed(Category category) {

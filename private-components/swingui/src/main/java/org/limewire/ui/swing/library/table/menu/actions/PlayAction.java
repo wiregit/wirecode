@@ -8,22 +8,25 @@ import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+
 /**
  * Plays the given file in the limewire player, 
  * or launches it depending on if it is supported.
  */
 public class PlayAction extends AbstractAction {
     
-    private final LibraryMediator libraryMediator;
-//    private final Catalog catalog;
-    private final LocalFileItem localFile;
+//    private final LibraryMediator libraryMediator;
+////    private final Catalog catalog;
+//    private final LocalFileItem localFile;
     
-    public PlayAction(LibraryMediator libraryMediator, //Catalog catalog, 
-            LocalFileItem localFile) {
+    @Inject
+    public PlayAction() {//LibraryMediator libraryMediator, //Catalog catalog, 
+//            LocalFileItem localFile) {
         super(I18n.tr("Play"));
-        this.libraryMediator = libraryMediator;
+//        this.libraryMediator = libraryMediator;
 //        this.catalog = catalog;
-        this.localFile = localFile;
+//        this.localFile = localFile;
     }
 
     @Override
@@ -31,6 +34,6 @@ public class PlayAction extends AbstractAction {
         // Set active catalog.
 //        libraryMediator.setActiveCatalog(catalog);
         // Play file.
-        PlayerUtils.playOrLaunch(localFile.getFile());
+//        PlayerUtils.playOrLaunch(localFile.getFile());
     }
 }
