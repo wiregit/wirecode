@@ -27,6 +27,7 @@ import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.IconManager;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -134,6 +135,7 @@ public class LibraryTable extends MouseableTable {
         // will need to create a filterator that we select a category on
         libraryTableModel = new LibraryTableModel(eventList, tableFormat);
         setModel(libraryTableModel);
+        setSelectionModel(new EventSelectionModel<LocalFileItem>(eventList));
         
         installListeners();
     }

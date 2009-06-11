@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -19,6 +18,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
@@ -37,6 +37,7 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 
@@ -49,6 +50,7 @@ public class LibraryPanel extends JPanel {
     private final LibrarySharingPanel librarySharingPanel;
     private final SharedFileListManager sharedFileListManager;
     private final LibraryManager libraryManager;
+    private final LocalFileListTransferHandler transferHandler;
     
     private JXButton addFilesButton;
     private LibraryTableSelectionComboBox tableSelectionComboBox;
@@ -73,7 +75,7 @@ public class LibraryPanel extends JPanel {
         this.tableSelectionComboBox = selectionComobBox;
         this.sharedFileListManager = sharedFileListManager;
         this.libraryManager = libraryManager;
-        
+        this.transferHandler = new LocalFileListTransferHandler();
         categoryMatcher = new LibraryCategoryMatcher();
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
@@ -178,21 +180,26 @@ public class LibraryPanel extends JPanel {
         sortedList = GlazedListsFactory.sortedList(eventList);
         filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
         libraryTable.setEventList(filteredList, tableSelectionComboBox.getSelectedTabelFormat());
-        setTransferHandler();
+        updateTransferHandler();
     }
 
-    private void setTransferHandler() {
+    @SuppressWarnings("unchecked")
+    private void updateTransferHandler() {
         LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
-        ListSelectionModel selectionModel = libraryTable.getSelectionModel();
+        EventSelectionModel<LocalFileItem> selectionModel = (EventSelectionModel<LocalFileItem>) libraryTable.getSelectionModel();
+        LocalFileList fileList = null;
+        
         if(isLibrarySelected(navItem)) {
-            libraryTable.setTransferHandler(new LocalFileListTransferHandler(selectionModel, libraryManager.getLibraryManagedList()));
+            fileList = libraryManager.getLibraryManagedList();
         } else {
-            SharedFileList fileList = sharedFileListManager.getSharedFileList(navItem.getTabID());
-            if(fileList != null) {
-                libraryTable.setTransferHandler(new LocalFileListTransferHandler(selectionModel, fileList));
-            } else {
-                libraryTable.setTransferHandler(null);
-            }
+            fileList = sharedFileListManager.getSharedFileList(navItem.getTabID());
+        }
+        
+        if(fileList != null) {
+            transferHandler.setFileList(selectionModel, fileList);
+            libraryTable.setTransferHandler(transferHandler);
+        } else {
+            libraryTable.setTransferHandler(null);
         }
     }
 

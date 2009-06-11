@@ -8,39 +8,44 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JComponent;
-import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.util.DNDUtils;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.swing.EventSelectionModel;
+
 public class LocalFileListTransferHandler extends TransferHandler {
 
-    private final LocalFileList fileList;
+    private LocalFileList fileList;
 
-    private final ListSelectionModel selectionModel;
+    private EventSelectionModel<LocalFileItem> selectionModel;
 
-    public LocalFileListTransferHandler(ListSelectionModel selectionModel,
+    public LocalFileListTransferHandler() {
+    }
+
+    public void setFileList(EventSelectionModel<LocalFileItem> selectionModel,
             LocalFileList fileList) {
-        this.selectionModel = selectionModel;
         this.fileList = fileList;
+        this.selectionModel = selectionModel;
     }
 
     @Override
     protected Transferable createTransferable(JComponent c) {
         LocalFileTransferable transferable = null;
-        if(selectionModel != null) {
+        if (selectionModel != null) {
             List<File> files = new ArrayList<File>();
-//            selectionModel.
-//            EventList<LocalFileItem> selected = selectionModel.getSelected();
-//            for(LocalFileItem fileItem : selected) {
-//                files.add(fileItem.getFile());
-//            }
+            EventList<LocalFileItem> selected = selectionModel.getSelected();
+            for (LocalFileItem fileItem : selected) {
+                files.add(fileItem.getFile());
+            }
             transferable = new LocalFileTransferable(files.toArray(new File[files.size()]));
         }
         return transferable;
     }
-    
+
     @Override
     public int getSourceActions(JComponent c) {
         return COPY;
@@ -48,7 +53,7 @@ public class LocalFileListTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport info) {
-        return DNDUtils.containsFileFlavors(info);
+        return fileList != null && DNDUtils.containsFileFlavors(info);
     }
 
     @Override

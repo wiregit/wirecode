@@ -22,7 +22,9 @@ public class LocalFileTransferable implements Transferable {
 
     @Override
     public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+        System.out.println("flavor: " + flavor);
         if(flavor.equals(LOCAL_FILE_DATA_FLAVOR)){
+            System.out.println("files: " + files);
             return files;
         } else if( flavor.equals(DNDUtils.URIFlavor)) {
             String seperator = System.getProperty("line.separator"); 
@@ -31,8 +33,11 @@ public class LocalFileTransferable implements Transferable {
                 lines.append(file.toURI().toString());
                 lines.append(seperator);
             }
+            lines.append(seperator);
+            System.out.println("lists: " + lines);
             return lines.toString();
         } else if(flavor.equals(DataFlavor.javaFileListFlavor)) {
+            System.out.println("list: " + Arrays.asList(files));
             return Arrays.asList(files);
         }
         
