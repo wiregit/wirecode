@@ -11,6 +11,7 @@ import javax.swing.table.TableCellEditor;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.inject.LazySingleton;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -40,8 +41,8 @@ public class LibraryNavigatorTable extends JXTable {
         setModel(new EventTableModel<LibraryNavItem>(eventList, new NavTableFormat()));
     }
     
-    public void addLibraryNavItem(String name, String id, boolean canRemove) {
-        eventList.add(new LibraryNavItem(name, id, canRemove));
+    public void addLibraryNavItem(String name, String id, NavType type) {
+        eventList.add(new LibraryNavItem(name, id, type));
     }
     
     public void removeLibraryNavItem(String id) {
