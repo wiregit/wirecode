@@ -55,9 +55,12 @@ public class PresenceListener implements Runnable {
                         // the check implicitly removes the friend if he's offline
                         boolean online = connection.sendFriendIsOnline(friend.getId());
                         if (online) {
+                            LOG.debugf("friend still online, overriding buddy list: {0}", friend);
                             // re-add friend to the set of online friends, so a recheck 
                             // happens the next time he's reported offline
                             onlineFriendIds.add(friend.getId());
+                        } else {
+                            LOG.debugf("buddy list was right, friend offline: {0}", friend);
                         }
                     } catch (FriendException e) {
                         LOG.debug("error checking online state", e);
