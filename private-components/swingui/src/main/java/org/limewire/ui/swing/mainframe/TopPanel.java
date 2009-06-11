@@ -186,7 +186,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
             @Override
             public void itemRemoved() {
                 searchList.removeTabActionMap(actionMap);
-                search.stop();
                 ((Disposable)searchPanel).dispose();
             }
 

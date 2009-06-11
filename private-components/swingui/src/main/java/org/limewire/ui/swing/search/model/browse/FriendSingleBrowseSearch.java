@@ -163,6 +163,7 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
 
     @Override
     public void repeat() {
+        stop();
         start();
     }
 }
