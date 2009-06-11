@@ -585,7 +585,7 @@ public class NIODispatcher implements Runnable {
      * and the current thread is not the dispatch thread.
      */
     void wakeup() {
-        if(!wokeup && Thread.currentThread() != dispatchThread) {
+        if(!wokeup && Thread.currentThread() != dispatchThread && primarySelector != null) {
             wokeup = true;
             primarySelector.wakeup();
         }
