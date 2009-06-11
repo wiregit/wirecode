@@ -70,6 +70,9 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
         context.checking(new Expectations() {{
             exactly(total).of(query).getGUID();
             will(returnValue(makeSuspiciousGuid()));
+            // This will be called for the last query, once per slice
+            exactly(4).of(query).desiresOutOfBandReplies();
+            will(returnValue(false));
         }});
         for(int i = 0; i < total - 1; i++) {
             assertTrue(filter.allow(query));
@@ -116,6 +119,9 @@ public class AnomalousQueryFilterTest extends BaseTestCase {
             will(returnValue(GUID.makeGuid()));
             exactly(suspiciousCount).of(query).getGUID();
             will(returnValue(makeSuspiciousGuid()));
+            // This will be called for the last query, once per slice
+            exactly(4).of(query).desiresOutOfBandReplies();
+            will(returnValue(false));
         }});
         for(int i = 0; i < total - 1; i++) {
             assertTrue(filter.allow(query));

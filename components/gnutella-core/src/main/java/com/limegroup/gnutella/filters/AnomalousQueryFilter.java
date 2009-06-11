@@ -63,7 +63,8 @@ public class AnomalousQueryFilter implements SpamFilter {
                 // Drop the query if we've seen enough queries to make a
                 // judgement and it matches a large fraction of recent queries 
                 if(sliceTotals[i] >= GUIDS_TO_COUNT &&
-                        count > sliceTotals[i] * MAX_FRACTION_PER_SLICE) {
+                        count > sliceTotals[i] * MAX_FRACTION_PER_SLICE &&
+                        !q.desiresOutOfBandReplies()) {
                     // Count the other slices before returning
                     shouldDrop = true;
                 }
