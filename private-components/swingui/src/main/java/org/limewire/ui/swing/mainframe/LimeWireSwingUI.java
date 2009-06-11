@@ -111,7 +111,7 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.add(sharedFileCountPopup, JLayeredPane.PALETTE_LAYER);
         layeredPane.addComponentListener(new PanelResizer(sharedFileCountPopup));
         layeredPane.add(loginPopup, JLayeredPane.POPUP_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(sharedFileCountPopup));
+        layeredPane.addComponentListener(new PanelResizer(loginPopup));
 //        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
 //        layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
         add(layeredPane, BorderLayout.CENTER);

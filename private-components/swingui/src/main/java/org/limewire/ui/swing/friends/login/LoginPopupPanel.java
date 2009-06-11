@@ -9,11 +9,10 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -24,6 +23,8 @@ import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -34,16 +35,21 @@ public class LoginPopupPanel extends Panel implements Resizable {
     @Resource private Color border;
     @Resource private Color titleBarBackground;
     @Resource private Color titleBarForeground;
-    @Resource private Color titleBarBorder;
     @Resource private Font titleBarFont;
     
     @Resource private Icon closeIcon;
     @Resource private Icon closeIconRollover;
     @Resource private Icon closeIconPressed;   
     
-    private JXPanel frame = null;
+    private final Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider;
     
-    public LoginPopupPanel() {
+    private JXPanel frame = null;
+    private JPanel contentPanel = null;
+    
+    @Inject
+    public LoginPopupPanel(Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider) {
+        this.serviceSelectionLoginPanelProvider = serviceSelectionLoginPanelProvider;
+        
         GuiUtils.assignResources(this);
         
         setLayout(new BorderLayout());
@@ -74,7 +80,14 @@ public class LoginPopupPanel extends Panel implements Resizable {
         headerBar.add(titleBarLabel, "gapleft 3, gapbottom 3, dock west, growx");
         headerBar.add(closeButton, "gapright 3, gaptop 0, dock east, growx");
         
+        contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setOpaque(false);
+        
         frame.add(headerBar, BorderLayout.NORTH);
+        frame.add(contentPanel, BorderLayout.CENTER);
+        
+        contentPanel.add(serviceSelectionLoginPanelProvider.get(), BorderLayout.CENTER);
+        
         
         add(frame, BorderLayout.CENTER);
     }
