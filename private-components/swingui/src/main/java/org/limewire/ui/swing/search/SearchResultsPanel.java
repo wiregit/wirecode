@@ -39,6 +39,8 @@ import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.model.browse.BrowseStatus;
+import org.limewire.ui.swing.search.model.browse.BrowseStatus.BrowseState;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
@@ -106,6 +108,14 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
 
     private boolean fullyConnected = true;
 
+    private BrowseStatus browseStatus = null;
+    
+    /** Shows status of failed browses and refresh button.
+     */
+    private BrowseStatusPanel browseStatusPanel;
+
+    private final BrowseFailedMessagePanel browseFailedPanel;
+
     /**
      * Constructs a SearchResultsPanel with the specified components.
      */
@@ -126,6 +136,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         this.sponsoredResultsPanel.setVisible(false);
+        this.browseFailedPanel = new BrowseFailedMessagePanel(searchResultsModel);
         
         // Create sort and filter components.
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
@@ -183,6 +194,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         messagePanel.add(messageLabel);
         messagePanel.setVisible(false);
         
+        browseStatusPanel = new BrowseStatusPanel(searchResultsModel);
+        
         classicSearchReminderPanel = new ClassicSearchWarningPanel();
         layoutComponents();
     }
@@ -227,6 +240,13 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             sponsoredResultsPanel.setVisible(true);
             syncColumnHeader();
         }
+    }
+    
+    /**
+     * @param title The title displayed at the top of the panel
+     */
+    public void setTitle(String title){
+        searchTitleLabel.setText(title);
     }
     
     /**
@@ -299,14 +319,21 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         tabHighlight.setBorderPaint(null);
         
         HeaderBar header = new HeaderBar(searchTitleLabel);
+        header.setLayout(new MigLayout("nogrid, hidemode 3, novisualpadding, insets 0, gap 0!, filly"));
+        header.add(browseStatusPanel, "growx, pushx");
         headerBarDecorator.decorateBasic(header);
         
-        sortAndFilterPanel.layoutComponents(header);
+        JPanel sortPanel = new JPanel();
+        sortPanel.setOpaque(false);
+        sortAndFilterPanel.layoutComponents(sortPanel);
+        header.add(sortPanel);
+        
         add(header                    , "spanx 2, growx, wrap");
         add(classicSearchReminderPanel, "spanx 2, growx, wrap");
         add(messagePanel              , "spanx 2, growx, wrap");
         add(filterPanel, "grow");
-        add(scrollPane , "grow");
+        add(scrollPane , "hidemode 3, grow");
+        add(browseFailedPanel , "hidemode 3, grow");
 
         scrollablePanel.setScrollableTracksViewportHeight(false);
         scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0, insets 0", "[]", "[grow][]"));
@@ -413,18 +440,33 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         updateMessages();        
     }
     
+    public void setBrowseStatus(BrowseStatus browseStatus){
+        this.browseStatus = browseStatus;
+        updateMessages();        
+    }
+    
     /**
      * Updates the user message based on the current state of the application. 
      */
     private void updateMessages() {
+        browseStatusPanel.setBrowseStatus(browseStatus);
+        
         if (!lifeCycleComplete) {
             messageLabel.setText(I18n.tr("LimeWire will start your search right after it finishes loading."));
             messagePanel.setVisible(true);
+            browseFailedPanel.setVisible(false);
         } else if (!fullyConnected) {
             messageLabel.setText(I18n.tr("You might not receive many results until LimeWire finishes loading..."));
             messagePanel.setVisible(true);
+            browseFailedPanel.setVisible(false);            
+        } else if (browseStatus != null && browseStatus.getState() == BrowseState.FAILED) {
+            browseFailedPanel.update(browseStatus.getBrowseSearch(), browseStatus.getFailedFriends());
+            browseFailedPanel.setVisible(true);
         } else {
             messagePanel.setVisible(false);
+            browseFailedPanel.setVisible(false);
         }
+
+        scrollPane.setVisible(!browseFailedPanel.isVisible());
     }
 }

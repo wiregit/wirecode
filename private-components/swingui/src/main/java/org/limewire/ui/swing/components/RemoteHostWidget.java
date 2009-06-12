@@ -121,6 +121,19 @@ public class RemoteHostWidget extends JPanel {
             }
         };
     }
+    
+    private Action getMultipleLibraryAction(final Collection<RemoteHost> people) {
+        return new AbstractAction(tr("Browse All {0}", people.size())) {
+            {
+                putValue(SINGULAR_ACTION_NAME, tr("Browse Files of All"));
+            }
+        
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getRemoteHostAction().viewLibrariesOf(people);
+            }
+        };
+    }
 
     private Action getSharingAction(final RemoteHost person) {
         return new AbstractAction(tr("What I'm Sharing")) {
@@ -130,7 +143,7 @@ public class RemoteHostWidget extends JPanel {
         
             @Override
             public void actionPerformed(ActionEvent e) {
-                getRemoteHostAction().showFilesSharedBy(person);
+                getRemoteHostAction().showFilesSharedWith(person);
             }
         };
     }
@@ -232,6 +245,8 @@ public class RemoteHostWidget extends JPanel {
             List<JMenuItem> friendsDisabled = new ArrayList<JMenuItem>();
             List<JMenuItem> p2pUsers = new ArrayList<JMenuItem>();
             List<JMenuItem> p2pUsersDisabled = new ArrayList<JMenuItem>();
+            List<RemoteHost> browsableHosts = new ArrayList<RemoteHost>();
+            
             for (RemoteHost person : people) {
                 JMenu submenu = new JMenu(person.getFriendPresence().getFriend().getRenderName());
                 comboBox.decorateMenuComponent(submenu);
@@ -256,6 +271,10 @@ public class RemoteHostWidget extends JPanel {
                 } else if (submenu.getMenuComponentCount() == 0) {
                     itemToAdd = new JMenuItem(submenu.getText());
                     itemToAdd.setEnabled(false);
+                }
+                
+                if(itemToAdd.isEnabled()){
+                    browsableHosts.add(person);
                 }
     
                 if (person.getFriendPresence().getFriend().isAnonymous()) {
@@ -296,6 +315,11 @@ public class RemoteHostWidget extends JPanel {
                 for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
                     comboBoxMenu.add(p2pUser);
                 }
+            }            
+
+            //and we add the browse all item if there is more than one person
+            if(browsableHosts.size() > 1){            
+                comboBoxMenu.add(createItem(getMultipleLibraryAction(browsableHosts)));
             }
         }
     }

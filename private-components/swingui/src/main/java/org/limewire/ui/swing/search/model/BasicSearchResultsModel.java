@@ -323,6 +323,13 @@ class BasicSearchResultsModel implements SearchResultsModel {
     }
     
     /**
+     * Removes all results from the model
+     */
+    public void clear(){
+        allSearchResults.clear();
+    }
+    
+    /**
      * Initiates a download of the specified visual search result.
      */
     @Override

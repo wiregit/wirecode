@@ -95,4 +95,9 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
      */
     void removeSearchResult(SearchResult result);
     
+    /**
+     * Removes all results from the model
+     */
+    void clear();
+    
 }

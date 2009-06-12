@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.ui.swing.painter.GreenMessagePainter;
+import org.limewire.ui.swing.painter.MessagePainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
@@ -168,7 +168,7 @@ public class GhostDragGlassPane extends JPanel {
         public DragPanel() {
             GuiUtils.assignResources(this);
             
-            setBackgroundPainter(new GreenMessagePainter<JXPanel>());
+            setBackgroundPainter(new MessagePainterFactory<JXPanel>().createGreenMessagePainter());
             
             setLayout(new BorderLayout());
             label = new JLabel("");

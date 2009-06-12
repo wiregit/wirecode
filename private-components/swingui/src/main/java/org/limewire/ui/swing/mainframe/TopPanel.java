@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -17,6 +18,7 @@ import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -51,6 +53,7 @@ import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.search.SearchResultMediator;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
+import org.limewire.ui.swing.search.model.browse.BrowseSearch;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.mozilla.browser.MozillaInitialization;
@@ -67,6 +70,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final Navigator navigator;        
     private final NavItem homeNav;
     private final KeywordAssistedSearchBuilder keywordAssistedSearchBuilder;
+    @Resource private Icon browseIcon;
         
     @Inject
     public TopPanel(final SearchHandler searchHandler,
@@ -167,12 +171,22 @@ class TopPanel extends JXPanel implements SearchNavigator {
     public boolean requestFocusInWindow() {
         return searchBar.requestFocusInWindow();
     }
+    
+
+    @Override
+    public SearchNavItem addSearch(String title, final JComponent searchPanel, final BrowseSearch search) {
+        return addSearch(title, searchPanel, search, browseIcon);
+    }
 
     @Override
     public SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search) {
-
+        return addSearch(title, searchPanel, search, null);
+    }
+    
+    private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, Icon icon) {
         final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(searchPanel));
         final SearchAction action = new SearchAction(item);
+        action.putValue(Action.LARGE_ICON_KEY, icon);
         search.addSearchListener(action);
 
         final Action moreTextAction = new NoOpAction();
@@ -188,7 +202,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
             @Override
             public void itemRemoved() {
                 searchList.removeTabActionMap(actionMap);
-                search.stop();
                 ((Disposable)searchPanel).dispose();
             }
 
