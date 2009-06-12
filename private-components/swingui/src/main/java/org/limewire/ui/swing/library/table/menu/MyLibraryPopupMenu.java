@@ -177,6 +177,12 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 //        add(new ViewFileInfoAction(firstItem, fileInfoFactory)).setEnabled(viewFileInfoEnabled);
     }
 
+//    I guess the point I was trying to make is we need to become more careful about redesigning UI components eventually. If we continue to drastically redesign the UI ever few months users will be annoyed. Many of them will probably already be annoyed with the new changes we're making now after getting used to 5.0. 
+//
+//    Going forward there needs to be some threshold that a new design has to overcome to warrant it to be changed. Just because we know something is wrong or could be done slightly better doesn't mean its worth changing the functionality for the user to make it slightly better. If it doesn't improve the usability enough then I think its not worth the change yet. There were plenty of design problems in 4.x and people seemed to get along just fine for many years with it. 
+//
+//    This particular change seems like it was one of the last design changes that was thrown in at the last minute without being tested.  To me it doesn't seem like it improves functionality enough to make it worth changing at this point. 
+    
     private boolean isGnutellaShareAllowed(Category category) {
         if(category != Category.DOCUMENT)
             return true;

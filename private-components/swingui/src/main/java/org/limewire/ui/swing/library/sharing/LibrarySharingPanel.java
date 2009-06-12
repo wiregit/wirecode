@@ -53,6 +53,7 @@ public class LibrarySharingPanel {
         
         component = new JPanel();
         component.setBackground(backgroundColor);
+        component.setVisible(false);
         
         component.setBorder(BorderFactory.createMatteBorder(0,0,0,1, borderColor));
                
