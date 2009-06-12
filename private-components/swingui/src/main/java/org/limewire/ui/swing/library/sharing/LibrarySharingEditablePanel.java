@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.library.sharing;
 
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,14 +14,10 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendManager;
-import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.inject.LazySingleton;
-import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.library.sharing.actions.ApplySharingAction;
@@ -32,7 +26,6 @@ import org.limewire.ui.swing.library.sharing.actions.SelectAllAction;
 import org.limewire.ui.swing.library.sharing.actions.SelectNoneAction;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPFriend;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -47,7 +40,6 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.name.Named;
 
 @LazySingleton
 public class LibrarySharingEditablePanel {

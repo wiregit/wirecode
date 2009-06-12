@@ -3,7 +3,7 @@ package org.limewire.ui.swing.library.popup;
 import javax.swing.JPopupMenu;
 
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
-import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
+import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.library.navigator.actions.AddFilesAction;
 import org.limewire.ui.swing.library.navigator.actions.ClearAction;
@@ -25,7 +25,7 @@ public class LibraryNavPopupMenu extends JPopupMenu {
     private final Provider<DeleteListAction> deleteAction;
     
     @Inject
-    public LibraryNavPopupMenu(LibraryNavigatorTable table, 
+    public LibraryNavPopupMenu(LibraryNavigatorPanel navPanel, 
             AddFilesAction addAction, ImportListAction importAction,
             ExportListAction exportAction, Provider<RenameAction> renameAction,
             ClearAction clearAction, Provider<DeleteListAction> deleteAction) {
@@ -36,7 +36,7 @@ public class LibraryNavPopupMenu extends JPopupMenu {
         this.clearAction = clearAction;
         this.deleteAction = deleteAction;
 
-        init(table.getSelectedItem());
+        init(navPanel.getSelectedNavItem());
     }
     
     public void init(LibraryNavItem item) {

@@ -8,13 +8,13 @@ import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.jacob.com.NotImplementedException;
 import com.limegroup.gnutella.library.FileCollectionManager;
 import com.limegroup.gnutella.library.SharedFileCollection;
 import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent;
@@ -154,5 +154,10 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     @Override
     public void deleteSharedFileList(String name) {
         throw new NotImplementedException("Deletion of filelists not implemented");
+    }
+
+    @Override
+    public void renameSharedFileList(String currentName, String newName) {
+        throw new NotImplementedException("Rename of filelists not implemented");
     }
 }

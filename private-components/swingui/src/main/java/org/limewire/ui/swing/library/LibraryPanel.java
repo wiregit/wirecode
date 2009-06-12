@@ -111,16 +111,9 @@ public class LibraryPanel extends JPanel {
     
     @Inject
     void register() {
-//        eventList = libraryManager.getLibraryManagedList().getSwingModel();
         //TODO: SharedFileLists use a different lock so we can't create a pluggable list with them
 //        baseLibraryList = new PluggableList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
 //        currentFriendFilterChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager, sharedFileListManager);
-
-        
-//        sortedList = GlazedListsFactory.sortedList(eventList);
-//        filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
-//        
-//        libraryTable.setEventList(sortedList, tableSelectionComboBox.getSelectedTabelFormat());
         
         
         //Loads the Library after Component has been realized.

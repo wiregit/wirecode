@@ -49,6 +49,7 @@ public class LibraryTable extends MouseableTable {
     private final Provider<NameRenderer> nameRenderer;
     private final Provider<IconManager> iconManager;
     private final Provider<RemoveRenderer> removeRenderer;
+    private final Provider<IsPlayingRenderer> isPlayingRenderer;
     private final IconLabelRenderer iconLabelRenderer;
     private final RemoveEditor removeEditor;
     
@@ -62,6 +63,7 @@ public class LibraryTable extends MouseableTable {
             Provider<IconManager> iconManager,
             Provider<LibraryPopupMenu> libraryPopupMenu,
             Provider<RemoveRenderer> removeRenderer,
+            Provider<IsPlayingRenderer> isPlayingRenderer,
             IconLabelRendererFactory iconLabelRendererFactory,
             RemoveEditor removeEditor) {
         this.defaultCellRenderer = defaultCellRenderer;
@@ -71,6 +73,7 @@ public class LibraryTable extends MouseableTable {
         this.qualityRenderer = qualityRenderer;
         this.nameRenderer = nameRenderer;
         this.removeRenderer = removeRenderer;
+        this.isPlayingRenderer = isPlayingRenderer;
         this.iconManager = iconManager;
         this.iconLabelRenderer = iconLabelRendererFactory.createIconRenderer(false);
         this.removeEditor = removeEditor;
@@ -195,6 +198,7 @@ public class LibraryTable extends MouseableTable {
             switch(category) {
             case AUDIO:
                 //TODO: setup play column renderer/editor
+                setCellRenderer(AudioTableFormat.PLAY_INDEX, isPlayingRenderer.get());
                 setCellRenderer(AudioTableFormat.SIZE_INDEX, fileSizeRenderer.get());
                 setCellRenderer(AudioTableFormat.LENGTH_INDEX, timeRenderer.get());
                 setCellRenderer(AudioTableFormat.QUALITY_INDEX, qualityRenderer.get());

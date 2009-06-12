@@ -10,7 +10,6 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.images.ThumbnailManager;
-import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 
 import ca.odell.glazedlists.EventList;
@@ -50,9 +49,10 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     
     @Override
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder,
-            EventList<LocalFileItem> eventList, LocalFileList fileList,
+            EventList<LocalFileItem> eventList, LocalFileList fileList//,
 //            ShareWidget<File> shareWidget, 
-            LibraryListSourceChanger listChanger) {
+//            LibraryListSourceChanger listChanger
+            ) {
 
         LibraryImageFolderComboBox comboBox = libraryImageComboBox.get();
         comboDecorator.decorateLinkComboBox(comboBox);

@@ -24,7 +24,7 @@ public class LibraryCategoryMatcher implements Matcher<LocalFileItem> {
     }
     
     @Override
-    public boolean matches(LocalFileItem item) { //System.out.println("selected " + categoryFilteredOn + " " + item.getCategory());
+    public boolean matches(LocalFileItem item) {
         if(categoryFilteredOn == null)
             return true;
         else

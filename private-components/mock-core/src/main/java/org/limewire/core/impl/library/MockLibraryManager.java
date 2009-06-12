@@ -207,4 +207,9 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
     public void deleteSharedFileList(String name) {
 
     }
+
+    @Override
+    public void renameSharedFileList(String currentName, String newName) {
+
+    }
 }

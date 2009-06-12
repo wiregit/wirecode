@@ -30,4 +30,9 @@ public interface SharedFileListManager {
      * Deletes the SharedFileList with this name.
      */
     void deleteSharedFileList(String name);
+    
+    /**
+     * Renames the SharedFileList with a new name.
+     */
+    void renameSharedFileList(String currentName, String newName);
 }

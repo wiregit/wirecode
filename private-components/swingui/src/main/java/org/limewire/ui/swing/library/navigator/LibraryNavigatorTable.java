@@ -11,7 +11,6 @@ import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.dnd.LibraryNavTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;

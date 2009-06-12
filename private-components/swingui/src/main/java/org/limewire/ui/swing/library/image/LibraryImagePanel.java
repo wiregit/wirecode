@@ -3,7 +3,6 @@ package org.limewire.ui.swing.library.image;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +15,11 @@ import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.images.ImageList;
-import org.limewire.ui.swing.images.ImageListModel;
-import org.limewire.ui.swing.library.LibraryListSourceChanger;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -61,16 +57,17 @@ public class LibraryImagePanel extends JPanel
     private final Map<File, LibraryImageSubPanel> panelMap;
 
     private final LocalFileList fileList;
-    private final LibraryListSourceChanger listChanger;
+//    private final LibraryListSourceChanger listChanger;
     
     private JScrollPane scrollPane;
     private LibraryImageSubPanelFactory subPanelFactory;
     
     public LibraryImagePanel(String name, EventList<LocalFileItem> eventList, 
             LocalFileList fileList, JScrollPane scrollPane,
-            Provider<LibraryImageSubPanelFactory> factory,
+            Provider<LibraryImageSubPanelFactory> factory//,
 //            ShareWidget<File> shareWidget,
-            LibraryListSourceChanger listChanger) {       
+//            LibraryListSourceChanger listChanger
+            ) {       
         super(new VerticalLayout());
         
         GuiUtils.assignResources(this); 
@@ -80,7 +77,7 @@ public class LibraryImagePanel extends JPanel
         this.scrollPane = scrollPane;
         this.factory = factory;
 //        this.shareWidget = shareWidget;
-        this.listChanger = listChanger;
+//        this.listChanger = listChanger;
         
         groupingList = GlazedListsFactory.groupingList(eventList, groupingComparator);
         
@@ -133,7 +130,7 @@ public class LibraryImagePanel extends JPanel
     private void createSubPanel(File parent, EventList<LocalFileItem> list){
         if(subPanelFactory == null)
             subPanelFactory = factory.get();
-        LibraryImageSubPanel subPanel = subPanelFactory.createMyLibraryImageSubPanel(parent, list, fileList, listChanger);
+        LibraryImageSubPanel subPanel = subPanelFactory.createMyLibraryImageSubPanel(parent, list, fileList);//, listChanger);
         panelMap.put(parent, subPanel);
         add(subPanel);
     }
