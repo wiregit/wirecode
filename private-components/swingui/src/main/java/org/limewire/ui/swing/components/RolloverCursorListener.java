@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -27,6 +28,22 @@ public class RolloverCursorListener extends MouseAdapter {
         this.rolloverCursor = rolloverCursor;
     }
     
+    /**
+     * Installs the listener on the specified component.
+     */
+    public void install(Component comp) {
+        comp.addMouseListener(this);
+        comp.addMouseMotionListener(this);
+    }
+    
+    /**
+     * Uninstalls the listener on the specified component.
+     */
+    public void uninstall(Component comp) {
+        comp.removeMouseListener(this);
+        comp.removeMouseMotionListener(this);
+    }
+    
     @Override
     public void mouseEntered(MouseEvent e) {
         e.getComponent().setCursor(rolloverCursor);
@@ -35,5 +52,10 @@ public class RolloverCursorListener extends MouseAdapter {
     @Override
     public void mouseExited(MouseEvent e) {
         e.getComponent().setCursor(Cursor.getDefaultCursor());
+    }
+    
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        e.getComponent().setCursor(rolloverCursor);
     }
 }

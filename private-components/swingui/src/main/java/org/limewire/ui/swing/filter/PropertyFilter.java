@@ -115,7 +115,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 resources.getHighlightBackground(), resources.getHighlightForeground()));
         
         // Add listener to show cursor on mouse over.
-        list.addMouseListener(new RolloverCursorListener());
+        new RolloverCursorListener().install(list);
         
         moreButton.setAction(new MoreAction());
         moreButton.setBorder(BorderFactory.createEmptyBorder(0, 1, 1, 1));
@@ -392,13 +392,15 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
             closeButton.setContentAreaFilled(false);
             closeButton.setForeground(resources.getPopupHeaderForeground());
             closeButton.setIcon(resources.getPopupCloseIcon());
-            closeButton.addMouseListener(new RolloverCursorListener());
             closeButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     hidePopup();
                 }
             });
+            
+            // Add listener to show cursor on mouse over.
+            new RolloverCursorListener().install(closeButton);
             
             moreList.setCellRenderer(new PropertyCellRenderer(getBackground(), 
                     BorderFactory.createEmptyBorder(1, 4, 0, 1)));
@@ -413,7 +415,7 @@ class PropertyFilter<E extends FilterableItem> extends AbstractFilter<E> {
                     resources.getHighlightBackground(), resources.getHighlightForeground()));
             
             // Add listener to show cursor on mouse over.
-            moreList.addMouseListener(new RolloverCursorListener());
+            new RolloverCursorListener().install(moreList);
             
             // Set list and selection models.  We use the unique list directly
             // to display values alphabetically.

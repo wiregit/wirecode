@@ -76,7 +76,7 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
                 resources.getHighlightBackground(), resources.getHighlightForeground()));
         
         // Add listener to show cursor on mouse over.
-        list.addMouseListener(new RolloverCursorListener());
+        new RolloverCursorListener().install(list);
         
         panel.add(categoryLabel, "gap 6 6, wrap");
         panel.add(list         , "grow");
