@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.io.IOUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.SystemUtils.SpecialLocations;
@@ -48,6 +49,31 @@ public class FileUtils {
     private static final Map<File, Boolean> CAN_WRITE_CACHE = new ConcurrentHashMap<File, Boolean>();
 
     private static final CopyOnWriteArrayList<FileLocker> fileLockers = new CopyOnWriteArrayList<FileLocker>();
+    
+    /** Writes an object to a backup file and then renames that file to a proper file. */
+    public static boolean writeWithBackupFile(Object toWrite, File backupFile, File properFile, org.apache.commons.logging.Log log) {
+        ObjectOutputStream out = null;
+        
+        try {
+            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(backupFile)));
+            out.writeObject(toWrite);
+            out.flush();
+            out.close();
+            out = null;
+            // Rename backup to save, now that it saved.
+            properFile.delete();
+            backupFile.renameTo(properFile);                
+            return true;
+        } catch(IOException iox) {
+            if(log != null) {
+                log.debug("IOX writing file to: " + properFile, iox);
+            }
+        } finally {
+            IOUtils.close(out);
+        }
+        
+        return false;
+    }
 
     /**
      * Writes the passed Object to corresponding file.
@@ -56,12 +82,6 @@ public class FileUtils {
      * @param obj the Object to be stored
      */
     public static void writeObject(File f, Object obj) throws IOException {
-
-        try {
-            f = getCanonicalFile(f);
-        } catch (IOException ignore) {
-        }
-
         ObjectOutputStream out = null;
         try {
             // open the file
@@ -83,12 +103,6 @@ public class FileUtils {
      * @return The Object that was read
      */
     public static Object readObject(File file) throws IOException, ClassNotFoundException {
-
-        try {
-            file = getCanonicalFile(file);
-        } catch (IOException ignore) {
-        }
-
         ObjectInputStream in = null;
         try {
             // open the file

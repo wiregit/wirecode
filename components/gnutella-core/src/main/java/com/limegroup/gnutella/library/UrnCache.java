@@ -1,10 +1,8 @@
 package com.limegroup.gnutella.library;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -30,6 +28,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
+import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Inject;
@@ -276,27 +275,10 @@ public final class UrnCache {
             LOG.debug("not dirty");
             return;
         }
-
-        getUrnMap(); // make sure it's finished constructing.
-
-        // It's not ideal to hold a lock while writing to disk, but I doubt
-        // think
-        // it's a problem in practice.
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(
-                    URN_CACHE_BACKUP_FILE)));
-            oos.writeObject(getUrnMap());
-            oos.flush();
-            URN_CACHE_FILE.delete();
-            URN_CACHE_BACKUP_FILE.renameTo(URN_CACHE_FILE);
-        } catch (IOException e) {
-            LOG.error("Unable to persist cache", e);
-        } finally {
-            IOUtils.close(oos);
+        
+        if(FileUtils.writeWithBackupFile(getUrnMap(), URN_CACHE_BACKUP_FILE, URN_CACHE_FILE, LOG)) {
+            dirty = false;
         }
-
-        dirty = false;
     }
 
     private Map<UrnSetKey, Set<URN>> getUrnMap() {

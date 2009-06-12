@@ -1,13 +1,9 @@
 package com.limegroup.gnutella.library;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +24,6 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.Category;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.io.IOUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.AbstractSettingsGroup;
@@ -112,7 +107,6 @@ class LibraryFileData extends AbstractSettingsGroup {
             return false;
         }
         
-        ObjectOutputStream out = null;
         Map<String, Object> save = new HashMap<String, Object>();
         lock.readLock().lock();
         try {
@@ -121,24 +115,12 @@ class LibraryFileData extends AbstractSettingsGroup {
             save.put("MANAGED_DIRECTORIES", directoriesToManageRecursively);
             save.put("DO_NOT_MANAGE", directoriesNotToManage);
             save.put("EXCLUDE_FILES", excludedFiles);
-            save.put("SHARE_DATA", libraryManageData);
-            
-            try {
-                out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(backupFile)));
-                out.writeObject(save);
-                out.flush();
-                out.close();
-                out = null;
-                // Rename backup to save, now that it saved.
-                saveFile.delete();
-                backupFile.renameTo(saveFile);                
+            save.put("SHARE_DATA", libraryManageData);            
+            if(FileUtils.writeWithBackupFile(save, backupFile, saveFile, LOG)) {
                 dirty = false;
-            } catch(IOException iox) {
-                LOG.debug("IOX saving library", iox);
             }
         } finally {
             lock.readLock().unlock();
-            IOUtils.close(out);
         }
         
         return true;
