@@ -46,7 +46,7 @@ import com.google.inject.Provider;
  * player (except the mini player) in the application otherwise there will be 
  * contention regarding play control and volume.
  */
-public class PlayerPanel extends JXPanel implements PlayerView {
+public class PlayerPanel extends JXPanel implements PlayerMediatorListener {
 
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -323,7 +323,7 @@ public class PlayerPanel extends JXPanel implements PlayerView {
     private PlayerMediator getPlayerMediator() {
         if (playerMediator == null) {
             playerMediator = playerProvider.get();
-            playerMediator.setPlayerView(this);
+            playerMediator.addMediatorListener(this);
         }
         return playerMediator;
     }
@@ -339,20 +339,20 @@ public class PlayerPanel extends JXPanel implements PlayerView {
 //    }
     
     @Override
-    public void updateProgress(float progress) {
+    public void progressUpdated(float progress) {
         if (!(progressSlider.getValueIsAdjusting() || getPlayerMediator().getStatus() == PlayerState.SEEKING)) {
             progressSlider.setValue((int) (progressSlider.getMaximum() * progress));
         }
     }
     
     @Override
-    public void updateSong(String songText) {
+    public void songChanged(String name) {
         // Update volume.
         updateVolume();
         
         // Set song text.
-        titleLabel.setText(songText);
-        titleLabel.setToolTipText(songText);
+        titleLabel.setText(name);
+        titleLabel.setToolTipText(name);
         titleLabel.start();
 
         if (!innerPanel.isVisible()) {
@@ -361,7 +361,7 @@ public class PlayerPanel extends JXPanel implements PlayerView {
     }
     
     @Override
-    public void updateState(PlayerState playerState) {
+    public void stateChanged(PlayerState playerState) {
         if ((playerState == PlayerState.OPENED) || (playerState == PlayerState.SEEKED)) {
             updateVolume();
         }

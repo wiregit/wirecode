@@ -1,8 +1,11 @@
 package org.limewire.ui.swing.player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.inject.LazySingleton;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
@@ -15,9 +18,10 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 /**
- * Mediator to control the interaction between the audio player and the 
- * current playlist.
+ * Mediator that controls the interaction between the player view, the current
+ * playlist, and the audio player.
  */
+@LazySingleton
 public class PlayerMediator {
 
     public static final String AUDIO_LENGTH_BYTES = "audio.length.bytes";
@@ -27,11 +31,10 @@ public class PlayerMediator {
     private static final String WAVE = "wave";
     
     private final Provider<AudioPlayer> audioPlayerProvider;
+    private final List<PlayerMediatorListener> listenerList;
     
     /** Audio player component. */
     private AudioPlayer audioPlayer;
-    /** Display view for the player. */
-    private PlayerView playerView;
     /** Current list of songs. */
     private EventList<LocalFileItem> playList;
     /** File item for the last opened song. */
@@ -47,6 +50,53 @@ public class PlayerMediator {
     @Inject
     public PlayerMediator(Provider<AudioPlayer> audioPlayerProvider) {
         this.audioPlayerProvider = audioPlayerProvider;
+        this.listenerList = new ArrayList<PlayerMediatorListener>();
+    }
+    
+    /**
+     * Adds the specified listener to the list that is notified about 
+     * mediator events.
+     */
+    public void addMediatorListener(PlayerMediatorListener listener) {
+        listenerList.add(listener);
+    }
+
+    /**
+     * Removes the specified listener from the list that is notified about
+     * mediator events.
+     */
+    public void removeMediatorListener(PlayerMediatorListener listener) {
+        listenerList.remove(listener);
+    }
+    
+    /**
+     * Notifies registered listeners that the progress is updated to the 
+     * specified value.
+     */
+    private void fireProgressUpdated(float progress) {
+        for (PlayerMediatorListener listener : listenerList) {
+            listener.progressUpdated(progress);
+        }
+    }
+    
+    /**
+     * Notifies registered listeners that the song is changed to the specified
+     * song name.
+     */
+    private void fireSongChanged(String name) {
+        for (PlayerMediatorListener listener : listenerList) {
+            listener.songChanged(name);
+        }
+    }
+    
+    /**
+     * Notifies registered listeners that the player state is changed to the
+     * specified state.
+     */
+    private void fireStateChanged(PlayerState state) {
+        for (PlayerMediatorListener listener : listenerList) {
+            listener.stateChanged(state);
+        }
     }
     
     /**
@@ -54,13 +104,6 @@ public class PlayerMediator {
      */
     public PlayerState getStatus() {
         return getAudioPlayer().getStatus();
-    }
-    
-    /**
-     * Sets the display view for the player.
-     */
-    public void setPlayerView(PlayerView playerView) {
-        this.playerView = playerView;
     }
     
     /**
@@ -239,7 +282,7 @@ public class PlayerMediator {
                 progress = bytesread / byteslength;
                 
                 // Notify UI about progress.
-                playerView.updateProgress(progress);
+                fireProgressUpdated(progress);
             }
         }
 
@@ -249,7 +292,7 @@ public class PlayerMediator {
             audioProperties = properties;
             
             // Notify UI about new song.
-            playerView.updateSong(getSongName());
+            fireSongChanged(getSongName());
         }
 
         @Override
@@ -260,7 +303,7 @@ public class PlayerMediator {
             }
             
             // Notify UI about state change.
-            playerView.updateState(event.getState());
+            fireStateChanged(event.getState());
         }
     }
 }
