@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library.navigator;
 
+
 public class LibraryNavItem {
 
     public static enum NavType {
@@ -9,6 +10,7 @@ public class LibraryNavItem {
     private final String tabId;
     private final String displayedText;
     private final NavType navType;
+    //TODO: add LocalFileList?? 
     
     public LibraryNavItem(String id, String text, NavType type) {
         this.tabId = id;

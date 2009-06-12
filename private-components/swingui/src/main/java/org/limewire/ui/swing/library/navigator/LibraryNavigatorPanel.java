@@ -19,8 +19,10 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.library.actions.CreateListAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.library.popup.LibraryNavPopupHandler;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -68,14 +70,11 @@ public class LibraryNavigatorPanel extends JXPanel {
         add(createListButton, "aligny top, gaptop 5, alignx center, wrap");
         
         initData();
-        
-        //TODO: move this out of the constructor
-        registerListeners();
     }
     
-    public void registerListeners() {
+    @Inject
+    void register() {
         sharedFileListManager.getModel().addListEventListener(new ListEventListener<SharedFileList>(){
-
             @Override
             public void listChanged(ListEvent<SharedFileList> listChanges) {
                 while(listChanges.next()) {
@@ -92,24 +91,30 @@ public class LibraryNavigatorPanel extends JXPanel {
     
     private void initData() {
         table.addLibraryNavItem(null, I18n.tr("Library"), NavType.LIBRARY);
-
-        EventList<SharedFileList> playLists = sharedFileListManager.getModel();
-
-        // TODO: this needs to be in a different thread.
-        playLists.getReadWriteLock().readLock().lock();
-        try {
-            for(SharedFileList fileList : playLists) {
-                //TODO: this is a bit hacky, really need a value within fileList
-                if(fileList.getCollectionName().equals("Shared"))
-                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), NavType.PUBLIC_SHARED);
-                else
-                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), NavType.LIST);
-            }
-        } finally {
-            playLists.getReadWriteLock().readLock().unlock();
-        }
-        
         table.getSelectionModel().setSelectionInterval(0, 0);
+
+        final EventList<SharedFileList> playLists = sharedFileListManager.getModel();
+
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                // TODO: this needs to be in a different thread.
+                playLists.getReadWriteLock().readLock().lock();
+                try {
+                    for(final SharedFileList fileList : playLists) {
+                        SwingUtils.invokeLater(new Runnable(){
+                            public void run() {
+                                if(!fileList.isNameChangeAllowed())
+                                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), NavType.PUBLIC_SHARED);
+                                else
+                                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), NavType.LIST);
+                            }
+                        });
+                    }
+                } finally {
+                    playLists.getReadWriteLock().readLock().unlock();
+                }
+            }
+        });
     }
     
     private void createCreateListButton() {

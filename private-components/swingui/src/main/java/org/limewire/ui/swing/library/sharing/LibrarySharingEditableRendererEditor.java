@@ -48,9 +48,9 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
         checkBox.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                cancelCellEditing();
                 if(data != null)
                     data.setIsSelected(checkBox.isSelected());
+                stopCellEditing();
             }
         });
         nameLabel = new JLabel();
@@ -133,7 +133,7 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
 
     @Override
     public boolean shouldSelectCell(EventObject anEvent) {
-        return false;
+        return true;
     }
 
     @Override

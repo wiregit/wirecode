@@ -10,6 +10,7 @@ import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -60,7 +61,10 @@ public class LibraryNavigatorTable extends JXTable {
     public LibraryNavItem getSelectedItem() {
         if(getSelectedRow() >= 0)
             return eventList.get(getSelectedRow());
-        else
+        else if(getRowCount() > 0) {
+            getSelectionModel().setSelectionInterval(0, 0);
+            return eventList.get(0);
+        } else            
             return null;
     }
     

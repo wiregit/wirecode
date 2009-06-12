@@ -3,6 +3,9 @@ package org.limewire.ui.swing.library.sharing;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.table.TableCellEditor;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -60,6 +63,25 @@ public class LibrarySharingTable<T> extends JXTable {
             return false;
         }
         return true;
+    }
+    
+    //Don't set the cell value when editing is cancelled
+    @Override
+    public void editingStopped(ChangeEvent e) {
+        TableCellEditor editor = getCellEditor();
+        if (editor != null) {    
+            //TODO: this replaces the need to keep a reference of the object in the editor. Not
+            // sure if this is cleaner than the way it works now
+//            if(editor instanceof LibrarySharingEditableRendererEditor) {
+//                LibrarySharingEditableRendererEditor sharingEditor = (LibrarySharingEditableRendererEditor) editor;
+//                Object value = getModel().getValueAt(getSelectedRow(), 0);
+//                if(value instanceof EditableSharingData) {
+//                    EditableSharingData data = (EditableSharingData) value;
+//                    data.setIsSelected(sharingEditor.isSelected());
+//                }
+//            }
+            removeEditor();
+        }
     }
     
     private class SharingTableFormat implements TableFormat<T> {

@@ -164,7 +164,7 @@ public class LibraryPanel extends JPanel {
     
     private void selectSharing(SharedFileList fileList, LibraryNavItem navItem) {
         librarySharingPanel.setSharedFileList(fileList);
-        librarySharingPanel.getComponent().setVisible(navItem.getType() == NavType.LIST);
+        librarySharingPanel.getComponent().setVisible(navItem != null && navItem.getType() == NavType.LIST);
     }
     
     private void selectTable(AbstractLibraryFormat<LocalFileItem> libraryTableFormat, Category category) {       

@@ -54,7 +54,7 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
     public String getCollectionName() {
         // TODO: do better.
         if(coreCollection.getId() == 0) {
-            return "Shared"; // TODO: i18n?
+            return "Public Shared"; // TODO: i18n?
         } else {
             return coreCollection.getName();
         }

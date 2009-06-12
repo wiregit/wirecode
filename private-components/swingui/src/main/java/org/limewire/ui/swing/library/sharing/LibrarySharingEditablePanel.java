@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.sharing;
 
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,7 +103,7 @@ public class LibrarySharingEditablePanel {
     }
     
     @Inject
-    void register(FriendManager friendManager, ListenerSupport<RosterEvent> rosterListeners) {
+    void register(final FriendManager friendManager, ListenerSupport<RosterEvent> rosterListeners) {
         if(eventList == null) {
             filterList = createEventListChain();
             SwingUtilities.invokeLater(new Runnable(){
@@ -119,11 +121,13 @@ public class LibrarySharingEditablePanel {
         filterList.addListEventListener(new ListEventListener<EditableSharingData>(){
             @Override
             public void listChanged(ListEvent<EditableSharingData> listChanges) {
-                SwingUtilities.invokeLater(new Runnable(){
-                    public void run() {
-                        component.revalidate();
-                    }
-                });
+                if(LibrarySharingEditablePanel.this.getComponent().isShowing()) {
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            component.revalidate();
+                        }
+                    });
+                }
             }
         });
 
@@ -136,26 +140,50 @@ public class LibrarySharingEditablePanel {
             eventList.add(new EditableSharingData(friend.getRenderName(), false));
         }
         
-//        rosterListeners.addListener(new EventListener<RosterEvent>() {
-//            @Override
-//            public void handleEvent(RosterEvent event) {
-//                XMPPFriend user = event.getData();
-//                System.out.println("add");
-//                switch(event.getType()) { 
-//                case USER_ADDED:
-//                    eventList.add(new EditableSharingData(user.getRenderName(), false));
+        rosterListeners.addListener(new EventListener<RosterEvent>() {
+            @Override
+            public void handleEvent(RosterEvent event) {
+                XMPPFriend user = event.getData();
+                System.out.println("add " + user);
+                switch(event.getType()) { 
+                case USER_ADDED:
+                    eventList.add(new EditableSharingData(user.getRenderName(), false));
+                    break;
 //                case USER_UPDATED:
-////                    if (user.isSubscribed()) {
-////                        addKnownFriend(user);
-////                    } else {
-////                        removeKnownFriend(user, true);
-////                    }
+//                    if (user.isSubscribed()) {
+//                        addKnownFriend(user);
+//                    } else {
+//                        removeKnownFriend(user, true);
+//                    }
 //                    break;
-//                case USER_DELETED:
-////                    removeKnownFriend(user, true);
-//                    break;
-//                }
+                case USER_DELETED: System.out.println("delete");
+//                    eventList.remove(new Editable)
+//                    removeKnownFriend(user, true);
+                    break;
+                }
+            }
+        });
+        
+        //TODO: depending on how we handle offline mode, may want to add/remove
+        // presencelistener here and repopulate the list at startup each time
+//        component.addComponentListener(new ComponentListener(){
+//
+//            @Override
+//            public void componentHidden(ComponentEvent e) {
 //            }
+//
+//            @Override
+//            public void componentMoved(ComponentEvent e) {
+//            }
+//
+//            @Override
+//            public void componentResized(ComponentEvent e) {
+//            }
+//
+//            @Override
+//            public void componentShown(ComponentEvent e) {
+//            }
+//            
 //        });
     }
     
@@ -192,7 +220,7 @@ public class LibrarySharingEditablePanel {
                 data.setIsSelected(sharingEventList.contains(data.getName()));
             }
         } finally {
-            eventList.getReadWriteLock().writeLock().lock();
+            eventList.getReadWriteLock().writeLock().unlock();
         }
     }
     
