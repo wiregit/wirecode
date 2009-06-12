@@ -112,8 +112,12 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new PanelResizer(shapeDialog));
         add(layeredPane, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
-        EventAnnotationProcessor.subscribe(this);
     }
+	
+	@Inject
+	public void registerWithEventBus(){
+        EventAnnotationProcessor.subscribe(this);
+	}
 	
 	void hideMainPanel() {
 	    mainPanel.setVisible(false);
