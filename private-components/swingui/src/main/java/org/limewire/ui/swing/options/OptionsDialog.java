@@ -14,6 +14,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
@@ -141,7 +142,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     }
     
     private void createComponents(BarPainterFactory barPainterFactory) {
-        setLayout(new MigLayout("gap 0, insets 0 0 0 0, fill", "fill", "[][fill][40!, fill]"));
+        setLayout(new MigLayout("gap 0, insets 0 0 0 0, fill", "fill", "[60!][fill][40!, fill]"));
         
         cardLayout = new CardLayout();
         cardPanel = new JPanel();
@@ -152,14 +153,16 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
                 
         footerPanel = new JPanel();
         
-        add(headerPanel, "wrap");
-        add(cardPanel, "wrap");
-        add(footerPanel);
-        
         createFooter();
         createHeader();
         
         select(LIBRARY);
+        
+        add(headerPanel, "aligny top, wrap");
+        add(cardPanel, "grow, wrap");
+        add(footerPanel);
+        
+
     }
     
     private void createHeader() {

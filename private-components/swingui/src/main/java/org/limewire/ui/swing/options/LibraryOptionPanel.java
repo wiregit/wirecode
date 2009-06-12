@@ -28,11 +28,11 @@ public class LibraryOptionPanel extends OptionPanel {
         this.playerPanel = new UsePlayerPanel();
         this.libraryPanel = new LibraryPanel();
 
-        setLayout(new MigLayout("insets 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("debug, insets 15, fillx"));
 
-        add(new JLabel("add some library options"), "pushx, growx");
-        add(libraryPanel, "pushx, growx");
-        add(playerPanel, "pushx, growx");
+        add(new JLabel("add some library options"), "wrap");
+        add(libraryPanel, "wrap");
+        add(playerPanel, "wrap");
     }
 
     @Override
@@ -69,7 +69,7 @@ public class LibraryOptionPanel extends OptionPanel {
         public LibraryPanel() {
             super("");
             setBorder(BorderFactory.createEmptyBorder());
-            setLayout(new MigLayout("ins 0 0 0 0, gap 0! 0!, fill"));
+            setLayout(new MigLayout("ins 0 0 0 0, gap 0"));
 
             audioCheckbox = new JCheckBox(I18n.tr("Audio"));
             audioCheckbox.setOpaque(false);
@@ -142,7 +142,7 @@ public class LibraryOptionPanel extends OptionPanel {
         public UsePlayerPanel() {
             super("");
             setBorder(BorderFactory.createEmptyBorder());
-            setLayout(new MigLayout("ins 0 0 0 0, gap 0! 0!, fill"));
+            setLayout(new MigLayout("ins 0 0 0 0, gap 0"));
 
             useLimeWirePlayer = new JCheckBox(I18n
                     .tr("Use the LimeWire player when I play audio files"));
