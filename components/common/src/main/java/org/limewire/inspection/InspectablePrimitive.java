@@ -18,5 +18,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface InspectablePrimitive {
     String value();
-    InspectionRequirements[] requires() default {};
+    InspectionRequirement[] requires() default {};
 }

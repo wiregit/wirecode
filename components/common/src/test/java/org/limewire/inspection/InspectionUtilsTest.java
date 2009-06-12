@@ -209,13 +209,13 @@ public class InspectionUtilsTest extends BaseTestCase {
         public Requirements() {
             created = true;
         }
-        @InspectablePrimitive(value="win", requires = InspectionRequirements.OS_WINDOWS)
+        @InspectablePrimitive(value="win", requires = InspectionRequirement.OS_WINDOWS)
         int x = 5;
         
-        @InspectablePrimitive(value="mac", requires = InspectionRequirements.OS_OSX)
+        @InspectablePrimitive(value="mac", requires = InspectionRequirement.OS_OSX)
         int y = 5;
         
-        @InspectablePrimitive(value="lin", requires = InspectionRequirements.OS_LINUX)
+        @InspectablePrimitive(value="lin", requires = InspectionRequirement.OS_LINUX)
         int z = 5;
     }
 

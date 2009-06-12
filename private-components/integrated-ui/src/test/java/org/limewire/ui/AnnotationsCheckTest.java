@@ -13,10 +13,12 @@ import javax.swing.SwingUtilities;
 import junit.framework.Test;
 
 import org.limewire.inspection.InspectionException;
+import org.limewire.inspection.InspectionRequirement;
 import org.limewire.inspection.InspectionTool;
 import org.limewire.inspection.Inspector;
 import org.limewire.ui.swing.AllLimeWireModules__DO_NOT_USE;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
 
@@ -71,6 +73,7 @@ public class AnnotationsCheckTest extends BaseTestCase {
         final Map<String, String> results = new ConcurrentHashMap<String, String>();
         final AtomicReference<Injector> injectorRef = new AtomicReference<Injector>();
         // This is explicitly using the DoNotUse module because that's what the build uses.
+        // (do it in the Swing thread to account for UI injectables that need the Swing thread)
         SwingUtilities.invokeAndWait(new Runnable() {
             @Override
             public void run() {
@@ -89,7 +92,17 @@ public class AnnotationsCheckTest extends BaseTestCase {
             try {
                 inspector.inspect(results.get(key));
             } catch(InspectionException ie) {
-                throw new RuntimeException("invalid key: " + key + ", value: " + results.get(key), ie);
+                boolean validFailure = false;
+                if(OSUtils.isLinux()) {
+                    validFailure = ie.getRequirements().size() > 0 && !ie.getRequirements().contains(InspectionRequirement.OS_LINUX);
+                } else if(OSUtils.isMacOSX()) {
+                    validFailure = ie.getRequirements().size() > 0 && !ie.getRequirements().contains(InspectionRequirement.OS_OSX);
+                } else if(OSUtils.isWindows()) {
+                    validFailure = ie.getRequirements().size() > 0 && !ie.getRequirements().contains(InspectionRequirement.OS_WINDOWS);
+                }
+                if(!validFailure) {
+                    fail("failed on key: " + key + ", value: " + results.get(key), ie);
+                }
             }
         }
     }

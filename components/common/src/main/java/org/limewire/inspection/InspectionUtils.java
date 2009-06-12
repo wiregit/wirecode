@@ -170,10 +170,10 @@ public class InspectionUtils {
         }
     }
     
-    private static void validateLimitations(InspectionRequirements[] limitations, InspectionData data) throws InspectionException {
+    private static void validateLimitations(InspectionRequirement[] limitations, InspectionData data) throws InspectionException {
         boolean valid = false;
         if(limitations != null && limitations.length > 0) {
-            for(InspectionRequirements limitation : limitations) {
+            for(InspectionRequirement limitation : limitations) {
                 switch(limitation) {
                 case OS_LINUX:
                     valid |= OSUtils.isLinux();
@@ -191,7 +191,8 @@ public class InspectionUtils {
         }
         
         if(!valid) {
-            throw new InspectionException("invalid limitations: " + Arrays.asList(limitations) + " on field: " + data.field);
+            List<InspectionRequirement> requires = Arrays.asList(limitations);
+            throw new InspectionException("invalid limitations: " + requires + " on field: " + data.field, requires);
         }
     }
     
