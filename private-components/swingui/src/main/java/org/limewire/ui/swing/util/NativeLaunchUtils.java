@@ -323,12 +323,7 @@ public final class NativeLaunchUtils {
         } catch (IOException err) {
             path = parentDir.getAbsolutePath();
         }
-        //TODO see what file browsers are available and use the one that is.
-        //TODO would be nice to select the file instead of just open the explorer
-        String[] command = new String[] { 
-                "nautilus", path};
-        
-        return command;
+        return new String[] {"xdg-open", path};        
     }
 
     /**
