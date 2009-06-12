@@ -28,7 +28,7 @@ public class LibraryOptionPanel extends OptionPanel {
         this.playerPanel = new UsePlayerPanel();
         this.libraryPanel = new LibraryPanel();
 
-        setLayout(new MigLayout("debug, insets 15, fillx"));
+        setLayout(new MigLayout("insets 15, fillx"));
 
         add(new JLabel("add some library options"), "wrap");
         add(libraryPanel, "wrap");
