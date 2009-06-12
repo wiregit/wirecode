@@ -78,7 +78,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
         IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
         closeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-                setVisible(false);
+                finished();
             }
         });
         
@@ -95,22 +95,6 @@ public class LoginPopupPanel extends Panel implements Resizable {
     }
     
     @Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        
-        if (frame == null && visible) {
-            initContent();
-        }
-        
-        if (visible) {
-            start();
-            resize();
-            validate();
-            frame.repaint();
-        }
-    }
-    
-    @Override
     public void resize() {
         Rectangle parentBounds = getParent().getBounds();
         Dimension childPreferredSize = frame.getPreferredSize();
@@ -121,10 +105,25 @@ public class LoginPopupPanel extends Panel implements Resizable {
                 w, h);
     }
     
+    @Override
+    public void setVisible(boolean visible) {
+        if (frame == null && visible) {
+            initContent();
+            start();
+            resize();
+            repaint();
+            validate();
+        } else if (visible && !isVisible()) {
+            restart();
+        } else if (contentPanel != null){
+            contentPanel.removeAll();
+        }
+        super.setVisible(visible);
+    }
     
     public void start() {
         contentPanel.add(serviceSelectionLoginPanelProvider.get(), BorderLayout.CENTER);
-    }
+     }
     
     public void restart() {
         contentPanel.removeAll();
@@ -135,7 +134,6 @@ public class LoginPopupPanel extends Panel implements Resizable {
     
     public void finished() {
         this.setVisible(false);
-        contentPanel.removeAll();
     }
     
     /**

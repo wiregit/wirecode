@@ -2,11 +2,8 @@ package org.limewire.ui.swing.friends.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.JDialog;
-
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.FocusJOptionPane;
-import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
+import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -14,11 +11,10 @@ import com.google.inject.Provider;
 
 public class LoginAction extends AbstractAction {
 
-    private final Provider<FriendsSignInPanel> friendsSignInPanel;
-    private JDialog dialog;
+    private final Provider<LoginPopupPanel> friendsSignInPanel;
     
     @Inject
-    public LoginAction(Provider<FriendsSignInPanel> friendsSignInPanel) {
+    public LoginAction(Provider<LoginPopupPanel> friendsSignInPanel) {
         super(I18n.tr("Login"));
 
         this.friendsSignInPanel = friendsSignInPanel;
@@ -26,15 +22,6 @@ public class LoginAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        //TODO: display the login overlay
-        if(dialog == null) {
-            dialog = FocusJOptionPane.createDialog(I18n.tr("Login"), null, friendsSignInPanel.get());
-            dialog.setResizable(true);
-            dialog.setModal(false);
-        }
-        if(!dialog.isVisible()) {
-//            dialog.setLocationRelativeTo(libraryPanel.get());
-            dialog.setVisible(true);
-        }
+        friendsSignInPanel.get().setVisible(true);
     }
 }
