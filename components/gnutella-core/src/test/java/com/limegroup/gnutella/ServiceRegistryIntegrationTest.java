@@ -60,7 +60,6 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "Mojito DHT", "DHTManagerImpl", 
         "Peer Locator", "HostCatcher", 
         "Static Messages", "StaticMessages", 
-        "Session Statistics", "Statistics", 
         "Message Routing", "StandardMessageRouter", 
         "Core Glue", "LimeCoreGlue", 
         "RUDP Message Routing", "LimeRUDPMessageHandler", 
@@ -89,7 +88,9 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "ForMeReplyHandler.Clear Push Requests", "ScheduledService",
         "DiskContrller.CacheCleaner", "ScheduledService",
         "urncache persister", "ScheduledService",
-        "TorrentManager", "TorrentManagerImpl"        
+        "TorrentManager", "LazyTorrentManager",
+        "Settings Saver", "SettingsSaverService",
+        
         };
         
         List<String> missing = new ArrayList<String>();
