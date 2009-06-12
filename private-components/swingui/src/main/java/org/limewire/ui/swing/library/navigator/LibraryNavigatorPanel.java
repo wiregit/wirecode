@@ -40,6 +40,7 @@ public class LibraryNavigatorPanel extends JXPanel {
     private final LibraryNavigatorTable table;
     private final CreateListAction createAction;
     private final SharedFileListManager sharedFileListManager;
+    private final LibraryManager libraryManager;
     
     private HyperlinkButton createListButton;
     
@@ -51,6 +52,7 @@ public class LibraryNavigatorPanel extends JXPanel {
         
         this.table = table;
         this.sharedFileListManager = sharedFileListManager;
+        this.libraryManager = libraryManager;
         this.createAction = createAction;
         
         GuiUtils.assignResources(this);
@@ -80,7 +82,7 @@ public class LibraryNavigatorPanel extends JXPanel {
                 while(listChanges.next()) {
                     SharedFileList list = listChanges.getSourceList().get(listChanges.getIndex());
                     if(listChanges.getType() == ListEvent.INSERT) {
-                        table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName(), NavType.LIST);
+                        table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName(), list, NavType.LIST);
                     } else if(listChanges.getType() == ListEvent.DELETE){
                         table.removeLibraryNavItem(list.getCollectionName());
                     }
@@ -90,7 +92,7 @@ public class LibraryNavigatorPanel extends JXPanel {
     }
     
     private void initData() {
-        table.addLibraryNavItem(null, I18n.tr("Library"), NavType.LIBRARY);
+        table.addLibraryNavItem(null, I18n.tr("Library"), libraryManager.getLibraryManagedList(), NavType.LIBRARY);
         table.getSelectionModel().setSelectionInterval(0, 0);
 
         final EventList<SharedFileList> playLists = sharedFileListManager.getModel();
@@ -104,9 +106,9 @@ public class LibraryNavigatorPanel extends JXPanel {
                         SwingUtils.invokeLater(new Runnable(){
                             public void run() {
                                 if(!fileList.isNameChangeAllowed())
-                                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), NavType.PUBLIC_SHARED);
+                                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), fileList,  NavType.PUBLIC_SHARED);
                                 else
-                                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), NavType.LIST);
+                                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), fileList, NavType.LIST);
                             }
                         });
                     }

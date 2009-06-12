@@ -12,7 +12,7 @@ import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.core.api.library.SharedFileList;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -29,12 +29,8 @@ public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer
     private @Resource Icon listIcon;
     private @Resource Icon listSharedIcon;
     
-    private final SharedFileListManager sharedFileListManager;
-    
     @Inject
-    public LibraryNavTableRenderer(SharedFileListManager sharedFileListManager) {
-        this.sharedFileListManager = sharedFileListManager;
-        
+    public LibraryNavTableRenderer() {        
         GuiUtils.assignResources(this);
         
         border = BorderFactory.createEmptyBorder(10,10,10,10);
@@ -70,15 +66,13 @@ public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer
         else if(item.getType() == NavType.PUBLIC_SHARED)
             setIcon(publicIcon);
         else {
-            String id = item.getTabID();
-            if(id != null) {
-                if(sharedFileListManager.getSharedFileList(id).getFriendIds().size() > 0)
+            if(item.getLocalFileList() instanceof SharedFileList) {
+                if(((SharedFileList)item.getLocalFileList()).getFriendIds().size() > 0)
                     setIcon(listSharedIcon);
                 else
                     setIcon(listIcon);
-            } else {
+            } else
                 setIcon(listIcon);
-            }
         }
     }
 }

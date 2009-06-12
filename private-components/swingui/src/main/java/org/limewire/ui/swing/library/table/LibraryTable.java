@@ -11,6 +11,8 @@ import javax.swing.table.TableCellRenderer;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.inject.LazySingleton;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.popup.LibraryPopupHandler;
 import org.limewire.ui.swing.library.popup.LibraryPopupMenu;
 import org.limewire.ui.swing.listener.MousePopupListener;
@@ -32,6 +34,7 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+@LazySingleton
 public class LibraryTable extends MouseableTable {
 
     private final int rowHeight = 20;
@@ -127,6 +130,13 @@ public class LibraryTable extends MouseableTable {
     
     public LibraryTableModel getLibraryTableModel() {
         return libraryTableModel;
+    }
+    
+    public LocalFileItem getSelectedItem() {
+        if(getSelectedRow() >= 0)
+            return libraryTableModel.getElementAt(getSelectedRow());
+        else           
+            return null;
     }
     
     public void setEventList(EventList<LocalFileItem> eventList, AbstractLibraryFormat<LocalFileItem> tableFormat) {

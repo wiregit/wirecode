@@ -18,9 +18,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
-import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
@@ -50,8 +48,6 @@ public class LibraryPanel extends JPanel {
     private final LibraryTable libraryTable;
     private final LibraryNavigatorPanel navigatorComponent;
     private final LibrarySharingPanel librarySharingPanel;
-    private final SharedFileListManager sharedFileListManager;
-    private final LibraryManager libraryManager;
     private final PublicSharedFeedbackPanel publicSharedFeedbackPanel;
     private final LocalFileListTransferHandler transferHandler;
     
@@ -63,22 +59,16 @@ public class LibraryPanel extends JPanel {
     private SortedList<LocalFileItem> sortedList;
     private FilterList<LocalFileItem> filteredList;
     
-//    private final PluggableList<LocalFileItem> baseLibraryList;
-//    private final LibraryListSourceChanger currentFriendFilterChanger;
-    
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
-            LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, LibraryManager libraryManager,
-            SharedFileListManager sharedFileListManager, PublicSharedFeedbackPanel publicSharedFeedbackPanel,
-            PlayerPanel playerPanel, AddFileAction addFileAction) {
+            LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, 
+            PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.navigatorComponent = navPanel;
         this.libraryTable = libraryTable;
         this.librarySharingPanel = sharingPanel;
         this.tableSelectionComboBox = selectionComobBox;
-        this.sharedFileListManager = sharedFileListManager;
-        this.libraryManager = libraryManager;
         this.publicSharedFeedbackPanel = publicSharedFeedbackPanel;
         this.transferHandler = new LocalFileListTransferHandler();
         categoryMatcher = new LibraryCategoryMatcher();
@@ -110,11 +100,7 @@ public class LibraryPanel extends JPanel {
     }
     
     @Inject
-    void register() {
-        //TODO: SharedFileLists use a different lock so we can't create a pluggable list with them
-//        baseLibraryList = new PluggableList<LocalFileItem>(libraryManager.getLibraryListEventPublisher(), libraryManager.getReadWriteLock());
-//        currentFriendFilterChanger = new LibraryListSourceChanger(baseLibraryList, libraryManager, sharedFileListManager);
-        
+    void register(LibraryManager libraryManager) {
         
         //Loads the Library after Component has been realized.
         final LibraryFileList libraryList = libraryManager.getLibraryManagedList();
@@ -141,22 +127,16 @@ public class LibraryPanel extends JPanel {
                 LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
 
                 setPublicSharedComponentVisible(navItem);
-                if(isLibrarySelected(navItem)) {                
-                    eventList = libraryManager.getLibraryManagedList().getSwingModel();
-                    selectSharing(null, navItem);
-                    selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
-                } else {       
-                    SharedFileList fileList = sharedFileListManager.getSharedFileList(navItem.getTabID());
-                    eventList = fileList.getSwingModel();
-                    selectSharing(fileList, navItem);
-                    selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
-                }
+                eventList = navItem.getLocalFileList().getSwingModel();
+                selectSharing(navItem);
+                selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
             }
         });
     }
     
-    private void selectSharing(SharedFileList fileList, LibraryNavItem navItem) {
-        librarySharingPanel.setSharedFileList(fileList);
+    private void selectSharing(LibraryNavItem navItem) {
+        if(navItem != null && navItem.getLocalFileList() instanceof SharedFileList)
+            librarySharingPanel.setSharedFileList((SharedFileList)navItem.getLocalFileList());
         librarySharingPanel.getComponent().setVisible(navItem != null && navItem.getType() == NavType.LIST);
     }
     
@@ -182,24 +162,13 @@ public class LibraryPanel extends JPanel {
     private void updateTransferHandler() {
         LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
         EventSelectionModel<LocalFileItem> selectionModel = (EventSelectionModel<LocalFileItem>) libraryTable.getSelectionModel();
-        LocalFileList fileList = null;
-        
-        if(isLibrarySelected(navItem)) {
-            fileList = libraryManager.getLibraryManagedList();
-        } else {
-            fileList = sharedFileListManager.getSharedFileList(navItem.getTabID());
-        }
-        
-        if(fileList != null) {
-            transferHandler.setFileList(selectionModel, fileList);
+
+        if(navItem != null) {
+            transferHandler.setFileList(selectionModel, navItem.getLocalFileList());
             libraryTable.setTransferHandler(transferHandler);
         } else {
             libraryTable.setTransferHandler(null);
         }
-    }
-
-    private boolean isLibrarySelected(LibraryNavItem navItem) {
-        return navItem == null || navItem.getType() == NavType.LIBRARY;
     }
     
     private void setPublicSharedComponentVisible(LibraryNavItem navItem) {

@@ -27,8 +27,6 @@ public class LibraryPopupHandler implements TablePopupHandler {
         int popupRow = libraryTable.rowAtPoint(new Point(x, y));
         libraryTable.setRowSelectionInterval(popupRow, popupRow);
 
-        //popupMenu.setSelectable(table);
         popupMenu.get().show(component, x, y);
     }
-
 }

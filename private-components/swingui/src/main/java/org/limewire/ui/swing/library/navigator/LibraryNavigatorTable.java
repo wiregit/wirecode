@@ -11,6 +11,7 @@ import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.dnd.LibraryNavTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
@@ -45,8 +46,8 @@ public class LibraryNavigatorTable extends JXTable {
         setTransferHandler(new LibraryNavTransferHandler());
     }
     
-    public void addLibraryNavItem(String name, String id, NavType type) {
-        eventList.add(new LibraryNavItem(name, id, type));
+    public void addLibraryNavItem(String name, String id, LocalFileList localFileList, NavType type) {
+        eventList.add(new LibraryNavItem(name, id, localFileList, type));
     }
     
     public void removeLibraryNavItem(String id) {

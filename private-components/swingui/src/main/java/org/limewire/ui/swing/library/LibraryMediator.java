@@ -80,11 +80,11 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         return libraryPanel;
 //        return panel;
     }
-    
-    public void addFriendListener(ListSourceChanger.ListChangedListener listener) {
-//        currentFriendFilterChanger.addListener(listener);
-        throw new NotImplementedException("not implemented");
-    }
+//    
+//    public void addFriendListener(ListSourceChanger.ListChangedListener listener) {
+////        currentFriendFilterChanger.addListener(listener);
+//        throw new NotImplementedException("not implemented");
+//    }
 
     public void selectInLibrary(File file, Category category) {
         // TODO Auto-generated method stub

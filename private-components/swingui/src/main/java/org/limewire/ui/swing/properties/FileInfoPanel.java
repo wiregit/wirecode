@@ -314,15 +314,15 @@ public class FileInfoPanel extends JPanel {
         switch(type) {
         case LOCAL_FILE:
             if(propertiableFile instanceof LocalFileItem) {
-                List<Friend> sharedWithList = getSharedWithList((LocalFileItem)propertiableFile);
+                List<String> sharedWithList = getSharedWithList((LocalFileItem)propertiableFile);
                 if(sharedWithList.size() > 0) {
                     final JPanel sharingPanel = createPanel(I18n.tr("Sharing with"));
                     final JPanel listPanel = new JPanel(new MigLayout("fillx, nogrid, gap 0! 0!, insets 0 0 0 0"));
                     listPanel.setBackground(backgroundColor);
                     
-                    for(Friend friend : sharedWithList) {
+                    for(String friend : sharedWithList) {
 //                        final Friend shareFriend = friend;
-                        final JLabel friendLabel = new JLabel(friend.getRenderName());
+                        final JLabel friendLabel = new JLabel(friend);
                         final JButton friendButton = new IconButton(removeIcon, removeIconRollover, removeIconPressed);
                         friendButton.addActionListener(new ActionListener() {
                             @Override
@@ -719,8 +719,10 @@ public class FileInfoPanel extends JPanel {
         }
     }
     
-    private List<Friend> getSharedWithList(LocalFileItem fileItem) {
-//        List<Friend> sharedWith = new ArrayList<Friend>();
+    private List<String> getSharedWithList(LocalFileItem fileItem) {
+        List<String> sharedWith = new ArrayList<String>();
+        
+//        if(fileItem)
 //        
 //        if(shareListManager.getGnutellaShareList().contains(fileItem.getFile()))
 //            sharedWith.add(SharingTarget.GNUTELLA_SHARE.getFriend());
@@ -731,8 +733,8 @@ public class FileInfoPanel extends JPanel {
 //                sharedWith.add(friend);
 //            }
 //        }
-//        return sharedWith;
-        throw new NotImplementedException();
+        return sharedWith;
+//        throw new NotImplementedException();
     }
     
     private JPanel createPanel() {
