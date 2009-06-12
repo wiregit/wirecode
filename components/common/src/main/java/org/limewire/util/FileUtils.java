@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.limewire.io.IOUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.SystemUtils.SpecialLocations;
@@ -69,7 +68,7 @@ public class FileUtils {
                 log.debug("IOX writing file to: " + properFile, iox);
             }
         } finally {
-            IOUtils.close(out);
+            close(out);
         }
         
         return false;
