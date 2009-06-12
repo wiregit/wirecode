@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -18,6 +19,9 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
@@ -29,6 +33,8 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
+import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
@@ -75,7 +81,33 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         setSignInComponentsEnabled(true);
     }
     
-    
+    @Inject
+    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
+        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPConnectionEvent event) {
+                switch(event.getType()) {
+                case CONNECTING:
+                    connecting(event.getSource().getConfiguration());
+                    break;
+                case CONNECTED:
+                    connected(event.getSource().getConfiguration());
+                    break;
+                case DISCONNECTED:
+                case CONNECT_FAILED:
+                    // Ignore duplicate events caused by authentication
+                    // errors and events caused by deliberately signing
+                    // out or switching user
+                    Exception reason = event.getException();
+                    if(reason != null) {
+                        disconnected(reason);
+                    }
+                }
+            }
+        });
+    }
+   
     private void initComponents(ButtonDecorator buttonDecorator,
             TextFieldDecorator textFieldDecorator) {
         
@@ -196,4 +228,25 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         }
     }
 
+    void connected(XMPPConnectionConfiguration config) {
+        setSignInComponentsEnabled(true);
+    }
+
+    void disconnected(Exception reason) {
+        setSignInComponentsEnabled(true);
+        populateInputs();
+        if(reason !=null && reason.getMessage() != null && reason.getMessage().toLowerCase(Locale.US).contains("auth")) {
+            authFailedLabel.setText(AUTHENTICATION_ERROR);
+            passwordField.setText("");
+        } else {
+            authFailedLabel.setText(NETWORK_ERROR);
+        }
+        authFailedLabel.setVisible(true);
+        validate();
+        repaint();
+    }
+    
+    public void connecting(XMPPConnectionConfiguration config) {
+        setSignInComponentsEnabled(false);
+    }
 }
