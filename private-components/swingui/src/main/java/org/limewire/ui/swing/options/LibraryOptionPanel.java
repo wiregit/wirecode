@@ -6,6 +6,7 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
@@ -18,9 +19,12 @@ public class LibraryOptionPanel extends OptionPanel {
     private final UsePlayerPanel playerPanel;
 
     private final LibraryPanel libraryPanel;
+    
+    private final LibraryManager libraryManager;
 
     @Inject
-    public LibraryOptionPanel() {
+    public LibraryOptionPanel(LibraryManager libraryManager) {
+        this.libraryManager = libraryManager;
         this.playerPanel = new UsePlayerPanel();
         this.libraryPanel = new LibraryPanel();
 
@@ -95,12 +99,16 @@ public class LibraryOptionPanel extends OptionPanel {
 
         @Override
         boolean applyOptions() {
-            LibrarySettings.MANAGE_AUDIO.set(audioCheckbox.isSelected());
-            LibrarySettings.MANAGE_VIDEO.set(videoCheckbox.isSelected());
-            LibrarySettings.MANAGE_IMAGES.set(imagesCheckbox.isSelected());
-            LibrarySettings.MANAGE_PROGRAMS.set(programsCheckbox.isSelected());
-            LibrarySettings.MANAGE_DOCUMENTS.set(documentsCheckbox.isSelected());
-            LibrarySettings.MANAGE_OTHER.set(otherCheckbox.isSelected());
+            if(hasChanged()) {
+                LibrarySettings.MANAGE_AUDIO.set(audioCheckbox.isSelected());
+                LibrarySettings.MANAGE_VIDEO.set(videoCheckbox.isSelected());
+                LibrarySettings.MANAGE_IMAGES.set(imagesCheckbox.isSelected());
+                LibrarySettings.MANAGE_PROGRAMS.set(programsCheckbox.isSelected());
+                LibrarySettings.MANAGE_DOCUMENTS.set(documentsCheckbox.isSelected());
+                LibrarySettings.MANAGE_OTHER.set(otherCheckbox.isSelected());
+                
+                //libraryData.setCategoriesToIncludeWhenAddingFolders(managedCategories)
+            }
             return false;
         }
 

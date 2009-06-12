@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.DropMode;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 
@@ -12,6 +13,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.inject.LazySingleton;
+import org.limewire.ui.swing.dnd.LibraryNavTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -40,6 +42,8 @@ public class LibraryNavigatorTable extends JXTable {
         eventList = new BasicEventList<LibraryNavItem>();
         
         setModel(new EventTableModel<LibraryNavItem>(eventList, new NavTableFormat()));
+        setDropMode(DropMode.ON);
+        setTransferHandler(new LibraryNavTransferHandler());
     }
     
     public void addLibraryNavItem(String name, String id, NavType type) {
