@@ -90,9 +90,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
         
         frame.add(headerBar, BorderLayout.NORTH);
         frame.add(contentPanel, BorderLayout.CENTER);
-        
-        contentPanel.add(serviceSelectionLoginPanelProvider.get(), BorderLayout.CENTER);
-        
+       
         add(frame, BorderLayout.CENTER);
     }
     
@@ -105,6 +103,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
         }
         
         if (visible) {
+            start();
             resize();
             validate();
             frame.repaint();
@@ -123,6 +122,22 @@ public class LoginPopupPanel extends Panel implements Resizable {
     }
     
     
+    public void start() {
+        contentPanel.add(serviceSelectionLoginPanelProvider.get(), BorderLayout.CENTER);
+    }
+    
+    public void restart() {
+        contentPanel.removeAll();
+        start();
+        contentPanel.repaint();
+        contentPanel.validate();
+    }
+    
+    public void finished() {
+        this.setVisible(false);
+        contentPanel.removeAll();
+    }
+    
     /**
      * Reports back a non xmmp service selection, (ie. facebook)
      */
@@ -137,6 +152,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
         contentPanel.removeAll();
         contentPanel.add(xmppUserEntryLoginPanelFactory.create(config), BorderLayout.CENTER);
         contentPanel.repaint();
+        contentPanel.validate();
     }
 
 }

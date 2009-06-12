@@ -60,7 +60,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
         if(largeIcon != null) {
             this.largeIcon = largeIcon;
         } else {
-            this.largeIcon = new EmptyIcon(32, 32);
+            this.largeIcon = new EmptyIcon(28, 28);
         }
         this.username = "";
         this.canonicalId = "";

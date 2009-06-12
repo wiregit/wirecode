@@ -9,7 +9,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Locale;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -22,6 +21,8 @@ import org.jdesktop.swingx.JXButton;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
@@ -55,10 +56,13 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     private JXButton signInButton;
     private final SignInAction signinAction = new SignInAction();
     
+    private ListenerSupport<XMPPConnectionEvent> connectionSupport = null;
+    
     private final XMPPAccountConfiguration accountConfig;
     private final LoginPopupPanel parent;
     private final XMPPService xmppService;
     private final XMPPAccountConfigurationManager accountManager;
+    private EventListener<XMPPConnectionEvent> connectionListener;
     
     @Inject
     public XMPPUserEntryLoginPanel(@Assisted XMPPAccountConfiguration accountConfig, LoginPopupPanel parent,
@@ -82,8 +86,11 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     }
     
     @Inject
-    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
-        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+    void registerListener(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
+        
+        this.connectionSupport = connectionSupport;
+        
+        connectionListener = new EventListener<XMPPConnectionEvent>() {
             @Override
             @SwingEDTEvent
             public void handleEvent(XMPPConnectionEvent event) {
@@ -105,7 +112,15 @@ public class XMPPUserEntryLoginPanel extends JPanel {
                     }
                 }
             }
-        });
+        };
+        
+        connectionSupport.addListener(connectionListener);
+    }
+    
+    private void unregisterListener() {
+        if (connectionSupport != null) {
+            connectionSupport.removeListener(connectionListener);
+        }
     }
    
     private void initComponents(ButtonDecorator buttonDecorator,
@@ -148,6 +163,14 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         authFailedLabel.setVisible(false);
         authFailedLabel.setName("LoginPanel.authFailedLabel");
 
+        HyperlinkButton goBackButton = new HyperlinkButton(new AbstractAction(I18n.tr("Choose another account")) {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                unregisterListener();
+                parent.restart();                
+            }
+        });
+        
         JPanel contentPanel = new JPanel(new MigLayout("nogrid, gap 0, insets 4 5 8 4, fill, alignx left"));
         
         contentPanel.add(authFailedLabel, "gapleft 2, wmin 0, hidemode 3, gapbottom 3, wrap");
@@ -155,7 +178,8 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         contentPanel.add(usernameField, "gapbottom 8, grow, wrap");
         contentPanel.add(passwordField, "gapbottom 4, grow, wrap");
         contentPanel.add(autoLoginCheckBox, "gapbottom 3, wmin 0, wrap");
-        contentPanel.add(signInButton);
+        contentPanel.add(signInButton, "wrap");
+        contentPanel.add(goBackButton);
         
         add(contentPanel, BorderLayout.CENTER);
     }
@@ -198,6 +222,29 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         xmppService.login(config);         
     }
 
+    void connected(XMPPConnectionConfiguration config) {
+        unregisterListener();
+        parent.finished();
+    }
+
+    void disconnected(Exception reason) {
+        setSignInComponentsEnabled(true);
+        populateInputs();
+        if(reason !=null && reason.getMessage() != null && reason.getMessage().toLowerCase(Locale.US).contains("auth")) {
+            authFailedLabel.setText(AUTHENTICATION_ERROR);
+            passwordField.setText("");
+        } else {
+            authFailedLabel.setText(NETWORK_ERROR);
+        }
+        authFailedLabel.setVisible(true);
+        validate();
+        repaint();
+    }
+    
+    public void connecting(XMPPConnectionConfiguration config) {
+        setSignInComponentsEnabled(false);
+    }
+    
     class SignInAction extends AbstractAction {
         public SignInAction() {
             super();
@@ -226,27 +273,5 @@ public class XMPPUserEntryLoginPanel extends JPanel {
             }
             login(accountConfig);
         }
-    }
-
-    void connected(XMPPConnectionConfiguration config) {
-        setSignInComponentsEnabled(true);
-    }
-
-    void disconnected(Exception reason) {
-        setSignInComponentsEnabled(true);
-        populateInputs();
-        if(reason !=null && reason.getMessage() != null && reason.getMessage().toLowerCase(Locale.US).contains("auth")) {
-            authFailedLabel.setText(AUTHENTICATION_ERROR);
-            passwordField.setText("");
-        } else {
-            authFailedLabel.setText(NETWORK_ERROR);
-        }
-        authFailedLabel.setVisible(true);
-        validate();
-        repaint();
-    }
-    
-    public void connecting(XMPPConnectionConfiguration config) {
-        setSignInComponentsEnabled(false);
     }
 }
