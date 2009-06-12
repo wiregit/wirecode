@@ -384,6 +384,10 @@ public abstract class BaseTestCase extends AssertComparisons implements Uncaught
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        error(e);
+        // instead of immediately failing, we forward the error
+        // to ErrorService -- this is so that tests can replace
+        // the ErrorService callback if they're expecting
+        // an uncaught exception.
+        ErrorService.error(e);
     }
 }
