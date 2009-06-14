@@ -2,19 +2,16 @@ package org.limewire.ui.swing.library;
 
 import java.io.File;
 
-import org.limewire.collection.glazedlists.PluggableList;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.nav.NavMediator;
+import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.jacob.com.NotImplementedException;
 
 @LazySingleton
 public class LibraryMediator implements NavMediator<LibraryPanel> {

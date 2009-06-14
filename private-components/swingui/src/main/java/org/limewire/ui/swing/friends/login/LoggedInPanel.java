@@ -31,7 +31,6 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.friends.AddFriendDialog;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;

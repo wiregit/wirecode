@@ -25,8 +25,6 @@ import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import com.google.inject.Singleton;
-
 public class ShapeDialog extends JXPanel implements Resizable {
 
 

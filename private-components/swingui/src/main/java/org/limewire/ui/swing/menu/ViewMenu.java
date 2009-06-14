@@ -8,7 +8,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
-import org.limewire.ui.swing.mainframe.LeftPanel;
 import org.limewire.ui.swing.util.EnabledType;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.VisibilityType;

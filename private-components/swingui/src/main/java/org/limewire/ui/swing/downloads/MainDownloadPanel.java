@@ -17,7 +17,6 @@ import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.event.DownloadVisibilityEvent;

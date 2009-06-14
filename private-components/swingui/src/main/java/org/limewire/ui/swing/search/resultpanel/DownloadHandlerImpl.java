@@ -10,9 +10,6 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 class DownloadHandlerImpl implements DownloadHandler {
     
     private final SearchResultsModel searchResultsModel;

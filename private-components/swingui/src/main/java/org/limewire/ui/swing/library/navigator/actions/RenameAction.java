@@ -4,9 +4,7 @@ import java.awt.event.ActionEvent;
 
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.NotImplementedException;
 

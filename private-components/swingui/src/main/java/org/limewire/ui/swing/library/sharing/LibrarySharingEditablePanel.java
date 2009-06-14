@@ -16,7 +16,6 @@ import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendManager;
 import org.limewire.inject.LazySingleton;
-import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
@@ -26,7 +25,6 @@ import org.limewire.ui.swing.library.sharing.actions.SelectAllAction;
 import org.limewire.ui.swing.library.sharing.actions.SelectNoneAction;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;

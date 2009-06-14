@@ -1,18 +1,11 @@
 package org.limewire.ui.swing.library.table.menu.actions;
 
 import java.awt.event.ActionEvent;
-import java.io.File;
 
 import javax.swing.Action;
 
-import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.player.PlayerUtils;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;

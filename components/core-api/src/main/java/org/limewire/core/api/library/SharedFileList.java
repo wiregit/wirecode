@@ -1,10 +1,8 @@
 package org.limewire.core.api.library;
 
-import com.limegroup.gnutella.library.SharedFileCollection;
-
 import ca.odell.glazedlists.EventList;
 
-/** The core API analog to {@link SharedFileCollection}. */
+/** The core API analog to {@link com.limegroup.gnutella.library.SharedFileCollection}. */
 public interface SharedFileList extends LocalFileList {
     
     /** Returns all friend IDs this list is shared with. */
