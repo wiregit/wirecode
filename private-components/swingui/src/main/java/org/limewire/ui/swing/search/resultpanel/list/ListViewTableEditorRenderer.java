@@ -51,7 +51,7 @@ import org.limewire.ui.swing.components.RemoteHostWidget;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.event.SelectAndScrollDownloadEvent;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
@@ -166,7 +166,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         Provider<SearchHeadingDocumentBuilder> headingBuilder,
         ListViewRowHeightRule rowHeightRule,
         final @Assisted ListViewDisplayedRowsLimit displayLimit,
-        LibraryNavigator libraryNavigator,
+        LibraryMediator libraryMediator,
         Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory) {
 
         this.categoryIconManager = categoryIconManager;
@@ -184,7 +184,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
        
-        makePanel(navigator, libraryNavigator);       
+        makePanel(navigator, libraryMediator);       
 
         setupButtons();
         
@@ -192,10 +192,10 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     }
     
 
-    private void makePanel(Navigator navigator, LibraryNavigator libraryNavigator) {
+    private void makePanel(Navigator navigator, LibraryMediator libraryMediator) {
         initializeComponents();
         makeIndentation();
-        setupListeners(navigator, libraryNavigator);
+        setupListeners(navigator, libraryMediator);
 
         lastRowPanel = new JPanel(new MigLayout("insets 10 30 0 0", "[]", "[]"));
         lastRowPanel.setOpaque(false);
@@ -487,7 +487,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         similarResultIndentation.setBackground(similarResultsBackgroundColor);
     }
 
-    private void setupListeners(final Navigator navigator, final LibraryNavigator libraryNavigator) {
+    private void setupListeners(final Navigator navigator, final LibraryMediator libraryMediator) {
         heading.addHyperlinkListener(new HyperlinkListener() {
 
             @Override
@@ -499,7 +499,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                     } else if (e.getDescription().equals("#downloading")) {
                         new SelectAndScrollDownloadEvent(vsr.getUrn()).publish();
                     } else if (e.getDescription().equals("#library")) {
-                        libraryNavigator.selectInLibrary(vsr.getUrn(), vsr.getCategory());
+                        libraryMediator.selectInLibrary(vsr.getUrn(), vsr.getCategory());
                     }
                 }
             }

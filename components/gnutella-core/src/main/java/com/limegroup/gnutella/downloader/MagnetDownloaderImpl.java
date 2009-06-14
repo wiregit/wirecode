@@ -33,7 +33,9 @@ import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMementoImpl;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileCollection;
+import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -90,7 +92,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	@Inject
 	MagnetDownloaderImpl(SaveLocationManager saveLocationManager,
 	        DownloadManager downloadManager,
-	        FileManager fileManager,
+	        @GnutellaFiles FileCollection gnutellaFileCollection,
 	        IncompleteFileManager incompleteFileManager,
 	        DownloadCallback downloadCallback,
 	        NetworkManager networkManager,
@@ -115,8 +117,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	        SocketsManager socketsManager, 
 	        @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
 	        DangerousFileChecker dangerousFileChecker,
-            SpamManager spamManager) {
-	    super(saveLocationManager, downloadManager, fileManager,
+            SpamManager spamManager, Library library) {
+	    super(saveLocationManager, downloadManager, gnutellaFileCollection,
 	            incompleteFileManager, downloadCallback, networkManager,
 	            alternateLocationFactory, requeryManagerFactory,
 	            queryRequestFactory, onDemandUnicaster, downloadWorkerFactory,
@@ -125,7 +127,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	            backgroundExecutor, messageRouter, tigerTreeCache,
 	            applicationServices, remoteFileDescFactory, pushListProvider,
 	            socketsManager, downloadStateProcessingQueue,
-	            dangerousFileChecker, spamManager);
+	            dangerousFileChecker, spamManager, library);
     }
     
     @Override

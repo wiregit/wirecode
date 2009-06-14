@@ -15,11 +15,11 @@ import org.limewire.listener.EventListener;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
 @Singleton
-public class AltLocManager implements EventListener<FileListChangedEvent> {
+public class AltLocManager implements EventListener<FileViewChangeEvent> {
 
     private static final Log LOG = LogFactory.getLog(AltLocManager.class);
     
@@ -236,15 +236,15 @@ public class AltLocManager implements EventListener<FileListChangedEvent> {
     /**
      * Listens for events from FileManager.
      */
-    public void handleEvent(FileListChangedEvent evt) {
+    public void handleEvent(FileViewChangeEvent evt) {
         switch(evt.getType()) {
-        case CLEAR:
+        case FILES_CLEARED:
             purge();
             break;
-        case REMOVED:
+        case FILE_REMOVED:
             URN urn = evt.getFileDesc().getSHA1Urn();
             // Purge if there's no more FDs for this URN.
-            if(evt.getList().getFileDescsMatching(urn).isEmpty()) {
+            if(evt.getFileView().getFileDescsMatching(urn).isEmpty()) {
                 purge(urn);
             }
             break;

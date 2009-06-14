@@ -22,8 +22,8 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.collection.Range;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
@@ -45,17 +45,14 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerImpl;
-import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
@@ -64,6 +61,7 @@ import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
@@ -71,9 +69,9 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerStub;
+import com.limegroup.gnutella.library.IncompleteFileCollection;
 import com.limegroup.gnutella.library.IncompleteFileDescStub;
+import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -86,11 +84,11 @@ public class ManagedDownloaderTest extends LimeTestCase {
     
     private final static int PORT=6666;
     private DownloadManagerImpl downloadManager;
-    private FileManagerStub fileManager;
-    private CoreDownloaderFactory gnutellaDownloaderFactory;
-    private static NetworkManagerStub networkManager;
-    private Injector injector;
-    private ScheduledExecutorService background;
+    @Inject private CoreDownloaderFactory gnutellaDownloaderFactory;
+    private NetworkManagerStub networkManager;
+    @Inject private Injector injector;
+    @Inject @Named("backgroundExecutor") private ScheduledExecutorService background;
+    @Inject private IncompleteFileCollection incompleteFileCollection;
 
     public ManagedDownloaderTest(String name) {
         super(name);
@@ -119,24 +117,22 @@ public class ManagedDownloaderTest extends LimeTestCase {
             protected void configure() {
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
-               bind(FileManager.class).to(FileManagerStub.class);
                bind(NetworkManager.class).to(NetworkManagerStub.class);
                bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProvider);
             } 
         });
+        allModules.add(new LibraryStubModule());
+        allModules.add(LimeTestUtils.createModule(this));
         allModules.addAll(Arrays.asList(modules));
         injector = LimeTestUtils.createInjector(allModules.toArray(new Module[allModules.size()]));
         ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
         connectionManager.setConnected(true);
                 
         downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
-        fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
-        gnutellaDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
         networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         
         downloadManager.start();
         downloadManager.scheduleWaitingPump();
-        background = injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
         RequeryManager.NO_DELAY = false;
     }
 
@@ -164,14 +160,14 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	URN partialURN = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
         
     	IncompleteFileDescStub partialDesc = new IncompleteFileDescStub("incomplete",partialURN,3);
-    	fileManager.getIncompleteFileList().add(partialDesc);
+    	incompleteFileCollection.add(partialDesc);
     	
     	// then create an rfd from a firewalled host
     	RemoteFileDesc rfd = newPushRFD("incomplete","urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE",GUID.makeGuid());
     	
     	//test that currently we have no altlocs for the incomplete file
     	
-    	FileDesc test = fileManager.getIncompleteFileList().getFileDesc(partialURN);
+    	FileDesc test = incompleteFileCollection.getFileDesc(partialURN);
     	assertNotNull(test);
     	AltLocManager altLocManager = injector.getInstance(AltLocManager.class);    	
     	assertEquals(0, altLocManager.getNumLocs(test.getSHA1Urn()));
@@ -568,7 +564,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null);
+                    null, null, null);
 	    managedDownloaderImpl1.addListener(downloadListener1);
         
         ManagedDownloaderImpl managedDownloaderImpl2 =
@@ -576,7 +572,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                     null, null, null, requeryManagerFactory, null, null, null,
                     null, null, null, null, null, null, null, background, null,
                     null, null, null, null, null, downloadProcessingQueue,
-                    null, null);
+                    null, null, null);
         managedDownloaderImpl2.addListener(downloadListener2);
         
 	    context.checking(new Expectations() {{
@@ -778,6 +774,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final ScheduledExecutorService nioExecutor;
         private final Provider<PushDownloadManager> pushDownloadManager;
         private final SocketsManager socketsManager;
+        private final NetworkManager networkManager;
         
         @Inject
         public AltLocWorkerStubFactory(
@@ -785,12 +782,14 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 @Named("nioExecutor") ScheduledExecutorService nioExecutor,
                 Provider<PushDownloadManager> pushDownloadManager,
-                SocketsManager socketsManager) {
+                SocketsManager socketsManager,
+                NetworkManager networkManager) {
             this.httpDownloaderFactory = httpDownloaderFactory;
             this.backgroundExecutor = backgroundExecutor;
             this.nioExecutor = nioExecutor;
             this.pushDownloadManager = pushDownloadManager;
             this.socketsManager = socketsManager;
+            this.networkManager = networkManager;
         }
         
         public DownloadWorker create(DownloadWorkerSupport manager,

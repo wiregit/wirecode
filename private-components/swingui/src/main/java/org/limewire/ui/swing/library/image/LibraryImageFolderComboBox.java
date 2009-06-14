@@ -12,16 +12,12 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
+import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.library.SelectAllable;
-import org.limewire.ui.swing.library.table.menu.actions.DisabledFriendLoginAction;
-import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class LibraryImageFolderComboBox extends LimeComboBox {
 
@@ -33,19 +29,19 @@ public class LibraryImageFolderComboBox extends LimeComboBox {
     private Color disabledColor;
     
     private final XMPPService xmppService;
-    private final FriendsSignInPanel friendsSignInPanel;
-    private final Provider<SharingActionFactory> sharingActionFactoryProvider;
+    private final FriendActions friendActions;
+//    private final Provider<SharingActionFactory> sharingActionFactoryProvider;
     
     private JPopupMenu menu = new JPopupMenu();
     
     private SelectAllable<LocalFileItem> selectAllable;
     
     @Inject
-    public LibraryImageFolderComboBox(XMPPService xmppService, Provider<SharingActionFactory> sharingActionFactory,
-            FriendsSignInPanel friendsSignInPanel) {
+    public LibraryImageFolderComboBox(XMPPService xmppService, //Provider<SharingActionFactory> sharingActionFactory,
+            FriendActions friendActions) {
         this.xmppService = xmppService;
-        this.friendsSignInPanel = friendsSignInPanel;
-        this.sharingActionFactoryProvider = sharingActionFactory;
+        this.friendActions = friendActions;
+//        this.sharingActionFactoryProvider = sharingActionFactory;
                 
         GuiUtils.assignResources(this);
         
@@ -91,25 +87,25 @@ public class LibraryImageFolderComboBox extends LimeComboBox {
             if(selectAllable == null)
                 return;
             
-            SharingActionFactory sharingActionFactory = sharingActionFactoryProvider.get();
-            
-            // if not logged in don't show options for friends.
-            if(!xmppService.isLoggedIn()) {
-                menu.add(decorateItem(sharingActionFactory.createShareGnutellaAction(true, selectAllable)));
-                menu.add(decorateItem(sharingActionFactory.createUnshareGnutellaAction(true, selectAllable)));
-                
-                menu.addSeparator();
-                
-                menu.add(decorateDisabledfItem(new DisabledFriendLoginAction(I18n.tr("Sign in to share with friends"), friendsSignInPanel)));
-            } else {
-                menu.add(decorateItem(sharingActionFactory.createShareGnutellaAction(true, selectAllable)));
-                menu.add(decorateItem(sharingActionFactory.createShareFriendAction(true, selectAllable)));
-                
-                menu.addSeparator();
-                
-                menu.add(decorateItem(sharingActionFactory.createUnshareGnutellaAction(true, selectAllable)));
-                menu.add(decorateItem(sharingActionFactory.createUnshareFriendAction(true, selectAllable)));
-            }
+//            SharingActionFactory sharingActionFactory = sharingActionFactoryProvider.get();
+//            
+//            // if not logged in don't show options for friends.
+//            if(!xmppService.isLoggedIn()) {
+//                menu.add(decorateItem(sharingActionFactory.createShareGnutellaAction(true, selectAllable)));
+//                menu.add(decorateItem(sharingActionFactory.createUnshareGnutellaAction(true, selectAllable)));
+//                
+//                menu.addSeparator();
+//                
+//                menu.add(decorateDisabledfItem(new DisabledFriendLoginAction(I18n.tr("Sign in to share with friends"), friendActions)));
+//            } else {
+//                menu.add(decorateItem(sharingActionFactory.createShareGnutellaAction(true, selectAllable)));
+//                menu.add(decorateItem(sharingActionFactory.createShareFriendAction(true, selectAllable)));
+//                
+//                menu.addSeparator();
+//                
+//                menu.add(decorateItem(sharingActionFactory.createUnshareGnutellaAction(true, selectAllable)));
+//                menu.add(decorateItem(sharingActionFactory.createUnshareFriendAction(true, selectAllable)));
+//            }
         }
     }
 }

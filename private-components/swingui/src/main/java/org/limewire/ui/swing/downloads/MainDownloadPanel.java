@@ -100,8 +100,6 @@ public class MainDownloadPanel extends JPanel {
         pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         add(pane, BorderLayout.CENTER);
 
-        setTransferHandler(new DownloadableTransferHandler(downloadListManager, saveLocationExceptionHandler));
-
         // handle individual completed downloads
         initializeDownloadListeners(downloadListManager);
         

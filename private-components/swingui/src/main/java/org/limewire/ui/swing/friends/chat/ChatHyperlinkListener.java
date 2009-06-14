@@ -23,7 +23,6 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.FocusJOptionPane;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -44,19 +43,19 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
     private final ResultDownloader downloader;
     private final RemoteFileItemFactory remoteFileItemFactory;
     private final Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler;
-    private final LibraryNavigator libraryNavigator;
+//    private final LibraryNavigator libraryNavigator;
 
     @Inject
     public ChatHyperlinkListener(@Assisted Conversation conversation, ResultDownloader downloader,
                                  RemoteFileItemFactory remoteFileItemFactory,
-                                 Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler,
-                                 LibraryNavigator libraryNavigator) {
+                                 Provider<SaveLocationExceptionHandler> saveLocationExceptionHandler) {
+//                                 LibraryNavigator libraryNavigator) {
 
         this.conversation = conversation;
         this.downloader = downloader;
         this.remoteFileItemFactory = remoteFileItemFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
-        this.libraryNavigator = libraryNavigator;
+//        this.libraryNavigator = libraryNavigator;
     }
 
     @Override
@@ -131,11 +130,13 @@ public class ChatHyperlinkListener implements javax.swing.event.HyperlinkListene
         if (ChatDocumentBuilder.LIBRARY_LINK.equals(linkDescription)) {
             ChatFriend libraryChatFriend = conversation.getChatFriend();
             LOG.debugf("Opening a view to {0}'s library", libraryChatFriend.getName());
-            libraryNavigator.selectFriendLibrary(libraryChatFriend.getFriend());
+//            libraryNavigator.selectFriendLibrary(libraryChatFriend.getFriend());
+            throw new IllegalStateException("action does't exist");
 
         } else if (ChatDocumentBuilder.MY_LIBRARY_LINK.equals(linkDescription)) {
             LOG.debugf("Opening a view to my library");
-            libraryNavigator.selectLibrary();
+//            libraryNavigator.selectLibrary();
+            throw new IllegalStateException("action does't exist");
         } else {
             LOG.debugf("Hyperlink clicked: {0}", linkDescription);
             if (linkDescription.startsWith("magnet")) {

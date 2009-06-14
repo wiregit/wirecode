@@ -21,14 +21,14 @@ public class XMPPAccountConfigurationImplTest extends BaseTestCase {
         assertEquals("romeo@capulet.com", configuration.getCanonicalizedLocalID());
         
         List<UnresolvedIpPort> servers = Collections.emptyList();
-        configuration = new XMPPAccountConfigurationImpl(true, "montague.org", "Montague", null, "resource", servers);
+        configuration = new XMPPAccountConfigurationImpl(true, "montague.org", "Montague", null, null, "resource", servers);
         assertEquals("", configuration.getCanonicalizedLocalID());
         configuration.setUsername("Julia");
         assertEquals("julia@montague.org", configuration.getCanonicalizedLocalID());
         configuration.setUsername("romeo@capulet.com");
         assertEquals("romeo@capulet.com", configuration.getCanonicalizedLocalID());
         
-        configuration = new XMPPAccountConfigurationImpl(false, "montague.org", "Montague", null, "resource", servers);
+        configuration = new XMPPAccountConfigurationImpl(false, "montague.org", "Montague", null, null, "resource", servers);
         assertEquals("", configuration.getCanonicalizedLocalID());
         configuration.setUsername("Julia");
         assertEquals("julia@montague.org", configuration.getCanonicalizedLocalID());

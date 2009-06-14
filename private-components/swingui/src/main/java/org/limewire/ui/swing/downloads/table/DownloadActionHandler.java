@@ -10,15 +10,12 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.library.sharing.ShareWidget;
-import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class DownloadActionHandler {
     
@@ -40,19 +37,20 @@ public class DownloadActionHandler {
     
    // private static final String ERROR_URL = "http://wiki.limewire.org/index.php?title=User_Guide_Download";
     
-    private final LibraryNavigator libraryNavigator;
+    private final LibraryMediator libraryMediator;
     private DownloadListManager downloadListManager;
-    private ShareWidget<File> shareWidget = null;
+//    private ShareWidget<File> shareWidget = null;
     private LibraryManager libraryManager;
     private final FileInfoDialogFactory fileInfoFactory;
-    private final Provider<ShareWidgetFactory> shareFactory;
+//    private final Provider<ShareWidgetFactory> shareFactory;
     
     @Inject
-    public DownloadActionHandler(Provider<ShareWidgetFactory> shareFactory, DownloadListManager downloadListManager, 
-            LibraryNavigator libraryNavigator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory){
+    public DownloadActionHandler(//Provider<ShareWidgetFactory> shareFactory, 
+            DownloadListManager downloadListManager, 
+            LibraryMediator libraryMediator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory){
         this.downloadListManager = downloadListManager;
-        this.shareFactory = shareFactory;
-        this.libraryNavigator = libraryNavigator;
+//        this.shareFactory = shareFactory;
+        this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
         this.fileInfoFactory = fileInfoFactory;
     }
@@ -89,19 +87,19 @@ public class DownloadActionHandler {
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadListManager.remove(item);
         } else if (actionCommmand == SHARE_COMMAND){
-            if(shareWidget == null)
-                shareWidget = shareFactory.get().createFileShareWidget();
-            shareWidget.setShareable(item.getDownloadingFile());
-            shareWidget.show(null);
+//            if(shareWidget == null)
+//                shareWidget = shareFactory.get().createFileShareWidget();
+//            shareWidget.setShareable(item.getDownloadingFile());
+//            shareWidget.show(null);
         } else if( actionCommmand == LIBRARY_COMMAND) {
             File file = item.getState() == DownloadState.DONE ? item.getLaunchableFile() : item.getDownloadingFile();
             URN urn = item.getUrn();
             Category category = item.getCategory();
             
             if(file != null) {
-                libraryNavigator.selectInLibrary(file, category);
+                libraryMediator.selectInLibrary(file, category);
             } else if (urn != null){
-                libraryNavigator.selectInLibrary(urn, category);
+                libraryMediator.selectInLibrary(urn, category);
             }
         }
     }

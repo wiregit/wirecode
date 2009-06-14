@@ -31,6 +31,7 @@ public class LocalFileTransferable implements Transferable {
                 lines.append(file.toURI().toString());
                 lines.append(seperator);
             }
+            lines.append(seperator);
             return lines.toString();
         } else if(flavor.equals(DataFlavor.javaFileListFlavor)) {
             return Arrays.asList(files);

@@ -7,15 +7,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.limewire.core.api.Category;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 
 
 /**
@@ -32,29 +28,33 @@ class LibraryConverter {
     void convert(LibraryFileData newData) {
         newData.revertToDefault();
         
+        List<File> sharedFolders = new ArrayList<File>();
+        List<File> excludedFolders = new ArrayList<File>();
+        List<File> excludedFiles = new ArrayList<File>();
+        List<String> extensions = new ArrayList<String>();
+        
         OldLibraryData oldData = new OldLibraryData(); // load if necessary
         for(File folder : OldLibrarySettings.DIRECTORIES_TO_SHARE.get()) {
             if(!LibraryUtils.isSensitiveDirectory(folder) || oldData.SENSITIVE_DIRECTORIES_VALIDATED.contains(folder)) {
                 folder = FileUtils.canonicalize(folder);
-                newData.addDirectoryToManageRecursively(folder);
+                sharedFolders.add(folder);
             }
         }
         
-        newData.setDirectoriesToExcludeFromManaging(oldData.DIRECTORIES_NOT_TO_SHARE);
+        excludedFolders.addAll(oldData.DIRECTORIES_NOT_TO_SHARE);
         
         for(File file : oldData.SPECIAL_FILES_TO_SHARE) {
             file = FileUtils.canonicalize(file);            
-            newData.addManagedFile(file, true);
-            newData.setSharedWithGnutella(file, true);
+            newData.addManagedFile(file);
+            newData.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
         }
         
         for(File file : oldData.FILES_NOT_TO_SHARE) {
             file = FileUtils.canonicalize(file);
-            newData.removeManagedFile(file, true);
+            excludedFiles.add(file);
         }
         
         // Set the new managed extensions.
-        List<String> extensions = new ArrayList<String>();
         extensions.addAll(Arrays.asList(OldLibrarySettings.getDefaultExtensions()));
         extensions.removeAll(Arrays.asList(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.get())));
         extensions.addAll(Arrays.asList(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.get())));        
@@ -62,23 +62,13 @@ class LibraryConverter {
         
         // Here's the bulk of the conversion -- loop through, recursively, previously 
         // shared directories & mark all potential files as shareable.
-        convertSharedFiles(newData);
+        convertSharedFiles(sharedFolders, excludedFolders, excludedFiles, extensions, newData);
         
         
         for(File file : oldData.SPECIAL_STORE_FILES) {
             file = FileUtils.canonicalize(file);
-            newData.addManagedFile(file, true);
+            newData.addManagedFile(file);
         }
-        
-        for(MediaType type : MediaType.getDefaultMediaTypes()) {
-            File file = SharingSettings.getFileSettingForMediaType(type).get();
-            file = FileUtils.canonicalize(file);
-            newData.addDirectoryToManageRecursively(file);
-        }
-        
-        newData.addDirectoryToManageRecursively(FileUtils.canonicalize(SharingSettings.getSaveLWSDirectory()));
-        
-        newData.addDirectoryToManageRecursively(FileUtils.canonicalize(SharingSettings.getSaveDirectory()));
         
         LibrarySettings.VERSION.set(LibrarySettings.LibraryVersion.FIVE_0_0.name());
         
@@ -90,24 +80,20 @@ class LibraryConverter {
         OldLibrarySettings.EXTENSIONS_TO_SHARE.revertToDefault();
     }
     
-    private void convertSharedFiles(LibraryFileData data) {
-        Map<Category, Collection<String>> extByCategory = data.getExtensionsPerCategory();
-        Collection<String> extensions = new ArrayList<String>();
-        for(Collection<String> exts : extByCategory.values()) {
-            extensions.addAll(exts);
-        }
+    private void convertSharedFiles(List<File> sharedFolders, List<File> excludedFolders,
+            List<File> excludedFiles, List<String> extensions, LibraryFileData data) {
         Set<File> convertedDirectories = new HashSet<File>();
-        for(File file : data.getDirectoriesToManageRecursively()) {
-            convertDirectory(file, extensions, data, convertedDirectories);
+        for (File file : sharedFolders) {
+            convertDirectory(file, extensions, sharedFolders, excludedFolders, excludedFiles,
+                    convertedDirectories, data);
         }
     }
     
-    // This replicates a lot of the logic in ManagedFileListImpl for scanning for
-    // managed files, but it's a lot simpler & exists only to upgrade prior versions.
     private void convertDirectory(File directory, final Collection<String> extensions,
-            final LibraryFileData data, Set<File> convertedDirectories) {
+            final List<File> sharedFolders, final List<File> excludedFolders, final List<File> excludedFiles,
+            Set<File> convertedDirectories, final LibraryFileData data) {
         // If we already converted this directory, exit.
-        if(convertedDirectories.contains(directory)) {
+        if (convertedDirectories.contains(directory)) {
             return;
         }
         
@@ -117,14 +103,14 @@ class LibraryConverter {
             public boolean accept(File file) {
                 return LibraryUtils.isFileManagable(file)
                         && extensions.contains(FileUtils.getFileExtension(file))
-                        && !data.isFileExcluded(file);
+                        && !excludedFiles.contains(file);
             }
         });
 
         if(fileList != null) {
             for (File file : fileList) {
                 file = FileUtils.canonicalize(file);
-                data.setSharedWithGnutella(file, true);
+                data.setFileInCollection(file, LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true);
             }
         }
 
@@ -136,14 +122,14 @@ class LibraryConverter {
                             && folder.canRead()
                             && !data.isIncompleteDirectory(folder)
                             && !LibraryUtils.isApplicationSpecialShareDirectory(folder)
-                            && !data.isFolderExcluded(folder)
+                            && !excludedFolders.contains(folder)
                             && !LibraryUtils.isFolderBanned(folder);
                 }
             });
             
             if(dirList != null) {
                 for (File subdir : dirList) {
-                    convertDirectory(subdir, extensions, data, convertedDirectories);
+                    convertDirectory(subdir, extensions, sharedFolders, excludedFolders, excludedFiles, convertedDirectories, data);
                 }
             }
         }

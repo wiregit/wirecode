@@ -69,10 +69,12 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
+import com.limegroup.gnutella.library.Library;
+import com.limegroup.gnutella.library.LibraryStatusEvent;
 import com.limegroup.gnutella.library.LibraryUtils;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -83,7 +85,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * version is stored in memory & on disk.
  */
 @Singleton
-public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedListStatusEvent>, Service {
+public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibraryStatusEvent>, Service {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandlerImpl.class);
     
@@ -160,7 +162,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     private final CapabilitiesVMFactory capabilitiesVMFactory;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<DownloadManager> downloadManager;
-    private final Provider<FileManager> fileManager;
+    private final Library library;
+    private final FileView gnutellaFileView;
     private final ApplicationServices applicationServices;
     private final UpdateCollectionFactory updateCollectionFactory;
     private final UpdateMessageVerifier updateMessageVerifier;
@@ -193,12 +196,13 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             CapabilitiesVMFactory capabilitiesVMFactory,
             Provider<ConnectionManager> connectionManager,
             Provider<DownloadManager> downloadManager,
-            Provider<FileManager> fileManager,
             ApplicationServices applicationServices,
             UpdateCollectionFactory updateCollectionFactory,
             Clock clock,
             UpdateMessageVerifier updateMessageVerifier, 
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory,
+            @GnutellaFiles FileView gnutellaFileView,
+            Library library) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
@@ -207,18 +211,19 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.connectionManager = connectionManager;
         this.downloadManager = downloadManager;
-        this.fileManager = fileManager;
+        this.library = library;
         this.applicationServices = applicationServices;
         this.updateCollectionFactory = updateCollectionFactory;
         this.clock = clock;
         this.updateMessageVerifier = updateMessageVerifier;
         this.remoteFileDescFactory = remoteFileDescFactory;
+        this.gnutellaFileView = gnutellaFileView;
         
         this.listeners = new EventListenerList<UpdateEvent>();
     }
     
     @Inject
-    void register(ListenerSupport<ManagedListStatusEvent> listener) {
+    void register(ListenerSupport<LibraryStatusEvent> listener) {
         listener.addListener(this);
     }
         
@@ -603,7 +608,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             if (isHopeless(next))
                 continue; 
             
-            if(downloadManager.get().isSavedDownloadsLoaded() && fileManager.get().getManagedFileList().isLoadFinished()) {
+            if(downloadManager.get().isSavedDownloadsLoaded() && library.isLoadFinished()) {
                 
                 //TODO: remove the cast
                 ManagedDownloader md = (ManagedDownloader)downloadManager.get().getDownloaderForURN(next.getUpdateURN());
@@ -644,7 +649,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
      * Deletes any files in the folder that are not listed in the update message.
      */
     private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
-        if (!downloadManager.get().isSavedDownloadsLoaded() || !fileManager.get().getManagedFileList().isLoadFinished())
+        if (!downloadManager.get().isSavedDownloadsLoaded() || !library.isLoadFinished())
             return;
 
         if (_killingObsoleteNecessary) {
@@ -655,10 +660,10 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            List<FileDesc> shared = fileManager.get().getGnutellaFileList().getFilesInDirectory(LibraryUtils.PREFERENCE_SHARE);
+            List<FileDesc> shared = gnutellaFileView.getFilesInDirectory(LibraryUtils.PREFERENCE_SHARE);
             for (FileDesc fd : shared) {
                 if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
-                    fileManager.get().getManagedFileList().remove(fd.getFile());
+                    library.remove(fd.getFile());
                     fd.getFile().delete();
                 }
             }
@@ -816,7 +821,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
      * there was nothing to download
      */
     private boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
-        if (!fileManager.get().getManagedFileList().isLoadFinished())
+        if (!library.isLoadFinished())
             return false;
         
         URN myUrn = myInfo.getUpdateURN();
@@ -827,7 +832,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     }
     
     private boolean hasCompleteFile(URN urn) {
-        List<FileDesc> fds = fileManager.get().getManagedFileList().getFileDescsMatching(urn);
+        List<FileDesc> fds = library.getFileDescsMatching(urn);
         for(FileDesc fd : fds) {
             if(!(fd instanceof IncompleteFileDesc)) {
                 return true;
@@ -997,8 +1002,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
      * Listens for events from FileManager.
      */
     @Override
-    public void handleEvent(ManagedListStatusEvent evt) {
-        if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
+    public void handleEvent(LibraryStatusEvent evt) {
+        if(evt.getType() == LibraryStatusEvent.Type.LOAD_COMPLETE) {
             tryToDownloadUpdates();
         }
     }

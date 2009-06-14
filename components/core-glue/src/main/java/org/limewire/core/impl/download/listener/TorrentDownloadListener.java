@@ -13,6 +13,8 @@ import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
@@ -29,7 +31,6 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
-import com.limegroup.gnutella.library.FileManager;
 
 /**
  * Listens for downloads of .torrent files to complete. When the download
@@ -47,19 +48,19 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
 
     private final List<DownloadItem> downloadItems;
 
-    private final FileManager fileManager;
+    private final SharedFileList gnutellaFileList;
 
     private final TorrentManager torrentManager;
 
     @Inject
     public TorrentDownloadListener(DownloadManager downloadManager,
-            ActivityCallback activityCallback, FileManager fileManager,
+            ActivityCallback activityCallback, SharedFileListManager fileListManager,
             TorrentManager torrentManager, @Assisted List<DownloadItem> downloadItems,
             @Assisted Downloader downloader) {
         this.downloader = Objects.nonNull(downloader, "downloader");
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.torrentManager = Objects.nonNull(torrentManager, "torrentManager");
-        this.fileManager = Objects.nonNull(fileManager, "fileManager");
+        this.gnutellaFileList = fileListManager.getSharedFileList("Public Shared");
         this.activityCallback = Objects.nonNull(activityCallback, "activityCallback");
         this.downloadItems = Objects.nonNull(downloadItems, "downloadItems");
 
@@ -182,7 +183,7 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
         }
 
         if (btData.isPrivate()) {
-            fileManager.getGnutellaFileList().remove(torrentFile);
+            gnutellaFileList.removeFile(torrentFile);
             return true;
         }
 
@@ -190,17 +191,17 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
         File torrentParent = torrentFile.getParentFile(); 
         if (torrentParent.equals(saveDir)) {
             // already in saveDir
-            fileManager.getGnutellaFileList().add(torrentFile);
+            gnutellaFileList.addFile(torrentFile);
             return true;
         }
 
         final File tFile = getSharedTorrentMetaDataFile(btData);
         if (tFile.equals(torrentFile)) {
-            fileManager.getGnutellaFileList().add(tFile);
+            gnutellaFileList.addFile(tFile);
             return true;
         }
 
-        fileManager.getGnutellaFileList().remove(tFile);
+        gnutellaFileList.removeFile(tFile);
         File backup = null;
         if (tFile.exists()) {
             backup = new File(tFile.getParent(), tFile.getName().concat(".bak"));
@@ -208,12 +209,12 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
         }
 
         if (FileUtils.copy(torrentFile, tFile)) {
-            fileManager.getGnutellaFileList().add(tFile);
+            gnutellaFileList.addFile(tFile);
         } else {
             if (backup != null) {
                 // restore backup
                 if (FileUtils.forceRename(backup, tFile)) {
-                    fileManager.getGnutellaFileList().add(tFile);
+                    gnutellaFileList.addFile(tFile);
                 }
             }
         }

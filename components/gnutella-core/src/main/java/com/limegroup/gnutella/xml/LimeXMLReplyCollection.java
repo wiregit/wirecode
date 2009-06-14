@@ -33,7 +33,7 @@ import org.xml.sax.SAXException;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
@@ -105,7 +105,7 @@ public class LimeXMLReplyCollection {
         INCORRECT_FILETYPE;
     }
 
-    private final Provider<FileManager> fileManager;
+    private final Provider<Library> library;
 
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
 
@@ -121,16 +121,16 @@ public class LimeXMLReplyCollection {
      *
      * @param URI this collection's schema URI
      * @param path directory where the xml documents are stored
-     * @param fileManager guice provider used for {@link FileManager}
+     * @param library guice provider used for {@link Library}
      * @param limeXMLDocumentFactory factory object for {@link LimeXMLDocument}
      * @param metaDataReader also used to construct {@link LimeXMLDocument}
      * @param metaDataFactory the MetaDataFactory used in this class
      */
-    LimeXMLReplyCollection(String URI, File path, Provider<FileManager> fileManager,
+    LimeXMLReplyCollection(String URI, File path, Provider<Library> library,
             LimeXMLDocumentFactory limeXMLDocumentFactory, MetaDataReader metaDataReader,
             MetaDataFactory metaDataFactory) {
         this.schemaURI = URI;
-        this.fileManager = fileManager;
+        this.library = library;
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
         this.metaDataReader = metaDataReader;
         this.metaDataFactory = metaDataFactory;
@@ -705,7 +705,7 @@ public class LimeXMLReplyCollection {
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
-        fileManager.get().getManagedFileList().fileChanged(fd.getFile(), currentXmlDocs);
+        library.get().fileChanged(fd.getFile(), currentXmlDocs);
         
         return retVal;
     }

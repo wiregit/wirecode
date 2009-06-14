@@ -15,6 +15,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
@@ -23,7 +24,6 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.CoreDownloader;
-import com.limegroup.gnutella.library.FileManager;
 
 public class TorrentDownloadListenerTest extends BaseTestCase {
 
@@ -40,7 +40,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final Downloader downloader = context.mock(CoreDownloader.class);
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
-        final FileManager fileManager = context.mock(FileManager.class);
+        final SharedFileListManager fileManager = context.mock(SharedFileListManager.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
         final List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
         context.checking(new Expectations() {
@@ -66,7 +66,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
-        final FileManager fileManager = context.mock(FileManager.class);
+        final SharedFileListManager fileManager = context.mock(SharedFileListManager.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
         context.checking(new Expectations() {
             {
@@ -92,7 +92,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
         final File torrentFile = new File("testTorrentFileDownloadAdded.torrent");
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
-        final FileManager fileManager = context.mock(FileManager.class);
+        final SharedFileListManager fileManager = context.mock(SharedFileListManager.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
         downloadItems.add(downloadItem);
         context.checking(new Expectations() {
@@ -130,7 +130,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final SaveLocationException sle = new SaveLocationException(
                 SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING, torrentFile);
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
-        final FileManager fileManager = context.mock(FileManager.class);
+        final SharedFileListManager fileManager = context.mock(SharedFileListManager.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
         downloadItems.add(downloadItem);
 
@@ -172,7 +172,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final ActivityCallback activityCallback = context.mock(ActivityCallback.class);
         final List<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
-        final FileManager fileManager = context.mock(FileManager.class);
+        final SharedFileListManager fileManager = context.mock(SharedFileListManager.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
         downloadItems.add(downloadItem);
 
@@ -211,7 +211,7 @@ public class TorrentDownloadListenerTest extends BaseTestCase {
         final SaveLocationException sle = new SaveLocationException(
                 SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING, null);
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
-        final FileManager fileManager = context.mock(FileManager.class);
+        final SharedFileListManager fileManager = context.mock(SharedFileListManager.class);
         final TorrentManager torrentManager = context.mock(TorrentManager.class);
         downloadItems.add(downloadItem);
 

@@ -78,8 +78,10 @@ import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
+import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -446,7 +448,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private final EventMulticaster<DownloadStateEvent> listeners;
 
     protected final DownloadManager downloadManager;
-    protected final FileManager fileManager;
+    protected final FileCollection gnutellaFileCollection;
     protected final IncompleteFileManager incompleteFileManager;
     protected final DownloadCallback downloadCallback;
     protected final NetworkManager networkManager;
@@ -470,6 +472,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final Provider<PushList> pushListProvider;
     protected final DangerousFileChecker dangerousFileChecker;
     protected final SpamManager spamManager;
+    protected final Library library;
 
     private final SocketsManager socketsManager;
 
@@ -486,7 +489,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     @Inject
     protected ManagedDownloaderImpl(SaveLocationManager saveLocationManager,
-                                    DownloadManager downloadManager, FileManager fileManager,
+                                    DownloadManager downloadManager, @GnutellaFiles FileCollection gnutellaFileCollection,
                                     IncompleteFileManager incompleteFileManager, DownloadCallback downloadCallback,
                                     NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
                                     RequeryManagerFactory requeryManagerFactory, QueryRequestFactory queryRequestFactory,
@@ -502,11 +505,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                                                  SocketsManager socketsManager,
                                                  @Named("downloadStateProcessingQueue")ListeningExecutorService downloadStateProcessingQueue,
                                                  DangerousFileChecker dangerousFileChecker,
-                                                 SpamManager spamManager) {
+                                                 SpamManager spamManager, Library library) {
         super(saveLocationManager);
         this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
-        this.fileManager = fileManager;
+        this.gnutellaFileCollection = gnutellaFileCollection;
         this.incompleteFileManager = incompleteFileManager;
         this.downloadCallback = downloadCallback;
         this.networkManager = networkManager;
@@ -532,6 +535,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.pushListProvider = pushListProvider;
         this.dangerousFileChecker = dangerousFileChecker;
         this.spamManager = spamManager;
+        this.library = library;
     }
 
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
@@ -2041,7 +2045,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // unshare the file if we didn't have a tree
         // otherwise we will have shared only the parts that verified
         if (commonOutFile.getHashTree() == null)
-            fileManager.getManagedFileList().remove(incompleteFile);
+            library.remove(incompleteFile);
 
         // purge the tree
         tigerTreeCache.get().purgeTree(getSha1Urn());
@@ -2113,7 +2117,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (saveFile.exists())
-            fileManager.getManagedFileList().remove(saveFile);
+            library.remove(saveFile);
 
         // add file hash to manager for fast lookup
         addFileHash(fileHash, saveFile);
@@ -2156,7 +2160,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             if (ttroot != null)
                 urns.add(ttroot);
             urnCache.addUrns(file, urns);
-            fileManager.getManagedFileList().add(file, getXMLDocuments());
+            library.add(file, getXMLDocuments());
         }
     }
 
@@ -2182,7 +2186,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected void shareSavedFile(File saveFile) {
         if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()
                 && !isFriendDownload)
-            fileManager.getGnutellaFileList().add(saveFile, getXMLDocuments());
+            gnutellaFileCollection.add(saveFile, getXMLDocuments());
     }
 
     /**
@@ -2913,7 +2917,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             URN sha1 = getSha1Urn();
             URN ttroot = tree.getTreeRootUrn();
             tigerTreeCache.get().addRoot(sha1, ttroot);
-            List<FileDesc> fds = fileManager.getManagedFileList().getFileDescsMatching(sha1);
+            List<FileDesc> fds = library.getFileDescsMatching(sha1);
             for (FileDesc fd : fds) {
                 fd.setTTRoot(ttroot);
             }

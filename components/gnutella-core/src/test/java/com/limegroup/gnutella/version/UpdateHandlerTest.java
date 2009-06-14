@@ -38,11 +38,10 @@ import com.limegroup.gnutella.ClockStub;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.version.UpdateHandlerImpl.UpdateType;
@@ -64,7 +63,6 @@ public class UpdateHandlerTest extends LimeTestCase {
     private HttpExecutor httpExecutor;
     private CapabilitiesVMFactory capabilitiesVmFactory;
     private ConnectionManager connectionManager;
-    private FileManager fileManager;
     private ApplicationServices applicationServices;
     private UpdateCollectionFactory updateCollectionFactory;
     private ClockStub clock;
@@ -83,7 +81,6 @@ public class UpdateHandlerTest extends LimeTestCase {
         httpExecutor = mockery.mock(HttpExecutor.class);
         capabilitiesVmFactory = mockery.mock(CapabilitiesVMFactory.class);
         connectionManager = mockery.mock(ConnectionManager.class);
-        fileManager = mockery.mock(FileManager.class);
         applicationServices = mockery.mock(ApplicationServices.class);
         updateCollectionFactory = mockery.mock(UpdateCollectionFactory.class);
         downloadManager = mockery.mock(DownloadManager.class);
@@ -111,7 +108,6 @@ public class UpdateHandlerTest extends LimeTestCase {
                 bind(HttpExecutor.class).toInstance(httpExecutor);
                 bind(CapabilitiesVMFactory.class).toInstance(capabilitiesVmFactory);
                 bind(ConnectionManager.class).toInstance(connectionManager);
-                bind(FileManager.class).toInstance(fileManager);
                 bind(ApplicationServices.class).toInstance(applicationServices);
                 bind(UpdateCollectionFactory.class).toInstance(updateCollectionFactory);
                 bind(Clock.class).toInstance(clock);
@@ -135,7 +131,6 @@ public class UpdateHandlerTest extends LimeTestCase {
                 ignoring(httpExecutor);
                 ignoring(capabilitiesVmFactory);
                 ignoring(connectionManager);
-                ignoring(fileManager);
                 ignoring(applicationServices);
                 ignoring(updateCollectionFactory);
                 ignoring(downloadManager);

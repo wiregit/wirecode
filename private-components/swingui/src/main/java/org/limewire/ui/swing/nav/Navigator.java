@@ -2,7 +2,6 @@ package org.limewire.ui.swing.nav;
 
 import javax.swing.JComponent;
 
-import org.limewire.ui.swing.library.nav.NavMediator;
 
 /**
  * The main hub for navigation.

@@ -29,16 +29,17 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.friends.actions.FriendButtonPopupListener;
+import org.limewire.ui.swing.friends.login.SignInAction;
 import org.limewire.ui.swing.home.HomeMediator;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.library.nav.NavMediator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.NavSelectable;
-import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
@@ -64,11 +65,14 @@ import com.google.inject.Singleton;
 @Singleton
 class TopPanel extends JXPanel implements SearchNavigator {
     
+    @Resource Icon friendIcon;
+    
     private final SearchBar searchBar;
     
     private final FlexibleTabList searchList;
     private final Navigator navigator;        
     private final NavItem homeNav;
+    private final NavItem libraryNav;
     private final KeywordAssistedSearchBuilder keywordAssistedSearchBuilder;
     @Resource private Icon browseIcon;
         
@@ -77,14 +81,14 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     Navigator navigator,
                     final HomeMediator homeMediator,
                     final StoreMediator storeMediator,
-                    final LeftPanel leftPanel,
                     SearchBar searchBar,
                     FlexibleTabListFactory tabListFactory,
                     BarPainterFactory barPainterFactory,
                     SearchTabPainterFactory tabPainterFactory,
-                    final LibraryNavigator libraryNavigator,
+                    final LibraryMediator myLibraryMediator,
                     AdvancedSearchMediator advancedSearchMediator,
-                    KeywordAssistedSearchBuilder keywordAssistedSearchBuilder) {        
+                    KeywordAssistedSearchBuilder keywordAssistedSearchBuilder,
+                    SignInAction signInAction, FriendButtonPopupListener friendListener) {        
         GuiUtils.assignResources(this);
         
         this.searchBar = searchBar;
@@ -100,17 +104,27 @@ class TopPanel extends JXPanel implements SearchNavigator {
         navigator.createNavItem(NavCategory.LIMEWIRE, AdvancedSearchMediator.NAME, advancedSearchMediator);
         
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME, homeMediator);      
-        JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
-        homeButton.setName("WireframeTop.homeButton");
-        homeButton.setToolTipText(I18n.tr("Home"));
-        homeButton.setText(null);
-        homeButton.setIconTextGap(1);
-        homeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                homeMediator.getComponent().loadDefaultUrl();
-            }
-        });
+        libraryNav = navigator.createNavItem(NavCategory.LIBRARY, I18n.tr("My Library"), myLibraryMediator);
+        JButton libraryButton = new IconButton(NavigatorUtils.getNavAction(libraryNav));
+        libraryButton.setName("WireframeTop.homeButton");
+        libraryButton.setToolTipText(I18n.tr("Library"));
+        libraryButton.setText(null);
+        libraryButton.setIconTextGap(1);
+//        homeButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                homeMediator.getComponent().loadDefaultUrl();
+//            }
+//        });
+        
+//        JButton friendButton = new IconButton(signInAction);
+        LimeComboBox friendButton = new LimeComboBox();
+        friendButton.setIcon(friendIcon);
+        friendButton.setName("WireframeTop.friendButton");
+        friendButton.setToolTipText(I18n.tr("Friend Login"));
+        friendButton.setText(null);
+        friendButton.setIconTextGap(1);
+        friendButton.getPopupMenu().addPopupMenuListener(friendListener);
         
         JButton storeButton;
         if(MozillaInitialization.isInitialized()) {
@@ -141,7 +155,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setTabInsets(new Insets(0,10,2,10));
 
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
-        add(homeButton, "gapbottom 2, gaptop 0");
+        add(libraryButton, "gapbottom 2, gaptop 0");
+        add(friendButton, "gapbottom 2, gaptop 0");
         add(storeButton, "gapbottom 2, gaptop 0");
 
         add(searchBar, "gapleft 70, gapbottom 2, gaptop 0");
@@ -152,19 +167,19 @@ class TopPanel extends JXPanel implements SearchNavigator {
             storeButton.setVisible(false);
         }
         
-        navigator.addNavigationListener(new NavigationListener() {
-            @Override
-            public void categoryRemoved(NavCategory category) {
-                if(category == NavCategory.SEARCH_RESULTS) {
-                    libraryNavigator.selectLibrary();
-                }
-            }
-            
-            @Override public void categoryAdded(NavCategory category) {}
-            @Override public void itemAdded(NavCategory category, NavItem navItem) {}
-            @Override public void itemRemoved(NavCategory category, NavItem navItem) {}
-            @Override public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, NavMediator navMediator) {}
-      ;  });
+//        navigator.addNavigationListener(new NavigationListener() {
+//            @Override
+//            public void categoryRemoved(NavCategory category) {
+//                if(category == NavCategory.SEARCH_RESULTS) {
+//                    libraryNavigator.selectLibrary();
+//                }
+//            }
+//            
+//            @Override public void categoryAdded(NavCategory category) {}
+//            @Override public void itemAdded(NavCategory category, NavItem navItem) {}
+//            @Override public void itemRemoved(NavCategory category, NavItem navItem) {}
+//            @Override public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable, NavMediator navMediator) {}
+//      ;  });
     };
 
     @Override

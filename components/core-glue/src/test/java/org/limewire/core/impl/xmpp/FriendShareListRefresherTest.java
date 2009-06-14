@@ -26,17 +26,16 @@ import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender
 import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender.ScheduledLibraryRefreshSender;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPFriend;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 
 import com.limegroup.gnutella.MockFriend;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.ManagedFileList;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.Library;
+import com.limegroup.gnutella.library.LibraryStatusEvent;
 
 public class FriendShareListRefresherTest extends BaseTestCase {
 
@@ -47,9 +46,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     @SuppressWarnings("unchecked")
     public void testRegister() {
         Mockery context = new Mockery();
-
-        final FileManager fileManager = context.mock(FileManager.class);
-        final ManagedFileList managedFileList = context.mock(ManagedFileList.class);
+        final Library library = context.mock(Library.class);
         
         final ListenerSupport<FriendShareListEvent> listenerSupport
             = context.mock(ListenerSupport.class);
@@ -59,15 +56,11 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.checking(new Expectations() {
             {
                 exactly(1).of(listenerSupport).addListener(with(same(friendShareListRefresher)));
-                
-                allowing(fileManager).getManagedFileList();
-                will(returnValue(managedFileList));
-                
-                exactly(1).of(managedFileList).addManagedListStatusListener(with(any(FinishedLoadingListener.class)));
+                exactly(1).of(library).addManagedListStatusListener(with(any(FinishedLoadingListener.class)));
                 
             }});
         
-        friendShareListRefresher.register(fileManager);
+        friendShareListRefresher.register(library);
         friendShareListRefresher.register(listenerSupport);
         
         context.assertIsSatisfied();
@@ -158,7 +151,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
         final XMPPService xmppService = context.mock(XMPPService.class);
         final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        final ManagedListStatusEvent event = context.mock(ManagedListStatusEvent.class);
+        final LibraryStatusEvent event = context.mock(LibraryStatusEvent.class);
         
         final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
                 xmppService, scheduledExecutorService);
@@ -167,9 +160,9 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         
         context.checking(new Expectations() {
             {   exactly(1).of(event).getType();
-                will(returnValue(ManagedListStatusEvent.Type.SAVE));
+                will(returnValue(LibraryStatusEvent.Type.SAVE));
                 exactly(1).of(event).getType();
-                will(returnValue(ManagedListStatusEvent.Type.LOAD_FINISHING));
+                will(returnValue(LibraryStatusEvent.Type.LOAD_FINISHING));
             }});
         
         finishedLoadingListener.handleEvent(event);
@@ -194,7 +187,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
         final XMPPService xmppService = context.mock(XMPPService.class);
         final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        final ManagedListStatusEvent event = context.mock(ManagedListStatusEvent.class);
+        final LibraryStatusEvent event = context.mock(LibraryStatusEvent.class);
         
         final XMPPConnection xmppConnection = context.mock(XMPPConnection.class);
         
@@ -226,7 +219,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.checking(new Expectations() {
             {   // These should be checked
                 atLeast(1).of(event).getType();
-                will(returnValue(ManagedListStatusEvent.Type.LOAD_COMPLETE));
+                will(returnValue(LibraryStatusEvent.Type.LOAD_COMPLETE));
 
                 // Non critical actions
                 allowing(xmppService).getActiveConnection();
@@ -280,7 +273,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
         final XMPPService xmppService = context.mock(XMPPService.class);
         final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        final ManagedListStatusEvent event = context.mock(ManagedListStatusEvent.class);
+        final LibraryStatusEvent event = context.mock(LibraryStatusEvent.class);
         
         final XMPPConnection xmppConnection = context.mock(XMPPConnection.class);
         
@@ -312,7 +305,7 @@ public class FriendShareListRefresherTest extends BaseTestCase {
         context.checking(new Expectations() {
             {   // These should be checked
                 atLeast(1).of(event).getType();
-                will(returnValue(ManagedListStatusEvent.Type.LOAD_COMPLETE));
+                will(returnValue(LibraryStatusEvent.Type.LOAD_COMPLETE));
 
                 // Non essential interactions
                 

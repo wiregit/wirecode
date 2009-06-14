@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -55,12 +57,34 @@ class LibraryFileData extends AbstractSettingsGroup {
     private final Collection<String> DEFAULT_MANAGED_EXTENSIONS =
         Collections.unmodifiableList(Arrays.asList(DEFAULT_MANAGED_EXTENSIONS_STRING.split(";")));
     
+    private static enum Version {
+        // for prior versions [before 5.0], see OldLibraryData & LibraryConverter
+        ONE, // the first ever version [active 5.0 -> 5.1]
+        TWO; // the current version [active 5.2 -> ]
+    }
+    
+    private static final String CURRENT_VERSION_KEY = "CURRENT_VERSION";
+    private static final String USER_EXTENSIONS_KEY = "USER_EXTENSIONS";
+    private static final String USER_REMOVED_KEY = "USER_REMOVED";
+//    private static final String MANAGED_DIRECTORIES_KEY = "MANAGED_DIRECTORIES";
+//    private static final String DO_NOT_MANAGE_KEY = "DO_NOT_MANAGE";
+//    private static final String EXCLUDE_FILES_KEY = "EXCLUDE_FILES";
+    private static final String SHARE_DATA_KEY = "SHARE_DATA";
+    private static final String FILE_DATA_KEY = "FILE_DATA";
+    private static final String COLLECTION_NAME_KEY = "COLLECTION_NAMES";
+    private static final String COLLECTION_SHARE_DATA_KEY = "COLLECTION_SHARE_DATA";
+    
+    static final Integer DEFAULT_SHARED_COLLECTION_ID = 0;
+    private static final Integer MIN_COLLECTION_ID = 1;
+    
+    
+    private final Version CURRENT_VERSION = Version.TWO;
+    
     private final Set<String> userExtensions = new HashSet<String>();
     private final Set<String> userRemoved = new HashSet<String>();
-    private final Set<File> directoriesToManageRecursively = new HashSet<File>();
-    private final Set<File> directoriesNotToManage = new HashSet<File>();
-    private final Set<File> excludedFiles = new HashSet<File>();
-    private final Map<File, FileProperties> libraryManageData = new HashMap<File, FileProperties>();
+    private final Map<File, List<Integer>> fileData = new HashMap<File, List<Integer>>();
+    private final SortedMap<Integer, String> collectionNames = new TreeMap<Integer, String>();
+    private final Map<Integer, List<String>> collectionShareData = new HashMap<Integer, List<String>>();
     private volatile boolean dirty = false;
     
     private final File saveFile = new File(CommonUtils.getUserSettingsDir(), "library5.dat"); 
@@ -93,10 +117,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             dirty = true;
             userExtensions.clear();
             userRemoved.clear();
-            directoriesToManageRecursively.clear();
-            directoriesNotToManage.clear();
-            excludedFiles.clear();
-            libraryManageData.clear();
+            fileData.clear();
         } finally {
             lock.writeLock().unlock();
         }
@@ -110,12 +131,12 @@ class LibraryFileData extends AbstractSettingsGroup {
         Map<String, Object> save = new HashMap<String, Object>();
         lock.readLock().lock();
         try {
-            save.put("USER_EXTENSIONS", userExtensions);
-            save.put("USER_REMOVED", userRemoved);
-            save.put("MANAGED_DIRECTORIES", directoriesToManageRecursively);
-            save.put("DO_NOT_MANAGE", directoriesNotToManage);
-            save.put("EXCLUDE_FILES", excludedFiles);
-            save.put("SHARE_DATA", libraryManageData);            
+            save.put(CURRENT_VERSION_KEY, CURRENT_VERSION);
+            save.put(USER_EXTENSIONS_KEY, userExtensions);
+            save.put(USER_REMOVED_KEY, userRemoved);
+            save.put(FILE_DATA_KEY, fileData);
+            save.put(COLLECTION_NAME_KEY, collectionNames);
+            save.put(COLLECTION_SHARE_DATA_KEY, collectionShareData);          
             if(FileUtils.writeWithBackupFile(save, backupFile, saveFile, LOG)) {
                 dirty = false;
             }
@@ -142,31 +163,17 @@ class LibraryFileData extends AbstractSettingsGroup {
             Object read = in.readObject();
             readMap = GenericsUtils.scanForMap(read, String.class, Object.class, ScanMode.REMOVE);
             if (readMap != null) {
-                Set<String> userExtensions = GenericsUtils.scanForSet(readMap.get("USER_EXTENSIONS"),
-                        String.class, ScanMode.REMOVE);
-                Set<String> userRemoved = GenericsUtils.scanForSet(readMap.get("USER_REMOVED"),
-                        String.class, ScanMode.REMOVE);
-                Set<File> directoriesToManageRecursively = GenericsUtils.scanForSet(readMap
-                        .get("MANAGED_DIRECTORIES"), File.class, ScanMode.REMOVE);
-                Set<File> directoriesNotToManage = GenericsUtils.scanForSet(
-                        readMap.get("DO_NOT_MANAGE"), File.class, ScanMode.REMOVE);
-                Set<File> excludedFiles = GenericsUtils.scanForSet(readMap.get("EXCLUDE_FILES"),
-                        File.class, ScanMode.REMOVE);
-                Map<File, FileProperties> libraryShareData = GenericsUtils.scanForMap(readMap
-                        .get("SHARE_DATA"), File.class, FileProperties.class, ScanMode.REMOVE);
-                
-                lock.writeLock().lock();
-                try {
-                    clear();
-                    this.userExtensions.addAll(lowercase(userExtensions));
-                    this.userRemoved.addAll(userRemoved);
-                    this.directoriesToManageRecursively.addAll(directoriesToManageRecursively);
-                    this.directoriesNotToManage.addAll(directoriesNotToManage);
-                    this.excludedFiles.addAll(excludedFiles);
-                    this.libraryManageData.putAll(libraryShareData);
-                } finally {
-                    lock.writeLock().unlock();
+                Object currentVersion = readMap.get("CURRENT_VERSION");
+                if(currentVersion == null) {
+                    currentVersion = Version.ONE;
                 }
+                
+                if(currentVersion instanceof Version) {
+                    initializeFromVersion(((Version)currentVersion), readMap);
+                } else {
+                    return false;
+                }
+                
                 return true;
             }
         } catch(Throwable throwable) {
@@ -176,50 +183,129 @@ class LibraryFileData extends AbstractSettingsGroup {
         return false;
     }
 
-    /** Returns true if the given file should be excluded from managing. */
-    boolean isFileExcluded(File file) {
-        lock.readLock().lock();
+    /**
+     * Initializes the read map assuming it's a particular version.
+     */
+    private void initializeFromVersion(Version version, Map<String, Object> readMap) {
+        Set<String> userExtensions;
+        Set<String> userRemoved;
+        Map<File, List<Integer>> fileData;
+        Map<Integer, String> collectionNames;
+        Map<Integer, List<String>> collectionShareData;
+        
+        switch(version) {
+        case ONE:
+            userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
+            userRemoved = GenericsUtils.scanForSet(readMap.get(USER_REMOVED_KEY), String.class, ScanMode.REMOVE);
+            Map<File, FileProperties> oldShareData = GenericsUtils.scanForMap(readMap.get(SHARE_DATA_KEY), File.class, FileProperties.class, ScanMode.REMOVE);
+            fileData = new HashMap<File, List<Integer>>();
+            collectionNames = new HashMap<Integer, String>();
+            collectionShareData = new HashMap<Integer, List<String>>();
+            convertShareData(oldShareData, fileData, collectionNames, collectionShareData);
+            break;
+        case TWO:
+            userExtensions = GenericsUtils.scanForSet(readMap.get(USER_EXTENSIONS_KEY), String.class, ScanMode.REMOVE);
+            userRemoved = GenericsUtils.scanForSet(readMap.get(USER_REMOVED_KEY), String.class, ScanMode.REMOVE);
+            fileData = GenericsUtils.scanForMapOfList(readMap.get(FILE_DATA_KEY), File.class, List.class, Integer.class, ScanMode.REMOVE);
+            collectionNames = GenericsUtils.scanForMap(readMap.get(COLLECTION_NAME_KEY), Integer.class, String.class, ScanMode.REMOVE);
+            collectionShareData = GenericsUtils.scanForMapOfList(readMap.get(COLLECTION_SHARE_DATA_KEY), Integer.class, List.class, String.class, ScanMode.REMOVE);
+            break;
+            
+        default:
+            throw new IllegalStateException("Invalid version: " + version);
+    }
+    
+        validateCollectionData(fileData, collectionNames, collectionShareData);
+                
+        
+        lock.writeLock().lock();
         try {
-            return excludedFiles.contains(file);
+            clear();
+            this.userExtensions.addAll(lowercase(userExtensions));
+            this.userRemoved.addAll(userRemoved);
+            this.fileData.putAll(fileData);
+            this.collectionNames.putAll(collectionNames);
+            this.collectionShareData.putAll(collectionShareData);
         } finally {
-            lock.readLock().unlock();
+            lock.writeLock().unlock();
         }
     }
 
+
+    private void validateCollectionData(Map<File, List<Integer>> fileData, Map<Integer, String> collectionNames, Map<Integer, List<String>> collectionShareData) {
+        // TODO: Do some validation
+    }
+
+    /** Converts 5.0 & 5.1 style share data into 5.2-style collections. */
+    private void convertShareData(Map<File, FileProperties> oldShareData, Map<File, List<Integer>> fileData, Map<Integer, String> collectionNames, Map<Integer, List<String>> collectionShareData) {
+        int currentId = MIN_COLLECTION_ID;
+        Map<String, Integer> friendToCollectionMap = new HashMap<String, Integer>();
+        for(Map.Entry<File, FileProperties> data : oldShareData.entrySet()) {
+            File file = data.getKey();
+            FileProperties shareData = data.getValue();
+            if(shareData == null || ((shareData.friends == null || shareData.friends.isEmpty()) && !shareData.gnutella)) {
+                fileData.put(file, Collections.<Integer>emptyList());
+            } else {
+                if(shareData.friends != null) {
+                    for(String friend : shareData.friends) {
+                        Integer collectionId = friendToCollectionMap.get(friend);
+                        if(collectionId == null) {
+                            collectionId = currentId;
+                            friendToCollectionMap.put(friend, collectionId);
+                            collectionNames.put(collectionId, friend);
+                            List<String> shareList = new ArrayList<String>(1);
+                            shareList.add(friend);
+                            collectionShareData.put(collectionId, shareList);
+                            
+                            currentId++;
+    }
+    
+                        List<Integer> collections = fileData.get(file);
+                        if(collections == null || collections == Collections.<Integer>emptyList()) {
+                            collections = new ArrayList<Integer>(1);
+                            fileData.put(file, collections);
+                        }
+                        collections.add(collectionId);
+        }
+    }    
+    
+                if(shareData.gnutella) {
+                    List<Integer> collections = fileData.get(file);
+                    if(collections == null || collections == Collections.<Integer>emptyList()) {
+                        collections = new ArrayList<Integer>(1);
+                        fileData.put(file, collections);
+            }
+                    collections.add(DEFAULT_SHARED_COLLECTION_ID);
+        }
+    }   
+        }
+    }
+    
     /**
-     * Adds a managed file.  If explicit is true, this will explicitly add it to the list of managed files,
-     * otherwise, it will just remove it from the list of excluded files.
+     * Adds a managed file.
      */
-    void addManagedFile(File file, boolean explicit) {
+    void addManagedFile(File file) {
         lock.writeLock().lock();
         try {
-            boolean changed = excludedFiles.remove(file);
-            if(explicit && !libraryManageData.containsKey(file)) {
-                libraryManageData.put(file, new FileProperties());
+            boolean changed = false;
+            if(!fileData.containsKey(file)) {
+                fileData.put(file, Collections.<Integer>emptyList());
                 changed = true;
             } 
-            dirty |= changed;
+            dirty |= changed;            
         } finally {
             lock.writeLock().unlock();
         }
     }
     
     /**
-     * Removes a file from being managed.  If explicit is true, this will
-     * explicitly add it to a list of excluded files that will not be
-     * managed when a folder is scanned.
-     * 
-     * @param file
-     * @param exclude
+     * Removes a file from being managed.
      */
-    void removeManagedFile(File file, boolean explicit) {
+    void removeManagedFile(File file) {
         lock.writeLock().lock();
         try {
-            boolean changed = libraryManageData.remove(file) != null;
-            if(explicit) {
-                changed |= excludedFiles.add(file);
-            }
-            dirty |= changed;
+            boolean changed = fileData.remove(file) != null;
+            dirty |= changed;            
         } finally {
             lock.writeLock().unlock();
         }
@@ -230,7 +316,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         List<File> indivFiles = new ArrayList<File>();
         lock.readLock().lock();
         try {
-            indivFiles.addAll(libraryManageData.keySet());
+            indivFiles.addAll(fileData.keySet());
         } finally {
             lock.readLock().unlock();
         }
@@ -240,96 +326,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     /** Retuns true if the given folder is the incomplete folder. */
     boolean isIncompleteDirectory(File folder) {
         return FileUtils.canonicalize(SharingSettings.INCOMPLETE_DIRECTORY.get()).equals(folder);
-    }
-    
-    /** Gets the list of directories to exclude from recursive management. */
-    List<File> getDirectoriesToExcludeFromManaging() {
-        lock.readLock().lock();
-        try {
-            return new ArrayList<File>(directoriesNotToManage);
-        } finally {
-            lock.readLock().unlock();
-        }
-    }    
-    
-    /** Sets the new directory to exclude from recursive management. */
-    void setDirectoriesToExcludeFromManaging(Collection<File> folders) {
-        lock.writeLock().lock();
-        try {
-            boolean changed = false;
-            if(!directoriesNotToManage.equals(folders)) {
-                changed = true;
-                directoriesNotToManage.clear();
-                directoriesNotToManage.addAll(folders);
-            }
-            changed |= directoriesToManageRecursively.removeAll(folders);
-            dirty |= changed;
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }   
-
-    /** Returns true if the given folder should be excluded. */
-    boolean isFolderExcluded(File folder) {
-        lock.readLock().lock();
-        try {
-            return directoriesNotToManage.contains(FileUtils.canonicalize(folder));
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-    
-    /** Adds a new directory to recursively manage. */
-    void addDirectoryToManageRecursively(File folder) {
-        lock.writeLock().lock();
-        try {
-            boolean changed = false;
-            changed |= directoriesToManageRecursively.add(folder);
-            changed |= directoriesNotToManage.remove(folder);
-            dirty |= changed;            
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-    
-    /** Sets the new directory to recursively manage. */
-    void setDirectoriesToManageRecursively(Collection<File> folders) {
-        lock.writeLock().lock();
-        try {
-            boolean changed = false;
-            if(!directoriesToManageRecursively.equals(folders)) {
-                changed = true;
-                directoriesToManageRecursively.clear();
-                directoriesToManageRecursively.addAll(folders);
-            }
-            changed |= directoriesNotToManage.removeAll(folders);
-            dirty |= changed;            
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    /** Returns a list of all top-level directories that should be managed recursively. */
-    List<File> getDirectoriesToManageRecursively() {
-        lock.readLock().lock();
-        try {
-            return new ArrayList<File>(directoriesToManageRecursively);
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    public Collection<File> getDirectoriesWithImportedFiles() {
-        Set<File> directories = new HashSet<File>();
-        lock.readLock().lock();
-        try {
-            for(File file : libraryManageData.keySet()) {
-                directories.add(file.getParentFile());
-            }
-        } finally {
-            lock.readLock().unlock();
-        }
-        return directories;
     }    
     
     /** Returns all categories that should be managed. */
@@ -443,33 +439,84 @@ class LibraryFileData extends AbstractSettingsGroup {
         return DEFAULT_MANAGED_EXTENSIONS;
     }
     
-    /** Marks the given file as either shared or not shared with gnutella. */
-    void setSharedWithGnutella(File file, boolean shared) {
+    /** Returns the IDs of all collections. */
+    Collection<Integer> getStoredCollectionIds() {
+        lock.readLock().lock();
+        try {
+            return new ArrayList<Integer>(collectionNames.keySet());
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+    
+    /** Marks the given file as either in the collection or not in the collection. */
+    void setFileInCollection(File file, int collectionId, boolean contained) {
         lock.writeLock().lock();
         try {
-            FileProperties props = libraryManageData.get(file);
-            if(props == null) {
-                if(!shared) {
-                    return; // Nothing to do.
-                }
-                props = new FileProperties();
-                libraryManageData.put(file, props);
+            if(contained) {
+                dirty |= addFileToCollection(file, collectionId);
+            } else {
+                dirty |= removeFileFromCollection(file, collectionId);
             }
-            boolean changed = props.gnutella != shared;
-            props.gnutella = shared;
-            dirty |= changed;
         } finally {
             lock.writeLock().unlock();
         }
     }
     
-    /** Returns true if the file is shared with gnutella. */
-    boolean isSharedWithGnutella(File file) {
+    /** Sets whether or not all the given files should be in the collection. */
+    void setFilesInCollection(Iterable<FileDesc> fileDescs, int collectionId, boolean contained) {
+        lock.writeLock().lock();
+        try {
+            if(contained) {
+                for(FileDesc fd : fileDescs) {
+                    dirty |= addFileToCollection(fd.getFile(), collectionId);
+                } 
+            } else {
+                for(FileDesc fd : fileDescs) {
+                    dirty |= removeFileFromCollection(fd.getFile(), collectionId);
+                }
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+    
+    /** Returns true if the file was removed from the collection, false if it wasn't in the collection. */
+    private boolean removeFileFromCollection(File file, int collectionId) {
+        List<Integer> collections = fileData.get(file);
+        if(collections == null || collections.isEmpty()) {
+            return false;
+        }
+        
+        // cast to ensure we use remove(Object) and not remove(int)
+        return collections.remove((Integer)collectionId);
+    }
+
+    /** Returns true if file was added to the collection, false if it already was in the collection. */
+    private boolean addFileToCollection(File file, int collectionId) {
+        boolean changed = false;
+        
+        List<Integer> collections = fileData.get(file);
+        if(collections == null || collections == Collections.<Integer>emptyList()) {
+            collections = new ArrayList<Integer>(1);
+            fileData.put(file, collections);
+        }
+        
+        if(!collections.contains(collectionId)) {
+            collections.add(collectionId);
+            changed = true;
+        }
+        
+        return changed;        
+    }
+    
+    /** Returns true if the file is in the given collection. */
+    boolean isFileInCollection(File file, int collectionId) {
         lock.readLock().lock();
         try {
-            FileProperties props = libraryManageData.get(file);
-            if(props != null) {
-                return props.gnutella;
+            List<Integer> collections = fileData.get(file);
+            if(collections != null) {
+                return collections.contains(collectionId);
             } else {
                 return false;
             }
@@ -478,51 +525,119 @@ class LibraryFileData extends AbstractSettingsGroup {
         }        
     }
 
-    /** Marks the given file as either shared or not shared with the given friend. */
-    void setSharedWithFriend(File file, String friendId, boolean shared) {
+    /** Returns the name of the given collection's id. */
+    String getNameForCollection(int collectionId) {
+        lock.readLock().lock();
+        try {
+            return collectionNames.get(collectionId);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+    
+    /** Sets a new name for the collection of the given id. */
+    boolean setNameForCollection(int collectionId, String name) {
         lock.writeLock().lock();
         try {
-            FileProperties props = libraryManageData.get(file);
-            if(props == null) {
-                if(!shared) {
-                    return; // Nothing to do.
-                }
-                props = new FileProperties();
-                libraryManageData.put(file, props);
+            String oldName = collectionNames.put(collectionId, name);
+            return oldName == null || !oldName.equals(name);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    /** Returns an ID that will be used for a new collection with the given name. */
+    int createNewCollection(String name) {
+        lock.writeLock().lock();
+        try {
+            int nextId = MIN_COLLECTION_ID;
+            if(!collectionNames.isEmpty()) {
+                nextId = collectionNames.lastKey() + 1;
             }
-            if(props.friends == null) {
-                if(!shared) {
-                    return; // Nothing to do.
+            collectionNames.put(nextId, name);
+            dirty = true;
+            return nextId;
+        } finally {
+            lock.writeLock().unlock();
                 }
-                props.friends = new HashSet<String>();
             }
-            boolean changed;
-            if(shared) {
-                changed = props.friends.add(friendId);
+    
+    /** Removes the collection's share data & name.  This assumes all files have already been dereferenced. */
+    void removeCollection(int collectionId) {
+        lock.writeLock().lock();
+        try {
+           dirty |= collectionNames.remove(collectionId) != null;
+           dirty |= collectionShareData.remove(collectionId) != null;
+        } finally {
+            lock.writeLock().unlock();
+                }
+            }
+
+    /** Adds a new shareId to the given collection's Id. */
+    boolean addFriendToCollection(int collectionId, String friendId) {
+        lock.writeLock().lock();
+        try {
+            List<String> ids = collectionShareData.get(collectionId);
+            if(ids == null) {
+                ids = new ArrayList<String>();
+                collectionShareData.put(collectionId, ids);
+            }
+            if(!ids.contains(friendId)) {
+                ids.add(friendId);
+                dirty = true;
+                return true;
             } else {
-                changed = props.friends.remove(friendId);
-                if(props.friends.isEmpty()) {
-                    props.friends = null;
+                return false;
                 }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    /** Removes a particular shareId from the given collection's Id. */
+    boolean removeFriendFromCollection(int collectionId, String friendId) {
+        lock.writeLock().lock();
+        try {
+            List<String> ids = collectionShareData.get(collectionId);
+            if(ids != null) {
+                return ids.remove(friendId);
+            } else {
+                return false;
             }
-            dirty |= changed;
         } finally {
             lock.writeLock().unlock();
         }
     }    
     
-    /** Returns true if the file is shared with the given friend. */
-    boolean isSharedWithFriend(File file, String friendId) {
+    /** Returns all shareIds for the given collection id. */
+    List<String> getFriendsForCollection(int collectionId) {
         lock.readLock().lock();
         try {
-            FileProperties props = libraryManageData.get(file);
-            if(props != null && props.friends != null) {
-                return props.friends.contains(friendId);
+            List<String> ids = collectionShareData.get(collectionId);
+            if(ids != null) {
+                return Collections.unmodifiableList(new ArrayList<String>(ids));
             } else {
-                return false;
+                return Collections.emptyList();
             }
         } finally {
             lock.readLock().unlock();
+        }
+    }
+
+    /** Sets a new share id list for the given collection id. */
+    void setFriendsForCollection(int collectionId, List<String> newIds) {
+        lock.writeLock().lock();
+        try {
+            List<String> ids = collectionShareData.get(collectionId);
+            if(ids == null) {
+                ids = new ArrayList<String>();
+                collectionShareData.put(collectionId, ids);
+            }
+            ids.clear();
+            ids.addAll(newIds);
+            dirty = true;
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
@@ -533,6 +648,14 @@ class LibraryFileData extends AbstractSettingsGroup {
     boolean isGnutellaDocumentSharingAllowed() {
         return LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue();
     }
+    
+    boolean isCollectionSmartAddEnabled(int id, Category category) {
+        return false; // TODO: What's going on with this?
+    }
+
+    void setCollectionSmartAddEnabled(int collectionId, Category image, boolean enabled) {
+        // TODO: What's going on with this?
+    }    
     
     private Collection<String> lowercase(Collection<String> extensions) {
         Set<String> exts = new HashSet<String>(extensions.size());
@@ -546,5 +669,10 @@ class LibraryFileData extends AbstractSettingsGroup {
         private static final long serialVersionUID = 767248414812908206L;
         private boolean gnutella;
         private Set<String> friends;
+        
+        @Override
+        public String toString() {
+            return "FileProperties: gnutella: " + gnutella + ", friends: " + friends;
+        }
     }
 }

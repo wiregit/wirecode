@@ -64,7 +64,7 @@ public class CoreLocalFileItemTest extends TestCase {
         final int friendShareCount = 4;
         context.checking(new Expectations() {
             {
-                one(fileDesc).getShareListCount();
+                one(fileDesc).getSharedCollectionCount();
                 will(returnValue(friendShareCount));
             }
         });
@@ -75,7 +75,7 @@ public class CoreLocalFileItemTest extends TestCase {
     public void testIsSharedWithGnutella() {
         context.checking(new Expectations() {
             {
-                one(fileDesc).isSharedWithGnutella();
+                one(fileDesc).isInGnutellaCollection();
                 will(returnValue(true));
             }
         });
@@ -83,7 +83,7 @@ public class CoreLocalFileItemTest extends TestCase {
 
         context.checking(new Expectations() {
             {
-                one(fileDesc).isSharedWithGnutella();
+                one(fileDesc).isInGnutellaCollection();
                 will(returnValue(false));
             }
         });

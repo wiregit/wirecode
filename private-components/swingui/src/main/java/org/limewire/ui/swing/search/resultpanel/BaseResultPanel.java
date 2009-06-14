@@ -31,7 +31,7 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.search.SearchViewType;
@@ -138,10 +138,11 @@ public class BaseResultPanel extends JXPanel {
             Navigator navigator,
             ListViewRowHeightRule rowHeightRule,
             RemoteHostWidgetFactory fromWidgetFactory,
-            LibraryNavigator libraryNavigator,
+//            DownloadHandlerFactory downloadHandlerFactory,
             Provider<IconLabelRendererFactory> iconLabelRendererFactory,
             FileInfoDialogFactory fileInfoFactory, Provider<TimeRenderer> timeRenderer,
             Provider<FileSizeRenderer> fileSizeRenderer, Provider<CalendarRenderer> calendarRenderer,
+            LibraryMediator libraryMediator,
             Provider<QualityRenderer> qualityRenderer, DefaultTableCellRenderer defaultTableCellRenderer) {
         
         this.searchResultsModel = searchResultsModel;
@@ -152,7 +153,7 @@ public class BaseResultPanel extends JXPanel {
         this.fromWidgetfactory = fromWidgetFactory;
         this.iconLabelRendererFactory = iconLabelRendererFactory;
         this.fileInfoFactory = fileInfoFactory;
-        this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, libraryNavigator);
+        this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, libraryMediator);
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
         this.calendarRenderer = calendarRenderer;

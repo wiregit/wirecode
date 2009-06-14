@@ -27,7 +27,6 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Singleton;
 
-@Singleton
 public class ShapeDialog extends JXPanel implements Resizable {
 
 

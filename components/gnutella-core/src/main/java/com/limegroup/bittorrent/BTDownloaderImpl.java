@@ -45,7 +45,7 @@ import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.LibTorrentBTDownloadMementoImpl;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.Library;
 
 /**
  * Wraps the Torrent class in the Downloader interface to enable the gui to
@@ -64,7 +64,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
-    private final FileManager fileManager;
+    private final Library library;
 
     private final EventMulticaster<DownloadStateEvent> listeners;
     
@@ -78,12 +78,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
             BTUploaderFactory btUploaderFactory, Provider<Torrent> torrentProvider,
-            FileManager fileManager, @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
+            Library library, @Named("fastExecutor") ScheduledExecutorService fastExecutor) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.btUploaderFactory = btUploaderFactory;
         this.torrent = torrentProvider.get();
-        this.fileManager = fileManager;
+        this.library = library;
         this.listeners = new AsynchronousMulticaster<DownloadStateEvent>(fastExecutor);
     }
 
@@ -105,9 +105,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             torrent.moveTorrent(completeDir);
             File completeFile = getSaveFile();
             if (completeFile.isDirectory()) {
-                fileManager.getManagedFileList().addFolder(completeFile);
+                library.addFolder(completeFile);
             } else {
-                fileManager.getManagedFileList().add(completeFile);
+                library.add(completeFile);
             }
             complete.set(true);
             deleteIncompleteFiles();

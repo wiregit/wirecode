@@ -2,7 +2,6 @@ package org.limewire.ui.swing.menu;
 
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.action.StatusActions;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.menu.actions.ChatAction;
 import org.limewire.ui.swing.menu.actions.SignInOutAction;
 import org.limewire.ui.swing.menu.actions.SwitchUserAction;
@@ -33,13 +32,13 @@ public class FriendMenu extends MnemonicMenu {
         add(signInOutAction);
     }
 
-    @Inject void register(Navigator navigator, final LibraryNavigator libraryNavigator) {
+    @Inject void register(Navigator navigator) {
         // listen for changes in the selected friend
         navigator.addNavigationListener(new NavigationListener() {
             @Override
             public void itemSelected(NavCategory category, NavItem navItem,
-                    NavSelectable selectable, org.limewire.ui.swing.library.nav.NavMediator navMediator) {
-                chatAction.setFriend(libraryNavigator.getSelectedFriend());
+                    NavSelectable selectable, org.limewire.ui.swing.nav.NavMediator navMediator) {
+//                chatAction.setFriend(libraryNavigator.getSelectedFriend());
             }
             
             @Override public void itemAdded(NavCategory category, NavItem navItem) {}

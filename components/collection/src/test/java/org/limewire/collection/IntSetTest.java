@@ -200,6 +200,17 @@ public class IntSetTest extends BaseTestCase {
         } catch (NoSuchElementException e) {
         }
     }
+    
+    public void testCopyConstructor() throws Exception {
+        s1=new IntSet(); s1.add(1); s1.add(2);   //[1-2]
+        s2=new IntSet(s1);
+        assertTrue(! s1.addAll(s2));   //s1 unchanged
+        assertTrue(s1.contains(1));
+        assertTrue(s1.contains(2));
+        assertTrue(!s2.addAll(s1));    //s2 equals s1
+        assertTrue(s2.contains(1));
+        assertTrue(s2.contains(2));
+    }
 
     public void testAddAll() throws Exception {
         // Test addAll method
@@ -214,6 +225,17 @@ public class IntSetTest extends BaseTestCase {
         assertTrue(s2.addAll(s1)); // s2 equals s1
         assertTrue(s2.contains(1));
         assertTrue(s2.contains(2));
+    }
+    
+    public void testRemoveAll() throws Exception {
+        s1=new TestingIntSet(); s1.add(1); s1.add(2);   //[1-2]
+        s2=new TestingIntSet(); s2.add(1);              //[1]
+        assertTrue(s1.removeAll(s2));  //s2 unchanged
+        assertTrue(!s1.contains(1));
+        assertTrue(s1.contains(2));  
+        assertTrue(!s2.removeAll(s1));   //s1 equals s2
+        assertTrue(!s1.contains(1));
+        assertTrue(s1.contains(2));  
     }
 
     public void testRetainAll() throws Exception {

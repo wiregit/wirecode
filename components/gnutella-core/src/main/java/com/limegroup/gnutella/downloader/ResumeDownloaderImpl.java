@@ -22,7 +22,9 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileCollection;
+import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -53,7 +55,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
     @Inject
     ResumeDownloaderImpl(SaveLocationManager saveLocationManager,
             DownloadManager downloadManager,
-            FileManager fileManager,
+            @GnutellaFiles FileCollection gnutellaFileCollection,
             IncompleteFileManager incompleteFileManager,
             DownloadCallback downloadCallback,
             NetworkManager networkManager,
@@ -78,8 +80,9 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
             SocketsManager socketsManager, 
             @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
-            SpamManager spamManager) {
-        super(saveLocationManager, downloadManager, fileManager,
+            SpamManager spamManager,
+            Library library) {
+        super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory,
@@ -88,7 +91,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
                 backgroundExecutor, messageRouter, tigerTreeCache,
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
-                dangerousFileChecker, spamManager);
+                dangerousFileChecker, spamManager, library);
     }
     
     /* (non-Javadoc)

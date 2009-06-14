@@ -31,21 +31,34 @@ import org.limewire.util.Objects;
  */
 public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaster<E> {
     
-    private final Log log;
-    
     private final List<ListenerProxy<E>> listenerList = new CopyOnWriteArrayList<ListenerProxy<E>>();
-    private final EventListenerListContext context = new EventListenerListContext();
+    private final Log log;
+    private final EventListenerListContext context;
 
+    /** Constructs an {@link EventListenerList} with a new context and no log. */
     public EventListenerList() {
-        this.log = null;        
+        this(null, new EventListenerListContext());
     }
     
+    /** Constructs an {@link EventListenerList} with a new context a log based on the given class. */
     public EventListenerList(Class loggerKey) {
-        this.log = LogFactory.getLog(loggerKey); 
+        this(LogFactory.getLog(loggerKey), new EventListenerListContext());
     }
     
+    /** Constructs an {@link EventListenerList} with a new context the given log. */
     public EventListenerList(Log log) {
+        this(log, new EventListenerListContext());
+    }
+    
+    /** Constructs an {@link EventListenerList} with the given context and no log. */
+    public EventListenerList(EventListenerListContext context) {
+        this(null, context);
+    }
+    
+    /** Constructs an {@link EventListenerList} with the given context and log. */
+    public EventListenerList(Log log, EventListenerListContext context) {
         this.log = log;
+        this.context = context;
     }
     
     /**

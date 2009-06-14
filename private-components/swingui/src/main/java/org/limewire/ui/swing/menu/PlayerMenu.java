@@ -11,7 +11,6 @@ import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.MnemonicMenu;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -19,7 +18,6 @@ import com.google.inject.Inject;
 public class PlayerMenu extends MnemonicMenu {
     @Inject
     public PlayerMenu(AudioPlayer audioPlayer,
-            LibraryNavigator libraryNavigator,
             LibraryManager libraryManager) {
         super(I18n.tr("&Player"));
 

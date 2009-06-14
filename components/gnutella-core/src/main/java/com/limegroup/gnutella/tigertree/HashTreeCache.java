@@ -3,7 +3,7 @@ package com.limegroup.gnutella.tigertree;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.Library;
 
 /**
  * A cache of HashTrees that can be serialized between session.
@@ -60,6 +60,6 @@ public interface HashTreeCache {
     /**
      * Write cache so that we only have to calculate them once.
      */
-    public void persistCache(FileManager fileManager, DownloadManager downloadManager);
+    public void persistCache(Library library, DownloadManager downloadManager);
 
 }

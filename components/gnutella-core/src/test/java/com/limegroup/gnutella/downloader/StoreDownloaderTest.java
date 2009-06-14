@@ -26,8 +26,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerStub;
+import com.limegroup.gnutella.library.LibraryStubModule;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 
@@ -66,11 +65,11 @@ public class StoreDownloaderTest extends LimeTestCase{
             protected void configure() {
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
-               bind(FileManager.class).to(FileManagerStub.class);
                bind(NetworkManager.class).to(NetworkManagerStub.class);
                bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProviderStub);
             } 
         });
+        allModules.add(new LibraryStubModule());
         allModules.addAll(Arrays.asList(modules));
         injector = LimeTestUtils.createInjector(allModules.toArray(new Module[0]));
         remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);

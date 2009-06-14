@@ -17,9 +17,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescChangeEvent;
-import com.limegroup.gnutella.library.FileListChangedEvent;
-import com.limegroup.gnutella.library.ManagedFileList;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
+import com.limegroup.gnutella.library.Library;
+import com.limegroup.gnutella.library.LibraryStatusEvent;
 
 
 /** 
@@ -74,7 +74,7 @@ public class SchemaReplyCollectionMapper {
         return mapper.values();
     }
     
-    @Inject void register(ServiceRegistry registry, final ManagedFileList managedList,
+    @Inject void register(ServiceRegistry registry, final Library managedList,
             final ListenerSupport<FileDescChangeEvent> fileDescSupport) {
         registry.register(new Service() {
             @Override
@@ -96,26 +96,26 @@ public class SchemaReplyCollectionMapper {
                     }
                 });
                 
-                managedList.addFileListListener(new EventListener<FileListChangedEvent>() {
+                managedList.addListener(new EventListener<FileViewChangeEvent>() {
                     @Override
-                    public void handleEvent(FileListChangedEvent event) {
+                    public void handleEvent(FileViewChangeEvent event) {
                         switch(event.getType()) {
-                        case REMOVED:
+                        case FILE_REMOVED:
                             removeFileDesc(event.getFileDesc());
                             break;
-                        case CHANGED:
+                        case FILE_CHANGED:
                             removeFileDesc(event.getOldValue());
                             break; 
-                        case CLEAR:
+                        case FILES_CLEARED:
                             loadSchemas();
                             break;
                         }
                     }
                 });
                 
-                managedList.addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+                managedList.addManagedListStatusListener(new EventListener<LibraryStatusEvent>() {
                     @Override
-                    public void handleEvent(ManagedListStatusEvent event) {
+                    public void handleEvent(LibraryStatusEvent event) {
                         switch (event.getType()) {
                         case LOAD_FINISHING:
                             finishLoading();
@@ -170,7 +170,7 @@ public class SchemaReplyCollectionMapper {
     /**
      * Serializes the current LimeXMLReplyCollection to disk.
      */
-    private void save(ManagedListStatusEvent event) {
+    private void save(LibraryStatusEvent event) {
         if (event.getList().isLoadFinished()) {
             synchronized (this) {
                 Collection<LimeXMLReplyCollection> replies = getCollections();

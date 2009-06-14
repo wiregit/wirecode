@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.SwingUtilities;
-
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
@@ -18,7 +16,6 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,14 +24,14 @@ import com.google.inject.Singleton;
 class P2PLinkSearchHandler implements SearchHandler {
     
     private final RemoteLibraryManager remoteLibraryManager;
-    private final LibraryNavigator libraryNavigator;
+//    private final LibraryNavigator libraryNavigator;
     private final AddressFactory addressFactory;
 
     @Inject
-    P2PLinkSearchHandler(RemoteLibraryManager remoteLibraryManager, LibraryNavigator libraryNavigator,
+    P2PLinkSearchHandler(RemoteLibraryManager remoteLibraryManager,// LibraryNavigator libraryNavigator,
                          AddressFactory addressFactory) {
         this.remoteLibraryManager = remoteLibraryManager;
-        this.libraryNavigator = libraryNavigator;
+//        this.libraryNavigator = libraryNavigator;
         this.addressFactory = addressFactory;
     }
     
@@ -44,12 +41,12 @@ class P2PLinkSearchHandler implements SearchHandler {
         final FriendPresence presence = createFriendPresence(q);
         remoteLibraryManager.addPresenceLibrary(presence);
         // Run this later, to allow the library a bit of time to render the friend.
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                libraryNavigator.selectFriendLibrary(presence.getFriend());
-            }
-        });
+//        SwingUtilities.invokeLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                libraryNavigator.selectFriendLibrary(presence.getFriend());
+//            }
+//        });
         return true;
     }
     

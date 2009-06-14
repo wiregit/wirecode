@@ -13,6 +13,7 @@ import java.util.StringTokenizer;
 
 import javax.swing.TransferHandler.TransferSupport;
 
+import org.limewire.ui.swing.dnd.DownloadTransferable;
 import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.util.OSUtils;
 import org.limewire.util.URIUtils;
@@ -33,6 +34,7 @@ public class DNDUtils {
         }
         fileDataFlavors.add(DataFlavor.javaFileListFlavor);
         fileDataFlavors.add(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR);
+        fileDataFlavors.add(DownloadTransferable.DOWNLOAD_ITEM_DATA_FLAVOR);
     }
 
     /**
@@ -97,6 +99,9 @@ public class DNDUtils {
                     .toArray(new File[0]);
         } else if (transferable.isDataFlavorSupported(URIFlavor)) {
             return getFiles(getURIs(transferable));
+        } else if (transferable.isDataFlavorSupported(DownloadTransferable.DOWNLOAD_ITEM_DATA_FLAVOR)) {
+            return ((List<File>) transferable.getTransferData(DownloadTransferable.DOWNLOAD_ITEM_DATA_FLAVOR))
+            .toArray(new File[0]);
         }
         return new File[0];
     }

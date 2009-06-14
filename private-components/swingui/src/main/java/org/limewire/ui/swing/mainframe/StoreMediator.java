@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.mainframe;
 
 import org.limewire.inject.LazySingleton;
-import org.limewire.ui.swing.library.nav.NavMediator;
+import org.limewire.ui.swing.nav.NavMediator;
 import org.limewire.ui.swing.nav.Navigator;
 
 import com.google.inject.Inject;

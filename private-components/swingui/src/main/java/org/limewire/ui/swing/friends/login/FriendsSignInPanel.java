@@ -1,11 +1,15 @@
 package org.limewire.ui.swing.friends.login;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.lifecycle.Service;
@@ -17,18 +21,13 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 
-import net.miginfocom.swing.MigLayout;
-
-@Singleton
 public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
     private final HyperlinkButton shareLabel;

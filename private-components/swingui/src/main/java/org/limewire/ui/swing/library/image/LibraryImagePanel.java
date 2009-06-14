@@ -3,7 +3,6 @@ package org.limewire.ui.swing.library.image;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -16,20 +15,13 @@ import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.images.ImageList;
-import org.limewire.ui.swing.images.ImageListModel;
-import org.limewire.ui.swing.library.LibraryListSourceChanger;
-import org.limewire.ui.swing.library.LibraryOperable;
-import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
-
-import com.google.inject.Provider;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GroupingList;
@@ -37,12 +29,14 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
+import com.google.inject.Provider;
+
 
 public class LibraryImagePanel extends JPanel
-    implements ListEventListener<List<LocalFileItem>>, Disposable, Scrollable, LibraryOperable<LocalFileItem> {
+    implements ListEventListener<List<LocalFileItem>>, Disposable, Scrollable {//, LibraryOperable<LocalFileItem> {
     
     private final Provider<LibraryImageSubPanelFactory> factory;
-    private ShareWidget<File> shareWidget;
+//    private ShareWidget<File> shareWidget;
     
     private final EventList<LocalFileItem> currentEventList;
 
@@ -63,16 +57,17 @@ public class LibraryImagePanel extends JPanel
     private final Map<File, LibraryImageSubPanel> panelMap;
 
     private final LocalFileList fileList;
-    private final LibraryListSourceChanger listChanger;
+//    private final LibraryListSourceChanger listChanger;
     
     private JScrollPane scrollPane;
     private LibraryImageSubPanelFactory subPanelFactory;
     
     public LibraryImagePanel(String name, EventList<LocalFileItem> eventList, 
             LocalFileList fileList, JScrollPane scrollPane,
-            Provider<LibraryImageSubPanelFactory> factory,
-            ShareWidget<File> shareWidget,
-            LibraryListSourceChanger listChanger) {       
+            Provider<LibraryImageSubPanelFactory> factory//,
+//            ShareWidget<File> shareWidget,
+//            LibraryListSourceChanger listChanger
+            ) {       
         super(new VerticalLayout());
         
         GuiUtils.assignResources(this); 
@@ -81,8 +76,8 @@ public class LibraryImagePanel extends JPanel
         this.currentEventList = eventList;
         this.scrollPane = scrollPane;
         this.factory = factory;
-        this.shareWidget = shareWidget;
-        this.listChanger = listChanger;
+//        this.shareWidget = shareWidget;
+//        this.listChanger = listChanger;
         
         groupingList = GlazedListsFactory.groupingList(eventList, groupingComparator);
         
@@ -135,7 +130,7 @@ public class LibraryImagePanel extends JPanel
     private void createSubPanel(File parent, EventList<LocalFileItem> list){
         if(subPanelFactory == null)
             subPanelFactory = factory.get();
-        LibraryImageSubPanel subPanel = subPanelFactory.createMyLibraryImageSubPanel(parent, list, fileList, shareWidget, listChanger);
+        LibraryImageSubPanel subPanel = subPanelFactory.createMyLibraryImageSubPanel(parent, list, fileList);//, listChanger);
         panelMap.put(parent, subPanel);
         add(subPanel);
     }
@@ -160,33 +155,33 @@ public class LibraryImagePanel extends JPanel
         
     }
     
-    @Override
-    public void selectAndScrollTo(File file) {
-        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-            ImageListModel model = subPanel.getModel();
-            for (int x=0; x<model.getSize(); x++) {
-                LocalFileItem item = model.getFileItem(x);
-                if (file.equals(item.getFile())) {
-                    scrollToImageInSubPanel(subPanel, x);
-                    break;
-                }
-            }
-        }
-    }
-    
-    @Override
-    public void selectAndScrollTo(URN urn) {
-        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-            ImageListModel model = subPanel.getModel();
-            for (int x=0; x<model.getSize(); x++) {
-                LocalFileItem item = model.getFileItem(x);
-                if (urn.equals(item.getUrn())) {
-                    scrollToImageInSubPanel(subPanel, x);
-                    break;
-                }
-            }
-        }
-    }
+//    @Override
+//    public void selectAndScrollTo(File file) {
+//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
+//            ImageListModel model = subPanel.getModel();
+//            for (int x=0; x<model.getSize(); x++) {
+//                LocalFileItem item = model.getFileItem(x);
+//                if (file.equals(item.getFile())) {
+//                    scrollToImageInSubPanel(subPanel, x);
+//                    break;
+//                }
+//            }
+//        }
+//    }
+//    
+//    @Override
+//    public void selectAndScrollTo(URN urn) {
+//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
+//            ImageListModel model = subPanel.getModel();
+//            for (int x=0; x<model.getSize(); x++) {
+//                LocalFileItem item = model.getFileItem(x);
+//                if (urn.equals(item.getUrn())) {
+//                    scrollToImageInSubPanel(subPanel, x);
+//                    break;
+//                }
+//            }
+//        }
+//    }
 
     private void scrollToImageInSubPanel(LibraryImageSubPanel subPanel, int index) {
         ImageList imageList = subPanel.getImageList();
@@ -260,42 +255,42 @@ public class LibraryImagePanel extends JPanel
         }
     }
 
-   @Override
-    public File getNextItem(File file) {
-        throw new IllegalStateException("Image library traversal not available");
-    }
-
-    @Override
-    public File getPreviousItem(File file) {
-        throw new IllegalStateException("Image library traversal not available");
-    }
-
-    @Override
-    public List<LocalFileItem> getSelectedItems() {
-        List<LocalFileItem> selectionList = new ArrayList<LocalFileItem>();
-        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-            selectionList.addAll(subPanel.getSelectedItems());
-        }
-        return selectionList;
-    }
-    
-    @Override
-    public List<LocalFileItem> getAllItems() {
-        List<LocalFileItem> allList = new ArrayList<LocalFileItem>();
-        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-            allList.addAll(subPanel.getAllItems());
-        }
-        return allList;
-    }
-
-    @Override
-    public void selectAll() {
-        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-            ImageList imageList = subPanel.getImageList();
-            if (imageList.getElementCount() > 0) {
-                imageList.setSelectionInterval(0, imageList.getElementCount() - 1);
-            }
-        }
-    }
+//   @Override
+//    public File getNextItem(File file) {
+//        throw new IllegalStateException("Image library traversal not available");
+//    }
+//
+//    @Override
+//    public File getPreviousItem(File file) {
+//        throw new IllegalStateException("Image library traversal not available");
+//    }
+//
+//    @Override
+//    public List<LocalFileItem> getSelectedItems() {
+//        List<LocalFileItem> selectionList = new ArrayList<LocalFileItem>();
+//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
+//            selectionList.addAll(subPanel.getSelectedItems());
+//        }
+//        return selectionList;
+//    }
+//    
+//    @Override
+//    public List<LocalFileItem> getAllItems() {
+//        List<LocalFileItem> allList = new ArrayList<LocalFileItem>();
+//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
+//            allList.addAll(subPanel.getAllItems());
+//        }
+//        return allList;
+//    }
+//
+//    @Override
+//    public void selectAll() {
+//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
+//            ImageList imageList = subPanel.getImageList();
+//            if (imageList.getElementCount() > 0) {
+//                imageList.setSelectionInterval(0, imageList.getElementCount() - 1);
+//            }
+//        }
+//    }
 
 }

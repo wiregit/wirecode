@@ -3,24 +3,20 @@ package org.limewire.core.impl.library;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
-import org.limewire.core.api.library.FriendFileList;
-import org.limewire.core.api.library.GnutellaFileList;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
 
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
@@ -28,9 +24,8 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class MockLibraryManager implements ShareListManager, LibraryManager {
+public class MockLibraryManager implements SharedFileListManager, LibraryManager {
 
-    private final MockCombinedShareList combinedShareList;
     private FileListAdapter allFileList;
     private FriendFileListAdapter gnutellaList;
     private FriendFileListAdapter friendList;
@@ -40,10 +35,8 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     
     public MockLibraryManager() {
         allFileList = new FileListAdapter();
-        
-        this.combinedShareList = new MockCombinedShareList(getLibraryListEventPublisher(), allFileList.getModel().getReadWriteLock());
-        gnutellaList = new FriendFileListAdapter(combinedShareList);
-        friendList = new FriendFileListAdapter(combinedShareList);
+        gnutellaList = new FriendFileListAdapter();
+        friendList = new FriendFileListAdapter();
         libraryData = new LibraryDataAdapter();
         
         friendMap = new HashMap<String, LocalFileList>();
@@ -142,27 +135,6 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     public LibraryFileList getLibraryManagedList() {
         return allFileList;
     }
-    
-    @Override
-    public FileList<LocalFileItem> getCombinedShareList() {
-        return new FileListAdapter();
-    }
-    
-    @Override
-    public GnutellaFileList getGnutellaShareList() {
-        return gnutellaList;
-    }        
-
-    @Override
-    public FriendFileList getOrCreateFriendShareList(Friend name) {
-        return new FriendFileListAdapter(combinedShareList);
-    }  
-    
-    @Override
-    public FriendFileList getFriendShareList(Friend friend) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     @Override
     public LibraryData getLibraryData() {
@@ -170,11 +142,6 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     }
     
     private class LibraryDataAdapter implements LibraryData {
-        
-        @Override
-        public List<File> getDirectoriesWithImportedFiles() {
-            return Collections.emptyList();
-        }
         
         @Override
         public boolean isFileManageable(File f) {
@@ -187,40 +154,15 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
         }
         
         @Override
-        public void setManagedOptions(Collection<File> recursiveFoldersToManage,
-                Collection<File> foldersToExclude, Collection<Category> managedCategories) {
-        }
-        
-        @Override
-        public void removeFolders(Collection<File> folders) {
-        }
-        
-        @Override
         public Collection<Category> getManagedCategories() {
             return EnumSet.allOf(Category.class);
         }
-
-        @Override
-        public List<File> getDirectoriesToExcludeFromManaging() {
-            return new ArrayList<File>();
-        }
-
+        
         @Override
         public boolean isDirectoryAllowed(File folder) {
             return folder.isDirectory();
         }
         
-        @Override
-        public boolean isDirectoryExcluded(File folder) {
-            return false;
-        }
-        
-
-        @Override
-        public List<File> getDirectoriesToManageRecursively() {
-            return new ArrayList<File>();
-        }
-
         @Override
         public Collection<String> getDefaultExtensions() {
             return new ArrayList<String>();
@@ -234,11 +176,41 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
         @Override
         public void setManagedExtensions(Collection<String> extensions) {
         }
-
+        
         @Override
         public void reload() {
+        
+        }
+
+        @Override
+        public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
+            // TODO Auto-generated method stub
+            
+        }
+        }
+
+        @Override
+    public void createNewSharedFileList(String name) {
+        }
+
+        @Override
+    public EventList<SharedFileList> getModel() {
+        // TODO Auto-generated method stub
+        return null;
+        }
+
+        @Override
+    public SharedFileList getSharedFileList(String name) {
+        return null;
+        }
+
+        @Override
+    public void deleteSharedFileList(String name) {
             
         }
         
+    @Override
+    public void renameSharedFileList(String currentName, String newName) {
+
     }
 }

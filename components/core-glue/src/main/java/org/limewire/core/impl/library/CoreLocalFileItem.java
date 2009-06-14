@@ -66,12 +66,12 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     @Override
     public int getFriendShareCount() {
-        return fileDesc.getShareListCount();
+        return fileDesc.getSharedCollectionCount();
     }
 
     @Override
     public boolean isSharedWithGnutella() {
-        return fileDesc.isSharedWithGnutella();
+        return fileDesc.isInGnutellaCollection();
     }
 
     @Override

@@ -5,24 +5,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.ui.swing.event.SelectAndScrollDownloadEvent;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 class DownloadHandlerImpl implements DownloadHandler {
     
     private final SearchResultsModel searchResultsModel;
     private List<DownloadPreprocessor> downloadPreprocessors = new ArrayList<DownloadPreprocessor>();
-    private LibraryNavigator libraryNavigator;
+    private LibraryMediator libraryMediator;
     
     /**
      * Starts all downloads from searches.  Navigates to Library or Downloads without downloading if the file is in either of those locations.
      */
     public DownloadHandlerImpl(SearchResultsModel searchResultsModel,
-            LibraryNavigator libraryNavigator) {
+            LibraryMediator libraryMediator) {
         this.searchResultsModel = searchResultsModel;
-        this.libraryNavigator = libraryNavigator;
+        this.libraryMediator = libraryMediator;
 
         this.downloadPreprocessors.add(new LicenseWarningDownloadPreprocessor());
     }
@@ -62,7 +65,7 @@ class DownloadHandlerImpl implements DownloadHandler {
             new SelectAndScrollDownloadEvent(vsr.getUrn()).publish();
             return true;
         } else if (vsr.getDownloadState() == BasicDownloadState.LIBRARY) {
-            libraryNavigator.selectInLibrary(vsr.getUrn(), vsr.getCategory());
+            libraryMediator.selectInLibrary(vsr.getUrn(), vsr.getCategory());
             return true;
         }
         return false;

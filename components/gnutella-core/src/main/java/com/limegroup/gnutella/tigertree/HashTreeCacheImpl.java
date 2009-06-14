@@ -30,9 +30,8 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.Library;
 
 /** This class maps SHA1_URNs to hash trees and roots. */
 /* This is public for tests, but only the interface should be used. */
@@ -62,10 +61,10 @@ public final class HashTreeCacheImpl implements HashTreeCache {
     private volatile boolean dirty = false;
     
     private final HashTreeFactory tigerTreeFactory;
-    private final ManagedFileList managedFileList;
+    private final Library managedFileList;
     
     @Inject
-    HashTreeCacheImpl(HashTreeFactory tigerTreeFactory, ManagedFileList managedFileList) {
+    HashTreeCacheImpl(HashTreeFactory tigerTreeFactory, Library managedFileList) {
         this.tigerTreeFactory = tigerTreeFactory;
         this.managedFileList = managedFileList;
         Tuple<Map<URN, URN>, Map<URN, HashTree>> tuple = loadCaches();
@@ -339,13 +338,13 @@ public final class HashTreeCacheImpl implements HashTreeCache {
      * @param map
      *            the <tt>Map</tt> to check
      */
-    private Set<URN> removeOldEntries(Map<URN,URN> roots, Map <URN, HashTree> map, FileManager fileManager, DownloadManager downloadManager) {
+    private Set<URN> removeOldEntries(Map<URN,URN> roots, Map <URN, HashTree> map, Library library, DownloadManager downloadManager) {
         Set<URN> removed = new HashSet<URN>();
         // discard outdated info
         Iterator<URN> iter = roots.keySet().iterator();
         while (iter.hasNext()) {
             URN sha1 = iter.next();
-            if (!fileManager.getManagedFileList().getFileDescsMatching(sha1).isEmpty()) {
+            if (!library.getFileDescsMatching(sha1).isEmpty()) {
                 continue;
             } else if (downloadManager.getIncompleteFileManager().getFileForUrn(sha1) != null) {
                 continue;
@@ -365,7 +364,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
     }
 
     @Override
-    public void persistCache(FileManager fileManager, DownloadManager downloadManager) {
+    public void persistCache(Library library, DownloadManager downloadManager) {
         if(!dirty)
             return;
         
@@ -396,7 +395,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
             }
         }
         
-        Set<URN> removed = removeOldEntries(roots, trees, fileManager, downloadManager);
+        Set<URN> removed = removeOldEntries(roots, trees, library, downloadManager);
         if(!removed.isEmpty()) {        
             synchronized(this) {
                 SHA1_TO_ROOT_MAP.keySet().removeAll(removed);

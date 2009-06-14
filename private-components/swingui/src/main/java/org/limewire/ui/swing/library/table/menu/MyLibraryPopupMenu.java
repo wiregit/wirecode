@@ -16,15 +16,13 @@ import org.limewire.core.api.playlist.Playlist;
 import org.limewire.core.api.playlist.PlaylistManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.Catalog;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.SelectAllable;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.menu.actions.DeleteAction;
 import org.limewire.ui.swing.library.table.menu.actions.LaunchFileAction;
 import org.limewire.ui.swing.library.table.menu.actions.LocateFileAction;
 import org.limewire.ui.swing.library.table.menu.actions.PlayAction;
 import org.limewire.ui.swing.library.table.menu.actions.RemoveAction;
-import org.limewire.ui.swing.library.table.menu.actions.SharingActionFactory;
 import org.limewire.ui.swing.library.table.menu.actions.ViewFileInfoAction;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
@@ -33,7 +31,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -45,8 +42,8 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private final Category category;
     private final FileInfoDialogFactory fileInfoFactory;
     private final XMPPService xmppService;
-    private final Provider<SharingActionFactory> sharingActionFactoryProvider;   
-    private final LibraryNavigator libraryNavigator;
+//    private final Provider<SharingActionFactory> sharingActionFactoryProvider;   
+    private final LibraryMediator libraryMediator;
     private final PlaylistManager playlistManager;
 
     private SelectAllable<LocalFileItem> librarySelectable;
@@ -56,13 +53,14 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     @Inject
     public MyLibraryPopupMenu(@Assisted Category category, LibraryManager libraryManager,
-            Provider<SharingActionFactory> sharingActionFactory, XMPPService xmppService, LibraryNavigator libraryNavigator, 
+//            Provider<SharingActionFactory> sharingActionFactory, 
+            XMPPService xmppService, LibraryMediator libraryMediator, 
             PlaylistManager playlistManager, FileInfoDialogFactory fileInfoFactory) {
         this.libraryManager = libraryManager;
-        this.sharingActionFactoryProvider = sharingActionFactory;
+//        this.sharingActionFactoryProvider = sharingActionFactory;
         this.category = category;
         this.xmppService = xmppService;
-        this.libraryNavigator = libraryNavigator;
+        this.libraryMediator = libraryMediator;
         this.playlistManager = playlistManager;
         this.fileInfoFactory = fileInfoFactory;
         
@@ -122,15 +120,15 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         switch (category) {
         case AUDIO:
         case VIDEO:
-            add(new PlayAction(libraryNavigator, new Catalog(category), firstItem)).setEnabled(playActionEnabled);
+//            add(new PlayAction(libraryMediator, new Catalog(category), firstItem)).setEnabled(playActionEnabled);
             break;
         case IMAGE:
         case DOCUMENT:
-            add(new LaunchFileAction(I18n.tr("View"), firstItem)).setEnabled(launchActionEnabled);
+//            add(new LaunchFileAction(I18n.tr("View"), firstItem)).setEnabled(launchActionEnabled);
             break;
         case PROGRAM:
         case OTHER:
-            add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
+//            add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
         }
 
         // Create playlist sub-menu for audio files.
@@ -150,34 +148,40 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         addSeparator();
 
-        SharingActionFactory sharingActionFactory = sharingActionFactoryProvider.get();
+//        SharingActionFactory sharingActionFactory = sharingActionFactoryProvider.get();
         
-        boolean isDocumentSharingAllowed = isGnutellaShareAllowed(category) & shareActionEnabled;
-        add(sharingActionFactory.createShareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
-        add(sharingActionFactory.createUnshareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
+//        boolean isDocumentSharingAllowed = isGnutellaShareAllowed(category) & shareActionEnabled;
+//        add(sharingActionFactory.createShareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
+//        add(sharingActionFactory.createUnshareGnutellaAction(false, librarySelectable)).setEnabled(isDocumentSharingAllowed);
+//        
+//        addSeparator();
+//        
+//        if(xmppService.isLoggedIn()) {
+//            add(sharingActionFactory.createShareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
+//            add(sharingActionFactory.createUnshareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
+//        } else {
+//            add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Share with Friend"))));
+//            add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Unshare with Friend"))));
+//        }
         
         addSeparator();
-        
-        if(xmppService.isLoggedIn()) {
-            add(sharingActionFactory.createShareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
-            add(sharingActionFactory.createUnshareFriendAction(false, librarySelectable)).setEnabled(shareActionEnabled);
-        } else {
-            add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Share with Friend"))));
-            add(decorateDisabledfItem(sharingActionFactory.createDisabledFriendAction(I18n.tr("Unshare with Friend"))));
-        }
-        
-        addSeparator();
-        if (category != Category.PROGRAM && category != Category.OTHER) {
-            add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
-        }
-
-        add(new RemoveAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(removeActionEnabled);
-        
-        add(new DeleteAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(deleteActionEnabled);
-
-        addSeparator();
-        add(new ViewFileInfoAction(firstItem, fileInfoFactory)).setEnabled(viewFileInfoEnabled);
+//        if (category != Category.PROGRAM && category != Category.OTHER) {
+//            add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
+//        }
+//
+//        add(new RemoveAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(removeActionEnabled);
+//        
+//        add(new DeleteAction(fileItems.toArray(new LocalFileItem[fileItems.size()]), libraryManager)).setEnabled(deleteActionEnabled);
+//
+//        addSeparator();
+//        add(new ViewFileInfoAction(firstItem, fileInfoFactory)).setEnabled(viewFileInfoEnabled);
     }
+
+//    I guess the point I was trying to make is we need to become more careful about redesigning UI components eventually. If we continue to drastically redesign the UI ever few months users will be annoyed. Many of them will probably already be annoyed with the new changes we're making now after getting used to 5.0. 
+//
+//    Going forward there needs to be some threshold that a new design has to overcome to warrant it to be changed. Just because we know something is wrong or could be done slightly better doesn't mean its worth changing the functionality for the user to make it slightly better. If it doesn't improve the usability enough then I think its not worth the change yet. There were plenty of design problems in 4.x and people seemed to get along just fine for many years with it. 
+//
+//    This particular change seems like it was one of the last design changes that was thrown in at the last minute without being tested.  To me it doesn't seem like it improves functionality enough to make it worth changing at this point. 
 
     private boolean isGnutellaShareAllowed(Category category) {
         if(category != Category.DOCUMENT)

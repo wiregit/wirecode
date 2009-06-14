@@ -9,7 +9,6 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.model.BrowseStatusListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
@@ -28,7 +27,7 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
 
 
     private final ChatFrame chatFrame;
-    private final LibraryNavigator libraryNavigator;
+//    private final LibraryNavigator libraryNavigator;
 
     private final SearchResultsModelFactory searchResultsModelFactory;
 
@@ -44,12 +43,12 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     @Inject
     public RemoteHostActionsImpl(ChatFrame chatFrame, SearchResultsModelFactory searchResultsModelFactory, 
             SearchResultsPanelFactory searchResultsPanelFactory, Provider<SearchNavigator> searchNavigator,
-            LibraryNavigator libraryNavigator, Navigator navigator, Provider<BrowseSearchFactory> browseSearchFactory) {
+            Navigator navigator, Provider<BrowseSearchFactory> browseSearchFactory) {
         this.chatFrame = chatFrame;
         this.searchResultsModelFactory = searchResultsModelFactory;
         this.searchResultsPanelFactory = searchResultsPanelFactory;
         this.searchNavigator = searchNavigator;
-        this.libraryNavigator = libraryNavigator; 
+//        this.libraryNavigator = libraryNavigator; 
         this.browseSearchFactory = browseSearchFactory;
     }
  
@@ -71,7 +70,7 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     public void showFilesSharedWith(RemoteHost person) {
         LOG.debugf("showFilesSharedWith: {0}", person.getFriendPresence().getFriend());
         Friend friend = person.getFriendPresence().getFriend();
-        libraryNavigator.selectFriendShareList(friend);
+//        libraryNavigator.selectFriendShareList(friend);
     }
 
     

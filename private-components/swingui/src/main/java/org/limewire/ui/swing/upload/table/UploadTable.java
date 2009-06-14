@@ -5,23 +5,23 @@ import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.table.LimeSingleColumnTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 
-import com.google.inject.Inject;
-
 import ca.odell.glazedlists.swing.EventTableModel;
+
+import com.google.inject.Inject;
 
 public class UploadTable extends MouseableTable {
     private EventTableModel<UploadItem> model;
 
     @Inject
     public UploadTable(UploadListManager uploadListManager, CategoryIconManager categoryIconManager, 
-            ProgressBarDecorator progressBarFactory, LibraryNavigator libraryNavigator, LibraryManager libraryManager,
+            ProgressBarDecorator progressBarFactory, LibraryMediator libraryMediator, LibraryManager libraryManager,
             RemoteHostWidgetFactory remoteHostWidgetFactory, FileInfoDialogFactory fileInfoFactory) {
         model = GlazedListsSwingFactory.eventTableModel(uploadListManager.getSwingThreadSafeUploads(), new LimeSingleColumnTableFormat<UploadItem>(UploadItem.class));
         setModel(model);
@@ -30,7 +30,7 @@ public class UploadTable extends MouseableTable {
         setStripesPainted(false);
         setFillsViewportHeight(false);
         
-        UploadActionHandler actionHandler = new UploadActionHandler(uploadListManager, libraryNavigator, fileInfoFactory);
+        UploadActionHandler actionHandler = new UploadActionHandler(uploadListManager, libraryMediator, fileInfoFactory);
         
         UploadTableRendererEditor editor = new UploadTableRendererEditor(categoryIconManager, progressBarFactory, remoteHostWidgetFactory);
         editor.setActionHandler(actionHandler);

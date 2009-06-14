@@ -9,7 +9,7 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
@@ -30,10 +30,10 @@ public class SecurityOptionPanel extends OptionPanel {
     private FilteringPanel filteringPanel;
     private final SpamManager spamManager;
     private final LibraryManager libraryManager;
-    private final ShareListManager shareListManager;
+    private final SharedFileListManager shareListManager;
     
     @Inject
-    public SecurityOptionPanel(SpamManager spamManager, LibraryManager libraryManager, ShareListManager shareListManager) {
+    public SecurityOptionPanel(SpamManager spamManager, LibraryManager libraryManager, SharedFileListManager shareListManager) {
         this.spamManager = spamManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;

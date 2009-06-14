@@ -36,7 +36,6 @@ import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
-import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.SortOption;
@@ -86,8 +85,7 @@ public class SortAndFilterPanel implements Disposable {
     SortAndFilterPanel(
             @Assisted SearchResultsModel searchResultsModel,
             ComboBoxDecorator comboBoxDecorator, 
-            ButtonDecorator buttonDecorator, 
-            HeaderBarDecorator headerBarFactory) {
+            ButtonDecorator buttonDecorator) {
         
         GuiUtils.assignResources(this);
         

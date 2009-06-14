@@ -35,8 +35,10 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
      */
     private boolean loaded = false;
     
-    @Resource private Icon gmailIcon;
-    @Resource private Icon ljIcon;
+    @Resource private Icon gmailIconSmall;
+    @Resource private Icon ljIconSmall;
+    @Resource private Icon gmailIconLarge;
+    @Resource private Icon ljIconLarge;
     
     @Inject
     public XMPPAccountConfigurationManagerImpl(PasswordManager passwordManager,
@@ -97,9 +99,9 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
 
     private void loadWellKnownServers() {
         XMPPAccountConfiguration gmail =
-            new XMPPAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, resource, getGTalkServers());
+            new XMPPAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIconSmall, gmailIconLarge, resource, getGTalkServers());
         XMPPAccountConfiguration livejournal =
-            new XMPPAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, resource, getLiveJournalServers());
+            new XMPPAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIconSmall, ljIconLarge, resource, getLiveJournalServers());
 
         configs.put(gmail.getLabel(), gmail);
         configs.put(livejournal.getLabel(), livejournal);
