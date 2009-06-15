@@ -19,7 +19,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * Creates {@link FriendRemoteFileDesc} for {@link org.limewire.core.api.friend.address.FriendAddress}.
  */
 @Singleton
-public class FriendRemoteFileDescCreator implements RemoteFileDescCreator {
+class FriendRemoteFileDescCreator implements RemoteFileDescCreator {
 
     private final AddressFactory addressFactory;
     private final FriendAddressResolver addressResolver;

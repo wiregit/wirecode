@@ -24,7 +24,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 @Singleton
-public class MutableFriendManagerImpl implements MutableFriendManager {
+class MutableFriendManagerImpl implements MutableFriendManager {
 
     private static final Log LOG = LogFactory.getLog(MutableFriendManagerImpl.class);
     

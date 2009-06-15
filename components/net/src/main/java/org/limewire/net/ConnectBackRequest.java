@@ -5,6 +5,9 @@ import org.limewire.io.GUID;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
+/**
+ * The data that is sent with a push request over a FriendConnection.
+ */
 public class ConnectBackRequest {
    
     private final Connectable address;

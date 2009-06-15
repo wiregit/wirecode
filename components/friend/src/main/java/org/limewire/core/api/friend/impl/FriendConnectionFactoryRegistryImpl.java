@@ -4,16 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
-import org.limewire.core.api.friend.client.FriendConnection;
 
 import com.google.inject.Singleton;
 
 @Singleton
-public class FriendConnectionFactoryRegistryImpl implements FriendConnectionFactoryRegistry, FriendConnectionFactory {
+class FriendConnectionFactoryRegistryImpl implements FriendConnectionFactoryRegistry, FriendConnectionFactory {
      private final Map<Network.Type, FriendConnectionFactory> factories =
              new HashMap<Network.Type, FriendConnectionFactory>();
 
@@ -28,12 +29,12 @@ public class FriendConnectionFactoryRegistryImpl implements FriendConnectionFact
         if(factory != null) {
             return factory.login(configuration);
         } else {
-            return null; // TODO
+            return new SimpleFuture<FriendConnection>(new IllegalArgumentException("no factory for type  " + configuration.getType()));
         }
     }
 
     @Override
     public void register(FriendConnectionFactoryRegistry registry) {
-        // TODO throw?
+        throw new UnsupportedOperationException();
     }
 }

@@ -9,7 +9,7 @@ import org.limewire.core.api.friend.impl.AbstractFriend;
 import org.limewire.core.api.friend.impl.AbstractFriendPresence;
 import org.limewire.listener.EventBroadcaster;
 
-public class PresenceImpl extends AbstractFriendPresence implements FriendPresence {
+class PresenceImpl extends AbstractFriendPresence implements FriendPresence {
 
     private final AbstractFriend friend;
     private final String jid;

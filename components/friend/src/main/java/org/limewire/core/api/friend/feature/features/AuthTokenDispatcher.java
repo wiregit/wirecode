@@ -1,6 +1,5 @@
 package org.limewire.core.api.friend.feature.features;
 
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.impl.AuthTokenImpl;
-import org.limewire.core.api.friend.impl.DefaultFriendAuthenticator;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
@@ -32,11 +30,11 @@ public class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
     private static final Log LOG = LogFactory.getLog(AuthTokenDispatcher.class);
     
     private final Map<String, AuthToken> pendingAuthTokens;
-    private final DefaultFriendAuthenticator authenticator;
+    private final AuthTokenRegistry authenticator;
     private final Set<FriendConnection> connections;
     
     @Inject
-    AuthTokenDispatcher(DefaultFriendAuthenticator authenticator,
+    AuthTokenDispatcher(AuthTokenRegistry authenticator,
                      FeatureRegistry featureRegistry) {
         this.authenticator = authenticator;
         this.connections = new HashSet<FriendConnection>();
@@ -90,7 +88,7 @@ public class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
         public void initializeFeature(FriendPresence friendPresence) {
             synchronized (AuthTokenDispatcher.this) {
                 try {
-                    final byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(friendPresence.getPresenceId())).getBytes(Charset.forName("UTF-8"));
+                    final byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(friendPresence.getPresenceId())).getToken();
                     FeatureTransport<AuthToken> transport = friendPresence.getTransport(AuthTokenFeature.class);
                     if (transport != null) {
                         transport.sendFeature(friendPresence, new AuthTokenImpl(authToken));

@@ -1,7 +1,9 @@
 package org.limewire.core.api.friend.impl;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.Credentials;
+import org.apache.commons.codec.binary.Base64;
+import org.limewire.core.api.friend.feature.features.AuthToken;
+import org.limewire.core.api.friend.feature.features.AuthTokenRegistry;
 import org.limewire.http.auth.Authenticator;
 import org.limewire.http.auth.AuthenticatorRegistry;
 import org.limewire.security.SHA1;
@@ -17,7 +19,7 @@ import com.google.inject.Singleton;
  * The class is inherently stateless except for a per session random seed.
  */
 @Singleton
-public class DefaultFriendAuthenticator implements Authenticator {
+class DefaultFriendAuthenticator implements Authenticator, AuthTokenRegistry {
 
 //    private final static Log LOG = LogFactory.getLog(DefaultFriendAuthenticator.class);
     
@@ -41,7 +43,7 @@ public class DefaultFriendAuthenticator implements Authenticator {
      * 
      * @return the ascii-encoded auth token
      */
-    public String getAuthToken(String userId) {
+    public AuthToken getAuthToken(String userId) {
         SHA1 sha1 = new SHA1();
         byte[] hash = sha1.digest(StringUtils.toUTF8Bytes(userId));
         for (int i = 0; i < hash.length; i++) {
@@ -49,7 +51,7 @@ public class DefaultFriendAuthenticator implements Authenticator {
         }
         sha1.reset();
         // digest again, to make the seed irreconstructible
-        return StringUtils.getASCIIString(Base64.encodeBase64(sha1.digest(hash)));
+        return new AuthTokenImpl(sha1.digest(hash));
     }
 
     @Override
@@ -59,6 +61,8 @@ public class DefaultFriendAuthenticator implements Authenticator {
         if (password == null) {
             return false;
         }
-        return password.equals(getAuthToken(credentials.getUserPrincipal().getName()));
+        return password.equals(StringUtils.getASCIIString(
+                Base64.encodeBase64(
+                        getAuthToken(credentials.getUserPrincipal().getName()).getToken())));
     }
 }

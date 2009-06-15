@@ -5,12 +5,10 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.MutableFriendManager;
 import org.limewire.core.api.friend.client.RosterEvent;
-import org.limewire.core.api.friend.impl.AbstractFriend;
 import org.limewire.core.api.friend.impl.PresenceEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.xmpp.client.impl.PresenceImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -74,8 +72,8 @@ class FriendListListeners {
         friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.ADDED));
     }
     
-    private void removePresence(PresenceImpl presence) {
-        AbstractFriend friend = presence.getFriend();
+    private void removePresence(FriendPresence presence) {
+        Friend friend = presence.getFriend();
         if(!friend.isSignedIn()) {
             friendManager.removeAvailableFriend(friend);
         }
@@ -98,7 +96,7 @@ class FriendListListeners {
                     }
                     break;
                 case unavailable:
-                    removePresence((PresenceImpl)event.getData());
+                    removePresence(event.getData());
                     break;
             }
         }

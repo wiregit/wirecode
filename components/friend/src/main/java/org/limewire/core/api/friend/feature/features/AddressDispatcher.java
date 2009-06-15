@@ -27,11 +27,19 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
+/**
+ * The <code>AddressDispatcher</code> does dispatching of local and remote <code>Address</code>s.<BR>
+ *
+ * It dispatches the local <code>Address</code> out to all <code>FriendPresence</code>s that support <code>AddressFeature</code>.<BR>
+ * It dispatches remote <code>Addresses</code> received from friends to the <code>FriendAddressRegistry</code>,
+ * which maps <code>FriendAddress</code>s (conceptually a friend id + GUID) to a <code>Connectable</code> or
+ * <code>FirewalledAddress</code>.
+ */
 public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTransport.Handler<Address> {
     private static final Log LOG = LogFactory.getLog(AddressDispatcher.class);
     private final FriendAddressRegistry addressRegistry;
     private final Map<String, Address> pendingAddresses;
-    private Address address;
+    private Address localAddress;
     private final Set<FriendConnection> connections;
 
     @Inject
@@ -40,7 +48,7 @@ public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTr
         this.addressRegistry = addressRegistry;
         this.pendingAddresses = new HashMap<String, Address>();
         this.connections = new HashSet<FriendConnection>();
-        new AddressIQFeatureInitializer().register(featureRegistry);
+        new AddressFeatureInitializer().register(featureRegistry);
     }
 
     @Inject
@@ -87,18 +95,18 @@ public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTr
     @Override
     public void handleEvent(AddressEvent event) {
         if (event.getType().equals(AddressEvent.Type.ADDRESS_CHANGED)) {
-            LOG.debugf("new address to publish: {0}", event);
+            LOG.debugf("new localAddress to publish: {0}", event);
             synchronized (this) {
-                address = event.getData();
+                localAddress = event.getData();
                 for(FriendConnection connection : connections) {
                     for(Friend friend : connection.getFriends()) {
                         for(FriendPresence presence : friend.getPresences().values()) {
                             if(presence.hasFeatures(LimewireFeature.ID)) {
                                 try {
                                     FeatureTransport<Address> transport = presence.getTransport(AddressFeature.class);
-                                    transport.sendFeature(presence, address);
+                                    transport.sendFeature(presence, localAddress);
                                 } catch (FriendException e) {
-                                    LOG.debugf("couldn't send address", e);
+                                    LOG.debugf("couldn't send localAddress", e);
                                 }
                             }
                         }
@@ -108,7 +116,7 @@ public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTr
         }
     }
     
-    private class AddressIQFeatureInitializer implements FeatureInitializer {
+    private class AddressFeatureInitializer implements FeatureInitializer {
         @Override
         public void register(FeatureRegistry registry) {
             registry.add(AddressFeature.ID, this);
@@ -117,16 +125,16 @@ public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTr
         @Override
         public void initializeFeature(FriendPresence friendPresence) {
             synchronized (AddressDispatcher.this) {
-                if (address != null) {
+                if (localAddress != null) {
                     try {
                         FeatureTransport<Address> transport = friendPresence.getTransport(AddressFeature.class);
-                        transport.sendFeature(friendPresence, address);
+                        transport.sendFeature(friendPresence, localAddress);
                     } catch (FriendException e) {
-                        LOG.debugf(e, "couldn't send address to {0}" + friendPresence.getPresenceId());
+                        LOG.debugf(e, "couldn't send localAddress to {0}" + friendPresence.getPresenceId());
                     }
                 }
                 if (pendingAddresses.containsKey(friendPresence.getPresenceId())) {
-                    LOG.debugf("updating address on presence {0} to {1}", friendPresence.getPresenceId(), address);
+                    LOG.debugf("updating address on presence {0} to {1}", friendPresence.getPresenceId(), localAddress);
                     Address pendingAddress = pendingAddresses.remove(friendPresence.getPresenceId());
                     addressRegistry.put(new FriendAddress(friendPresence.getPresenceId()), pendingAddress);
                     friendPresence.addFeature(new AddressFeature(new FriendAddress(friendPresence.getPresenceId()))); 
