@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.components.decorators;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 
 import javax.swing.BorderFactory;
@@ -171,6 +172,7 @@ public class ButtonDecorator {
         
         button.setForeground(flatTextForeground);
         button.setFont(flatTextFont);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
         
     private static void decorateGeneral(JXButton button) {
