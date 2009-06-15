@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.sharing;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendManager;
 import org.limewire.inject.LazySingleton;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
@@ -32,6 +34,7 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.xmpp.api.client.XMPPFriend;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -150,50 +153,49 @@ public class LibrarySharingEditablePanel {
             }
         });
 
-        eventList.add(new EditableSharingData("this is fake data", false));
-        eventList.add(new EditableSharingData("remove when", false));
-        eventList.add(new EditableSharingData("friend login", false));
-        eventList.add(new EditableSharingData("works again", false));
-        eventList.add(new EditableSharingData("this is fake data 1", false));
-        eventList.add(new EditableSharingData("remove when 1", false));
-        eventList.add(new EditableSharingData("friend login 1", false));
-        eventList.add(new EditableSharingData("works again 1", false));
-        eventList.add(new EditableSharingData("this is fake data 2", false));
-        eventList.add(new EditableSharingData("remove when 2", false));
-        eventList.add(new EditableSharingData("friend login 2", false));
-        eventList.add(new EditableSharingData("works again 2", false));
-        eventList.add(new EditableSharingData("this is fake data 3", false));
-        eventList.add(new EditableSharingData("remove when 3", false));
-        eventList.add(new EditableSharingData("friend login 3", false));
-        eventList.add(new EditableSharingData("works again 3", false));
+//        eventList.add(new EditableSharingData("this is fake data", false));
+//        eventList.add(new EditableSharingData("remove when", false));
+//        eventList.add(new EditableSharingData("friend login", false));
+//        eventList.add(new EditableSharingData("works again", false));
+//        eventList.add(new EditableSharingData("this is fake data 1", false));
+//        eventList.add(new EditableSharingData("remove when 1", false));
+//        eventList.add(new EditableSharingData("friend login 1", false));
+//        eventList.add(new EditableSharingData("works again 1", false));
+//        eventList.add(new EditableSharingData("this is fake data 2", false));
+//        eventList.add(new EditableSharingData("remove when 2", false));
+//        eventList.add(new EditableSharingData("friend login 2", false));
+//        eventList.add(new EditableSharingData("works again 2", false));
+//        eventList.add(new EditableSharingData("this is fake data 3", false));
+//        eventList.add(new EditableSharingData("remove when 3", false));
+//        eventList.add(new EditableSharingData("friend login 3", false));
+//        eventList.add(new EditableSharingData("works again 3", false));
         for(Friend friend : friendManager.getKnownFriends()) {
             eventList.add(new EditableSharingData(friend.getRenderName(), false));
         }
         
         //TODO: this changed on head, see how
-//        rosterListeners.addListener(new EventListener<RosterEvent>() {
-//            @Override
-//            public void handleEvent(RosterEvent event) {
-//                XMPPFriend user = event.getData();
-//                System.out.println("add " + user);
-//                switch(event.getType()) { 
-//                case USER_ADDED:
-//                    eventList.add(new EditableSharingData(user.getRenderName(), false));
-//                    break;
-////                case USER_UPDATED:
-////                    if (user.isSubscribed()) {
-////                        addKnownFriend(user);
-////                    } else {
-////                        removeKnownFriend(user, true);
-////                    }
-////                    break;
-//                case USER_DELETED: System.out.println("delete");
-////                    eventList.remove(new Editable)
-////                    removeKnownFriend(user, true);
-//                    break;
-//                }
-//            }
-//        });
+        rosterListeners.addListener(new EventListener<RosterEvent>() {
+            @Override
+            public void handleEvent(RosterEvent event) {
+                  switch(event.getType()) { 
+                  case FRIENDS_ADDED:
+                      for(XMPPFriend user : event.getData())
+                          eventList.add(new EditableSharingData(user.getRenderName(), false));
+                      break;
+    //                  case USER_UPDATED:
+    //                      if (user.isSubscribed()) {
+    //                          addKnownFriend(user);
+    //                      } else {
+    //                          removeKnownFriend(user, true);
+    //                      }
+    //                      break;
+                  case FRIENDS_DELETED: System.out.println("delete");
+                      for(XMPPFriend user : event.getData())
+                          eventList.remove(new EditableSharingData(user.getRenderName(), false));
+                      break;
+                  }                    
+            }
+        });
         
         //TODO: depending on how we handle offline mode, may want to add/remove
         // presencelistener here and repopulate the list at startup each time
@@ -234,6 +236,7 @@ public class LibrarySharingEditablePanel {
         sharingTable.setEventList(new BasicEventList<EditableSharingData>());
                 
         JScrollPane scrollPane = new JScrollPane(sharingTable);
+        scrollPane.setMinimumSize(new Dimension(0,0));
         scrollPane.setBorder(BorderFactory.createMatteBorder(1,0,1,0, borderColor)); 
                 
         component.add(scrollPane, "growx, gaptop 5, wrap");

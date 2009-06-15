@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library.table;
 
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
@@ -8,6 +9,9 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
@@ -23,6 +27,7 @@ import org.limewire.ui.swing.table.IconLabelRendererFactory;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.NameRenderer;
 import org.limewire.ui.swing.table.QualityRenderer;
+import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.IconManager;
@@ -168,18 +173,7 @@ public class LibraryTable extends MouseableTable {
         }
         return item == null;
     }
-    
-//    private static class DisabledHighlightPredicate implements HighlightPredicate {
-//        private LibraryTab table;
-//        public DisabledHighlightPredicate (LibraryTab table) {
-//            this.table = table;
-//        }
-//        @Override
-//        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {           
-//            return table.isRowDisabled(adapter.row);
-//        }
-//    }
-    
+        
     /**
      * Loads the saved state of the columns. 
      *

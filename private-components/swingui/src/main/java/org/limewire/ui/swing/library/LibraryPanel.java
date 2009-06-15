@@ -16,6 +16,9 @@ import javax.swing.table.JTableHeader;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryFileList;
@@ -37,6 +40,7 @@ import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
+import org.limewire.ui.swing.table.TableColors;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -99,6 +103,8 @@ public class LibraryPanel extends JPanel {
         JScrollPane libraryScrollPane = new JScrollPane(libraryTable);
         libraryScrollPane.setBorder(BorderFactory.createEmptyBorder());  
         configureEnclosingScrollPane(libraryScrollPane);
+        
+        setupStoreHighlighter();
         
         add(navigatorComponent, "dock west, growy");
         add(headerBar, "dock north, growx");
@@ -197,5 +203,26 @@ public class LibraryPanel extends JPanel {
     
     private void setPublicSharedComponentVisible(LibraryNavItem navItem) {
         publicSharedFeedbackPanel.getComponent().setVisible(navItem != null && navItem.getType() == NavType.PUBLIC_SHARED);
+    }
+    
+    public void setupStoreHighlighter() {
+        TableColors tableColors = new TableColors();
+        ColorHighlighter highlighter = new ColorHighlighter(new StoreHighlightPredicate(), 
+                null, tableColors.getDisabledForegroundColor(), 
+                null, tableColors.getDisabledForegroundColor());
+        libraryTable.addHighlighter(highlighter);
+    }
+    
+    private class StoreHighlightPredicate implements HighlightPredicate {
+        @Override
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+            LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
+            if(navItem == null || navItem.getType() != NavType.LIST ||
+                    (navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() == 0))
+                return false;
+            
+            LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
+            return !item.isShareable();
+        }
     }
 }
