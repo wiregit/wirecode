@@ -14,4 +14,9 @@ public class IncompleteFileCollectionStub extends AbstractFileCollectionStub imp
         // No-op.
     }
 
+    @Override
+    public boolean isFileAddable(File file) {
+        return true;
+    }
+
 }

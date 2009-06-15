@@ -65,4 +65,10 @@ public interface FileCollection extends FileView {
      * Resets all values within this list.
      */
     void clear();
+
+    /**
+     * Returns true if the file is addable to the collection. 
+     */
+    boolean isFileAddable(File file);
+
 }

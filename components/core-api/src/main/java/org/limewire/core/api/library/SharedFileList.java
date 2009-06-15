@@ -22,5 +22,10 @@ public interface SharedFileList extends LocalFileList {
     
     /** Returns true if name changing is allowed for this collection. */
     boolean isNameChangeAllowed();
+    
+    /**
+     * Returns true if this is a public share list. 
+     */
+    boolean isPublic();
 
 }

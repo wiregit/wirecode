@@ -61,6 +61,11 @@ class IncompleteFileCollectionImpl extends AbstractFileCollection implements Inc
     protected void saveChange(File file, boolean added) {
         // Don't save incomplete status.
     }
+
+    @Override
+    public boolean isFileAddable(File file) {
+        return true;
+    }
     
     
 }

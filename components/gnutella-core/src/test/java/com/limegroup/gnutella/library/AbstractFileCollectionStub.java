@@ -15,7 +15,7 @@ import org.limewire.listener.EventListenerList;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public class AbstractFileCollectionStub implements FileCollection {
+public abstract class AbstractFileCollectionStub implements FileCollection {
 
     private final Lock lock = new ReentrantLock();
     protected final List<FileDesc> fileDescList = new CopyOnWriteArrayList<FileDesc>();

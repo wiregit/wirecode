@@ -41,14 +41,14 @@ class FileCollectionManagerImpl implements FileCollectionManager {
         this.incompleteCollection.initialize();
         this.sharedFileCollectionImplFactory = sharedFileCollectionImplFactory;
         this.sharedBroadcaster = sharedBroadcaster;
-        this.defaultSharedCollection = sharedFileCollectionImplFactory.createSharedFileCollectionImpl(LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, Friend.P2P_FRIEND_ID);
+        this.defaultSharedCollection = sharedFileCollectionImplFactory.createSharedFileCollectionImpl(LibraryFileData.DEFAULT_SHARED_COLLECTION_ID, true, Friend.P2P_FRIEND_ID);
         this.defaultSharedCollection.initialize();
     }
     
     void loadStoredCollections() {
         for(Integer id : libraryFileData.get().getStoredCollectionIds()) {
             if(!sharedCollections.containsKey(id) && id != LibraryFileData.DEFAULT_SHARED_COLLECTION_ID) {
-                SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(id);
+                SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(id, false);
                 collection.initialize();
                 synchronized(this) {
                     sharedCollections.put(id, collection);
@@ -90,7 +90,7 @@ class FileCollectionManagerImpl implements FileCollectionManager {
     
     private synchronized SharedFileCollectionImpl createNewCollectionImpl(String name) {
         int newId = libraryFileData.get().createNewCollection(name);
-        SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId);
+        SharedFileCollectionImpl collection =  sharedFileCollectionImplFactory.createSharedFileCollectionImpl(newId, false);
         collection.initialize();
         sharedCollections.put(newId, collection);
         return collection;

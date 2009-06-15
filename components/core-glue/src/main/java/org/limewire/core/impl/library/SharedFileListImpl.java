@@ -24,9 +24,9 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
     private final EventList<String> readOnlyFriendList = GlazedListsFactory.readOnlyList(friendList);
 
     public SharedFileListImpl(CoreLocalFileItemFactory coreLocalFileItemFactory,
-            SharedFileCollection gnutellaFileCollection) {
+            SharedFileCollection coreFileCollection) {
         super(new BasicEventList<LocalFileItem>(), coreLocalFileItemFactory);
-        this.coreCollection = gnutellaFileCollection;
+        this.coreCollection = coreFileCollection;
         this.coreCollection.addListener(newEventListener());
     }
     
@@ -36,7 +36,7 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
     }
 
     @Override
-    protected FileCollection getCoreCollection() {
+    protected SharedFileCollection getCoreCollection() {
         return coreCollection;
     }
 
@@ -91,6 +91,11 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
 
     void friendAdded(String friendId) {
         friendList.add(friendId);
+    }
+
+    @Override
+    public boolean isPublic() {
+        return getCoreCollection().isPublic();
     }
 
 }

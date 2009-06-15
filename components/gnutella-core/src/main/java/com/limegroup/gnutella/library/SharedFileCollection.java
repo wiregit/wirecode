@@ -29,4 +29,9 @@ public interface SharedFileCollection extends FileCollection {
     /** Sets the new list of people this collection should be shared with. */
     void setFriendList(List<String> friendIds);
 
+    /**
+     * Returns true if this is a public collection. 
+     */
+    boolean isPublic();
+
 }

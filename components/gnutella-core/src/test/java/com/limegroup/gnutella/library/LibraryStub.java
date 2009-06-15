@@ -87,4 +87,9 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean isFileAddable(File file) {
+        return true;
+    }
 }

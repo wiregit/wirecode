@@ -109,4 +109,9 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public boolean isFileAddable(File file) {
+        return true;
+    }
 }

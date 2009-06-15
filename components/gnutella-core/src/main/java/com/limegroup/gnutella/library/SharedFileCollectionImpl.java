@@ -28,18 +28,21 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     private final HashTreeCache treeCache;    
     private final EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster;
     private final List<String> defaultFriendIds;
+    private final boolean publicCollection;
 
     @Inject
     public SharedFileCollectionImpl(Provider<LibraryFileData> data, LibraryImpl managedList, 
                                     SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster,
                                     EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
                                     @Assisted int id, HashTreeCache treeCache,
+                                    @Assisted boolean publicCollection,
                                     @Assisted String... defaultFriendIds) {
         super(managedList, multicaster);
         this.collectionId = id;
         this.data = data;
         this.treeCache = treeCache;
         this.sharedBroadcaster = sharedCollectionBroadcaster;
+        this.publicCollection = publicCollection;
         if(defaultFriendIds.length == 0) {
             this.defaultFriendIds = Collections.emptyList();
         } else {
@@ -208,5 +211,15 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         oldFileDesc.decrementSharedCollectionCount();
         newFileDesc.incrementSharedCollectionCount();
         super.fireChangeEvent(oldFileDesc, newFileDesc);
+    }
+
+    @Override
+    public boolean isFileAddable(File file) {
+        return true;
+    }
+
+    @Override
+    public boolean isPublic() {
+        return publicCollection;
     }
 }

@@ -69,4 +69,14 @@ public class GnutellaFileCollectionStub extends AbstractFileCollectionStub imple
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public boolean isFileAddable(File file) {
+        return true;
+    }
+
+    @Override
+    public boolean isPublic() {
+        return true;
+    }
 }

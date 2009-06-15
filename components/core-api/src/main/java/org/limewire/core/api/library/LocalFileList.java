@@ -42,5 +42,10 @@ public interface LocalFileList extends FileList<LocalFileItem> {
      * This may return null if the library has not finished loading.
      */
     LocalFileItem getFileItem(File file);
+    
+    /**
+     * Returns true if the file is addable to the list. 
+     */
+    boolean isFileAddable(File file);
 
 }

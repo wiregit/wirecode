@@ -1097,4 +1097,9 @@ class LibraryImpl implements Library, FileCollection {
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder) {
         throw new NotImplementedException();
     }
+
+    @Override
+    public boolean isFileAddable(File file) {
+        return true;
+    }
 }

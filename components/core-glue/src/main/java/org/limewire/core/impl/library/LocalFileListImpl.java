@@ -224,4 +224,9 @@ abstract class LocalFileListImpl implements LocalFileList {
       }
       return null;
     }
+    
+    @Override
+    public boolean isFileAddable(File file) {
+       return getCoreCollection().isFileAddable(file);
+    }
 }
