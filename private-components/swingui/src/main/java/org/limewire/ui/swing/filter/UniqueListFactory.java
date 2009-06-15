@@ -64,10 +64,13 @@ public class UniqueListFactory<E> {
     }
     
     /**
-     * Disposes of the factory by removing the listener on the source list.
+     * Disposes of the factory by removing the listener on the source list, and
+     * disposing of the unique list.  The unique list can no longer be used
+     * after this method is called.
      */
     public void dispose() {
         sourceList.removeListEventListener(sourceListener);
+        uniqueList.dispose();
     }
     
     /**
