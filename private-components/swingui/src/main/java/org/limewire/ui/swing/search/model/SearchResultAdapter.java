@@ -85,9 +85,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         this.friends = new TreeSet<Friend>(new Comparator<Friend>() {
             @Override
             public int compare(Friend o1, Friend o2) {
-                String name1 = o1.getName();
-                String name2 = o2.getName();
-                return Objects.compareToNullIgnoreCase(name1, name2, false);
+                String id1 = o1.getId();
+                String id2 = o2.getId();
+                return Objects.compareToNullIgnoreCase(id1, id2, false);
             }
         });
         
