@@ -14,6 +14,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.client.PasswordManager;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
+import org.limewire.core.settings.FacebookSettings;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.io.UnresolvedIpPortImpl;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -98,15 +99,16 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
     }
 
     private void loadWellKnownServers() {
+        if(FacebookSettings.FACEBOOK_ENABLED.getValue()) {
+            FriendAccountConfiguration facebook =
+                new FriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIcon, resource, getGTalkServers(), Network.Type.FACEBOOK);
+            configs.put(facebook.getLabel(), facebook);
+        }
         FriendAccountConfiguration gmail =
             new FriendAccountConfigurationImpl(true, "gmail.com", "Gmail", gmailIcon, resource, getGTalkServers(), Network.Type.XMPP);
+        configs.put(gmail.getLabel(), gmail);
         FriendAccountConfiguration livejournal =
             new FriendAccountConfigurationImpl(false, "livejournal.com", "LiveJournal", ljIcon, resource, getLiveJournalServers(), Network.Type.XMPP);
-        FriendAccountConfiguration facebook =
-            new FriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIcon, resource, getGTalkServers(), Network.Type.FACEBOOK);
-
-        configs.put(facebook.getLabel(), facebook);
-        configs.put(gmail.getLabel(), gmail);
         configs.put(livejournal.getLabel(), livejournal);
     }
 
