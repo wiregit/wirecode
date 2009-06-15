@@ -21,11 +21,6 @@ public class MockTorrentManager implements TorrentManager {
     }
     
     @Override
-    public int getNumActiveTorrents() {
-        return 0;
-    }
-
-    @Override
     public List<String> getPeers(Torrent torrent) {
         return Collections.emptyList();
     }

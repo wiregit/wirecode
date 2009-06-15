@@ -15,7 +15,6 @@ public class UploadServicesImpl implements UploadServices {
     private final Provider<UploadManager> uploadManager;
     private final Provider<UploadSlotManager> uploadSlotManager;
     private final Provider<ConnectionManager> connectionManager;
-    private final Provider<TorrentManager> torrentManager;
     
     @Inject
     public UploadServicesImpl(Provider<UploadManager> uploadManager,
@@ -25,7 +24,6 @@ public class UploadServicesImpl implements UploadServices {
         this.uploadManager = uploadManager;
         this.uploadSlotManager = uploadSlotManager;
         this.connectionManager = connectionManager;
-        this.torrentManager = torrentManager;
     }
     
 
@@ -74,7 +72,7 @@ public class UploadServicesImpl implements UploadServices {
      * @see com.limegroup.gnutella.UploadServices#getNumUploads()
      */
     public int getNumUploads() {
-        return uploadManager.get().uploadsInProgress() + torrentManager.get().getNumActiveTorrents();
+        return uploadManager.get().uploadsInProgress();
     }
 
     /* (non-Javadoc)

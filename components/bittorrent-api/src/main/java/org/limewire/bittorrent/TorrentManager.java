@@ -43,11 +43,6 @@ public interface TorrentManager extends Service {
     public void moveTorrent(Torrent torrent, File directory);
 
     /**
-     * Returns the number of active torrents.
-     */
-    public int getNumActiveTorrents();
-
-    /**
      * Registers the specified torrent with the TorrentManager. Delegates an add
      * torrent call to the underlying libtorrent wrapper library.
      */

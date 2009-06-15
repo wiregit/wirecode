@@ -56,12 +56,6 @@ public class LazyTorrentManager implements TorrentManager {
     }
 
     @Override
-    public int getNumActiveTorrents() {
-        setupTorrentManager();
-        return torrentManager.get().getNumActiveTorrents();
-    }
-
-    @Override
     public List<String> getPeers(Torrent torrent) {
         setupTorrentManager();
         return torrentManager.get().getPeers(torrent);

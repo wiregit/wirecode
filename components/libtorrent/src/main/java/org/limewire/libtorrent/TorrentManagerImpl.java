@@ -246,11 +246,6 @@ public class TorrentManagerImpl implements TorrentManager {
     }
 
     @Override
-    public int getNumActiveTorrents() {
-        return torrents.size();
-    }
-
-    @Override
     public String getServiceName() {
         return "TorrentManager";
     }
