@@ -48,7 +48,7 @@ public class LibraryNavigatorPanel extends JXPanel {
     public LibraryNavigatorPanel(LibraryNavigatorTable table, LibraryNavTableRenderer renderer,
             LibraryNavPopupHandler popupHandler, LibraryManager libraryManager, CreateListAction createAction,
             SharedFileListManager sharedFileListManager) {
-        super(new MigLayout("insets 0, gap 0, fillx", "[125!]", ""));
+        super(new MigLayout("insets 0, gap 0, fillx", "[150!]", ""));
         
         this.table = table;
         this.sharedFileListManager = sharedFileListManager;

@@ -106,6 +106,7 @@ public class LibrarySharingPanel {
             return;
         this.currentList = currentFileList;
 //        showLoginView();
+        //TODO: create logic for properlly setting panel here
         showNonEditableView();
     }
     

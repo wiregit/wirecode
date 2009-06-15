@@ -3,6 +3,8 @@ package org.limewire.ui.swing.library.sharing;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.library.actions.ShowLoginAction;
 import org.limewire.ui.swing.util.I18n;
@@ -20,7 +22,7 @@ public class LibrarySharingLoginPanel {
     
     @Inject
     public LibrarySharingLoginPanel(ShowLoginAction loginAction) {
-        component = new JPanel();
+        component = new JPanel(new MigLayout("", "134!", ""));
         
         component.setOpaque(false);
         

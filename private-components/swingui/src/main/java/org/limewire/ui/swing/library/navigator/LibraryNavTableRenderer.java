@@ -24,6 +24,7 @@ public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer
     private @Resource Color selectedColor;
     private @Resource Font font;
     private @Resource Color fontColor;
+    private @Resource int iconGap;
     private @Resource Icon libraryIcon;
     private @Resource Icon publicIcon;
     private @Resource Icon listIcon;
@@ -33,10 +34,11 @@ public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer
     public LibraryNavTableRenderer() {        
         GuiUtils.assignResources(this);
         
-        border = BorderFactory.createEmptyBorder(10,10,10,10);
+        border = BorderFactory.createEmptyBorder(5,6,5,6);
         
         setBackground(selectedColor);
         setFont(font);
+        setIconTextGap(iconGap);
         setForeground(fontColor);
     }
     

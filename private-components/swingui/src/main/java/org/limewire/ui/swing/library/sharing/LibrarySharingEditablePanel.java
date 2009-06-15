@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.sharing;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendManager;
@@ -19,10 +22,14 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.library.sharing.actions.ApplySharingAction;
 import org.limewire.ui.swing.library.sharing.actions.CancelSharingAction;
 import org.limewire.ui.swing.library.sharing.actions.SelectAllAction;
 import org.limewire.ui.swing.library.sharing.actions.SelectNoneAction;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.RosterEvent;
 
@@ -41,6 +48,12 @@ import com.google.inject.Provider;
 
 @LazySingleton
 public class LibrarySharingEditablePanel {
+    
+    @Resource Color borderColor;
+    @Resource Font sharingLabelFont;
+    @Resource Color sharingLabelColor;
+    @Resource Font selectFont;
+    @Resource Color selectColor;
     
     private final JPanel component;
     private PromptTextField filterTextField;
@@ -62,8 +75,11 @@ public class LibrarySharingEditablePanel {
             Provider<LibrarySharingEditableRendererEditor> renderer,
             Provider<LibrarySharingEditableRendererEditor> editor,
             ApplySharingAction applyAction, CancelSharingAction cancelAction, 
-            SelectAllAction selectAllAction, SelectNoneAction selectNoneAction) {
-        component = new JPanel(new MigLayout("insets 0, gap 0, fillx", "[125!]", ""));
+            SelectAllAction selectAllAction, SelectNoneAction selectNoneAction,
+            TextFieldDecorator textFieldDecorator, ButtonDecorator buttonDecorator) {
+        GuiUtils.assignResources(this);
+        
+        component = new JPanel(new MigLayout("insets 0, gap 0, fillx", "[134!]", ""));
         
         this.sharingTableProvider = sharingTableProvider;
         this.renderer = renderer;
@@ -71,25 +87,38 @@ public class LibrarySharingEditablePanel {
         
         component.setOpaque(false);
         
-        component.add(new JLabel(I18n.tr("Share list with...")), "gapleft 5, gaptop 5, wrap");
+        JLabel shareLabel = new JLabel(I18n.tr("Share list with..."));
+        shareLabel.setFont(sharingLabelFont);
+        shareLabel.setForeground(sharingLabelColor);
+        component.add(shareLabel, "gapleft 5, gaptop 6, wrap");
         
         filterTextField = new PromptTextField(I18n.tr("Find..."));
+        textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.NONE);
         
-        component.add(filterTextField, "gapleft 5, gaptop 5, wmax 115, wrap");
+        component.add(filterTextField, "gapleft 5, gaptop 7, gapright 5, wmax 124, wrap");
 
-        component.add(new JLabel(I18n.tr("Select")), "gapleft 5, gaptop 5, wrap");
+        JLabel selectLabel = new JLabel(I18n.tr("Select"));
+        selectLabel.setFont(selectFont);
+        selectLabel.setForeground(selectColor);
+        component.add(selectLabel, "gapleft 5, gaptop 5, wrap");
+        
         allButton = new HyperlinkButton(selectAllAction);
+        allButton.setFont(selectFont);
         noneButton = new HyperlinkButton(selectNoneAction);
+        noneButton.setFont(selectFont);
         component.add(allButton, "gapleft 15, gaptop 5, wrap");
         component.add(noneButton, "gapleft 15, gaptop 5, wrap");
         
         initTable();
         
         applyButton = new JXButton(applyAction);
+        applyButton.setFont(selectFont);
+        buttonDecorator.decorateDarkFullButton(applyButton);
         cancelButton = new HyperlinkButton(cancelAction);
+        cancelButton.setFont(selectFont);
         
-        component.add(applyButton, "split 2, gaptop 5, gapright unrelated, alignx center");
-        component.add(cancelButton, "gaptop 5, wrap");
+        component.add(applyButton, "split 2, gaptop 5, gapbottom 5, gapright unrelated, alignx center");
+        component.add(cancelButton, "gaptop 5, gapbottom 5, wrap");
     }
     
     @Inject
@@ -121,11 +150,22 @@ public class LibrarySharingEditablePanel {
             }
         });
 
-        
         eventList.add(new EditableSharingData("this is fake data", false));
         eventList.add(new EditableSharingData("remove when", false));
         eventList.add(new EditableSharingData("friend login", false));
         eventList.add(new EditableSharingData("works again", false));
+        eventList.add(new EditableSharingData("this is fake data 1", false));
+        eventList.add(new EditableSharingData("remove when 1", false));
+        eventList.add(new EditableSharingData("friend login 1", false));
+        eventList.add(new EditableSharingData("works again 1", false));
+        eventList.add(new EditableSharingData("this is fake data 2", false));
+        eventList.add(new EditableSharingData("remove when 2", false));
+        eventList.add(new EditableSharingData("friend login 2", false));
+        eventList.add(new EditableSharingData("works again 2", false));
+        eventList.add(new EditableSharingData("this is fake data 3", false));
+        eventList.add(new EditableSharingData("remove when 3", false));
+        eventList.add(new EditableSharingData("friend login 3", false));
+        eventList.add(new EditableSharingData("works again 3", false));
         for(Friend friend : friendManager.getKnownFriends()) {
             eventList.add(new EditableSharingData(friend.getRenderName(), false));
         }
@@ -194,7 +234,7 @@ public class LibrarySharingEditablePanel {
         sharingTable.setEventList(new BasicEventList<EditableSharingData>());
                 
         JScrollPane scrollPane = new JScrollPane(sharingTable);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder()); 
+        scrollPane.setBorder(BorderFactory.createMatteBorder(1,0,1,0, borderColor)); 
                 
         component.add(scrollPane, "growx, gaptop 5, wrap");
     }

@@ -29,6 +29,7 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
 
     private @Resource Font font;
     private @Resource Color fontColor;
+    private @Resource Color backgroundColor;
     
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
     
@@ -56,8 +57,9 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
         nameLabel = new JLabel();
         nameLabel.setFont(font);
         nameLabel.setForeground(fontColor);
-        
-        add(checkBox, "aligny center");
+                
+        setBackground(backgroundColor);
+        add(checkBox, "aligny center, gapright 6");
         add(nameLabel, "growx, alignx left, aligny center, wrap");
     }
     

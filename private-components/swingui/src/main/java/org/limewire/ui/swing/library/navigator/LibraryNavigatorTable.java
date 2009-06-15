@@ -77,7 +77,7 @@ public class LibraryNavigatorTable extends JXTable {
         setBackground(backgroundColor);
         setShowGrid(false, false);
         setTableHeader(null);
-        setRowHeight(26);
+        setRowHeight(24);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         addMouseListener(new MouseAdapter() {

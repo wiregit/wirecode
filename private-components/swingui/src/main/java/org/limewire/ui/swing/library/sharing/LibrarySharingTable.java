@@ -1,14 +1,11 @@
 package org.limewire.ui.swing.library.sharing;
 
-import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
-import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -18,8 +15,6 @@ import ca.odell.glazedlists.swing.EventTableModel;
 import com.google.inject.Inject;
 
 public class LibrarySharingTable<T> extends JXTable {
-
-    @Resource private Color backgroundColor;
     
     private EventList<T> eventList;
     
@@ -29,8 +24,7 @@ public class LibrarySharingTable<T> extends JXTable {
     
     @Inject
     public LibrarySharingTable() {
-        GuiUtils.assignResources(this);
-        
+       
         eventList = new BasicEventList<T>();        
         setEventList(eventList);
         
@@ -46,7 +40,6 @@ public class LibrarySharingTable<T> extends JXTable {
     }
     
     private void initialize() {
-        setBackground(backgroundColor);
         setShowGrid(false, false);
         setTableHeader(null);
         setRowHeight(rowHeight);
@@ -59,7 +52,7 @@ public class LibrarySharingTable<T> extends JXTable {
     
     @Override
     public boolean isCellEditable(int row, int col) {
-        if (!isEditable && row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0) {
+        if (!isEditable || (row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0)) {
             return false;
         }
         return true;

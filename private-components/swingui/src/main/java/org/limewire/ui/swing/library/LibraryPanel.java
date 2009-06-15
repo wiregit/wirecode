@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -9,6 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.JTableHeader;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -21,6 +24,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.actions.AddFileAction;
@@ -32,6 +36,7 @@ import org.limewire.ui.swing.library.sharing.PublicSharedFeedbackPanel;
 import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.player.PlayerPanel;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -50,6 +55,7 @@ public class LibraryPanel extends JPanel {
     private final LibrarySharingPanel librarySharingPanel;
     private final PublicSharedFeedbackPanel publicSharedFeedbackPanel;
     private final LocalFileListTransferHandler transferHandler;
+    private final ButtonDecorator buttonDecorator;
     
     private JXButton addFilesButton;
     private LibraryTableSelectionComboBox tableSelectionComboBox;
@@ -62,7 +68,8 @@ public class LibraryPanel extends JPanel {
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, 
-            PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction) {
+            PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
+            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.navigatorComponent = navPanel;
@@ -70,8 +77,9 @@ public class LibraryPanel extends JPanel {
         this.librarySharingPanel = sharingPanel;
         this.tableSelectionComboBox = selectionComobBox;
         this.publicSharedFeedbackPanel = publicSharedFeedbackPanel;
+        this.buttonDecorator = buttonDecorator;
+        this.categoryMatcher = categoryMatcher;
         this.transferHandler = new LocalFileListTransferHandler();
-        categoryMatcher = new LibraryCategoryMatcher();
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 
@@ -90,13 +98,27 @@ public class LibraryPanel extends JPanel {
         
         JScrollPane libraryScrollPane = new JScrollPane(libraryTable);
         libraryScrollPane.setBorder(BorderFactory.createEmptyBorder());  
+        configureEnclosingScrollPane(libraryScrollPane);
         
         add(navigatorComponent, "dock west, growy");
         add(headerBar, "dock north, growx");
         add(publicSharedFeedbackPanel.getComponent(), "dock north, growx, hidemode 3");
         add(librarySharingPanel.getComponent(), "dock west, growy, hidemode 3");
         add(libraryScrollPane, "grow");
-        
+    }
+    
+    /**
+     * Fills in the top right corner if a scrollbar appears with an empty table
+     * header.
+     */
+    protected void configureEnclosingScrollPane(JScrollPane scrollPane) {
+        JTableHeader th = new JTableHeader();
+        th.setDefaultRenderer(new TableCellHeaderRenderer());
+        // Put a dummy header in the upper-right corner.
+        final Component renderer = th.getDefaultRenderer().getTableCellRendererComponent(null, "", false, false, -1, -1);
+        JPanel cornerComponent = new JPanel(new BorderLayout());
+        cornerComponent.add(renderer, BorderLayout.CENTER);
+        scrollPane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, cornerComponent);
     }
     
     @Inject
@@ -149,6 +171,8 @@ public class LibraryPanel extends JPanel {
     
     private void createAddFilesButton(AddFileAction addFileAction) {
         addFilesButton = new JXButton(addFileAction);
+        addFilesButton.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
+        buttonDecorator.decorateDarkFullButton(addFilesButton);
     }
     
     private void setEventList(EventList<LocalFileItem> eventList) {

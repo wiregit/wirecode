@@ -18,20 +18,28 @@ public class LibrarySharingNonEditableRenderer extends JLabel implements TableCe
 
     private @Resource Font font;
     private @Resource Color fontColor;
+    private @Resource Color backgroundColor;
+    private @Resource Color backgroundScrollBarColor;
     
     @Inject
     public LibrarySharingNonEditableRenderer() {
         GuiUtils.assignResources(this);
         
-        setBorder(BorderFactory.createEmptyBorder(0,10,0,5));
+        setBorder(BorderFactory.createEmptyBorder(10,14,10,5));
         setFont(font);
         setForeground(fontColor);
+        setBackground(backgroundScrollBarColor);
+        setOpaque(true);
     }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        
+        if(table.getVisibleRect().height < table.getRowCount() * table.getRowHeight())
+            setBackground(backgroundScrollBarColor);
+        else
+            setBackground(backgroundColor);
+
         if(value instanceof String) {
             setText((String)value);
         } else {

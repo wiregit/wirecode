@@ -3,6 +3,8 @@ package org.limewire.ui.swing.library;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 
+import com.google.inject.Inject;
+
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
@@ -13,6 +15,10 @@ import ca.odell.glazedlists.matchers.Matcher;
 public class LibraryCategoryMatcher implements Matcher<LocalFileItem> {
 
     private Category categoryFilteredOn;
+    
+    @Inject
+    public LibraryCategoryMatcher(){
+    }
     
     /**
      * Category to filter this list on. Only Items within this
