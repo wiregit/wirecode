@@ -35,9 +35,6 @@ import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -67,7 +64,7 @@ public class SearchBar extends JXPanel {
     private final HistoryAndFriendAutoCompleter autoCompleter;
     private final FriendAutoCompleterFactory friendAutoCompleterFactory;
     private final AutoCompleteDictionary searchHistory;
-    private final Navigator navigator;
+    private final SearchNavigator searchNavigator;
     
     private SearchCategory categoryToSearch; 
     
@@ -78,13 +75,13 @@ public class SearchBar extends JXPanel {
             @Named("searchHistory") AutoCompleteDictionary searchHistory,
             CategoryIconManager categoryIconManager,
             TextFieldDecorator textFieldDecorator,
-            Navigator navigator) {
+            SearchNavigator searchNavigator) {
         super(new MigLayout("ins 0, gapx 0, gapy 0"));
     
         GuiUtils.assignResources(this);
         
         this.friendAutoCompleterFactory = friendAutoCompleterFactory;
-        this.navigator = navigator;
+        this.searchNavigator = searchNavigator;
         this.searchHistory = searchHistory;
         this.autoCompleter = new HistoryAndFriendAutoCompleter();
         this.categoryToSearch = SearchCategory.forId(SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue());
@@ -172,8 +169,8 @@ public class SearchBar extends JXPanel {
                 menu.add(new HyperlinkButton(new AbstractAction(I18n.tr("Advanced Search")) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        NavItem item = navigator.getNavItem(NavCategory.LIMEWIRE, AdvancedSearchMediator.NAME);
-                        item.select();
+                        SearchNavItem navItem = searchNavigator.addAdvancedSearch();
+                        navItem.select();
                         menu.setVisible(false);
                     }
                 }));

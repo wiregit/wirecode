@@ -1,15 +1,19 @@
 package org.limewire.ui.swing.search.advanced;
 
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -17,6 +21,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.BasicAutoCompleter;
 import org.limewire.ui.swing.components.CollectionBackedComboBoxModel;
 import org.limewire.ui.swing.components.DropDownListAutoCompleteControl;
@@ -32,6 +37,8 @@ abstract class AdvancedPanel extends JPanel {
     private final SearchCategory category;
 
     private final FriendAutoCompleterFactory friendAutoCompleterFactory;
+    
+    private final Action enterKeyAction;
 
 	/**
 	 * Resource package since this class is abstract.
@@ -48,15 +55,16 @@ abstract class AdvancedPanel extends JPanel {
     /** 
      * Constructs an AdvancedPanel that will search the given category.
      */
-    public AdvancedPanel(SearchCategory category, FriendAutoCompleterFactory friendAutoCompleterFactory) {
+    public AdvancedPanel(SearchCategory category, FriendAutoCompleterFactory friendAutoCompleterFactory, Action enterKeyAction) {
         super(new MigLayout("fillx", "[]related[grow]", ""));
         
         this.category = category;
         this.friendAutoCompleterFactory = friendAutoCompleterFactory;
+        this.enterKeyAction = enterKeyAction;
         
         GuiUtils.assignResources(this);
     }
-    
+
     /**
      * Adds a new JTextField that will search using the given FilePropertyKey using 
      *  the default for the description text.
@@ -73,11 +81,25 @@ abstract class AdvancedPanel extends JPanel {
         label.setFont(resources.font);
         add(label);
         JTextField textField = new JTextField();
+        
+        addEnterAction(textField);
+        
         textField.setFont(resources.font);
         final DropDownListAutoCompleteControl autoCompleteControl = DropDownListAutoCompleteControl.install(textField, new BasicAutoCompleter(friendAutoCompleterFactory.getDictionary(category, key)));
         autoCompleteControl.setAutoComplete(true);
         add(textField, "growx, wrap");
         componentMap.put(key, textField);
+    }
+
+    private void addEnterAction(JComponent component) {
+        component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "pressed");
+        component.getActionMap().put("pressed", new AbstractAction("pressed") { 
+            public void actionPerformed(ActionEvent e) {
+                if(enterKeyAction != null) {
+                    enterKeyAction.actionPerformed(e);
+                }
+            }
+        });
     }
     
     /**
@@ -98,6 +120,7 @@ abstract class AdvancedPanel extends JPanel {
         label.setFont(resources.font);
         add(label);
         JComboBox comboBox = new JComboBox(new CollectionBackedComboBoxModel(possibleValues));
+        addEnterAction(comboBox);
         comboBox.setFont(resources.font);
         add(comboBox, "growx, wrap");
         componentMap.put(key, comboBox);

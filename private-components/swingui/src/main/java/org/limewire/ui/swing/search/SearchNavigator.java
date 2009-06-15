@@ -14,4 +14,7 @@ public interface SearchNavigator {
     /** Adds a new browse search whose results will show in the given panel. */
     SearchNavItem addSearch(String title, JComponent searchPanel, BrowseSearch search);
 
+    /** Adds a new advanced search panel */
+    SearchNavItem addAdvancedSearch();
+
 }

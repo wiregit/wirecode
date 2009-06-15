@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,7 +45,6 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.painter.factories.SearchTabPainterFactory;
-import org.limewire.ui.swing.search.AdvancedSearchMediator;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchBar;
@@ -53,13 +53,16 @@ import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.search.SearchResultMediator;
+import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
+import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.search.model.browse.BrowseSearch;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -70,10 +73,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final SearchBar searchBar;
     
     private final FlexibleTabList searchList;
-    private final Navigator navigator;        
+    private final Navigator navigator;
     private final NavItem homeNav;
     private final NavItem libraryNav;
     private final KeywordAssistedSearchBuilder keywordAssistedSearchBuilder;
+    private final Provider<AdvancedSearchPanel> advancedSearchPanel;
+    private final SearchHandler searchHandler;
     @Resource private Icon browseIcon;
         
     @Inject
@@ -86,22 +91,20 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     BarPainterFactory barPainterFactory,
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryMediator myLibraryMediator,
-                    AdvancedSearchMediator advancedSearchMediator,
                     KeywordAssistedSearchBuilder keywordAssistedSearchBuilder,
-                    SignInAction signInAction, FriendButtonPopupListener friendListener) {        
+                    SignInAction signInAction, FriendButtonPopupListener friendListener,
+                    Provider<AdvancedSearchPanel> advancedSearchPanel) {        
         GuiUtils.assignResources(this);
-        
+        this.searchHandler = searchHandler;
         this.searchBar = searchBar;
         this.navigator = navigator;
         this.searchBar.addSearchActionListener(new Searcher(searchHandler));        
         this.keywordAssistedSearchBuilder = keywordAssistedSearchBuilder;
+        this.advancedSearchPanel = advancedSearchPanel;
         
         setName("WireframeTop");
         
         setBackgroundPainter(barPainterFactory.createTopBarPainter());
-        
-        // add advanced search into the navigator, for use elsewhere.
-        navigator.createNavItem(NavCategory.LIMEWIRE, AdvancedSearchMediator.NAME, advancedSearchMediator);
         
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME, homeMediator);      
         libraryNav = navigator.createNavItem(NavCategory.LIBRARY, I18n.tr("My Library"), myLibraryMediator);
@@ -198,6 +201,44 @@ class TopPanel extends JXPanel implements SearchNavigator {
         return addSearch(title, searchPanel, search, null);
     }
     
+    @Override
+    public SearchNavItem addAdvancedSearch() {
+        String title = I18n.tr("Advanced Search");
+        final AdvancedSearchPanel advancedPanel = advancedSearchPanel.get();
+        advancedPanel.addSearchListener(new UiSearchListener() {
+            @Override
+            public void searchTriggered(SearchInfo searchInfo) {
+                searchHandler.doSearch(searchInfo);
+            }
+        });
+        final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(advancedPanel));
+        final SearchAction action = new SearchAction(item);
+        
+        final Action moreTextAction = new NoOpAction();
+        final TabActionMap actionMap = new TabActionMap(
+                action, action, moreTextAction, new ArrayList<Action>());
+            
+            searchList.addTabActionMapAt(actionMap, 0);
+            
+            item.addNavItemListener(new SearchTabNavItemListener(action, actionMap, item, advancedPanel) {
+                @Override
+                protected SearchCategory getCategory() {
+                    return SearchCategory.ALL;
+                }
+            });
+            
+        final SearchNavItem searchNavItem =  new SearchNavItemImpl(item, action);
+        
+        advancedPanel.addSearchListener(new UiSearchListener() {
+            @Override
+             public void searchTriggered(SearchInfo searchInfo) {
+                searchNavItem.remove();
+             } 
+         });
+        
+        return searchNavItem;
+    }
+    
     private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, Icon icon) {
         final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(searchPanel));
         final SearchAction action = new SearchAction(item);
@@ -213,74 +254,117 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         searchList.addTabActionMapAt(actionMap, 0);
         
-        item.addNavItemListener(new NavItemListener() {
-            @Override
-            public void itemRemoved() {
-                searchList.removeTabActionMap(actionMap);
-                ((Disposable)searchPanel).dispose();
-            }
-
-            @Override
-            public void itemSelected(boolean selected) {
-                searchBar.setText(item.getId());
-                searchBar.setCategory(search.getCategory());
-                action.putValue(Action.SELECTED_KEY, selected);
-            }
+        item.addNavItemListener(new SearchTabNavItemListener(action, actionMap, item, (Disposable)searchPanel) {
+           @Override
+           protected SearchCategory getCategory() {
+                return search.getCategory();
+            } 
         });
         
-        return new SearchNavItem() {
-            @Override
-            public void sourceCountUpdated(int newSourceCount) {
-                if(!item.isSelected()) {
-                    action.putValue(TabActionMap.NEW_HINT, true);
-                }
-
-                if (newSourceCount >= 50) {
-                    action.killBusy();
-                }
-            }
-            
-            @Override
-            public String getId() {
-                return item.getId();
-            }
-            
-            @Override
-            public void remove() {
-                item.remove();
-            }
-            
-            @Override
-            public void select() {
-                select(null);
-            }
-            
-            @Override
-            public void select(NavSelectable selectable) {
-                item.select();
-            }
-            
-            @Override
-            public void addNavItemListener(NavItemListener listener) {
-                item.addNavItemListener(listener);
-            }
-            
-            @Override
-            public void removeNavItemListener(NavItemListener listener) {
-                item.removeNavItemListener(listener);
-            }
-            
-            @Override
-            public boolean isSelected() {
-                return item.isSelected();
-            }
-        };
+        return new SearchNavItemImpl(item, action);
     }
 
     public void goHome() {
         homeNav.select();
     }
     
+    /**
+     * Specialized NavItemListener that handles disposing the SearchPanel after a search is closed, 
+     * removes the panel from the search list. and updates the search bar text and category when a 
+     * new search tab is selected. 
+     */
+    private abstract class SearchTabNavItemListener implements NavItemListener {
+        private final SearchAction action;
+
+        private final TabActionMap actionMap;
+
+        private final NavItem item;
+
+        private final Disposable panel;
+
+        private SearchTabNavItemListener(SearchAction action, TabActionMap actionMap, NavItem item,
+                Disposable panel) {
+            this.action = action;
+            this.actionMap = actionMap;
+            this.item = item;
+            this.panel = panel;
+        }
+
+        @Override
+        public void itemRemoved() {
+            searchList.removeTabActionMap(actionMap);
+            panel.dispose();
+        }
+
+        @Override
+        public void itemSelected(boolean selected) {
+            searchBar.setText(item.getId());
+            searchBar.setCategory(getCategory());
+            action.putValue(Action.SELECTED_KEY, selected);
+        }
+        /**
+         * Returns the category for this search tab. 
+         */
+        abstract protected SearchCategory getCategory();
+    }
+
+    private final class SearchNavItemImpl implements SearchNavItem {
+        private final NavItem item;
+
+        private final SearchAction action;
+
+        private SearchNavItemImpl(NavItem item, SearchAction action) {
+            this.item = item;
+            this.action = action;
+        }
+
+        @Override
+        public void sourceCountUpdated(int newSourceCount) {
+            if(!item.isSelected()) {
+                action.putValue(TabActionMap.NEW_HINT, true);
+            }
+
+            if (newSourceCount >= 50) {
+                action.killBusy();
+            }
+        }
+
+        @Override
+        public String getId() {
+            return item.getId();
+        }
+
+        @Override
+        public void remove() {
+            item.remove();
+        }
+
+        @Override
+        public void select() {
+            select(null);
+        }
+
+        @Override
+        public void select(NavSelectable selectable) {
+            item.select();
+        }
+
+        @Override
+        public void addNavItemListener(NavItemListener listener) {
+            item.addNavItemListener(listener);
+        }
+
+        @Override
+        public void removeNavItemListener(NavItemListener listener) {
+            item.removeNavItemListener(listener);
+        }
+
+        @Override
+        public boolean isSelected() {
+            return item.isSelected();
+        }
+    }
+
     private class Searcher implements ActionListener {
         private final SearchHandler searchHandler;
         

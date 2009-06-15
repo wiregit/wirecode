@@ -17,10 +17,11 @@ import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.search.AdvancedSearchMediator;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.search.SearchNavItem;
+import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
@@ -39,9 +40,9 @@ public class ToolsMenu extends MnemonicMenu {
     @Inject
     public ToolsMenu(final Provider<AdvancedToolsPanel> advancedProvider, 
             final Navigator navigator, final UploadMediator uploadMediator,
-            final SearchHandler searchHandler, final LibraryManager libraryManager) {
+            final SearchHandler searchHandler, final LibraryManager libraryManager, final SearchNavigator searchNavigator) {
         super(I18n.tr("&Tools"));
-        
+
         add(new AbstractAction(I18n.tr("&Uploads")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -58,8 +59,8 @@ public class ToolsMenu extends MnemonicMenu {
         add(new AbstractAction(I18n.tr("Advanced &Search")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                NavItem navItem = navigator.getNavItem(NavCategory.LIMEWIRE, AdvancedSearchMediator.NAME);
-                navItem.select();
+                SearchNavItem item = searchNavigator.addAdvancedSearch();
+                item.select();
             }
         });
         

@@ -6,10 +6,10 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -28,6 +28,7 @@ import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
@@ -42,7 +43,7 @@ import org.limewire.ui.swing.util.ResizeUtils;
 import com.google.inject.Inject;
 
 /** The container for advanced searching. */
-public class AdvancedSearchPanel extends JXPanel {
+public class AdvancedSearchPanel extends JXPanel implements Disposable {
         
     private final FriendAutoCompleterFactory friendAutoCompleterFactory;
     private final KeywordAssistedSearchBuilder advancedSearchBuilder;
@@ -51,7 +52,8 @@ public class AdvancedSearchPanel extends JXPanel {
     
     private final Action searchAction = new SearchAction();
     
-    private final List<UiSearchListener> uiSearchListeners = new ArrayList<UiSearchListener>();
+    /* CoW so that listeners can modify the list of listeners. */ 
+    private final List<UiSearchListener> uiSearchListeners = new CopyOnWriteArrayList<UiSearchListener>();
     private Map<Category, AdvancedPanel> advancedPanels = new HashMap<Category, AdvancedPanel>();
     
     private AdvancedPanel visibleComponent = null;
@@ -102,24 +104,32 @@ public class AdvancedSearchPanel extends JXPanel {
         inputPanel.add(searchButtonPanel, "dock south, gapbefore push, gapright 5, gaptop 5");
         add(inputPanel, "gapleft 45, gaptop 4");
     }
+
     
     /**
 	 * Creates the correct AdvancedPanel based on the category 
 	 * selected.
 	 */
     private AdvancedPanel createAdvancedPanel(Category category) {
-        if(category == Category.AUDIO)
-            return new AdvancedAudioPanel(propertyDictionary, friendAutoCompleterFactory);
-        else if(category == Category.VIDEO)
-            return new AdvancedVideoPanel(propertyDictionary, friendAutoCompleterFactory);
-        else if(category == Category.DOCUMENT)
-            return new AdvancedDocumentPanel(friendAutoCompleterFactory);
-        else if(category == Category.IMAGE)
-            return new AdvancedImagePanel(friendAutoCompleterFactory);
-        else if(category == Category.PROGRAM)
-            return new AdvancedProgramPanel(friendAutoCompleterFactory);
+        Action enterKeyAction = new AbstractAction("pressed") { 
+            public void actionPerformed(ActionEvent e) {
+                searchButton.doClick();
+            }
+        };
+        AdvancedPanel panel = null;
+        if(category == Category.AUDIO) {
+            panel =  new AdvancedAudioPanel(propertyDictionary, friendAutoCompleterFactory, enterKeyAction);
+        } else if(category == Category.VIDEO) {
+            panel = new AdvancedVideoPanel(propertyDictionary, friendAutoCompleterFactory, enterKeyAction);
+        } else if(category == Category.DOCUMENT) {
+            panel = new AdvancedDocumentPanel(friendAutoCompleterFactory, enterKeyAction);
+        } else if(category == Category.IMAGE) {
+            panel = new AdvancedImagePanel(friendAutoCompleterFactory, enterKeyAction);
+        } else if(category == Category.PROGRAM) {
+            panel = new AdvancedProgramPanel(friendAutoCompleterFactory, enterKeyAction);
+        }
         
-        return null;
+        return panel;
     }
 
     private void addCategory(final SearchCategory category) {
@@ -200,5 +210,10 @@ public class AdvancedSearchPanel extends JXPanel {
                 }
             }
         }
-    }   
+    }
+
+    @Override
+    public void dispose() {
+        uiSearchListeners.clear();
+    }
 }
