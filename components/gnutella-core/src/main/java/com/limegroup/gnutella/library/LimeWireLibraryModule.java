@@ -73,6 +73,10 @@ public class LimeWireLibraryModule extends AbstractModule {
         return manager.getGnutellaFileView();
     }
     
+    @Provides @SharedFiles FileView allSharedView(FileViewManagerImpl manager) {
+        return manager.getAllSharedFilesView();
+    }
+    
     
 
 }

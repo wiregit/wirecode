@@ -51,11 +51,17 @@ class FileViewManagerImpl implements FileViewManager {
     /** Lock held to mutate any structure in this class or to mutate a MultiFileView. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     
+    /** A FileView containing every file that is shared with anyone. */
+    // We cannot construct it here because MultiFileView's constructor implicitly
+    // uses FileViewManagerImpl.this.library, which might not be set until
+    // the FileViewManagerImpl's constructor finishes.
+    private final MultiFileView allSharedFilesView;
+    
     /** 
      * The share id mapped to the MultiFileView of all FileDescs visible by that id.
      * This is lazily built as people request views for a given id, which is why
      * scattered throughout this class places check for fileViewsPerFriend(id) != null.
-     *  */
+     */
     private final Map<String, MultiFileView> fileViewsPerFriend = new HashMap<String, MultiFileView>();
 
     /** Any collection this is mapping to a MultiFileView. */
@@ -68,6 +74,7 @@ class FileViewManagerImpl implements FileViewManager {
     @Inject
     public FileViewManagerImpl(LibraryImpl library) {
         this.library = library;
+        this.allSharedFilesView = new MultiFileView();
     }
     
     @Inject void register(ListenerSupport<FileViewChangeEvent> viewListeners,
@@ -120,8 +127,26 @@ class FileViewManagerImpl implements FileViewManager {
         });
     }
     
+    FileView getAllSharedFilesView() {
+        return allSharedFilesView;
+    }
+    
     FileView getGnutellaFileView() {
         return getFileViewForId(Friend.P2P_FRIEND_ID);
+    }
+    
+    /**
+     * Adds a new list of K => List<V> element to the map if v is not empty,
+     * creating the map if it doesn't already exist.
+     */
+    private <K, V> Map<K, List<V>> addToOrCreateMapOfList(Map<K, List<V>> map, K k, List<V> v) {
+        if(!v.isEmpty()) {
+            if(map == null) {
+                map = new HashMap<K, List<V>>();
+            }
+            map.put(k, v);
+        }
+        return map;
     }
     
     /**
@@ -137,16 +162,19 @@ class FileViewManagerImpl implements FileViewManager {
         rwLock.writeLock().lock();
         try {
             sharedCollections.add(collection);
-            for(String id : collection.getFriendList()) {
+            List<String> friendList = collection.getFriendList();
+
+            // if it was shared with atleast one person, add it to the 'all shared' view.
+            if(!friendList.isEmpty()) {
+                List<FileDesc> added = allSharedFilesView.addNewBackingView(collection);
+                addedFiles = addToOrCreateMapOfList(addedFiles, allSharedFilesView, added);                
+            }
+            
+            for(String id : friendList) {
                 MultiFileView view = fileViewsPerFriend.get(id);
                 if(view != null) {
                     List<FileDesc> added = view.addNewBackingView(collection);
-                    if(!added.isEmpty()) {
-                        if(addedFiles == null) {
-                            addedFiles = new HashMap<FileView, List<FileDesc>>();
-                        }
-                        addedFiles.put(view, added);
-                    }
+                    addedFiles = addToOrCreateMapOfList(addedFiles, view, added);
                 }
             }
         } finally {
@@ -176,14 +204,13 @@ class FileViewManagerImpl implements FileViewManager {
         rwLock.writeLock().lock();
         try {
             sharedCollections.remove(collection);
+            
+            List<FileDesc> removed = allSharedFilesView.removeBackingView(collection);
+            removedFiles = addToOrCreateMapOfList(removedFiles, allSharedFilesView, removed);
+            
             for(MultiFileView view : fileViewsPerFriend.values()) {
-                List<FileDesc> removed = view.removeBackingView(collection);
-                if(!removed.isEmpty()) {
-                    if(removedFiles == null) {
-                        removedFiles = new HashMap<FileView, List<FileDesc>>();
-                    }
-                    removedFiles.put(view, removed);
-                }
+                removed = view.removeBackingView(collection);
+                removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
             }
         } finally {
             rwLock.writeLock().unlock();
@@ -208,21 +235,30 @@ class FileViewManagerImpl implements FileViewManager {
      * {@link MultiFileView}.
      */
     private void friendAddedToCollection(SharedFileCollection collection, String id) {
-        MultiFileView view = null;
-        List<FileDesc> added = null;
+        Map<FileView, List<FileDesc>> addedFiles = null;
+        
         rwLock.writeLock().lock();
         try {
-            view = fileViewsPerFriend.get(id);
+            // make sure it's added to the 'all' view --
+            // if the all view already contained it, this will return
+            // an empty list.
+            List<FileDesc> added = allSharedFilesView.addNewBackingView(collection);
+            addedFiles = addToOrCreateMapOfList(addedFiles, allSharedFilesView, added);
+            
+            MultiFileView view = fileViewsPerFriend.get(id);
             if(view != null) {
                 added = view.addNewBackingView(collection);
+                addedFiles = addToOrCreateMapOfList(addedFiles, view, added);
             }
         } finally {
             rwLock.writeLock().unlock();
         }
         
-        if(view != null && added != null) {
-            for(FileDesc fd : added) {
-                multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_ADDED, fd));
+        if(addedFiles != null) {
+            for(Map.Entry<FileView, List<FileDesc>> entry : addedFiles.entrySet()) {
+                for(FileDesc fd : entry.getValue()) {
+                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_ADDED, fd));
+                }
             }
         }
     }
@@ -237,21 +273,31 @@ class FileViewManagerImpl implements FileViewManager {
      * {@link MultiFileView}.
      */
     private void friendRemovedFromCollection(SharedFileCollection collection, String id) {
-        MultiFileView view = null;
-        List<FileDesc> removed = null;
+        Map<FileView, List<FileDesc>> removedFiles = null;
+        
         rwLock.writeLock().lock();
         try {
-            view = fileViewsPerFriend.get(id);
+            // if there are no more friends this collection is shared with,
+            // remove it from the 'all' view.
+            if(collection.getFriendList().isEmpty()) {
+                List<FileDesc> removed = allSharedFilesView.removeBackingView(collection);
+                removedFiles = addToOrCreateMapOfList(removedFiles, allSharedFilesView, removed);
+            }
+            
+            MultiFileView view = fileViewsPerFriend.get(id);
             if(view != null) {
-                removed = view.removeBackingView(collection);
+                List<FileDesc> removed = view.removeBackingView(collection);
+                removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
             }
         } finally {
             rwLock.writeLock().unlock();
         }
         
-        if(view != null && removed != null) {
-            for(FileDesc fd : removed) {
-                multicaster.broadcast(new FileViewChangeEvent(view, Type.FILE_REMOVED, fd));
+        if(removedFiles != null) {
+            for(Map.Entry<FileView, List<FileDesc>> entry : removedFiles.entrySet()) {
+                for(FileDesc fd : entry.getValue()) {
+                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_REMOVED, fd));
+                }
             }
         }
     }
@@ -265,17 +311,12 @@ class FileViewManagerImpl implements FileViewManager {
         
         rwLock.writeLock().lock();
         try {
+            List<FileDesc> removed = allSharedFilesView.fileViewCleared(collection);
+            removedFiles = addToOrCreateMapOfList(removedFiles, allSharedFilesView, removed);
+            
             for(String id : collection.getFriendList()) {
                 MultiFileView view = fileViewsPerFriend.get(id);
-                if(view != null) {
-                    List<FileDesc> removed = view.fileViewCleared(collection);
-                    if(!removed.isEmpty()) {
-                        if(removedFiles == null) {
-                            removedFiles = new HashMap<FileView, List<FileDesc>>();
-                        }
-                        removedFiles.put(view, removed);
-                    }
-                }
+                removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
                 
             }
         } finally {
@@ -296,6 +337,11 @@ class FileViewManagerImpl implements FileViewManager {
         
         rwLock.writeLock().lock();
         try {
+            if(allSharedFilesView.fileRemovedFromView(fileDesc, collection)) {
+                removedViews = new ArrayList<FileView>();
+                removedViews.add(allSharedFilesView);
+            }
+            
             for(String id : collection.getFriendList()) {
                 MultiFileView view = fileViewsPerFriend.get(id);
                 if(view != null) {
@@ -324,6 +370,16 @@ class FileViewManagerImpl implements FileViewManager {
         
         rwLock.writeLock().lock();
         try {
+            if(allSharedFilesView.fileRemovedFromView(oldFileDesc, collection)) {
+                if(allSharedFilesView.fileAddedFromView(newFileDesc, collection)) {
+                    changedViews = new ArrayList<FileView>();
+                    changedViews.add(allSharedFilesView);
+                } else {
+                    removedViews = new ArrayList<FileView>();
+                    removedViews.add(allSharedFilesView);
+                }
+            }
+            
             for(String id : collection.getFriendList()) {
                 MultiFileView view = fileViewsPerFriend.get(id);
                 if(view != null) {
@@ -363,6 +419,15 @@ class FileViewManagerImpl implements FileViewManager {
         
         rwLock.writeLock().lock();
         try {
+            List<String> friendList = collection.getFriendList();
+            if(!friendList.isEmpty()) {
+                // if the list was shared with anyone, add it to our all shared list!
+                if(allSharedFilesView.fileAddedFromView(fileDesc, collection)) {
+                    addedViews = new ArrayList<FileView>();
+                    addedViews.add(allSharedFilesView);
+                }
+            }
+            
             for(String id : collection.getFriendList()) {
                 MultiFileView view = fileViewsPerFriend.get(id);
                 if(view != null) {
@@ -522,26 +587,31 @@ class FileViewManagerImpl implements FileViewManager {
         List<FileDesc> addNewBackingView(FileView view) {
             if(!backingViews.contains(view)) {
                 backingViews.add(view);
+            
+                // lock the backing view in order to iterate through its
+                // indexes.
+                List<FileDesc> added = new ArrayList<FileDesc>(view.size());
+                view.getReadLock().lock();
+                try {
+                    IntSetIterator iter = ((AbstractFileView)view).getInternalIndexes().iterator();
+                    while(iter.hasNext()) {
+                        int i = iter.next();
+                        if(getInternalIndexes().add(i)) {
+                            FileDesc fd = library.getFileDescForIndex(i);
+                            added.add(fd);
+                            totalFileSize += fd.getFileSize();
+                        }
+                    }
+                } finally {
+                    view.getReadLock().unlock();
+                }
+                
+                return added;
+            } else {
+                // we already had this backing view -- no need to redo it.
+                return Collections.emptyList();
             }
             
-            // lock the backing view in order to iterate through its
-            // indexes.
-            List<FileDesc> added = new ArrayList<FileDesc>(view.size());
-            view.getReadLock().lock();
-            try {
-                IntSetIterator iter = ((AbstractFileView)view).getInternalIndexes().iterator();
-                while(iter.hasNext()) {
-                    int i = iter.next();
-                    if(getInternalIndexes().add(i)) {
-                        FileDesc fd = library.getFileDescForIndex(i);
-                        added.add(fd);
-                        totalFileSize += fd.getFileSize();
-                    }
-                }
-            } finally {
-                view.getReadLock().unlock();
-            }
-            return added;
         }
 
         /**
@@ -551,7 +621,11 @@ class FileViewManagerImpl implements FileViewManager {
          *         to being removed from the backing view.
          */
         List<FileDesc> fileViewCleared(FileView fileView) {
-            return validateItems();
+            if(backingViews.contains(fileView)) {
+                return validateItems();
+            } else {
+                return Collections.emptyList();
+            }
         }
 
         /**

@@ -1,5 +1,6 @@
 package org.limewire.core.impl.library;
 
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -212,5 +213,19 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
     @Override
     public void renameSharedFileList(String currentName, String newName) {
 
+    }
+    
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+    }
+    
+    @Override
+    public int getSharedFileCount() {
+        return 0;
+    }
+    
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        
     }
 }

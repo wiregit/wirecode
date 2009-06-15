@@ -1,11 +1,26 @@
 package org.limewire.core.api.library;
 
+import java.beans.PropertyChangeListener;
+
 import ca.odell.glazedlists.EventList;
 
 /**
  * Manager for all share lists.
  */
 public interface SharedFileListManager {
+    
+    String SHARED_FILE_COUNT = "sharedFileCount";
+    
+    /** Adds a {@link PropertyChangeListener}. */
+    void addPropertyChangeListener(PropertyChangeListener listener);
+    
+    /** Removes the {@link PropertyChangeListener}. */
+    void removePropertyChangeListener(PropertyChangeListener listener);
+    
+    /**
+     * Gets the current total number of files that are shared with anyone.
+     */
+    int getSharedFileCount();
 
     /**
      * Returns an EventList that can be used to view all {@link SharedFileList

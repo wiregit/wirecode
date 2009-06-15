@@ -2,21 +2,18 @@ package com.limegroup.gnutella.library;
 
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAddFails;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAdds;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAddsFolder;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertContainsFiles;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChangedFails;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChanges;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileRenames;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.assertLoads;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.change;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewExtensionTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestStoreFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.getUrn;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -47,7 +44,7 @@ public class GnutellaFileCollectionImplTest extends LimeTestCase {
     @Inject private UrnValidator urnValidator;
     @Inject private Injector injector;
 
-    private File f1, f2, f3, f4, f5;
+    private File f1, f2, f3, f4;
     private List<FileDesc> sharedFiles;
 
     public GnutellaFileCollectionImplTest(String name) {

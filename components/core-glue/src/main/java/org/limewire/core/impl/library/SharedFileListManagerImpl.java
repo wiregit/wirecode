@@ -1,5 +1,7 @@
 package org.limewire.core.impl.library;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Collection;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -8,6 +10,7 @@ import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -16,8 +19,11 @@ import ca.odell.glazedlists.EventList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileCollectionManager;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.SharedFileCollection;
 import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent;
+import com.limegroup.gnutella.library.SharedFiles;
 
 @Singleton
 class SharedFileListManagerImpl implements SharedFileListManager {
@@ -29,16 +35,34 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     
     private final EventList<SharedFileList> sharedLists = GlazedListsFactory.threadSafeList(new BasicEventList<SharedFileList>());
     private final EventList<SharedFileList> readOnlySharedLists = GlazedListsFactory.readOnlyList(sharedLists);
+
+    private final FileView allSharedFilesView;
+    
+    private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
     
     @Inject
     SharedFileListManagerImpl(FileCollectionManager collectionManager,
             CoreLocalFileItemFactory coreLocalFileItemFactory,
-            LibraryManager libraryManager) {
+            LibraryManager libraryManager, 
+            @SharedFiles FileView allSharedFilesView) {
         this.collectionManager = collectionManager;
         this.coreLocalFileItemFactory = coreLocalFileItemFactory;
+        this.allSharedFilesView = allSharedFilesView;
     }
     
     @Inject void register(ListenerSupport<SharedFileCollectionChangeEvent> support) {
+        allSharedFilesView.addListener(new EventListener<FileViewChangeEvent>() {
+            public void handleEvent(FileViewChangeEvent event) {
+                switch(event.getType()) {
+                case FILE_ADDED:
+                case FILE_REMOVED:
+                case FILES_CLEARED:
+                    changeSupport.firePropertyChange(SHARED_FILE_COUNT, null, allSharedFilesView.size());
+                    break;
+                }
+            }
+        });
+        
         for(SharedFileCollection collection : collectionManager.getSharedFileCollections()) {
             collectionAdded(collection);
         }
@@ -123,6 +147,21 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         } finally {
             sharedLists.getReadWriteLock().readLock().unlock();
         }
+    }
+    
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
+    }
+    
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.removePropertyChangeListener(listener);
+    }
+    
+    @Override
+    public int getSharedFileCount() {
+        return allSharedFilesView.size();
     }
 
     @Override
