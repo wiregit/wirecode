@@ -13,19 +13,34 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem;
+import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
+
 import com.google.inject.Inject;
 
 public class RemoveEditor extends JPanel implements TableCellEditor {
 
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 
+    private LocalFileItem currentEditingItem;
+    
     @Inject
-    public RemoveEditor(RemoveButton removeButton) {
+    public RemoveEditor(RemoveButton removeButton, final LibraryNavigatorPanel libraryNavigatorPanel) {
         add(removeButton);
         removeButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                cancelCellEditing();
+                //TODO: there has to be a cleaner way of handling actions in tables
+                //   performing the function on stopCellEditing within the table seems just as 
+                //   hacky. Maybe inject everything into the buttonAction and handle it there along
+                //   with a mouselistener for selecting the correct row. 
+                if(currentEditingItem != null) {
+                    LibraryNavItem item = libraryNavigatorPanel.getSelectedNavItem();
+                    item.getLocalFileList().removeFile(currentEditingItem.getFile());
+                    currentEditingItem = null;
+                }
+                stopCellEditing();
             }
         });
     }
@@ -33,7 +48,10 @@ public class RemoveEditor extends JPanel implements TableCellEditor {
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
-        // TODO Auto-generated method stub
+        if(value instanceof LocalFileItem)
+            currentEditingItem = (LocalFileItem) value;
+        else
+            currentEditingItem = null;
         return this;
     }
 
