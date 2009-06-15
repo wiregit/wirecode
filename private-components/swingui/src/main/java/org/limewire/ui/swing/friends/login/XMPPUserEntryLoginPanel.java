@@ -59,6 +59,13 @@ public class XMPPUserEntryLoginPanel extends JPanel {
     @Resource private Color inputTextForeground;
     @Resource private Font goBackTextFont;
     
+    @Resource(key="XMPPUserEntryLoginPanel.authFailedLabel.foreground")
+    private Color warningForeground;
+    @Resource(key="XMPPUserEntryLoginPanel.authFailedLabel.font")
+    private Font warningFont;
+    @Resource(key="XMPPUserEntryLoginPanel.authFailedLabel.icon")
+    private Icon warningIcon;
+    
     @Resource(key="XMPPUserEntryLoginPanel.signInButton.foreground")
     private Color signInButtonForeground;
     @Resource(key="XMPPUserEntryLoginPanel.signInButton.font") 
@@ -225,7 +232,9 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         
         authFailedLabel = new MultiLineLabel();
         authFailedLabel.setVisible(false);
-        authFailedLabel.setName("LoginPanel.authFailedLabel");
+        authFailedLabel.setForeground(warningForeground);
+        authFailedLabel.setFont(warningFont);
+        authFailedLabel.setIcon(warningIcon);
 
         HyperlinkButton goBackButton = new HyperlinkButton(new AbstractAction(I18n.tr("Choose another account")) {
             @Override
@@ -238,9 +247,8 @@ public class XMPPUserEntryLoginPanel extends JPanel {
         
         JPanel contentPanel = new JPanel(new MigLayout("gap 0, insets 10, align center"));
         
-        contentPanel.add(authFailedLabel, "gapleft 2, wmin 0, hidemode 3, gapbottom 3, wrap");
-        
-        contentPanel.add(serviceLabel, "wrap");
+        contentPanel.add(authFailedLabel, "gapleft 2, hidemode 3, gapbottom 3, wrap");
+        contentPanel.add(serviceLabel, "hidemode 3, wrap");
         contentPanel.add(serviceField, "gapbottom 10, hidemode 3, grow, wrap");
         contentPanel.add(usernameLabel, "wrap");
         contentPanel.add(usernameField, "gapbottom 10, grow, wrap");

@@ -42,6 +42,9 @@ public class ButtonDecorator {
     @Resource private Font  darkFullTextFont;
     @Resource private Color darkFullTextForeground;
     
+    @Resource private Font flatTextFont;
+    @Resource private Color flatTextForeground;
+    
     @Inject
     ButtonDecorator(ButtonPainterFactory painterFactory) {
         GuiUtils.assignResources(this);
@@ -50,6 +53,7 @@ public class ButtonDecorator {
         
         // TODO: Underline can not be set using resources?
         linkTextFont = FontUtils.deriveUnderline(linkTextFont, true);
+        flatTextFont = FontUtils.deriveUnderline(flatTextFont, true);
     }
     
     public void decorateMiniButton(JXButton button) {
@@ -154,7 +158,20 @@ public class ButtonDecorator {
         
         button.setForeground(lightFullTextForeground);
         button.setFont(lightFullTextFont);
-    }    
+    }   
+    
+    /**
+     * Decorates a button using the flat button style with no rollover and click effects and a minimal
+     *  visual style.
+     */
+    public void decorateFlatButton(JXButton button) {
+        button.setBackgroundPainter(painterFactory.createFlatButtonBackgroundPainter());
+
+        decorateGeneral(button);
+        
+        button.setForeground(flatTextForeground);
+        button.setFont(flatTextFont);
+    }
         
     private static void decorateGeneral(JXButton button) {
         button.setOpaque(false);

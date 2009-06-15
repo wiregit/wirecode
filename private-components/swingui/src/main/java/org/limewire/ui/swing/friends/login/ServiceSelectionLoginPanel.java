@@ -6,14 +6,18 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 
-import javax.swing.JButton;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXButton;
+import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
@@ -23,19 +27,31 @@ public class ServiceSelectionLoginPanel extends JPanel {
     
     private static final String CONFIG = "limewire.configProperty";
     
+    @Resource Color labelTextForeground;
+    @Resource Font labelTextFont;
+    @Resource Color messageTextForeground;
+    @Resource Font messageTextFont;
+    
+    @Resource Icon facebookIcon;
+    
     private final LoginPopupPanel parent;
     
     @Inject
-    public ServiceSelectionLoginPanel(LoginPopupPanel parent, XMPPAccountConfigurationManager accountManager) {
+    public ServiceSelectionLoginPanel(LoginPopupPanel parent, XMPPAccountConfigurationManager accountManager,
+            ButtonDecorator buttonDecorator) {
+        
         super(new BorderLayout());
         setOpaque(false);
     
+        GuiUtils.assignResources(this);
+        
         this.parent = parent;        
         
         JPanel topPanel = new JPanel(new MigLayout("insets 0, gap 0, alignx center, flowy"));
         
         JLabel shareLabel = new JLabel(I18n.tr("Share"));
-        shareLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        shareLabel.setFont(labelTextFont);
+        shareLabel.setForeground(labelTextForeground);
         topPanel.add(shareLabel, "gaptop 8");
         
         JPanel shareIcon = new JPanel();
@@ -44,7 +60,8 @@ public class ServiceSelectionLoginPanel extends JPanel {
         topPanel.add(shareIcon, "gapright 14, wrap");
         
         JLabel browseLabel = new JLabel(I18n.tr("Browse"));
-        browseLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        browseLabel.setFont(labelTextFont);
+        browseLabel.setForeground(labelTextForeground);
         topPanel.add(browseLabel);
         
         JPanel browseIcon = new JPanel();
@@ -53,7 +70,8 @@ public class ServiceSelectionLoginPanel extends JPanel {
         topPanel.add(browseIcon, "gapright 14, wrap");
         
         JLabel chatLabel = new JLabel(I18n.tr("Chat"));
-        chatLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        chatLabel.setFont(labelTextFont);
+        chatLabel.setForeground(labelTextForeground);
         topPanel.add(chatLabel);
         
         JPanel chatIcon = new JPanel();
@@ -61,22 +79,45 @@ public class ServiceSelectionLoginPanel extends JPanel {
         ResizeUtils.forceSize(chatIcon, new Dimension(153,90));
         topPanel.add(chatIcon);
         
-        JPanel bottomPanel = new JPanel(new MigLayout("gap 0, insets 0, align center"));
-        bottomPanel.setOpaque(false);
+        
+        JPanel centerPanel = new JPanel(new MigLayout("gap 0, insets 15 0 0 0, align center"));
+        
         JLabel signOnMessageLabel = new JLabel(I18n.tr("Sign on with any of the services below:"));
         signOnMessageLabel.setOpaque(false);
-        bottomPanel.add(signOnMessageLabel, "dock north");
+        signOnMessageLabel.setForeground(messageTextForeground);
+        signOnMessageLabel.setFont(messageTextFont);
         
-        JPanel selectionPanel = new JPanel(new MigLayout("gap 0, insets 0, alignx center, filly"));
+        centerPanel.add(signOnMessageLabel);        
+        
+        JPanel bottomPanel = new JPanel(new MigLayout("gap 0, insets 0, align center"));
+        bottomPanel.setOpaque(false);
+        
+        JXButton facebookButton = new JXButton("Facebook", facebookIcon);
+        JXButton gmailButton = new JXButton(new ServiceAction(accountManager.getConfig("Gmail")));
+        JXButton liveJournalButton = new JXButton(new ServiceAction(accountManager.getConfig("LiveJournal")));
+        JXButton otherButton = new JXButton(new ServiceAction(I18n.tr("Other"), accountManager.getConfig("Jabber")));
+        
+        ResizeUtils.forceSize(facebookButton, new Dimension(180, 58));
+        ResizeUtils.forceSize(gmailButton, new Dimension(180, 58));
+        ResizeUtils.forceSize(liveJournalButton, new Dimension(180, 58));
+        ResizeUtils.forceSize(otherButton, new Dimension(180, 58));
+        
+        buttonDecorator.decorateFlatButton(facebookButton);
+        buttonDecorator.decorateFlatButton(gmailButton);
+        buttonDecorator.decorateFlatButton(liveJournalButton);
+        buttonDecorator.decorateFlatButton(otherButton);
+        
+        JPanel selectionPanel = new JPanel(new MigLayout("gap 0, insets 0 0 40 0, alignx center, filly"));
         selectionPanel.setOpaque(false);
-        selectionPanel.add(new JButton("Facebook"), "gaptop 10, gapright 30");
-        selectionPanel.add(new JButton(new ServiceAction(accountManager.getConfig("Gmail"))), "wrap");
-        selectionPanel.add(new JButton(new ServiceAction(accountManager.getConfig("LiveJournal"))), "gapright 30, gaptop 30");
-        selectionPanel.add(new JButton(new ServiceAction(I18n.tr("Other"), accountManager.getConfig("Jabber"))));
+        selectionPanel.add(facebookButton, "gaptop 10, gapright 30");
+        selectionPanel.add(gmailButton, "wrap");
+        selectionPanel.add(liveJournalButton, "gapright 30, gaptop 30");
+        selectionPanel.add(otherButton);
         bottomPanel.add(selectionPanel);
         
         add(topPanel, BorderLayout.NORTH);
-        add(bottomPanel, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
         
     }
     

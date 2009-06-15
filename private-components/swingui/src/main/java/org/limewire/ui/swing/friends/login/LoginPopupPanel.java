@@ -40,7 +40,7 @@ public class LoginPopupPanel extends Panel implements Resizable {
     
     @Resource private Icon closeIcon;
     @Resource private Icon closeIconRollover;
-    @Resource private Icon closeIconPressed;   
+    @Resource private Icon closeIconPressed;
     
     private final Provider<ServiceSelectionLoginPanel> serviceSelectionLoginPanelProvider;
     private final XMPPUserEntryLoginPanelFactory xmppUserEntryLoginPanelFactory;
