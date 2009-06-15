@@ -33,10 +33,13 @@ public class ConnectBackRequestHandler implements FeatureTransport<ConnectBackRe
     private static final String TYPE = "connect-back-request";
     
     private final EventBroadcaster<ConnectBackRequestedEvent> connectBackEventBroadcaster;
+
+    private final FacebookFriendConnection connection;
     
     @AssistedInject
     public ConnectBackRequestHandler(@Assisted FacebookFriendConnection connection,
                 EventBroadcaster<ConnectBackRequestedEvent> connectBackEventBroadcaster) {
+        this.connection = connection;
         this.connectBackEventBroadcaster = connectBackEventBroadcaster;
     }
 
@@ -90,6 +93,8 @@ public class ConnectBackRequestHandler implements FeatureTransport<ConnectBackRe
             address.put("value", StringUtils.toUTF8String(Base64.encodeBase64(serializer.serialize(data.getAddress()))));
             
             message.put("address", address);
+            
+            connection.sendLiveMessage(presence, TYPE, message);
         } catch (IOException ie) {
             throw new RuntimeException(ie);
         }
