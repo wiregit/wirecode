@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.sharing;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -59,6 +60,7 @@ public class LibrarySharingNonEditablePanel {
         component.add(headerLabel, "aligny top, gaptop 8, gapleft 6, gapbottom 6, wrap");
         
         scrollPane = new JScrollPane(table);
+        scrollPane.setMinimumSize(new Dimension(0,0));
         scrollPane.setBorder(BorderFactory.createEmptyBorder(1,0,1,0));
         scrollPane.setBackground(backgroundColor);
        
