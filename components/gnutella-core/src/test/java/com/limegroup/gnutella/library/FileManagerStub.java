@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.library;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -52,9 +53,6 @@ public class FileManagerStub implements FileManager, FileCollectionManager, File
     @Override
     public void stop() {}
 
-    public void unloadCollectionByName(String name) { }
-
-
     @Override
     public FileView getFileViewForId(String id) {
         throw new UnsupportedOperationException();
@@ -70,8 +68,7 @@ public class FileManagerStub implements FileManager, FileCollectionManager, File
 
     @Override
     public List<SharedFileCollection> getSharedFileCollections() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
     }
 
 

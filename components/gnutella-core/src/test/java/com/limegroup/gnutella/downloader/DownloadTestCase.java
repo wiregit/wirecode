@@ -134,6 +134,8 @@ public abstract class DownloadTestCase extends LimeTestCase {
     @Inject protected SocketsManager socketsManager;
 
     @Inject protected MessageFactory messageFactory;
+
+    @Inject private LifecycleManager lifecycleManager;
     
     @Inject protected RemoteFileDescFactory remoteFileDescFactory;
     @Inject protected DownloadStatsTracker statsTracker;
@@ -426,8 +428,6 @@ public abstract class DownloadTestCase extends LimeTestCase {
     protected final int COMPLETE = 2;
 
     protected final int INVALID = 3;
-
-    private LifecycleManager lifecycleManager;
 
     protected void waitForComplete(boolean corrupt) {
         waitForCompleteImpl(corrupt ? CORRUPT : COMPLETE);
