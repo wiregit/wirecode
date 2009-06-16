@@ -2,6 +2,7 @@ package org.limewire.ui.swing.statusbar;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -15,11 +16,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.Timer;
+import javax.swing.table.TableCellRenderer;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
@@ -29,10 +34,9 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Resizable;
-import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -47,21 +51,30 @@ import com.google.inject.Inject;
 
 public class SharedFileCountPopupPanel extends Panel implements Resizable {
    
+    private static final String ICON_COLUMN_ID = "Icon";
+    private static final String NAME_COLUMN_ID = "Name";
+    
     @Resource private Color dividerForeground = PainterUtils.TRASPARENT;;
     @Resource private Color rolloverBackground = PainterUtils.TRASPARENT;
     @Resource private Color activeBackground = PainterUtils.TRASPARENT;
     @Resource private Color activeBorder = PainterUtils.TRASPARENT;
     @Resource private Color border = PainterUtils.TRASPARENT;
     @Resource private Font headerFont;
+   
+    @Resource private Icon closeIcon;
+    @Resource private Icon closeIconRollover;
+    @Resource private Icon closeIconPressed;
+    
+    @Resource private Icon publicIcon;
+    @Resource private Icon listSharedIcon;
     
     private final SharedFileCountPanel sharedFileCountPanel;
-    private final HeaderBarDecorator barDecorator;
     private final SharedFileListManager shareListManager;
     
     private JXPanel frame = null;
     private JTable table = null;
     
-    private final AbstractAction closeAction = new AbstractAction(I18n.tr("Hide")) {
+    private final AbstractAction closeAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             setVisible(false);
@@ -71,11 +84,10 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
     @Inject
     public SharedFileCountPopupPanel(SharedFileCountPanel sharedFileCountPanel,
-            HeaderBarDecorator barDecorator, SharedFileListManager shareListManager) {
+            SharedFileListManager shareListManager) {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
-        this.barDecorator = barDecorator;
         this.shareListManager = shareListManager;
         
         GuiUtils.assignResources(this);
@@ -111,20 +123,23 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         frame.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border));
         frame.setPreferredSize(new Dimension(300, 200));
         
-        HeaderBar bar = new HeaderBar(I18n.tr("Sharing"));
-        barDecorator.decorateBasic(bar);
-        bar.setFont(headerFont);
-        bar.setLayout(new BorderLayout());
-        ResizeUtils.forceHeight(bar, 18);
+        JPanel topBarPanel = new JPanel(new MigLayout("gap 0, insets 0, fill"));
+        topBarPanel.setBackground(border);
+        ResizeUtils.forceHeight(topBarPanel, 21);
         
-        HyperlinkButton closeButton = new HyperlinkButton(closeAction);
-        closeButton.setFont(headerFont);
-        closeButton.setNormalForeground(Color.WHITE);
-        closeButton.setRolloverForeground(Color.WHITE);
-        bar.add(closeButton, BorderLayout.EAST);
+        JLabel titleBarLabel = new JLabel(I18n.tr("Sharing Lists"));
+        titleBarLabel.setOpaque(false);
+        titleBarLabel.setForeground(Color.WHITE);
+        titleBarLabel.setFont(headerFont);
+        IconButton closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
+        closeButton.addActionListener(closeAction);
+        closeButton.setOpaque(false);
         
-        frame.add(bar, BorderLayout.NORTH);
-
+        topBarPanel.add(titleBarLabel, "gapleft 4, dock west");
+        topBarPanel.add(closeButton, "gapright 3, dock east");
+        
+        frame.add(topBarPanel, BorderLayout.NORTH);
+        
         JPanel contentPanel = new JPanel(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         
@@ -133,42 +148,57 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         contentPanel.setOpaque(false);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
         
-        JLabel titleLabel = new JLabel(I18n.tr("You're sharing the following lists"));
-        titleLabel.setOpaque(false);
-        contentPanel.add(titleLabel, BorderLayout.NORTH);
-        
+        JLabel headingLabel = new JLabel(I18n.tr("You're sharing the following lists"));
+        headingLabel.setOpaque(false);
+        contentPanel.add(headingLabel, BorderLayout.NORTH);
+                        
         table = new JTable(new EventTableModel<SharedFileList>(shareListManager.getModel(),
                 new TableFormat<SharedFileList>() {
                     @Override
                     public int getColumnCount() {
-                        return 2;
+                        return 3;
                     }
                     @Override
                     public String getColumnName(int column) {
                         if (column == 0) {
-                            return "Name";
+                            return ICON_COLUMN_ID;
+                        }
+                        else if (column == 1) {
+                            return NAME_COLUMN_ID;
                         } 
                         else {
                             return "Files";
                         }
                     }
+                                        
                     @Override
                     public Object getColumnValue(SharedFileList baseObject, int column) {
                         if (column == 0) {
+                            if (baseObject.isPublic()) {
+                                return publicIcon;
+                            }
+                            else {
+                                return listSharedIcon;
+                            }
+                        }
+                        else if (column == 1) {
                             return baseObject.getCollectionName();
                         } 
                         else {
                             return I18n.trn("{0} file", "{0} files", baseObject.size());
-                                    
                         }
                     }
         }));
+     
+        table.getColumn(ICON_COLUMN_ID).setCellRenderer(new IconRenderer());
+        table.getColumn(NAME_COLUMN_ID).setCellRenderer(new LinkRenderer());
         
         table.setOpaque(false);
         table.setShowGrid(false);
         table.setFocusable(false);
         table.setCellSelectionEnabled(false);
-
+        table.setRowHeight(18);
+        
         final ListEventListener<LocalFileItem> repaintListener = new RepaintListener();
             
  
@@ -279,6 +309,37 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         @Override
         public void listChanged(ListEvent<LocalFileItem> listChanges) {
             repaintTimer.start();
+        }
+    }
+    
+    private static class IconRenderer extends JLabel implements TableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            
+            if (!(value instanceof Icon)) {
+                return null;
+            }
+            
+            setIcon((Icon) value);
+            return this;
+        }
+    }
+    
+    private static class LinkRenderer extends HyperlinkButton implements TableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            
+            if (value == null) {
+                return null;
+            }
+            
+            setText(value.toString());
+            
+            return this;         
         }
     }
 }
