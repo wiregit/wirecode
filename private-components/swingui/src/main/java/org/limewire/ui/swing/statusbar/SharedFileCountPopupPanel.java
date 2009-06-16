@@ -23,9 +23,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.Timer;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.apache.log4j.lf5.viewer.FilteredLogTableModel;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
@@ -42,9 +44,11 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
@@ -121,7 +125,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
         frame = new JXPanel(new BorderLayout());
         frame.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, border));
-        frame.setPreferredSize(new Dimension(300, 200));
+        frame.setPreferredSize(new Dimension(250, 160));
         
         JPanel topBarPanel = new JPanel(new MigLayout("gap 0, insets 0, fill"));
         topBarPanel.setBackground(border);
@@ -146,13 +150,18 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         scrollPane.setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         contentPanel.setOpaque(false);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(5,4,4,4));
+                               
+        FilterList<SharedFileList> filteredSharedFileLists 
+            = new FilterList<SharedFileList>(shareListManager.getModel());
+        filteredSharedFileLists.setMatcher(new Matcher<SharedFileList>() {
+            @Override
+            public boolean matches(SharedFileList item) {
+                return item.isPublic() || (item.size() != 0 && item.getFriendIds().size() != 0);
+            }
+        });
         
-        JLabel headingLabel = new JLabel(I18n.tr("You're sharing the following lists"));
-        headingLabel.setOpaque(false);
-        contentPanel.add(headingLabel, BorderLayout.NORTH);
-                        
-        table = new JTable(new EventTableModel<SharedFileList>(shareListManager.getModel(),
+        table = new JTable(new EventTableModel<SharedFileList>(filteredSharedFileLists,
                 new TableFormat<SharedFileList>() {
                     @Override
                     public int getColumnCount() {
@@ -190,14 +199,21 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                     }
         }));
      
-        table.getColumn(ICON_COLUMN_ID).setCellRenderer(new IconRenderer());
+        TableColumn iconColumn = table.getColumn(ICON_COLUMN_ID); 
+        iconColumn.setCellRenderer(new IconRenderer());
+        iconColumn.setPreferredWidth(publicIcon.getIconWidth());
+        iconColumn.setMaxWidth(publicIcon.getIconWidth());
+        
         table.getColumn(NAME_COLUMN_ID).setCellRenderer(new LinkRenderer());
+        
+        
         
         table.setOpaque(false);
         table.setShowGrid(false);
         table.setFocusable(false);
         table.setCellSelectionEnabled(false);
         table.setRowHeight(18);
+        
         
         final ListEventListener<LocalFileItem> repaintListener = new RepaintListener();
             
