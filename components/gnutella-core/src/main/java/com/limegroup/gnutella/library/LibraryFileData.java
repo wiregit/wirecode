@@ -540,7 +540,9 @@ class LibraryFileData extends AbstractSettingsGroup {
         lock.writeLock().lock();
         try {
             String oldName = collectionNames.put(collectionId, name);
-            return oldName == null || !oldName.equals(name);
+            boolean changed = oldName == null || !oldName.equals(name);
+            dirty |= changed;
+            return changed;
         } finally {
             lock.writeLock().unlock();
         }
@@ -559,8 +561,8 @@ class LibraryFileData extends AbstractSettingsGroup {
             return nextId;
         } finally {
             lock.writeLock().unlock();
-                }
-            }
+        }
+    }
     
     /** Removes the collection's share data & name.  This assumes all files have already been dereferenced. */
     void removeCollection(int collectionId) {
@@ -570,8 +572,8 @@ class LibraryFileData extends AbstractSettingsGroup {
            dirty |= collectionShareData.remove(collectionId) != null;
         } finally {
             lock.writeLock().unlock();
-                }
-            }
+        }
+    }
 
     /** Adds a new shareId to the given collection's Id. */
     boolean addFriendToCollection(int collectionId, String friendId) {
