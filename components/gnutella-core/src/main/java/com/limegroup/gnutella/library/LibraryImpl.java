@@ -1094,8 +1094,26 @@ class LibraryImpl implements Library, FileCollection {
     }
 
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder) {
-        throw new NotImplementedException();
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder) {
+        final List<ListeningFuture<FileDesc>> listeningFutureList = new ArrayList<ListeningFuture<FileDesc>>();
+        return fileLoader.submit(new Runnable() {
+            @Override
+            public void run() {
+                addFolderInternal(folder);
+            }
+
+            private void addFolderInternal(File folderOrFile) {
+                if(folderOrFile != null ) {
+                    if(folderOrFile.isDirectory() && isDirectoryAllowed(folderOrFile)) {
+                        for(File file : folderOrFile.listFiles()) {
+                            addFolderInternal(file);
+                        }
+                    } else {
+                        listeningFutureList.add(add(folderOrFile));
+                    }
+                }
+            }
+        }, listeningFutureList);
     }
 
     @Override
