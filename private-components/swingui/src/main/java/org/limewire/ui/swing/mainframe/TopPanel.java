@@ -14,6 +14,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -126,7 +127,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
         friendButton.setToolTipText(I18n.tr("Friend Login"));
         friendButton.setText(null);
         friendButton.setIconTextGap(1);
-        friendButton.getPopupMenu().addPopupMenuListener(friendListener);
+        JPopupMenu menu = new JPopupMenu();
+        friendButton.overrideMenu(menu);
+        menu.addPopupMenuListener(friendListener);
         
         JButton storeButton;
         if(MozillaInitialization.isInitialized()) {
