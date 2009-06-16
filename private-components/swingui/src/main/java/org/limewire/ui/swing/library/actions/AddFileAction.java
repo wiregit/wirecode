@@ -10,6 +10,7 @@ import javax.swing.filechooser.FileFilter;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -30,7 +31,7 @@ public class AddFileAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        List<File> files = FileChooser.getInput(GuiUtils.getMainFrame(), I18n.tr("Add Files(s)"), 
+        final List<File> files = FileChooser.getInput(GuiUtils.getMainFrame(), I18n.tr("Add Files(s)"), 
                 I18n.tr("Add Files(s)"), FileChooser.getLastInputDirectory(),
                 JFileChooser.FILES_AND_DIRECTORIES, JFileChooser.APPROVE_OPTION, true,
                 new FileFilter() {
@@ -46,17 +47,21 @@ public class AddFileAction extends AbstractAction {
                 });
 
         if (files != null) {
-            LibraryNavItem item = libraryNavigatorPanel.get().getSelectedNavItem();
+            BackgroundExecutorService.execute(new Runnable(){
+                public void run() {
+                    LibraryNavItem item = libraryNavigatorPanel.get().getSelectedNavItem();
 
-            if(item != null) {
-                for(File file : files) {
-                    if(file.isDirectory()) {
-                        item.getLocalFileList().addFolder(file);
-                    } else {
-                        item.getLocalFileList().addFile(file);
-                    }
+                    if(item != null) {
+                        for(File file : files) {
+                            if(file.isDirectory()) {
+                                item.getLocalFileList().addFolder(file);
+                            } else {
+                                item.getLocalFileList().addFile(file);
+                            }
+                        }
+                    }                    
                 }
-            }
+            });
         }
     } 
 }
