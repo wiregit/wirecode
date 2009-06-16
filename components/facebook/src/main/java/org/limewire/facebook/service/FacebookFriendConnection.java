@@ -745,8 +745,8 @@ public class FacebookFriendConnection implements FriendConnection {
     void sendChatMessage(String friendId, String message) throws FriendException {
         List <NameValuePair> nvps = new ArrayList <NameValuePair>();
         nvps.add(new BasicNameValuePair("msg_text", (message == null)? "":message));
-        nvps.add(new BasicNameValuePair("msg_id", new Random().nextInt(999999999) + ""));
-        nvps.add(new BasicNameValuePair("client_time", new Date().getTime() + ""));
+        nvps.add(new BasicNameValuePair("msg_id", (int)(Math.random() * 1000000000) + ""));
+        nvps.add(new BasicNameValuePair("client_time", System.currentTimeMillis() + ""));
         nvps.add(new BasicNameValuePair("to", friendId));
 
         String post_form_id = postFormID.get();
