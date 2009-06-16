@@ -7,29 +7,25 @@ import javax.swing.TransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-
 public class LibraryNavTransferHandler extends TransferHandler {
-
-    private final Provider<LibraryNavigatorTable> libraryNavigatorTable;
 
     private final LocalFileListTransferHandler localFileListTransferHandler = new LocalFileListTransferHandler();
 
-    @Inject
-    public LibraryNavTransferHandler(Provider<LibraryNavigatorTable> libraryNavigatorTable) {
-        this.libraryNavigatorTable = libraryNavigatorTable;
-    }
-
     @Override
     public boolean canImport(TransferSupport info) {
+
+        if (!LibraryNavigatorTable.class.isInstance(info.getComponent())) {
+            return false;
+        }
+
+        LibraryNavigatorTable libraryNavigatorTable = (LibraryNavigatorTable) info.getComponent();
         DropLocation dropLocation = info.getDropLocation();
         Point point = dropLocation.getDropPoint();
-        int column = libraryNavigatorTable.get().columnAtPoint(point);
-        int row = libraryNavigatorTable.get().rowAtPoint(point);
+        int column = libraryNavigatorTable.columnAtPoint(point);
+        int row = libraryNavigatorTable.rowAtPoint(point);
 
-        LibraryNavItem libraryNavItem = (LibraryNavItem) libraryNavigatorTable.get().getValueAt(
-                row, column);
+        LibraryNavItem libraryNavItem = (LibraryNavItem) libraryNavigatorTable.getValueAt(row,
+                column);
         if (libraryNavItem == null) {
             return false;
         }
@@ -39,12 +35,18 @@ public class LibraryNavTransferHandler extends TransferHandler {
 
     @Override
     public boolean importData(TransferSupport info) {
+        if (!LibraryNavigatorTable.class.isInstance(info.getComponent())) {
+            return false;
+        }
+
+        LibraryNavigatorTable libraryNavigatorTable = (LibraryNavigatorTable) info.getComponent();
+
         DropLocation dropLocation = info.getDropLocation();
         Point point = dropLocation.getDropPoint();
-        int column = libraryNavigatorTable.get().columnAtPoint(point);
-        int row = libraryNavigatorTable.get().rowAtPoint(point);
-        LibraryNavItem libraryNavItem = (LibraryNavItem) libraryNavigatorTable.get().getValueAt(
-                row, column);
+        int column = libraryNavigatorTable.columnAtPoint(point);
+        int row = libraryNavigatorTable.rowAtPoint(point);
+        LibraryNavItem libraryNavItem = (LibraryNavItem) libraryNavigatorTable.getValueAt(row,
+                column);
         if (libraryNavItem == null) {
             return false;
         }
