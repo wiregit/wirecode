@@ -46,7 +46,6 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 
@@ -73,7 +72,7 @@ public class LibraryPanel extends JPanel {
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, 
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
-            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher) {
+            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LocalFileListTransferHandler transferHandler) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.navigatorComponent = navPanel;
@@ -83,7 +82,7 @@ public class LibraryPanel extends JPanel {
         this.publicSharedFeedbackPanel = publicSharedFeedbackPanel;
         this.buttonDecorator = buttonDecorator;
         this.categoryMatcher = categoryMatcher;
-        this.transferHandler = new LocalFileListTransferHandler();
+        this.transferHandler = transferHandler;
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 
@@ -100,6 +99,7 @@ public class LibraryPanel extends JPanel {
         headerBar.add(playerPanel, "grow, align 50%");
         headerBar.add(tableSelectionComboBox, "alignx right, gapright 5");
         
+        libraryTable.setTransferHandler(transferHandler);
         JScrollPane libraryScrollPane = new JScrollPane(libraryTable);
         libraryScrollPane.setBorder(BorderFactory.createEmptyBorder());  
         configureEnclosingScrollPane(libraryScrollPane);
@@ -184,20 +184,6 @@ public class LibraryPanel extends JPanel {
         sortedList = GlazedListsFactory.sortedList(eventList);
         filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
         libraryTable.setEventList(filteredList, tableSelectionComboBox.getSelectedTabelFormat());
-        updateTransferHandler();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void updateTransferHandler() {
-        LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
-        EventSelectionModel<LocalFileItem> selectionModel = (EventSelectionModel<LocalFileItem>) libraryTable.getSelectionModel();
-
-        if(navItem != null) {
-            transferHandler.setFileList(selectionModel, navItem.getLocalFileList());
-            libraryTable.setTransferHandler(transferHandler);
-        } else {
-            libraryTable.setTransferHandler(null);
-        }
     }
     
     private void setPublicSharedComponentVisible(LibraryNavItem navItem) {

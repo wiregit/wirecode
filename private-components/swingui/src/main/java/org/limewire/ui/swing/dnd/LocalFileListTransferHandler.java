@@ -12,32 +12,34 @@ import javax.swing.TransferHandler;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem;
+import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
+import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.util.DNDUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
+import com.google.inject.Inject;
+
 public class LocalFileListTransferHandler extends TransferHandler {
 
-    private LocalFileList fileList;
+    private final LibraryNavigatorTable libraryNavigatorTable;
+    private final LibraryTable libraryTable;
 
-    private EventSelectionModel<LocalFileItem> selectionModel;
-
-    public LocalFileListTransferHandler() {
-    }
-
-    public void setFileList(EventSelectionModel<LocalFileItem> selectionModel,
-            LocalFileList fileList) {
-        this.fileList = fileList;
-        this.selectionModel = selectionModel;
+    @Inject
+    public LocalFileListTransferHandler(LibraryNavigatorTable libraryNavigatorTable, 
+            LibraryTable libraryTable) {
+        this.libraryNavigatorTable = libraryNavigatorTable;
+        this.libraryTable = libraryTable;
     }
 
     @Override
     protected Transferable createTransferable(JComponent c) {
         LocalFileTransferable transferable = null;
-        if (selectionModel != null) {
+        if (libraryTable.getSelectionModel() != null) {
             List<File> files = new ArrayList<File>();
-            EventList<LocalFileItem> selected = selectionModel.getSelected();
+            EventList<LocalFileItem> selected = ((EventSelectionModel<LocalFileItem>) libraryTable.getSelectionModel()).getSelected();
             for (LocalFileItem fileItem : selected) {
                 files.add(fileItem.getFile());
             }
@@ -53,7 +55,7 @@ public class LocalFileListTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport info) {
-        if (fileList == null || !DNDUtils.containsFileFlavors(info)) {
+        if (getLocalFileList() == null || !DNDUtils.containsFileFlavors(info)) {
             return false;
         }
 
@@ -67,8 +69,9 @@ public class LocalFileListTransferHandler extends TransferHandler {
             }
         }
 
+        LocalFileList localFileList = getLocalFileList();
         for (File file : files) {
-            if (fileList.isFileAddable(file)) {
+            if (localFileList.isFileAddable(file)) {
                 return true;
             }
         }
@@ -97,15 +100,23 @@ public class LocalFileListTransferHandler extends TransferHandler {
     }
 
     private void handleFiles(final List<File> files) {
+        LocalFileList localFileList = getLocalFileList();
         for (File file : files) {
-            if (fileList.isFileAddable(file)) {
+            if (localFileList.isFileAddable(file)) {
                 if (file.isDirectory()) {
-                    fileList.addFolder(file);
+                    localFileList.addFolder(file);
                 } else {
-                    fileList.addFile(file);
+                    localFileList.addFile(file);
                 }
             }
         }
+    }
+    
+    private LocalFileList getLocalFileList() {
+        LibraryNavItem item = libraryNavigatorTable.getSelectedItem();
+        if(item == null)
+            return null;
+        return item.getLocalFileList();
     }
 
 }
