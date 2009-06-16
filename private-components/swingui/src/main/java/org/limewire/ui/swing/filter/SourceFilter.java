@@ -331,10 +331,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
      */
     private void updateAnonymousFound() {
         // Determine if anonymous sources are found.
-        boolean found = false;
-        if (uniqueSourceList.contains(SourceItem.ANONYMOUS_SOURCE)) {
-            found = (uniqueSourceList.getCount(SourceItem.ANONYMOUS_SOURCE) > 0);
-        }
+        boolean found = uniqueSourceList.contains(SourceItem.ANONYMOUS_SOURCE);
         
         // Update current unique list only if changed.
         UniqueList<SourceItem> newList = found ? uniqueSourceList : uniqueFriendList;
@@ -361,10 +358,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
      */
     private void updateAnyFriendFound() {
         // Determine if any friend sources are found.
-        boolean found = false;
-        if (uniqueSourceList.contains(SourceItem.ANY_FRIEND_SOURCE)) {
-            found = (uniqueSourceList.getCount(SourceItem.ANY_FRIEND_SOURCE) > 0);
-        }
+        boolean found = uniqueSourceList.contains(SourceItem.ANY_FRIEND_SOURCE);
         
         // Update indicator if necessary.
         if (anyFriendFound == found) return;
@@ -566,7 +560,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
 
         @Override
         public SourceItem evaluate(Friend sourceValue) {
-            return new SourceItem(SourceItem.Type.FRIEND, sourceValue.getName());
+            return new SourceItem(SourceItem.Type.FRIEND, sourceValue.getRenderName());
         }
     }
     

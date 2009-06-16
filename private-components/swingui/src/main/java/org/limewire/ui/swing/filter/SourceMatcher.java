@@ -39,7 +39,7 @@ class SourceMatcher<E extends FilterableItem> implements Matcher<E> {
             Collection<Friend> friends = item.getFriends();
             String name = sourceItem.getName();
             for (Friend friend : friends) {
-                if (Objects.compareToNullIgnoreCase(name, friend.getName(), false) == 0) {
+                if (Objects.compareToNullIgnoreCase(name, friend.getRenderName(), false) == 0) {
                     return true;
                 }
             }
