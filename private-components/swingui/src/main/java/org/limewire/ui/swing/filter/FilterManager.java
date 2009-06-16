@@ -105,8 +105,8 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
     /**
      * Returns a filter for file sources.
      */
-    public Filter<E> getSourceFilter() {
-        return getFilter(FilterType.SOURCE);
+    public SourceFilter<E> getSourceFilter() {
+        return (SourceFilter<E>) getFilter(FilterType.SOURCE);
     }
     
     /**
@@ -244,7 +244,7 @@ public class FilterManager<E extends FilterableItem> implements Disposable {
             return new RangeFilter<E>(new QualityFilterFormat<E>());
             
         case SOURCE:
-            return new SourceFilter<E>();
+            return new SourceFilter<E>(filterableSource.getFilteredList());
             
         default:
             throw new IllegalArgumentException("Invalid filter type " + filterType);
