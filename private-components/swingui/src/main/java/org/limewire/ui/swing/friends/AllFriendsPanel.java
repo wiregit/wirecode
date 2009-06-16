@@ -59,7 +59,7 @@ public class AllFriendsPanel extends JPanel {
             public void searchStopped(Search search) {}}
         );     
         
-        panel.setTitle(I18n.tr("Browse All Friends"));
+        panel.setBrowseTitle(I18n.tr("All Friends"));
 
     }
 }
