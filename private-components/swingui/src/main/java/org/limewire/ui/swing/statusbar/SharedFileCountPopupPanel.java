@@ -27,22 +27,26 @@ import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.apache.log4j.lf5.viewer.FilteredLogTableModel;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -52,12 +56,13 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class SharedFileCountPopupPanel extends Panel implements Resizable {
    
     private static final String ICON_COLUMN_ID = "Icon";
     private static final String NAME_COLUMN_ID = "Name";
-    
+
     @Resource private Color dividerForeground = PainterUtils.TRASPARENT;;
     @Resource private Color rolloverBackground = PainterUtils.TRASPARENT;
     @Resource private Color activeBackground = PainterUtils.TRASPARENT;
@@ -72,11 +77,20 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     @Resource private Icon publicIcon;
     @Resource private Icon listSharedIcon;
     
+    @Resource private Font listTextFont;
+    @Resource private Color listTextForeground;
+    @Resource private Font signInTextFont;
+    
     private final SharedFileCountPanel sharedFileCountPanel;
     private final SharedFileListManager shareListManager;
+    private final Provider<LoginPopupPanel> loginPanelProvider;
+    private final XMPPService xmppService;
+    private final ListenerSupport<XMPPConnectionEvent> connectionSupport;
     
     private JXPanel frame = null;
     private JTable table = null;
+    private VisiblityMatcher matcher = null;
+    private FilterList<SharedFileList> filteredSharedFileLists;
     
     private final AbstractAction closeAction = new AbstractAction() {
         @Override
@@ -88,11 +102,17 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
     @Inject
     public SharedFileCountPopupPanel(SharedFileCountPanel sharedFileCountPanel,
-            SharedFileListManager shareListManager) {
+            SharedFileListManager shareListManager,
+            Provider<LoginPopupPanel> loginPanelProvider,
+            XMPPService xmppService,
+            ListenerSupport<XMPPConnectionEvent> connectionSupport) {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
         this.shareListManager = shareListManager;
+        this.loginPanelProvider = loginPanelProvider;
+        this.xmppService = xmppService;
+        this.connectionSupport = connectionSupport;
         
         GuiUtils.assignResources(this);
         
@@ -121,6 +141,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         });
     }
     
+    @SuppressWarnings("unchecked")
     private void initContent() {
         
         frame = new JXPanel(new BorderLayout());
@@ -152,14 +173,12 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         contentPanel.setOpaque(false);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(5,4,4,4));
                                
-        FilterList<SharedFileList> filteredSharedFileLists 
-            = new FilterList<SharedFileList>(shareListManager.getModel());
-        filteredSharedFileLists.setMatcher(new Matcher<SharedFileList>() {
-            @Override
-            public boolean matches(SharedFileList item) {
-                return item.isPublic() || (item.size() != 0 && item.getFriendIds().size() != 0);
-            }
-        });
+        filteredSharedFileLists = new FilterList<SharedFileList>(shareListManager.getModel());
+        
+        matcher = new VisiblityMatcher();
+        filteredSharedFileLists.setMatcher(matcher);
+        
+        filteredSharedFileLists.setMatcher(null);
         
         table = new JTable(new EventTableModel<SharedFileList>(filteredSharedFileLists,
                 new TableFormat<SharedFileList>() {
@@ -204,23 +223,24 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         iconColumn.setPreferredWidth(publicIcon.getIconWidth());
         iconColumn.setMaxWidth(publicIcon.getIconWidth());
         
-        table.getColumn(NAME_COLUMN_ID).setCellRenderer(new LinkRenderer());
         
+        LinkRenderer linkRenderer = new LinkRenderer();
+        linkRenderer.setFont(listTextFont);
+        table.getColumn(NAME_COLUMN_ID).setCellRenderer(linkRenderer);
         
-        
+        table.setFont(listTextFont);
+        table.setForeground(listTextForeground);
         table.setOpaque(false);
         table.setShowGrid(false);
         table.setFocusable(false);
         table.setCellSelectionEnabled(false);
         table.setRowHeight(18);
         
-        
-        final ListEventListener<LocalFileItem> repaintListener = new RepaintListener();
-            
- 
-        
+        final ListEventListener repaintListener = new RepaintListener();
+               
         for ( SharedFileList item : shareListManager.getModel() ) {
             item.getSwingModel().addListEventListener(repaintListener);
+            item.getFriendIds().addListEventListener(repaintListener);
         }
         
         shareListManager.getModel().addListEventListener(new ListEventListener<SharedFileList>() {
@@ -228,8 +248,11 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             public void listChanged(ListEvent<SharedFileList> listChanges) {
                 while(listChanges.next()) {
                     if (listChanges.getType() == ListEvent.INSERT) {
-                        listChanges.getSourceList().get(listChanges.getIndex()).
-                            getModel().addListEventListener(repaintListener);
+                        
+                        SharedFileList newList = listChanges.getSourceList().get(listChanges.getIndex());
+                        
+                        newList.getModel().addListEventListener(repaintListener);
+                        newList.getFriendIds().addListEventListener(repaintListener);
                     }
                 }
             }
@@ -237,6 +260,28 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         
         contentPanel.add(table, BorderLayout.CENTER);
 
+        JPanel bottomPanel = new JPanel(new MigLayout("gap 0, insets 0, align center"));
+        bottomPanel.setOpaque(false);
+        final HyperlinkButton signIntoFriendsButton 
+            = new HyperlinkButton(new AbstractAction(I18n.tr("Sign in to share with friends")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    loginPanelProvider.get().setVisible(true);
+                }
+            });
+        signIntoFriendsButton.setFont(signInTextFont);
+        signIntoFriendsButton.setVisible(!xmppService.isLoggedIn());
+        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+            @SwingEDTEvent
+            @Override
+            public void handleEvent(XMPPConnectionEvent event) {
+                signIntoFriendsButton.setVisible(!xmppService.isLoggedIn());
+            }
+        });
+        
+        bottomPanel.add(signIntoFriendsButton);
+        contentPanel.add(bottomPanel, BorderLayout.SOUTH);
+        
         frame.add(scrollPane, BorderLayout.CENTER);
 
         add(frame, BorderLayout.CENTER);
@@ -307,7 +352,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         }    
     }
     
-    private class RepaintListener implements ListEventListener<LocalFileItem> {
+    private class RepaintListener implements ListEventListener {
             
         private final Timer repaintTimer; 
             
@@ -316,6 +361,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             repaintTimer = new Timer(15, new ActionListener() {
                    @Override
                    public void actionPerformed(ActionEvent e) {
+                       filteredSharedFileLists.setMatcher(matcher);
                        table.repaint();
                    }
             });
@@ -323,7 +369,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         } 
             
         @Override
-        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+        public void listChanged(ListEvent listChanges) {
             repaintTimer.start();
         }
     }
@@ -356,6 +402,16 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
             setText(value.toString());
             
             return this;         
+        }
+    }
+    
+    private static class VisiblityMatcher implements Matcher<SharedFileList> {
+        @Override
+        public boolean matches(SharedFileList item) {
+            return item.size() != 0 && 
+                    (   item.isPublic() 
+                     || (item.getFriendIds().size() != 0)
+                    );
         }
     }
 }
