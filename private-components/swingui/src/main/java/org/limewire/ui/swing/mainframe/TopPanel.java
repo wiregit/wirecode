@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -57,6 +57,7 @@ import org.limewire.ui.swing.search.SearchResultMediator;
 import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
 import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
+import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.mozilla.browser.MozillaInitialization;
@@ -194,13 +195,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
 
     @Override
-    public SearchNavItem addSearch(String title, final JComponent searchPanel, final BrowseSearch search) {
-        return addSearch(title, searchPanel, search, browseIcon);
+    public SearchNavItem addSearch(String title, final JComponent searchPanel, final BrowseSearch search, SearchResultsModel model) {
+        return addSearch(title, searchPanel, search, model, browseIcon);
     }
 
     @Override
-    public SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search) {
-        return addSearch(title, searchPanel, search, null);
+    public SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model) {
+        return addSearch(title, searchPanel, search, model, null);
     }
     
     @Override
@@ -241,18 +242,19 @@ class TopPanel extends JXPanel implements SearchNavigator {
         return searchNavItem;
     }
     
-    private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, Icon icon) {
+    private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model, Icon icon) {
         final NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(searchPanel));
         final SearchAction action = new SearchAction(item);
         action.putValue(Action.LARGE_ICON_KEY, icon);
         search.addSearchListener(action);
 
         final Action moreTextAction = new NoOpAction();
-        final RepeatSearchAction repeat = new RepeatSearchAction(search);
-        search.addSearchListener(repeat);
+        final Action moreResults = new MoreResultsAction(search).register();
+        final Action repeatSearch = new RepeatSearchAction(search, model).register();
+        final Action stopSearch = new StopSearchAction(search).register();
 
         final TabActionMap actionMap = new TabActionMap(
-            action, action, moreTextAction, Collections.singletonList(repeat));
+            action, action, moreTextAction, Arrays.asList(stopSearch, repeatSearch, TabActionMap.SEPARATOR, moreResults));
         
         searchList.addTabActionMapAt(actionMap, 0);
         
@@ -488,19 +490,40 @@ class TopPanel extends JXPanel implements SearchNavigator {
             });
         }
     }
+    
+    private static abstract class SearchListenerAction extends AbstractAction implements SearchListener{
+        protected final Search search;
+
+        public SearchListenerAction(String tr, Search search) {
+            super(tr);
+            this.search = search;
+        }        
+    
+        /**
+         * Registers the SearchListenerAction as a SearchListener on search.
+         * 
+         * @return this
+         */
+        public SearchListenerAction register(){
+            search.addSearchListener(this);
+            return this;
+        }
+        
+        @Override
+        public void handleSearchResult(Search search, SearchResult searchResult) {}
+        @Override
+        public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {}
+    }
 
     /**
      * Action which repeats a search.  Since it makes no sense to
      * repeat an unstarted search, this class only enables searches to be
      * repeated if they have already started.
      */
-    private class RepeatSearchAction extends AbstractAction implements SearchListener {
+    private static class MoreResultsAction extends SearchListenerAction {
 
-        private final Search search;
-
-        RepeatSearchAction(Search search) {
-            super(I18n.tr("Find More Results"));
-            this.search = search;
+        MoreResultsAction(Search search) {
+            super(I18n.tr("Find More Results"), search);
             setEnabled(false);
         }
 
@@ -515,7 +538,56 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
 
         @Override public void searchStopped(Search search) { }
-        @Override public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) { }
-        @Override public void handleSearchResult(Search search, SearchResult searchResult) {}
+    }
+    
+    /**
+     * Clears the current search results and repeats the search
+     */
+    private static class RepeatSearchAction extends SearchListenerAction {
+        private SearchResultsModel model;
+
+        RepeatSearchAction(Search search, SearchResultsModel model) {
+            super(I18n.tr("Repeat Search"), search);
+            this.model = model;
+            setEnabled(false);
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            model.clear();
+            search.repeat();
+        }
+        
+        @Override
+        public void searchStopped(Search search) {
+            setEnabled(true);
+        }
+
+        @Override
+        public void searchStarted(Search search) {}
+        
+    }
+    
+    /**Stops the search*/
+    private static class StopSearchAction extends SearchListenerAction {
+        StopSearchAction(Search search) {
+            super(I18n.tr("Stop Search"), search);
+            setEnabled(false);
+        }
+                
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            search.stop();
+        }          
+
+        @Override
+        public void searchStarted(Search search) {
+            setEnabled(true);
+        }
+
+        @Override
+        public void searchStopped(Search search) {
+            setEnabled(false);
+        } 
     }
 }

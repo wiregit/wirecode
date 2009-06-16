@@ -84,7 +84,7 @@ class TextSearchHandlerImpl implements SearchHandler {
         SearchResultsPanel searchPanel = panelFactory.createSearchResultsPanel(searchModel);
         
         // Add search results display to the UI, and select its navigation item.
-        SearchNavItem item = searchNavigator.addSearch(panelTitle, searchPanel, search);
+        SearchNavItem item = searchNavigator.addSearch(panelTitle, searchPanel, search, searchModel);
         item.select();
 
         // Add listeners for connection events.

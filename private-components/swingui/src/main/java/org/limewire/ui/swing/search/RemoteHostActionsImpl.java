@@ -128,7 +128,7 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
        
         SearchResultsPanel searchPanel = browsePanelFactory.createBrowsePanel(search);
         // Add search results display to the UI, and select its navigation item.
-        SearchNavItem item = searchNavigator.get().addSearch(title, searchPanel, search);
+        SearchNavItem item = searchNavigator.get().addSearch(title, searchPanel, search, searchPanel.getModel());
         item.select();
         searchPanel.getModel().start(new SwingSearchListener(searchPanel.getModel(), searchPanel, item));
         searchPanel.setBrowseTitle(title);

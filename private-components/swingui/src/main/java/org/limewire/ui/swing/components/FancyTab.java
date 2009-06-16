@@ -384,7 +384,11 @@ public class FancyTab extends JXPanel {
     private void showPopup(MouseEvent e) {
         JPopupMenu menu = new JPopupMenu();
         for (Action action : getTabActionMap().getRightClickActions()) {
-            menu.add(action);
+            if(action == TabActionMap.SEPARATOR){
+                menu.addSeparator();
+            } else {
+                menu.add(action);
+            }
         }
         
         if (getComponentCount() != 0 && props.isRemovable()) {
