@@ -102,6 +102,7 @@ public class FriendAccountConfigurationManagerImpl implements FriendAccountConfi
         if(FacebookSettings.FACEBOOK_ENABLED.getValue()) {
             FriendAccountConfiguration facebook =
                 new FriendAccountConfigurationImpl(true, "facebook.com", "Facebook", facebookIcon, resource, getGTalkServers(), Network.Type.FACEBOOK);
+            facebook.setUsername("Facebook");
             configs.put(facebook.getLabel(), facebook);
         }
         FriendAccountConfiguration gmail =
