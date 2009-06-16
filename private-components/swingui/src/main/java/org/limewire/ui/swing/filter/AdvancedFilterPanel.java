@@ -33,19 +33,18 @@ import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.SideLineBorder;
 import org.limewire.ui.swing.components.SideLineBorder.Side;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
-import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
-
-import com.google.inject.Provider;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.CompositeMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+
+import com.google.inject.Provider;
 
 /**
  * Filter panel for filterable data.  AdvancedFilterPanel presents advanced 
@@ -66,9 +65,6 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     
     /** Filterable data source. */
     private final FilterableSource<E> filterableSource;
-
-    /** Manager for friend services. */
-    private final FriendActions friendManager;
 
     /** List of editors being used for filtering. */
     private final EventList<MatcherEditor<E>> editorList;
@@ -116,11 +112,9 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
      */
     public AdvancedFilterPanel(FilterableSource<E> filterableSource,
             TextFieldDecorator textFieldDecorator,
-            FriendActions friendManager,
             Provider<IconManager> iconManager) {
         
         this.filterableSource = filterableSource;
-        this.friendManager = friendManager;
         this.editorList = new BasicEventList<MatcherEditor<E>>();
         this.filterManager = new FilterManager<E>(filterableSource, iconManager);
         
@@ -182,9 +176,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
             @Override
             public void friendFound(boolean found) {
                 if (!sourceFilter.isActive()) {
-                    sourceFilter.getComponent().setVisible(found && 
-                            (AdvancedFilterPanel.this.friendManager != null) &&
-                            AdvancedFilterPanel.this.friendManager.isSignedIn());
+                    sourceFilter.getComponent().setVisible(found);
                 }
             }
         });
