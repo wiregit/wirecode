@@ -9,6 +9,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
@@ -21,6 +22,7 @@ import com.google.inject.Inject;
 public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer {
     
     private Border border;
+    private Border dropBorder;
     private @Resource Color selectedColor;
     private @Resource Font font;
     private @Resource Color fontColor;
@@ -29,12 +31,16 @@ public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer
     private @Resource Icon publicIcon;
     private @Resource Icon listIcon;
     private @Resource Icon listSharedIcon;
+    private @Resource Color dropBackgroundColor;
+    private @Resource Color dropBorderColor;
     
     @Inject
     public LibraryNavTableRenderer() {        
         GuiUtils.assignResources(this);
         
         border = BorderFactory.createEmptyBorder(5,6,5,6);
+        dropBorder = new CompoundBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, dropBorderColor), 
+                BorderFactory.createEmptyBorder(3,4,3,4));
         
         setBackground(selectedColor);
         setFont(font);
@@ -45,8 +51,6 @@ public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
-
-        setBorder(border);
         
         if(value instanceof LibraryNavItem) {
             LibraryNavItem item = (LibraryNavItem) value;
@@ -56,8 +60,19 @@ public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer
             setText("");
             setIcon(null);
         }
-
-        setOpaque(isSelected);
+        
+        JTable.DropLocation dropLocation = table.getDropLocation();
+        if(dropLocation != null             
+                && dropLocation.getRow() == row
+                && dropLocation.getColumn() == column) {
+            setOpaque(true);
+            setBorder(dropBorder);
+            setBackground(dropBackgroundColor);
+        } else {
+            setBorder(border);
+            setOpaque(isSelected);
+            setBackground(selectedColor);
+        }
            
         return this;
     }
