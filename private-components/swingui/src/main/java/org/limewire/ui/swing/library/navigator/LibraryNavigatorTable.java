@@ -38,7 +38,7 @@ public class LibraryNavigatorTable extends JXTable {
     private final EventList<LibraryNavItem> eventList;
     
     @Inject
-    public LibraryNavigatorTable() {        
+    public LibraryNavigatorTable(LibraryNavTransferHandler libraryNavTransferHandler) {        
         GuiUtils.assignResources(this);
         
         initialize();
@@ -48,7 +48,7 @@ public class LibraryNavigatorTable extends JXTable {
         
         setModel(new EventTableModel<LibraryNavItem>(sortedList, new NavTableFormat()));
         setDropMode(DropMode.ON);
-        setTransferHandler(new LibraryNavTransferHandler());
+        setTransferHandler(libraryNavTransferHandler);
         setEditable(false);
     }
     

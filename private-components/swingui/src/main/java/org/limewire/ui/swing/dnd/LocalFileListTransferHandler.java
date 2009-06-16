@@ -53,7 +53,27 @@ public class LocalFileListTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport info) {
-        return fileList != null && DNDUtils.containsFileFlavors(info);
+        if (fileList == null || !DNDUtils.containsFileFlavors(info)) {
+            return false;
+        }
+
+        List<File> files = Collections.emptyList();
+        if (DNDUtils.containsFileFlavors(info)) {
+            Transferable t = info.getTransferable();
+            try {
+                files = Arrays.asList(DNDUtils.getFiles(t));
+            } catch (Throwable failed) {
+                return true;
+            }
+        }
+
+        for (File file : files) {
+            if (fileList.isFileAddable(file)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -62,7 +82,7 @@ public class LocalFileListTransferHandler extends TransferHandler {
             return false;
         }
 
-        List<File> files = Collections.emptyList();        
+        List<File> files = Collections.emptyList();
         if (DNDUtils.containsFileFlavors(info)) {
             Transferable t = info.getTransferable();
             try {
@@ -70,18 +90,20 @@ public class LocalFileListTransferHandler extends TransferHandler {
             } catch (Throwable failed) {
                 return false;
             }
-        } 
-        
+        }
+
         handleFiles(files);
         return true;
     }
 
     private void handleFiles(final List<File> files) {
         for (File file : files) {
-            if (file.isDirectory()) {
-                fileList.addFolder(file);
-            } else {
-                fileList.addFile(file);
+            if (fileList.isFileAddable(file)) {
+                if (file.isDirectory()) {
+                    fileList.addFolder(file);
+                } else {
+                    fileList.addFile(file);
+                }
             }
         }
     }

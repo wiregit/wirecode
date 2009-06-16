@@ -6,8 +6,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.SourcedEventMulticaster;
+import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -215,6 +218,25 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
 
     @Override
     public boolean isFileAddable(File file) {
+        if(file == null) {
+            return false;
+        }
+        
+        if(file.isDirectory()) {
+            return true;
+        }
+        
+        MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
+        if(MediaType.getProgramMediaType().equals(mediaType) && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+            return false;
+        }
+        
+        if(isPublic()) {
+            if(MediaType.getDocumentMediaType().equals(mediaType) && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
+                return false;
+            }
+        }
+        
         return true;
     }
 
