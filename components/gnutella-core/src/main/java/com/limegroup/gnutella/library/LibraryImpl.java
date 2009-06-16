@@ -1105,6 +1105,7 @@ class LibraryImpl implements Library, FileCollection {
             }
 
             private void addFolderInternal(File folderOrFile) {
+                //TODO try to make non-recursive
                 if(folderOrFile != null ) {
                     if(folderOrFile.isDirectory() && isDirectoryAllowed(folderOrFile)) {
                         for(File file : folderOrFile.listFiles()) {
