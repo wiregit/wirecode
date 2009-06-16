@@ -1,10 +1,13 @@
 package org.limewire.ui.swing.friends.login;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -14,15 +17,27 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.core.api.friend.Network.Type;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionFactory;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.browser.Browser;
+import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
@@ -35,19 +50,27 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.ResizeUtils;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
-import org.limewire.core.api.friend.client.FriendConnectionFactory;
+import org.mozilla.browser.MozillaPanel;
+import org.mozilla.browser.XPCOMUtils;
+import org.mozilla.browser.impl.ChromeAdapter;
+import org.mozilla.interfaces.nsICookieManager;
+import org.mozilla.interfaces.nsICookieService;
+import org.mozilla.interfaces.nsIDOMEvent;
+import org.mozilla.interfaces.nsIDOMEventListener;
+import org.mozilla.interfaces.nsIDOMEventTarget;
+import org.mozilla.interfaces.nsIDOMWindow2;
+import org.mozilla.interfaces.nsIDownloadManager;
+import org.mozilla.interfaces.nsIIOService;
+import org.mozilla.interfaces.nsISupports;
+import org.mozilla.interfaces.nsIURI;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import net.miginfocom.swing.MigLayout;
-
 @Singleton
 class LoginPanel extends JXPanel implements SettingListener {
-
+    
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign In");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in...");
     private static final String AUTHENTICATION_ERROR = tr("Incorrect username or password.");
@@ -288,31 +311,89 @@ class LoginPanel extends JXPanel implements SettingListener {
         }
 
         public void actionPerformed(ActionEvent e) {
-            String user = usernameField.getText().trim();
-            String password = new String(passwordField.getPassword());
-            if(user.equals("") || password.equals("")) {
-                return;
-            }            
-            FriendAccountConfiguration config = (FriendAccountConfiguration)serviceComboBox.getSelectedAction().getValue(CONFIG);
-            if(config.getLabel().equals("Jabber")) {
-                String service = serviceField.getText().trim();
-                if(service.equals(""))
+            final FriendAccountConfiguration config = (FriendAccountConfiguration)serviceComboBox.getSelectedAction().getValue(CONFIG);
+            if (config.getType() == Type.XMPP) {
+                String user = usernameField.getText().trim();
+                String password = new String(passwordField.getPassword());
+                if(user.equals("") || password.equals("")) {
                     return;
-                config.setServiceName(service);
-            }
-            config.setUsername(user);
-            config.setPassword(password);
-            if(autoLoginCheckBox.isSelected()) {
-                // Set this as the auto-login account
-                accountManager.setAutoLoginConfig(config);
+                }            
+                if(config.getLabel().equals("Jabber")) {
+                    String service = serviceField.getText().trim();
+                    if(service.equals(""))
+                        return;
+                    config.setServiceName(service);
+                }
+                config.setUsername(user);
+                config.setPassword(password);
+                if(autoLoginCheckBox.isSelected()) {
+                    // Set this as the auto-login account
+                    accountManager.setAutoLoginConfig(config);
+                } else {
+                    // If there was previously an auto-login account, delete it
+                    accountManager.setAutoLoginConfig(null);
+                }
+                login(config);
             } else {
-                // If there was previously an auto-login account, delete it
-                accountManager.setAutoLoginConfig(null);
+                JFrame dialog = new JFrame();
+                final Browser browser = new Browser() {
+                    @Override
+                    public void onAttachBrowser(ChromeAdapter chromeAdapter,
+                            ChromeAdapter parentChromeAdapter) {
+                        super.onAttachBrowser(chromeAdapter, parentChromeAdapter);
+                        nsIDOMEventTarget eventTarget = XPCOMUtils.qi(chromeAdapter.getWebBrowser().getContentDOMWindow(),
+                                nsIDOMWindow2.class).getWindowRoot();
+                        eventTarget.addEventListener("load", new nsIDOMEventListener() {
+                            @Override
+                            public void handleEvent(nsIDOMEvent event) {
+                                String url = getUrl();
+                                if (url.contains("desktopapp.php")) {
+                                    nsICookieService cookieService = XPCOMUtils.getServiceProxy("@mozilla.org/cookieService;1",
+                                            nsICookieService.class);
+                                    nsIIOService ioService = XPCOMUtils.getServiceProxy("@mozilla.org/network/io-service;1", nsIIOService.class);
+                                    nsIURI uri = ioService.newURI(url, null, null);
+                                    String cookie = cookieService.getCookieStringFromHttp(uri, null, null);
+                                    uri = ioService.newURI("http://facebook.com/", null, null);
+                                    cookie = cookieService.getCookieStringFromHttp(uri, null, null);
+                                    config.setAttribute("url", "http://facebook.com/");
+                                    config.setAttribute("cookie", cookie);
+                                    friendConnectionFactory.login(config);
+                                } else if (url.contains("login")) {
+                                    String script = "(function() {var input = document.createElement('input');" +
+                                    "input.type='hidden';" +
+                                    "input.name='persistent';" +
+                                    "input.value='1';" +
+                                    "document.forms[0].appendChild(input);"; 
+                                    jsexec(script);
+                                }
+                            }
+                            @Override
+                            public nsISupports queryInterface(String uuid) {
+                                return null;
+                            }
+                        }, true);
+                    }
+                };
+                dialog.getContentPane().add(browser);
+                dialog.setSize(800, 600);
+                dialog.pack();
+                dialog.setVisible(true);
+                friendConnectionFactory.getLoginUrl(config).addFutureListener(new EventListener<FutureEvent<String>>() {
+                    @Override
+                    public void handleEvent(FutureEvent<String> event) {
+                        switch (event.getType()) {
+                        case SUCCESS:
+                            browser.load(event.getResult());
+                            break;
+                        default:
+                            throw new IllegalStateException(event.getType().toString());
+                        }
+                    }
+                });
             }
-            login(config);
         }
     }
-
+    
     public void connecting(FriendConnectionConfiguration config) {
         setSignInComponentsEnabled(false);
     }

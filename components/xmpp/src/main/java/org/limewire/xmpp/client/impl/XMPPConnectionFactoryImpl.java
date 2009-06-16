@@ -290,5 +290,11 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
             connection.setModeImpl(mode);
         }
     }
+
+    @Override
+    public ListeningFuture<String> getLoginUrl(FriendConnectionConfiguration configuration) {
+        return null;
+    }
+
     
 }

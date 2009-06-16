@@ -5,12 +5,12 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.limewire.core.api.friend.client.ChatState;
+import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.facebook.service.livemessage.LiveMessageHandler;
 import org.limewire.facebook.service.livemessage.LiveMessageHandlerRegistry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.core.api.friend.client.MessageReader;
-import org.limewire.core.api.friend.client.ChatState;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -89,6 +89,7 @@ public class ChatListener implements Runnable {
                 LOG.debug("error parsing chat message", e);
             }
         }
+        LOG.debug("chat listener is done");
     }
 
     private void dispatchMessage(JSONObject message) throws JSONException {

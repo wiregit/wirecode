@@ -1,15 +1,18 @@
 package org.limewire.ui.swing.friends.settings;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.swing.Icon;
 
 import org.jdesktop.swingx.icon.EmptyIcon;
+import org.limewire.core.api.friend.client.RosterEvent;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.listener.EventListener;
 import org.limewire.util.StringUtils;
-import org.limewire.core.api.friend.client.RosterEvent;
 
 /**
  * Stores all the information required to log into an XMPP server and
@@ -29,6 +32,10 @@ class FriendAccountConfigurationImpl implements FriendAccountConfiguration {
     private volatile String password;
     private final List<UnresolvedIpPort> defaultServers;
     private final Type type;
+    /**
+     * Synchronized, since accessed by the core in different threads. 
+     */
+    private final Map<String, Object> attributes = Collections.synchronizedMap(new HashMap<String, Object>()); 
 
     /** Constructs an XMPPAccountConfiguration with the following parameters. */
     public FriendAccountConfigurationImpl(boolean requireDomain, String serviceName, String label, Icon icon, String resource, List<UnresolvedIpPort> defaultServers, Type type) {
@@ -151,5 +158,15 @@ class FriendAccountConfigurationImpl implements FriendAccountConfiguration {
     @Override
     public List<UnresolvedIpPort> getDefaultServers() {
         return defaultServers;
+    }
+
+    @Override
+    public Object getAttribute(String key) {
+        return attributes.get(key);
+    }
+
+    @Override
+    public void setAttribute(String key, Object property) {
+        attributes.put(key, property);
     }
 }

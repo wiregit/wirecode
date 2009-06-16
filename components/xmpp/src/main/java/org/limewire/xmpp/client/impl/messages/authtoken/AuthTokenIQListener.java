@@ -30,19 +30,14 @@ public class AuthTokenIQListener implements PacketListener, FeatureTransport<Aut
     public void processPacket(Packet packet) {
         final AuthTokenIQ iq = (AuthTokenIQ)packet;
         if(iq.getType().equals(IQ.Type.SET)) {
-            handler.featureReceived(iq.getFrom(), new AuthToken() {
-                @Override
-                public byte[] getToken() {
-                    return iq.getAuthToken();
-                }
-            });
+            handler.featureReceived(iq.getFrom(), iq.getAuthToken());
 
         }
     }
 
     @Override
     public void sendFeature(FriendPresence presence, AuthToken localFeature) throws FriendException {
-        AuthTokenIQ queryResult = new AuthTokenIQ(localFeature.getToken());
+        AuthTokenIQ queryResult = new AuthTokenIQ(localFeature);
         queryResult.setTo(presence.getPresenceId());
         queryResult.setFrom(connection.getLocalJid());
         queryResult.setType(IQ.Type.SET);

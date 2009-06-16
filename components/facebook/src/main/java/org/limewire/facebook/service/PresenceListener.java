@@ -3,6 +3,7 @@ package org.limewire.facebook.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +23,7 @@ public class PresenceListener implements Runnable {
     
     private final FacebookFriendConnection connection;
     private final BuddyListResponseDeserializer deserializer = new BuddyListResponseDeserializer();
-    private Set<String> lastOnlineFriends = Collections.emptySet();
+    private Set<String> lastOnlineFriends = new HashSet<String>();
 
     @AssistedInject
     PresenceListener(@Assisted FacebookFriendConnection connection) {

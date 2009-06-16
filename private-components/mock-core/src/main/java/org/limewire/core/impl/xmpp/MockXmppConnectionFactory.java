@@ -19,4 +19,9 @@ class MockXmppConnectionFactory implements FriendConnectionFactory {
     public void register(FriendConnectionFactoryRegistry registry) {
         registry.register(Network.Type.XMPP, this);
     }
+
+    @Override
+    public ListeningFuture<String> getLoginUrl(FriendConnectionConfiguration configuration) {
+        return null;
+    }
 }

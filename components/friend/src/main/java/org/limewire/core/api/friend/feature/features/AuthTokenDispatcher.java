@@ -15,7 +15,6 @@ import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
 import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.core.api.friend.impl.AuthTokenImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
@@ -88,15 +87,15 @@ public class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
         public void initializeFeature(FriendPresence friendPresence) {
             synchronized (AuthTokenDispatcher.this) {
                 try {
-                    final byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(friendPresence.getPresenceId())).getToken();
+                    final AuthToken authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(friendPresence.getPresenceId()));
                     FeatureTransport<AuthToken> transport = friendPresence.getTransport(AuthTokenFeature.class);
                     if (transport != null) {
-                        transport.sendFeature(friendPresence, new AuthTokenImpl(authToken));
+                        transport.sendFeature(friendPresence, authToken);
                     } else {
                         LOG.debugf("no auth transport for: {0}", friendPresence);
                     }
                 } catch (FriendException e) {
-                    LOG.debugf(e, "couldn't send auth token to {0} " + friendPresence);
+                    LOG.debugf(e, "couldn't send auth token to: {0}", friendPresence);
                 }
                 AuthToken authToken = pendingAuthTokens.remove(friendPresence.getPresenceId());
                 if (authToken != null) {

@@ -2,8 +2,10 @@ package org.limewire.core.api.friend.impl;
 
 import java.util.Arrays;
 
+import org.apache.commons.codec.binary.Base64;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.util.Objects;
+import org.limewire.util.StringUtils;
 
 /**
  * Default implementation for {@link AuthToken}.
@@ -14,6 +16,10 @@ public class AuthTokenImpl implements AuthToken {
 
     public AuthTokenImpl(byte[] token) {
         this.token = Objects.nonNull(token, "token");
+    }
+    
+    public AuthTokenImpl(String base64Encoded) {
+        this.token = Base64.decodeBase64(StringUtils.toAsciiBytes(base64Encoded));
     }
     
     @Override
@@ -27,5 +33,15 @@ public class AuthTokenImpl implements AuthToken {
             return Arrays.equals(token, ((AuthToken)obj).getToken());
         }
         return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(token);
+    }
+
+    @Override
+    public String getBase64() {
+        return StringUtils.getASCIIString(Base64.encodeBase64(token));
     }
 }

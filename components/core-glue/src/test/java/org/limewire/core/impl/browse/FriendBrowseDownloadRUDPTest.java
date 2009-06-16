@@ -116,6 +116,13 @@ public class FriendBrowseDownloadRUDPTest extends LimeTestCase {
             @Override public String getNetworkName() { return getServiceName(); }
             @Override public List<UnresolvedIpPort> getDefaultServers() { return UnresolvedIpPort.EMPTY_LIST;}
             @Override public Type getType() { return Network.Type.XMPP;}
+            @Override
+            public Object getAttribute(String key) {
+                return null;
+            }
+            @Override
+            public void setAttribute(String key, Object property) {
+            }
         };
     }
 

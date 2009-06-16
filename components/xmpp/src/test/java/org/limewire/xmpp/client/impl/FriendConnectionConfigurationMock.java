@@ -75,4 +75,13 @@ public class FriendConnectionConfigurationMock implements FriendConnectionConfig
     @Override public List<UnresolvedIpPort> getDefaultServers() {
         return Collections.emptyList();
     }
+
+    @Override
+    public Object getAttribute(String key) {
+        return null;
+    }
+
+    @Override
+    public void setAttribute(String key, Object property) {
+    }
 }

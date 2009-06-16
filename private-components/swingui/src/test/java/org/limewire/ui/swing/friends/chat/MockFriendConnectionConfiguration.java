@@ -76,4 +76,13 @@ public class MockFriendConnectionConfiguration implements FriendConnectionConfig
     public Type getType() {
         return Network.Type.XMPP;
     }
+
+    @Override
+    public Object getAttribute(String key) {
+        return null;
+    }
+
+    @Override
+    public void setAttribute(String key, Object property) {
+    }
 }

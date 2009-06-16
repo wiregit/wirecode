@@ -1,7 +1,6 @@
 package org.limewire.core.api.friend.client;
 
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.core.api.friend.client.FriendConnection;
 
 
 /**
@@ -22,4 +21,7 @@ public interface FriendConnectionFactory {
     public ListeningFuture<FriendConnection> login(FriendConnectionConfiguration configuration);
 
     public void register(FriendConnectionFactoryRegistry registry);
+    
+    ListeningFuture<String> getLoginUrl(FriendConnectionConfiguration configuration);
+    
 }

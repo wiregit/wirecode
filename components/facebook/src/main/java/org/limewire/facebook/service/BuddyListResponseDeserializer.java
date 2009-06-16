@@ -1,6 +1,5 @@
 package org.limewire.facebook.service;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -44,7 +43,7 @@ public class BuddyListResponseDeserializer {
 			    LOG.debugf("received error description: {0}", errorDescription);
 			}
 		}
-        return Collections.emptySet();
+        return new HashSet<String>();
     }
     
     private Set<String> deserialize(JSONObject buddyList) throws JSONException {

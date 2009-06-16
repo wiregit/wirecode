@@ -43,15 +43,14 @@ public class AuthTokenHandler implements LiveMessageHandler, FeatureTransport<Au
         String from = message.optString("from", null);
         String authtoken = message.optString("auth-token", null);
         if (from != null && authtoken != null) {
-            byte[] token = Base64.decodeBase64(StringUtils.toUTF8Bytes(authtoken));
-            authTokenHandler.featureReceived(from, new AuthTokenImpl(token));
+            authTokenHandler.featureReceived(from, new AuthTokenImpl(authtoken));
         }
     }
     
     @Override
     public void sendFeature(FriendPresence presence, AuthToken localFeature) throws FriendException {
         Map<String, Object> message = new HashMap<String, Object>();
-        message.put("auth-token", StringUtils.toUTF8String(Base64.encodeBase64(localFeature.getToken())));
+        message.put("auth-token", localFeature.getBase64());
         connection.sendLiveMessage(presence, TYPE, message);
     }
 }

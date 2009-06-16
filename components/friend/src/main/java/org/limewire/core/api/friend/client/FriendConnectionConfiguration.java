@@ -55,4 +55,8 @@ public interface FriendConnectionConfiguration extends Network {
      * @return a list of jabber servers; never null
      */
     public List<UnresolvedIpPort> getDefaultServers();
+    
+    public void setAttribute(String key, Object property);
+    
+    public Object getAttribute(String key);
 }

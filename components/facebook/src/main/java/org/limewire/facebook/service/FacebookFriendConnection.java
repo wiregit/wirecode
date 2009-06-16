@@ -2,16 +2,15 @@ package org.limewire.facebook.service;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -21,23 +20,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.ProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.RedirectHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.cookie.CookieOrigin;
+import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BestMatchSpec;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.jivesoftware.smack.util.StringUtils;
 import org.json.JSONArray;
@@ -78,6 +77,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequest;
 import org.limewire.security.SecurityUtils;
+import org.limewire.util.URIUtils;
 
 import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJsonRestClient;
@@ -94,13 +94,9 @@ public class FacebookFriendConnection implements FriendConnection {
     private final Provider<String> apiKey;
     private static final String HOME_PAGE = "http://www.facebook.com/home.php";
     private static final String PRESENCE_POPOUT_PAGE = "http://www.facebook.com/presence/popout.php";
-    private static final String FACEBOOK_LOGIN_GET_URL = "http://coelacanth:5555/getlogin/";
-    private static final String FACEBOOK_LOGIN_POST_ACTION_URL = "https://login.facebook.com/login.php?";
     private static final String FACEBOOK_GET_SESSION_URL = "http://coelacanth:5555/getsession/";
     private static final String FACEBOOK_CHAT_SETTINGS_URL = "https://www.facebook.com/ajax/chat/settings.php?";
-    private static final String INCORRECT_LOGIN_INDICATOR_TEXT = "Incorrect Email/Password Combination";
     private static final String INVALID_LOGIN_HTTP_RESPONSE = "Invalid HTTP login response";
-    private String authToken;
     private String session;
     private String uid;
     private String secret;
@@ -115,7 +111,6 @@ public class FacebookFriendConnection implements FriendConnection {
     private FacebookJsonRestClient facebookClient;
     private final CookieStore cookieStore = new BasicCookieStore();
     private AtomicReference<String> postFormID = new AtomicReference<String>();
-
     
     /**
      * Lock being held for adding and removing presences from friends.
@@ -137,7 +132,7 @@ public class FacebookFriendConnection implements FriendConnection {
     private final Network network = new Network() {
         @Override
         public String getCanonicalizedLocalID() {
-            return getUID();
+            return uid;
         }
         @Override
         public String getNetworkName() {
@@ -199,6 +194,10 @@ public class FacebookFriendConnection implements FriendConnection {
         this.libraryRefreshHandler = libraryRefreshHandlerFactory.create(this);
         this.chatManager = new ChatManager(this);
         this.sessionId = createSessionId();
+        
+        for (Cookie cookie : parseCookies(configuration)) {
+            cookieStore.addCookie(cookie);
+        }
     }
     
     private static String createSessionId() {
@@ -311,7 +310,6 @@ public class FacebookFriendConnection implements FriendConnection {
             try {
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));
                 loggingIn.set(true);
-                loginToFacebook();
                 requestSession();
                 fetchAllFriends();
                 readMetadataFromHomePage();
@@ -360,6 +358,10 @@ public class FacebookFriendConnection implements FriendConnection {
         if (entity != null) {
             entity.consumeContent();
         }
+    }
+    
+    String getUID() {
+        return uid;
     }
 
     /**
@@ -419,60 +421,13 @@ public class FacebookFriendConnection implements FriendConnection {
         }
     }
 
-    private void loginToFacebook() throws IOException {
-        LOG.debugf("getting facebook login URL from {0}...", FACEBOOK_LOGIN_GET_URL);
-        HttpGet loginGet = new HttpGet(FACEBOOK_LOGIN_GET_URL);
-        loginGet.addHeader("User-Agent", USER_AGENT_HEADER);
-        HttpClient httpClient = createHttpClient();
-        HttpResponse response = httpClient.execute(loginGet);
-        HttpEntity entity = response.getEntity();
-
-        if (entity != null) {
-            entity.consumeContent();
-        }
-
-        final String loginURL = FACEBOOK_LOGIN_POST_ACTION_URL + "version=1.0" + "&auth_token=" + authToken +
-                "&api_key=" + apiKey.get();
-        LOG.debugf("logging into {0}...", loginURL);
-        HttpPost httpost = new HttpPost(loginURL);
-
-        httpost.addHeader("User-Agent", USER_AGENT_HEADER);
-        List <NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair("email", configuration.getUserInputLocalID()));
-        nvps.add(new BasicNameValuePair("pass", configuration.getPassword()));
-        nvps.add(new BasicNameValuePair("persistent", "1"));
-        nvps.add(new BasicNameValuePair("login", "Login"));
-        nvps.add(new BasicNameValuePair("visibility", "true"));
-        nvps.add(new BasicNameValuePair("charset_test", "€,´,€,´,水,Д,Є"));
-
-        httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
-
-        HttpResponse responsePost = httpClient.execute(httpost);
-        validateLoginResponse(responsePost);
-    }
-
     private void requestSession() throws IOException, JSONException {
+        String authToken = (String)configuration.getAttribute("auth-token");
         LOG.debugf("requesting session from {0}...", FACEBOOK_GET_SESSION_URL + authToken + "/");
         HttpGet sessionRequest = new HttpGet(FACEBOOK_GET_SESSION_URL + authToken + "/");
         HttpClient httpClient = createHttpClient();
         HttpResponse response = httpClient.execute(sessionRequest);
         parseSessionResponse(response);        
-    }
-
-    private void validateLoginResponse(HttpResponse responsePost) throws IOException {
-        // validate http response code
-        if (responsePost.getStatusLine().getStatusCode() != 200) {
-            throw new IOException(INVALID_LOGIN_HTTP_RESPONSE);
-        }
-        HttpEntity entity = responsePost.getEntity();
-
-        if (entity != null) {
-            String response = EntityUtils.toString(entity);
-            if (response.contains(INCORRECT_LOGIN_INDICATOR_TEXT)) {
-                throw new IOException("authentication failure due to invalid username and/or password.");
-            }
-            entity.consumeContent();
-        }
     }
 
     private void parseSessionResponse(HttpResponse response) throws IOException, JSONException {
@@ -655,18 +610,6 @@ public class FacebookFriendConnection implements FriendConnection {
         }
     }
 
-    public String getAuthToken() {
-        return authToken;
-    }
-    
-    public String getSession() {
-        return session;
-    }
-    
-    public String getUID() {
-        return uid;    
-    }
-    
     public String getChannel() {
         return chatChannel.get();
     }
@@ -677,46 +620,6 @@ public class FacebookFriendConnection implements FriendConnection {
     
     ChatManager getChatManager() {
         return chatManager;
-    }
-
-    private class AuthTokenInterceptingHttpClient extends DefaultHttpClient  {
-        @Override
-        protected RedirectHandler createRedirectHandler() {
-            return new AuthTokenInterceptingRediectHandler(super.createRedirectHandler());
-        }
-    }
-    
-    private class AuthTokenInterceptingRediectHandler implements RedirectHandler {
-
-        private final RedirectHandler parent;
-        
-        AuthTokenInterceptingRediectHandler(RedirectHandler parent) {
-            this.parent = parent;
-        }
-        
-        @Override
-        public boolean isRedirectRequested(HttpResponse response, HttpContext context) {
-            boolean isRedirect = parent.isRedirectRequested(response, context);
-            Header [] locations = response.getHeaders("location");
-            if(locations != null && locations.length > 0) {
-                String location = locations[0].getValue();
-                int authTokenIndex = location.indexOf("auth_token=");
-                if(authTokenIndex > -1) {
-                    // TODO concurrency
-                    authToken = location.substring(authTokenIndex + "auth_token=".length());
-                    int nextParamIndex = authToken.indexOf('&');
-                    if(nextParamIndex > -1) {
-                        authToken = authToken.substring(0, nextParamIndex);
-                    }
-                }
-            }
-            return isRedirect;
-        }
-
-        @Override
-        public URI getLocationURI(HttpResponse response, HttpContext context) throws ProtocolException {
-            return parent.getLocationURI(response, context);
-        }
     }
 
     public void sendLiveMessage(FriendPresence presence, String type, Map<String, Object> messageMap) {
@@ -832,7 +735,7 @@ public class FacebookFriendConnection implements FriendConnection {
     }
     
     private HttpClient createHttpClient() {
-        AuthTokenInterceptingHttpClient httpClient = new AuthTokenInterceptingHttpClient();
+        DefaultHttpClient httpClient = new DefaultHttpClient();
         httpClient.setCookieStore(cookieStore);
         return httpClient;
     }
@@ -932,7 +835,6 @@ public class FacebookFriendConnection implements FriendConnection {
 
     void setIncomingChatListener(String friendId, IncomingChatListener listener) {
         chatManager.setIncomingChatListener(friendId, listener);
-
     }
 
     void removeIncomingChatListener(String friendId) {
@@ -941,5 +843,23 @@ public class FacebookFriendConnection implements FriendConnection {
 
     MessageWriter createChat(String friendId, MessageReader reader) {
         return chatManager.addMessageReader(friendId, reader);
+    }
+ 
+    private static List<Cookie> parseCookies(FriendConnectionConfiguration configuration) {
+        BestMatchSpec cookieParser = new BestMatchSpec();
+        try {
+            URI uri = URIUtils.toURI((String)configuration.getAttribute("url"));
+            int port = uri.getPort();
+            CookieOrigin cookieOrigin = new CookieOrigin(uri.getHost(), port == -1 ? 80 : port,
+                    uri.getPath(), uri.getScheme().endsWith("s"));
+            LOG.debugf("setting cookies for origin: {0}", cookieOrigin);
+            String cookie = (String)configuration.getAttribute("cookie");
+            cookie = cookie.replace(';', ',');
+            return cookieParser.parse(new BasicHeader("Set-Cookie", cookie), cookieOrigin);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        } catch (MalformedCookieException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
