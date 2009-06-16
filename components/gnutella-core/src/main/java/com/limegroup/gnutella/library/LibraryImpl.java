@@ -1095,7 +1095,8 @@ class LibraryImpl implements Library, FileCollection {
 
     @Override
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder) {
-        final List<ListeningFuture<FileDesc>> listeningFutureList = new ArrayList<ListeningFuture<FileDesc>>();
+        //TODO use a seperate queue to allow files to come in faster while scanning the directory.
+        final List<ListeningFuture<FileDesc>> listeningFutureList = Collections.synchronizedList(new ArrayList<ListeningFuture<FileDesc>>());
         return fileLoader.submit(new Runnable() {
             @Override
             public void run() {
