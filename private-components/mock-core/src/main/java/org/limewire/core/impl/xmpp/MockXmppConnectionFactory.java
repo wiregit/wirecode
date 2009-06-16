@@ -21,7 +21,7 @@ class MockXmppConnectionFactory implements FriendConnectionFactory {
     }
 
     @Override
-    public ListeningFuture<String> getLoginUrl(FriendConnectionConfiguration configuration) {
+    public ListeningFuture<String> requestLoginUrl(FriendConnectionConfiguration configuration) {
         return null;
     }
 }

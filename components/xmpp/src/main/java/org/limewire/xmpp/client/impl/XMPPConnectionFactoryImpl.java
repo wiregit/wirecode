@@ -292,7 +292,7 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
     }
 
     @Override
-    public ListeningFuture<String> getLoginUrl(FriendConnectionConfiguration configuration) {
+    public ListeningFuture<String> requestLoginUrl(FriendConnectionConfiguration configuration) {
         return null;
     }
 

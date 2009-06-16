@@ -22,6 +22,6 @@ public interface FriendConnectionFactory {
 
     public void register(FriendConnectionFactoryRegistry registry);
     
-    ListeningFuture<String> getLoginUrl(FriendConnectionConfiguration configuration);
+    ListeningFuture<String> requestLoginUrl(FriendConnectionConfiguration configuration);
     
 }

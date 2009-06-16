@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -30,14 +29,11 @@ import org.limewire.core.api.friend.Network.Type;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.browser.Browser;
-import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
@@ -51,16 +47,13 @@ import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
-import org.mozilla.browser.MozillaPanel;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.ChromeAdapter;
-import org.mozilla.interfaces.nsICookieManager;
 import org.mozilla.interfaces.nsICookieService;
 import org.mozilla.interfaces.nsIDOMEvent;
 import org.mozilla.interfaces.nsIDOMEventListener;
 import org.mozilla.interfaces.nsIDOMEventTarget;
 import org.mozilla.interfaces.nsIDOMWindow2;
-import org.mozilla.interfaces.nsIDownloadManager;
 import org.mozilla.interfaces.nsIIOService;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIURI;
@@ -375,10 +368,10 @@ class LoginPanel extends JXPanel implements SettingListener {
                     }
                 };
                 dialog.getContentPane().add(browser);
-                dialog.setSize(800, 600);
                 dialog.pack();
+                dialog.setSize(800, 600);
                 dialog.setVisible(true);
-                friendConnectionFactory.getLoginUrl(config).addFutureListener(new EventListener<FutureEvent<String>>() {
+                friendConnectionFactory.requestLoginUrl(config).addFutureListener(new EventListener<FutureEvent<String>>() {
                     @Override
                     public void handleEvent(FutureEvent<String> event) {
                         switch (event.getType()) {

@@ -42,8 +42,8 @@ class FriendConnectionFactoryRegistryImpl implements FriendConnectionFactoryRegi
     }
 
     @Override
-    public ListeningFuture<String> getLoginUrl(FriendConnectionConfiguration configuration) {
-        return getFactory(configuration).getLoginUrl(configuration);
+    public ListeningFuture<String> requestLoginUrl(FriendConnectionConfiguration configuration) {
+        return getFactory(configuration).requestLoginUrl(configuration);
     }
 
 }

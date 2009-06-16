@@ -139,7 +139,7 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     }
 
     @Override
-    public ListeningFuture<String> getLoginUrl(final FriendConnectionConfiguration configuration) {
+    public ListeningFuture<String> requestLoginUrl(final FriendConnectionConfiguration configuration) {
         return executorService.submit(new Callable<String>() {
             @Override
             public String call() throws Exception {
