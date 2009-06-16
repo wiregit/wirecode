@@ -32,6 +32,8 @@ import org.limewire.listener.EventListener;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.browser.Browser;
+import org.limewire.ui.swing.browser.LimeDomListener;
+import org.limewire.ui.swing.browser.UriAction;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.MultiLineLabel;
@@ -46,6 +48,7 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.ChromeAdapter;
@@ -336,6 +339,17 @@ class LoginPanel extends JXPanel implements SettingListener {
                         super.onAttachBrowser(chromeAdapter, parentChromeAdapter);
                         nsIDOMEventTarget eventTarget = XPCOMUtils.qi(chromeAdapter.getWebBrowser().getContentDOMWindow(),
                                 nsIDOMWindow2.class).getWindowRoot();
+                        
+                        LimeDomListener limeDomListener = new LimeDomListener();
+                        limeDomListener.addTargetedUrlAction("", new UriAction() {
+                            @Override
+                            public boolean uriClicked(TargetedUri targetedUri) {
+                                NativeLaunchUtils.openURL(targetedUri.getUri());
+                                return true;
+                            }
+                        });
+                        eventTarget.addEventListener("click", limeDomListener, true);
+                        
                         eventTarget.addEventListener("load", new nsIDOMEventListener() {
                             @Override
                             public void handleEvent(nsIDOMEvent event) {
@@ -390,4 +404,5 @@ class LoginPanel extends JXPanel implements SettingListener {
     public void connecting(FriendConnectionConfiguration config) {
         setSignInComponentsEnabled(false);
     }
+    
 }
