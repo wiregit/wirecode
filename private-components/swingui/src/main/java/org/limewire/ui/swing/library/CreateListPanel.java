@@ -5,12 +5,14 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JDialog;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
@@ -23,7 +25,7 @@ public class CreateListPanel extends JXPanel {
     private JXButton createButton;
     
     @Inject
-    public CreateListPanel(final Provider<SharedFileListManager> shareManager) {
+    public CreateListPanel(final Provider<SharedFileListManager> shareManager, final Provider<LibraryNavigatorTable> navTable) {
         super(new MigLayout("gap 5, insets 5")); 
         
         nameTextField = new JTextField(30);
@@ -32,10 +34,17 @@ public class CreateListPanel extends JXPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(nameTextField != null && nameTextField.getText().trim().length() > 0) {
+                    final String text = nameTextField.getText().trim();
                     BackgroundExecutorService.execute(new Runnable() {
                         @Override
                         public void run() {
-                          shareManager.get().createNewSharedFileList(nameTextField.getText());
+                          shareManager.get().createNewSharedFileList(text);
+                          // select our newly created NavItem
+                          SwingUtilities.invokeLater(new Runnable(){
+                              public void run() {
+                                  navTable.get().selectLibraryNavItem(text);                                  
+                              }
+                          });
                         }
                     });
                     hideDialog();

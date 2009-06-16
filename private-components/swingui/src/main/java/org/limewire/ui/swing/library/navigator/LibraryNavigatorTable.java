@@ -65,6 +65,18 @@ public class LibraryNavigatorTable extends JXTable {
         }
     }
     
+    public void selectLibraryNavItem(String id) {
+        for(int i = 0; i < getModel().getRowCount(); i++) {
+            Object value = getModel().getValueAt(i, 0);
+            if(value instanceof LibraryNavItem) {
+                if( ((LibraryNavItem) value).getTabID() == id) {
+                    getSelectionModel().setSelectionInterval(i,i);
+                    break;
+                }
+            }
+        }
+    }
+    
     public LibraryNavItem getSelectedItem() {
         if(getSelectedRow() >= 0)
             return eventList.get(getSelectedRow());
