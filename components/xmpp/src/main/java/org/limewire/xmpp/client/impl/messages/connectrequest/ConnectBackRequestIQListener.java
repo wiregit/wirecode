@@ -5,11 +5,7 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Packet;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.feature.FeatureInitializer;
-import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.FeatureTransport;
-import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
-import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequest;
@@ -26,25 +22,22 @@ import com.google.inject.assistedinject.AssistedInject;
 public class ConnectBackRequestIQListener implements PacketListener, FeatureTransport<ConnectBackRequest> {
 
     private static final Log LOG = LogFactory.getLog(ConnectBackRequestIQListener.class);
-    
-    private final EventBroadcaster<ConnectBackRequestedEvent> connectBackRequestedEventBroadcaster;
 
     private final XMPPFriendConnectionImpl connection;
+    private final Handler<ConnectBackRequest> connectBackRequestHandler;
 
     @AssistedInject
     public ConnectBackRequestIQListener(@Assisted XMPPFriendConnectionImpl connection,
-            EventBroadcaster<ConnectBackRequestedEvent> connectBackRequestedEventBroadcaster,
-            FeatureRegistry featureRegistry) {
+                                        FeatureTransport.Handler<ConnectBackRequest> connectBackRequestHandler) {
         this.connection = connection;
-        this.connectBackRequestedEventBroadcaster = connectBackRequestedEventBroadcaster;
-        new ConnectBackRequestIQFeatureInitializer().register(featureRegistry);
+        this.connectBackRequestHandler = connectBackRequestHandler;
     }
     
     @Override
     public void processPacket(Packet packet) {
         ConnectBackRequestIQ connectRequest = (ConnectBackRequestIQ)packet;
         LOG.debugf("processing connect request: {0}", connectRequest);
-        connectBackRequestedEventBroadcaster.broadcast(new ConnectBackRequestedEvent(connectRequest.getConnectBackRequest()));
+        connectBackRequestHandler.featureReceived(packet.getFrom(), connectRequest.getConnectBackRequest());
     }
     
     @Override
@@ -69,22 +62,4 @@ public class ConnectBackRequestIQListener implements PacketListener, FeatureTran
             }
         };
     }
-    
-    private class ConnectBackRequestIQFeatureInitializer implements FeatureInitializer {
-        @Override
-        public void register(FeatureRegistry registry) {
-            registry.add(ConnectBackRequestFeature.ID, this);
-        }
-
-        @Override
-        public void initializeFeature(FriendPresence friendPresence) {
-            friendPresence.addFeature(new ConnectBackRequestFeature());
-        }
-
-        @Override
-        public void removeFeature(FriendPresence friendPresence) {
-            friendPresence.removeFeature(ConnectBackRequestFeature.ID);
-        }
-    }
-
 }

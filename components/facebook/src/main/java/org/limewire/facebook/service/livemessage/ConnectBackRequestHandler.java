@@ -10,16 +10,14 @@ import org.json.JSONObject;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.feature.FeatureTransport;
+import org.limewire.facebook.service.FacebookFriendConnection;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
-import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequest;
-import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.util.StringUtils;
-import org.limewire.facebook.service.FacebookFriendConnection;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -31,16 +29,15 @@ public class ConnectBackRequestHandler implements FeatureTransport<ConnectBackRe
     private static final Log LOG = LogFactory.getLog(AddressHandler.class);
     
     private static final String TYPE = "connect-back-request";
-    
-    private final EventBroadcaster<ConnectBackRequestedEvent> connectBackEventBroadcaster;
+    private final Handler<ConnectBackRequest> connectBackRequestHandler;
 
     private final FacebookFriendConnection connection;
     
     @AssistedInject
     public ConnectBackRequestHandler(@Assisted FacebookFriendConnection connection,
-                EventBroadcaster<ConnectBackRequestedEvent> connectBackEventBroadcaster) {
+                FeatureTransport.Handler<ConnectBackRequest> connectBackRequestHandler) {
         this.connection = connection;
-        this.connectBackEventBroadcaster = connectBackEventBroadcaster;
+        this.connectBackRequestHandler = connectBackRequestHandler;
     }
 
     @Inject
@@ -61,7 +58,8 @@ public class ConnectBackRequestHandler implements FeatureTransport<ConnectBackRe
         }
         int fwtVersion = message.getInt("supported-fwt-version");
         Connectable address = deserializeAddress(message.getJSONObject("address"));
-        connectBackEventBroadcaster.broadcast(new ConnectBackRequestedEvent(new ConnectBackRequest(address, clientGuid, fwtVersion)));
+        String from = message.optString("from", null);
+        connectBackRequestHandler.featureReceived(from, new ConnectBackRequest(address, clientGuid, fwtVersion));
     }
     
     static Connectable deserializeAddress(JSONObject address) throws JSONException {
