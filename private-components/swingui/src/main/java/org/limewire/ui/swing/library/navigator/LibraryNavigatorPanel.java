@@ -2,9 +2,6 @@ package org.limewire.ui.swing.library.navigator;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
@@ -23,11 +20,9 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.library.actions.CreateListAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.library.popup.LibraryNavPopupHandler;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -51,6 +46,7 @@ public class LibraryNavigatorPanel extends JXPanel {
     
     @Inject
     public LibraryNavigatorPanel(LibraryNavigatorTable table, LibraryNavTableRenderer renderer,
+            LibraryNavTableEditor editor,
             LibraryNavPopupHandler popupHandler, LibraryManager libraryManager, CreateListAction createAction,
             SharedFileListManager sharedFileListManager) {
         super(new MigLayout("insets 0, gap 0, fillx", "[150!]", ""));
@@ -69,6 +65,7 @@ public class LibraryNavigatorPanel extends JXPanel {
         scrollPane.setBorder(BorderFactory.createEmptyBorder()); 
         
         table.getColumnModel().getColumn(0).setCellRenderer(renderer);
+        table.getColumnModel().getColumn(0).setCellEditor(editor);
         table.setPopupHandler(popupHandler);
         
         add(scrollPane, "growx, growy, wrap");
@@ -119,6 +116,9 @@ public class LibraryNavigatorPanel extends JXPanel {
                                 table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName(), list, NavType.LIST);
                             } else if(type == ListEvent.DELETE){
                                 table.removeLibraryNavItem(list.getCollectionName());
+                            } else if(type == ListEvent.UPDATE) {
+                                //TODO: make sure only renames are called by update
+                                table.getSelectedItem().setText(list.getCollectionName());
                             }
                             LibraryNavigatorPanel.this.revalidate();
                         }

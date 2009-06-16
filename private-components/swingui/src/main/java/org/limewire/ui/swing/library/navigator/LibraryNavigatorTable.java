@@ -8,11 +8,13 @@ import java.util.Comparator;
 
 import javax.swing.DropMode;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.dnd.LibraryNavTransferHandler;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
@@ -47,6 +49,7 @@ public class LibraryNavigatorTable extends JXTable {
         setModel(new EventTableModel<LibraryNavItem>(sortedList, new NavTableFormat()));
         setDropMode(DropMode.ON);
         setTransferHandler(new LibraryNavTransferHandler());
+        setEditable(false);
     }
     
     public void addLibraryNavItem(String name, String id, LocalFileList localFileList, NavType type) {
@@ -158,7 +161,6 @@ public class LibraryNavigatorTable extends JXTable {
                     }
                 }
             }
-
         });
     }
     
@@ -171,6 +173,43 @@ public class LibraryNavigatorTable extends JXTable {
         this.popupHandler = popupHandler;
     }
     
+    @Override
+    public void editingStopped(ChangeEvent e) {
+        TableCellEditor editor = getCellEditor();
+        if (editor != null) {    
+            Object value = editor.getCellEditorValue();
+            if(value instanceof String) {
+                handleRename((String)value);
+            }
+            removeEditor();
+        }
+        setEditable(false);
+    }
+    
+    /**
+     * Renames the selected LibraryNavItem if the new Name
+     * is a valid String.
+     */
+    private void handleRename(String newName) {
+        if(newName == null || newName.length() == 0)
+            return;
+        LibraryNavItem item = getSelectedItem();
+        LocalFileList fileList = item.getLocalFileList();
+        if(fileList instanceof SharedFileList) {
+            SharedFileList sharedFileList = (SharedFileList) fileList;
+            if(sharedFileList.isNameChangeAllowed() && !sharedFileList.getCollectionName().equals(newName)) {
+                sharedFileList.setCollectionName(newName);
+            }
+        }
+    }
+    
+    @Override
+    public boolean isCellEditable(int row, int col) {
+        if (!isEditable() || row >= getRowCount() || col >= getColumnCount() || row < 2 || col < 0) {
+            return false;
+        }
+        return true;
+    }
     
     private class NavTableFormat implements TableFormat<LibraryNavItem> {
         @Override

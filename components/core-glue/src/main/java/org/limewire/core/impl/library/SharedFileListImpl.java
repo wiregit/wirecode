@@ -10,7 +10,6 @@ import org.limewire.util.StringUtils;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
-import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.SharedFileCollection;
 
 /**

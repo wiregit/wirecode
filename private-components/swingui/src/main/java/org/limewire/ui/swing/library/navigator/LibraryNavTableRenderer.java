@@ -73,8 +73,9 @@ public class LibraryNavTableRenderer extends JLabel implements TableCellRenderer
                     setIcon(listSharedIcon);
                 else
                     setIcon(listIcon);
-            } else
+            } else {
                 setIcon(listIcon);
+            }
         }
     }
 }

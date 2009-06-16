@@ -9,8 +9,8 @@ public class LibraryNavItem {
         LIBRARY, PUBLIC_SHARED, LIST
     }
     
-    private final String tabId;
-    private final String displayedText;
+    private String tabId;
+    private String displayedText;
     private final NavType navType;
     private final LocalFileList localFileList;
     
@@ -31,6 +31,11 @@ public class LibraryNavItem {
     
     public String getDisplayedText() {
         return displayedText;
+    }
+    
+    public void setText(String text) {
+        this.tabId = text;
+        this.displayedText = text;
     }
     
     public boolean canRemove() {
