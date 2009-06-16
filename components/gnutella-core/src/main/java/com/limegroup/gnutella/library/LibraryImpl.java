@@ -68,7 +68,8 @@ class LibraryImpl implements Library, FileCollection {
     private final EventMulticaster<FileViewChangeEvent> fileListListenerSupport;
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final UrnCache urnCache;
-    private final FileDescFactory fileDescFactory; 
+    private final FileDescFactory fileDescFactory;
+    private final ListeningExecutorService folderLoader;
     private final ListeningExecutorService fileLoader;
     private final PropertyChangeSupport changeSupport;
     private final DangerousFileChecker dangerousFileChecker;
@@ -159,7 +160,8 @@ class LibraryImpl implements Library, FileCollection {
         this.fileDescMulticaster = fileDescMulticaster;
         this.managedListListenerSupport = managedListSupportMulticaster;
         this.fileListListenerSupport = new EventMulticasterImpl<FileViewChangeEvent>();
-        this.fileLoader = ExecutorsHelper.newProcessingQueue("ManagedList Loader");
+        this.folderLoader = ExecutorsHelper.newProcessingQueue("ManagedList Folder Loader");
+        this.fileLoader = ExecutorsHelper.newProcessingQueue("ManagedList File Loader");
         this.files = new ArrayList<FileDesc>();
         this.extensions = new ConcurrentSkipListSet<String>();
         this.urnMap = new HashMap<URN, IntSet>();
@@ -1095,9 +1097,8 @@ class LibraryImpl implements Library, FileCollection {
 
     @Override
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder) {
-        //TODO use a seperate queue to allow files to come in faster while scanning the directory.
         final List<ListeningFuture<FileDesc>> listeningFutureList = Collections.synchronizedList(new ArrayList<ListeningFuture<FileDesc>>());
-        return fileLoader.submit(new Runnable() {
+        return folderLoader.submit(new Runnable() {
             @Override
             public void run() {
                 addFolderInternal(folder);
