@@ -83,7 +83,15 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     }        
     @Override
     public ListeningFuture<FileDesc> add(File file) {
+
+        if(!isFileAddable(file)) {
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(
+                    new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_ADD_FAILED, file),
+                    FileViewChangeFailedException.Reason.CANT_ADD_TO_LIST));
+        }
+        
         FileDesc fd = library.getFileDesc(file);
+
         if(fd == null) {
             saveChange(canonicalize(file), true); // Save early, will RM if it can't become FD.
             return wrapFuture(library.add(file));
@@ -95,7 +103,15 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     
     @Override
     public ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
+
+        if(!isFileAddable(file)) {
+            return new SimpleFuture<FileDesc>(new FileViewChangeFailedException(
+                    new FileViewChangeEvent(AbstractFileCollection.this, FileViewChangeEvent.Type.FILE_ADD_FAILED, file),
+                    FileViewChangeFailedException.Reason.CANT_ADD_TO_LIST));
+        }
+
         FileDesc fd = library.getFileDesc(file);
+
         if(fd == null) {
             saveChange(canonicalize(file), true); // Save early, will RM if it can't become FD.
             return wrapFuture(library.add(file, documents));
@@ -107,6 +123,10 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     
     @Override
     public boolean add(FileDesc fileDesc) {
+        if(!isFileAddable(fileDesc)) {
+            return false;
+        }
+        
         if(addFileDescImpl(fileDesc)) {
             saveChange(fileDesc.getFile(), true);
             fireAddEvent(fileDesc);
