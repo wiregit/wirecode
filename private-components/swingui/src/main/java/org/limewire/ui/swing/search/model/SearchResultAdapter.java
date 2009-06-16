@@ -275,7 +275,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         for (SearchResult result : coreResults) {
             List<RemoteHost> sources = result.getSources();
             remoteHosts.addAll(sources);
-            // Add friends to collection.
+            
+            // Build collection of non-anonymous friends for filtering.
             for (RemoteHost source : sources) {
                 Friend friend = source.getFriendPresence().getFriend();
                 if (friend.isAnonymous()) {
