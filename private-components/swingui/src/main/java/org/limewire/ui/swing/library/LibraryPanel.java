@@ -151,7 +151,6 @@ public class LibraryPanel extends JPanel {
         navigatorComponent.addTableSelectionListener(new ListSelectionListener(){
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                //TODO: this locks should be in a different thread
                 LibraryNavItem navItem = navigatorComponent.getSelectedNavItem();
 
                 setPublicSharedComponentVisible(navItem);

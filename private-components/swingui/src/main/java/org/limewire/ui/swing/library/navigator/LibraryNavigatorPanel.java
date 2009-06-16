@@ -2,9 +2,13 @@ package org.limewire.ui.swing.library.navigator;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
@@ -19,6 +23,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.library.actions.CreateListAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.library.popup.LibraryNavPopupHandler;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -76,34 +81,14 @@ public class LibraryNavigatorPanel extends JXPanel {
     
     @Inject
     void register() {
-        sharedFileListManager.getModel().addListEventListener(new ListEventListener<SharedFileList>(){
-            @Override
-            public void listChanged(ListEvent<SharedFileList> listChanges) {
-                while(listChanges.next()) {
-                    SharedFileList list = listChanges.getSourceList().get(listChanges.getIndex());
-                    if(listChanges.getType() == ListEvent.INSERT) {
-                        table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName(), list, NavType.LIST);
-                    } else if(listChanges.getType() == ListEvent.DELETE){
-                        table.removeLibraryNavItem(list.getCollectionName());
-                    }
-                }
-            }
-        });
-    }
-    
-    private void initData() {
-        table.addLibraryNavItem(null, I18n.tr("Library"), libraryManager.getLibraryManagedList(), NavType.LIBRARY);
-        table.getSelectionModel().setSelectionInterval(0, 0);
-
         final EventList<SharedFileList> playLists = sharedFileListManager.getModel();
 
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {
-                // TODO: this needs to be in a different thread.
                 playLists.getReadWriteLock().readLock().lock();
                 try {
                     for(final SharedFileList fileList : playLists) {
-                        SwingUtils.invokeLater(new Runnable(){
+                        SwingUtilities.invokeLater(new Runnable(){
                             public void run() {
                                 if(!fileList.isNameChangeAllowed())
                                     table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), fileList,  NavType.PUBLIC_SHARED);
@@ -115,8 +100,44 @@ public class LibraryNavigatorPanel extends JXPanel {
                 } finally {
                     playLists.getReadWriteLock().readLock().unlock();
                 }
+                
+                // if only the Public Shared fileList exists, try creating the Private Shared list
+                if(playLists.size() == 1)
+                    createPrivateShareList();
             }
         });
+        
+        sharedFileListManager.getModel().addListEventListener(new ListEventListener<SharedFileList>(){
+            @Override
+            public void listChanged(ListEvent<SharedFileList> listChanges) {
+                while(listChanges.next()) {
+                    final SharedFileList list = listChanges.getSourceList().get(listChanges.getIndex());
+                    final int type = listChanges.getType();
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            if(type == ListEvent.INSERT) {
+                                table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName(), list, NavType.LIST);
+                            } else if(type == ListEvent.DELETE){
+                                table.removeLibraryNavItem(list.getCollectionName());
+                            }
+                            LibraryNavigatorPanel.this.revalidate();
+                        }
+                    });                    
+                }
+            }
+        });
+    }
+    
+    /**
+     * If we haven't created the Private Shared list yet, create it
+     */
+    private void createPrivateShareList() {
+        sharedFileListManager.createNewSharedFileList(I18n.tr("Private Shared"));
+    }
+    
+    private void initData() {
+        table.addLibraryNavItem(null, I18n.tr("Library"), libraryManager.getLibraryManagedList(), NavType.LIBRARY);
+        table.getSelectionModel().setSelectionInterval(0, 0);
     }
     
     private void createCreateListButton() {
