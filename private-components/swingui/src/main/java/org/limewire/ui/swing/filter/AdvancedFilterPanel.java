@@ -33,19 +33,18 @@ import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.SideLineBorder;
 import org.limewire.ui.swing.components.SideLineBorder.Side;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
-import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
-
-import com.google.inject.Provider;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.CompositeMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+
+import com.google.inject.Provider;
 
 /**
  * Filter panel for filterable data.  AdvancedFilterPanel presents advanced 
@@ -80,7 +79,7 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
     private final CategoryFilter<E> categoryFilter;
     
     /** Filter for file source. */
-    private final Filter<E> sourceFilter;
+    private final SourceFilter<E> sourceFilter;
     
     /** Text field for text filter. */
     private final PromptTextField filterTextField = new PromptTextField(I18n.tr("Refine results..."));
@@ -113,7 +112,6 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
      */
     public AdvancedFilterPanel(FilterableSource<E> filterableSource,
             TextFieldDecorator textFieldDecorator,
-            FriendActions friendManager,
             Provider<IconManager> iconManager) {
         
         this.filterableSource = filterableSource;
@@ -171,8 +169,17 @@ public class AdvancedFilterPanel<E extends FilterableItem> extends JPanel implem
         
         // Create source filter and display component.
         sourceFilter = filterManager.getSourceFilter();
-        JComponent sourceComp = sourceFilter.getComponent();
-        sourceComp.setVisible(friendManager.isSignedIn());
+        sourceFilter.getComponent().setVisible(false);
+        
+        // Add listener to show source filter when friend results are received.
+        sourceFilter.addFriendListener(new SourceFilter.FriendListener() {
+            @Override
+            public void friendFound(boolean found) {
+                if (!sourceFilter.isActive()) {
+                    sourceFilter.getComponent().setVisible(found);
+                }
+            }
+        });
         
         // Layout components.
         add(filterTextField   , "gap 6 6 6 6, growx, wrap");
