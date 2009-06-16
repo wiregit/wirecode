@@ -116,7 +116,7 @@ public class LibrarySharingEditablePanel {
         
         applyButton = new JXButton(applyAction);
         applyButton.setFont(selectFont);
-        buttonDecorator.decorateDarkFullButton(applyButton);
+        buttonDecorator.decorateDarkFullButton(applyButton, AccentType.NONE);
         cancelButton = new HyperlinkButton(cancelAction);
         cancelButton.setFont(selectFont);
         
