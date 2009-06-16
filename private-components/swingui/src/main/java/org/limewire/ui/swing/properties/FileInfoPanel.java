@@ -13,7 +13,6 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +55,6 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.spam.SpamManager;
-import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.Address;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.BitziLookupAction;
@@ -639,11 +637,7 @@ public class FileInfoPanel extends JPanel {
      * Blacklists the given ipAddress.
      */
     private void addToFilterList(String ipAddress) {
-        List<String> blackList = new ArrayList<String>(Arrays.asList(FilterSettings.BLACK_LISTED_IP_ADDRESSES.get()));
-        blackList.add(ipAddress);
-        FilterSettings.USE_NETWORK_FILTER.setValue(true);
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(blackList.toArray(new String[blackList.size()]));
-        spamManager.reloadIPFilter();
+        spamManager.addToBlackList(ipAddress);
     }
     
     /**

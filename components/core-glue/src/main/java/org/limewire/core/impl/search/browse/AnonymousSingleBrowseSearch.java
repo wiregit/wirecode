@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.model.browse;
+package org.limewire.core.impl.search.browse;
 
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
@@ -6,8 +6,9 @@ import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.ui.swing.search.model.BrowseStatusListener;
-import org.limewire.ui.swing.search.model.browse.BrowseStatus.BrowseState;
+import org.limewire.core.api.search.browse.BrowseStatus;
+import org.limewire.core.api.search.browse.BrowseStatusListener;
+import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 
 class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
    

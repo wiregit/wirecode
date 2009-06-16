@@ -26,6 +26,7 @@ import org.limewire.core.impl.player.MockPlayerModule;
 import org.limewire.core.impl.playlist.MockPlaylistModule;
 import org.limewire.core.impl.properties.MockPropertyModule;
 import org.limewire.core.impl.search.MockSearchModule;
+import org.limewire.core.impl.search.browse.MockBrowseSearchModule;
 import org.limewire.core.impl.spam.MockSpamModule;
 import org.limewire.core.impl.support.MockSupportModule;
 import org.limewire.core.impl.updates.MockUpdatesModule;
@@ -64,6 +65,7 @@ public class MockModule extends AbstractModule {
         install(new MockDaapModule());
         install(new MockSpamModule());
         install(new MockSearchModule());
+        install(new MockBrowseSearchModule());
         install(new MockNetworkModule());
         install(new MockDownloadModule());
         install(new MockFriendModule());

@@ -20,14 +20,14 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.search.browse.BrowseStatus;
+import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.search.model.browse.BrowseStatus;
-import org.limewire.ui.swing.search.model.browse.BrowseStatus.BrowseState;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 

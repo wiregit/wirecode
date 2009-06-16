@@ -16,12 +16,12 @@ public class FriendButtonPopupListener implements PopupMenuListener {
     private final Provider<LogoutAction> logoutAction;
     private final Provider<AddFriendAction> addFriendAction;
     private final Provider<RemoveFriendAction> removeFriendAction;
-    private final Provider<BrowseFriendAction> browseFriendAction;
+    private final Provider<BrowseFriendsAction> browseFriendAction;
     
     @Inject
     public FriendButtonPopupListener(Provider<XMPPService> xmppService, Provider<LoginAction> loginAction,
         Provider<LogoutAction> logoutAction, Provider<AddFriendAction> addFriendAction,
-        Provider<RemoveFriendAction> removeFriendAction, Provider<BrowseFriendAction> browseFriendAction) {
+        Provider<RemoveFriendAction> removeFriendAction, Provider<BrowseFriendsAction> browseFriendAction) {
         this.xmppService = xmppService;
         this.loginAction = loginAction;
         this.logoutAction = logoutAction;

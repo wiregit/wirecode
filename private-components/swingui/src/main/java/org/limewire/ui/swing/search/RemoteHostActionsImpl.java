@@ -4,18 +4,13 @@ import java.util.Collection;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.browse.BrowseSearch;
+import org.limewire.core.api.search.browse.BrowseSearchFactory;
 import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.search.model.BrowseStatusListener;
-import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.search.model.SearchResultsModelFactory;
-import org.limewire.ui.swing.search.model.browse.BrowseSearch;
-import org.limewire.ui.swing.search.model.browse.BrowseSearchFactory;
-import org.limewire.ui.swing.search.model.browse.BrowseStatus;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -29,10 +24,6 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     private final ChatFrame chatFrame;
 //    private final LibraryNavigator libraryNavigator;
 
-    private final SearchResultsModelFactory searchResultsModelFactory;
-
-    private final SearchResultsPanelFactory searchResultsPanelFactory;
-
     //Provider prevents circular dependency
     private final Provider<SearchNavigator> searchNavigator;
 
@@ -40,13 +31,15 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     private final Provider<BrowseSearchFactory> browseSearchFactory;
 
 
+    private final BrowsePanelFactory browsePanelFactory;
+
+
     @Inject
-    public RemoteHostActionsImpl(ChatFrame chatFrame, SearchResultsModelFactory searchResultsModelFactory, 
-            SearchResultsPanelFactory searchResultsPanelFactory, Provider<SearchNavigator> searchNavigator,
+    public RemoteHostActionsImpl(ChatFrame chatFrame,  
+            BrowsePanelFactory browsePanelFactory, Provider<SearchNavigator> searchNavigator,
             Navigator navigator, Provider<BrowseSearchFactory> browseSearchFactory) {
         this.chatFrame = chatFrame;
-        this.searchResultsModelFactory = searchResultsModelFactory;
-        this.searchResultsPanelFactory = searchResultsPanelFactory;
+        this.browsePanelFactory = browsePanelFactory;
         this.searchNavigator = searchNavigator;
 //        this.libraryNavigator = libraryNavigator; 
         this.browseSearchFactory = browseSearchFactory;
@@ -150,25 +143,12 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     }
     
     private void browse(BrowseSearch search, String title, String panelTitle){
-        //TODO: better SearchInfo
-        SearchInfo searchInfo = DefaultSearchInfo.createKeywordSearch("", SearchCategory.ALL);
-        
-        SearchResultsModel searchModel = searchResultsModelFactory.createSearchResultsModel(searchInfo, search);
-        final SearchResultsPanel searchPanel = searchResultsPanelFactory.createSearchResultsPanel(searchModel);
-        
-        
-        search.addBrowseStatusListener(new BrowseStatusListener(){
-            @Override
-            public void statusChanged(BrowseStatus status) {
-                searchPanel.setBrowseStatus(status);
-                
-            }            
-        });
-
+       
+        SearchResultsPanel searchPanel = browsePanelFactory.createBrowsePanel(search);
         // Add search results display to the UI, and select its navigation item.
         SearchNavItem item = searchNavigator.get().addSearch(title, searchPanel, search);
         item.select();
-        searchModel.start(new SwingSearchListener(searchModel, searchPanel, item));
+        searchPanel.getModel().start(new SwingSearchListener(searchPanel.getModel(), searchPanel, item));
         searchPanel.setTitle(panelTitle);
     }
 

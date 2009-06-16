@@ -5,21 +5,34 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.core.api.spam.SpamManager;
+import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
+import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.TablePopupHandler;
+
+import com.google.inject.Provider;
 
 public class SearchPopupHandler implements TablePopupHandler {
 
     private final ResultsTable<VisualSearchResult> resultsTable;
     private final DownloadHandler downloadHandler;
     private final FileInfoDialogFactory fileInfoFactory;
+    private final Provider<RemoteHostActions> remoteHostActions;
+    private final SpamManager spamManager;
+    private final LibraryMediator libraryMediator;
 
     public SearchPopupHandler(ResultsTable<VisualSearchResult> resultsTable,
-            DownloadHandler downloadHandler, FileInfoDialogFactory fileInfoFactory) {
+            DownloadHandler downloadHandler, FileInfoDialogFactory fileInfoFactory,
+            Provider<RemoteHostActions> remoteHostActions, SpamManager spamManager,
+            LibraryMediator libraryMediator) {
         this.resultsTable = resultsTable;
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
+        this.remoteHostActions = remoteHostActions;
+        this.spamManager = spamManager;
+        this.libraryMediator = libraryMediator;
     }
 
     @Override
@@ -51,7 +64,7 @@ public class SearchPopupHandler implements TablePopupHandler {
         }
 
         SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, selectedItems,
-                fileInfoFactory, SearchResultMenu.ViewType.Table);
+                fileInfoFactory, remoteHostActions, spamManager, libraryMediator, SearchResultMenu.ViewType.Table);
         searchResultMenu.show(component, x, y);
     }
 

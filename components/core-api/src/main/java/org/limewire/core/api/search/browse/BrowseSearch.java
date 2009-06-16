@@ -1,7 +1,6 @@
-package org.limewire.ui.swing.search.model.browse;
+package org.limewire.core.api.search.browse;
 
 import org.limewire.core.api.search.Search;
-import org.limewire.ui.swing.search.model.BrowseStatusListener;
 
 /**
  * Handles browse host as a Search.

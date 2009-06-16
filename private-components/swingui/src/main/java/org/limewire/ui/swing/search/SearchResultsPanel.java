@@ -28,6 +28,8 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.browse.BrowseStatus;
+import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -39,8 +41,6 @@ import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.model.browse.BrowseStatus;
-import org.limewire.ui.swing.search.model.browse.BrowseStatus.BrowseState;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
@@ -211,6 +211,13 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         filterPanel.dispose();
         classicSearchReminderPanel.dispose();
         searchResultsModel.dispose();
+    }
+    
+    /**
+     * @return the SearchResultsModel of the SearchResultsPanel.
+     */
+    public SearchResultsModel getModel(){
+        return searchResultsModel;
     }
 
     /**

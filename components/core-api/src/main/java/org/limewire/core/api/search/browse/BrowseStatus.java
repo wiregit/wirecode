@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.model.browse;
+package org.limewire.core.api.search.browse;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,13 +12,13 @@ public class BrowseStatus {
     }    
     
     private final BrowseState state;
-    private final Friend[] failedFriends;
+    private final List<Friend> failed;
     private final BrowseSearch search;
     
     public BrowseStatus(BrowseSearch search, BrowseState state, Friend... failedFriends){
         this.search = search;
         this.state = state;
-        this.failedFriends = failedFriends;
+        this.failed = Arrays.asList(failedFriends);
     }
     
     public BrowseState getState(){
@@ -26,7 +26,7 @@ public class BrowseStatus {
     }
     
     public List<Friend> getFailedFriends(){
-        return Arrays.asList(failedFriends);
+        return failed;
     }
 
     public BrowseSearch getBrowseSearch() {

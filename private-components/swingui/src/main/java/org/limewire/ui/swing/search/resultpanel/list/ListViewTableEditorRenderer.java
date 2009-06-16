@@ -44,6 +44,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.spam.SpamManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.IconButton;
@@ -56,6 +57,7 @@ import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
+import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
@@ -155,6 +157,10 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
      * cached width used for text truncation
      */
     private int textPanelWidth;
+
+    private final SpamManager spamManager;
+
+    private final Provider<RemoteHostActions> remoteHostActions;
     
     @Inject
     ListViewTableEditorRenderer(
@@ -167,7 +173,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         ListViewRowHeightRule rowHeightRule,
         final @Assisted ListViewDisplayedRowsLimit displayLimit,
         LibraryMediator libraryMediator,
-        Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory) {
+        Provider<SearchResultTruncator> truncator, FileInfoDialogFactory fileInfoFactory,
+        Provider<RemoteHostActions> remoteHostActions, SpamManager spamManager) {
 
         this.categoryIconManager = categoryIconManager;
         
@@ -178,6 +185,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.truncator = truncator;
         this.downloadHandler = downloadHandler;
         this.fileInfoFactory = fileInfoFactory;
+        this.remoteHostActions = remoteHostActions;
+        this.spamManager = spamManager;
         
         GuiUtils.assignResources(this);
 
@@ -512,7 +521,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             @Override
             public void handlePopupMouseEvent(MouseEvent e) {
                 final VisualSearchResult result = vsr; 
-                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, Collections.singletonList(vsr), fileInfoFactory, SearchResultMenu.ViewType.List);
+                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, Collections.singletonList(vsr), 
+                        fileInfoFactory, remoteHostActions, spamManager, libraryMediator, SearchResultMenu.ViewType.List);
                 searchResultMenu.addPopupMenuListener(new PopupMenuListener() {
                     @Override
                     public void popupMenuCanceled(PopupMenuEvent e) {

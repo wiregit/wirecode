@@ -13,11 +13,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.components.MessageComponent.MessageBackground;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.search.model.browse.BrowseSearch;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 

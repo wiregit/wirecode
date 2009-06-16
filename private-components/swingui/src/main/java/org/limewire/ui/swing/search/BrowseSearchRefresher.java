@@ -1,8 +1,11 @@
 package org.limewire.ui.swing.search;
 
+import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.search.model.browse.BrowseSearch;
 
+/**
+ * Encapsulates logic for refreshing a BrowseSearch
+ */
 public class BrowseSearchRefresher {
     
     private BrowseSearch browseSearch;

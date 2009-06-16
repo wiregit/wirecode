@@ -1,8 +1,9 @@
-package org.limewire.ui.swing.search.model.browse;
+package org.limewire.core.impl.search.browse;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -10,16 +11,23 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.browse.BrowseSearch;
+import org.limewire.core.api.search.browse.BrowseSearchFactory;
+import org.limewire.core.api.search.browse.BrowseStatus;
+import org.limewire.core.api.search.browse.BrowseStatusListener;
+import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.ui.swing.search.model.BrowseStatusListener;
-import org.limewire.ui.swing.search.model.browse.BrowseStatus.BrowseState;
 
+/**
+ * Aggregates multiple AnonymousSingleBrowseSearches and FriendSingleBrowseSearches.
+ *
+ */
 class MultipleBrowseSearch extends AbstractBrowseSearch {
 
     private final CombinedSearchListener combinedSearchListener = new CombinedSearchListener();
     private final CombinedBrowseStatusListener combinedBrowseStatusListener = new CombinedBrowseStatusListener();
     
-    private List<BrowseSearch> browses;
+    private final List<BrowseSearch> browses = new CopyOnWriteArrayList<BrowseSearch>();
 
     private final BrowseSearchFactory browseSearchFactory;
 
@@ -31,9 +39,10 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         this.browseSearchFactory = browseSearchFactory;
         initialize(hosts);
     }
-
+    
+    /**Creates a BrowseSearch for each of the hosts, adds the necessary listeners to it, 
+     * and adds it to the list of BrowseSearches.*/
     private void initialize(Collection<RemoteHost> hosts){
-        browses = new ArrayList<BrowseSearch>(hosts.size());
         for(RemoteHost host : hosts){
             BrowseSearch browseSearch = browseSearchFactory.createBrowseSearch(host);
             browseSearch.addSearchListener(combinedSearchListener);
@@ -68,6 +77,7 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
     }
     
     private class CombinedSearchListener implements SearchListener {
+        /**Keeps count of how many browses have completed*/
         private AtomicInteger stoppedBrowses = new AtomicInteger(0);
 
         @Override
@@ -76,7 +86,8 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
                 listener.handleSearchResult(MultipleBrowseSearch.this, searchResult);
             }
         }
-
+        
+        /**Clears the count of completed browses*/
         public void clear() {
             stoppedBrowses.set(0);
         }
@@ -107,18 +118,23 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
     }
     
     private class CombinedBrowseStatusListener implements BrowseStatusListener {
-        private List<Friend> failedList = new ArrayList<Friend>();
-        private boolean hasUpdated;
-        private boolean hasLoaded;
+        /**List of all failed browses (Friends includes anonymous*/
+        private List<Friend> failedList = new CopyOnWriteArrayList<Friend>();
+        /**The number of BrowseSearches in the LOADED state*/
+        private AtomicInteger loaded = new AtomicInteger(0);
+        /**Whether or not there are updates in any of the browses*/
+        private AtomicBoolean hasUpdated = new AtomicBoolean(false);
         
         @Override
         public void statusChanged(BrowseStatus status) {
             if(status.getState() == BrowseState.FAILED){
+                //getFailedFriends() will only return 1 person 
+                //since status is from a single browse
                 failedList.addAll(status.getFailedFriends());
             } else if(status.getState() == BrowseState.UPDATED){
-                hasUpdated = true;
+                hasUpdated.set(true);
             } else if (status.getState() == BrowseState.LOADED){
-                hasLoaded = true;
+                loaded.incrementAndGet();
             }
             
            BrowseState state = getReleventMultipleBrowseState(status);
@@ -131,30 +147,35 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
            }
         }        
         
+        /**
+         * Clears all cached data about the browses
+         */
         public void clear(){
-            hasUpdated = false;
-            hasLoaded = false;
+            hasUpdated.set(false);
+            loaded.set(0);
             failedList.clear();
         }
         
         /**
-         * @return can be null
+         * @return The aggregated status of the browses.  
          */
         private BrowseState getReleventMultipleBrowseState(BrowseStatus status){
-            if(failedList.size() == browses.size()){
+            if(loaded.get() == browses.size()){
+                return BrowseState.LOADED;
+            } else if(failedList.size() == browses.size()){
                 return BrowseState.FAILED;
             } else if(failedList.size() > 0){
-                if(hasLoaded){
-                    if(hasUpdated){
+                if(loaded.get() > 0){
+                    if(hasUpdated.get()){
                         return BrowseState.UPDATED_PARTIAL_FAIL;
                     } else {
                         return BrowseState.PARTIAL_FAIL;
                     }
                 }
-            } else if (hasUpdated){
+            } else if (hasUpdated.get()){
                 return BrowseState.UPDATED;
             }
-            return null;
+            return BrowseState.LOADING;
         }
     }
     

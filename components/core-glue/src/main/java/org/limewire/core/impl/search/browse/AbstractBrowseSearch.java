@@ -1,10 +1,11 @@
-package org.limewire.ui.swing.search.model.browse;
+package org.limewire.core.impl.search.browse;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
-import org.limewire.ui.swing.search.model.BrowseStatusListener;
+import org.limewire.core.api.search.browse.BrowseSearch;
+import org.limewire.core.api.search.browse.BrowseStatusListener;
 
 abstract class AbstractBrowseSearch implements BrowseSearch {
     protected final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();

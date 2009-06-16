@@ -274,7 +274,7 @@ public class SortAndFilterPanel implements Disposable {
      * Adds the sorting and filtering components to the specified panel.
      */
     public void layoutComponents(JPanel panel) {
-        panel.setLayout(new MigLayout("insets 0, filly, gapx 0", "push[][][][][]"));
+        panel.setLayout(new MigLayout("insets 0, filly, novisualpadding, gapx 0", "push[][][][][]"));
         
         panel.add(sortLabel, "gapafter 10, hidemode 3");
         panel.add(sortCombo, "gapafter 10, hidemode 3");

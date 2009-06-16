@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.model.browse;
+package org.limewire.core.impl.search.browse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,10 @@ import java.util.List;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchListener;
-import org.limewire.ui.swing.search.model.BrowseStatusListener;
-import org.limewire.ui.swing.search.model.browse.BrowseStatus.BrowseState;
+import org.limewire.core.api.search.browse.BrowseStatus;
+import org.limewire.core.api.search.browse.BrowseStatusListener;
+import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
+import org.limewire.core.impl.library.CoreRemoteFileItem;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -51,13 +53,18 @@ class AllFriendsBrowseSearch extends AbstractBrowseSearch {
         //add all files
         for (RemoteFileItem item : remoteFileItems) {
             for (SearchListener listener : searchListeners) {
-                listener.handleSearchResult(this, item.getSearchResult());
+                listener.handleSearchResult(this, ((CoreRemoteFileItem)item).getSearchResult());
             }
         }
         
         //browse is finished
         for (SearchListener listener : searchListeners) {
             listener.searchStopped(AllFriendsBrowseSearch.this);
+        }
+        
+        BrowseStatus status = new BrowseStatus(AllFriendsBrowseSearch.this, BrowseState.LOADED);
+        for (BrowseStatusListener listener : browseStatusListeners){
+            listener.statusChanged(status);
         }
     }
     

@@ -3,7 +3,7 @@ package org.limewire.ui.swing.search;
 import javax.swing.JComponent;
 
 import org.limewire.core.api.search.Search;
-import org.limewire.ui.swing.search.model.browse.BrowseSearch;
+import org.limewire.core.api.search.browse.BrowseSearch;
 
 /** A central hub for showing a new search in the UI. */
 public interface SearchNavigator {

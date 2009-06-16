@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.model.browse;
+package org.limewire.core.impl.search.browse;
 
 import java.util.Collection;
 
@@ -6,18 +6,20 @@ import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.search.browse.BrowseSearch;
+import org.limewire.core.api.search.browse.BrowseSearchFactory;
 import org.limewire.inject.LazySingleton;
 
 import com.google.inject.Inject;
 
 @LazySingleton
-public class BrowseSearchFactory {
+class CoreBrowseSearchFactory implements BrowseSearchFactory{
     
     private RemoteLibraryManager remoteLibraryManager;
     private BrowseFactory browseFactory;
 
     @Inject
-    public BrowseSearchFactory(RemoteLibraryManager remoteLibraryManager,
+    public CoreBrowseSearchFactory(RemoteLibraryManager remoteLibraryManager,
     BrowseFactory browseFactory) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.browseFactory = browseFactory;

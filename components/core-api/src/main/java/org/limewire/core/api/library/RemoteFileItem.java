@@ -3,7 +3,6 @@ package org.limewire.core.api.library;
 import java.util.List;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.search.SearchResult;
 
 public interface RemoteFileItem extends FileItem {
     /**
@@ -11,9 +10,4 @@ public interface RemoteFileItem extends FileItem {
      * Limiting the number of sources to friends plus 2 other sources.
      */
     List<RemoteHost> getSources();
-    
-    /**
-     * @return the underlying SearchResult
-     */
-    SearchResult getSearchResult();
 }
