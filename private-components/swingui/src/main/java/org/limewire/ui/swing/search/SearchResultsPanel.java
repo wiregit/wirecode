@@ -10,6 +10,7 @@ import java.awt.Rectangle;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -44,8 +45,12 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -60,6 +65,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     
     /** Decorator used to set the appearance of the header bar. */
     private final HeaderBarDecorator headerBarDecorator;
+    
+    /** Icon manager for categories. */
+    private final CategoryIconManager categoryIconManager;
     
     /** Label that displays the search title. */
     private final JLabel searchTitleLabel = new JLabel();
@@ -98,6 +106,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     /** Listener for changes in the view type. */
     private final SettingListener viewTypeListener;
     
+    /** Listener for updates to the result count. */
+    private final ListEventListener<VisualSearchResult> resultCountListener;
+    
     /** Search results data model. */
     private final SearchResultsModel searchResultsModel;
     
@@ -113,6 +124,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     /** Shows status of failed browses and refresh button.
      */
     private BrowseStatusPanel browseStatusPanel;
+    
+    /** Title when browsing friends; null for search results. */
+    private String browseTitle;
 
     private final BrowseFailedMessagePanel browseFailedPanel;
 
@@ -127,12 +141,14 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             AdvancedFilterPanelFactory<VisualSearchResult> filterPanelFactory,
             SearchTabItemsFactory searchTabItemsFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
-            HeaderBarDecorator headerBarDecorator) {
+            HeaderBarDecorator headerBarDecorator,
+            CategoryIconManager categoryIconManager) {
 
         GuiUtils.assignResources(this);
         
         this.searchResultsModel = searchResultsModel;
         this.headerBarDecorator = headerBarDecorator; 
+        this.categoryIconManager = categoryIconManager;
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         this.sponsoredResultsPanel.setVisible(false);
@@ -171,7 +187,18 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         };
         SwingUiSettings.SEARCH_VIEW_TYPE_ID.addSettingListener(viewTypeListener);
         
-        searchTitleLabel.setText(I18n.tr("Results from {0}", searchResultsModel.getSearchTitle()));
+        // Initialize header label.
+        updateTitle();
+        
+        // Install listener to update header label.
+        resultCountListener = new ListEventListener<VisualSearchResult>() {
+            @Override
+            public void listChanged(ListEvent<VisualSearchResult> listChanges) {
+                updateTitle();
+            }
+        };
+        searchResultsModel.getUnfilteredList().addListEventListener(resultCountListener);
+        searchResultsModel.getFilteredList().addListEventListener(resultCountListener);
         
         // Configure sort panel and results container.
         sortAndFilterPanel.setSearchCategory(searchResultsModel.getSearchCategory());
@@ -186,6 +213,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
                 sortAndFilterPanel.setSearchCategory(displayCategory);
                 resultsContainer.showCategory(displayCategory);
                 syncScrollPieces();
+                updateTitle();
             }
         });
 
@@ -207,6 +235,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     @Override
     public void dispose() {
         SwingUiSettings.SEARCH_VIEW_TYPE_ID.removeSettingListener(viewTypeListener);
+        searchResultsModel.getFilteredList().removeListEventListener(resultCountListener);
+        searchResultsModel.getUnfilteredList().removeListEventListener(resultCountListener);
         sortAndFilterPanel.dispose();
         filterPanel.dispose();
         classicSearchReminderPanel.dispose();
@@ -250,10 +280,97 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     }
     
     /**
-     * @param title The title displayed at the top of the panel
+     * Sets the browse title in the container.  When not null, the browse title
+     * is displayed at the top of the panel.  When null, the container displays 
+     * the search title from the data model.
      */
-    public void setTitle(String title){
-        searchTitleLabel.setText(title);
+    public void setBrowseTitle(String title) {
+        browseTitle = title;
+        updateTitle();
+    }
+    
+    /**
+     * Updates the title icon and text in the container.  For search results, 
+     * the title includes the category name, search title, and result counts. 
+     */
+    private void updateTitle() {
+        // Get result counts.
+        int total = searchResultsModel.getUnfilteredList().size();
+        int actual = searchResultsModel.getFilteredList().size();
+        
+        if (browseTitle != null) {
+            // Set browse title.
+            searchTitleLabel.setText((actual == total) ?
+                    // {0}: browse title, {1}: total count
+                    I18n.tr("Browse {0} ({1})", browseTitle, total) :
+                    // {0}: browse title, {1}: actual count, {2}: total count 
+                    I18n.tr("Browse {0} - Showing {1} of {2}", browseTitle, actual, total));
+            
+        } else {
+            // Get search category and title.
+            SearchCategory displayCategory = searchResultsModel.getSelectedCategory();
+            String title = searchResultsModel.getSearchTitle();
+            
+            // Set title icon based on category.
+            Icon icon = (displayCategory == SearchCategory.ALL) ? null :
+                categoryIconManager.getIcon(displayCategory.getCategory());
+            searchTitleLabel.setIcon(icon);
+
+            // Set title text.
+            switch (displayCategory) {
+            case ALL:
+                searchTitleLabel.setText((actual == total) ?
+                        // {0}: search title, {1}: total count
+                        I18n.tr("All results for {0} ({1})", title, total) :
+                        // {0}: search title, {1}: actual count, {2}: total count 
+                        I18n.tr("All results for {0} - Showing {1} of {2}", title, actual, total));
+                break;
+            case AUDIO:
+                searchTitleLabel.setText((actual == total) ?
+                        // {0}: search title, {1}: total count
+                        I18n.tr("Audio results for {0} ({1})", title, total) :
+                        // {0}: search title, {1}: actual count, {2}: total count 
+                        I18n.tr("Audio results for {0} - Showing {1} of {2}", title, actual, total));
+                break;
+            case VIDEO:
+                searchTitleLabel.setText((actual == total) ?
+                        // {0}: search title, {1}: total count
+                        I18n.tr("Video results for {0} ({1})", title, total) :
+                        // {0}: search title, {1}: actual count, {2}: total count 
+                        I18n.tr("Video results for {0} - Showing {1} of {2}", title, actual, total));
+                break;
+            case IMAGE:
+                searchTitleLabel.setText((actual == total) ?
+                        // {0}: search title, {1}: total count
+                        I18n.tr("Image results for {0} ({1})", title, total) :
+                        // {0}: search title, {1}: actual count, {2}: total count 
+                        I18n.tr("Image results for {0} - Showing {1} of {2}", title, actual, total));
+                break;
+            case DOCUMENT:
+                searchTitleLabel.setText((actual == total) ?
+                        // {0}: search title, {1}: total count
+                        I18n.tr("Document results for {0} ({1})", title, total) :
+                        // {0}: search title, {1}: actual count, {2}: total count 
+                        I18n.tr("Document results for {0} - Showing {1} of {2}", title, actual, total));
+                break;
+            case PROGRAM:
+                searchTitleLabel.setText((actual == total) ?
+                        // {0}: search title, {1}: total count
+                        I18n.tr("Program results for {0} ({1})", title, total) :
+                        // {0}: search title, {1}: actual count, {2}: total count 
+                        I18n.tr("Program results for {0} - Showing {1} of {2}", title, actual, total));
+                break;
+            case OTHER:
+                searchTitleLabel.setText((actual == total) ?
+                        // {0}: search title, {1}: total count
+                        I18n.tr("Other results for {0} ({1})", title, total) :
+                        // {0}: search title, {1}: actual count, {2}: total count 
+                        I18n.tr("Other results for {0} - Showing {1} of {2}", title, actual, total));
+                break;
+            default:
+                throw new IllegalStateException("Invalid search category " + displayCategory);
+            }
+        }
     }
     
     /**

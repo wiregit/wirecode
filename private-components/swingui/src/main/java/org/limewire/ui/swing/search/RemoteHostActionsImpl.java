@@ -72,23 +72,22 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
         assert(person != null);
         LOG.debugf("viewLibraryOf: {0}", person);
         browse(browseSearchFactory.get().createBrowseSearch(person),
-                person.getFriendPresence().getFriend().getRenderName(), 
-                I18n.tr("Browse {0}", person.getFriendPresence().getFriend().getRenderName()));
+                person.getFriendPresence().getFriend().getRenderName());
     }
     
     @Override
     public void viewLibraryOf(Friend friend) {
         assert(friend != null && !friend.isAnonymous());
         LOG.debugf("viewLibraryOf: {0}", friend);
-        browse(browseSearchFactory.get().createFriendBrowseSearch(friend), friend.getRenderName(), 
-                I18n.tr("Browse {0}", friend.getRenderName()));
+        browse(browseSearchFactory.get().createFriendBrowseSearch(friend), 
+                friend.getRenderName());
     }
 
 
     @Override
     public void viewLibrariesOf(Collection<RemoteHost> people) {
          browse(browseSearchFactory.get().createBrowseSearch(people),
-                 getTabTitle(people), getPanelTitle(people));
+                 getTabTitle(people));
     }
     
     private String getTabTitle(Collection<RemoteHost> people){
@@ -107,23 +106,6 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
         return "";
     }
 
-    
-    private String getPanelTitle(Collection<RemoteHost> people){
-        boolean hasP2P = hasP2P(people);
-        boolean hasFriends = hasFriend(people);
-        
-        if (hasP2P && hasFriends){
-            return I18n.trn("Browse {0} Person", "Browse {0} People", people.size());
-        } else if (hasP2P){
-            return I18n.trn("Browse {0} P2P User", "Browse {0} P2P Users", people.size());            
-        } else if (hasFriends){
-            return I18n.trn("Browse {0} Friend", "Browse {0} Friends", people.size());            
-        }
-        
-        //empty list
-        return "";
-    }
-    
     private boolean hasP2P(Collection<RemoteHost> people) {
         for (RemoteHost host : people) {
             if (host.getFriendPresence().getFriend().isAnonymous()) {
@@ -142,14 +124,14 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
         return false;
     }
     
-    private void browse(BrowseSearch search, String title, String panelTitle){
+    private void browse(BrowseSearch search, String title) {
        
         SearchResultsPanel searchPanel = browsePanelFactory.createBrowsePanel(search);
         // Add search results display to the UI, and select its navigation item.
         SearchNavItem item = searchNavigator.get().addSearch(title, searchPanel, search);
         item.select();
         searchPanel.getModel().start(new SwingSearchListener(searchPanel.getModel(), searchPanel, item));
-        searchPanel.setTitle(panelTitle);
+        searchPanel.setBrowseTitle(title);
     }
 
 }
