@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
+import javax.swing.Icon;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
@@ -30,11 +30,12 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
     private @Resource Font font;
     private @Resource Color fontColor;
     private @Resource Color backgroundColor;
+    private @Resource Icon checkedCheckBox;
+    private @Resource Icon uncheckedCheckBox;
     
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
     
     private final JCheckBox checkBox;
-    private final JLabel nameLabel;
     
     private EditableSharingData data;
     
@@ -45,7 +46,13 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
         GuiUtils.assignResources(this);
        
         checkBox = new JCheckBox();
+        checkBox.setIcon(uncheckedCheckBox);
+        checkBox.setSelectedIcon(checkedCheckBox);
         checkBox.setOpaque(false);
+        checkBox.setIconTextGap(6);
+        checkBox.setFont(font);
+        checkBox.setFocusPainted(false);
+        checkBox.setForeground(fontColor);
         checkBox.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -54,17 +61,9 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
                 stopCellEditing();
             }
         });
-        nameLabel = new JLabel();
-        nameLabel.setFont(font);
-        nameLabel.setForeground(fontColor);
                 
         setBackground(backgroundColor);
-        add(checkBox, "aligny center, gapright 6");
-        add(nameLabel, "growx, alignx left, aligny center, wrap");
-    }
-    
-    public boolean isSelected() {
-        return checkBox.isSelected();
+        add(checkBox, "aligny center, growx");
     }
     
     @Override
@@ -73,13 +72,12 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
 
         if(value instanceof EditableSharingData) {
             data = (EditableSharingData) value;
-            nameLabel.setText(data.getName());
+            checkBox.setText(data.getName());
             checkBox.setSelected(data.isSelected());
         } else {
-            nameLabel.setText("");
+            checkBox.setText("");
             checkBox.setSelected(false);
-        }
-        
+        }     
         return this;
     }
     
@@ -88,13 +86,12 @@ public class LibrarySharingEditableRendererEditor extends JPanel implements Tabl
             boolean hasFocus, int row, int column) {
         if(value instanceof EditableSharingData) {
             EditableSharingData data = (EditableSharingData) value;
-            nameLabel.setText(data.getName());
+            checkBox.setText(data.getName());
             checkBox.setSelected(data.isSelected());
         } else {
-            nameLabel.setText("");
+            checkBox.setText("");
             checkBox.setSelected(false);
-        }
-        
+        }     
         return this;
     }
 
