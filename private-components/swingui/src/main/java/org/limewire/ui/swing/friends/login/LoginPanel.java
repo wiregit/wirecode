@@ -366,11 +366,13 @@ class LoginPanel extends JXPanel implements SettingListener {
                                     config.setAttribute("cookie", cookie);
                                     friendConnectionFactory.login(config);
                                 } else if (url.contains("login")) {
-                                    String script = "(function() {var input = document.createElement('input');" +
-                                    "input.type='hidden';" +
-                                    "input.name='persistent';" +
-                                    "input.value='1';" +
-                                    "document.forms[0].appendChild(input);"; 
+                                    String script = "(function() {" +
+                                    "    function addHiddenInput(name, value) {" +
+                                    "    var input = document.createElement('input'); input.type='hidden'; input.name=name; input.value=value; document.forms[0].appendChild(input);" +
+                                    "    }" +
+                                    "    addHiddenInput('persistent', '1');" +
+                                    "    addHiddenInput('visibility', 'true');" +
+                                    "})();";
                                     jsexec(script);
                                 }
                             }
