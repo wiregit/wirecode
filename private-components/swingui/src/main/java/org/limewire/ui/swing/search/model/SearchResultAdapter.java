@@ -21,10 +21,12 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Provider;
@@ -42,6 +44,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
 
     private Map<FilePropertyKey, Object> properties;
 
+    private final Set<Friend> friends;
+
     private final Set<RemoteHost> remoteHosts;
     
     private final Provider<PropertiableHeadings> propertiableHeadings;
@@ -51,6 +55,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     private final Set<VisualSearchResult> similarResults = new HashSet<VisualSearchResult>();
 
     private VisualSearchResult similarityParent;
+
+    private boolean anonymous;
 
     private boolean visible;
 
@@ -75,7 +81,16 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     public SearchResultAdapter(List<SearchResult> sourceValue, Provider<PropertiableHeadings> propertiableHeadings) {
         this.coreResults = sourceValue;
         this.propertiableHeadings = propertiableHeadings;
-
+        
+        this.friends = new TreeSet<Friend>(new Comparator<Friend>() {
+            @Override
+            public int compare(Friend o1, Friend o2) {
+                String id1 = o1.getId();
+                String id2 = o2.getId();
+                return Objects.compareToNullIgnoreCase(id1, id2, false);
+            }
+        });
+        
         this.remoteHosts = new TreeSet<RemoteHost>(new Comparator<RemoteHost>() {
             @Override
             public int compare(RemoteHost o1, RemoteHost o2) {
@@ -99,6 +114,11 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     }
 
     @Override
+    public boolean isAnonymous() {
+        return anonymous;
+    }
+    
+    @Override
     public Category getCategory() {
         return coreResults.get(0).getCategory();
     }
@@ -116,6 +136,11 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     @Override
     public String getFileName() {
         return coreResults.get(0).getFileName();
+    }
+    
+    @Override
+    public Collection<Friend> getFriends() {
+        return friends;
     }
 
     @Override
@@ -244,8 +269,22 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     void update() {
         relevance = null;
         remoteHosts.clear();
+        friends.clear();
+        anonymous = false;
+        
         for (SearchResult result : coreResults) {
-            remoteHosts.addAll(result.getSources());
+            List<RemoteHost> sources = result.getSources();
+            remoteHosts.addAll(sources);
+            
+            // Build collection of non-anonymous friends for filtering.
+            for (RemoteHost source : sources) {
+                Friend friend = source.getFriendPresence().getFriend();
+                if (friend.isAnonymous()) {
+                    anonymous = true;
+                } else {
+                    friends.add(friend);
+                }
+            }
         }
     }
 
