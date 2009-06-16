@@ -172,7 +172,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
                 isStoreXML(fileDesc.getLimeXMLDocuments().get(0))) {
             return false;
         } 
-        return true;
+        return isFileAddable(fileDesc.getFile());
     }
     
     @Override

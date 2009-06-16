@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,23 +57,30 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
 
     @Override
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder) {
-        library.addFolder(folder);
-        
-        return library.submit(new Callable<List<ListeningFuture<FileDesc>>>() {
+        return library.submitFolder(new Callable<List<ListeningFuture<FileDesc>>>() {
+            private final List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
+            private final FileFilter filter = library.newManageableFilter();
+            
             @Override
             public List<ListeningFuture<FileDesc>> call() throws Exception {
-                File[] potentials = folder.listFiles(library.newManageableFilter());
-                List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-                for(File file : potentials) {
-                    if(!contains(file)) {
-                        futures.add(add(file));
-                    }
-                }
+                addFolderInternal(folder);
                 return futures;
             }
+            
+            private void addFolderInternal(File folderOrFile) {
+                //TODO try to make non-recursive
+                if(folderOrFile != null ) {
+                    if(folderOrFile.isDirectory() && library.isDirectoryAllowed(folderOrFile)) {
+                        for(File file : folderOrFile.listFiles(filter)) {
+                            addFolderInternal(file);
+                        }
+                    } else {
+                        futures.add(add(folderOrFile));
+                    }
+                }
+            }
         });
-    }
-    
+    }        
     @Override
     public ListeningFuture<FileDesc> add(File file) {
         FileDesc fd = library.getFileDesc(file);

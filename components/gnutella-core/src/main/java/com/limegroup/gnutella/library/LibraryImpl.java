@@ -73,6 +73,8 @@ class LibraryImpl implements Library, FileCollection {
     private final ListeningExecutorService fileLoader;
     private final PropertyChangeSupport changeSupport;
     private final DangerousFileChecker dangerousFileChecker;
+    private final AtomicInteger processingIndex = new AtomicInteger(0);
+    private final AtomicInteger processingQueueSize = new AtomicInteger(0);
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -201,12 +203,20 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     /**
-     * Runs the callable in the managed filelist thread & returns a Future used
+     * Runs the callable in the managed filelist file thread & returns a Future used
      * to get its result.
      */
     <V> ListeningFuture<V> submit(Callable<V> callable) {
         return fileLoader.submit(callable);
     }
+    
+    /**
+    * Runs the callable in the managed filelist folder thread & returns a Future used
+    * to get its result.
+    */
+   <V> ListeningFuture<V> submitFolder(Callable<V> callable) {
+       return folderLoader.submit(callable);
+   }
     
     /** Initializes all listeners. */
     void initialize() {
@@ -567,10 +577,22 @@ class LibraryImpl implements Library, FileCollection {
                             task.setException(new FileViewChangeFailedException(fileEvent, FileViewChangeFailedException.Reason.REVISIONS_CHANGED));
                         } else {
                             fileToFutures.remove(interned);
+                            synchronized (processingQueueSize) {
+                                processingQueueSize.addAndGet(1);
+                            }
                             fileToFutures.put(interned, fileLoader.submit(new Runnable() {
                                 @Override
                                 public void run() {
+                                    processingIndex.addAndGet(1);
+                                    System.out.println("Processing " + processingIndex.get() + " of " + processingQueueSize.get() + " - " + interned.getName());
                                     finishLoadingFileDesc(interned, event, metadata, rev, oldFileDesc, task);
+                                    synchronized (processingQueueSize) {
+                                        if(processingIndex.get() >= processingQueueSize.get()) {
+                                            //TODO put in properly synchronized stuff
+                                            processingIndex.set(0);
+                                            processingQueueSize.set(0);
+                                        }
+                                    }
                                 }
                             }));
                         }
@@ -1048,10 +1070,8 @@ class LibraryImpl implements Library, FileCollection {
         
         @Override
         public boolean accept(File file) {
-            return file.isFile()
-                && (includeContainedFiles || !contains(file))
-                && LibraryUtils.isFileManagable(file)
-                && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US));
+            return file.isDirectory() || (includeContainedFiles || !contains(file))
+                   && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US));
         }
     }
 
@@ -1097,26 +1117,29 @@ class LibraryImpl implements Library, FileCollection {
 
     @Override
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder) {
-        final List<ListeningFuture<FileDesc>> listeningFutureList = Collections.synchronizedList(new ArrayList<ListeningFuture<FileDesc>>());
-        return folderLoader.submit(new Runnable() {
+        return folderLoader.submit(new Callable<List<ListeningFuture<FileDesc>>>() {
+            private final List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
+            private final FileFilter filter = newManageableFilter();
+            
             @Override
-            public void run() {
+            public List<ListeningFuture<FileDesc>> call() throws Exception {
                 addFolderInternal(folder);
+                return futures;
             }
-
+            
             private void addFolderInternal(File folderOrFile) {
                 //TODO try to make non-recursive
                 if(folderOrFile != null ) {
                     if(folderOrFile.isDirectory() && isDirectoryAllowed(folderOrFile)) {
-                        for(File file : folderOrFile.listFiles()) {
+                        for(File file : folderOrFile.listFiles(filter)) {
                             addFolderInternal(file);
                         }
                     } else {
-                        listeningFutureList.add(add(folderOrFile));
+                        futures.add(add(folderOrFile));
                     }
                 }
             }
-        }, listeningFutureList);
+        });
     }
 
     @Override
