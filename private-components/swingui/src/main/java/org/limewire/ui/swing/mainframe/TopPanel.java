@@ -35,7 +35,6 @@ import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.friends.actions.FriendButtonPopupListener;
-import org.limewire.ui.swing.friends.login.SignInAction;
 import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -92,7 +91,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryMediator myLibraryMediator,
                     KeywordAssistedSearchBuilder keywordAssistedSearchBuilder,
-                    SignInAction signInAction, FriendButtonPopupListener friendListener,
+                    FriendButtonPopupListener friendListener,
                     Provider<AdvancedSearchPanel> advancedSearchPanel) {        
         GuiUtils.assignResources(this);
         this.searchHandler = searchHandler;

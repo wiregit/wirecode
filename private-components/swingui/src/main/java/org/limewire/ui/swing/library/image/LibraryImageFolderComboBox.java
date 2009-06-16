@@ -12,7 +12,6 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
-import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.library.SelectAllable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -29,19 +28,14 @@ public class LibraryImageFolderComboBox extends LimeComboBox {
     private Color disabledColor;
     
     private final XMPPService xmppService;
-    private final FriendActions friendActions;
-//    private final Provider<SharingActionFactory> sharingActionFactoryProvider;
     
     private JPopupMenu menu = new JPopupMenu();
     
     private SelectAllable<LocalFileItem> selectAllable;
     
     @Inject
-    public LibraryImageFolderComboBox(XMPPService xmppService, //Provider<SharingActionFactory> sharingActionFactory,
-            FriendActions friendActions) {
+    public LibraryImageFolderComboBox(XMPPService xmppService) {
         this.xmppService = xmppService;
-        this.friendActions = friendActions;
-//        this.sharingActionFactoryProvider = sharingActionFactory;
                 
         GuiUtils.assignResources(this);
         

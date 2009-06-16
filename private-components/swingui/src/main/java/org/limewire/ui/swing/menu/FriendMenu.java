@@ -3,8 +3,6 @@ package org.limewire.ui.swing.menu;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.action.StatusActions;
 import org.limewire.ui.swing.menu.actions.ChatAction;
-import org.limewire.ui.swing.menu.actions.SignInOutAction;
-import org.limewire.ui.swing.menu.actions.SwitchUserAction;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavSelectable;
@@ -20,7 +18,7 @@ public class FriendMenu extends MnemonicMenu {
     
   
     @Inject
-    public FriendMenu(SwitchUserAction switchUserAction, SignInOutAction signInOutAction, ChatAction chatAction, StatusActions statusActions) {
+    public FriendMenu(ChatAction chatAction, StatusActions statusActions) {
         super(I18n.tr("F&riend"));
         this.chatAction = chatAction;
         add(chatAction);
@@ -28,8 +26,6 @@ public class FriendMenu extends MnemonicMenu {
         add(statusActions.getAvailableMenuItem());
         add(statusActions.getDnDMenuItem());
         addSeparator();
-        add(switchUserAction);
-        add(signInOutAction);
     }
 
     @Inject void register(Navigator navigator) {

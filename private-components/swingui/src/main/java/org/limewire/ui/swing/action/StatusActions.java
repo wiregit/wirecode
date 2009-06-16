@@ -17,7 +17,6 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
-import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -125,7 +124,7 @@ public class StatusActions {
     }
 
     @Inject
-    void register(FriendActions actions, ListenerSupport<XMPPConnectionEvent> event) {
+    void register(ListenerSupport<XMPPConnectionEvent> event) {
         event.addListener(new EventListener<XMPPConnectionEvent>() {
             @Override
             @SwingEDTEvent
