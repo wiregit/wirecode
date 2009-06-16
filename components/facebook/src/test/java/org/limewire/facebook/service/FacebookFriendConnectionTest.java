@@ -11,6 +11,7 @@ import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.api.friend.LimeWireFriendModule;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.facebook.service.settings.ChatChannel;
 import org.limewire.http.auth.LimeWireHttpAuthModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inject.MutableProvider;

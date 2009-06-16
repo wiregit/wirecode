@@ -1,4 +1,4 @@
-package org.limewire.facebook.service;
+package org.limewire.facebook.service.settings;
 
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;

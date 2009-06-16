@@ -70,6 +70,7 @@ import org.limewire.facebook.service.livemessage.ConnectBackRequestHandler;
 import org.limewire.facebook.service.livemessage.ConnectBackRequestHandlerFactory;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
+import org.limewire.facebook.service.settings.ChatChannel;
 import org.limewire.inject.MutableProvider;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;

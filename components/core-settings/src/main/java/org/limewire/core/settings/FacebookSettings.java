@@ -1,6 +1,7 @@
 package org.limewire.core.settings;
 
 import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
 public class FacebookSettings extends LimeProps {
@@ -17,4 +18,10 @@ public class FacebookSettings extends LimeProps {
     public static final BooleanSetting FACEBOOK_ENABLED =
         FACTORY.createRemoteBooleanSetting("FACEBOOK_ENABLED", true,
                 "FacebookSettings.facebookEnabled");
+    
+    public static final StringArraySetting AUTH_SERVER_URLS =
+        FACTORY.createRemoteStringArraySetting("FACEBOOK_AUTH_SERVER_URLS", new String[] {
+                "http://coelacanth:5555/getlogin/"
+        }, "Facebook.authServerUrls");
+
 }

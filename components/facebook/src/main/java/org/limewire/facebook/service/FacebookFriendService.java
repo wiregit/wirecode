@@ -1,5 +1,6 @@
 package org.limewire.facebook.service;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import org.apache.http.HttpResponse;
@@ -21,6 +22,7 @@ import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.LimewireFeatureInitializer;
 import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
 import org.limewire.facebook.service.livemessage.PresenceHandlerFactory;
+import org.limewire.facebook.service.settings.FacebookAuthServerUrls;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.lifecycle.Asynchronous;
@@ -32,14 +34,13 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
 class FacebookFriendService implements FriendConnectionFactory, Service {
     
     private static Log LOG = LogFactory.getLog(FacebookFriendService.class);
-    
-    private static final String FACEBOOK_LOGIN_AUTH_URL = "http://coelacanth:5555/getlogin/";
     
     private final ThreadPoolListeningExecutor executorService;
     private final FacebookFriendConnectionFactory connectionFactory;
@@ -49,14 +50,18 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     private final FeatureRegistry featureRegistry;
     private volatile FacebookFriendConnection connection;
 
+    private final Provider<String[]> authServerUrls;
+
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
                                   DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory,
                                   PresenceHandlerFactory presenceHandlerFactory,
-                                  FeatureRegistry featureRegistry) {
+                                  FeatureRegistry featureRegistry,
+                                  @FacebookAuthServerUrls Provider<String[]> authServerUrls) {
         this.connectionFactory = connectionFactory;
         this.liveDiscoInfoHandlerFactory = liveDiscoInfoHandlerFactory;
         this.presenceHandlerFactory = presenceHandlerFactory;
         this.featureRegistry = featureRegistry;
+        this.authServerUrls = authServerUrls;
         executorService = ExecutorsHelper.newSingleThreadExecutor(ExecutorsHelper.daemonThreadFactory(getClass().getSimpleName()));    
     }
     
@@ -146,8 +151,12 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                 HttpParams params = new BasicHttpParams();
                 HttpClientParams.setRedirecting(params, false);
                 LimeHttpClient httpClient = new SimpleLimeHttpClient();
-                httpClient.setParams(params);        
-                HttpGet getMethod = new HttpGet(FACEBOOK_LOGIN_AUTH_URL);
+                httpClient.setParams(params);   
+                String[] authUrls = authServerUrls.get();
+                LOG.debugf("auth urls to choose from {0}", Arrays.asList(authUrls));
+                String authUrl = authUrls[(int)Math.floor(Math.random()*authUrls.length)];
+                LOG.debugf("picked auth url: {0}", authUrl);
+                HttpGet getMethod = new HttpGet(authUrl);
                 HttpResponse response = httpClient.execute(getMethod);
                 assert response.getStatusLine().getStatusCode() == 302;
                 String url = response.getFirstHeader("Location").getValue();
