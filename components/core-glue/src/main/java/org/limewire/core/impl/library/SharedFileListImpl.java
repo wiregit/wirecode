@@ -1,6 +1,7 @@
 package org.limewire.core.impl.library;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LocalFileItem;
@@ -67,6 +68,11 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
     @Override
     public void removeFriend(String friendId) {
         coreCollection.removeFriend(friendId);
+    }
+    
+    @Override
+    public void setFriendList(List<String> friendIdList) {
+        coreCollection.setFriendList(friendIdList);
     }
 
     @Override

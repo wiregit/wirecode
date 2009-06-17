@@ -1,30 +1,45 @@
 package org.limewire.ui.swing.library.sharing;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.limewire.core.api.friend.Friend;
 
 class EditableSharingData {
 
     private final Friend friend;
-    private boolean isSelected;
+    private boolean selected;
+    private List<String> ids;
     
     public EditableSharingData(Friend friend, boolean isSelected) {
         this.friend = friend;
-        this.isSelected = isSelected;
+        this.selected = isSelected;
+        this.ids = null;
     }
     
-    public String getName() {
-        return friend.getRenderName();
+    public EditableSharingData(List<String> ids, boolean selected) {
+        this.ids = ids;
+        this.friend = null;
+        this.selected = selected;
     }
     
-    public String getId() {
-        return friend.getId();
+    public Friend getFriend() {
+        return friend;
+    }
+    
+    public List<String> getIds() {
+        if(ids == null) {
+            return Collections.singletonList(friend.getId());
+        } else {
+            return ids;
+        }
     }
     
     public boolean isSelected() {
-        return isSelected;
+        return selected;
     }
     
-    public void setIsSelected(boolean value) {
-        this.isSelected = value;
+    public void setSelected(boolean value) {
+        this.selected = value;
     }
 }

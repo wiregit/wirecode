@@ -120,9 +120,13 @@ class LibrarySharingFriendListPanel {
         });
     }
     
+    void clear() {
+        friendModel.setData(Collections.emptyList());
+    }
+    
     /** Sets the list of IDs this is shared with. */
-    public void setSharedFriendIds(List<String> newFriendIds) {
-        if(newFriendIds.isEmpty()) {
+    void setSharedFriendIds(List<String> newFriendIds) {
+        if(!newFriendIds.isEmpty()) {
             headerLabel.setText(I18n.tr("Sharing list with..."));
         } else {
             headerLabel.setText(I18n.tr("Not Shared"));
@@ -156,7 +160,7 @@ class LibrarySharingFriendListPanel {
         component.revalidate();
     }
     
-    public JComponent getComponent() {
+    JComponent getComponent() {
         return component;
     }
     

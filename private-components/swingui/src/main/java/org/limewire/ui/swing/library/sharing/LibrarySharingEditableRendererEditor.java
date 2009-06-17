@@ -22,8 +22,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
-
-import com.google.inject.Inject;
+import org.limewire.ui.swing.util.I18n;
 
 class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
 
@@ -39,7 +38,6 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
     
     private EditableSharingData data;
     
-    @Inject
     public LibrarySharingEditableRendererEditor() {
         super(new MigLayout("filly, insets 0, gap 0"));
 
@@ -56,8 +54,9 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
         checkBox.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(data != null)
-                    data.setIsSelected(checkBox.isSelected());
+                if(data != null) {
+                    data.setSelected(checkBox.isSelected());
+                }
                 stopCellEditing();
             }
         });
@@ -72,7 +71,7 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
 
         if(value instanceof EditableSharingData) {
             data = (EditableSharingData) value;
-            checkBox.setText(data.getName());
+            checkBox.setText(textFor(data));
             checkBox.setSelected(data.isSelected());
         } else {
             checkBox.setText("");
@@ -86,13 +85,21 @@ class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRe
             boolean hasFocus, int row, int column) {
         if(value instanceof EditableSharingData) {
             EditableSharingData data = (EditableSharingData) value;
-            checkBox.setText(data.getName());
+            checkBox.setText(textFor(data));
             checkBox.setSelected(data.isSelected());
         } else {
             checkBox.setText("");
             checkBox.setSelected(false);
         }     
         return this;
+    }
+    
+    private String textFor(EditableSharingData data) {
+        if(data.getFriend() != null) {
+            return data.getFriend().getRenderName();
+        } else {
+            return I18n.tr("{0} friends from other accounts", data.getIds().size());
+        }
     }
 
     @Override

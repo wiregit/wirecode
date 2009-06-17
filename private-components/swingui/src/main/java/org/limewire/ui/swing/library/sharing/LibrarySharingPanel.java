@@ -3,7 +3,6 @@ package org.limewire.ui.swing.library.sharing;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +36,8 @@ import com.google.inject.Provider;
 @LazySingleton
 public class LibrarySharingPanel {
 
-    @Resource
-    private Color backgroundColor;
-
-    @Resource
-    private Color borderColor;
+    @Resource private Color backgroundColor;
+    @Resource private Color borderColor;
     
     private static final String LOGIN_VIEW = "LOGIN_VIEW";
     private static final String EDITABLE_VIEW = "EDITABLE_VIEW";
@@ -122,7 +118,7 @@ public class LibrarySharingPanel {
             layoutMap.put(EDITABLE_VIEW, newComponent);
         }         
         currentView = View.EDIT_LIST;
-        editablePanel.setSelectedShareIds(Collections.unmodifiableList(currentList.getFriendIds()));
+        editablePanel.editWithSelectedIds(currentList.getFriendIds());
         layout.show(component, EDITABLE_VIEW);
     }
     
@@ -145,19 +141,9 @@ public class LibrarySharingPanel {
         }
     }
     
-    void updateFriends(List<String> friends) {
-        List<String> currentFriends = Collections.unmodifiableList(currentList.getFriendIds());
-        for(String id : currentFriends) {
-            if(!friends.contains(id)) {
-                currentList.removeFriend(id);
-            }
-        }
-        
-        for(String id: friends) {
-            if(!currentList.getFriendIds().contains(id)) {
-                currentList.addFriend(id);
-            }
-        }
+    /** Sets the new list of IDs that should be shared. */
+    void setFriendIdsForSharing(List<String> friendIds) {
+        currentList.setFriendList(friendIds);
     }
     
     private void sharesChanged() {

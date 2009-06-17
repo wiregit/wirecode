@@ -3,26 +3,29 @@ package org.limewire.ui.swing.library.sharing;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.table.TableCellEditor;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.inject.LazySingleton;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
@@ -34,81 +37,99 @@ import org.limewire.ui.swing.util.I18n;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 @LazySingleton
 class LibrarySharingEditablePanel {
     
-    @Resource Color borderColor;
-    @Resource Font sharingLabelFont;
-    @Resource Color sharingLabelColor;
-    @Resource Font selectFont;
-    @Resource Color selectColor;
+    @Resource private Color borderColor;
+    @Resource private Font sharingLabelFont;
+    @Resource private Color sharingLabelColor;
+    @Resource private Font selectFont;
+    @Resource private Color selectColor;
     
     private final JPanel component;
-    private PromptTextField filterTextField;
-    private HyperlinkButton allButton;
-    private HyperlinkButton noneButton;
-    private JXButton applyButton;
-    private HyperlinkButton cancelButton;
+    private final PromptTextField filterTextField;
+    private final HyperlinkButton allButton;
+    private final HyperlinkButton noneButton;
+    private final JXButton applyButton;
+    private final HyperlinkButton cancelButton;
     
-    private Provider<LibrarySharingTable<EditableSharingData>> sharingTableProvider;
-    private Provider<LibrarySharingEditableRendererEditor> renderer;
-    private Provider<LibrarySharingEditableRendererEditor> editor;
+    private final Map<String, Friend> knownFriends;
     
-    private LibrarySharingTable<EditableSharingData> sharingTable;
-    private EventList<EditableSharingData> eventList;
-    private FilterList<EditableSharingData> filterList;
+    private final EventList<EditableSharingData> baseEventList;
+    private final EventList<EditableSharingData> filteredList;
+    private final JXTable friendTable;
     
     @Inject
-    public LibrarySharingEditablePanel(Provider<LibrarySharingTable<EditableSharingData>> sharingTableProvider,
-            Provider<LibrarySharingEditableRendererEditor> renderer,
-            Provider<LibrarySharingEditableRendererEditor> editor,
-            ApplySharingAction applyAction, CancelSharingAction cancelAction, 
-            SelectAllAction selectAllAction, SelectNoneAction selectNoneAction,
-            TextFieldDecorator textFieldDecorator, ButtonDecorator buttonDecorator) {
+    public LibrarySharingEditablePanel(ApplySharingAction applyAction,
+            CancelSharingAction cancelAction, TextFieldDecorator textFieldDecorator,
+            ButtonDecorator buttonDecorator, @Named("known") Map<String, Friend> knownFriends) {
         GuiUtils.assignResources(this);
+        this.knownFriends = knownFriends;
         
-        component = new JPanel(new MigLayout("insets 0, gap 0, fillx", "[134!]", ""));
-        
-        this.sharingTableProvider = sharingTableProvider;
-        this.renderer = renderer;
-        this.editor = editor;
-        
+        component = new JPanel(new MigLayout("insets 0, gap 0, fillx", "[134!]", ""));        
         component.setOpaque(false);
         
-        JLabel shareLabel = new JLabel(I18n.tr("Share list with..."));
+        JLabel shareLabel = new JLabel(I18n.tr("Sharing list with..."));
         shareLabel.setFont(sharingLabelFont);
         shareLabel.setForeground(sharingLabelColor);
-        component.add(shareLabel, "gapleft 5, gaptop 6, wrap");
+        component.add(shareLabel, "gapleft 5, gaptop 6, wrap");        
         
-        filterTextField = new PromptTextField(I18n.tr("Find..."));
+        filterTextField = new PromptTextField(I18n.tr("Filter..."));
         textFieldDecorator.decorateClearablePromptField(filterTextField, AccentType.NONE);
-        
         component.add(filterTextField, "gapleft 5, gaptop 7, gapright 5, wmax 124, wrap");
 
         JLabel selectLabel = new JLabel(I18n.tr("Select"));
         selectLabel.setFont(selectFont);
         selectLabel.setForeground(selectColor);
-        component.add(selectLabel, "gapleft 5, gaptop 5, wrap");
+        component.add(selectLabel, "gapleft 5, gaptop 5, split 3");
         
-        allButton = new HyperlinkButton(selectAllAction);
+        allButton = new HyperlinkButton(new AbstractAction(I18n.tr("all")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setSelectedStateForAll(true);
+            }
+        });
         allButton.setFont(selectFont);
-        noneButton = new HyperlinkButton(selectNoneAction);
+        noneButton = new HyperlinkButton(new AbstractAction(I18n.tr("none")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setSelectedStateForAll(false);
+            }
+        });
         noneButton.setFont(selectFont);
-        component.add(allButton, "gapleft 15, gaptop 5, wrap");
+        component.add(allButton, "gapleft 15, gaptop 5");
         component.add(noneButton, "gapleft 15, gaptop 5, wrap");
-        
-        initTable();
+                
+        baseEventList = new BasicEventList<EditableSharingData>();
+        MatcherEditor<EditableSharingData> matcher = new TextComponentMatcherEditor<EditableSharingData>(filterTextField, new FriendFilterator());
+        filteredList = new FilterList<EditableSharingData>(baseEventList, matcher);
+        friendTable = new JXTable(new EventTableModel<EditableSharingData>(baseEventList, new EditTableFormat())) {
+            @Override
+            public void editingStopped(ChangeEvent e) {
+                TableCellEditor editor = getCellEditor();
+                if(editor != null) {
+                    removeEditor();
+                }
+            }
+        };
+        JScrollPane scrollPane = new JScrollPane(friendTable);
+        scrollPane.setMinimumSize(new Dimension(0,0));
+        scrollPane.setBorder(BorderFactory.createMatteBorder(1,0,1,0, borderColor)); 
+        friendTable.getColumnExt(0).setCellRenderer(new LibrarySharingEditableRendererEditor());
+        friendTable.getColumnExt(0).setCellEditor(new LibrarySharingEditableRendererEditor());
+        friendTable.setTableHeader(null);
+        friendTable.setShowGrid(false, false);
+                
+        component.add(scrollPane, "growx, gaptop 5, wrap");
         
         applyButton = new JXButton(applyAction);
         applyButton.setFont(selectFont);
@@ -120,162 +141,44 @@ class LibrarySharingEditablePanel {
         component.add(cancelButton, "gaptop 5, gapbottom 5, wrap");
     }
     
-    @Inject
-    void register(@Named("known") Collection<Friend> knownFriends, @Named("known") ListenerSupport<FriendEvent> knownSupport) {
-        if(eventList == null) {
-            filterList = createEventListChain();
-            SwingUtilities.invokeLater(new Runnable(){
-                public void run() {
-                    sharingTable.setEventList(filterList);
-                    sharingTable.getColumnModel().getColumn(0).setCellRenderer(renderer.get());            
-                    sharingTable.getColumnModel().getColumn(0).setCellEditor(editor.get());       
-                }
-            });
-        }
-        
-        // the table is strictly the size of the number of rows or full screen with a scrollbar
-        // if it surpasses available space. When adding/removing friends or filtering need to
-        // revalidate the size to correctly update the panel and table sizing.
-        filterList.addListEventListener(new ListEventListener<EditableSharingData>(){
-            @Override
-            public void listChanged(ListEvent<EditableSharingData> listChanges) {
-                if(LibrarySharingEditablePanel.this.getComponent().isShowing()) {
-                    SwingUtilities.invokeLater(new Runnable(){
-                        public void run() {
-                            component.revalidate();
-                        }
-                    });
-                }
-            }
-        });
-        
-        for(Friend friend : knownFriends) {
-            eventList.add(new EditableSharingData(friend, false));
-        }
-        
-        //TODO: this changed on head, see how
-        // FYI: Never use RosterEvent, Ever.
-        
-        // I don't understand why this is necessary at all --
-        // the ShareList contains a model of people it is currently shared with,
-        // and the checklist model doesn't need to be in real-time, just grab
-        // the current list of known friends from @Named("known") Collection<Friend>
-        // and add to it any IDs that are in the shared list that aren't known.
-        // We don't need to keep it synced throughout the lifetime of the application.
-        // Just build it once it needs to be shown and get rid of it after that.
-        // Don't see why it needs to be a singleton or anything like that.
-        knownSupport.addListener(new EventListener<FriendEvent>() {
-            @Override
-            public void handleEvent(FriendEvent event) {
-                  switch(event.getType()) { 
-                  case ADDED:
-                      eventList.add(new EditableSharingData(event.getData(), false));
-                      break;
-                  case DELETE:
-                  case REMOVED:
-                      eventList.remove(new EditableSharingData(event.getData(), false));
-                      break;
-                  }                    
-            }
-        });
-        
-        //TODO: depending on how we handle offline mode, may want to add/remove
-        // presencelistener here and repopulate the list at startup each time
-//        component.addComponentListener(new ComponentListener(){
-//
-//            @Override
-//            public void componentHidden(ComponentEvent e) {
-//            }
-//
-//            @Override
-//            public void componentMoved(ComponentEvent e) {
-//            }
-//
-//            @Override
-//            public void componentResized(ComponentEvent e) {
-//            }
-//
-//            @Override
-//            public void componentShown(ComponentEvent e) {
-//            }
-//            
-//        });
-    }
-    
-    /**
-     * Sets up the EventList chain for displaying, filtering, sorting friends.
-     */
-    private FilterList<EditableSharingData> createEventListChain() {
-        eventList = GlazedLists.threadSafeList(new BasicEventList<EditableSharingData>());
-        MatcherEditor<EditableSharingData> matcher = new TextComponentMatcherEditor<EditableSharingData>(filterTextField, new FriendFilterator());
-        FilterList<EditableSharingData> filterList = new FilterList<EditableSharingData>(eventList, matcher);
-        return filterList;
-    }
-    
-    private void initTable() {
-        sharingTable = sharingTableProvider.get();
-        sharingTable.enableEditing(true);
-        sharingTable.setEventList(new BasicEventList<EditableSharingData>());
-                
-        JScrollPane scrollPane = new JScrollPane(sharingTable);
-        scrollPane.setMinimumSize(new Dimension(0,0));
-        scrollPane.setBorder(BorderFactory.createMatteBorder(1,0,1,0, borderColor)); 
-                
-        component.add(scrollPane, "growx, gaptop 5, wrap");
-    }
-    
     public JComponent getComponent() {
         return component;
     }
     
-    public void setSelectedShareIds(List<String> sharingEventList) {
+    void clear() {
+        baseEventList.clear();
+    }
+    
+    void editWithSelectedIds(List<String> selectedIds) {
         filterTextField.setText("");
-        eventList.getReadWriteLock().writeLock().lock();
-        try {
-            for(EditableSharingData data : eventList) {
-                data.setIsSelected(sharingEventList.contains(data.getId()));
-            }
-        } finally {
-            eventList.getReadWriteLock().writeLock().unlock();
+        baseEventList.clear();
+        Set<String> setOfIds = new HashSet<String>(selectedIds);
+        for(Friend friend : knownFriends.values()) {
+            baseEventList.add(new EditableSharingData(friend, setOfIds.remove(friend.getId())));
+        }
+        if(!setOfIds.isEmpty()) {
+            baseEventList.add(new EditableSharingData(new ArrayList<String>(setOfIds), true));
         }
     }
     
     /**
      * Returns a list of Friends who this list is shared with.
      */
-    public List<String> getSelectedFriendIds() {
+    List<String> getSelectedFriendIds() {
         List<String> friends = new ArrayList<String>();
-        eventList.getReadWriteLock().readLock().lock();
-        try {
-            for(EditableSharingData data : eventList) {
-                if(data.isSelected()) {
-                    friends.add(data.getId());
-                }
+        for(EditableSharingData data : baseEventList) {
+            if(data.isSelected()) {
+                friends.addAll(data.getIds());
             }
-        } finally {
-            eventList.getReadWriteLock().readLock().unlock();
         }
         return friends;
     }
     
-    public void selectAllFriends() {
-        selectAll(true);
-    }
-    
-    public void deselectAllFriends() {
-        selectAll(false);
-    }
-    
-    private void selectAll(boolean isSelected) {
-        eventList.getReadWriteLock().readLock().lock();
-        try {
-            for(EditableSharingData data : filterList) {
-                data.setIsSelected(isSelected);
-            }
-        } finally {
-            eventList.getReadWriteLock().readLock().unlock();
+    private void setSelectedStateForAll(boolean isSelected) {
+        for(EditableSharingData data : filteredList) {
+            data.setSelected(isSelected);
         }
-        sharingTable.repaint();
+        friendTable.repaint();
     }
     
     /**
@@ -284,8 +187,42 @@ class LibrarySharingEditablePanel {
     private class FriendFilterator implements TextFilterator<EditableSharingData> {
         @Override
         public void getFilterStrings(List<String> baseList, EditableSharingData data) {
-            baseList.add(data.getName());
-            baseList.add(data.getId());
+            Friend friend = data.getFriend();
+            if(friend != null) {
+                if(friend.getName() != null) {
+                    baseList.add(friend.getName());
+                }
+                baseList.add(friend.getId());
+            }
         }
+    }
+    
+    private static class EditTableFormat implements WritableTableFormat<EditableSharingData> {
+        @Override
+        public int getColumnCount() {
+            return 1;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            return "";
+        }
+
+        @Override
+        public Object getColumnValue(EditableSharingData baseObject, int column) {
+            return baseObject;
+        }
+        
+        @Override
+        public boolean isEditable(EditableSharingData baseObject, int column) {
+            return true;
+        }
+        
+        @Override
+        public EditableSharingData setColumnValue(EditableSharingData baseObject,
+                Object editedValue, int column) {
+            return baseObject;
+        }
+        
     }
 }
