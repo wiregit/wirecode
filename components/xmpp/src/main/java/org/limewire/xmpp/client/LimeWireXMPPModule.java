@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.core.api.friend.client.ConnectBackRequestSender;
 import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.core.api.friend.client.FriendRequestEvent;
 import org.limewire.core.api.friend.client.RosterEvent;
@@ -55,8 +54,7 @@ public class LimeWireXMPPModule extends AbstractModule {
             bind(JabberSettings.class).to(jabberSettingsClass);
         }
         bind(XMPPConnectionFactoryImpl.class);
-        bind(ConnectBackRequestSender.class).to(XMPPConnectionFactoryImpl.class);
-
+        
         Executor executor = ExecutorsHelper.newProcessingQueue("XMPPEventThread");
         
         EventMulticaster<RosterEvent> rosterMulticaster = new AsynchronousMulticaster<RosterEvent>(executor); 

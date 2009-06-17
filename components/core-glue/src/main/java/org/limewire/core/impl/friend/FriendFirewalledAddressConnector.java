@@ -10,7 +10,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.limewire.core.api.friend.client.ConnectBackRequestSender;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
+import org.limewire.core.api.friend.address.FriendFirewalledAddress;
+import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.feature.FeatureTransport;
+import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
@@ -25,7 +30,6 @@ import org.limewire.net.address.FirewalledAddress;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPSelectorProvider;
-import org.limewire.core.api.friend.address.FriendFirewalledAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -47,7 +51,6 @@ class FriendFirewalledAddressConnector implements AddressConnector, PushedSocket
     
     private final PushDownloadManager pushDownloadManager;
     private final NetworkManager networkManager;
-    private final ConnectBackRequestSender connectRequestSender;
     private final ScheduledExecutorService backgroundExecutor;
     
     final List<PushedSocketConnectObserver> observers = new CopyOnWriteArrayList<PushedSocketConnectObserver>();
@@ -56,12 +59,14 @@ class FriendFirewalledAddressConnector implements AddressConnector, PushedSocket
 
     private final Provider<SocketProcessor> socketProcessor;
 
+    private final FriendAddressResolver friendAddressResolver;
+
     @Inject
-    public FriendFirewalledAddressConnector(ConnectBackRequestSender connectRequestSender, PushDownloadManager pushDownloadManager,
+    public FriendFirewalledAddressConnector(FriendAddressResolver friendAddressResolver, PushDownloadManager pushDownloadManager,
             NetworkManager networkManager, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<UDPSelectorProvider> udpSelectorProvider,
             Provider<SocketProcessor> socketProcessor) {
-        this.connectRequestSender = connectRequestSender;
+        this.friendAddressResolver = friendAddressResolver;
         this.pushDownloadManager = pushDownloadManager;
         this.networkManager = networkManager;
         this.backgroundExecutor = backgroundExecutor;
@@ -94,7 +99,19 @@ class FriendFirewalledAddressConnector implements AddressConnector, PushedSocket
 
     @Override
     public void connect(Address address, ConnectObserver observer) {
-        LOG.debug("connecting");
+        try {
+            connectSendingConnectBack(address, observer);
+        } catch (ConnectBackRequestException ce) {
+            LOG.debugf(ce, "could not send connect back request {0}", address);
+            // fall back on push download manager
+            pushDownloadManager.connect(((FriendFirewalledAddress)address).getFirewalledAddress(), observer);
+        }
+    }
+    
+    /**
+     * @throws ConnectBackRequestException if sending the connect back request fails
+     */
+    void connectSendingConnectBack(Address address, ConnectObserver observer) throws ConnectBackRequestException {
         FriendFirewalledAddress friendFirewalledAddress = (FriendFirewalledAddress)address;
         FirewalledAddress firewalledAddress = friendFirewalledAddress.getFirewalledAddress();
         GUID clientGuid = firewalledAddress.getClientGuid();
@@ -104,21 +121,31 @@ class FriendFirewalledAddressConnector implements AddressConnector, PushedSocket
             observer.handleIOException(new ConnectException("no valid address yet: " + publicAddress));
             return;
         }
+        
+        boolean isFWT = !networkManager.acceptedIncomingConnection();
+        
+        FriendPresence presence = friendAddressResolver.getPresence(friendFirewalledAddress.getFriendAddress());
+        if (presence == null) {
+            throw new ConnectBackRequestException("no presence available for: " + friendFirewalledAddress.getFriendAddress());
+        }
+        FeatureTransport<ConnectBackRequest> transport = presence.getTransport(ConnectBackRequestFeature.class);
+        if (transport == null) {
+            throw new ConnectBackRequestException("no transport for presence: " + presence);
+        }
         /* there's a slight race condition, if a connection was just accepted between getting the address
          * and checking for it in the call below, but this should only change the address wrt to port vs
          * udp port which are usually the same anyways.
          */
         final PushedSocketConnectObserver pushedSocketObserver = new PushedSocketConnectObserver(firewalledAddress, observer);
         observers.add(pushedSocketObserver);
-        boolean isFWT = !networkManager.acceptedIncomingConnection(); 
-        boolean canSend = connectRequestSender.send(friendFirewalledAddress.getXmppAddress().getFullId(), new ConnectBackRequest(publicAddress, clientGuid, isFWT ? networkManager.supportsFWTVersion() : 0));
-        if (!canSend) {
-            LOG.debugf("could not send xmpp connect back request {0}", address);
-            // fall back on push download manager
+        try {
+            transport.sendFeature(presence, new ConnectBackRequest(publicAddress, clientGuid, isFWT ? networkManager.supportsFWTVersion() : 0));
+        } catch (FriendException e) {
+            // clean up observer
             observers.remove(pushedSocketObserver);
-            pushDownloadManager.connect(friendFirewalledAddress.getFirewalledAddress(), observer);
-            return;
+            throw new ConnectBackRequestException(e);
         }
+        
         if (isFWT) {
             LOG.debug("Starting fwt communication");
             assert NetworkUtils.isValidIpPort(firewalledAddress.getPublicAddress()) : "invalid public address" + firewalledAddress;
@@ -211,6 +238,17 @@ class FriendFirewalledAddressConnector implements AddressConnector, PushedSocket
             if (acceptedOrFailed.compareAndSet(false, true)) {
                 observer.handleIOException(ie);
             }
+        }
+    }
+    
+    static class ConnectBackRequestException extends Exception {
+        
+        public ConnectBackRequestException(String message) {
+            super(message);
+        }
+        
+        public ConnectBackRequestException(Throwable cause) {
+            super(cause);
         }
     }
 }

@@ -33,7 +33,7 @@ public class FriendFirewalledAddress implements Address {
     /**
      * @return the {@link FriendAddress} 
      */
-    public FriendAddress getXmppAddress() {
+    public FriendAddress getFriendAddress() {
         return friendAddress;
     }
     

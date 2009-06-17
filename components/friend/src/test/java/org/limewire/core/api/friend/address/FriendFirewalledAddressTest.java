@@ -26,7 +26,7 @@ public class FriendFirewalledAddressTest extends BaseTestCase {
                 new ConnectableImpl("192.168.0.1", 1000, true), new GUID(),
                 Connectable.EMPTY_SET, 0);
         FriendFirewalledAddress friendFirewalledAddress = new FriendFirewalledAddress(friendAddress, firewalledAddress);
-        assertSame(friendAddress, friendFirewalledAddress.getXmppAddress());
+        assertSame(friendAddress, friendFirewalledAddress.getFriendAddress());
         assertSame(firewalledAddress, friendFirewalledAddress.getFirewalledAddress());
     }
 

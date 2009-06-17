@@ -4,8 +4,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.net.ConnectBackRequest;
 
-public class ConnectBackRequestFeature extends Feature<String> {
+public class ConnectBackRequestFeature extends Feature<ConnectBackRequest> {
 
     public static final URI ID;
 
@@ -18,6 +19,6 @@ public class ConnectBackRequestFeature extends Feature<String> {
     }
 
     public ConnectBackRequestFeature() {
-        super(ID.toASCIIString(), ID);
+        super(ID);
     }
 }

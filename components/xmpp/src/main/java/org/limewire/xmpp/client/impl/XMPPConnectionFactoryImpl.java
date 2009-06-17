@@ -8,21 +8,18 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.client.ConnectBackRequestSender;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendConnectionEvent;
 import org.limewire.core.api.friend.client.FriendConnectionFactory;
 import org.limewire.core.api.friend.client.FriendConnectionFactoryRegistry;
 import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.client.FriendConnectionEvent;
-import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -35,17 +32,15 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectBackRequest;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
-import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 
 @Singleton
-public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFactory, ConnectBackRequestSender {
+public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFactory {
 
     private static final Log LOG = LogFactory.getLog(XMPPConnectionFactoryImpl.class);
 
@@ -254,37 +249,6 @@ public class XMPPConnectionFactoryImpl implements Service, FriendConnectionFacto
         return Collections.unmodifiableList(connections);
     } 
     
-    @Override
-    public boolean send(String userId, ConnectBackRequest connectBackRequest) {
-        LOG.debug("send connect request");
-        XMPPFriendConnectionImpl connection = getActiveConnection();
-        if (connection == null) {
-            return false;
-        }
-        Friend user = connection.getFriend(StringUtils.parseBareAddress(userId));
-        if (user == null) {
-            return false;
-        }
-        FriendPresence presence = user.getPresences().get(userId);
-        if (presence == null) {
-            return false;
-        }
-        if (!presence.hasFeatures(ConnectBackRequestFeature.ID)) {
-            return false;
-        }
-        ConnectBackRequestIQ connectRequest = new ConnectBackRequestIQ(connectBackRequest);
-        connectRequest.setTo(userId);
-        try {
-            connectRequest.setFrom(connection.getLocalJid());
-            LOG.debugf("sending request: {0}", connectRequest);
-            connection.sendPacket(connectRequest);
-        } catch (FriendException e) {
-            LOG.debug("sending connect back request failed", e);
-            return false;
-        }
-        return true;
-    }
-
     private void setModeImpl(FriendPresence.Mode mode) throws FriendException {
         for(XMPPFriendConnectionImpl connection : connections) {
             connection.setModeImpl(mode);

@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.impl;
+package org.limewire.core.api.friend.address;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -30,7 +30,7 @@ import org.limewire.net.address.BlockingAddressResolutionObserver;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.util.BaseTestCase;
 
-public class XMPPAddressResolverTest extends BaseTestCase {
+public class FriendAddressResolverTest extends BaseTestCase {
 
     private Mockery context;
     private FriendConnection connection;
@@ -40,7 +40,7 @@ public class XMPPAddressResolverTest extends BaseTestCase {
     private FriendPresence friendPresence;
     private FriendAddressResolver friendAddressResolver;
 
-    public XMPPAddressResolverTest(String name) {
+    public FriendAddressResolverTest(String name) {
         super(name);
     }
     
@@ -139,7 +139,7 @@ public class XMPPAddressResolverTest extends BaseTestCase {
         assertInstanceof(FriendFirewalledAddress.class, address);
         FriendFirewalledAddress xmppfiFirewalledAddress = (FriendFirewalledAddress)address;
         assertSame(firewalledAddress, xmppfiFirewalledAddress.getFirewalledAddress());
-        assertEquals(new FriendAddress("me@you.com/resource"), xmppfiFirewalledAddress.getXmppAddress());
+        assertEquals(new FriendAddress("me@you.com/resource"), xmppfiFirewalledAddress.getFriendAddress());
         context.assertIsSatisfied();
     }
     

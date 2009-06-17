@@ -45,13 +45,9 @@ public class ConnectBackRequestIQListener implements PacketListener, FeatureTran
             throws FriendException {
         ConnectBackRequestIQ connectRequest = new ConnectBackRequestIQ(connectBackRequest);
         connectRequest.setTo(presence.getPresenceId());
-        try {
-            connectRequest.setFrom(connection.getLocalJid());
-            LOG.debugf("sending request: {0}", connectRequest);
-            connection.sendPacket(connectRequest);
-        } catch (FriendException e) {
-            LOG.debug("sending connect back request failed", e);
-        }
+        connectRequest.setFrom(connection.getLocalJid());
+        LOG.debugf("sending request: {0}", connectRequest);
+        connection.sendPacket(connectRequest);
     }
     
     public PacketFilter getPacketFilter() {

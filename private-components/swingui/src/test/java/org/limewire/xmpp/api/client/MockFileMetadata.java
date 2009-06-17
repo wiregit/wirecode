@@ -1,6 +1,7 @@
 package org.limewire.xmpp.api.client;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 import org.limewire.core.api.friend.client.FileMetaData;
@@ -56,8 +57,7 @@ public class MockFileMetadata implements FileMetaData {
     }
 
     @Override
-    public String toXML() {
-        // TODO Auto-generated method stub
+    public Map<String, String> getSerializableMap() {
         return null;
     }
 }

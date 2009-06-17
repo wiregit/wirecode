@@ -13,9 +13,13 @@ import java.util.concurrent.TimeUnit;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.api.friend.address.FriendAddressResolver;
 import org.limewire.core.api.friend.address.FriendFirewalledAddress;
-import org.limewire.core.api.friend.client.ConnectBackRequestSender;
+import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.feature.FeatureTransport;
+import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.core.impl.friend.FriendFirewalledAddressConnector.PushedSocketConnectObserver;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
@@ -257,13 +261,13 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
      *  are processed correctly. 
      */
     @SuppressWarnings("unchecked")
-    public void testConnectSimple() throws IOException {
+    public void testConnectSimple() throws Exception {
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
             }};
 
+        final FriendAddressResolver friendAddressResolver = context.mock(FriendAddressResolver.class);
         final NetworkManager networkManager = context.mock(NetworkManager.class);
-        final ConnectBackRequestSender connectRequestSender = context.mock(ConnectBackRequestSender.class);
         final Provider<UDPSelectorProvider> udpSelectorProviderProvider = context.mock(Provider.class);
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
         final Provider<SocketProcessor> socketProcessorProvider = context.mock(Provider.class);
@@ -290,13 +294,17 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
         
         final SocketProcessor socketProcessor = context.mock(SocketProcessor.class);
         
+        final FriendPresence friendPresence = context.mock(FriendPresence.class);
+        
+        final FeatureTransport<ConnectBackRequest> connectBackTransport = context.mock(FeatureTransport.class);
+        
         final MatchAndCopy<ConnectObserver> connectObserverCollector 
             = new MatchAndCopy<ConnectObserver>(ConnectObserver.class);
     
         final MatchAndCopy<Runnable> runnableCollector = new MatchAndCopy<Runnable>(Runnable.class);
         
         final FriendFirewalledAddressConnector connector 
-            = new FriendFirewalledAddressConnector(connectRequestSender, null, networkManager,
+            = new FriendFirewalledAddressConnector(friendAddressResolver, null, networkManager,
                     backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
         
         context.checking(new Expectations() {
@@ -320,7 +328,7 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                 allowing(publicConnectable).getInetSocketAddress();
                 will(returnValue(inetSocketAddr));
                 
-                allowing(address).getXmppAddress();
+                allowing(address).getFriendAddress();
                 will(returnValue(friendAddress));
                 allowing(friendAddress).getFullId();
                 will(returnValue("403"));
@@ -342,8 +350,13 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                 exactly(1).of(networkManager).acceptedIncomingConnection();
                 will(returnValue(false));
                 
-                exactly(1).of(connectRequestSender).send("403", new ConnectBackRequest(publicConnectable, guid, 407));
-                will(returnValue(true));
+                one(friendAddressResolver).getPresence(friendAddress);
+                will(returnValue(friendPresence));
+                
+                one(friendPresence).getTransport(ConnectBackRequestFeature.class);
+                will(returnValue(connectBackTransport));
+                
+                one(connectBackTransport).sendFeature(friendPresence, new ConnectBackRequest(publicConnectable, guid, 407));
                 
                 exactly(1).of(socket).connect(with(same(inetSocketAddr)),
                         with(any(Integer.class)), with(connectObserverCollector));
@@ -395,7 +408,6 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
             }};
 
         final NetworkManager networkManager = context.mock(NetworkManager.class);
-        final ConnectBackRequestSender connectRequestSender = context.mock(ConnectBackRequestSender.class);
         final Provider<UDPSelectorProvider> udpSelectorProviderProvider = context.mock(Provider.class);
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
         final Provider<SocketProcessor> socketProcessorProvider = context.mock(Provider.class);
@@ -411,7 +423,7 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
         final InetSocketAddress inetSocketAddr = context.mock(InetSocketAddress.class);
         
         final FriendFirewalledAddressConnector connector 
-            = new FriendFirewalledAddressConnector(connectRequestSender, null, networkManager,
+            = new FriendFirewalledAddressConnector(null, null, networkManager,
                 backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
         
         context.checking(new Expectations() {
@@ -449,13 +461,13 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
      * Connect when is there is no incoming connection and an send failure.
      */
     @SuppressWarnings("unchecked")
-    public void testConnectWithFails() throws IOException {
+    public void testConnectWithFails() throws Exception {
         Mockery context = new Mockery() {
             {   setImposteriser(ClassImposteriser.INSTANCE);
             }};
 
+            final FriendAddressResolver friendAddressResolver = context.mock(FriendAddressResolver.class);
         final NetworkManager networkManager = context.mock(NetworkManager.class);
-        final ConnectBackRequestSender connectRequestSender = context.mock(ConnectBackRequestSender.class);
         final Provider<UDPSelectorProvider> udpSelectorProviderProvider = context.mock(Provider.class);
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
         final Provider<SocketProcessor> socketProcessorProvider = context.mock(Provider.class);
@@ -473,9 +485,13 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
         final Connectable publicConnectable = context.mock(Connectable.class);
         final InetAddress inetAddr = context.mock(InetAddress.class);
         final InetSocketAddress inetSocketAddr = context.mock(InetSocketAddress.class);
+        
+        final FriendPresence friendPresence = context.mock(FriendPresence.class);
+        
+        final FeatureTransport<ConnectBackRequest> connectBackTransport = context.mock(FeatureTransport.class);
     
         final FriendFirewalledAddressConnector connector 
-            = new FriendFirewalledAddressConnector(connectRequestSender, pushDownloadManager, networkManager,
+            = new FriendFirewalledAddressConnector(friendAddressResolver, pushDownloadManager, networkManager,
                     backgroundExecutor, udpSelectorProviderProvider, socketProcessorProvider);
         
         context.checking(new Expectations() {
@@ -499,7 +515,7 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                 allowing(publicConnectable).getInetSocketAddress();
                 will(returnValue(inetSocketAddr));
                 
-                allowing(address).getXmppAddress();
+                allowing(address).getFriendAddress();
                 will(returnValue(friendAddress));
                 allowing(friendAddress).getFullId();
                 will(returnValue("403"));
@@ -508,11 +524,16 @@ public class FriendFirewalledAddressConnectorTest extends BaseTestCase {
                 exactly(2).of(networkManager).acceptedIncomingConnection();
                 will(returnValue(true));
                 
-                exactly(1).of(connectRequestSender).send("403", new ConnectBackRequest(publicConnectable, guid, 0));
-                will(returnValue(false));
+                allowing(friendAddressResolver).getPresence(friendAddress);
+                will(returnValue(friendPresence));
                 
-                exactly(1).of(connectRequestSender).send("403", new ConnectBackRequest(publicConnectable, guid, 0));
-                will(returnValue(true));
+                allowing(friendPresence).getTransport(ConnectBackRequestFeature.class);
+                will(returnValue(connectBackTransport));
+                
+                one(connectBackTransport).sendFeature(friendPresence, new ConnectBackRequest(publicConnectable, guid, 0));
+                will(throwException(new FriendException("error sending")));
+                
+                one(connectBackTransport).sendFeature(friendPresence, new ConnectBackRequest(publicConnectable, guid, 0));
                 
                 exactly(1).of(pushDownloadManager).connect(fwAddress, observer);
                 
