@@ -12,6 +12,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.LibrarySupport;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -20,11 +21,13 @@ import com.google.inject.Inject;
 
 public class AddFolderAction extends AbstractAction {
     private final LibraryManager libraryManager;
+    private final LibrarySupport librarySupport;
 
     @Inject
-    public AddFolderAction(LibraryManager libraryManager) {
+    public AddFolderAction(LibraryManager libraryManager, LibrarySupport librarySupport) {
         super(I18n.tr("Add &Folder to Library..."));
         this.libraryManager = libraryManager;
+        this.librarySupport = librarySupport;
     }
 
     @Override
@@ -45,10 +48,7 @@ public class AddFolderAction extends AbstractAction {
                 });
 
         if (folders != null) {
-            for (File folder : folders) {
-                libraryManager.getLibraryManagedList().addFolder(folder);
-            }
+            librarySupport.addFiles(libraryManager.getLibraryManagedList(), folders);
         }
-
     }
 }

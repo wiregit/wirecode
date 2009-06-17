@@ -24,12 +24,12 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
+import org.limewire.ui.swing.dnd.LibraryTransferHandler;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.actions.AddFileAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
@@ -47,7 +47,6 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 
@@ -71,10 +70,10 @@ public class LibraryPanel extends JPanel {
     private FilterList<LocalFileItem> filteredList;
     
     @Inject
-    public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, final LibraryTable libraryTable,
+    public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, 
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
-            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher) {
+            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LibraryTransferHandler transferHandler) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.navigatorComponent = navPanel;
@@ -84,22 +83,7 @@ public class LibraryPanel extends JPanel {
         this.publicSharedFeedbackPanel = publicSharedFeedbackPanel;
         this.buttonDecorator = buttonDecorator;
         this.categoryMatcher = categoryMatcher;
-        this.transferHandler = new LocalFileListTransferHandler() {
-          @Override
-            public LocalFileList getLocalFileList() {
-                LibraryNavItem item = navigatorComponent.getSelectedNavItem();
-                if(item == null) {
-                    return null;
-                }
-                return item.getLocalFileList();
-            }
-          
-            @SuppressWarnings("unchecked")
-            @Override
-            public EventSelectionModel<LocalFileItem> getSelectionModel() {
-                return (EventSelectionModel<LocalFileItem>) libraryTable.getSelectionModel();
-            }
-        };
+        this.transferHandler = transferHandler;
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 

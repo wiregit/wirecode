@@ -4,14 +4,22 @@ import java.awt.Point;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.library.LibrarySupport;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
+
+import com.google.inject.Inject;
 
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public class LibraryNavTransferHandler extends LocalFileListTransferHandler {
-    
     private LocalFileList localFileList = null;
+    
+    @Inject
+    public LibraryNavTransferHandler(LibrarySupport librarySupport) {
+        super(librarySupport);
+    }
+    
     @Override
     public boolean canImport(TransferSupport info) {
 

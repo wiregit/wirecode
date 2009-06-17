@@ -12,12 +12,18 @@ import javax.swing.TransferHandler;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.library.LibrarySupport;
 import org.limewire.ui.swing.util.DNDUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public abstract class LocalFileListTransferHandler extends TransferHandler {
+    private final LibrarySupport librarySupport;
+
+    public LocalFileListTransferHandler(LibrarySupport librarySupport) {
+        this.librarySupport = librarySupport;
+    }
 
     @Override
     protected Transferable createTransferable(JComponent c) {
@@ -33,11 +39,11 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
         }
         return transferable;
     }
-    
+
     public abstract EventSelectionModel<LocalFileItem> getSelectionModel();
 
     public abstract LocalFileList getLocalFileList();
-    
+
     @Override
     public int getSourceActions(JComponent c) {
         return COPY;
@@ -91,14 +97,6 @@ public abstract class LocalFileListTransferHandler extends TransferHandler {
 
     private void handleFiles(final List<File> files) {
         LocalFileList localFileList = getLocalFileList();
-        for (File file : files) {
-            if (localFileList.isFileAddable(file)) {
-                if (file.isDirectory()) {
-                    localFileList.addFolder(file);
-                } else {
-                    localFileList.addFile(file);
-                }
-            }
-        }
+        librarySupport.addFiles(localFileList, files);
     }
 }

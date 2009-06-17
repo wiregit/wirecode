@@ -8,6 +8,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.LibrarySupport;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -21,12 +22,14 @@ import com.google.inject.Provider;
 public class AddFileAction extends AbstractAction {
 
     private final Provider<LibraryNavigatorPanel> libraryNavigatorPanel;
+    private final LibrarySupport librarySupport;
     
     @Inject
-    public AddFileAction(Provider<LibraryNavigatorPanel> libraryNavigatorPanel) {
+    public AddFileAction(Provider<LibraryNavigatorPanel> libraryNavigatorPanel, LibrarySupport librarySupport) {
         super(I18n.tr("Add Files"));
         
         this.libraryNavigatorPanel = libraryNavigatorPanel;
+        this.librarySupport = librarySupport;
     }
     
     @Override
@@ -52,13 +55,7 @@ public class AddFileAction extends AbstractAction {
                     LibraryNavItem item = libraryNavigatorPanel.get().getSelectedNavItem();
 
                     if(item != null) {
-                        for(File file : files) {
-                            if(file.isDirectory()) {
-                                item.getLocalFileList().addFolder(file);
-                            } else {
-                                item.getLocalFileList().addFile(file);
-                            }
-                        }
+                        librarySupport.addFiles(item.getLocalFileList(), files);
                     }                    
                 }
             });
