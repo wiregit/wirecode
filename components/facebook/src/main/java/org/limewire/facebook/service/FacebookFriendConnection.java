@@ -251,28 +251,36 @@ public class FacebookFriendConnection implements FriendConnection {
         synchronized (this) {
             LOG.debug("logging out from facebook...");
             loggedIn.set(false);
+
+            // over-the-network logout activities
             try {
                 sendOfflinePresences();
-                synchronized (friends) {
-                    for (FacebookFriend friend : friends.values()) {
-                        removeAllPresences(friend);
-                    }
-                    friends.clear();
-                }
                 logoutFromFacebook();
                 expireSession();
-                if(chatListener != null) {
-                    chatListener.setDone();
-                }
-                if(presenceListenerFuture != null) {
-                    presenceListenerFuture.cancel(false);
-                }
-                LOG.debug("logged out from facebook.");
-            } catch (IOException e) {
-                LOG.debug("logout failed", e);
-            } catch (FacebookException e) {
+            } catch (Exception e) {
                 LOG.debug("logout failed", e);
             }
+
+            // remove all friends
+            synchronized (friends) {
+                for (FacebookFriend friend : friends.values()) {
+                    removeAllPresences(friend);
+                }
+                friends.clear();
+            }
+
+            // stop and remove essential listeners/handlers
+            if(chatListener != null) {
+                chatListener.setDone();
+                chatListener = null;
+            }
+            if(presenceListenerFuture != null) {
+                presenceListenerFuture.cancel(false);
+                presenceListenerFuture = null;
+            }
+
+            LOG.debug("logged out from facebook.");
+
             connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.DISCONNECTED));  
         }
     }
@@ -333,14 +341,17 @@ public class FacebookFriendConnection implements FriendConnection {
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
             } catch (IOException e) {
                 LOG.debug("login error", e);
+                logoutImpl();
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw new FriendException(e);
             } catch (JSONException e) {
                 LOG.debug("login error", e);
+                logoutImpl();
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw new FriendException(e);
             } catch (RuntimeException e) {
                 LOG.debug("unexpected login error; probable bug", e);
+                logoutImpl();
                 connectionBroadcaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
                 throw e;
             } finally {
@@ -467,27 +478,21 @@ public class FacebookFriendConnection implements FriendConnection {
 		}
     }
     
-    public void readMetadataFromHomePage() throws FriendException {
-        try {
-            String homePage = httpGET(HOME_PAGE);
+    public void readMetadataFromHomePage() throws IOException {
+        String homePage = httpGET(HOME_PAGE);
 
-            if(homePage == null){
-                throw new IOException("no response");
-            }
-            if(uid == null){
-                throw new IOException("no uid");
-            }
-
-            readLogoutURL(homePage);
-            
-            String presencePopoutPage = httpGET(PRESENCE_POPOUT_PAGE);
-            readChannel(presencePopoutPage);
-            readPOSTFormID(presencePopoutPage);
-            
-        } catch (IOException ioe)  {
-            LOG.debug("starting chat failed", ioe);
-            throw new FriendException(ioe);
+        if(homePage == null){
+            throw new IOException("no response");
         }
+        if(uid == null){
+            throw new IOException("no uid");
+        }
+
+        readLogoutURL(homePage);
+
+        String presencePopoutPage = httpGET(PRESENCE_POPOUT_PAGE);
+        readChannel(presencePopoutPage);
+        readPOSTFormID(presencePopoutPage);
     }
 
     private void readLogoutURL(String homePage) throws IOException {

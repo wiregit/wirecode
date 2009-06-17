@@ -22,6 +22,7 @@ import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.LimewireFeatureInitializer;
 import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
 import org.limewire.facebook.service.livemessage.PresenceHandlerFactory;
+import org.limewire.facebook.service.livemessage.DiscoInfoHandler;
 import org.limewire.facebook.service.settings.FacebookAuthServerUrls;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
@@ -46,6 +47,7 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     private final FacebookFriendConnectionFactory connectionFactory;
 
     private final DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory;
+    private DiscoInfoHandler discoInfoHandler;
     private final PresenceHandlerFactory presenceHandlerFactory;
     private final FeatureRegistry featureRegistry;
     private volatile FacebookFriendConnection connection;
@@ -69,17 +71,23 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     void register(ServiceRegistry registry) {
         registry.register(this);
     }
-    
+
+    @Inject
     public void register(ListenerSupport<FriendConnectionEvent> listenerSupport) {
         listenerSupport.addListener(new EventListener<FriendConnectionEvent>() {
             @Override
             public void handleEvent(FriendConnectionEvent event) {
-                if(event.getType() == FriendConnectionEvent.Type.DISCONNECTED) {
-                    synchronized (FacebookFriendService.this) {
-                        if(connection != null && connection == event.getSource()) {
-                            connection = null;
+                switch (event.getType()) {
+                    case DISCONNECTED:
+                    case CONNECT_FAILED:
+                        synchronized (FacebookFriendService.this) {
+                            if(connection != null && connection == event.getSource()) {
+                                connection = null;
+                            }
                         }
-                    }
+                        discoInfoHandler.unregister();
+                        break;
+                    default:
                 }
             }
         });
@@ -134,7 +142,7 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     FacebookFriendConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
         LOG.debug("creating connection");
         connection = connectionFactory.create(configuration);
-        liveDiscoInfoHandlerFactory.create(connection);
+        discoInfoHandler = liveDiscoInfoHandlerFactory.create(connection);
         presenceHandlerFactory.create(connection);
         new LimewireFeatureInitializer().register(featureRegistry);
         LOG.debug("logging in to facebook...");

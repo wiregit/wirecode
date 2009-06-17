@@ -36,7 +36,10 @@ public class DiscoInfoHandler implements LiveMessageHandler {
     
     private final FacebookFriendConnection connection;
     private final FeatureRegistry featureRegistry;
-    
+
+    private ListenerSupport<FriendPresenceEvent> availableFriends;
+    private EventListener<FriendPresenceEvent> friendPresenceListener;
+
     @AssistedInject
     DiscoInfoHandler(@Assisted FacebookFriendConnection connection,
             FeatureRegistry featureRegistry) {
@@ -50,6 +53,40 @@ public class DiscoInfoHandler implements LiveMessageHandler {
     public void register(LiveMessageHandlerRegistry registry) {
         registry.register(REQUEST_TYPE, this);
         registry.register(RESPONSE_TYPE, this);
+    }
+
+    @Inject
+    public void register(ListenerSupport<FriendPresenceEvent> availableFriends) {
+        this.availableFriends = availableFriends;
+        this.friendPresenceListener = new EventListener<FriendPresenceEvent>() {
+            // TODO listen for known friends instead?
+            // TODO would result in exchanging disco-info's faster
+            // TODO but also lots of requests to offline friends
+            @Override
+            public void handleEvent(FriendPresenceEvent event) {
+                LOG.debugf("friend presence event: {0}", event);
+                if(event.getType() != FriendPresenceEvent.Type.ADDED) {
+                    return;
+                }
+                FriendPresence friendPresence = event.getData();
+                if (!(friendPresence instanceof FacebookFriendPresence)) {
+                    return;
+                }
+                FacebookFriend facebookFriend = (FacebookFriend)friendPresence.getFriend();
+                if (!facebookFriend.hasLimeWireAppInstalled()) {
+                    LOG.debugf("not a limewire friend: {0}", facebookFriend);
+                    return;
+                }
+                connection.sendLiveMessage(friendPresence, REQUEST_TYPE, new HashMap<String, Object>());
+            }
+        };
+        this.availableFriends.addListener(friendPresenceListener);
+    }
+
+    public void unregister() {
+        if (availableFriends != null) {
+            availableFriends.removeListener(friendPresenceListener);
+        }
     }
 
     private void handleDiscInfoResponse(JSONObject message) throws JSONException, URISyntaxException {
@@ -113,31 +150,5 @@ public class DiscoInfoHandler implements LiveMessageHandler {
                 initializer.initializeFeature(presence);
             }
         }
-    }
-    
-    @Inject
-    public void register(ListenerSupport<FriendPresenceEvent> availableFriends) {
-        availableFriends.addListener(new EventListener<FriendPresenceEvent>() {
-            // TODO listen for known friends instead?
-            // TODO would result in exchanging disco-info's faster
-            // TODO but also lots of requests to offline friends
-            @Override
-            public void handleEvent(FriendPresenceEvent event) {
-                LOG.debugf("friend presence event: {0}", event);
-                if(event.getType() != FriendPresenceEvent.Type.ADDED) {
-                    return;
-                }
-                FriendPresence friendPresence = event.getData();
-                if (!(friendPresence instanceof FacebookFriendPresence)) {
-                    return;
-                }
-                FacebookFriend facebookFriend = (FacebookFriend)friendPresence.getFriend();
-                if (!facebookFriend.hasLimeWireAppInstalled()) {
-                    LOG.debugf("not a limewire friend: {0}", facebookFriend);
-                    return;
-                }
-                connection.sendLiveMessage(friendPresence, REQUEST_TYPE, new HashMap<String, Object>());
-            }
-        });
     }
 }
