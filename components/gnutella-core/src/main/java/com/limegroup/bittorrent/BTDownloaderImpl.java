@@ -641,7 +641,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     @Override
     public void deleteIncompleteFiles() {
         if(!complete.get()) {
-            FileUtils.deleteRecursive(getIncompleteFile());
+            File incompleteFile = getIncompleteFile();
+            if(incompleteFile != null) {
+                FileUtils.deleteRecursive(incompleteFile);
+            }
         }
         
         File torrentFile = torrent.getTorrentFile();
