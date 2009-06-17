@@ -12,4 +12,8 @@ public interface LibraryFileList extends LocalFileList {
     void addPropertyChangeListener(PropertyChangeListener listener);
 
     void removePropertyChangeListener(PropertyChangeListener listener);
+    
+    void addFileProcessingListener(FileProcessingListener listener);
+    
+    void removeFileProcessingListener(FileProcessingListener listener);
 }

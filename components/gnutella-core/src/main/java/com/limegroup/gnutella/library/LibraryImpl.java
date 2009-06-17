@@ -33,11 +33,14 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureTask;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.library.FileProcessingEvent;
+import org.limewire.core.api.library.FileProcessingListener;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.SourcedEventMulticaster;
@@ -73,6 +76,7 @@ class LibraryImpl implements Library, FileCollection {
     private final ListeningExecutorService fileLoader;
     private final PropertyChangeSupport changeSupport;
     private final DangerousFileChecker dangerousFileChecker;
+    private final EventListenerList<FileProcessingEvent> fileProcessingListeners = new EventListenerList<FileProcessingEvent>();
     private final AtomicInteger processingIndex = new AtomicInteger(0);
     private final AtomicInteger processingQueueSize = new AtomicInteger(0);
     
@@ -591,14 +595,14 @@ class LibraryImpl implements Library, FileCollection {
                                 @Override
                                 public void run() {
                                     processingIndex.addAndGet(1);
-                                    //TODO put in event call
-                                    //System.out.println("Processing " + processingIndex.get() + " of " + processingQueueSize.get() + " - " + interned.getName());
+                                    fileProcessingListeners.broadcast(new FileProcessingEvent(FileProcessingEvent.Type.FILE_PROCESSED, interned, processingIndex.get(), processingQueueSize.get()));
                                     finishLoadingFileDesc(interned, event, metadata, rev, oldFileDesc, task);
                                     synchronized (processingQueueSize) {
                                         if(processingIndex.get() >= processingQueueSize.get()) {
                                             //TODO put in properly synchronized stuff
                                             processingIndex.set(0);
                                             processingQueueSize.set(0);
+                                            fileProcessingListeners.broadcast(new FileProcessingEvent(FileProcessingEvent.Type.FINISHED, null, 0, 0));
                                         }
                                     }
                                 }
@@ -1155,5 +1159,15 @@ class LibraryImpl implements Library, FileCollection {
         //additional checks happen in the add method already.
         //TODO but for the ui to show properly, should probably at least check if the file is a program and return false if programs are turned off
         return true;
+    }
+
+    @Override
+    public void addFileProcessingListener(FileProcessingListener listener) {
+        fileProcessingListeners.addListener(listener);
+    }
+
+    @Override
+    public void removeFileProcessingListener(FileProcessingListener listener) {
+        fileProcessingListeners.removeListener(listener);    
     }
 }

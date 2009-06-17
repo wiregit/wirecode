@@ -34,7 +34,7 @@ public class StatusPanel extends JXPanel {
             FriendStatusPanel friendStatusPanel, 
             ConnectionStatusPanel connectionStatus, ProStatusPanel proStatusPanel,
             SharedFileCountPanel sharedFileCountPanel, DownloadCountPanel downloadCountPanel,
-            BarPainterFactory barPainterFactory) {
+            BarPainterFactory barPainterFactory, FileProcessingPanel fileProcessingPanel) {
         
         GuiUtils.assignResources(this);
         
@@ -62,6 +62,8 @@ public class StatusPanel extends JXPanel {
         leftPanel.add(connectionStatus, "growy, gapbefore 2, gaptop 2, gapbottom 2");
         leftPanel.add(sharedFileCountPanel, "growy, gaptop 0, gapbottom 0");
         leftPanel.add(downloadCountPanel, "growy, gaptop 2, gapbottom 2");
+        leftPanel.add(fileProcessingPanel, "growy, gaptop 0, gapbottom 0");
+        
         centerPanel.add(proStatusPanel, "growy, gaptop 2");
         rightPanel.add(miniPlayerPanel, "gapafter 4");
         rightPanel.add(chatButton, "growy");

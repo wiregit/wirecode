@@ -9,6 +9,7 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.library.FileProcessingListener;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
@@ -113,5 +114,15 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     @Override
     public boolean isFileAddable(File file) {
         return true;
+    }
+
+    @Override
+    public void addFileProcessingListener(FileProcessingListener listener) {
+        
+    }
+
+    @Override
+    public void removeFileProcessingListener(FileProcessingListener listener) {
+        
     }
 }
