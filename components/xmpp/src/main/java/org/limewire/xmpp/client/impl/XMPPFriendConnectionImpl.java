@@ -66,6 +66,12 @@ import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListenerFa
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+/**
+ * Implements a {@link FriendConnection} using XMPP.
+ * <p>
+ * It wraps a {@link XMPPConnection} and keeps track of all the listeners
+ * created around that connection and the list of users that is online.
+ */
 public class XMPPFriendConnectionImpl implements FriendConnection {
 
     private static final Log LOG = LogFactory.getLog(XMPPFriendConnectionImpl.class);

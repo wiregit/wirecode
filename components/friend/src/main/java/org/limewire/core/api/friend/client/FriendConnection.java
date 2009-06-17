@@ -6,6 +6,10 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 
+/**
+ * Represents a connection to a service that provides means to see friends
+ * online and interact with them through LimeWire.
+ */
 public interface FriendConnection {
     
     public FriendConnectionConfiguration getConfiguration();

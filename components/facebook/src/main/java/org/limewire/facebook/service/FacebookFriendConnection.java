@@ -90,6 +90,13 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
 
+/**
+ * Implements a {@link FriendConnection} using facebook.
+ * <p>
+ * There is no actual TCP connection kept with the facebook server. The connection
+ * object keeps all the state necessary to send facebook api calls to the facebook
+ * servers and also to listen for incoming chat messages. 
+ */
 public class FacebookFriendConnection implements FriendConnection {
     
     private static final Log LOG = LogFactory.getLog(FacebookFriendConnection.class);
