@@ -9,9 +9,10 @@ import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.core.api.friend.client.FileOffer;
 import org.limewire.core.api.friend.client.FileOfferEvent;
+import org.limewire.core.api.friend.client.FileMetaDataImpl;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.client.impl.messages.filetransfer.FileMetaDataImpl.Element;
+import org.limewire.core.api.friend.client.FileMetaDataImpl.Element;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ.TransferType;
 
 public class FileTransferIQListenerTest extends BaseTestCase {

@@ -37,12 +37,15 @@ public class FileOfferHandler implements LiveMessageHandler, FeatureTransport<Fi
 
     @Override
     public void handle(String messageType, JSONObject message) throws JSONException {
-        fileMetaDataHandler.featureReceived(null, null);  // TODO
+        String from = message.optString("from", null);
+        FacebookFileMetaData fileMetaData = new FacebookFileMetaData(message);
+        fileMetaDataHandler.featureReceived(from, fileMetaData);
     }
 
     @Override
     public void sendFeature(FriendPresence presence, FileMetaData localFeature) throws FriendException {
-        Map<String, Object> messageMap = new HashMap<String, Object>(); // TODO
-        connection.sendLiveMessage(presence, TYPE, null);
+        Map<String, Object> messageMap = new HashMap<String, Object>();
+        messageMap.putAll(localFeature.getSerializableMap());
+        connection.sendLiveMessage(presence, TYPE, messageMap);
     }
 }

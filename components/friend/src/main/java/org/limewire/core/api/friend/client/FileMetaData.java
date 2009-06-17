@@ -1,6 +1,7 @@
 package org.limewire.core.api.friend.client;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,5 +31,6 @@ public interface FileMetaData {
      * @return not null, mandatory
      */
     public Date getCreateTime();
-    public String toXML();
+
+    public Map<String, String> getSerializableMap();
 }

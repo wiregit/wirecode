@@ -18,6 +18,7 @@ import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.client.FileMetaDataImpl;
 import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
@@ -27,8 +28,7 @@ import org.limewire.inject.AbstractModule;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.xmpp.client.impl.messages.filetransfer.FileMetaDataImpl;
-import org.limewire.xmpp.client.impl.messages.filetransfer.FileMetaDataImpl.Element;
+import org.limewire.core.api.friend.client.FileMetaDataImpl.Element;
 import org.xmlpull.v1.XmlPullParserException;
 
 import com.google.inject.Module;

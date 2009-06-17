@@ -1,20 +1,16 @@
-package org.limewire.xmpp.client.impl.messages.filetransfer;
+package org.limewire.core.api.friend.client;
 
-import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Map.Entry;
 
-import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
-import org.limewire.xmpp.client.impl.messages.InvalidIQException;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 public class FileMetaDataImpl implements FileMetaData {
 
@@ -30,24 +26,9 @@ public class FileMetaDataImpl implements FileMetaData {
         Element.index, Element.name, Element.size, Element.createTime, Element.urns
     };
     
-    private final Map<String, String> data = new HashMap<String, String>();
+    protected final Map<String, String> data = new HashMap<String, String>();
 
-    public FileMetaDataImpl(XmlPullParser parser) throws XmlPullParserException, IOException, InvalidIQException {
-        parser.nextTag();
-        do {            
-            int eventType = parser.getEventType();
-            if(eventType == XmlPullParser.START_TAG) {
-                data.put(parser.getName(), parser.nextText());
-            } else if(eventType == XmlPullParser.END_TAG) {
-                if(parser.getName().equals("file")) {
-                    break;
-                }
-            }
-        } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
-        if (!isValid()) {
-            throw new InvalidIQException("is missing mandatory fields: " + this);
-        }
-    }
+    public FileMetaDataImpl() {}
     
     /**
      * 
@@ -79,7 +60,7 @@ public class FileMetaDataImpl implements FileMetaData {
         }
     }
     
-    private boolean isValid() {
+    protected boolean isValid() {
         for (Element element : MANDATORY_FIELDS) {
             if (get(element) == null) {
                 return false;
@@ -163,16 +144,10 @@ public class FileMetaDataImpl implements FileMetaData {
     public void setCreateTime(Date date) {
         put(Element.createTime, Long.toString(date.getTime()));
     }
-    
-    public String toXML() {
-        StringBuilder fileMetadata = new StringBuilder("<file>");
-        for(Entry<String, String> entry : data.entrySet()) { 
-            fileMetadata.append("<").append(entry.getKey()).append(">");
-            fileMetadata.append(org.jivesoftware.smack.util.StringUtils.escapeForXML(entry.getValue()));
-            fileMetadata.append("</").append(entry.getKey()).append(">");
-        }
-        fileMetadata.append("</file>");
-        return fileMetadata.toString();
+
+    @Override
+    public Map<String, String> getSerializableMap() {
+        return Collections.unmodifiableMap(data);
     }
     
     @Override

@@ -2,20 +2,20 @@ package org.limewire.xmpp.client.impl.messages.filetransfer;
 
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.client.impl.messages.IQTestUtils;
-import org.limewire.xmpp.client.impl.messages.filetransfer.FileMetaDataImpl;
+import org.limewire.core.api.friend.client.FileMetaDataImpl;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 
-public class FileMetaDataImplTest extends BaseTestCase {
+public class XMPPFileMetaDataTest extends BaseTestCase {
 
-    public FileMetaDataImplTest(String name) {
+    public XMPPFileMetaDataTest(String name) {
         super(name);
     }
-    
+
     public void testInvalidElementReadFromXML() throws Exception {
         XmlPullParser parser = IQTestUtils.createParser("<file><name>hello</name><invalidtag>harhar</invalidtag><size>2</size><index>0</index><createTime>50005</createTime><urns>urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB</urns></file>");
         parser.next();
-        FileMetaDataImpl metaDataImpl = new FileMetaDataImpl(parser);
+        FileMetaDataImpl metaDataImpl = new XMPPFileMetaData(parser);
         assertEquals("hello", metaDataImpl.getName());
         assertEquals(2, metaDataImpl.getSize());
         assertEquals(0, metaDataImpl.getIndex());
@@ -24,14 +24,14 @@ public class FileMetaDataImplTest extends BaseTestCase {
     public void testRandomUnescapedText() throws Exception {
         XmlPullParser parser = IQTestUtils.createParser("<file><name>&quot;&amp;\\//[[hello\"'kdf;;.?---</name><size>2</size><index>0</index><createTime>50005</createTime><urns>urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB</urns></file>");
         parser.next();
-        FileMetaDataImpl metaData = new FileMetaDataImpl(parser);
+        FileMetaDataImpl metaData = new XMPPFileMetaData(parser);
         assertEquals("\"&\\//[[hello\"'kdf;;.?---", metaData.getName());
     }
     
     public void testHandlesMissingNonMandatoryParsedElementsGracefully() throws Exception {
         XmlPullParser parser = IQTestUtils.createParser("<file><urns>urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB</urns><name>hello</name><size>2</size><index>0</index><createTime>50005</createTime></file>");
         parser.next();
-        FileMetaDataImpl metaData = new FileMetaDataImpl(parser);
+        FileMetaDataImpl metaData = new XMPPFileMetaData(parser);
         metaData.getCreateTime();
         metaData.getName();
         assertNull(metaData.getDescription());
@@ -45,13 +45,13 @@ public class FileMetaDataImplTest extends BaseTestCase {
         try {
             XmlPullParser parser = IQTestUtils.createParser("<file>" + incompleteInput + "</file>");
             parser.next();
-            new FileMetaDataImpl(parser);
+            new XMPPFileMetaData(parser);
             fail("invalid iq exception expected for missing field: " + missingField);
         } catch (InvalidIQException iie) {
         }
         XmlPullParser parser = IQTestUtils.createParser("<file>" + incompleteInput + missingField + "</file>");
         parser.next();
-        new FileMetaDataImpl(parser);
+        new XMPPFileMetaData(parser);
     }
     
     public void testUrnsAreMandatory() throws Exception {
