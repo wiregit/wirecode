@@ -136,7 +136,7 @@ public class LibraryPanel extends JPanel {
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {
                 eventList = libraryList.getSwingModel();
-                selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
+                selectTable(tableSelectionComboBox.getSelectedTableFormat(), tableSelectionComboBox.getSelectedCategory());
             }
         });
         
@@ -145,7 +145,7 @@ public class LibraryPanel extends JPanel {
         tableSelectionComboBox.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
+                selectTable(tableSelectionComboBox.getSelectedTableFormat(), tableSelectionComboBox.getSelectedCategory());
             }
         });
         
@@ -157,14 +157,15 @@ public class LibraryPanel extends JPanel {
                 setPublicSharedComponentVisible(navItem);
                 eventList = navItem.getLocalFileList().getSwingModel();
                 selectSharing(navItem);
-                selectTable(tableSelectionComboBox.getSelectedTabelFormat(), tableSelectionComboBox.getSelectedCategory());
+                selectTable(tableSelectionComboBox.getSelectedTableFormat(), tableSelectionComboBox.getSelectedCategory());
             }
         });
     }
     
     private void selectSharing(LibraryNavItem navItem) {
-        if(navItem != null && navItem.getLocalFileList() instanceof SharedFileList)
+        if(navItem != null && navItem.getLocalFileList() instanceof SharedFileList) {
             librarySharingPanel.setSharedFileList((SharedFileList)navItem.getLocalFileList());
+        }
         librarySharingPanel.getComponent().setVisible(navItem != null && navItem.getType() == NavType.LIST);
     }
     
@@ -184,7 +185,7 @@ public class LibraryPanel extends JPanel {
     private void setEventList(EventList<LocalFileItem> eventList) {
         sortedList = GlazedListsFactory.sortedList(eventList);
         filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
-        libraryTable.setEventList(filteredList, tableSelectionComboBox.getSelectedTabelFormat());
+        libraryTable.setEventList(filteredList, tableSelectionComboBox.getSelectedTableFormat());
     }
     
     private void setPublicSharedComponentVisible(LibraryNavItem navItem) {

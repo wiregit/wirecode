@@ -43,28 +43,26 @@ public class FontUtils {
 
     public static void underline(JComponent component) {
         Font font = component.getFont();
-        
-        if (font == null) {
-            return;
+        if(font != null) {  
+            component.setFont(deriveUnderline(font, true));
         }
-        
-        component.setFont(deriveUnderline(font, true));
     }
     
     public static boolean isUnderlined(JComponent component) {
         Font font = component.getFont();
-        Map<TextAttribute, ?> map = font.getAttributes();
-        return map.get(TextAttribute.UNDERLINE) == TextAttribute.UNDERLINE_ON;
+        if(font != null) {
+            Map<TextAttribute, ?> map = font.getAttributes();
+            return map.get(TextAttribute.UNDERLINE) == TextAttribute.UNDERLINE_ON;
+        } else {
+            return false;
+        }
     }
     
     public static void removeUnderline(JComponent component) {
-        Font font = component.getFont();
-        
-        if (font == null) {
-            return;
+        Font font = component.getFont();        
+        if (font != null) {
+            component.setFont(deriveUnderline(font, false));
         }
-        
-        component.setFont(deriveUnderline(font, false));
     }
 
     public static Font deriveUnderline(Font font, boolean underlined) {

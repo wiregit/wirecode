@@ -14,7 +14,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 
-public class LibrarySharingNonEditableRenderer extends JLabel implements TableCellRenderer {
+class LibrarySharingFriendListRenderer extends JLabel implements TableCellRenderer {
 
     private @Resource Font font;
     private @Resource Color fontColor;
@@ -22,7 +22,7 @@ public class LibrarySharingNonEditableRenderer extends JLabel implements TableCe
     private @Resource Color backgroundScrollBarColor;
     
     @Inject
-    public LibrarySharingNonEditableRenderer() {
+    public LibrarySharingFriendListRenderer() {
         GuiUtils.assignResources(this);
         
         setBorder(BorderFactory.createEmptyBorder(10,14,10,5));

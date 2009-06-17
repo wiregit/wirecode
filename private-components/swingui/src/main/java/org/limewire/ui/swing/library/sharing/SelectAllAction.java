@@ -1,15 +1,14 @@
-package org.limewire.ui.swing.library.sharing.actions;
+package org.limewire.ui.swing.library.sharing;
 
 import java.awt.event.ActionEvent;
 
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.sharing.LibrarySharingEditablePanel;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class SelectAllAction extends AbstractAction {
+class SelectAllAction extends AbstractAction {
 
     Provider<LibrarySharingEditablePanel> sharingEditablePanel;
     

@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.sharing;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -10,86 +11,142 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
+import org.limewire.listener.EventBean;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent.Type;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+/**
+ * The panel in all shared lists that contains either the login view, the list
+ * of friends the list is shared with, or a way of editing the list of friends.
+ */
 @LazySingleton
 public class LibrarySharingPanel {
 
-    @Resource private Color backgroundColor;
-    @Resource private Color borderColor;
+    @Resource
+    private Color backgroundColor;
+
+    @Resource
+    private Color borderColor;
     
     private static final String LOGIN_VIEW = "LOGIN_VIEW";
     private static final String EDITABLE_VIEW = "EDITABLE_VIEW";
-    private static final String NONEDITABLE_VIEW = "NONEDITABLE_VIEW";
+    private static final String FRIEND_LIST_VIEW = "FRIEND_LIST_VIEW";
     
-    private final Provider<LibrarySharingLoginPanel> loginPanel;
-    private final Provider<LibrarySharingNonEditablePanel> nonEditablePanel;
-    private final Provider<LibrarySharingEditablePanel> editablePanel;
+    private final Provider<LibrarySharingLoginPanel> loginPanelProvider;
+    private final Provider<LibrarySharingFriendListPanel> friendListPanelProvider;
+    private final Provider<LibrarySharingEditablePanel> editablePanelProvider;
     
-    private final JPanel component;
+    // these are all lazily created.
+    private LibrarySharingLoginPanel loginPanel;
+    private LibrarySharingFriendListPanel friendListPanel;
+    private LibrarySharingEditablePanel editablePanel;
     
-    private final CardLayout layout = new CardLayout();
-    
+    private final JPanel component;    
+    private final CardLayout layout = new CardLayout();    
     private final Map<String, JComponent> layoutMap = new HashMap<String, JComponent>();
+    
+    private final EventBean<XMPPConnectionEvent> connectionEvent;
+    private final ListEventListener<String> friendsListener;
+    
+    private enum View { NONE, LOGIN, FRIEND_LIST, EDIT_LIST }
+    private View currentView = View.NONE;
     
     private SharedFileList currentList;
     
     @Inject
     public LibrarySharingPanel(Provider<LibrarySharingLoginPanel> loginPanel,
-            Provider<LibrarySharingNonEditablePanel> nonEditablePanel,
-            Provider<LibrarySharingEditablePanel> editablePanel) {
-        this.loginPanel = loginPanel;
-        this.nonEditablePanel = nonEditablePanel;
-        this.editablePanel = editablePanel;
+            Provider<LibrarySharingFriendListPanel> nonEditablePanel,
+            Provider<LibrarySharingEditablePanel> editablePanel,
+            EventBean<XMPPConnectionEvent> connectionEvent) {
+        this.loginPanelProvider = loginPanel;
+        this.friendListPanelProvider = nonEditablePanel;
+        this.editablePanelProvider = editablePanel;
+        this.connectionEvent = connectionEvent;
+        this.friendsListener = new FriendsListener();
                 
         GuiUtils.assignResources(this);
         
         component = new JPanel();
         component.setBackground(backgroundColor);
-        component.setVisible(false);
-        
-        component.setBorder(BorderFactory.createMatteBorder(0,0,0,1, borderColor));
-               
+        component.setVisible(false);        
+        component.setBorder(BorderFactory.createMatteBorder(0,0,0,1, borderColor));               
         component.setLayout(layout);
     }
     
-    public void showLoginView() {
+    @Inject void register(ListenerSupport<XMPPConnectionEvent> connectionEvent) {
+        connectionEvent.addListener(new EventListener<XMPPConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPConnectionEvent event) {
+                if(!isLoggedIn()) {
+                    showLoginView();
+                } else if(currentView == View.LOGIN) {
+                    showFriendListView();
+                }
+            }
+        });
+    }
+    
+    void showLoginView() {
         if(!layoutMap.containsKey(LOGIN_VIEW)) {
-            JComponent newComponent = loginPanel.get().getComponent();
+            loginPanel = loginPanelProvider.get();
+            JComponent newComponent = loginPanel.getComponent();
             component.add(newComponent, LOGIN_VIEW);
             layoutMap.put(LOGIN_VIEW, newComponent);
         }         
+        currentView = View.LOGIN;
+        sharesChanged();
         layout.show(component, LOGIN_VIEW);
     }
     
-    public void showEditableView() {
+    void showEditableView() {
         if(!layoutMap.containsKey(EDITABLE_VIEW)) {
-            JComponent newComponent = editablePanel.get().getComponent();
+            editablePanel = editablePanelProvider.get();
+            JComponent newComponent = editablePanel.getComponent();
             component.add(newComponent, EDITABLE_VIEW);
             layoutMap.put(EDITABLE_VIEW, newComponent);
         }         
-        editablePanel.get().updateTableModel(Collections.unmodifiableList(currentList.getFriendIds()));
+        currentView = View.EDIT_LIST;
+        editablePanel.setSelectedShareIds(Collections.unmodifiableList(currentList.getFriendIds()));
         layout.show(component, EDITABLE_VIEW);
     }
     
-    public void showNonEditableView() {
-        if(!layoutMap.containsKey(NONEDITABLE_VIEW)) {
-            JComponent newComponent = nonEditablePanel.get().getComponent();
-            component.add(newComponent, NONEDITABLE_VIEW);
-            layoutMap.put(NONEDITABLE_VIEW, newComponent);
-        }         
-        nonEditablePanel.get().setSharedFileList(currentList);
-        layout.show(component, NONEDITABLE_VIEW);
+    void showFriendListView() {
+        if(!layoutMap.containsKey(FRIEND_LIST_VIEW)) {
+            friendListPanel = friendListPanelProvider.get();
+            JComponent newComponent = friendListPanel.getComponent();
+            component.add(newComponent, FRIEND_LIST_VIEW);
+            layoutMap.put(FRIEND_LIST_VIEW, newComponent);
+        }
+        currentView = View.FRIEND_LIST;
+        sharesChanged();
+        friendListPanel.setSharedFileList(currentList);
+        layout.show(component, FRIEND_LIST_VIEW);
+    }
+
+    /** Stops sharing the current list with any friends. */
+    void stopSharing() {
+        for(String friend : new ArrayList<String>(currentList.getFriendIds())) {
+            currentList.removeFriend(friend);
+        }
     }
     
-    public void updateFriends(List<String> friends) {
+    void updateFriends(List<String> friends) {
         List<String> currentFriends = Collections.unmodifiableList(currentList.getFriendIds());
         for(String id : currentFriends) {
             if(!friends.contains(id)) {
@@ -104,16 +161,53 @@ public class LibrarySharingPanel {
         }
     }
     
-    public void setSharedFileList(SharedFileList currentFileList) {
-        if(this.currentList == currentFileList)
-            return;
-        this.currentList = currentFileList;
-//        showLoginView();
-        //TODO: create logic for properlly setting panel here
-        showNonEditableView();
+    private void sharesChanged() {
+        switch(currentView) {
+        case FRIEND_LIST:
+//            friendListPanel.setSharedFriendIds(currentList.getFriendIds());
+            break;
+        case LOGIN:
+            loginPanel.setSharedFriendIds(currentList.getFriendIds());
+            break;
+        }
+    }
+    
+    /** Sets a new backing SharedFileList that this sharing panel will use. */
+    public void setSharedFileList(SharedFileList newList) {
+        if(currentList != newList) {
+            if(currentList != null) {
+                currentList.getFriendIds().removeListEventListener(friendsListener);
+            }
+            currentList = newList;
+            currentList.getFriendIds().addListEventListener(friendsListener);
+            if(isLoggedIn()) {
+                showFriendListView();
+            } else {
+                showLoginView();
+            }
+        }
     }
     
     public JComponent getComponent() {
         return component;
+    }
+    
+    private boolean isLoggedIn() {
+        if(connectionEvent.getLastEvent() == null) {
+            return false;
+        } else {
+            return connectionEvent.getLastEvent().getType() == Type.CONNECTED;
+        }
+    }
+    
+    private class FriendsListener implements ListEventListener<String> {
+        @Override
+        public void listChanged(final ListEvent<String> listChanges) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    sharesChanged();
+                }
+            });
+        }
     }
 }

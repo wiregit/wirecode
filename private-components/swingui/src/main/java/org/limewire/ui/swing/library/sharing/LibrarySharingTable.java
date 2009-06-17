@@ -14,7 +14,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
 
-public class LibrarySharingTable<T> extends JXTable {
+class LibrarySharingTable<T> extends JXTable {
     
     private EventList<T> eventList;
     

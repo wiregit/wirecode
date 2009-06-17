@@ -18,36 +18,33 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.library.sharing.actions.EditSharingAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-
-import ca.odell.glazedlists.BasicEventList;
 
 import com.google.inject.Inject;
 
 @LazySingleton
-public class LibrarySharingNonEditablePanel {
+class LibrarySharingFriendListPanel {
 
-    @Resource Font labelFont;
-    @Resource Color labelColor;
-    @Resource Font linkFont;
-    @Resource Color backgroundColor;
+    @Resource private Font labelFont;
+    @Resource private Color labelColor;
+    @Resource private Font linkFont;
+    @Resource private Color backgroundColor;
     
     private final JPanel component;
     private final JLabel headerLabel;
     private final HyperlinkButton editButton;
     
     private final LibrarySharingTable<String> table;
-    private final LibrarySharingNonEditableRenderer renderer;
+    private final LibrarySharingFriendListRenderer renderer;
     private final JScrollPane scrollPane;
-    
+
     @Inject
-    public LibrarySharingNonEditablePanel(LibrarySharingTable<String> table, LibrarySharingNonEditableRenderer renderer,
-            EditSharingAction sharingAction) {
+    public LibrarySharingFriendListPanel(LibrarySharingTable<String> table,
+            LibrarySharingFriendListRenderer renderer, EditSharingAction sharingAction) {
         this.table = table;
         this.renderer = renderer;
-        
+
         GuiUtils.assignResources(this);
         
         component = new JPanel(new MigLayout("insets 0, gap 0, fillx", "134!", ""));
@@ -99,10 +96,7 @@ public class LibrarySharingNonEditablePanel {
     }
     
     public void setSharedFileList(SharedFileList fileList) {
-        if(fileList == null)
-            table.setEventList(new BasicEventList<String>());
-        else
-            table.setEventList(fileList.getFriendIds());
+        table.setEventList(fileList.getFriendIds());
         table.getColumnModel().getColumn(0).setCellRenderer(renderer);
         setHeaderLabelText();
         component.revalidate();

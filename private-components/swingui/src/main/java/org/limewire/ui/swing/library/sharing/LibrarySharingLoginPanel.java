@@ -2,36 +2,64 @@ package org.limewire.ui.swing.library.sharing;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.library.actions.ShowLoginAction;
+import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.util.I18n;
 
-import com.google.inject.Inject;
+import ca.odell.glazedlists.EventList;
 
-/**
- * Creates Login Panel for inner sharing Nav.
- */
-public class LibrarySharingLoginPanel {
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
+/** Creates Login Panel for inner sharing Nav. */
+class LibrarySharingLoginPanel {
     
-    private final HyperlinkButton loginButton;
+    private static final String SIGN_IN = "#signin";
+    private static final String STOP_SHARING = "#stopsharing";
     
-    private final JPanel component;
+    private final HTMLLabel htmlLabel;    
+    private final JPanel component;    
     
     @Inject
-    public LibrarySharingLoginPanel(ShowLoginAction loginAction) {
+    public LibrarySharingLoginPanel(final Provider<ShowLoginAction> loginAction,
+            final Provider<StopSharingAction> stopSharing) {
         component = new JPanel(new MigLayout("", "134!", ""));
         
         component.setOpaque(false);
         
-        loginButton = new HyperlinkButton(I18n.tr("Share with your friends"), loginAction);
-        
-        component.add(loginButton);
+        htmlLabel = new HTMLLabel("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list.", SIGN_IN) + "</html>");
+        htmlLabel.setOpenUrlsNatively(false);
+        htmlLabel.setOpaque(false);
+        htmlLabel.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (EventType.ACTIVATED == e.getEventType()) {
+                    if (e.getDescription().equals(SIGN_IN)) {
+                        loginAction.get().actionPerformed(null);
+                    } else if (e.getDescription().equals(STOP_SHARING)) {
+                        stopSharing.get().actionPerformed(null);
+                    }
+                }
+            }
+        });
+        component.add(htmlLabel);
     }
     
     public JComponent getComponent() {
         return component;
+    }
+
+    /** Sets the new set of people that this list is shared with. */
+    void setSharedFriendIds(EventList<String> friendIds) {
+        if(friendIds.isEmpty()) {
+            htmlLabel.setText("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list.", SIGN_IN) + "</html>");
+        } else {
+            htmlLabel.setText("<html>" + I18n.tr("<a href={0}>Sign in</a> to share this list and edit sharing.  Or <a href={1}>stop it</a> from being shared now.", SIGN_IN, STOP_SHARING) + "</html>");
+        }
     }
 }

@@ -37,7 +37,7 @@ public class LibraryTableSelectionComboBox extends JComboBox {
             addItem(new ComboBoxItem(I18n.tr("Other"), Category.OTHER, otherFormat));
     }
     
-    public AbstractLibraryFormat<LocalFileItem> getSelectedTabelFormat() {
+    public AbstractLibraryFormat<LocalFileItem> getSelectedTableFormat() {
         ComboBoxItem item = (ComboBoxItem) getSelectedItem();
         return item.getTabelFormat();
     }

@@ -1,18 +1,16 @@
-package org.limewire.ui.swing.library.sharing.actions;
+package org.limewire.ui.swing.library.sharing;
 
 import java.awt.event.ActionEvent;
 import java.util.List;
 
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
-import org.limewire.ui.swing.library.sharing.LibrarySharingEditablePanel;
-import org.limewire.ui.swing.library.sharing.LibrarySharingPanel;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class ApplySharingAction extends AbstractAction {
+class ApplySharingAction extends AbstractAction {
 
     private final Provider<LibrarySharingPanel> librarySharingPanel;
     private final Provider<LibrarySharingEditablePanel> librarySharingEditablePanel;
@@ -34,6 +32,6 @@ public class ApplySharingAction extends AbstractAction {
         List<String> friends = librarySharingEditablePanel.get().getSelectedFriendIds();
         librarySharingPanel.get().updateFriends(friends);
         libraryNavigatorPanel.get().repaint();
-        librarySharingPanel.get().showNonEditableView();
+        librarySharingPanel.get().showFriendListView();
     }
 }

@@ -25,7 +25,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 
-public class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
+class LibrarySharingEditableRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
 
     private @Resource Font font;
     private @Resource Color fontColor;

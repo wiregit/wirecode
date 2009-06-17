@@ -27,10 +27,6 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
-import org.limewire.ui.swing.library.sharing.actions.ApplySharingAction;
-import org.limewire.ui.swing.library.sharing.actions.CancelSharingAction;
-import org.limewire.ui.swing.library.sharing.actions.SelectAllAction;
-import org.limewire.ui.swing.library.sharing.actions.SelectNoneAction;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -50,7 +46,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 @LazySingleton
-public class LibrarySharingEditablePanel {
+class LibrarySharingEditablePanel {
     
     @Resource Color borderColor;
     @Resource Font sharingLabelFont;
@@ -232,7 +228,7 @@ public class LibrarySharingEditablePanel {
         return component;
     }
     
-    public void updateTableModel(List<String> sharingEventList) {
+    public void setSelectedShareIds(List<String> sharingEventList) {
         filterTextField.setText("");
         eventList.getReadWriteLock().writeLock().lock();
         try {
