@@ -9,12 +9,13 @@ import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
-import org.limewire.core.api.library.FileProcessingListener;
+import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.FileItem;
+import org.limewire.listener.EventListener;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -117,12 +118,12 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     }
 
     @Override
-    public void addFileProcessingListener(FileProcessingListener listener) {
+    public void addFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         
     }
 
     @Override
-    public void removeFileProcessingListener(FileProcessingListener listener) {
+    public void removeFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         
     }
 }

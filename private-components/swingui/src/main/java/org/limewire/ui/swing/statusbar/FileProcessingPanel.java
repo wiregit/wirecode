@@ -2,8 +2,8 @@ package org.limewire.ui.swing.statusbar;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.library.FileProcessingEvent;
-import org.limewire.core.api.library.FileProcessingListener;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -20,7 +20,7 @@ class FileProcessingPanel extends JXButton {
     @Inject
     void register(LibraryManager libraryManager) {
         libraryManager.getLibraryManagedList().addFileProcessingListener(
-                new FileProcessingListener() {
+                new EventListener<FileProcessingEvent>() {
                     @Override
                     public void handleEvent(final FileProcessingEvent event) {
 

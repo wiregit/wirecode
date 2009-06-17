@@ -34,7 +34,6 @@ import org.limewire.concurrent.ListeningFutureTask;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileProcessingEvent;
-import org.limewire.core.api.library.FileProcessingListener;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
@@ -1162,12 +1161,12 @@ class LibraryImpl implements Library, FileCollection {
     }
 
     @Override
-    public void addFileProcessingListener(FileProcessingListener listener) {
+    public void addFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         fileProcessingListeners.addListener(listener);
     }
 
     @Override
-    public void removeFileProcessingListener(FileProcessingListener listener) {
+    public void removeFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         fileProcessingListeners.removeListener(listener);    
     }
 }

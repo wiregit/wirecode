@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.FileProcessingListener;
+import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -66,7 +66,7 @@ public interface Library extends FileCollection {
      */
     void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories);
     
-    void addFileProcessingListener(FileProcessingListener listener);
+    void addFileProcessingListener(EventListener<FileProcessingEvent> listener);
     
-    void removeFileProcessingListener(FileProcessingListener listener);
+    void removeFileProcessingListener(EventListener<FileProcessingEvent> listener);
 }

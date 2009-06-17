@@ -8,10 +8,11 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
 
-import org.limewire.core.api.library.FileProcessingListener;
+import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -78,12 +79,12 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     }
 
     @Override
-    public void addFileProcessingListener(FileProcessingListener listener) {
+    public void addFileProcessingListener(EventListener<FileProcessingEvent> listener) {
        managedList.addFileProcessingListener(listener);
     }
 
     @Override
-    public void removeFileProcessingListener(FileProcessingListener listener) {
+    public void removeFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         managedList.removeFileProcessingListener(listener);
     }
 }

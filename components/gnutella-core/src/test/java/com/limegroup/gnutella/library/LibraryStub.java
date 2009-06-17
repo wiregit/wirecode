@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.FileProcessingListener;
+import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Singleton;
@@ -95,12 +95,12 @@ public class LibraryStub extends AbstractFileCollectionStub implements Library {
     }
 
     @Override
-    public void addFileProcessingListener(FileProcessingListener listener) {
+    public void addFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         
     }
 
     @Override
-    public void removeFileProcessingListener(FileProcessingListener listener) {
+    public void removeFileProcessingListener(EventListener<FileProcessingEvent> listener) {
         
     }
 }
