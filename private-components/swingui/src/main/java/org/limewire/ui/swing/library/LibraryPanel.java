@@ -24,6 +24,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.components.HeaderBar;
@@ -46,6 +47,7 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 
@@ -57,8 +59,8 @@ public class LibraryPanel extends JPanel {
     private final LibraryNavigatorPanel navigatorComponent;
     private final LibrarySharingPanel librarySharingPanel;
     private final PublicSharedFeedbackPanel publicSharedFeedbackPanel;
-    private final LocalFileListTransferHandler transferHandler;
     private final ButtonDecorator buttonDecorator;
+    private final LocalFileListTransferHandler transferHandler;
     
     private JXButton addFilesButton;
     private LibraryTableSelectionComboBox tableSelectionComboBox;
@@ -69,10 +71,10 @@ public class LibraryPanel extends JPanel {
     private FilterList<LocalFileItem> filteredList;
     
     @Inject
-    public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
+    public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, final LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, 
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
-            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LocalFileListTransferHandler transferHandler) {
+            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.navigatorComponent = navPanel;
@@ -82,7 +84,22 @@ public class LibraryPanel extends JPanel {
         this.publicSharedFeedbackPanel = publicSharedFeedbackPanel;
         this.buttonDecorator = buttonDecorator;
         this.categoryMatcher = categoryMatcher;
-        this.transferHandler = transferHandler;
+        this.transferHandler = new LocalFileListTransferHandler() {
+          @Override
+            public LocalFileList getLocalFileList() {
+                LibraryNavItem item = navigatorComponent.getSelectedNavItem();
+                if(item == null) {
+                    return null;
+                }
+                return item.getLocalFileList();
+            }
+          
+            @SuppressWarnings("unchecked")
+            @Override
+            public EventSelectionModel<LocalFileItem> getSelectionModel() {
+                return (EventSelectionModel<LocalFileItem>) libraryTable.getSelectionModel();
+            }
+        };
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 

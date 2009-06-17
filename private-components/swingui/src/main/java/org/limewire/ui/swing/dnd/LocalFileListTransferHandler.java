@@ -12,34 +12,20 @@ import javax.swing.TransferHandler;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.library.navigator.LibraryNavItem;
-import org.limewire.ui.swing.library.navigator.LibraryNavigatorTable;
-import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.util.DNDUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
-import com.google.inject.Inject;
-
-public class LocalFileListTransferHandler extends TransferHandler {
-
-    private final LibraryNavigatorTable libraryNavigatorTable;
-    private final LibraryTable libraryTable;
-
-    @Inject
-    public LocalFileListTransferHandler(LibraryNavigatorTable libraryNavigatorTable, 
-            LibraryTable libraryTable) {
-        this.libraryNavigatorTable = libraryNavigatorTable;
-        this.libraryTable = libraryTable;
-    }
+public abstract class LocalFileListTransferHandler extends TransferHandler {
 
     @Override
     protected Transferable createTransferable(JComponent c) {
         LocalFileTransferable transferable = null;
-        if (libraryTable.getSelectionModel() != null) {
+        EventSelectionModel<LocalFileItem> selectionModel = getSelectionModel();
+        if (selectionModel != null) {
             List<File> files = new ArrayList<File>();
-            EventList<LocalFileItem> selected = ((EventSelectionModel<LocalFileItem>) libraryTable.getSelectionModel()).getSelected();
+            EventList<LocalFileItem> selected = selectionModel.getSelected();
             for (LocalFileItem fileItem : selected) {
                 files.add(fileItem.getFile());
             }
@@ -47,7 +33,11 @@ public class LocalFileListTransferHandler extends TransferHandler {
         }
         return transferable;
     }
+    
+    public abstract EventSelectionModel<LocalFileItem> getSelectionModel();
 
+    public abstract LocalFileList getLocalFileList();
+    
     @Override
     public int getSourceActions(JComponent c) {
         return COPY;
@@ -111,12 +101,4 @@ public class LocalFileListTransferHandler extends TransferHandler {
             }
         }
     }
-    
-    private LocalFileList getLocalFileList() {
-        LibraryNavItem item = libraryNavigatorTable.getSelectedItem();
-        if(item == null)
-            return null;
-        return item.getLocalFileList();
-    }
-
 }
