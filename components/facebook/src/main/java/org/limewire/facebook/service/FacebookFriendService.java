@@ -153,7 +153,9 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                 LimeHttpClient httpClient = new SimpleLimeHttpClient();
                 httpClient.setParams(params);   
                 String[] authUrls = authServerUrls.get();
-                LOG.debugf("auth urls to choose from {0}", Arrays.asList(authUrls));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debugf("auth urls to choose from {0}", Arrays.asList(authUrls));
+                }
                 String authUrl = authUrls[(int)Math.floor(Math.random()*authUrls.length)];
                 LOG.debugf("picked auth url: {0}", authUrl);
                 HttpGet getMethod = new HttpGet(authUrl);
