@@ -135,7 +135,6 @@ public class LibrarySharingPanel {
         }
         currentView = View.FRIEND_LIST;
         sharesChanged();
-        friendListPanel.setSharedFileList(currentList);
         layout.show(component, FRIEND_LIST_VIEW);
     }
 
@@ -164,7 +163,7 @@ public class LibrarySharingPanel {
     private void sharesChanged() {
         switch(currentView) {
         case FRIEND_LIST:
-//            friendListPanel.setSharedFriendIds(currentList.getFriendIds());
+            friendListPanel.setSharedFriendIds(currentList.getFriendIds());
             break;
         case LOGIN:
             loginPanel.setSharedFriendIds(currentList.getFriendIds());

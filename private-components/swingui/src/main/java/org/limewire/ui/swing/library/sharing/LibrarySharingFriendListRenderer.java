@@ -5,47 +5,51 @@ import java.awt.Component;
 import java.awt.Font;
 
 import javax.swing.BorderFactory;
-import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.table.TableCellRenderer;
+import javax.swing.border.Border;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import com.google.inject.Inject;
-
-class LibrarySharingFriendListRenderer extends JLabel implements TableCellRenderer {
+class LibrarySharingFriendListRenderer extends DefaultTableCellRenderer {
 
     private @Resource Font font;
     private @Resource Color fontColor;
     private @Resource Color backgroundColor;
     private @Resource Color backgroundScrollBarColor;
     
-    @Inject
-    public LibrarySharingFriendListRenderer() {
+    private final Border border = BorderFactory.createEmptyBorder(10,14,10,5);
+    
+    private final JScrollPane scrollPane;
+    
+    public LibrarySharingFriendListRenderer(JScrollPane scrollPane) {
         GuiUtils.assignResources(this);
-        
-        setBorder(BorderFactory.createEmptyBorder(10,14,10,5));
-        setFont(font);
-        setForeground(fontColor);
-        setBackground(backgroundScrollBarColor);
-        setOpaque(true);
+        this.scrollPane = scrollPane;
     }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        if(table.getVisibleRect().height < table.getRowCount() * table.getRowHeight())
-            setBackground(backgroundScrollBarColor);
-        else
-            setBackground(backgroundColor);
-
-        if(value instanceof String) {
-            setText((String)value);
-        } else {
-            setText("");
+        if(value instanceof Friend) {
+            value = ((Friend)value).getRenderName();
+        } else if(value instanceof String) {
+            value = "<html>" + value + "</html>";
         }
         
+        if(value == null) {
+            value = "";
+        }        
+        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        
+        setBorder(border);
+        setFont(font);
+        setForeground(fontColor);
+        setBackground(scrollPane.getVerticalScrollBar().isVisible() ? backgroundScrollBarColor : backgroundColor);
+//        setPreferredSize(null);
+//        setPreferredSize(new Dimension(table.getWidth(), getPreferredSize().height));
         return this;
     }
 }

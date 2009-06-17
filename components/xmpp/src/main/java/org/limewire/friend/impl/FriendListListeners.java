@@ -161,8 +161,8 @@ class FriendListListeners implements FriendManager {
         friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.REMOVED));
     }
 
-    public Collection<Friend> getKnownFriends() {
-        return Collections.unmodifiableCollection(knownFriends.values());        
+    Map<String, Friend> getKnownFriends() {
+        return Collections.unmodifiableMap(knownFriends);        
     }
 
     Map<String, Friend> getAvailableFriends() {

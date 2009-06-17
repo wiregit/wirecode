@@ -23,8 +23,8 @@ public class LimeWireFriendXmppModule extends AbstractModule {
     }
 
     // TODO fberger: move these out of the XMPP specific code by untying from FriendListListeners 
-    @Provides @Named("known") Collection<Friend> knownFriendsList(FriendListListeners listeners) {
-        return listeners.getKnownFriends();
+    @Provides @Named("known") Collection<Friend> knownFriendsList(@Named("known") Map<String, Friend> friends) {
+        return friends.values();
     }
     
     @Provides @Named("available") Collection<Friend> availableFriendsList(@Named("available") Map<String, Friend> friends) {
@@ -37,6 +37,10 @@ public class LimeWireFriendXmppModule extends AbstractModule {
     
     @Provides @Named("available") Map<String, Friend> availableFriends(FriendListListeners listeners) {
         return listeners.getAvailableFriends();
+    }
+    
+    @Provides @Named("known") Map<String, Friend> knownFriends(FriendListListeners listeners) {
+        return listeners.getKnownFriends();
     }
 
 }
