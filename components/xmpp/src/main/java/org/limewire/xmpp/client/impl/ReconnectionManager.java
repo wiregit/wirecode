@@ -12,6 +12,7 @@ import org.limewire.util.DebugRunnable;
 import org.limewire.core.api.friend.client.FriendConnection;
 import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnectionEvent;
+import org.limewire.core.api.friend.Network;
 
 /**
  * Different implementation from {@link org.jivesoftware.smack.ReconnectionManager}
@@ -36,40 +37,43 @@ class ReconnectionManager implements EventListener<FriendConnectionEvent> {
     
     @Override
     public void handleEvent(FriendConnectionEvent event) {
-        if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
-            connected = true;   
-        } else if(event.getType() == FriendConnectionEvent.Type.DISCONNECTED) {
-            if(event.getException() != null && connected) {
-                FriendConnection connection = event.getSource();
-                final FriendConnectionConfiguration configuration = connection.getConfiguration();
-                synchronized (this.serviceImpl) {
-                    this.serviceImpl.connections.remove(connection);
-                }
-                Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
-                    @Override
-                    public void run() {
-                        long sleepTime = 10000;
-                        FriendConnection newConnection = null;
-                        for(int i = 0; i < MAX_RECONNECTION_ATTEMPTS &&
-                                newConnection == null; i++) {
-                            try {
-                                LOG.debugf("attempting to reconnect to {0} ..." + configuration.getServiceName());
-                                newConnection = serviceImpl.loginImpl(configuration, true);
-                            } catch (FriendException e) {
-                                // Ignored
-                            }
-                            try {
-                                Thread.sleep(sleepTime);
-                            } catch (InterruptedException e) {
-                                // Ignored
-                            }
-                        }
-                        LOG.debugf("giving up trying to connect to {0}" + configuration.getServiceName());
+        // todo: should not be necessary to check for xmpp. Address this in LWC-3436, ReconnectionManager for facebook
+        if (event.getSource().getConfiguration().getType() == Network.Type.XMPP) {
+            if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
+                connected = true;
+            } else if(event.getType() == FriendConnectionEvent.Type.DISCONNECTED) {
+                if(event.getException() != null && connected) {
+                    FriendConnection connection = event.getSource();
+                    final FriendConnectionConfiguration configuration = connection.getConfiguration();
+                    synchronized (this.serviceImpl) {
+                        this.serviceImpl.connections.remove(connection);
                     }
-                }), "xmpp-reconnection-manager");
-                t.start();
+                    Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            long sleepTime = 10000;
+                            FriendConnection newConnection = null;
+                            for(int i = 0; i < MAX_RECONNECTION_ATTEMPTS &&
+                                    newConnection == null; i++) {
+                                try {
+                                    LOG.debugf("attempting to reconnect to {0} ..." + configuration.getServiceName());
+                                    newConnection = serviceImpl.loginImpl(configuration, true);
+                                } catch (FriendException e) {
+                                    // Ignored
+                                }
+                                try {
+                                    Thread.sleep(sleepTime);
+                                } catch (InterruptedException e) {
+                                    // Ignored
+                                }
+                            }
+                            LOG.debugf("giving up trying to connect to {0}" + configuration.getServiceName());
+                        }
+                    }), "xmpp-reconnection-manager");
+                    t.start();
+                }
+                connected = false;
             }
-            connected = false;
         }
     }
 }
