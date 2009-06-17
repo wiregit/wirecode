@@ -1,6 +1,9 @@
-package org.limewire.xmpp.client.impl.messages;
+package org.limewire.xmpp.client.impl.messages.filetransfer;
 
 import org.limewire.util.BaseTestCase;
+import org.limewire.xmpp.client.impl.messages.IQTestUtils;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileMetaDataImpl;
+import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 
 public class FileMetaDataImplTest extends BaseTestCase {

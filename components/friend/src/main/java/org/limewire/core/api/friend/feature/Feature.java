@@ -15,6 +15,11 @@ public class Feature<T> {
     private final T feature;
     private final URI id;
 
+    public Feature(URI id) {
+        this.feature = null;
+        this.id = id;
+    }
+
     public Feature(T feature, URI id) {
         this.feature = Objects.nonNull(feature, "feature");
         this.id = id;

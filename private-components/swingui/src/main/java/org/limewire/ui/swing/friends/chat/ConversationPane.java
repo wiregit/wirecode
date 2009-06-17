@@ -21,10 +21,10 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -46,17 +46,17 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.client.ChatState;
 import org.limewire.core.api.friend.client.FileMetaData;
-import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.MessageWriter;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
-import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -533,8 +533,8 @@ public class ConversationPane extends JPanel implements Displayable, Conversatio
                 if (fileOfferFeature != null) {
                     try {
                         writer.setChatState(ChatState.active);
-                        FileOfferer fileOfferer = ((FileOfferFeature) fileOfferFeature).getFeature();
-                        fileOfferer.offerFile(metadata);
+                        FeatureTransport<FileMetaData> fileOfferer = presence.getTransport(FileOfferFeature.class);
+                        fileOfferer.sendFeature(presence, metadata);
                         fileOfferSent = true;
                     } catch (FriendException e) {
                         LOG.debug("File offer failed", e);

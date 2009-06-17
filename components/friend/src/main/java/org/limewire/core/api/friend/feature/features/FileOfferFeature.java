@@ -3,9 +3,10 @@ package org.limewire.core.api.friend.feature.features;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.feature.Feature;
 
-public class FileOfferFeature extends Feature<FileOfferer> {
+public class FileOfferFeature extends Feature<FileMetaData> {
 
     public static final URI ID;
 
@@ -17,7 +18,11 @@ public class FileOfferFeature extends Feature<FileOfferer> {
         }
     }
 
-    public FileOfferFeature(FileOfferer feature) {
+    public FileOfferFeature(FileMetaData feature) {
         super(feature, ID);
+    }
+
+    public FileOfferFeature() {
+        super(ID);
     }
 }

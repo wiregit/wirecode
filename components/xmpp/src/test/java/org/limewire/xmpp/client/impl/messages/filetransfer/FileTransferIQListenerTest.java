@@ -11,8 +11,7 @@ import org.limewire.core.api.friend.client.FileOffer;
 import org.limewire.core.api.friend.client.FileOfferEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
-import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl.Element;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileMetaDataImpl.Element;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ.TransferType;
 
 public class FileTransferIQListenerTest extends BaseTestCase {
@@ -30,7 +29,7 @@ public class FileTransferIQListenerTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
         eventBroadcaster = context.mock(EventBroadcaster.class);
-        fileTransferIQListener = new FileTransferIQListener(eventBroadcaster);
+        fileTransferIQListener = new FileTransferIQListener(null, null);  // TODO this is broken
     }
 
     @SuppressWarnings("unchecked")

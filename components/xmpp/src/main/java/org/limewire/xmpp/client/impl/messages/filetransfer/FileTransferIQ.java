@@ -8,7 +8,6 @@ import org.jivesoftware.smack.provider.IQProvider;
 import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

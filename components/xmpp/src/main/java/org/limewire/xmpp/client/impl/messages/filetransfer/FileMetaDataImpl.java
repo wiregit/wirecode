@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.impl.messages;
+package org.limewire.xmpp.client.impl.messages.filetransfer;
 
 import java.io.IOException;
 import java.util.Date;
@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
+import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 

@@ -31,6 +31,8 @@ import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQListener;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQListenerFactory;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListener;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListenerFactory;
 
@@ -84,6 +86,7 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(AuthTokenIQListenerFactory.class).toProvider(FactoryProvider.newFactory(AuthTokenIQListenerFactory.class, AuthTokenIQListener.class));
         bind(ConnectBackRequestIQListenerFactory.class).toProvider(FactoryProvider.newFactory(ConnectBackRequestIQListenerFactory.class, ConnectBackRequestIQListener.class));
         bind(LibraryChangedIQListenerFactory.class).toProvider(FactoryProvider.newFactory(LibraryChangedIQListenerFactory.class, LibraryChangedIQListener.class));
+        bind(FileTransferIQListenerFactory.class).toProvider(FactoryProvider.newFactory(FileTransferIQListenerFactory.class, FileTransferIQListener.class));
         
     }
 }

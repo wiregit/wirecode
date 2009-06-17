@@ -58,6 +58,7 @@ import org.limewire.core.api.friend.client.FriendException;
 import org.limewire.core.api.friend.client.IncomingChatListener;
 import org.limewire.core.api.friend.client.MessageReader;
 import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.client.FileMetaData;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AuthToken;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
@@ -68,6 +69,8 @@ import org.limewire.facebook.service.livemessage.AuthTokenHandler;
 import org.limewire.facebook.service.livemessage.AuthTokenHandlerFactory;
 import org.limewire.facebook.service.livemessage.ConnectBackRequestHandler;
 import org.limewire.facebook.service.livemessage.ConnectBackRequestHandlerFactory;
+import org.limewire.facebook.service.livemessage.FileOfferHandler;
+import org.limewire.facebook.service.livemessage.FileOfferHandlerFactory;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
 import org.limewire.facebook.service.settings.ChatChannel;
@@ -122,6 +125,8 @@ public class FacebookFriendConnection implements FriendConnection {
     private AddressHandler addressHandler;
     private AuthTokenHandler authTokenHandler;
     private final LibraryRefreshHandler libraryRefreshHandler;
+    private final ConnectBackRequestHandler connectBackRequestHandler;
+    private final FileOfferHandler fileOfferHandler;
 
     private final EventBroadcaster<FeatureEvent> featureEventBroadcaster;
     
@@ -149,7 +154,6 @@ public class FacebookFriendConnection implements FriendConnection {
     private final PresenceListenerFactory presenceListenerFactory;
     private final FacebookFriendFactory friendFactory;
 
-    private final ConnectBackRequestHandler connectBackRequestHandler;
     private ChatListener chatListener;
     private ScheduledFuture presenceListenerFuture;
     private String logoutURL;
@@ -161,7 +165,7 @@ public class FacebookFriendConnection implements FriendConnection {
      * session id.
      */
     private final String sessionId;
-    
+
     @AssistedInject
     public FacebookFriendConnection(@Assisted FriendConnectionConfiguration configuration,
                                     @Named("facebookApiKey") Provider<String> apiKey,
@@ -173,6 +177,7 @@ public class FacebookFriendConnection implements FriendConnection {
                                     AuthTokenHandlerFactory authTokenHandlerFactory,
                                     ConnectBackRequestHandlerFactory connectBackRequestHandlerFactory,
                                     LibraryRefreshHandlerFactory libraryRefreshHandlerFactory,
+                                    FileOfferHandlerFactory fileOfferHandlerFactory,
                                     PresenceListenerFactory presenceListenerFactory,
                                     FacebookFriendFactory friendFactory,
                                     ChatListenerFactory chatListenerFactory,
@@ -193,6 +198,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.authTokenHandler = authTokenHandlerFactory.create(this);
         this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
         this.libraryRefreshHandler = libraryRefreshHandlerFactory.create(this);
+        this.fileOfferHandler = fileOfferHandlerFactory.create(this);
         this.chatManager = new ChatManager(this);
         this.sessionId = createSessionId();
         
@@ -795,6 +801,7 @@ public class FacebookFriendConnection implements FriendConnection {
         presence.addTransport(AuthToken.class, authTokenHandler);
         presence.addTransport(ConnectBackRequest.class, connectBackRequestHandler);
         presence.addTransport(LibraryChangedNotifier.class, libraryRefreshHandler);
+        presence.addTransport(FileMetaData.class, fileOfferHandler);
     }
     
     public void removePresence(String presenceId) {

@@ -8,6 +8,8 @@ import org.limewire.facebook.service.livemessage.ConnectBackRequestHandler;
 import org.limewire.facebook.service.livemessage.ConnectBackRequestHandlerFactory;
 import org.limewire.facebook.service.livemessage.DiscoInfoHandler;
 import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
+import org.limewire.facebook.service.livemessage.FileOfferHandler;
+import org.limewire.facebook.service.livemessage.FileOfferHandlerFactory;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
 import org.limewire.facebook.service.livemessage.LiveMessageHandlerRegistry;
@@ -34,6 +36,7 @@ public class LimeWireFacebookModule extends AbstractModule {
         bind(PresenceHandlerFactory.class).toProvider(FactoryProvider.newFactory(PresenceHandlerFactory.class, PresenceHandler.class));
         bind(ConnectBackRequestHandlerFactory.class).toProvider(FactoryProvider.newFactory(ConnectBackRequestHandlerFactory.class, ConnectBackRequestHandler.class));
         bind(LibraryRefreshHandlerFactory.class).toProvider(FactoryProvider.newFactory(LibraryRefreshHandlerFactory.class, LibraryRefreshHandler.class));
+        bind(FileOfferHandlerFactory.class).toProvider(FactoryProvider.newFactory(FileOfferHandlerFactory.class, FileOfferHandler.class));
         bind(FacebookFriendFactory.class).toProvider(FactoryProvider.newFactory(FacebookFriendFactory.class, FacebookFriend.class));
     }
 }

@@ -10,25 +10,25 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.address.FriendAddress;
+import org.limewire.core.api.friend.address.FriendAddressRegistry;
 import org.limewire.core.api.friend.client.FileMetaData;
-import org.limewire.core.api.friend.client.MessageWriter;
-import org.limewire.core.api.friend.client.FriendException;
-import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
 import org.limewire.core.api.friend.client.FriendConnection;
+import org.limewire.core.api.friend.client.FriendConnectionConfiguration;
+import org.limewire.core.api.friend.client.FriendException;
+import org.limewire.core.api.friend.client.MessageWriter;
+import org.limewire.core.api.friend.feature.FeatureTransport;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
-import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.address.FriendAddressRegistry;
-import org.limewire.core.api.friend.address.FriendAddress;
 import org.limewire.inject.AbstractModule;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
-import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl.Element;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileMetaDataImpl;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileMetaDataImpl.Element;
 import org.xmlpull.v1.XmlPullParserException;
 
 import com.google.inject.Module;
@@ -256,8 +256,8 @@ public class XMPPServiceTest extends XmppBaseTestCase {
         FileMetaDataImpl metaData = new FileMetaDataImpl(data);
         FileOfferFeature feature = (FileOfferFeature)automatedtestfriend2.getFeature(FileOfferFeature.ID);
         assertNotNull(feature);
-        FileOfferer fileOfferer = feature.getFeature();
-        fileOfferer.offerFile(metaData);
+        FeatureTransport<FileMetaData> fileOfferer = automatedtestfriend2.getTransport(FileOfferFeature.class);
+        fileOfferer.sendFeature(automatedtestfriend2, metaData);
 
         Thread.sleep(SLEEP);
 
