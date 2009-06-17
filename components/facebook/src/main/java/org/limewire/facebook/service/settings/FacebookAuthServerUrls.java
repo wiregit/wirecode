@@ -7,6 +7,9 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
+/**
+ * Settings annotation for facebook auth server urls.
+ */
 @BindingAnnotation
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD}) 
 @Retention(RetentionPolicy.RUNTIME)
