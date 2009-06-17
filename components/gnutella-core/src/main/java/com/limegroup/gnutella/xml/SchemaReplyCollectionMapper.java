@@ -171,7 +171,7 @@ public class SchemaReplyCollectionMapper {
      * Serializes the current LimeXMLReplyCollection to disk.
      */
     private void save(LibraryStatusEvent event) {
-        if (event.getList().isLoadFinished()) {
+        if (event.getLibrary().isLoadFinished()) {
             synchronized (this) {
                 Collection<LimeXMLReplyCollection> replies = getCollections();
                 for (LimeXMLReplyCollection col : replies)

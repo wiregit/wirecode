@@ -8,22 +8,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.listener.EventListenerList;
 
 public class MockFriendPresence implements FriendPresence {
     
     private MockFriend friend;
     private Map<URI, Feature> features;
-    private EventListenerList<FeatureEvent> featureListeners;
+    private String presenceId;
     
     public MockFriendPresence() {
-        this(new MockFriend());
+        this(new MockFriend(), null);
     }
     
-    public MockFriendPresence(MockFriend friend, Feature...features) {
+    public MockFriendPresence(MockFriend friend, String presenceId, Feature...features) {
+        this.presenceId = presenceId;
         this.features = new ConcurrentHashMap<URI, Feature>();
-        this.featureListeners = new EventListenerList<FeatureEvent>();
         this.friend = friend;
         for(Feature feature : features) {
             addFeature(feature);
@@ -37,7 +35,7 @@ public class MockFriendPresence implements FriendPresence {
 
     @Override
     public String getPresenceId() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return presenceId;
     }
 
     @Override
@@ -63,14 +61,10 @@ public class MockFriendPresence implements FriendPresence {
     @Override
     public void addFeature(Feature feature) {
         features.put(feature.getID(), feature);
-        featureListeners.broadcast(new FeatureEvent(this, FeatureEvent.Type.ADDED, feature));
     }
 
     @Override
     public void removeFeature(URI id) {
-        Feature feature = features.remove(id);
-        if(feature != null) {
-            featureListeners.broadcast(new FeatureEvent(this, FeatureEvent.Type.REMOVED, feature));
-        }
+        features.remove(id);
     }
 }

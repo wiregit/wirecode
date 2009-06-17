@@ -25,6 +25,8 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.listener.SourcedEventMulticasterImpl;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.RPNParser;
 import org.limewire.util.StringUtils;
@@ -45,6 +47,8 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
  */
 @Singleton
 class FileViewManagerImpl implements FileViewManager {
+    
+    private static final Log LOG = LogFactory.getLog(FileViewManagerImpl.class);
     
     private final LibraryImpl library;
     
@@ -74,7 +78,7 @@ class FileViewManagerImpl implements FileViewManager {
     @Inject
     public FileViewManagerImpl(LibraryImpl library) {
         this.library = library;
-        this.allSharedFilesView = new MultiFileView();
+        this.allSharedFilesView = new MultiFileView("All Shared Files");
     }
     
     @Inject void register(ListenerSupport<FileViewChangeEvent> viewListeners,
@@ -87,6 +91,7 @@ class FileViewManagerImpl implements FileViewManager {
         viewListeners.addListener(new EventListener<FileViewChangeEvent>() {
             @Override
             public void handleEvent(FileViewChangeEvent event) {
+                LOG.debugf("Handling event {0}", event);
                 if(!(event.getSource() instanceof IncompleteFileCollection)) {                
                     switch(event.getType()) {
                     case FILE_ADDED:
@@ -109,6 +114,7 @@ class FileViewManagerImpl implements FileViewManager {
         collectionListeners.addListener(new EventListener<SharedFileCollectionChangeEvent>() {
             @Override
             public void handleEvent(SharedFileCollectionChangeEvent event) {
+                LOG.debugf("Handling event {0}", event);
                 switch(event.getType()) {
                 case COLLECTION_ADDED:
                     collectionAdded(event.getSource());
@@ -125,6 +131,16 @@ class FileViewManagerImpl implements FileViewManager {
                 }
             }
         });
+    }
+    
+    @Override
+    public void addListener(EventListener<FileViewChangeEvent> listener) {
+        multicaster.addListener(listener);
+    }
+    
+    @Override
+    public boolean removeListener(EventListener<FileViewChangeEvent> listener) {
+        return multicaster.removeListener(listener);
     }
     
     FileView getAllSharedFilesView() {
@@ -158,6 +174,8 @@ class FileViewManagerImpl implements FileViewManager {
      * each {@link MultiFileView}.
      */
     private void collectionAdded(SharedFileCollection collection) {
+        LOG.debugf("New collection {0} added", collection);
+        
         Map<FileView, List<FileDesc>> addedFiles = null;
         rwLock.writeLock().lock();
         try {
@@ -174,6 +192,7 @@ class FileViewManagerImpl implements FileViewManager {
                 MultiFileView view = fileViewsPerFriend.get(id);
                 if(view != null) {
                     List<FileDesc> added = view.addNewBackingView(collection);
+                    LOG.debugf("Added collection {0} to view {1}, added {2}", collection, view, added);
                     addedFiles = addToOrCreateMapOfList(addedFiles, view, added);
                 }
             }
@@ -210,6 +229,7 @@ class FileViewManagerImpl implements FileViewManager {
             
             for(MultiFileView view : fileViewsPerFriend.values()) {
                 removed = view.removeBackingView(collection);
+                LOG.debugf("Removed collection {0} from view {1}, added {2}", collection, view, removed);
                 removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
             }
         } finally {
@@ -248,6 +268,7 @@ class FileViewManagerImpl implements FileViewManager {
             MultiFileView view = fileViewsPerFriend.get(id);
             if(view != null) {
                 added = view.addNewBackingView(collection);
+                LOG.debugf("Friend {0} added to collection {1}, changing view {2}, added {3}", id, collection, view, added);
                 addedFiles = addToOrCreateMapOfList(addedFiles, view, added);
             }
         } finally {
@@ -287,6 +308,7 @@ class FileViewManagerImpl implements FileViewManager {
             MultiFileView view = fileViewsPerFriend.get(id);
             if(view != null) {
                 List<FileDesc> removed = view.removeBackingView(collection);
+                LOG.debugf("Friend {0} removed from collection {1}, changing view {2}, removed {2}", id, collection, view, removed);
                 removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
             }
         } finally {
@@ -316,6 +338,8 @@ class FileViewManagerImpl implements FileViewManager {
             
             for(String id : collection.getFriendList()) {
                 MultiFileView view = fileViewsPerFriend.get(id);
+                removed = view.fileViewCleared(collection);
+                LOG.debugf("Cleared collection {0}, changing view {1}, removed {2}", collection, view, removed);
                 removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
                 
             }
@@ -350,6 +374,11 @@ class FileViewManagerImpl implements FileViewManager {
                             removedViews = new ArrayList<FileView>();
                         }
                         removedViews.add(view);
+                        LOG.debugf("File {0} removed from collection {1}, changing view {2}", fileDesc, collection, view);
+                    } else {
+                        if(LOG.isDebugEnabled()) {
+                            LOG.debugf("File {0} removed from collection {1}, but didn't change view {2}.  View contains file? {3}", fileDesc, collection, view, view.contains(fileDesc));
+                        }
                     }
                 }
             }
@@ -389,11 +418,13 @@ class FileViewManagerImpl implements FileViewManager {
                                 changedViews = new ArrayList<FileView>();
                             }
                             changedViews.add(view);
-                        } else {
+                            LOG.debugf("File {0} changed from old file {1} in collection {1}, changing view {2}", newFileDesc, oldFileDesc, collection, view);
+                        } else if(!view.contains(newFileDesc)) {
                             if(removedViews == null) {
                                 removedViews = new ArrayList<FileView>();
                             }
                             removedViews.add(view);
+                            LOG.debugf("File {0} changed from old file {1} in collection {1}, couldn't add new file to view {2}", newFileDesc, oldFileDesc, collection, view);
                         }
                     }
                 }
@@ -436,6 +467,11 @@ class FileViewManagerImpl implements FileViewManager {
                             addedViews = new ArrayList<FileView>();
                         }
                         addedViews.add(view);
+                        LOG.debugf("File {0} added to collection {1}, changing view {2}", fileDesc, collection, view);
+                    } else {
+                        if(LOG.isDebugEnabled()) {
+                            LOG.debugf("File {0} added to collection {1}, but didn't change view {2}, view contains file ? {3}", fileDesc, collection, view, view.contains(fileDesc));
+                        }
                     }
                 }
             }
@@ -478,7 +514,8 @@ class FileViewManagerImpl implements FileViewManager {
     }
     
     private MultiFileView createFileView(String id) {
-        MultiFileView view = new MultiFileView();
+        LOG.debugf("Creating new file view for id {0}", id);
+        MultiFileView view = new MultiFileView(id);
         initialize(view, id);
         return view;
     }
@@ -486,6 +523,7 @@ class FileViewManagerImpl implements FileViewManager {
     private void initialize(MultiFileView view, String id) {
         for(SharedFileCollection collection : sharedCollections) {
             if(collection.getFriendList().contains(id)) {
+                LOG.debugf("Adding backing view of {0} to view for id {1}", collection, id);
                 view.addNewBackingView(collection);
             }
         }
@@ -513,8 +551,16 @@ class FileViewManagerImpl implements FileViewManager {
         
         private volatile long totalFileSize = 0;
         
-        MultiFileView() {
+        private final String name;
+        
+        MultiFileView(String name) {
             super(FileViewManagerImpl.this.library);
+            this.name = name;
+        }
+        
+        @Override
+        public String getName() {
+            return name;
         }
         
         @Override
@@ -632,7 +678,7 @@ class FileViewManagerImpl implements FileViewManager {
          * Notification that a {@link FileDesc} was removed from a backing {@link FileView}.
          * 
          * @return true if the file used to exist in this view (and is now removed).
-         *         false if it did not exist in this view.
+         *         false if it did not exist in this view or still exists.
          */
         boolean fileRemovedFromView(FileDesc fileDesc, FileView fileView) {
             for(FileView view : backingViews) {

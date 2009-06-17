@@ -3,6 +3,8 @@ package com.limegroup.gnutella.library;
 import java.util.Collections;
 import java.util.List;
 
+import org.limewire.listener.EventListener;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -71,6 +73,15 @@ public class FileManagerStub implements FileManager, FileCollectionManager, File
         return Collections.emptyList();
     }
 
-
+    @Override
+    public void addListener(EventListener<FileViewChangeEvent> listener) {
+    }
+    
+    @Override
+    public boolean removeListener(EventListener<FileViewChangeEvent> listener) {
+        return false;
+    }
+    
+    
 }
 

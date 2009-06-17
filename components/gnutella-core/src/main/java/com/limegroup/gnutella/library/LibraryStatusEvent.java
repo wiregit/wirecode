@@ -34,19 +34,19 @@ public class LibraryStatusEvent {
     }
     
     private final Type type;
-    private final Library list;
+    private final Library library;
     
     public LibraryStatusEvent(Library list, Type type) {
         this.type = type;
-        this.list = list;
+        this.library = list;
     }
     
     public Type getType() {
         return type;
     }
     
-    public Library getList() {
-        return list;
+    public Library getLibrary() {
+        return library;
     }
     
     @Override

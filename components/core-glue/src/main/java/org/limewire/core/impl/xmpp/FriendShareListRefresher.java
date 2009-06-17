@@ -1,35 +1,32 @@
 package org.limewire.core.impl.xmpp;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.collection.Periodic;
 import org.limewire.core.api.browse.server.BrowseTracker;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
-import org.limewire.core.api.library.FriendShareListEvent;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.RegisteringEventListener;
-import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPService;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+import org.limewire.util.Clock;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
 
@@ -41,112 +38,157 @@ import com.limegroup.gnutella.library.LibraryStatusEvent;
  */
 
 @Singleton
-class FriendShareListRefresher implements RegisteringEventListener<FriendShareListEvent> {
+class FriendShareListRefresher {
+    
+    private static final Log LOG = LogFactory.getLog(FriendShareListRefresher.class);
 
+    private final Clock clock;
     private final BrowseTracker tracker;
-    private final XMPPService xmppService;
     private final ScheduledExecutorService scheduledExecutorService;
+    private final Map<String, Friend> friendMap;
 
-    private final Map<String, LibraryChangedSender> listeners;
+    /** A map of change senders per each id. */
+    private final ConcurrentMap<String, LibraryChangedSender> changeSenders;
     
     // Package private for testing
     final AtomicBoolean fileManagerLoaded = new AtomicBoolean(false);
 
     @Inject
-    FriendShareListRefresher(BrowseTracker tracker,
-                             XMPPService xmppService,
-                             @Named("backgroundExecutor")ScheduledExecutorService scheduledExecutorService) {
+    FriendShareListRefresher(Clock clock, BrowseTracker tracker,
+                             @Named("backgroundExecutor")ScheduledExecutorService scheduledExecutorService,
+                             @Named("available") Map<String, Friend> friendMap) {
+        this.clock = clock;
         this.tracker = tracker;
-        this.xmppService = xmppService;
         this.scheduledExecutorService = scheduledExecutorService;
-        listeners = new ConcurrentHashMap<String, LibraryChangedSender>();
+        this.changeSenders = new ConcurrentHashMap<String, LibraryChangedSender>();
+        this.friendMap = friendMap;
     }
 
-    @Inject
-    public void register(Library library) {
+    @Inject void register(Library library) {
         library.addManagedListStatusListener(new FinishedLoadingListener());
     }
 
-    @Inject
-    public void register(ListenerSupport<FriendShareListEvent> friendShareListEventListenerSupport) {
-        friendShareListEventListenerSupport.addListener(this);
+    @Inject void register(final FileViewManager fileViewManager, @Named("available") ListenerSupport<FriendEvent> friendSupport) {
+        fileViewManager.addListener(new EventListener<FileViewChangeEvent>() {
+            public void handleEvent(FileViewChangeEvent event) {
+                switch(event.getType()) {
+                case FILE_ADDED:
+                case FILE_REMOVED:
+                case FILE_CHANGED:
+                case FILES_CLEARED:
+                    triggerChangeSender(event.getSource().getName());
+                    break;
+                }
+            }
+        });
+        
+        friendSupport.addListener(new EventListener<FriendEvent>() {
+            @Override
+            public void handleEvent(FriendEvent event) {
+                LOG.debugf("Received friend event {0}", event);
+                switch(event.getType()) {
+                case DELETE:
+                case REMOVED:
+                    removeChangeSender(event.getData().getId());
+                    break;
+                case ADDED:
+                    fileViewManager.getFileViewForId(event.getData().getId());
+                    break;
+                }
+            }
+        });
     }
-
-    public void handleEvent(final FriendShareListEvent event) {
-        if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED) {
-            LibraryChangedSender listener = new LibraryChangedSender(event.getFriend());
-            listener.scheduleSendRefreshCheck();
-            listeners.put(event.getFriend().getId(), listener);
-            event.getFileList().getModel().addListEventListener(listener);
-        } else if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED) {
-            event.getFileList().getModel().removeListEventListener(listeners.remove(event.getFriend().getId()));
+    
+    private void triggerChangeSender(String id) {
+        LOG.debugf("Change triggered for id {0}", id);
+        if(fileManagerLoaded.get()) {
+            Friend friend = friendMap.get(id);
+            if(friend != null) {
+                LOG.debugf("Triggering library change for friend {0}", friend);
+                LibraryChangedSender sender = changeSenders.get(id);
+                if(sender == null) {
+                    LOG.debugf("No existing sender for friend {0}, creating a new one", friend);
+                    LibraryChangedSender newSender = new LibraryChangedSender(friend);
+                    sender = changeSenders.putIfAbsent(id, newSender);
+                    if(sender == null) {
+                        sender = newSender;
+                    }
+                }
+                sender.scheduleSendRefreshCheck();
+            } else {
+                LOG.debugf("Not triggering library change for id {0} because no friend was available", id);
+            }
         }
     }
     
-    class FinishedLoadingListener implements EventListener<LibraryStatusEvent> {
+    private void removeChangeSender(String id) {
+        LibraryChangedSender sender = changeSenders.remove(id);
+        if(sender != null) {
+            LOG.debugf("Removing change trigger for id {0}", id);
+            sender.cancel();
+        }
+    }
+    
+    private class FinishedLoadingListener implements EventListener<LibraryStatusEvent> {
         @SuppressWarnings("unchecked")
         @BlockingEvent
         public void handleEvent(LibraryStatusEvent evt) {
-            if(evt.getType() == LibraryStatusEvent.Type.LOAD_COMPLETE) {
-                fileManagerLoaded.set(true);  
-                XMPPConnection connection = xmppService.getActiveConnection();
-                if(connection != null) {
-                    Collection<XMPPFriend> friends = connection.getFriends();
-                    for(Friend friend : friends) {
-                        tracker.sentRefresh(friend.getId());
-                        Map<String, FriendPresence> presences = friend.getFriendPresences();
-                        for(FriendPresence presence : presences.values()) {
-                            Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);                                
-                            if(notifier != null) {
-                                notifier.getFeature().sendLibraryRefresh();
-                            }
+            switch(evt.getType()) {
+            case LOAD_COMPLETE:
+                fileManagerLoaded.set(true);
+                for(Friend friend : friendMap.values()) {
+                    tracker.sentRefresh(friend.getId());
+                    for(FriendPresence presence : friend.getFriendPresences().values()) {
+                        Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);                                
+                        if(notifier != null) {
+                            notifier.getFeature().sendLibraryRefresh();
                         }
                     }
                 }
+                break;
             }
         }            
     }
     
-    class LibraryChangedSender implements ListEventListener<LocalFileItem> {
-        
-        private final Friend friend;
-        
+    private class LibraryChangedSender {        
+        private final Friend friend;        
         private final Periodic libraryRefreshPeriodic;
         
         LibraryChangedSender(Friend friend){
             this.friend = friend;
-            this.libraryRefreshPeriodic = new Periodic(new ScheduledLibraryRefreshSender(), scheduledExecutorService);
-        }        
-        
-        public void listChanged(ListEvent<LocalFileItem> listChanges) {
-            if(fileManagerLoaded.get()) {
-                libraryRefreshPeriodic.rescheduleIfLater(5000);                                
-            }
-        }        
+            this.libraryRefreshPeriodic = new Periodic(new ScheduledLibraryRefreshSender(), scheduledExecutorService, clock);
+        }
         
         /**
          * Schedules an immediate check if a library refresh should be sent
          * to the friend.
          */
-        private void scheduleSendRefreshCheck() {
-            libraryRefreshPeriodic.rescheduleIfLater(0);
+        void scheduleSendRefreshCheck() {
+            libraryRefreshPeriodic.rescheduleIfLater(5000);
+        }
+        
+        void cancel() {
+            libraryRefreshPeriodic.unschedule();
         }
     
-        class ScheduledLibraryRefreshSender implements Runnable {
-    
+        private class ScheduledLibraryRefreshSender implements Runnable {    
             @SuppressWarnings("unchecked")
             @Override
             public void run() {
                 BrowseTracker browseTracker = FriendShareListRefresher.this.tracker;
                 Date lastBrowseTime = browseTracker.lastBrowseTime(friend.getId());
                 Date lastRefreshTime = browseTracker.lastRefreshTime(friend.getId());
+                LOG.debugf("Running library periodic for friend {0}, lastBrowseTime {1}, lastRefreshTime {2}", friend, lastBrowseTime, lastRefreshTime);
                 if(lastBrowseTime != null && (lastRefreshTime == null || lastBrowseTime.after(lastRefreshTime))) {
                     browseTracker.sentRefresh(friend.getId());
                     Map<String,FriendPresence> presences = friend.getFriendPresences();
                     for(FriendPresence presence : presences.values()) {
                         Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);
                         if(notifier != null) {
+                            LOG.debugf("Sending library refresh to presence {0}", presence);
                             notifier.getFeature().sendLibraryRefresh();
+                        } else {
+                            LOG.debugf("Not sending library refresh because feature not supported for presence {0}", presence);
                         }
                     }
                 }

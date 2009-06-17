@@ -24,6 +24,11 @@ public abstract class AbstractFileCollectionStub implements FileCollection {
         = new EventListenerList<FileViewChangeEvent>();
     
     @Override
+    public String getName() {
+        return "Stub Collection";
+    }
+    
+    @Override
     public long getNumBytes() {
         long size = 0;
         for(FileDesc fd : fileDescList) {

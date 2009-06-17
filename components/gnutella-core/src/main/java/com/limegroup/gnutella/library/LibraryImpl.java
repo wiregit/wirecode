@@ -175,6 +175,11 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     @Override
+    public String getName() {
+        return "Library";
+    }
+    
+    @Override
     public List<FileDesc> getFilesInDirectory(File directory) {
         throw new UnsupportedOperationException("unsupported");
     }

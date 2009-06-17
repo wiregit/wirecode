@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -18,7 +19,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendManager;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.inject.LazySingleton;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -33,8 +34,6 @@ import org.limewire.ui.swing.library.sharing.actions.SelectNoneAction;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPFriend;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -48,6 +47,7 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 @LazySingleton
 public class LibrarySharingEditablePanel {
@@ -125,7 +125,7 @@ public class LibrarySharingEditablePanel {
     }
     
     @Inject
-    void register(final FriendManager friendManager, ListenerSupport<RosterEvent> rosterListeners) {
+    void register(@Named("known") Collection<Friend> knownFriends, @Named("known") ListenerSupport<FriendEvent> knownSupport) {
         if(eventList == null) {
             filterList = createEventListChain();
             SwingUtilities.invokeLater(new Runnable(){
@@ -152,46 +152,32 @@ public class LibrarySharingEditablePanel {
                 }
             }
         });
-
-//        eventList.add(new EditableSharingData("this is fake data", false));
-//        eventList.add(new EditableSharingData("remove when", false));
-//        eventList.add(new EditableSharingData("friend login", false));
-//        eventList.add(new EditableSharingData("works again", false));
-//        eventList.add(new EditableSharingData("this is fake data 1", false));
-//        eventList.add(new EditableSharingData("remove when 1", false));
-//        eventList.add(new EditableSharingData("friend login 1", false));
-//        eventList.add(new EditableSharingData("works again 1", false));
-//        eventList.add(new EditableSharingData("this is fake data 2", false));
-//        eventList.add(new EditableSharingData("remove when 2", false));
-//        eventList.add(new EditableSharingData("friend login 2", false));
-//        eventList.add(new EditableSharingData("works again 2", false));
-//        eventList.add(new EditableSharingData("this is fake data 3", false));
-//        eventList.add(new EditableSharingData("remove when 3", false));
-//        eventList.add(new EditableSharingData("friend login 3", false));
-//        eventList.add(new EditableSharingData("works again 3", false));
-        for(Friend friend : friendManager.getKnownFriends()) {
-            eventList.add(new EditableSharingData(friend.getRenderName(), false));
+        
+        for(Friend friend : knownFriends) {
+            eventList.add(new EditableSharingData(friend, false));
         }
         
         //TODO: this changed on head, see how
-        rosterListeners.addListener(new EventListener<RosterEvent>() {
+        // FYI: Never use RosterEvent, Ever.
+        
+        // I don't understand why this is necessary at all --
+        // the ShareList contains a model of people it is currently shared with,
+        // and the checklist model doesn't need to be in real-time, just grab
+        // the current list of known friends from @Named("known") Collection<Friend>
+        // and add to it any IDs that are in the shared list that aren't known.
+        // We don't need to keep it synced throughout the lifetime of the application.
+        // Just build it once it needs to be shown and get rid of it after that.
+        // Don't see why it needs to be a singleton or anything like that.
+        knownSupport.addListener(new EventListener<FriendEvent>() {
             @Override
-            public void handleEvent(RosterEvent event) {
+            public void handleEvent(FriendEvent event) {
                   switch(event.getType()) { 
-                  case FRIENDS_ADDED:
-                      for(XMPPFriend user : event.getData())
-                          eventList.add(new EditableSharingData(user.getRenderName(), false));
+                  case ADDED:
+                      eventList.add(new EditableSharingData(event.getData(), false));
                       break;
-    //                  case USER_UPDATED:
-    //                      if (user.isSubscribed()) {
-    //                          addKnownFriend(user);
-    //                      } else {
-    //                          removeKnownFriend(user, true);
-    //                      }
-    //                      break;
-                  case FRIENDS_DELETED: System.out.println("delete");
-                      for(XMPPFriend user : event.getData())
-                          eventList.remove(new EditableSharingData(user.getRenderName(), false));
+                  case DELETE:
+                  case REMOVED:
+                      eventList.remove(new EditableSharingData(event.getData(), false));
                       break;
                   }                    
             }
@@ -251,7 +237,7 @@ public class LibrarySharingEditablePanel {
         eventList.getReadWriteLock().writeLock().lock();
         try {
             for(EditableSharingData data : eventList) {
-                data.setIsSelected(sharingEventList.contains(data.getName()));
+                data.setIsSelected(sharingEventList.contains(data.getId()));
             }
         } finally {
             eventList.getReadWriteLock().writeLock().unlock();
@@ -261,13 +247,14 @@ public class LibrarySharingEditablePanel {
     /**
      * Returns a list of Friends who this list is shared with.
      */
-    public List<String> getSelectedFriends() {
+    public List<String> getSelectedFriendIds() {
         List<String> friends = new ArrayList<String>();
         eventList.getReadWriteLock().readLock().lock();
         try {
             for(EditableSharingData data : eventList) {
-                if(data.isSelected())
-                    friends.add(data.getName());
+                if(data.isSelected()) {
+                    friends.add(data.getId());
+                }
             }
         } finally {
             eventList.getReadWriteLock().readLock().unlock();
@@ -302,6 +289,7 @@ public class LibrarySharingEditablePanel {
         @Override
         public void getFilterStrings(List<String> baseList, EditableSharingData data) {
             baseList.add(data.getName());
+            baseList.add(data.getId());
         }
     }
 }

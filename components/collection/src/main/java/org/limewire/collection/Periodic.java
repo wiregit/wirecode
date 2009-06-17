@@ -4,6 +4,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.util.Clock;
+
 /**
  * A utility to schedule, reschedule and cancel the execution of a task.
  * 
@@ -37,9 +39,15 @@ public class Periodic {
     private long nextExecuteTime;
 
     private Future future;
+    
+    private final Clock clock;
 
-    private static long now() {
-        return System.nanoTime() - NANO_ORIGIN;
+    private long now() {
+        if(clock == null) {
+            return System.nanoTime() - NANO_ORIGIN;
+        } else {
+            return clock.nanoTime() - NANO_ORIGIN;
+        }
     }
 
     /**
@@ -50,9 +58,21 @@ public class Periodic {
      *        on.
      */
     public Periodic(Runnable r, ScheduledExecutorService scheduler) {
+        this(r, scheduler, null);
+    }
+    
+    /**
+     * Creates a periodic task, with the given clock.
+     * 
+     * @param r the <tt>Runnable</tt> to execute
+     * @param scheduler the <tt>SchedulingThreadPool</tt> to schedule execution
+     *        on.
+     */
+    public Periodic(Runnable r, ScheduledExecutorService scheduler, Clock clock) {
         this.d = new Delegate(r);
         this.scheduler = scheduler;
-    }
+        this.clock = clock;
+    }    
 
     /**
      * Changes the execution time of this Periodic task if it is later than the

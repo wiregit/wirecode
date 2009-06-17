@@ -282,8 +282,8 @@ public class BrowseHostHandlerTest extends LimeTestCase {
     }
     
     public void testGetPathForNonAnonymousFriend() {
-        assertEquals("/friend/browse/me%40you.com/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("me@you.com", false))));
-        assertEquals("/friend/browse/Hello+There/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("Hello There", false))));
+        assertEquals("/friend/browse/me%40you.com/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("me@you.com", false), null)));
+        assertEquals("/friend/browse/Hello+There/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("Hello There", false), null)));
     }
 
     @Singleton

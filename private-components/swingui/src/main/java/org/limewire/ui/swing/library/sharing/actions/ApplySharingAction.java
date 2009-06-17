@@ -31,7 +31,7 @@ public class ApplySharingAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        List<String> friends = librarySharingEditablePanel.get().getSelectedFriends();
+        List<String> friends = librarySharingEditablePanel.get().getSelectedFriendIds();
         librarySharingPanel.get().updateFriends(friends);
         libraryNavigatorPanel.get().repaint();
         librarySharingPanel.get().showNonEditableView();

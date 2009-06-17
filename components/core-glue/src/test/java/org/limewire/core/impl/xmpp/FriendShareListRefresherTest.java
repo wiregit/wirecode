@@ -2,7 +2,6 @@ package org.limewire.core.impl.xmpp;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,27 +12,21 @@ import org.jmock.Sequence;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.browse.server.BrowseTracker;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
-import org.limewire.core.api.library.FriendShareListEvent;
-import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.FriendShareListEvent.Type;
-import org.limewire.core.impl.xmpp.FriendShareListRefresher.FinishedLoadingListener;
-import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender;
-import org.limewire.core.impl.xmpp.FriendShareListRefresher.LibraryChangedSender.ScheduledLibraryRefreshSender;
+import org.limewire.core.impl.library.FileViewStub;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.BaseTestCase;
-import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPFriend;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.util.MatchAndCopy;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-
+import com.limegroup.gnutella.ClockStub;
 import com.limegroup.gnutella.MockFriend;
+import com.limegroup.gnutella.MockFriendPresence;
+import com.limegroup.gnutella.library.FileDescStub;
+import com.limegroup.gnutella.library.FileViewChangeEvent;
+import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
 
@@ -47,466 +40,235 @@ public class FriendShareListRefresherTest extends BaseTestCase {
     public void testRegister() {
         Mockery context = new Mockery();
         final Library library = context.mock(Library.class);
-        
-        final ListenerSupport<FriendShareListEvent> listenerSupport
-            = context.mock(ListenerSupport.class);
+        final FileViewManager viewManager = context.mock(FileViewManager.class);
+        final ListenerSupport friendSupport = context.mock(ListenerSupport.class);
       
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(null, null, null);
-        
-        context.checking(new Expectations() {
-            {
-                exactly(1).of(listenerSupport).addListener(with(same(friendShareListRefresher)));
-                exactly(1).of(library).addManagedListStatusListener(with(any(FinishedLoadingListener.class)));
-                
-            }});
-        
-        friendShareListRefresher.register(library);
-        friendShareListRefresher.register(listenerSupport);
-        
+        FriendShareListRefresher refresher = new FriendShareListRefresher(null, null, null, null);        
+        context.checking(new Expectations() {{
+            exactly(1).of(library).addManagedListStatusListener(with(any(EventListener.class)));
+            exactly(1).of(viewManager).addListener(with(any(EventListener.class)));
+            exactly(1).of(friendSupport).addListener(with(any(EventListener.class)));
+        }});        
+        refresher.register(library);
+        refresher.register(viewManager, friendSupport);        
         context.assertIsSatisfied();
     }
 
-    /**
-     * Confirm completion listeners are added and removed with respective friend share list events.
-     */
     @SuppressWarnings("unchecked")
-    public void testHandleEvent() {
-        Mockery context = new Mockery() {
-            {   setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
-
-        final FriendShareListEvent event1 = context.mock(FriendShareListEvent.class);
-        final FriendShareListEvent event2 = context.mock(FriendShareListEvent.class);
-        final FriendShareListEvent event3 = context.mock(FriendShareListEvent.class);
-        final Friend friend = context.mock(Friend.class);
-        final LocalFileList localFileList = context.mock(LocalFileList.class);
-        final EventList<LocalFileItem> eventList = context.mock(EventList.class);
+    public void testHandleEventBeforeLibraryLoad() {
+        Mockery context = new Mockery();
+        final Map friendMap = context.mock(Map.class);
         final ScheduledExecutorService executor = context.mock(ScheduledExecutorService.class);
+        final FileViewManager viewManager = context.mock(FileViewManager.class);
+        final ListenerSupport friendSupport = context.mock(ListenerSupport.class);
+       
+        final MatchAndCopy<EventListener> viewMatcher = new MatchAndCopy<EventListener>(EventListener.class);
+        final MatchAndCopy<EventListener> friendMatcher = new MatchAndCopy<EventListener>(EventListener.class);
         
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(null, null, executor);
-        
-        final Sequence resultSequence = context.sequence("resultSequence");
-        
-        context.checking(new Expectations() {
-            {
-                // These should be checked
-                atLeast(1).of(event1).getType();
-                will(returnValue(FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED));
-                atLeast(1).of(event2).getType();
-                will(returnValue(FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED));
-                atLeast(1).of(event3).getType();
-                will(returnValue(FriendShareListEvent.Type.FRIEND_SHARE_LIST_DELETED));
-                
-                // Non critical actions
-                                
-                allowing(event1).getFriend();
-                will(returnValue(friend));
-                
-                allowing(event2).getFriend();
-                will(returnValue(friend));
-                
-                allowing(friend).getId();
-                will(returnValue("sadsadsa"));
-                
-                allowing(event1).getFileList();
-                will(returnValue(localFileList));
-                
-                allowing(event2).getFileList();
-                will(returnValue(localFileList));
-                
-                allowing(localFileList).getModel();
-                will(returnValue(eventList));
-                
-                // Assertions
-                exactly(1).of(eventList).addListEventListener(with(any(LibraryChangedSender.class)));
-                inSequence(resultSequence);
-                
-                exactly(1).of(eventList).removeListEventListener(with(any(LibraryChangedSender.class)));
-                inSequence(resultSequence);
-                
-                one(executor).execute(with(any(Runnable.class)));
-            }});
-        
-        
-        friendShareListRefresher.handleEvent(event1);
-        friendShareListRefresher.handleEvent(event2);
-        friendShareListRefresher.handleEvent(event3);
+        FriendShareListRefresher refresher = new FriendShareListRefresher(null, null, executor, friendMap);
+
+        // Events do nothing because library isn't loaded.
+        context.checking(new Expectations() {{
+            exactly(1).of(viewManager).addListener(with(viewMatcher));
+            exactly(1).of(friendSupport).addListener(with(friendMatcher));
+        }});        
+        refresher.register(viewManager, friendSupport);
+        viewMatcher.getLastMatch().handleEvent(new FileViewChangeEvent(new FileViewStub("test id"), FileViewChangeEvent.Type.FILE_ADDED, new FileDescStub()));
+        friendMatcher.getLastMatch().handleEvent(new FriendEvent(new MockFriend("test id"), FriendEvent.Type.REMOVED));
         
         context.assertIsSatisfied();
 
     }
     
-    /**
-     * Fire handleEvent() of the FinishedLoadingListener with SAVE and LOAD_FINISHING.
-     * <p>
-     * Confirm that nothing happens
-     */
-    public void testFinishedLoadingListenerWithOtherEvents() {
-        Mockery context = new Mockery() {
-            {   setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
-
-        final BrowseTracker tracker = context.mock(BrowseTracker.class);
-        final XMPPService xmppService = context.mock(XMPPService.class);
-        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        final LibraryStatusEvent event = context.mock(LibraryStatusEvent.class);
-        
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                xmppService, scheduledExecutorService);
-
-        final FinishedLoadingListener finishedLoadingListener = friendShareListRefresher.new FinishedLoadingListener();
-        
-        context.checking(new Expectations() {
-            {   exactly(1).of(event).getType();
-                will(returnValue(LibraryStatusEvent.Type.SAVE));
-                exactly(1).of(event).getType();
-                will(returnValue(LibraryStatusEvent.Type.LOAD_FINISHING));
-            }});
-        
-        finishedLoadingListener.handleEvent(event);
-        finishedLoadingListener.handleEvent(event);
-        
-        context.assertIsSatisfied();
-    }
-    
-    
-    /**
-     * Fire handleEvent() of the FinishedLoadingListener.
-     * <p>
-     * Ensure that refreshes are sent to all friend and presences.
-     */
     @SuppressWarnings("unchecked")
-    public void testFinishedLoadingListenerWithLoadComplete() {
-        Mockery context = new Mockery() {
-            {   setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
+    public void testHandleEventAfterLibraryLoad() {
+        Mockery context = new Mockery();
+
+        final Map friendMap = context.mock(Map.class);
+        final ScheduledExecutorService executor = context.mock(ScheduledExecutorService.class);
+        final FileViewManager viewManager = context.mock(FileViewManager.class);
+        final ListenerSupport friendSupport = context.mock(ListenerSupport.class);
+        final Friend friend = new MockFriend("test id");
+        
+        final MatchAndCopy<EventListener> viewMatcher = new MatchAndCopy<EventListener>(EventListener.class);
+        final MatchAndCopy<EventListener> friendMatcher = new MatchAndCopy<EventListener>(EventListener.class);
+        
+        FriendShareListRefresher refresher = new FriendShareListRefresher(null, null, executor, friendMap);
+        refresher.fileManagerLoaded.set(true);
+        
+        final Sequence resultSequence = context.sequence("resultSequence");        
+        
+        // Initial setup. 
+        context.checking(new Expectations() {{
+            exactly(1).of(viewManager).addListener(with(viewMatcher));
+            exactly(1).of(friendSupport).addListener(with(friendMatcher));
+        }});
+        refresher.register(viewManager, friendSupport);       
+        context.assertIsSatisfied();
+        
+        // Event triggers friend retrieval & scheduling.
+        context.checking(new Expectations() {{
+            exactly(1).of(friendMap).get(friend.getId());
+            will(returnValue(friend));
+            inSequence(resultSequence);
+            
+            exactly(1).of(executor).schedule(with(any(Runnable.class)), with(equal(5000000000L)), with(equal(TimeUnit.NANOSECONDS)));
+            inSequence(resultSequence);
+        }});        
+        viewMatcher.getLastMatch().handleEvent(new FileViewChangeEvent(new FileViewStub(friend.getId()), FileViewChangeEvent.Type.FILE_ADDED, new FileDescStub()));
+        context.assertIsSatisfied();
+        
+        // Another modification event will not trigger a new runnable to be scheduled,
+        // because one is already scheduled.
+        context.checking(new Expectations() {{
+            exactly(1).of(friendMap).get(friend.getId());
+            will(returnValue(friend));
+            inSequence(resultSequence);            
+        }});
+        viewMatcher.getLastMatch().handleEvent(new FileViewChangeEvent(new FileViewStub(friend.getId()), FileViewChangeEvent.Type.FILE_ADDED, new FileDescStub()));
+        context.assertIsSatisfied();
+        
+        // But now, if we remove the known friend, a later modification will again trigger a new runnable.
+        context.checking(new Expectations() {{
+            exactly(1).of(friendMap).get(friend.getId());
+            will(returnValue(friend));
+            inSequence(resultSequence);
+            
+            exactly(1).of(executor).schedule(with(any(Runnable.class)), with(equal(5000000000L)), with(equal(TimeUnit.NANOSECONDS)));
+            inSequence(resultSequence);            
+        }});
+        friendMatcher.getLastMatch().handleEvent(new FriendEvent(friend, FriendEvent.Type.REMOVED));
+        viewMatcher.getLastMatch().handleEvent(new FileViewChangeEvent(new FileViewStub(friend.getId()), FileViewChangeEvent.Type.FILE_ADDED, new FileDescStub()));
+        context.assertIsSatisfied();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void testFinishedLoadingListenerWithUnrelatedEventsDoesNothing() {
+        Mockery context = new Mockery();
 
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
-        final XMPPService xmppService = context.mock(XMPPService.class);
         final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        final LibraryStatusEvent event = context.mock(LibraryStatusEvent.class);
+        final Library library = context.mock(Library.class);
         
-        final XMPPConnection xmppConnection = context.mock(XMPPConnection.class);
+        FriendShareListRefresher refresher = new FriendShareListRefresher(null, tracker, scheduledExecutorService, null);
         
-        final LinkedList<XMPPFriend> users = new LinkedList<XMPPFriend>();
-        users.add(context.mock(XMPPFriend.class));
-        users.add(context.mock(XMPPFriend.class));
+        final MatchAndCopy<EventListener> libraryMatcher = new MatchAndCopy<EventListener>(EventListener.class);
         
-        final Map<String, FriendPresence> presences1 = new HashMap<String, FriendPresence>();
-        final Map<String, FriendPresence> presences2 = new HashMap<String, FriendPresence>();
-                
-        presences1.put("a", context.mock(FriendPresence.class));
-        presences1.put("b", context.mock(FriendPresence.class));
-        presences2.put("a", context.mock(FriendPresence.class));
+        context.checking(new Expectations() {{
+            exactly(1).of(library).addManagedListStatusListener(with(libraryMatcher));
+        }});
+        refresher.register(library);
         
-        final Feature<LibraryChangedNotifier> featureA = context.mock(Feature.class);
-        final Feature<LibraryChangedNotifier> featureB = context.mock(Feature.class);
+        libraryMatcher.getLastMatch().handleEvent(new LibraryStatusEvent(library, LibraryStatusEvent.Type.SAVE));
+        libraryMatcher.getLastMatch().handleEvent(new LibraryStatusEvent(library, LibraryStatusEvent.Type.LOAD_FINISHING));        
+        context.assertIsSatisfied();
+    }
+    
+    
+    @SuppressWarnings("unchecked")
+    public void testFinishedLoadingListenerWithLoadCompleteSendsNotifications() {
+        Mockery context = new Mockery() {{
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }};
+
+        final BrowseTracker tracker = context.mock(BrowseTracker.class);
+        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
+        final Library library = context.mock(Library.class);
+        final Map<String, Friend> friendMap = new HashMap<String, Friend>();
         
+        final MockFriend friend1 = new MockFriend("friend 1");
+        final MockFriend friend2 = new MockFriend("friend 2");
+        final MockFriendPresence friend1Presence1 = new MockFriendPresence(friend1, "a");
+        final MockFriendPresence friend1Presence2 = new MockFriendPresence(friend1, "b");
+        final MockFriendPresence friend2Presence1 = new MockFriendPresence(friend2, "c");
+        final MockFriendPresence friend2Presence2 = new MockFriendPresence(friend2, "d");
+        friend1.addPresence(friend1Presence1);
+        friend1.addPresence(friend1Presence2);
+        friend2.addPresence(friend2Presence1);
+        friend2.addPresence(friend2Presence2);
+        friendMap.put(friend1.getId(), friend1);
+        friendMap.put(friend2.getId(), friend2);
+        
+        FriendShareListRefresher refresher = new FriendShareListRefresher(null, tracker, scheduledExecutorService, friendMap);
+       
         final LibraryChangedNotifier notifierA = context.mock(LibraryChangedNotifier.class);
-        final LibraryChangedNotifier notifierB = context.mock(LibraryChangedNotifier.class); 
+        final LibraryChangedNotifier notifierB = context.mock(LibraryChangedNotifier.class);
+        final LibraryChangedNotifier notifierC = context.mock(LibraryChangedNotifier.class); 
         
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                xmppService, scheduledExecutorService);
-
-        final FinishedLoadingListener finishedLoadingListener = friendShareListRefresher.new FinishedLoadingListener();
+        friend1Presence1.addFeature(new LibraryChangedNotifierFeature(notifierA));
+        friend1Presence2.addFeature(new LibraryChangedNotifierFeature(notifierB));
+        friend2Presence1.addFeature(new LibraryChangedNotifierFeature(notifierC));
+        // Do not add a feature for f2p2.
         
-        final String id1 = "1234";
-        final String id2 = "5678";
+        final MatchAndCopy<EventListener> libraryMatcher = new MatchAndCopy<EventListener>(EventListener.class);
         
-        context.checking(new Expectations() {
-            {   // These should be checked
-                atLeast(1).of(event).getType();
-                will(returnValue(LibraryStatusEvent.Type.LOAD_COMPLETE));
-
-                // Non critical actions
-                allowing(xmppService).getActiveConnection();
-                will(returnValue(xmppConnection));
-                allowing(xmppConnection).getFriends();
-                will(returnValue(users));
-                allowing(users.get(0)).getId();
-                will(returnValue(id1));
-                allowing(users.get(1)).getId();
-                will(returnValue(id2));
-                allowing(users.get(0)).getFriendPresences();
-                will(returnValue(presences1));
-                allowing(users.get(1)).getFriendPresences();
-                will(returnValue(presences2));
-                allowing(presences1.get("a")).getFeature(LibraryChangedNotifierFeature.ID);
-                will(returnValue(featureA));
-                allowing(presences1.get("b")).getFeature(LibraryChangedNotifierFeature.ID);
-                will(returnValue(featureB));
-                allowing(presences2.get("a")).getFeature(LibraryChangedNotifierFeature.ID);
-                will(returnValue(featureA));
-                allowing(featureA).getFeature();
-                will(returnValue(notifierA));
-                allowing(featureB).getFeature();
-                will(returnValue(notifierB));
-                
-                // Assertions
-                exactly(1).of(tracker).sentRefresh(id1);
-                exactly(1).of(tracker).sentRefresh(id2);
-                exactly(2).of(notifierA).sendLibraryRefresh();
-                exactly(1).of(notifierB).sendLibraryRefresh();
-                
-            }});
+        context.checking(new Expectations() {{
+            exactly(1).of(library).addManagedListStatusListener(with(libraryMatcher));
+        }});
+        refresher.register(library);        
+        context.assertIsSatisfied();
         
-        finishedLoadingListener.handleEvent(event);
+        context.checking(new Expectations() {{
+            exactly(1).of(tracker).sentRefresh(friend1.getId());
+            exactly(1).of(tracker).sentRefresh(friend2.getId());
+            exactly(1).of(notifierA).sendLibraryRefresh();
+            exactly(1).of(notifierB).sendLibraryRefresh();
+            exactly(1).of(notifierC).sendLibraryRefresh();
+            
+        }});
         
+        assertFalse(refresher.fileManagerLoaded.get());
+        libraryMatcher.getLastMatch().handleEvent(new LibraryStatusEvent(library, LibraryStatusEvent.Type.LOAD_COMPLETE));
+        assertTrue(refresher.fileManagerLoaded.get());
         context.assertIsSatisfied();
     }
     
-    /**
-     * Fire handleEvent() of the FinishedLoadingListener.
-     * <p>
-     * Ensure that null connections and features are are handled correctly.
-     */
     @SuppressWarnings("unchecked")
-    public void testFinishedLoadingListenerWithNulls() {
-        Mockery context = new Mockery() {
-            {   setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
-
-        final BrowseTracker tracker = context.mock(BrowseTracker.class);
-        final XMPPService xmppService = context.mock(XMPPService.class);
-        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        final LibraryStatusEvent event = context.mock(LibraryStatusEvent.class);
-        
-        final XMPPConnection xmppConnection = context.mock(XMPPConnection.class);
-        
-        final LinkedList<XMPPFriend> users = new LinkedList<XMPPFriend>();
-        users.add(context.mock(XMPPFriend.class));
-        users.add(context.mock(XMPPFriend.class));
-        
-        final Map<String, FriendPresence> presences1 = new HashMap<String, FriendPresence>();
-        final Map<String, FriendPresence> presences2 = new HashMap<String, FriendPresence>();
-                
-        presences1.put("a", context.mock(FriendPresence.class));
-        presences1.put("b", context.mock(FriendPresence.class));
-        presences2.put("a", context.mock(FriendPresence.class));
-        
-        final Feature<LibraryChangedNotifier> featureA = context.mock(Feature.class);
-        final Feature<LibraryChangedNotifier> featureB = context.mock(Feature.class);
-        
-        final LibraryChangedNotifier notifierA = context.mock(LibraryChangedNotifier.class);
-        final LibraryChangedNotifier notifierB = context.mock(LibraryChangedNotifier.class); 
-        
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                xmppService, scheduledExecutorService);
-
-        final FinishedLoadingListener finishedLoadingListener = friendShareListRefresher.new FinishedLoadingListener();
-        
-        final String id1 = "1234";
-        final String id2 = "5678";
-        
-        context.checking(new Expectations() {
-            {   // These should be checked
-                atLeast(1).of(event).getType();
-                will(returnValue(LibraryStatusEvent.Type.LOAD_COMPLETE));
-
-                // Non essential interactions
-                
-                // --Stunt the first getActiveConnection() with null--
-                one(xmppService).getActiveConnection();
-                will(returnValue(null));
-                
-                allowing(xmppService).getActiveConnection();
-                will(returnValue(xmppConnection));
-                
-                allowing(xmppConnection).getFriends();
-                will(returnValue(users));
-                allowing(users.get(0)).getId();
-                will(returnValue(id1));
-                allowing(users.get(1)).getId();
-                will(returnValue(id2));
-                allowing(users.get(0)).getFriendPresences();
-                will(returnValue(presences1));
-                allowing(users.get(1)).getFriendPresences();
-                will(returnValue(presences2));
-                
-                // --Stunt the first feature request with null, make sure the process recovers--
-                allowing(presences1.get("a")).getFeature(LibraryChangedNotifierFeature.ID);
-                will(returnValue(null));
-                
-                allowing(presences1.get("b")).getFeature(LibraryChangedNotifierFeature.ID);
-                will(returnValue(featureB));
-                allowing(presences2.get("a")).getFeature(LibraryChangedNotifierFeature.ID);
-                will(returnValue(featureA));
-                allowing(featureA).getFeature();
-                will(returnValue(notifierA));
-                allowing(featureB).getFeature();
-                will(returnValue(notifierB));
-                
-                // Assertions
-                exactly(1).of(tracker).sentRefresh(id1);
-                exactly(1).of(tracker).sentRefresh(id2);
-                exactly(1).of(notifierA).sendLibraryRefresh();
-                exactly(1).of(notifierB).sendLibraryRefresh();
-                
-            }});
-        
-        
-        // This invocation should fail since the first getConnection() will return null
-        finishedLoadingListener.handleEvent(event);
-        
-        // There will be only one refresh for notifierA since the first getFeature() will fail
-        finishedLoadingListener.handleEvent(event);
-        
-        context.assertIsSatisfied();
-    }
-    
-    /**
-     * Test the listChanged() handler when the file manager has not yet been loaded.
-     *  No new runnable should be scheduled.
-     */
-    @SuppressWarnings("unchecked")
-    public void testLibraryChangedSenderWithoutFileManagedLoaded() {
-        Mockery context = new Mockery() {
-            {   setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
-
-        final BrowseTracker tracker = context.mock(BrowseTracker.class);
-        final XMPPService xmppService = context.mock(XMPPService.class);
-        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        
-        ListEvent<LocalFileItem> event = context.mock(ListEvent.class);
-        
-        final Friend friend = context.mock(Friend.class);
-        
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                xmppService, scheduledExecutorService);
-        
-        // Ensure file manager loaded flag is cleared
-        friendShareListRefresher.fileManagerLoaded.set(false);
-        
-        final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
-        
-        context.checking(new Expectations() {
-            {
-                // Assertions
-                never(scheduledExecutorService).schedule(with(any(ScheduledLibraryRefreshSender.class)),
-                        with(any(Integer.class)), with(any(TimeUnit.class)));
-                
-            }});
-        
-        libraryChangedSender.listChanged(event);
-        
-        context.assertIsSatisfied();
-    }
-    
-    /**
-     * Create a new LibraryChangedSender within a ready FriendShareListRefresher and 
-     *  fire a listChanged event.  Ensure that a new runnable is scheduled for the
-     *  library refresh.
-     */
-    @SuppressWarnings("unchecked")
-    public void testLibraryChangedSenderWithListChanged() {
-        Mockery context = new Mockery() {
-            {   setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
-
-        final BrowseTracker tracker = context.mock(BrowseTracker.class);
-        final XMPPService xmppService = context.mock(XMPPService.class);
-        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        
-        ListEvent<LocalFileItem> event = context.mock(ListEvent.class);
-        
-        final Friend friend = context.mock(Friend.class);
-        
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                xmppService, scheduledExecutorService);
-        friendShareListRefresher.fileManagerLoaded.set(true);
-        
-        final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
-        
-        context.checking(new Expectations() {
-            {
-                // Assertions
-                exactly(1).of(scheduledExecutorService).schedule(with(any(ScheduledLibraryRefreshSender.class)),
-                        with(any(Integer.class)), with(any(TimeUnit.class)));
-                
-            }});
-        
-        libraryChangedSender.listChanged(event);
-        
-        context.assertIsSatisfied();
-    }
-    
-    /**
-     * Force fire a refresh action with the last browse time before the 
-     * last refresh time, therefore with no notifications necessary.
-     * <p>
-     * Ensure no notifications are made.
-     */
     public void testScheduledLibraryRefreshSenderWithNoRefreshNeeded() {
         Mockery context = new Mockery();
         
+        final ClockStub clock = new ClockStub();
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
-        final XMPPService xmppService = context.mock(XMPPService.class);
-        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
-        
-        final Friend friend = context.mock(Friend.class);
-        
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                xmppService, scheduledExecutorService);
-        
-        final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
-        
-        final ScheduledLibraryRefreshSender scheduledLibraryRefreshSender = libraryChangedSender.new ScheduledLibraryRefreshSender();
-        
-        final String friendID = "anID";
-        final Date lastBrowseTime = new Date(50);
-        final Date lastRefreshTime = new Date(100);
-        
-        
-        context.checking(new Expectations() {
-            {   
-                // Non critical actions
-                allowing(friend).getId();
-                will(returnValue(friendID));
-                
-                // Browse times should at least be compared
-                atLeast(1).of(tracker).lastBrowseTime(friendID);
-                will(returnValue(lastBrowseTime));
-                atLeast(1).of(tracker).lastRefreshTime(friendID);
-                will(returnValue(lastRefreshTime));
-                
-            }});
-        
-        scheduledLibraryRefreshSender.run();
-        
-        context.assertIsSatisfied();
-    }
-    
-    /**
-     * Ensures that friend add event causes the {@link ScheduledLibraryRefreshSender} 
-     * to be executed to possibly send out library refresh notifications.
-     */
-    public void testCallsLibraryRefresherOnAddEvent() {
-        Mockery context = new Mockery();
         final ScheduledExecutorService executor = context.mock(ScheduledExecutorService.class);
-        final LocalFileList localFileList = context.mock(LocalFileList.class);
-        @SuppressWarnings("unchecked")
-        final EventList<LocalFileItem> eventList = context.mock(EventList.class);
+        final FileViewManager viewManager = context.mock(FileViewManager.class);
+        final ListenerSupport friendSupport = context.mock(ListenerSupport.class);
+        final Map<String, Friend> friendMap = new HashMap<String, Friend>();
+        final Friend friend = new MockFriend("anId");
+        friendMap.put(friend.getId(), friend);
         
-        FriendShareListRefresher refresher = new FriendShareListRefresher(null, null, executor);
+        final MatchAndCopy<EventListener> viewMatcher = new MatchAndCopy<EventListener>(EventListener.class);
+        final MatchAndCopy<EventListener> friendMatcher = new MatchAndCopy<EventListener>(EventListener.class);
+       
+        FriendShareListRefresher refresher = new FriendShareListRefresher(clock, tracker, executor, friendMap);
+        refresher.fileManagerLoaded.set(true);
+        
+        // Initial setup. 
+        context.checking(new Expectations() {{
+            exactly(1).of(viewManager).addListener(with(viewMatcher));
+            exactly(1).of(friendSupport).addListener(with(friendMatcher));
+        }});
+        refresher.register(viewManager, friendSupport);
+        context.assertIsSatisfied();
+        
+        final MatchAndCopy<Runnable> runnableMatcher = new MatchAndCopy<Runnable>(Runnable.class);
+        
+        // Event triggers friend retrieval & scheduling.
+        context.checking(new Expectations() {{            
+            exactly(1).of(executor).schedule(with(runnableMatcher), with(equal(5000000000L)), with(equal(TimeUnit.NANOSECONDS)));
+        }});
+        clock.setNanoTime(System.nanoTime());
+        viewMatcher.getLastMatch().handleEvent(new FileViewChangeEvent(new FileViewStub(friend.getId()), FileViewChangeEvent.Type.FILE_ADDED, new FileDescStub()));
+        context.assertIsSatisfied();
         
         context.checking(new Expectations() {{
-            // stub stuff
-            allowing(localFileList).getModel();
-            will(returnValue(eventList));
-            allowing(eventList).addListEventListener(with(any(LibraryChangedSender.class)));
-            // assertions
-            one(executor).execute(with(any(ScheduledLibraryRefreshSender.class)));
+            // Browse times should at least be compared
+            exactly(1).of(tracker).lastBrowseTime(friend.getId());
+            will(returnValue(new Date(50)));
+            exactly(1).of(tracker).lastRefreshTime(friend.getId());
+            will(returnValue(new Date(100)));            
         }});
-        
-        refresher.handleEvent(new FriendShareListEvent(Type.FRIEND_SHARE_LIST_ADDED, localFileList, new MockFriend("hello")));
-        
+        clock.setNanoTime(clock.nanoTime() + TimeUnit.SECONDS.toNanos(6));
+        runnableMatcher.getLastMatch().run();
         context.assertIsSatisfied();
     }
     
@@ -520,72 +282,60 @@ public class FriendShareListRefresherTest extends BaseTestCase {
      */
     @SuppressWarnings("unchecked")
     public void testScheduledLibraryRefreshSender() {
-        Mockery context = new Mockery() {
-            {   setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
+        Mockery context = new Mockery();
         
+        final ClockStub clock = new ClockStub();
         final BrowseTracker tracker = context.mock(BrowseTracker.class);
-        final XMPPService xmppService = context.mock(XMPPService.class);
-        final ScheduledExecutorService scheduledExecutorService = context.mock(ScheduledExecutorService.class);
+        final ScheduledExecutorService executor = context.mock(ScheduledExecutorService.class);
+        final FileViewManager viewManager = context.mock(FileViewManager.class);
+        final ListenerSupport friendSupport = context.mock(ListenerSupport.class);
+        final Map<String, Friend> friendMap = new HashMap<String, Friend>();
+        final MockFriend friend = new MockFriend("anId");
+        final MockFriendPresence presence1 = new MockFriendPresence(friend, "a");
+        final MockFriendPresence presence2 = new MockFriendPresence(friend, "b");
+        friend.addPresence(presence1);
+        friend.addPresence(presence2);
+        friendMap.put(friend.getId(), friend);
         
+        final MatchAndCopy<EventListener> viewMatcher = new MatchAndCopy<EventListener>(EventListener.class);
+        final MatchAndCopy<EventListener> friendMatcher = new MatchAndCopy<EventListener>(EventListener.class);
+       
+        FriendShareListRefresher refresher = new FriendShareListRefresher(clock, tracker, executor, friendMap);
+        refresher.fileManagerLoaded.set(true);
         
-        final Map<String, FriendPresence> presences = new HashMap<String, FriendPresence>();
-        presences.put("a", context.mock(FriendPresence.class));
-        presences.put("b", context.mock(FriendPresence.class));
+        // Initial setup. 
+        context.checking(new Expectations() {{
+            exactly(1).of(viewManager).addListener(with(viewMatcher));
+            exactly(1).of(friendSupport).addListener(with(friendMatcher));
+        }});
+        refresher.register(viewManager, friendSupport);
+        context.assertIsSatisfied();
         
-        final Feature<LibraryChangedNotifier> featureA = context.mock(Feature.class);
-        final Feature<LibraryChangedNotifier> featureB = context.mock(Feature.class);
+        final MatchAndCopy<Runnable> runnableMatcher = new MatchAndCopy<Runnable>(Runnable.class);
         
+        // Event triggers friend retrieval & scheduling.
+        context.checking(new Expectations() {{            
+            exactly(1).of(executor).schedule(with(runnableMatcher), with(equal(5000000000L)), with(equal(TimeUnit.NANOSECONDS)));
+        }});
+        clock.setNanoTime(System.nanoTime());
+        viewMatcher.getLastMatch().handleEvent(new FileViewChangeEvent(new FileViewStub(friend.getId()), FileViewChangeEvent.Type.FILE_ADDED, new FileDescStub()));
+        context.assertIsSatisfied();
+                
         final LibraryChangedNotifier notifierA = context.mock(LibraryChangedNotifier.class);
-        final LibraryChangedNotifier notifierB = context.mock(LibraryChangedNotifier.class); 
+        presence1.addFeature(new LibraryChangedNotifierFeature(notifierA));
         
-        final Friend friend = context.mock(Friend.class);
-        
-        final FriendShareListRefresher friendShareListRefresher = new FriendShareListRefresher(tracker,
-                xmppService, scheduledExecutorService);
-        
-        final LibraryChangedSender libraryChangedSender = friendShareListRefresher.new LibraryChangedSender(friend);
-        
-        final ScheduledLibraryRefreshSender scheduledLibraryRefreshSender = libraryChangedSender.new ScheduledLibraryRefreshSender();
-        
-        final String friendID = "anID";
-        final Date lastBrowseTime = new Date(100);
-        final Date lastRefreshTime = new Date(50);
-        
-        context.checking(new Expectations() {
-            {   
-                // Non critical actions
-                allowing(friend).getId();
-                will(returnValue(friendID));
-                allowing(friend).getFriendPresences();
-                will(returnValue(presences));
-                allowing(presences.get("a")).getFeature(LibraryChangedNotifierFeature.ID);
-                will(returnValue(featureA));
-                
-                // -- Stunt return of feature lookup on B with null --
-                allowing(presences.get("b")).getFeature(LibraryChangedNotifierFeature.ID);
-                will(returnValue(null));
-                
-                allowing(featureA).getFeature();
-                will(returnValue(notifierA));
-                allowing(featureB).getFeature();
-                will(returnValue(notifierB));
-                
-                // Browse times should at least be compared
-                atLeast(1).of(tracker).lastBrowseTime(friendID);
-                will(returnValue(lastBrowseTime));
-                atLeast(1).of(tracker).lastRefreshTime(friendID);
-                will(returnValue(lastRefreshTime));
-                
-                // Assertions -- B should not be notified since it's getFeature() failed
-                exactly(1).of(tracker).sentRefresh(friendID);
-                exactly(1).of(notifierA).sendLibraryRefresh();
-                never(notifierB).sendLibraryRefresh();
-            }});
-        
-        scheduledLibraryRefreshSender.run();
-        
+        context.checking(new Expectations() {{
+            // Browse times should at least be compared
+            exactly(1).of(tracker).lastBrowseTime(friend.getId());
+            will(returnValue(new Date(100)));
+            exactly(1).of(tracker).lastRefreshTime(friend.getId());
+            will(returnValue(new Date(50)));     
+            
+            exactly(1).of(tracker).sentRefresh(friend.getId());
+            exactly(1).of(notifierA).sendLibraryRefresh();
+        }});
+        clock.setNanoTime(clock.nanoTime() + TimeUnit.SECONDS.toNanos(6));
+        runnableMatcher.getLastMatch().run();
         context.assertIsSatisfied();
     }
 }

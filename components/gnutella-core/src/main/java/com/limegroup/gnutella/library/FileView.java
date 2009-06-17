@@ -11,6 +11,9 @@ import com.limegroup.gnutella.URN;
 
 /** A read-only view of a collection of files. */
 public interface FileView extends Iterable<FileDesc>, ListenerSupport<FileViewChangeEvent> {
+        
+    /** Gets the current name of this collection. */
+    String getName();
     
     /** Returns the size of all files within this view, in <b>bytes</b>. */
     long getNumBytes();

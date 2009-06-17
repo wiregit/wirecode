@@ -92,12 +92,15 @@ public class LibrarySharingPanel {
     public void updateFriends(List<String> friends) {
         List<String> currentFriends = Collections.unmodifiableList(currentList.getFriendIds());
         for(String id : currentFriends) {
-            if(!friends.contains(id))
+            if(!friends.contains(id)) {
                 currentList.removeFriend(id);
+            }
         }
+        
         for(String id: friends) {
-            if(!currentList.getFriendIds().contains(id))
+            if(!currentList.getFriendIds().contains(id)) {
                 currentList.addFriend(id);
+            }
         }
     }
     

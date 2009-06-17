@@ -26,6 +26,11 @@ class IncompleteFileCollectionImpl extends AbstractFileCollection implements Inc
         super(managedList, multicaster);
         this.managedList = managedList;
     }
+    
+    @Override
+    public String getName() {
+        return "Incomplete Collection";
+    }
 
     public void addIncompleteFile(File incompleteFile, Set<? extends URN> urns, String name,
             long size, VerifyingFile vf) {

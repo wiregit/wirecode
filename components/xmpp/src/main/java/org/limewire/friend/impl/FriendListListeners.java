@@ -2,6 +2,7 @@ package org.limewire.friend.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -97,11 +98,6 @@ class FriendListListeners implements FriendManager {
             return null;
         }
     }
-    
-    @Override
-    public boolean containsAvailableFriend(String id) {
-        return availFriends.containsKey(id);
-    }
 
     private void addFriends(Collection<XMPPFriend> friends) {
         for (XMPPFriend friend : friends) {
@@ -169,8 +165,8 @@ class FriendListListeners implements FriendManager {
         return Collections.unmodifiableCollection(knownFriends.values());        
     }
 
-    Collection<Friend> getAvailableFriends() {
-        return Collections.unmodifiableCollection(availFriends.values());
+    Map<String, Friend> getAvailableFriends() {
+        return Collections.unmodifiableMap(availFriends);
     }
     
     Set<String> getAvailableFriendIds() {

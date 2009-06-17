@@ -3,6 +3,7 @@ package com.limegroup.gnutella.library;
 import java.util.Collection;
 
 import org.limewire.listener.SourcedEvent;
+import org.limewire.util.StringUtils;
 
 /** A change event for a {@link SharedFileCollection}. */
 public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileCollection> {
@@ -63,5 +64,10 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
 
     public String getNewName() {
         return newName;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 }

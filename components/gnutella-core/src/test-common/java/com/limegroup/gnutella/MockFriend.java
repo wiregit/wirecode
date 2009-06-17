@@ -1,15 +1,17 @@
 package com.limegroup.gnutella;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Network;
 
 public class MockFriend implements Friend {
     
     private String localID;
     private boolean anonymous;
+    private Map<String, FriendPresence> friendPresences; 
 
     public MockFriend() {
         this(null);
@@ -66,7 +68,19 @@ public class MockFriend implements Friend {
 
     @Override
     public Map<String, FriendPresence> getFriendPresences() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return friendPresences;
+    }
+    
+    public void setFriendPresences(Map<String, FriendPresence> presences) {
+        this.friendPresences = presences;
+    }
+    
+    public void addPresence(FriendPresence presence) {
+        if(friendPresences == null) {
+            // use linked to make iterating easier for tests.
+            friendPresences = new LinkedHashMap<String, FriendPresence>();
+        }
+        friendPresences.put(presence.getPresenceId(), presence);
     }
 
     @Override

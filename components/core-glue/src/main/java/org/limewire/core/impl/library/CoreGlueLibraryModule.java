@@ -1,19 +1,13 @@
 package org.limewire.core.impl.library;
 
 import org.limewire.core.api.library.FriendAutoCompleterFactory;
-import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.AbstractModule;
-import org.limewire.listener.EventBroadcaster;
-import org.limewire.listener.EventMulticaster;
-import org.limewire.listener.EventMulticasterImpl;
-import org.limewire.listener.ListenerSupport;
 
-import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
 
 public class CoreGlueLibraryModule extends AbstractModule {
@@ -27,15 +21,7 @@ public class CoreGlueLibraryModule extends AbstractModule {
         bind(PresenceLibraryBrowser.class);
         bind(FriendSearcher.class);
         
-        EventMulticaster<FriendShareListEvent> friendShareListMulticaster = new EventMulticasterImpl<FriendShareListEvent>(); 
-        bind(new TypeLiteral<ListenerSupport<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
-        bind(new TypeLiteral<EventBroadcaster<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
-        
-        
-        bind(CoreLocalFileItemFactory.class)
-                .toProvider(
-                        FactoryProvider.newFactory(CoreLocalFileItemFactory.class,
-                                CoreLocalFileItem.class));
+        bind(CoreLocalFileItemFactory.class).toProvider(FactoryProvider.newFactory(CoreLocalFileItemFactory.class,CoreLocalFileItem.class));
         bind(MetaDataManager.class).to(MetaDataManagerImpl.class);
         bind(FriendAutoCompleterFactory.class).to(FriendAutoCompleterFactoryImpl.class);
     }
