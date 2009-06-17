@@ -257,7 +257,9 @@ public class FacebookFriendConnection implements FriendConnection {
                 sendOfflinePresences();
                 logoutFromFacebook();
                 expireSession();
-            } catch (Exception e) {
+            } catch (FacebookException e) {
+                LOG.debug("logout failed", e);
+            } catch (IOException e) {
                 LOG.debug("logout failed", e);
             }
 
