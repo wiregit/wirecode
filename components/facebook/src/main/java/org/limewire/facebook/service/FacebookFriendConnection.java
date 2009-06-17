@@ -3,6 +3,7 @@ package org.limewire.facebook.service;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -297,16 +298,12 @@ public class FacebookFriendConnection implements FriendConnection {
     }
 
     private void logoutFromFacebook() throws IOException {
-        HttpGet httpGet = new HttpGet(logoutURL);
-        httpGet.addHeader("User-Agent", USER_AGENT_HEADER);
-        
-        HttpClient httpClient = createHttpClient();
-        HttpResponse response = httpClient.execute(httpGet);
-        HttpEntity entity = response.getEntity();
-
-        if (entity != null) {
-            entity.consumeContent();
-        }
+        List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+        nvps.add(new BasicNameValuePair("confirm", "1"));
+        URL logout = new URL(logoutURL);
+        String logouthost = logout.getProtocol() + "://" + logout.getHost();
+        String logoutpath = logout.getPath();
+        httpPOST(logouthost, logoutpath, nvps);
     }
 
     @Override
