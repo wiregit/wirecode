@@ -578,6 +578,8 @@ class LibraryImpl implements Library, FileCollection {
                         } else {
                             fileToFutures.remove(interned);
                             synchronized (processingQueueSize) {
+                                //TODO not really correct urns are already calculated by this point, but will let us create a listener to 
+                                //stub out the listening logic until new code gets merged.
                                 processingQueueSize.addAndGet(1);
                             }
                             fileToFutures.put(interned, fileLoader.submit(new Runnable() {
