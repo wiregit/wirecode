@@ -331,7 +331,7 @@ class LoginPanel extends JXPanel implements SettingListener {
                 }
                 login(config);
             } else {
-                JFrame dialog = new JFrame();
+                final JFrame dialog = new JFrame();
                 final Browser browser = new Browser() {
                     @Override
                     public void onAttachBrowser(ChromeAdapter chromeAdapter,
@@ -365,6 +365,7 @@ class LoginPanel extends JXPanel implements SettingListener {
                                     config.setAttribute("url", "http://facebook.com/");
                                     config.setAttribute("cookie", cookie);
                                     friendConnectionFactory.login(config);
+                                    dialog.setVisible(false);
                                 } else if (url.contains("login")) {
                                     String script = "(function() {" +
                                     "    function addHiddenInput(name, value) {" +
@@ -394,6 +395,9 @@ class LoginPanel extends JXPanel implements SettingListener {
                         case SUCCESS:
                             browser.load(event.getResult());
                             break;
+                        case EXCEPTION:
+                            // TODO write error handling ui code 
+                            throw new RuntimeException(event.getException());
                         default:
                             throw new IllegalStateException(event.getType().toString());
                         }
