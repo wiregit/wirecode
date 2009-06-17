@@ -6,15 +6,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicHTML;
 
@@ -61,6 +60,7 @@ import com.limegroup.gnutella.ActiveLimeWireCheck;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.UPnPManager;
+import com.limegroup.gnutella.ActiveLimeWireCheck.ActiveLimeWireException;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
 import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -359,12 +359,21 @@ public final class Initializer {
         }
         
         // Exit if another LimeWire is already running...
-        ActiveLimeWireCheck activeLimeWireCheck = new ActiveLimeWireCheck(args, StartupSettings.ALLOW_MULTIPLE_INSTANCES.getValue());
-        stopwatch.resetAndLog("Create ActiveLimeWireCheck");
-        if (activeLimeWireCheck.checkForActiveLimeWire()) {
-            System.exit(0);
+        if(!StartupSettings.ALLOW_MULTIPLE_INSTANCES.getValue()) {
+            ActiveLimeWireCheck activeCheck = ActiveLimeWireCheck.instance();
+            stopwatch.resetAndLog("Create ActiveLimeWireCheck");
+            try {
+                if(activeCheck.checkForActiveLimeWire(args))
+                    System.exit(0);
+            } catch(ActiveLimeWireException e) {
+                LOG.debug(e);
+                stopwatch.resetAndLog("Warn user about running instance");
+                GuiUtils.hideAndDisposeAllWindows();
+                if(!warnAlreadyRunning())
+                    System.exit(0);
+            }
+            stopwatch.resetAndLog("Run ActiveLimeWireCheck");
         }
-        stopwatch.resetAndLog("Run ActiveLimeWireCheck");
     }
     
     /** Wires together LimeWire. */
@@ -625,25 +634,40 @@ public final class Initializer {
    
     /** Shows a msg & fails. */
     private void fail(final String msgKey) {
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                public void run() {
-                    JOptionPane.showMessageDialog(null,
-                            new MultiLineLabel(msgKey, 300),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            });
-        } catch (InterruptedException ignored) {
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
-            if(cause instanceof RuntimeException)
-                throw (RuntimeException)cause;
-            if(cause instanceof Error)
-                throw (Error)cause;
-            throw new RuntimeException(cause);
-        }
+        SwingUtils.invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                JOptionPane.showMessageDialog(null,
+                        new MultiLineLabel(msgKey, 300),
+                        I18n.tr("Error"),
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        });
         System.exit(1);
+    }
+    
+    /**
+     * Warns the user that another instance of LimeWire appears to be
+     * running and that it should be shut down before proceeding.
+     * 
+     * @return true if the user chooses to proceed.
+     */
+    private boolean warnAlreadyRunning() {
+        final AtomicInteger response =
+            new AtomicInteger(JOptionPane.CANCEL_OPTION);
+        final String message = I18n.tr("Another instance of LimeWire " +
+                "appears to be running. Please completely shut down all " +
+                "other instances of LimeWire before continuing.");
+        SwingUtils.invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                response.set(JOptionPane.showConfirmDialog(null,
+                        new MultiLineLabel(message, 300),
+                        I18n.tr("LimeWire is already running"),
+                        JOptionPane.OK_CANCEL_OPTION));
+            }
+        });
+        return response.get() == JOptionPane.OK_OPTION;
     }
 }
 
