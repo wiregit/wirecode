@@ -123,17 +123,11 @@ public class SharingSettings extends LimeProps {
             "CLEAR_DOWNLOAD", false);
     
     /**
-     * Specifies whether or not to warn the user when they are about to share a folder with a public share list.
+     * Specifies whether or not to warn the user when they are about to share a folder.
      */
-    public static final BooleanSetting WARN_SHARING_FOLDER_WORLD = FACTORY.createBooleanSetting(
-            "WARN_SHARING_FOLDER_WORLD", true);
+    public static final BooleanSetting WARN_SHARING_FOLDER = FACTORY.createBooleanSetting(
+            "WARN_SHARING_FOLDER", true);
     
-    /**
-     * Specifies whether or not to warn the user when they are about to share a folder with a share list with friends.
-     */
-    public static final BooleanSetting WARN_SHARING_FOLDER_FRIENDS = FACTORY.createBooleanSetting(
-            "WARN_SHARING_FOLDER_FRIENDS", true);
-
     /**
      * Helper method left from SettingsManager.
      * <p>

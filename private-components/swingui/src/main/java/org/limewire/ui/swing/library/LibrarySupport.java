@@ -19,11 +19,14 @@ import org.limewire.ui.swing.util.I18n;
  */
 public class LibrarySupport {
     public void addFiles(final LocalFileList fileList, final List<File> files) {
-        boolean hasDirectory = false;
+        int directoryCount = 0;
         for (File file : files) {
             if (file.isDirectory()) {
-                hasDirectory = true;
-                break;
+                directoryCount++;
+                if(directoryCount > 1) {
+                    //short circuit just need to know if there is more than 1
+                    break;
+                }
             }
         }
 
@@ -32,46 +35,39 @@ public class LibrarySupport {
             sharedFileList = (SharedFileList) fileList;
         }
 
-        final SharedFileList sharedFileListCopy = sharedFileList;
-
-        if (hasDirectory
+        if (directoryCount > 0
                 && sharedFileList != null
                 && sharedFileList.getFriendIds().size() > 0
-                && ((sharedFileList.isPublic() && SharingSettings.WARN_SHARING_FOLDER_WORLD
-                        .getValue()) || (!sharedFileList.isPublic() && SharingSettings.WARN_SHARING_FOLDER_FRIENDS
-                        .getValue()))) {
+                && SharingSettings.WARN_SHARING_FOLDER.getValue()) {
 
             String message = null;
             String optionsMessage = null;
             if (sharedFileList.isPublic()) {
-                //TODO change the wording for Share Files etc., depending on whehter 1 folder in the list or more.s
-                message = I18n.tr("Share files in folder and all it's subfolders with the world?");
-                //TODO change the wording for don't ask me etc.
+                if(directoryCount == 1) {
+                    message = I18n.tr("Share files in this folder and all its subfolders with the world?");
+                } else {
+                    message = I18n.tr("Share files in these folders and their subfolders with the world?");
+                }
                 optionsMessage = I18n
-                        .tr("Don't ask me again when adding a folder share with the world");
+                        .tr("Don't ask me again when adding folders to a shared list");
             } else {
-                //TODO change the wording for Share Files etc., depending on whehter 1 folder in the list or more.s
-                message = I18n.tr("Share files in folder and all it's subfolders with {0} friends",
-                        sharedFileList.getFriendIds().size());
-                //TODO change the wording for don't ask me etc.
-                optionsMessage = I18n.tr("Don't ask me again when adding a folder to a list.");
+                if(directoryCount == 1) {
+                    message = I18n.tr("Share files in this folder and all its subfolders with selected friends?");
+                } else {
+                    message = I18n.tr("Share files in these folders and their subfolders with selected friends?");
+                }
+                optionsMessage = I18n.tr("Don't ask me again when adding folders to a shared list");
             }
-
+            
             final YesNoCheckBoxDialog yesNoCheckBoxDialog = new YesNoCheckBoxDialog(message,
-                    optionsMessage, false);
+                    optionsMessage, false, I18n.tr("Share Files"), I18n.tr("Canel"));
             yesNoCheckBoxDialog.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     boolean yes = YesNoCheckBoxDialog.YES_COMMAND.equals(e.getActionCommand());
 
                     if (yes) {
-                        if (sharedFileListCopy.isPublic()) {
-                            SharingSettings.WARN_SHARING_FOLDER_WORLD.setValue(!yesNoCheckBoxDialog
-                                    .isCheckBoxSelected());
-                        } else {
-                            SharingSettings.WARN_SHARING_FOLDER_FRIENDS
-                                    .setValue(!yesNoCheckBoxDialog.isCheckBoxSelected());
-                        }
+                        SharingSettings.WARN_SHARING_FOLDER.setValue(!yesNoCheckBoxDialog.isCheckBoxSelected());
                         addFilesInner(fileList, files);
                     }
                 }
