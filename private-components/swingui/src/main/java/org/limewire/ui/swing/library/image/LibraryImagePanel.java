@@ -1,193 +1,78 @@
 package org.limewire.ui.swing.library.image;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
-import java.io.File;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
-import org.jdesktop.swingx.VerticalLayout;
-import org.limewire.collection.glazedlists.GlazedListsFactory;
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.application.Resource;
+import org.jdesktop.jxlayer.JXLayer;
+import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.settings.SharingSettings;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.images.ImageList;
+import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GroupingList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.matchers.Matcher;
 
-import com.google.inject.Provider;
+import com.google.inject.Inject;
 
+public class LibraryImagePanel extends JPanel implements Scrollable {
 
-public class LibraryImagePanel extends JPanel
-    implements ListEventListener<List<LocalFileItem>>, Disposable, Scrollable {//, LibraryOperable<LocalFileItem> {
+    @Resource
+    private Color backgroundColor;
     
-    private final Provider<LibraryImageSubPanelFactory> factory;
-//    private ShareWidget<File> shareWidget;
+    private final ImageList imageList;
     
-    private final EventList<LocalFileItem> currentEventList;
+    private  JXLayer<JComponent> layer;
 
-    private final GroupingList<LocalFileItem> groupingList;
-
-    private final Comparator<LocalFileItem> groupingComparator = new Comparator<LocalFileItem>() {
-        @Override
-        public int compare(LocalFileItem o1, LocalFileItem o2) {
-            if (o1.getFile() != null) {
-                return (o2.getFile() != null) ? o1.getFile().getParent().compareTo(o2.getFile().getParent()) : 1;
-            } else  {
-                return (o2.getFile() != null) ? -1 : 0;
-            }
-        }
-    };
+    private EventList<LocalFileItem> model;
     
-
-    private final Map<File, LibraryImageSubPanel> panelMap;
-
-    private final LocalFileList fileList;
-//    private final LibraryListSourceChanger listChanger;
-    
-    private JScrollPane scrollPane;
-    private LibraryImageSubPanelFactory subPanelFactory;
-    
-    public LibraryImagePanel(String name, EventList<LocalFileItem> eventList, 
-            LocalFileList fileList, JScrollPane scrollPane,
-            Provider<LibraryImageSubPanelFactory> factory//,
-//            ShareWidget<File> shareWidget,
-//            LibraryListSourceChanger listChanger
-            ) {       
-        super(new VerticalLayout());
-        
+    @Inject
+    public LibraryImagePanel(ImageList imageList) {
+        super(new MigLayout("insets 0 0 0 0, fill"));
         GuiUtils.assignResources(this); 
         
-        this.fileList = fileList;
-        this.currentEventList = eventList;
-        this.scrollPane = scrollPane;
-        this.factory = factory;
-//        this.shareWidget = shareWidget;
-//        this.listChanger = listChanger;
+        setBackground(backgroundColor);
         
-        groupingList = GlazedListsFactory.groupingList(eventList, groupingComparator);
+        this.imageList = imageList;
+        imageList.setBorder(BorderFactory.createEmptyBorder(0,7,0,7));
+        JScrollPane imageScrollPane = new JScrollPane(imageList);
+        imageScrollPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         
-        groupingList.addListEventListener(this);
-
-        panelMap = new ConcurrentHashMap<File, LibraryImageSubPanel>();
-    
-        initList();
-    }
-    
-    public void dispose() {
-        for(LibraryImageSubPanel subPanel : panelMap.values()){
-            subPanel.dispose();
-        }
-        panelMap.clear();
-        groupingList.removeListEventListener(this);
-        groupingList.dispose();
-    }
-
-    //TODO: thread safety
-    @Override
-    public void listChanged(ListEvent<List<LocalFileItem>> listChanges) {
-        while (listChanges.next()){
-            if (listChanges.getType() == ListEvent.INSERT) {
-                // INSERT adds sublist to the GroupingList - UPDATEs are also
-                // fired for each file added to the sublist
-                final File parent = getParentFolder(listChanges.getSourceList().get(listChanges.getIndex()).get(0));
-                if (!panelMap.containsKey(parent)) {
-                    final EventList<LocalFileItem> newList = GlazedListsFactory.filterList(currentEventList, new DirectoryMatcher(parent));
-                    SwingUtils.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            createSubPanel(parent, newList);
-                        }
-                    });
-                }
-            }
-        }       
-    }
-    
-    private void initList() {
-        for( List<LocalFileItem> fileItemList : groupingList) {
-            final File parent = getParentFolder(fileItemList.get(0));
-            final EventList<LocalFileItem> newList = GlazedListsFactory.filterList(currentEventList, new DirectoryMatcher(parent));
-            createSubPanel(parent, newList);
-        }
-    }
-    
-    
-    private void createSubPanel(File parent, EventList<LocalFileItem> list){
-        if(subPanelFactory == null)
-            subPanelFactory = factory.get();
-        LibraryImageSubPanel subPanel = subPanelFactory.createMyLibraryImageSubPanel(parent, list, fileList);//, listChanger);
-        panelMap.put(parent, subPanel);
-        add(subPanel);
-    }
+        layer = new JXLayer<JComponent>(imageScrollPane, new  AbstractLayerUI<JComponent>());
+        layer.getGlassPane().setLayout(null);
         
-    private static File getParentFolder(LocalFileItem localFileItem){
-        return localFileItem.isIncomplete() ? SharingSettings.INCOMPLETE_DIRECTORY.get() : 
-            ((localFileItem.getFile() == null) ? SharingSettings.INCOMPLETE_DIRECTORY.get() : localFileItem.getFile().getParentFile());
+        add(layer, "grow");
     }
     
-    private static class DirectoryMatcher implements Matcher<LocalFileItem>{
-        
-        private File parentDirectory;
-
-        public DirectoryMatcher(File parentDirectory){
-            this.parentDirectory = parentDirectory;
-        }
-
-        @Override
-        public boolean matches(LocalFileItem item) {
-            return getParentFolder(item).equals(parentDirectory);
-        }
-        
+    public void setEventList(EventList<LocalFileItem> localFileList) {
+        imageList.setModel(localFileList);
     }
-    
-//    @Override
-//    public void selectAndScrollTo(File file) {
-//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-//            ImageListModel model = subPanel.getModel();
-//            for (int x=0; x<model.getSize(); x++) {
-//                LocalFileItem item = model.getFileItem(x);
-//                if (file.equals(item.getFile())) {
-//                    scrollToImageInSubPanel(subPanel, x);
-//                    break;
-//                }
-//            }
-//        }
+//    public void setEventList(LocalFileList localFileList) {
+//        imageList.setModel(localFileList);
 //    }
-//    
-//    @Override
-//    public void selectAndScrollTo(URN urn) {
-//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-//            ImageListModel model = subPanel.getModel();
-//            for (int x=0; x<model.getSize(); x++) {
-//                LocalFileItem item = model.getFileItem(x);
-//                if (urn.equals(item.getUrn())) {
-//                    scrollToImageInSubPanel(subPanel, x);
-//                    break;
-//                }
-//            }
-//        }
-//    }
-
-    private void scrollToImageInSubPanel(LibraryImageSubPanel subPanel, int index) {
-        ImageList imageList = subPanel.getImageList();
-        imageList.setSelectedIndex(index);
-        Rectangle rect = imageList.getCellBounds(index, index);
-        subPanel.scrollRectToVisible(rect);
+    
+    public void setPopupHandler(TablePopupHandler popupHandler) {
+        imageList.setPopupHandler(popupHandler);
+    }
+    
+    public void setImageEditor(TableRendererEditor editor) {
+//        new MouseReaction(imageList, editor);
+        layer.getGlassPane().add(editor);
     }
     
     /**
@@ -202,13 +87,13 @@ public class LibraryImagePanel extends JPanel
         Dimension dimension = super.getPreferredSize();
         if (getParent() == null)
             return dimension;
-        if (dimension.height > scrollPane.getSize().height){
-            return new Dimension(scrollPane.getWidth() -20, dimension.height);
+        if (dimension.height > getParent().getSize().height){
+            return new Dimension(getParent().getWidth(), dimension.height);
         } else {
-            return scrollPane.getSize(); 
+            return getParent().getSize(); 
         }
     }
-
+    
     @Override
     public Dimension getPreferredScrollableViewportSize() {
         return getPreferredSize();
@@ -254,43 +139,62 @@ public class LibraryImagePanel extends JPanel
             return ((currentPosition / height) + 1) * height - currentPosition;
         }
     }
+    
+    public class MouseReaction implements MouseListener, MouseMotionListener {
 
-//   @Override
-//    public File getNextItem(File file) {
-//        throw new IllegalStateException("Image library traversal not available");
-//    }
-//
-//    @Override
-//    public File getPreviousItem(File file) {
-//        throw new IllegalStateException("Image library traversal not available");
-//    }
-//
-//    @Override
-//    public List<LocalFileItem> getSelectedItems() {
-//        List<LocalFileItem> selectionList = new ArrayList<LocalFileItem>();
-//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-//            selectionList.addAll(subPanel.getSelectedItems());
-//        }
-//        return selectionList;
-//    }
-//    
-//    @Override
-//    public List<LocalFileItem> getAllItems() {
-//        List<LocalFileItem> allList = new ArrayList<LocalFileItem>();
-//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-//            allList.addAll(subPanel.getAllItems());
-//        }
-//        return allList;
-//    }
-//
-//    @Override
-//    public void selectAll() {
-//        for (LibraryImageSubPanel subPanel : panelMap.values()) {
-//            ImageList imageList = subPanel.getImageList();
-//            if (imageList.getElementCount() > 0) {
-//                imageList.setSelectionInterval(0, imageList.getElementCount() - 1);
+        private ImageList imageList;
+        private TableRendererEditor hoverComponent;
+        
+        public MouseReaction(ImageList imageList, TableRendererEditor hoverComponent) {
+            this.imageList = imageList;          
+            this.hoverComponent = hoverComponent;
+
+            imageList.addMouseListener(this);
+            imageList.addMouseMotionListener(this);
+        }
+        
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            update(e.getPoint());
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) { 
+            if(!hoverComponent.getBounds().contains(e.getPoint())) {
+                hoverComponent.setVisible(false);
+            }
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            int index = imageList.locationToIndex(e.getPoint());
+            if(!e.isPopupTrigger() && !e.isShiftDown() && !e.isControlDown() && !e.isMetaDown() && index > -1)
+                imageList.setSelectedIndex(index);
+        }
+        @Override
+        public void mousePressed(MouseEvent e) {}
+        @Override
+        public void mouseReleased(MouseEvent e) {}
+        @Override
+        public void mouseDragged(MouseEvent e) {}
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            update(e.getPoint());
+        }
+        
+        private void update(Point point){
+//            if (imageList.getModel().getSize() > 0) {
+//                int index = imageList.locationToIndex(point);
+//                if (index > -1) {
+//                    hoverComponent.setVisible(true);
+//                    ((Configurable)hoverComponent).configure((LocalFileItem) imageList.getModel().getElementAt(index), true);
+//                    Rectangle bounds = imageList.getCellBounds(index, index);
+//                    ImageCellRenderer renderer = imageList.getImageCellRenderer();
+//                    hoverComponent.setLocation(bounds.x + renderer.getSubComponentLocation().x,
+//                            bounds.y + renderer.getSubComponentLocation().y);
+//                }
 //            }
-//        }
-//    }
-
+        }
+    }
 }

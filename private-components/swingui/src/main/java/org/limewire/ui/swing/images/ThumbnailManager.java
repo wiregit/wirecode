@@ -11,8 +11,8 @@ import javax.swing.JList;
  */
 public interface ThumbnailManager {
     
-    public static final int WIDTH = 120;
-    public static final int HEIGHT = 90;
+    public static final int WIDTH = 116;
+    public static final int HEIGHT = 86;
 
     /**
      * Returns the thumbnail for this file. If this file is not immediately 

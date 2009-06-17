@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,6 +33,7 @@ import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.dnd.LibraryTransferHandler;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.actions.AddFileAction;
+import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
@@ -49,10 +51,14 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 @LazySingleton
 public class LibraryPanel extends JPanel {
 
+    private static final String TABLE = "TABLE";
+    private static final String LIST = "LIST";
+    
     private final HeaderBar headerBar = new HeaderBar();
     private final LibraryTable libraryTable;
     private final LibraryNavigatorPanel navigatorComponent;
@@ -60,6 +66,11 @@ public class LibraryPanel extends JPanel {
     private final PublicSharedFeedbackPanel publicSharedFeedbackPanel;
     private final ButtonDecorator buttonDecorator;
     private final LocalFileListTransferHandler transferHandler;
+    private final Provider<LibraryImagePanel> libraryImagePanelProvider;
+    private LibraryImagePanel libraryImagePanel;
+    
+    private JPanel tableListPanel;
+    private CardLayout tableListLayout;
     
     private JXButton addFilesButton;
     private LibraryTableSelectionComboBox tableSelectionComboBox;
@@ -73,7 +84,8 @@ public class LibraryPanel extends JPanel {
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibrarySharingPanel sharingPanel, LibraryTableSelectionComboBox selectionComobBox, 
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerPanel playerPanel, AddFileAction addFileAction,
-            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LibraryTransferHandler transferHandler) {
+            ButtonDecorator buttonDecorator, LibraryCategoryMatcher categoryMatcher, LibraryTransferHandler transferHandler,
+            Provider<LibraryImagePanel> libraryImagePanelProvider) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.navigatorComponent = navPanel;
@@ -84,6 +96,7 @@ public class LibraryPanel extends JPanel {
         this.buttonDecorator = buttonDecorator;
         this.categoryMatcher = categoryMatcher;
         this.transferHandler = transferHandler;
+        this.libraryImagePanelProvider = libraryImagePanelProvider;
         
         layoutComponents(headerBarDecorator, playerPanel, addFileAction);
 
@@ -100,10 +113,14 @@ public class LibraryPanel extends JPanel {
         headerBar.add(playerPanel, "grow, align 50%");
         headerBar.add(tableSelectionComboBox, "alignx right, gapright 5");
         
+        tableListLayout = new CardLayout();
+        tableListPanel = new JPanel(tableListLayout);
+        
         libraryTable.setTransferHandler(transferHandler);
         JScrollPane libraryScrollPane = new JScrollPane(libraryTable);
         libraryScrollPane.setBorder(BorderFactory.createEmptyBorder());  
         configureEnclosingScrollPane(libraryScrollPane);
+        tableListPanel.add(libraryScrollPane, TABLE);
         
         setupStoreHighlighter();
         
@@ -111,7 +128,7 @@ public class LibraryPanel extends JPanel {
         add(headerBar, "dock north, growx");
         add(publicSharedFeedbackPanel.getComponent(), "dock north, growx, hidemode 3");
         add(librarySharingPanel.getComponent(), "dock west, growy, hidemode 3");
-        add(libraryScrollPane, "grow");
+        add(tableListPanel, "grow");
     }
     
     /**
@@ -169,11 +186,26 @@ public class LibraryPanel extends JPanel {
         librarySharingPanel.getComponent().setVisible(navItem != null && navItem.getType() == NavType.LIST);
     }
     
+    private void createImageList() {
+        libraryImagePanel = libraryImagePanelProvider.get();
+
+        tableListPanel.add(libraryImagePanel, LIST); 
+    }
+    
     private void selectTable(AbstractLibraryFormat<LocalFileItem> libraryTableFormat, Category category) {       
         categoryMatcher.setCategoryFilter(category);
-        setEventList(eventList);
-        libraryTable.setupCellRenderers(category, libraryTableFormat);
-        libraryTable.applySavedColumnSettings();
+        
+        if(category != Category.IMAGE) {
+            tableListLayout.show(tableListPanel, TABLE);
+            setEventList(eventList);
+            libraryTable.setupCellRenderers(category, libraryTableFormat);
+            libraryTable.applySavedColumnSettings();
+        } else {
+            if(libraryImagePanel == null) 
+                createImageList();
+            tableListLayout.show(tableListPanel, LIST);
+            setEventListImage(eventList);
+        }
     }
     
     private void createAddFilesButton(AddFileAction addFileAction) {
@@ -186,6 +218,12 @@ public class LibraryPanel extends JPanel {
         sortedList = GlazedListsFactory.sortedList(eventList);
         filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
         libraryTable.setEventList(filteredList, tableSelectionComboBox.getSelectedTableFormat());
+    }
+    
+    private void setEventListImage(EventList<LocalFileItem> eventList) {
+        sortedList = GlazedListsFactory.sortedList(eventList);
+        filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
+        libraryImagePanel.setEventList(filteredList);
     }
     
     private void setPublicSharedComponentVisible(LibraryNavItem navItem) {
