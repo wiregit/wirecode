@@ -18,7 +18,9 @@ class SharedFileCountPanel extends JXButton {
         super(I18n.tr("Sharing {0} files", shareListManager.getSharedFileCount()));
         
         setName("SharedFileCountPanel");
-        
+    }
+    
+    @Inject void register(SharedFileListManager shareListManager) {
         shareListManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {

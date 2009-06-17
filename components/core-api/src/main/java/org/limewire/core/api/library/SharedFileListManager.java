@@ -11,14 +11,20 @@ public interface SharedFileListManager {
     
     String SHARED_FILE_COUNT = "sharedFileCount";
     
-    /** Adds a {@link PropertyChangeListener}. */
+    /**
+     * Adds a {@link PropertyChangeListener}. Any listeners added while on the
+     * EDT thread will also be notified on the EDT thread, regardless of the
+     * thread the event originates on.
+     */
     void addPropertyChangeListener(PropertyChangeListener listener);
-    
+
     /** Removes the {@link PropertyChangeListener}. */
     void removePropertyChangeListener(PropertyChangeListener listener);
     
     /**
      * Gets the current total number of files that are shared with anyone.
+     * This list strips out duplicates -- a file shared with two people
+     * or a file shared via two collections will only be counted once.
      */
     int getSharedFileCount();
 
