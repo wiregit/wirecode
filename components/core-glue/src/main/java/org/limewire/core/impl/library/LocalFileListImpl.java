@@ -62,7 +62,7 @@ abstract class LocalFileListImpl implements LocalFileList {
     
     @Override
     public ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder) {
-        return new ListWrapper((getCoreCollection().addFolder(folder)));
+        return new ListWrapper((getCoreCollection().addFolder(folder, null)));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -105,7 +106,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             torrent.moveTorrent(completeDir);
             File completeFile = getSaveFile();
             if (completeFile.isDirectory()) {
-                library.addFolder(completeFile);
+                library.addFolder(completeFile, new FileFilter() {
+                    @Override
+                    public boolean accept(File file) {
+                        //library addFile method will filter out any truly unaddable files.
+                        return true;
+                    }
+                });
             } else {
                 library.add(completeFile);
             }

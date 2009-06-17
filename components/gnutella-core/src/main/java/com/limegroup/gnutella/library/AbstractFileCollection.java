@@ -56,10 +56,10 @@ abstract class AbstractFileCollection extends AbstractFileView implements FileCo
     }
 
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder) {
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder, final FileFilter fileFilter) {
         return library.submitFolder(new Callable<List<ListeningFuture<FileDesc>>>() {
             private final List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-            private final FileFilter filter = library.newManageableFilter();
+            private final FileFilter filter = fileFilter == null ? library.newManageableFilter() : fileFilter;
             
             @Override
             public List<ListeningFuture<FileDesc>> call() throws Exception {

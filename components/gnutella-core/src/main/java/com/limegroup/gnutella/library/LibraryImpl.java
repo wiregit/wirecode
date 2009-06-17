@@ -591,7 +591,8 @@ class LibraryImpl implements Library, FileCollection {
                                 @Override
                                 public void run() {
                                     processingIndex.addAndGet(1);
-                                    System.out.println("Processing " + processingIndex.get() + " of " + processingQueueSize.get() + " - " + interned.getName());
+                                    //TODO put in event call
+                                    //System.out.println("Processing " + processingIndex.get() + " of " + processingQueueSize.get() + " - " + interned.getName());
                                     finishLoadingFileDesc(interned, event, metadata, rev, oldFileDesc, task);
                                     synchronized (processingQueueSize) {
                                         if(processingIndex.get() >= processingQueueSize.get()) {
@@ -1123,10 +1124,10 @@ class LibraryImpl implements Library, FileCollection {
     }
 
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder) {
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder, final FileFilter fileFilter) {
         return folderLoader.submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             private final List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-            private final FileFilter filter = newManageableFilter();
+            private final FileFilter filter = fileFilter == null ? newManageableFilter() : fileFilter;
             
             @Override
             public List<ListeningFuture<FileDesc>> call() throws Exception {
@@ -1151,6 +1152,8 @@ class LibraryImpl implements Library, FileCollection {
 
     @Override
     public boolean isFileAddable(File file) {
+        //additional checks happen in the add method already.
+        //TODO but for the ui to show properly, should probably at least check if the file is a program and return false if programs are turned off
         return true;
     }
 }

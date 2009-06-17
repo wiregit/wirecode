@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -61,7 +62,7 @@ public abstract class AbstractFileCollectionStub implements FileCollection {
     }
     
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder) {
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder, FileFilter fileFilter) {
         throw new UnsupportedOperationException("Cannot add files");
     }
     

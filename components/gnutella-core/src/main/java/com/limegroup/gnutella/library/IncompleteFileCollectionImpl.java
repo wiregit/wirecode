@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.List;
 import java.util.Set;
 
@@ -48,7 +49,7 @@ class IncompleteFileCollectionImpl extends AbstractFileCollection implements Inc
     }
     
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder) {
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder, FileFilter fileFilter) {
         throw new UnsupportedOperationException("cannot add from here");
     }
     

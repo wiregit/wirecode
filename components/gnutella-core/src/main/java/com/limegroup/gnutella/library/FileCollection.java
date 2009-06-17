@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -22,10 +23,14 @@ public interface FileCollection extends FileView {
     boolean add(FileDesc fileDesc);
 
     /**
-     * Adds all files from the folder that are manageable
-     * according to the current set of managed categories.
+     * Adds all files in the folder to the list. A fileFilter is used while recursively traversing the folder.
+     * Each file that matches the filter is added to the list via the addFile method.
+     * 
+     * @param fileFilter optional FileFilter to apply to the addFolderLogic. 
+     * If no fileFilter is supplied the default filter is used. which filters against the set of active categories.
+     * In most cases the default FileFilter should be used. But there are a few use cases for custom filtering.
      */
-    ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder);
+    ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder, FileFilter fileFilter);
     
     /**
      * Asynchronously adds a file to the list. The returned Future can be used

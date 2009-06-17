@@ -124,7 +124,7 @@ public class FileManagerTestUtils {
     }
     
     public static List<FileDesc> assertAddsFolder(FileCollection fileList, File folder) throws Exception {
-        return assertFutureListFinishes(fileList.addFolder(folder), 5, TimeUnit.SECONDS);
+        return assertFutureListFinishes(fileList.addFolder(folder, null), 5, TimeUnit.SECONDS);
     }
     
     /**
