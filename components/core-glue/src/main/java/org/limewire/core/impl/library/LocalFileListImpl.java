@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.core.impl.library;
 
 import java.awt.EventQueue;
@@ -26,9 +23,6 @@ import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
 
-//TODO: This really should only deal with collections, but
-//because the UI still wants to know about "shared with",
-//we have to keep track of all the views for now.
 abstract class LocalFileListImpl implements LocalFileList {
     
     protected final EventList<LocalFileItem> baseList;
