@@ -330,10 +330,9 @@ public class FacebookFriendConnection implements FriendConnection {
                 if (presence.hasFeatures(LimewireFeature.ID)) {
                     Map<String, Object> message = new HashMap<String, Object>();
                     message.put("type", "unavailable");
-                    Long presenceId = Long.parseLong(presence.getFriend().getId());
 
                     try {
-                        sendLiveMessageDirect(presenceId, "presence", message);
+                        sendLiveMessageDirect(presence, "presence", message);
                     } catch (FacebookException e) {
                         LOG.debug("error sending offline presence notification");
                     }
@@ -683,18 +682,14 @@ public class FacebookFriendConnection implements FriendConnection {
         return chatManager;
     }
 
-    public void sendLiveMessage(FriendPresence presence, String type, Map<String, Object> messageMap) {
-        messageMap.put("to", presence.getPresenceId());
-        sendLiveMessage(Long.parseLong(presence.getFriend().getId()), type, messageMap);
-    }
-    
-    private void sendLiveMessage(final Long userId, final String type, final Map<String, Object> messageMap) {
-        messageMap.put("from", getPresenceId());
+    public void sendLiveMessage(final FriendPresence presence,
+                                final String type, final Map<String, Object> messageMap) {
+
         executorService.submit(new Runnable() {
             public void run() {
                 synchronized (FacebookFriendConnection.this) {
                     try {
-                        sendLiveMessageDirect(userId, type, messageMap);
+                        sendLiveMessageDirect(presence, type, messageMap);
                     }
                     catch (FacebookException e) {
                         LOG.debug("Error sending live message: {0}", e);
@@ -711,9 +706,13 @@ public class FacebookFriendConnection implements FriendConnection {
             }
         });
     }
-    
-    private void sendLiveMessageDirect(Long userId, String type,
-                                                    Map<String, Object> messageMap) throws FacebookException {
+
+    private void sendLiveMessageDirect(FriendPresence presence,
+                                       String type, Map<String, Object> messageMap) throws FacebookException {
+        messageMap.put("to", presence.getPresenceId());
+        messageMap.put("from", getPresenceId());
+        final Long userId = Long.parseLong(presence.getFriend().getId());
+        
         JSONObject message = new JSONObject(messageMap);
         LOG.debugf("live message {0} to {1} : {2}", type, userId, message);
         facebookClient.liveMessage_send(userId, type, message);
