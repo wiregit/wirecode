@@ -26,4 +26,7 @@ public interface RemoteHostActions {
      * @param people Can be anonymous but not null.
      */
     void viewLibrariesOf(Collection<RemoteHost> people);
+
+    /**Shows files from all friends*/
+    void browseAllFriends();
 }

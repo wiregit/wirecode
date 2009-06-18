@@ -10,6 +10,7 @@ import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
+import org.limewire.core.settings.FriendBrowseSettings;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -57,15 +58,22 @@ class AllFriendsBrowseSearch extends AbstractBrowseSearch {
             }
         }
         
+        
+        if(remoteFileItems.size() > 0){
+            FriendBrowseSettings.HAS_BROWSED_ALL_FRIENDS.set(true);
+        } 
+        
         //browse is finished
         for (SearchListener listener : searchListeners) {
             listener.searchStopped(AllFriendsBrowseSearch.this);
         }
         
-        BrowseStatus status = new BrowseStatus(AllFriendsBrowseSearch.this, BrowseState.LOADED);
+        BrowseStatus status = (remoteFileItems.size() > 0) ? new BrowseStatus(AllFriendsBrowseSearch.this, BrowseState.LOADED) :
+            new BrowseStatus(AllFriendsBrowseSearch.this, BrowseState.NO_FRIENDS_SHARING);
         for (BrowseStatusListener listener : browseStatusListeners){
             listener.statusChanged(status);
         }
+
     }
     
     private void installListener(){

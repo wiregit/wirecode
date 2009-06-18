@@ -17,16 +17,15 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class AllFriendsPanel extends JPanel {
     
-    private final Provider<BrowseSearchFactory> browseSearchFactory;
+    private final BrowseSearchFactory browseSearchFactory;
 
     private final BrowsePanelFactory browsePanelFactory;
 
     @Inject
-    public AllFriendsPanel(Provider<BrowseSearchFactory> browseSearchFactory, BrowsePanelFactory browsePanelFactory){
+    public AllFriendsPanel(BrowseSearchFactory browseSearchFactory, BrowsePanelFactory browsePanelFactory){
         super(new BorderLayout());
         this.browseSearchFactory = browseSearchFactory;
         this.browsePanelFactory = browsePanelFactory;
@@ -34,7 +33,7 @@ public class AllFriendsPanel extends JPanel {
     }
     
     private void initialize(){
-        BrowseSearch search = browseSearchFactory.get().createAllFriendsBrowseSearch();
+        BrowseSearch search = browseSearchFactory.createAllFriendsBrowseSearch();
         final SearchResultsPanel panel = browsePanelFactory.createBrowsePanel(search);
         add(panel);
         

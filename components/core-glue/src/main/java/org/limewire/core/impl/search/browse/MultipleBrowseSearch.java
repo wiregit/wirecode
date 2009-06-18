@@ -127,7 +127,7 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         
         @Override
         public void statusChanged(BrowseStatus status) {
-            if(status.getState() == BrowseState.FAILED){
+            if(status.getState() == BrowseState.FAILED || status.getState() == BrowseState.OFFLINE){
                 //getFailedFriends() will only return 1 person 
                 //since status is from a single browse
                 failedList.addAll(status.getFailedFriends());
@@ -157,7 +157,9 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         }
         
         /**
-         * @return The aggregated status of the browses.  
+         * @return The aggregated status of the browses.  For example if the browses are a mix of 
+         * FAILED and LOADED, the status will be PARTIAL_FAIL.  If the browses contain, FAILED, 
+         * LOADED, and UPDATED, it will be UPDATED_PARTIAL_FAIL.
          */
         private BrowseState getReleventMultipleBrowseState(BrowseStatus status){
             if(loaded.get() == browses.size()){

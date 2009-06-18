@@ -67,12 +67,7 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
         
         if (library == null) {
             // Failed!
-            //TODO: should be something about being offline?
-            BrowseStatus status = createBrowseStatus(BrowseState.FAILED, friend);
-
-            for (BrowseStatusListener listener : browseStatusListeners) {
-                listener.statusChanged(status);
-            } 
+           fireBrowseStatusChanged(BrowseState.OFFLINE, friend);
             
         } else {
             if(library.getState() == LibraryState.LOADING){
@@ -96,11 +91,7 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
             }
         }
         
-        BrowseStatus status = createBrowseStatus(BrowseState.LOADED);
-
-        for (BrowseStatusListener listener : browseStatusListeners) {
-            listener.statusChanged(status);
-        } 
+        fireBrowseStatusChanged(BrowseState.LOADED);
         
         for (SearchListener listener : searchListeners) {
             listener.searchStopped(FriendSingleBrowseSearch.this);
@@ -121,8 +112,11 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
         }
     }
     
-    private BrowseStatus createBrowseStatus(BrowseState state, Friend... friends){
-        return new BrowseStatus(FriendSingleBrowseSearch.this, state, friends);
+    private void fireBrowseStatusChanged(BrowseState state, Friend... friends){
+        BrowseStatus status = new BrowseStatus(FriendSingleBrowseSearch.this, state, friends);
+        for (BrowseStatusListener listener : browseStatusListeners) {
+            listener.statusChanged(status);
+        } 
     }
 
     private class FriendLibraryListEventListener implements ListEventListener<FriendLibrary> {
@@ -133,15 +127,13 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
                     FriendLibrary newLibrary = (FriendLibrary) listChanges.getSourceList().get(listChanges.getIndex());
                     if (newLibrary.getFriend().getId().equals(friend.getId())) {//There is a new library for our friend!
                         //Add a property change listener to the new library and keep a reference to the library so we can remove the listener later.
-                        currentLibrary.set(newLibrary);
+                        currentLibrary.set(remoteLibraryManager.getFriendLibrary(friend));
                         currentLibrary.get().addPropertyChangeListener(libraryPropertyChangeListener);
                     }
-                } else if (listChanges.getType() == ListEvent.DELETE && currentLibrary.get() != null && remoteLibraryManager.getFriendLibrary(friend) == null){
-                    //Our friend's library is gone from remoteLibraryManager and we still have a reference to it.
-                    //Remove the listener and the reference.
-                    currentLibrary.get().removePropertyChangeListener(libraryPropertyChangeListener);
+                } else if (listChanges.getType() == ListEvent.DELETE && remoteLibraryManager.getFriendLibrary(friend) == null){   
+                    //our friend has logged off
                     currentLibrary.set(null);
-                    //TODO fire something here - our friend logged out
+                    fireBrowseStatusChanged(BrowseState.OFFLINE, friend);
                 }
             }
         }
@@ -151,17 +143,13 @@ class FriendSingleBrowseSearch extends AbstractBrowseSearch {
         
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            FriendLibrary library = (FriendLibrary)evt.getSource();
-            if (library.getState() != LibraryState.LOADING) {
-                library.removePropertyChangeListener(LibraryPropertyChangeListener.this);
+            LibraryState state = (LibraryState)evt.getNewValue();
+            if (state != LibraryState.LOADING) {
                 // The list has changed - tell the listeners
-                
-                final BrowseStatus status = library.getState() == LibraryState.LOADED ? 
-                        createBrowseStatus(BrowseState.UPDATED) : 
-                            createBrowseStatus(BrowseState.FAILED, friend);
-
-                for (BrowseStatusListener listener : browseStatusListeners) {
-                    listener.statusChanged(status);
+                if (state == LibraryState.LOADED) {
+                    fireBrowseStatusChanged(BrowseState.UPDATED);
+                } else {
+                    fireBrowseStatusChanged(BrowseState.FAILED, friend);
                 }
 
             }

@@ -92,6 +92,12 @@ class RemoteHostActionsImpl implements RemoteHostActions {
                  getTabTitle(people));
     }
     
+    @Override
+    public void browseAllFriends() {
+         browse(browseSearchFactory.get().createAllFriendsBrowseSearch(),
+                 I18n.tr("All Friends"));
+    }
+    
     private String getTabTitle(Collection<RemoteHost> people){
         boolean hasP2P = hasP2P(people);
         boolean hasFriends = hasFriend(people);

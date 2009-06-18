@@ -30,7 +30,6 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.browse.BrowseStatus;
-import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -583,8 +582,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             messageLabel.setText(I18n.tr("You might not receive many results until LimeWire finishes loading..."));
             messagePanel.setVisible(true);
             browseFailedPanel.setVisible(false);            
-        } else if (browseStatus != null && browseStatus.getState() == BrowseState.FAILED) {
-            browseFailedPanel.update(browseStatus.getBrowseSearch(), browseStatus.getFailedFriends());
+        } else if (browseStatus != null && !browseStatus.getState().isOK()) {
+            browseFailedPanel.update(browseStatus.getState(), browseStatus.getBrowseSearch(), browseStatus.getFailedFriends());
             browseFailedPanel.setVisible(true);
         } else {
             messagePanel.setVisible(false);

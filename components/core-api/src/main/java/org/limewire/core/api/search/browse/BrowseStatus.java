@@ -8,7 +8,22 @@ import org.limewire.core.api.friend.Friend;
 public class BrowseStatus {
     
     public enum BrowseState {
-        LOADED, FAILED, PARTIAL_FAIL, UPDATED, LOADING, UPDATED_PARTIAL_FAIL
+        LOADED(true), FAILED(false), PARTIAL_FAIL(true), UPDATED(true), LOADING(true), UPDATED_PARTIAL_FAIL(true), OFFLINE(false), 
+        /** The list of files from all friends is empty */
+        NO_FRIENDS_SHARING(false) ;
+        
+        private boolean ok;
+        BrowseState(boolean ok){
+            this.ok = ok;
+        }
+        
+        /**
+         * @return true if any files have loaded or if there is a chance of files loading (including UPDATED), false if
+         * the browse has failed or there are no files to load
+         */
+        public boolean isOK(){
+            return ok;
+        }
     }    
     
     private final BrowseState state;
