@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
-import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.PresenceUtils;
 import org.limewire.friend.api.feature.AuthToken;
 import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
@@ -62,7 +62,7 @@ public class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
     public void featureReceived(String from, final AuthToken feature) {
         for(FriendConnection connection : connections) {
             synchronized (this) {
-                Friend user = connection.getFriend(StringUtils.parseBareAddress(from));
+                Friend user = connection.getFriend(PresenceUtils.parseBareAddress(from));
                 if (user != null) {
                     FriendPresence presence = user.getPresences().get(from);
                     if(presence != null) {
@@ -88,7 +88,7 @@ public class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
         public void initializeFeature(FriendPresence friendPresence) {
             synchronized (AuthTokenDispatcher.this) {
                 try {
-                    final AuthToken authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(friendPresence.getPresenceId()));
+                    final AuthToken authToken = authenticator.getAuthToken(PresenceUtils.parseBareAddress(friendPresence.getPresenceId()));
                     FeatureTransport<AuthToken> transport = friendPresence.getTransport(AuthTokenFeature.class);
                     if (transport != null) {
                         transport.sendFeature(friendPresence, authToken);

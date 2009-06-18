@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.PresenceEvent;
 import org.limewire.friend.api.RosterEvent;
+import org.limewire.friend.api.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.listener.EventListener;
 
@@ -60,7 +60,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
             public void handleEvent(PresenceEvent event) {
                 synchronized (RosterListenerMock.this) {
                     FriendPresence presence = event.getData();
-                    String id = StringUtils.parseBareAddress(presence.getPresenceId());
+                    String id = PresenceUtils.parseBareAddress(presence.getPresenceId());
                     if(presence.getType().equals(FriendPresence.Type.available)) {
                         if(roster.get(id) == null) {
                             roster.put(id, new ArrayList<FriendPresence>());

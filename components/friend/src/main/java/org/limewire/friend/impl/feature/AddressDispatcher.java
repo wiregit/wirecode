@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -17,6 +16,7 @@ import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.friend.api.feature.FeatureTransport;
@@ -74,7 +74,7 @@ public class AddressDispatcher implements EventListener<AddressEvent>, FeatureTr
     public void featureReceived(String from, Address address) {
         synchronized (this) {
             for(FriendConnection connection : connections) {
-                Friend friend = connection.getFriend(StringUtils.parseBareAddress(from));
+                Friend friend = connection.getFriend(PresenceUtils.parseBareAddress(from));
                 if (friend != null) {
                     FriendPresence presence = friend.getPresences().get(from);
                     if(presence != null) {

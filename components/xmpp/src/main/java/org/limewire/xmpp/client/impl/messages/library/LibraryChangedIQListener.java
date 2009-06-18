@@ -6,10 +6,10 @@ import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.friend.api.feature.LibraryChangedNotifier;
 import org.limewire.logging.Log;
@@ -62,7 +62,7 @@ public class LibraryChangedIQListener implements PacketListener, FeatureTranspor
         if (LOG.isDebugEnabled()) {
             LOG.debug("handling library changed set " + packet.getPacketID());
         }
-        Friend user = connection.getFriend(StringUtils.parseBareAddress(packet.getFrom()));
+        Friend user = connection.getFriend(PresenceUtils.parseBareAddress(packet.getFrom()));
         if (user != null) {
             FriendPresence presence = user.getPresences().get(packet.getFrom());
             if(presence != null) {

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jivesoftware.smack.util.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,6 +15,7 @@ import org.limewire.facebook.service.FacebookFriendConnection;
 import org.limewire.facebook.service.FacebookFriendPresence;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.FriendPresenceEvent;
+import org.limewire.friend.api.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureInitializer;
 import org.limewire.friend.api.feature.FeatureRegistry;
 import org.limewire.listener.EventListener;
@@ -92,7 +92,7 @@ public class DiscoInfoHandler implements LiveMessageHandler {
     private void handleDiscInfoResponse(JSONObject message) throws JSONException, URISyntaxException {
         JSONArray features = message.getJSONArray("features");     
         String from = message.getString("from");
-        String friendId = StringUtils.parseBareAddress(from);
+        String friendId = PresenceUtils.parseBareAddress(from);
         FacebookFriend friend = connection.getFriend(friendId);
         if (friend == null) {
             LOG.debugf("no friend for id {0}", friendId);
@@ -108,7 +108,7 @@ public class DiscoInfoHandler implements LiveMessageHandler {
     
     private void handleDiscInfoRequest(JSONObject message) throws JSONException {
         String from = message.getString("from");
-        String friendId = StringUtils.parseBareAddress(from);
+        String friendId = PresenceUtils.parseBareAddress(from);
         FacebookFriend friend = connection.getFriend(friendId);
         if (friend == null) {
             LOG.debugf("disc info from non-friend: {0}", friendId);

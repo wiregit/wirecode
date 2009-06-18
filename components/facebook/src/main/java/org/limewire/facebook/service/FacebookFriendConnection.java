@@ -39,7 +39,6 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.jivesoftware.smack.util.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,6 +69,7 @@ import org.limewire.friend.api.MessageReader;
 import org.limewire.friend.api.MessageWriter;
 import org.limewire.friend.api.MutableFriendManager;
 import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceUtils;
 import org.limewire.friend.api.feature.AuthToken;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.friend.api.feature.LibraryChangedNotifier;
@@ -832,7 +832,7 @@ public class FacebookFriendConnection implements FriendConnection {
     public void addPresence(String presenceId) {
         FacebookFriendPresence newPresence = null;
         synchronized (presenceLock) {
-            String friendId = StringUtils.parseBareAddress(presenceId);
+            String friendId = PresenceUtils.parseBareAddress(presenceId);
             FacebookFriend facebookFriend = getFriend(friendId);
             if(facebookFriend != null) {
                 Map<String, FriendPresence> presences = facebookFriend.getPresences();
@@ -840,7 +840,7 @@ public class FacebookFriendConnection implements FriendConnection {
                     // remove old presence with same resource prefix
                     String newResourcePrefix = FriendAddress.parseIdPrefix(presenceId);
                     for (String id : presences.keySet()) {
-                        String fullResource = StringUtils.parseResource(id);
+                        String fullResource = PresenceUtils.parseResource(id);
                         if (fullResource.startsWith(newResourcePrefix)) {
                             LOG.debugf("found old presence to replace: {0}, new id: {1}", id, presenceId);
                             removePresence(id);
@@ -872,7 +872,7 @@ public class FacebookFriendConnection implements FriendConnection {
     
     public void removePresence(String presenceId) {
         synchronized (presenceLock) {
-            String friendId = StringUtils.parseBareAddress(presenceId);
+            String friendId = PresenceUtils.parseBareAddress(presenceId);
             FacebookFriend facebookFriend = getFriend(friendId);
             if(facebookFriend != null) {
                 FriendPresence presence = facebookFriend.getPresences().get(presenceId);

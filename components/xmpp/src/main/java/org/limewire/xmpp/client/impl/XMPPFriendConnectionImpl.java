@@ -17,7 +17,6 @@ import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.provider.ProviderManager;
-import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.limewire.concurrent.ListeningExecutorService;
@@ -31,6 +30,7 @@ import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.FriendRequestEvent;
 import org.limewire.friend.api.RosterEvent;
+import org.limewire.friend.api.PresenceUtils;
 import org.limewire.friend.api.feature.AuthToken;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.friend.api.feature.FeatureRegistry;
@@ -401,7 +401,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         private XMPPFriendImpl getUser(org.jivesoftware.smack.packet.Presence presence) {
             XMPPFriendImpl user;
             synchronized (users) {
-                user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                user = users.get(PresenceUtils.parseBareAddress(presence.getFrom()));
             }
             return user;
         }
@@ -490,7 +490,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
 
     @Override
     public Friend getFriend(String id) {
-        id = org.jivesoftware.smack.util.StringUtils.parseBareAddress(id);
+        id = PresenceUtils.parseBareAddress(id);
         synchronized (users) { 
             return users.get(id);
         }

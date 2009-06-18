@@ -7,6 +7,7 @@ import java.util.Map;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
 import org.limewire.friend.api.FileMetaData;
+import org.limewire.friend.api.PresenceUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;
@@ -82,7 +83,7 @@ public class FileTransferIQ extends IQ {
         StringBuilder fileMetadata = new StringBuilder("<file>");
         for(Map.Entry<String, String> entry : data.entrySet()) {
             fileMetadata.append("<").append(entry.getKey()).append(">");
-            fileMetadata.append(org.jivesoftware.smack.util.StringUtils.escapeForXML(entry.getValue()));
+            fileMetadata.append(PresenceUtils.escapeForXML(entry.getValue()));
             fileMetadata.append("</").append(entry.getKey()).append(">");
         }
         fileMetadata.append("</file>");

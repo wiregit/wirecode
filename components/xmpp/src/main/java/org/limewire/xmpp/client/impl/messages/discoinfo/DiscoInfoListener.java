@@ -6,7 +6,6 @@ import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
@@ -18,6 +17,7 @@ import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.PresenceEvent;
 import org.limewire.friend.api.RosterEvent;
+import org.limewire.friend.api.PresenceUtils;
 import org.limewire.friend.api.feature.FeatureRegistry;
 
 /**
@@ -48,7 +48,7 @@ public class DiscoInfoListener implements PacketListener {
     @Override
     public void processPacket(Packet packet) {
         DiscoverInfo discoverInfo = (DiscoverInfo)packet;
-        Friend user = connection.getFriend(StringUtils.parseBareAddress(discoverInfo.getFrom()));
+        Friend user = connection.getFriend(PresenceUtils.parseBareAddress(discoverInfo.getFrom()));
         if (user != null) {
             FriendPresence presence = user.getPresences().get(discoverInfo.getFrom());
             if(presence != null) {
