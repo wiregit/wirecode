@@ -11,9 +11,7 @@ import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
-import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
 import org.limewire.facebook.service.livemessage.PresenceHandlerFactory;
-import org.limewire.facebook.service.livemessage.DiscoInfoHandler;
 import org.limewire.facebook.service.settings.FacebookAuthServerUrls;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionConfiguration;
@@ -46,8 +44,6 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     private final ThreadPoolListeningExecutor executorService;
     private final FacebookFriendConnectionFactory connectionFactory;
 
-    private final DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory;
-    private DiscoInfoHandler discoInfoHandler;
     private final PresenceHandlerFactory presenceHandlerFactory;
     private final FeatureRegistry featureRegistry;
     private volatile FacebookFriendConnection connection;
@@ -55,12 +51,10 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     private final Provider<String[]> authServerUrls;
 
     @Inject FacebookFriendService(FacebookFriendConnectionFactory connectionFactory,
-                                  DiscoInfoHandlerFactory liveDiscoInfoHandlerFactory,
                                   PresenceHandlerFactory presenceHandlerFactory,
                                   FeatureRegistry featureRegistry,
                                   @FacebookAuthServerUrls Provider<String[]> authServerUrls) {
         this.connectionFactory = connectionFactory;
-        this.liveDiscoInfoHandlerFactory = liveDiscoInfoHandlerFactory;
         this.presenceHandlerFactory = presenceHandlerFactory;
         this.featureRegistry = featureRegistry;
         this.authServerUrls = authServerUrls;
@@ -85,7 +79,6 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
                                 connection = null;
                             }
                         }
-                        discoInfoHandler.unregister();
                         break;
                     default:
                 }
@@ -142,7 +135,6 @@ class FacebookFriendService implements FriendConnectionFactory, Service {
     FacebookFriendConnection loginImpl(FriendConnectionConfiguration configuration) throws FriendException {
         LOG.debug("creating connection");
         connection = connectionFactory.create(configuration);
-        discoInfoHandler = liveDiscoInfoHandlerFactory.create(connection);
         presenceHandlerFactory.create(connection);
         new LimewireFeatureInitializer().register(featureRegistry);
         LOG.debug("logging in to facebook...");

@@ -55,6 +55,8 @@ import org.limewire.facebook.service.livemessage.FileOfferHandler;
 import org.limewire.facebook.service.livemessage.FileOfferHandlerFactory;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
+import org.limewire.facebook.service.livemessage.DiscoInfoHandlerFactory;
+import org.limewire.facebook.service.livemessage.DiscoInfoHandler;
 import org.limewire.facebook.service.settings.ChatChannel;
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.FriendConnection;
@@ -162,11 +164,13 @@ public class FacebookFriendConnection implements FriendConnection {
     private final MutableFriendManager friendManager;
     private final PresenceListenerFactory presenceListenerFactory;
     private final FacebookFriendFactory friendFactory;
+    private final DiscoInfoHandlerFactory discoInfoHandlerFactory;
 
     private ChatListener chatListener;
     private ScheduledFuture presenceListenerFuture;
     private String logoutURL;
     private final ChatManager chatManager;
+    private DiscoInfoHandler discoInfoHandler;
 
     /**
      * Session id as part of the full presence id. Follows the lifetime of
@@ -190,6 +194,7 @@ public class FacebookFriendConnection implements FriendConnection {
                                     PresenceListenerFactory presenceListenerFactory,
                                     FacebookFriendFactory friendFactory,
                                     ChatListenerFactory chatListenerFactory,
+                                    DiscoInfoHandlerFactory discoInfoHandlerFactory,
                                     @Named("backgroundExecutor")ScheduledListeningExecutorService executorService,
                                     @ChatChannel MutableProvider<String> chatChannel) {
         this.configuration = configuration;
@@ -208,6 +213,7 @@ public class FacebookFriendConnection implements FriendConnection {
         this.connectBackRequestHandler = connectBackRequestHandlerFactory.create(this);
         this.libraryRefreshHandler = libraryRefreshHandlerFactory.create(this);
         this.fileOfferHandler = fileOfferHandlerFactory.create(this);
+        this.discoInfoHandlerFactory = discoInfoHandlerFactory;
         this.chatManager = new ChatManager(this);
         this.sessionId = createSessionId();
 
@@ -323,6 +329,10 @@ public class FacebookFriendConnection implements FriendConnection {
             presenceListenerFuture.cancel(false);
             presenceListenerFuture = null;
         }
+        if (discoInfoHandler != null) {
+            discoInfoHandler.unregister();
+            discoInfoHandler = null;
+        }
     }
 
     private void sendOfflinePresences() {
@@ -377,6 +387,7 @@ public class FacebookFriendConnection implements FriendConnection {
                 requestSession();
                 fetchAllFriends();
                 readMetadataFromHomePage();
+                discoInfoHandler = discoInfoHandlerFactory.create(this);
                 chatListener = chatListenerFactory.createChatListener(this);
                 ThreadExecutor.startThread(chatListener, "chat-listener-thread");
                 setVisible();
