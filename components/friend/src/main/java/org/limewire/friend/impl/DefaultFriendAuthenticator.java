@@ -1,7 +1,7 @@
 package org.limewire.friend.impl;
 
-import org.apache.http.auth.Credentials;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.auth.Credentials;
 import org.limewire.friend.api.feature.AuthToken;
 import org.limewire.friend.impl.feature.AuthTokenImpl;
 import org.limewire.friend.impl.feature.AuthTokenRegistry;
@@ -40,7 +40,7 @@ class DefaultFriendAuthenticator implements Authenticator, AuthTokenRegistry {
     }
 
     /**
-     * Returns an base 64 encoded auth token for <code>userId</code>.
+     * Returns auth token for <code>userId</code>.
      * 
      * @return the ascii-encoded auth token
      */
@@ -62,8 +62,6 @@ class DefaultFriendAuthenticator implements Authenticator, AuthTokenRegistry {
         if (password == null) {
             return false;
         }
-        return password.equals(StringUtils.getASCIIString(
-                Base64.encodeBase64(
-                        getAuthToken(credentials.getUserPrincipal().getName()).getToken())));
+        return password.equals(getAuthToken(credentials.getUserPrincipal().getName()).getBase64());
     }
 }

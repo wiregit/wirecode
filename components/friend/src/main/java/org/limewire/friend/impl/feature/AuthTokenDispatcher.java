@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
@@ -24,8 +23,13 @@ import org.limewire.logging.LogFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Installs {@link AuthTokenFeatureInitializer} in the feature registry
+ * and attaches {@link AuthTokenFeature auth token features} to presences
+ * when {@link #featureReceived(String, AuthToken)} is called.
+ */
 @Singleton
-public class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
+class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
     
     private static final Log LOG = LogFactory.getLog(AuthTokenDispatcher.class);
     
@@ -100,9 +104,7 @@ public class AuthTokenDispatcher implements FeatureTransport.Handler<AuthToken>{
                 }
                 AuthToken authToken = pendingAuthTokens.remove(friendPresence.getPresenceId());
                 if (authToken != null) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("updating auth token on presence " + friendPresence.getPresenceId() + " to " + org.limewire.util.StringUtils.toUTF8String(Base64.encodeBase64(authToken.getToken())));
-                    }
+                    LOG.debugf("updating auth token on presence {0} to {1}", friendPresence, authToken);
                     friendPresence.addFeature(new AuthTokenFeature(authToken));
                 }
             }

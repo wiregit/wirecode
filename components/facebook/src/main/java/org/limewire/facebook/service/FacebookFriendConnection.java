@@ -57,7 +57,6 @@ import org.limewire.facebook.service.livemessage.LibraryRefreshHandler;
 import org.limewire.facebook.service.livemessage.LibraryRefreshHandlerFactory;
 import org.limewire.facebook.service.settings.ChatChannel;
 import org.limewire.friend.api.ChatState;
-import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.friend.api.FriendConnectionEvent;
@@ -70,17 +69,18 @@ import org.limewire.friend.api.MessageWriter;
 import org.limewire.friend.api.MutableFriendManager;
 import org.limewire.friend.api.Network;
 import org.limewire.friend.api.PresenceUtils;
-import org.limewire.friend.api.feature.AuthToken;
 import org.limewire.friend.api.feature.FeatureEvent;
-import org.limewire.friend.api.feature.LibraryChangedNotifier;
 import org.limewire.friend.impl.address.FriendAddress;
+import org.limewire.friend.impl.feature.AddressFeature;
+import org.limewire.friend.impl.feature.AuthTokenFeature;
+import org.limewire.friend.impl.feature.ConnectBackRequestFeature;
+import org.limewire.friend.impl.feature.FileOfferFeature;
+import org.limewire.friend.impl.feature.LibraryChangedNotifierFeature;
 import org.limewire.friend.impl.feature.LimewireFeature;
 import org.limewire.inject.MutableProvider;
-import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectBackRequest;
 import org.limewire.security.SecurityUtils;
 import org.limewire.util.URIUtils;
 
@@ -862,11 +862,11 @@ public class FacebookFriendConnection implements FriendConnection {
     } 
     
     private void addTransports(FacebookFriendPresence presence) {
-        presence.addTransport(Address.class, addressHandler);
-        presence.addTransport(AuthToken.class, authTokenHandler);
-        presence.addTransport(ConnectBackRequest.class, connectBackRequestHandler);
-        presence.addTransport(LibraryChangedNotifier.class, libraryRefreshHandler);
-        presence.addTransport(FileMetaData.class, fileOfferHandler);
+        presence.addTransport(AddressFeature.class, addressHandler);
+        presence.addTransport(AuthTokenFeature.class, authTokenHandler);
+        presence.addTransport(ConnectBackRequestFeature.class, connectBackRequestHandler);
+        presence.addTransport(LibraryChangedNotifierFeature.class, libraryRefreshHandler);
+        presence.addTransport(FileOfferFeature.class, fileOfferHandler);
     }
     
     public void removePresence(String presenceId) {

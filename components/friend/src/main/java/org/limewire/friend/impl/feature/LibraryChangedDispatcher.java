@@ -16,8 +16,14 @@ import org.limewire.friend.api.feature.LibraryChangedNotifier;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Registers the {@link LibraryChangedNotifierFeature} with the {@link FeatureRegistry}.
+ * <p>
+ * Fires {@link LibraryChangedEvent} when it receives feature data from the wire.
+ */
 @Singleton
-public class LibraryChangedDispatcher implements  FeatureTransport.Handler<LibraryChangedNotifier> {
+class LibraryChangedDispatcher implements FeatureTransport.Handler<LibraryChangedNotifier> {
+   
     private final EventBean<FriendConnectionEvent> friendConnectionEvent;
     private final EventBroadcaster<LibraryChangedEvent> libChangedBroadcaster;
 

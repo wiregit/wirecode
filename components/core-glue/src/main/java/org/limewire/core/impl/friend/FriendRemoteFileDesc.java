@@ -133,8 +133,7 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
         if(authTokenFeature == null) {
             return null;
         }
-        byte[] authToken = authTokenFeature.getFeature().getToken();
-        return new UsernamePasswordCredentials(presence.getFriend().getNetwork().getCanonicalizedLocalID(), StringUtils.getUTF8String(authToken));
+        return new UsernamePasswordCredentials(presence.getFriend().getNetwork().getCanonicalizedLocalID(), authTokenFeature.getFeature().getBase64());
     }
 
     @Override

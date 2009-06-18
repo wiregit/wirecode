@@ -1,6 +1,5 @@
 package org.limewire.friend.impl;
 
-import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
@@ -13,10 +12,14 @@ import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListenerList;
 
+/**
+ * Abstract implementation of {@link FriendPresence} providing
+ * management of features and feature transports.
+ */
 public abstract class AbstractFriendPresence implements FriendPresence {
     
     private final Map<URI, Feature> features;
-    private final Map<Class, FeatureTransport> featureTransports;
+    private final Map<Class<? extends Feature<?>>, FeatureTransport> featureTransports;
     private final EventBroadcaster<FeatureEvent> featureBroadcaster;
     
     public AbstractFriendPresence() {
@@ -25,7 +28,7 @@ public abstract class AbstractFriendPresence implements FriendPresence {
 
     public AbstractFriendPresence(EventBroadcaster<FeatureEvent> featureEventBroadcaster){
         this.features = new ConcurrentHashMap<URI, Feature>();
-        this.featureTransports = new ConcurrentHashMap<Class, FeatureTransport>();
+        this.featureTransports = new ConcurrentHashMap<Class<? extends Feature<?>>, FeatureTransport>();
         this.featureBroadcaster = featureEventBroadcaster;
     }
 
@@ -63,24 +66,14 @@ public abstract class AbstractFriendPresence implements FriendPresence {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature) {
-        java.lang.reflect.Type type = feature.getGenericSuperclass();
-        if(type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType)type;
-            java.lang.reflect.Type [] typeArgs = parameterizedType.getActualTypeArguments();
-            if(typeArgs != null && typeArgs.length > 0) {
-                java.lang.reflect.Type typeArg = typeArgs[0];
-                if(typeArg instanceof Class) {
-                    return featureTransports.get(typeArg);
-                }
-            }
-        }
-        return null;
+        return featureTransports.get(feature);
     }
 
     @Override
-    public <U> void addTransport(Class<U> clazz, FeatureTransport<U> transport) {
+    public <D, F extends Feature<D>> void addTransport(Class<F> clazz, FeatureTransport<D> transport) {
         featureTransports.put(clazz, transport);
     }
 }

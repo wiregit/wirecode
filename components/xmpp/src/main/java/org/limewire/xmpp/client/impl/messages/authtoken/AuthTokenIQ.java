@@ -2,12 +2,10 @@ package org.limewire.xmpp.client.impl.messages.authtoken;
 
 import java.io.IOException;
 
-import org.apache.commons.codec.binary.Base64;
 import org.jivesoftware.smack.packet.IQ;
 import org.limewire.friend.api.feature.AuthToken;
 import org.limewire.friend.impl.feature.AuthTokenImpl;
 import org.limewire.util.Objects;
-import org.limewire.util.StringUtils;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

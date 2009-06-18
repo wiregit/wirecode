@@ -19,7 +19,7 @@ public class AuthTokenImpl implements AuthToken {
     }
     
     public AuthTokenImpl(String base64Encoded) {
-        this.token = Base64.decodeBase64(StringUtils.toAsciiBytes(base64Encoded));
+        this.token = StringUtils.toAsciiBytes(base64Encoded);
     }
     
     @Override
@@ -43,5 +43,10 @@ public class AuthTokenImpl implements AuthToken {
     @Override
     public String getBase64() {
         return StringUtils.getASCIIString(Base64.encodeBase64(token));
+    }
+    
+    @Override
+    public String toString() {
+        return getBase64();
     }
 }

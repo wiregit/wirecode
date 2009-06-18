@@ -23,6 +23,12 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+/**
+ * Handles incoming connect back request through the facebook connection and
+ * fowards them to the {@link Handler} for {@link ConnectBackRequest connect back requests}.
+ * <p>
+ * Sends {@link ConnectBackRequest connect back requests} to facebook friends.
+ */
 public class ConnectBackRequestHandler implements FeatureTransport<ConnectBackRequest>,
         LiveMessageHandler {
 
@@ -58,7 +64,7 @@ public class ConnectBackRequestHandler implements FeatureTransport<ConnectBackRe
         }
         int fwtVersion = message.getInt("supported-fwt-version");
         Connectable address = deserializeAddress(message.getJSONObject("address"));
-        String from = message.optString("from", null);
+        String from = message.getString("from");
         connectBackRequestHandler.featureReceived(from, new ConnectBackRequest(address, clientGuid, fwtVersion));
     }
     
@@ -94,6 +100,7 @@ public class ConnectBackRequestHandler implements FeatureTransport<ConnectBackRe
             
             connection.sendLiveMessage(presence, TYPE, message);
         } catch (IOException ie) {
+            // not supposed to happen, would indicate internal erro in address serializer
             throw new RuntimeException(ie);
         }
     }

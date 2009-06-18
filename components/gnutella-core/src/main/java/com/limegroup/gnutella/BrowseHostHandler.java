@@ -222,7 +222,7 @@ public class BrowseHostHandler {
             Feature feature = friendPresence.getFeature(AuthTokenFeature.ID);
             if(feature != null) {
                 AuthTokenFeature authTokenFeature = (AuthTokenFeature)feature;
-                String password = StringUtils.getUTF8String(authTokenFeature.getFeature().getToken());
+                String password = authTokenFeature.getFeature().getBase64();
                 client.setCredentials(new UsernamePasswordCredentials(username, password));
             } else {
                 LOG.infof("no auth token for: {0}", friendPresence);

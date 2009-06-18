@@ -59,9 +59,9 @@ public class DiscoInfoHandler implements LiveMessageHandler {
     public void register(ListenerSupport<FriendPresenceEvent> availableFriends) {
         this.availableFriends = availableFriends;
         this.friendPresenceListener = new EventListener<FriendPresenceEvent>() {
-            // TODO listen for known friends instead?
-            // TODO would result in exchanging disco-info's faster
-            // TODO but also lots of requests to offline friends
+            // listen for known friends instead?
+            // would result in exchanging disco-info's faster
+            // but also lots of requests to offline friends
             @Override
             public void handleEvent(FriendPresenceEvent event) {
                 LOG.debugf("friend presence event: {0}", event);
@@ -102,7 +102,7 @@ public class DiscoInfoHandler implements LiveMessageHandler {
         if(presence != null) {
             initializePresenceFeatures(presence, features);
         } else {
-            // TODO ?
+            LOG.debugf("presence offline: {0}", from);
         }
     }
     

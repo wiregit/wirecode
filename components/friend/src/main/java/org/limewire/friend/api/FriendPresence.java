@@ -55,9 +55,26 @@ public interface FriendPresence {
      */
     void removeFeature(URI id);
     
-    <T extends Feature<U>, U> FeatureTransport<U> getTransport(Class<T> feature);
+    /**
+     * Returns a feature transport for a feature, that allows the caller to
+     * send feature specific data to a presence.
+     * <p>
+     * Example: Sending a connect back request to the presence of a friend.
+     * <pre>
+     *  FeatureTransport<ConnectBackRequest> transport = presence.getTransport(ConnectBackRequestFeature.class);
+     *  if (transport != null) {
+     *      transport.sendFeature(presence, new ConnectBackRequest(...));
+     *  }
+     * </pre>
+     * 
+     * @return null if no transport is registered for that presence and feature
+     */
+    <F extends Feature<D>, D> FeatureTransport<D> getTransport(Class<F> feature);
 
-    <U> void addTransport(Class<U> clazz, FeatureTransport<U> transport);
+    /**
+     * Adds a transport 
+     */
+    <D, F extends Feature<D>> void addTransport(Class<F> clazz, FeatureTransport<D> transport);
 
     /**
      * @return the presence type

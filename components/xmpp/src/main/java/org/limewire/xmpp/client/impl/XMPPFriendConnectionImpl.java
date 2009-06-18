@@ -21,7 +21,6 @@ import org.jivesoftware.smackx.ChatStateManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionConfiguration;
@@ -29,21 +28,22 @@ import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.FriendRequestEvent;
-import org.limewire.friend.api.RosterEvent;
 import org.limewire.friend.api.PresenceUtils;
-import org.limewire.friend.api.feature.AuthToken;
+import org.limewire.friend.api.RosterEvent;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.friend.api.feature.FeatureRegistry;
-import org.limewire.friend.api.feature.LibraryChangedNotifier;
+import org.limewire.friend.impl.feature.AddressFeature;
+import org.limewire.friend.impl.feature.AuthTokenFeature;
+import org.limewire.friend.impl.feature.ConnectBackRequestFeature;
+import org.limewire.friend.impl.feature.FileOfferFeature;
+import org.limewire.friend.impl.feature.LibraryChangedNotifierFeature;
 import org.limewire.friend.impl.feature.LimewireFeatureInitializer;
-import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventRebroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectBackRequest;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListenerFactory;
@@ -408,11 +408,11 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
 
         private void addNewPresence(final XMPPFriendImpl user, final org.jivesoftware.smack.packet.Presence presence) {
             final PresenceImpl presenceImpl = new PresenceImpl(presence, user, featureSupport);
-            presenceImpl.addTransport(Address.class, addressIQListener);
-            presenceImpl.addTransport(AuthToken.class, authTokenIQListener);
-            presenceImpl.addTransport(ConnectBackRequest.class, connectRequestIQListener);
-            presenceImpl.addTransport(LibraryChangedNotifier.class, libraryChangedIQListener);
-            presenceImpl.addTransport(FileMetaData.class, fileTransferIQListener);
+            presenceImpl.addTransport(AddressFeature.class, addressIQListener);
+            presenceImpl.addTransport(AuthTokenFeature.class, authTokenIQListener);
+            presenceImpl.addTransport(ConnectBackRequestFeature.class, connectRequestIQListener);
+            presenceImpl.addTransport(LibraryChangedNotifierFeature.class, libraryChangedIQListener);
+            presenceImpl.addTransport(FileOfferFeature.class, fileTransferIQListener);
             user.addPresense(presenceImpl);
         }
 

@@ -12,15 +12,15 @@ public interface Friend {
     public static final String P2P_FRIEND_ID = "_@_GNUTELLA_@_";
 
     /**
-     * Returns the ID of the user.  This can be any form of unique ID.
-     * For example, an XMPP Friend can be in the form of <code>user@host.com</code>,
+     * Returns the ID of the friend.  This can be any form of unique ID.
+     * For example, an friend can be in the form of <code>friend@host.com</code>,
      * whereas a Gnutella Friend can be the clientGUID.
      */
     public String getId();
 
     /**
-     * Return the friendly user given name to the user, can be null.
-     * For example, an XMPP Friend can be the alias of the user,
+     * Return the friendly given name to the friend, can be null.
+     * For example, a friend can be the alias of the friend,
      * where a Gnutella friend can be the IP address.
      * */
     public String getName();
@@ -36,7 +36,7 @@ public interface Friend {
     
     /**
      * Returns true if this is an anonymous friend.
-     * For example, an XMPP Friend is not anonymous -- it is identified
+     * For example, an XMPP friend is not anonymous -- it is identified
      * by an email address and is permanent.  A Gnutella Friend is anonymous,
      * in that their existence is temporary and no long-lasting relationship
      * exists.
@@ -50,7 +50,7 @@ public interface Friend {
     Network getNetwork();
 
     /**
-     * Allows the xmpp service user to register a listener for presence changes of this user
+     * Allows to register a listener for presence changes of this friend
      * @param presenceListener
      */
     void addPresenceListener(EventListener<PresenceEvent> presenceListener);
@@ -86,14 +86,14 @@ public interface Friend {
     FriendPresence getActivePresence();
 
     /**
-     * @return true if this user has an associated active presence
-     * (presence this user is currently chatting with)
+     * @return true if this friend has an associated active presence
+     * (presence this friend is currently chatting with)
      */
     boolean hasActivePresence();
 
     /**
-     * Returns whether or not this user is signed in to chat
-     * @return true if this user is signed in with at least 1 presence
+     * Returns whether or not this friend is signed in to chat
+     * @return true if this friend is signed in with at least 1 presence
      */
     boolean isSignedIn();
 
@@ -105,10 +105,10 @@ public interface Friend {
     Map<String, FriendPresence> getPresences();
 
     /**
-     * Returns whether the current login is subscribed to this user.
+     * Returns whether the current login is subscribed to this friend.
      * This information is in the roster packet.
      * <p>
-     * For instance, if a user sends the current login a friend
+     * For instance, if a friend sends the current login a friend
      * add request, and the current login accepts, this method
      * will return true.
      * <p>
@@ -124,7 +124,7 @@ public interface Friend {
      *   </query>
      * </iq>
      *
-     * @return true if the roster entry for this user has
+     * @return true if the roster entry for this friend has
      * a subscription attriburte equal to "both" or "to"
      * Returns false otherwise ("from" or "none")
      */
