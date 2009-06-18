@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.actions;
+package org.limewire.ui.swing.library;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -8,10 +8,8 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.LibrarySupport;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -50,15 +48,10 @@ public class AddFileAction extends AbstractAction {
                 });
 
         if (files != null) {
-            BackgroundExecutorService.execute(new Runnable(){
-                public void run() {
-                    LibraryNavItem item = libraryNavigatorPanel.get().getSelectedNavItem();
-
-                    if(item != null) {
-                        librarySupport.addFiles(item.getLocalFileList(), files);
-                    }                    
-                }
-            });
+            LibraryNavItem item = libraryNavigatorPanel.get().getSelectedNavItem();
+            if(item != null) {
+                librarySupport.addFiles(item.getLocalFileList(), files);
+            }                    
         }
     } 
 }

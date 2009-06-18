@@ -12,12 +12,13 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.chat.ChatFrame;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 @LazySingleton
-public class RemoteHostActionsImpl implements RemoteHostActions {
+class RemoteHostActionsImpl implements RemoteHostActions {
     private static final Log LOG = LogFactory.getLog(RemoteHostActionsImpl.class);
 
 
@@ -62,7 +63,8 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     @Override
     public void showFilesSharedWith(RemoteHost person) {
         LOG.debugf("showFilesSharedWith: {0}", person.getFriendPresence().getFriend());
-        Friend friend = person.getFriendPresence().getFriend();
+//        Friend friend = person.getFriendPresence().getFriend();
+        throw new NotImplementedException();
 //        libraryNavigator.selectFriendShareList(friend);
     }
 

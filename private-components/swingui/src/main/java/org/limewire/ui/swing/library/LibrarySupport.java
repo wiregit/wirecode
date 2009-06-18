@@ -9,6 +9,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.YesNoCheckBoxDialog;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -81,14 +82,19 @@ public class LibrarySupport {
     }
 
     private void addFilesInner(final LocalFileList fileList, final List<File> files) {
-        for (File file : files) {
-            if (fileList.isFileAddable(file)) {
-                if (file.isDirectory()) {
-                    fileList.addFolder(file);
-                } else {
-                    fileList.addFile(file);
+        BackgroundExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (File file : files) {
+                    if (fileList.isFileAddable(file)) {
+                        if (file.isDirectory()) {
+                            fileList.addFolder(file);
+                        } else {
+                            fileList.addFile(file);
+                        }
+                    }
                 }
             }
-        }
+        });
     }
 }

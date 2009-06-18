@@ -17,16 +17,16 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class LibraryTableSelectionComboBox extends JComboBox {
+class LibraryTableSelectionComboBox extends JComboBox {
 
     @Inject
     public LibraryTableSelectionComboBox(Provider<AllTableFormat<LocalFileItem>> allFormat, 
             Provider<AudioTableFormat<LocalFileItem>> audioFormat,
-            Provider<VideoTableFormat> videoFormat,
-            Provider<ImageTableFormat> imageFormat,
-            Provider<DocumentTableFormat> documentFormat,
-            Provider<ProgramTableFormat> programFormat,
-            Provider<OtherTableFormat> otherFormat) {
+            Provider<VideoTableFormat<LocalFileItem>> videoFormat,
+            Provider<ImageTableFormat<LocalFileItem>> imageFormat,
+            Provider<DocumentTableFormat<LocalFileItem>> documentFormat,
+            Provider<ProgramTableFormat<LocalFileItem>> programFormat,
+            Provider<OtherTableFormat<LocalFileItem>> otherFormat) {
         
             addItem(new ComboBoxItem(I18n.tr("All"), null, allFormat));
             addItem(new ComboBoxItem(I18n.tr("Audio"), Category.AUDIO, audioFormat));
@@ -39,7 +39,7 @@ public class LibraryTableSelectionComboBox extends JComboBox {
     
     public AbstractLibraryFormat<LocalFileItem> getSelectedTableFormat() {
         ComboBoxItem item = (ComboBoxItem) getSelectedItem();
-        return item.getTabelFormat();
+        return item.getTableFormat();
     }
     
     public Category getSelectedCategory() {
@@ -48,14 +48,14 @@ public class LibraryTableSelectionComboBox extends JComboBox {
     }
     
     
-    private class ComboBoxItem <T extends AbstractLibraryFormat>{
+    private class ComboBoxItem {
         private final String displayText;
         private final Category category;
-        private final Provider<T> providerTableFormat;
+        private final Provider<? extends AbstractLibraryFormat<LocalFileItem>> providerTableFormat;
         
-        private T tableFormat;
+        private AbstractLibraryFormat<LocalFileItem> tableFormat;
         
-        public ComboBoxItem(String text, Category category, Provider<T> tableFormat) {
+        public ComboBoxItem(String text, Category category, Provider<? extends AbstractLibraryFormat<LocalFileItem>> tableFormat) {
             this.displayText = text;
             this.category = category;
             this.providerTableFormat = tableFormat;
@@ -65,7 +65,7 @@ public class LibraryTableSelectionComboBox extends JComboBox {
             return category;
         }
         
-        public T getTabelFormat() {
+        public AbstractLibraryFormat<LocalFileItem> getTableFormat() {
             if(tableFormat == null)
                 tableFormat = providerTableFormat.get();
             return tableFormat;

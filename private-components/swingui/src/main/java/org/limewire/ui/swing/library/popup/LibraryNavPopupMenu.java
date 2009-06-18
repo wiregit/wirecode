@@ -2,7 +2,7 @@ package org.limewire.ui.swing.library.popup;
 
 import javax.swing.JPopupMenu;
 
-import org.limewire.ui.swing.library.actions.AddFileAction;
+import org.limewire.ui.swing.library.AddFileAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
@@ -15,7 +15,7 @@ import org.limewire.ui.swing.library.navigator.actions.RenameAction;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class LibraryNavPopupMenu extends JPopupMenu {
+class LibraryNavPopupMenu extends JPopupMenu {
 
     private final AddFileAction addAction;
     private final ImportListAction importAction;

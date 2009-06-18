@@ -8,6 +8,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
@@ -15,7 +16,6 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.library.popup.LibraryPopupHandler;
 import org.limewire.ui.swing.library.popup.LibraryPopupMenu;
 import org.limewire.ui.swing.listener.MousePopupListener;
-import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
@@ -25,9 +25,11 @@ import org.limewire.ui.swing.table.NameRenderer;
 import org.limewire.ui.swing.table.QualityRenderer;
 import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TimeRenderer;
-import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.EventListJXTableSorting;
+import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
@@ -38,7 +40,11 @@ public class LibraryTable extends MouseableTable {
 
     private final int rowHeight = 20;
 
-    private LibraryTableModel libraryTableModel; 
+    private LibraryTableModel cachedLibraryTableModel;
+    private EventSelectionModel<LocalFileItem> cachedEventSelectionModel;
+    private EventListJXTableSorting cachedTableSorting;
+    private SortedList<LocalFileItem> cachedSortedList;
+    
     private AbstractLibraryFormat<LocalFileItem> fileItemFormat;
     private ColumnStateHandler columnStateHandler;
     private MousePopupListener mousePopupListener;
@@ -46,10 +52,10 @@ public class LibraryTable extends MouseableTable {
     private Provider<DefaultLibraryRenderer> defaultCellRenderer;
     private final Provider<TimeRenderer> timeRenderer;
     private final Provider<FileSizeRenderer> fileSizeRenderer;
-    private final Provider<CalendarRenderer> calendarRenderer;
+//    private final Provider<CalendarRenderer> calendarRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
     private final Provider<NameRenderer> nameRenderer;
-    private final Provider<IconManager> iconManager;
+//    private final Provider<IconManager> iconManager;
     private final Provider<RemoveRenderer> removeRenderer;
     private final Provider<IsPlayingRenderer> isPlayingRenderer;
     private final IconLabelRenderer iconLabelRenderer;
@@ -59,10 +65,10 @@ public class LibraryTable extends MouseableTable {
     public LibraryTable(Provider<DefaultLibraryRenderer> defaultCellRenderer,
             Provider<TimeRenderer> timeRenderer,
             Provider<FileSizeRenderer> fileSizeRenderer,
-            Provider<CalendarRenderer> calendarRenderer,
+//            Provider<CalendarRenderer> calendarRenderer,
             Provider<QualityRenderer> qualityRenderer,
             Provider<NameRenderer> nameRenderer,
-            Provider<IconManager> iconManager,
+//            Provider<IconManager> iconManager,
             Provider<LibraryPopupMenu> libraryPopupMenu,
             Provider<RemoveRenderer> removeRenderer,
             Provider<IsPlayingRenderer> isPlayingRenderer,
@@ -71,17 +77,16 @@ public class LibraryTable extends MouseableTable {
         this.defaultCellRenderer = defaultCellRenderer;
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
-        this.calendarRenderer = calendarRenderer;
+//        this.calendarRenderer = calendarRenderer;
         this.qualityRenderer = qualityRenderer;
         this.nameRenderer = nameRenderer;
         this.removeRenderer = removeRenderer;
         this.isPlayingRenderer = isPlayingRenderer;
-        this.iconManager = iconManager;
+//        this.iconManager = iconManager;
         this.iconLabelRenderer = iconLabelRendererFactory.createIconRenderer(false);
         this.removeEditor = removeEditor;
         
         initTable();
-        
         
         //TODO: anything below here should be initialized outside of the constructor
         mousePopupListener = new MousePopupListener() {
@@ -128,12 +133,12 @@ public class LibraryTable extends MouseableTable {
     }
     
     public LibraryTableModel getLibraryTableModel() {
-        return libraryTableModel;
+        return cachedLibraryTableModel;
     }
     
     public LocalFileItem getSelectedItem() {
         if(getSelectedRow() >= 0)
-            return libraryTableModel.getElementAt(getSelectedRow());
+            return cachedLibraryTableModel.getElementAt(getSelectedRow());
         else           
             return null;
     }
@@ -141,22 +146,29 @@ public class LibraryTable extends MouseableTable {
     public void setEventList(EventList<LocalFileItem> eventList, AbstractLibraryFormat<LocalFileItem> tableFormat) {
         uninstallListeners();
         
-        this.fileItemFormat = tableFormat;
+        fileItemFormat = tableFormat;
         
-        //TODO: try replacing tableformat rather replacing entire tablemodel
-        // will need to create a filterator that we select a category on
-        libraryTableModel = new LibraryTableModel(eventList, tableFormat);
-        setModel(libraryTableModel);
-        setSelectionModel(new EventSelectionModel<LocalFileItem>(eventList));
+        SortedList<LocalFileItem> newSortedList = GlazedListsFactory.sortedList(eventList);
+        LibraryTableModel newLibraryTableModel = new LibraryTableModel(newSortedList, tableFormat);
+        EventSelectionModel<LocalFileItem> newEventSelectionModel = GlazedListsSwingFactory.eventSelectionModel(newSortedList);
         
-        installListeners();
-    }
-    
-    public void setTableFormat(AbstractLibraryFormat<LocalFileItem> tableFormat) {
-        uninstallListeners();
+        setModel(newLibraryTableModel);
+        setSelectionModel(newEventSelectionModel);
+        newLibraryTableModel.setTableFormat(tableFormat);
         
-        this.fileItemFormat = tableFormat;
-        libraryTableModel.setTableFormat(tableFormat);
+        if(cachedLibraryTableModel != null) {
+            cachedEventSelectionModel.dispose();
+            cachedLibraryTableModel.dispose();
+            cachedSortedList.dispose();
+            cachedTableSorting.uninstall();
+        }
+        
+        EventListJXTableSorting newTableSorting = EventListJXTableSorting.install(this, newSortedList, tableFormat);
+        
+        cachedSortedList = newSortedList;
+        cachedLibraryTableModel = newLibraryTableModel;
+        cachedEventSelectionModel = newEventSelectionModel;
+        cachedTableSorting = newTableSorting;
         
         installListeners();
     }

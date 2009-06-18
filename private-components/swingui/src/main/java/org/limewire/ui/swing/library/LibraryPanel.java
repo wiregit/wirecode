@@ -32,7 +32,6 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.dnd.LibraryTransferHandler;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
-import org.limewire.ui.swing.library.actions.AddFileAction;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
@@ -48,13 +47,12 @@ import org.limewire.ui.swing.table.TableColors;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.SortedList;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 @LazySingleton
-public class LibraryPanel extends JPanel {
+class LibraryPanel extends JPanel {
 
     private static final String TABLE = "TABLE";
     private static final String LIST = "LIST";
@@ -77,7 +75,6 @@ public class LibraryPanel extends JPanel {
     
     private LibraryCategoryMatcher categoryMatcher;
     private EventList<LocalFileItem> eventList;
-    private SortedList<LocalFileItem> sortedList;
     private FilterList<LocalFileItem> filteredList;
     
     @Inject
@@ -214,15 +211,21 @@ public class LibraryPanel extends JPanel {
         buttonDecorator.decorateDarkFullButton(addFilesButton);
     }
     
+    private void disposeOldLists() {
+        if(filteredList != null) {
+            filteredList.dispose();
+        }        
+    }
+    
     private void setEventList(EventList<LocalFileItem> eventList) {
-        sortedList = GlazedListsFactory.sortedList(eventList);
-        filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
+        disposeOldLists();
+        filteredList = GlazedListsFactory.filterList(eventList, categoryMatcher);
         libraryTable.setEventList(filteredList, tableSelectionComboBox.getSelectedTableFormat());
     }
     
     private void setEventListImage(EventList<LocalFileItem> eventList) {
-        sortedList = GlazedListsFactory.sortedList(eventList);
-        filteredList = GlazedListsFactory.filterList(sortedList, categoryMatcher);
+        disposeOldLists();
+        filteredList = GlazedListsFactory.filterList(eventList, categoryMatcher);
         libraryImagePanel.setEventList(filteredList);
     }
     

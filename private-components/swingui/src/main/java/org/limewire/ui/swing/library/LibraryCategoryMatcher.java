@@ -12,7 +12,7 @@ import ca.odell.glazedlists.matchers.Matcher;
  * in different table views without having to create a new filter. A category
  * may be selected and the eventList will be filtered on that category.
  */
-public class LibraryCategoryMatcher implements Matcher<LocalFileItem> {
+class LibraryCategoryMatcher implements Matcher<LocalFileItem> {
 
     private Category categoryFilteredOn;
     
