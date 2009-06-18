@@ -123,7 +123,7 @@ public class RemoteHostWidget extends JPanel {
     }
     
     private Action getMultipleLibraryAction(final Collection<RemoteHost> people) {
-        return new AbstractAction(tr("Browse All {0}", people.size())) {    
+        return new AbstractAction(tr("Browse All")) {    
             @Override
             public void actionPerformed(ActionEvent e) {
                 getRemoteHostAction().viewLibrariesOf(people);
