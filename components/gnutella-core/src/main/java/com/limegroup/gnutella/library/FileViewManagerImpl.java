@@ -338,9 +338,11 @@ class FileViewManagerImpl implements FileViewManager {
             
             for(String id : collection.getFriendList()) {
                 MultiFileView view = fileViewsPerFriend.get(id);
-                removed = view.fileViewCleared(collection);
-                LOG.debugf("Cleared collection {0}, changing view {1}, removed {2}", collection, view, removed);
-                removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
+                if(view != null) {
+                    removed = view.fileViewCleared(collection);
+                    LOG.debugf("Cleared collection {0}, changing view {1}, removed {2}", collection, view, removed);
+                    removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
+                }
                 
             }
         } finally {

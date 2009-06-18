@@ -23,85 +23,96 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import com.google.inject.Singleton;
 
-
 @Singleton
 public class MockLibraryManager implements SharedFileListManager, LibraryManager {
 
     private FileListAdapter allFileList;
+
     private FriendFileListAdapter gnutellaList;
+
     private FriendFileListAdapter friendList;
+
     private LibraryData libraryData;
-    
+
     private Map<String, LocalFileList> friendMap;
-    
+
     public MockLibraryManager() {
         allFileList = new FileListAdapter();
         gnutellaList = new FriendFileListAdapter();
         friendList = new FriendFileListAdapter();
         libraryData = new LibraryDataAdapter();
-        
+
         friendMap = new HashMap<String, LocalFileList>();
 
         initializeMockGnutellaData();
         initializeMockFriendData();
         initializeFriends();
     }
-    
+
     @Override
     public ListEventPublisher getLibraryListEventPublisher() {
         return allFileList.getModel().getPublisher();
     }
+
     @Override
     public ReadWriteLock getReadWriteLock() {
         return allFileList.getModel().getReadWriteLock();
     }
-    
-    private void initializeMockGnutellaData(){
-//        MockLocalFileItem item = new MockLocalFileItem("Big Town Hero.mp3", 1000,12345,23456, 5,1, Category.AUDIO);
-//        gnutellaList.addFileItem(item);
-//        allFileList.addFileItem(item);
-        
-        MockLocalFileItem item = new MockLocalFileItem("Pictures.jpg", 12345,12312,534512,3,2, Category.IMAGE);
+
+    private void initializeMockGnutellaData() {
+        // MockLocalFileItem item = new MockLocalFileItem("Big Town Hero.mp3",
+        // 1000,12345,23456, 5,1, Category.AUDIO);
+        // gnutellaList.addFileItem(item);
+        // allFileList.addFileItem(item);
+
+        MockLocalFileItem item = new MockLocalFileItem("Pictures.jpg", 12345, 12312, 534512, 3, 2,
+                Category.IMAGE);
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
-        
-//        item = new MockLocalFileItem("LimeWireStore.html", 32423, 3415412, 123123,0,0, Category.DOCUMENT);
-//        gnutellaList.addFileItem(item);
-//        allFileList.addFileItem(item);
 
-//        item = new MockLocalFileItem("Apu Cannon ball.avi", 32423, 3415412, 123123,0,0, Category.VIDEO);
-//        gnutellaList.addFileItem(item);
-//        allFileList.addFileItem(item);
-        
-        Thread t = new Thread(new Runnable(){
-            public void run(){
+        // item = new MockLocalFileItem("LimeWireStore.html", 32423, 3415412,
+        // 123123,0,0, Category.DOCUMENT);
+        // gnutellaList.addFileItem(item);
+        // allFileList.addFileItem(item);
+
+        // item = new MockLocalFileItem("Apu Cannon ball.avi", 32423, 3415412,
+        // 123123,0,0, Category.VIDEO);
+        // gnutellaList.addFileItem(item);
+        // allFileList.addFileItem(item);
+
+        Thread t = new Thread(new Runnable() {
+            public void run() {
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     return;
                 }
-                MockLocalFileItem item = new MockLocalFileItem("Lazy load.bmp", 32423, 3415412, 123123,0,0, Category.IMAGE);
+                MockLocalFileItem item = new MockLocalFileItem("Lazy load.bmp", 32423, 3415412,
+                        123123, 0, 0, Category.IMAGE);
                 gnutellaList.addFileItem(item);
                 allFileList.addFileItem(item);
             }
         });
         t.start();
     }
-    
-    private void initializeMockFriendData(){
-        MockLocalFileItem item = new MockLocalFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1, Category.AUDIO);
+
+    private void initializeMockFriendData() {
+        MockLocalFileItem item = new MockLocalFileItem("Small Town Hero.mp3", 1000, 12345, 23456,
+                1, 1, Category.AUDIO);
         friendList.addFileItem(item);
         allFileList.addFileItem(item);
-        
-        item = new MockLocalFileItem("LimeWire4.18.exe", 12345,12312,534512,5,0, Category.PROGRAM);
+
+        item = new MockLocalFileItem("LimeWire4.18.exe", 12345, 12312, 534512, 5, 0,
+                Category.PROGRAM);
         friendList.addFileItem(item);
         allFileList.addFileItem(item);
-        
-        item = new MockLocalFileItem("Pictures_SanFrancisco.zip", 32423, 3415412, 123123,0,0, Category.OTHER);
+
+        item = new MockLocalFileItem("Pictures_SanFrancisco.zip", 32423, 3415412, 123123, 0, 0,
+                Category.OTHER);
         friendList.addFileItem(item);
         allFileList.addFileItem(item);
     }
-    
+
     private void initializeFriends() {
         friendMap.put("Sean", new FileListAdapter());
         initializeFriend4(friendMap.get("Sean"));
@@ -112,25 +123,25 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         friendMap.put("Rob", new FileListAdapter());
         initializeFriend2(friendMap.get("Rob"));
     }
-    
+
     private void initializeFriend(FileList fileList) {
         FileListAdapter files = (FileListAdapter) fileList;
         files.addFileItem(allFileList.getModel().get(0));
     }
-    
+
     private void initializeFriend2(FileList fileList) {
         FileListAdapter files = (FileListAdapter) fileList;
         files.addFileItem(allFileList.getModel().get(0));
         files.addFileItem(allFileList.getModel().get(2));
     }
-    
+
     private void initializeFriend4(FileList fileList) {
         FileListAdapter files = (FileListAdapter) fileList;
         files.addFileItem(allFileList.getModel().get(0));
         files.addFileItem(allFileList.getModel().get(1));
         files.addFileItem(allFileList.getModel().get(2));
         files.addFileItem(allFileList.getModel().get(3));
-    }    
+    }
 
     @Override
     public LibraryFileList getLibraryManagedList() {
@@ -141,29 +152,29 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
     public LibraryData getLibraryData() {
         return libraryData;
     }
-    
+
     private class LibraryDataAdapter implements LibraryData {
-        
+
         @Override
         public boolean isFileManageable(File f) {
             return true;
         }
-        
+
         @Override
         public boolean isProgramManagingAllowed() {
             return false;
         }
-        
+
         @Override
         public Collection<Category> getManagedCategories() {
             return EnumSet.allOf(Category.class);
         }
-        
+
         @Override
         public boolean isDirectoryAllowed(File folder) {
             return folder.isDirectory();
         }
-        
+
         @Override
         public Collection<String> getDefaultExtensions() {
             return new ArrayList<String>();
@@ -177,55 +188,50 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         @Override
         public void setManagedExtensions(Collection<String> extensions) {
         }
-        
+
         @Override
         public void reload() {
-        
+
         }
 
         @Override
         public void setCategoriesToIncludeWhenAddingFolders(Collection<Category> managedCategories) {
             // TODO Auto-generated method stub
-            
-        }
-        }
 
-        @Override
+        }
+    }
+
+    @Override
     public void createNewSharedFileList(String name) {
-        }
+    }
 
-        @Override
+    @Override
     public EventList<SharedFileList> getModel() {
         // TODO Auto-generated method stub
         return null;
-        }
+    }
 
-        @Override
+    @Override
     public SharedFileList getSharedFileList(String name) {
         return null;
-        }
+    }
 
-        @Override
-    public void deleteSharedFileList(String name) {
-            
-        }
-        
     @Override
-    public void renameSharedFileList(String currentName, String newName) {
+    public void deleteSharedFileList(SharedFileList list) {
 
     }
-    
+
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
     }
-    
+
     @Override
     public int getSharedFileCount() {
         return 0;
     }
-    
+
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        
+
     }
 }

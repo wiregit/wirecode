@@ -11,7 +11,6 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
-import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -176,7 +175,6 @@ class SharedFileListManagerImpl implements SharedFileListManager {
 
     @Override
     public SharedFileList getSharedFileList(String name) {
-        // TODO: this needs to be in a different thread.
         sharedLists.getReadWriteLock().readLock().lock();
         try {
             for(SharedFileList fileList : sharedLists) {
@@ -191,12 +189,11 @@ class SharedFileListManagerImpl implements SharedFileListManager {
 
 
     @Override
-    public void deleteSharedFileList(String name) {
-        throw new NotImplementedException("Deletion of filelists not implemented");
-    }
-
-    @Override
-    public void renameSharedFileList(String currentName, String newName) {
-        throw new NotImplementedException("Rename of filelists not implemented");
+    public void deleteSharedFileList(SharedFileList fileList) {
+        if(fileList instanceof SharedFileListImpl) {
+            collectionManager.removeCollectionById(((SharedFileListImpl)fileList).getCoreCollection().getId());
+        } else {
+            throw new IllegalStateException("invalid FileList: " + fileList);
+        }
     }
 }

@@ -5,28 +5,30 @@ import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
+import org.limewire.core.api.lifecycle.LifeCycleEvent;
+import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.inject.LazySingleton;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.library.actions.CreateListAction;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.library.popup.LibraryNavPopupHandler;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 
@@ -77,55 +79,71 @@ public class LibraryNavigatorPanel extends JXPanel {
     }
     
     @Inject
-    void register() {
-        final EventList<SharedFileList> playLists = sharedFileListManager.getModel();
+    void register(LifeCycleManager lifecycleManager) {
+        final EventList<SharedFileList> listsModel = sharedFileListManager.getModel();
 
-        BackgroundExecutorService.execute(new Runnable(){
-            public void run() {
-                playLists.getReadWriteLock().readLock().lock();
-                try {
-                    for(final SharedFileList fileList : playLists) {
-                        SwingUtilities.invokeLater(new Runnable(){
-                            public void run() {
-                                if(!fileList.isNameChangeAllowed())
-                                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), fileList,  NavType.PUBLIC_SHARED);
-                                else
-                                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), fileList, NavType.LIST);
-                            }
-                        });
-                    }
-                } finally {
-                    playLists.getReadWriteLock().readLock().unlock();
+        // Setup the list of existing models & add a listener for creating/updating/deleting new ones
+        // Make sure this is done atomically within the lock, so that changes aren't lost.
+        listsModel.getReadWriteLock().readLock().lock();
+        try {
+            for(SharedFileList fileList : listsModel) {
+                if(!fileList.isNameChangeAllowed()) {
+                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), fileList,  NavType.PUBLIC_SHARED);
+                } else {
+                    table.addLibraryNavItem(fileList.getCollectionName(), fileList.getCollectionName(), fileList, NavType.LIST);
                 }
-                
-                // if only the Public Shared fileList exists, try creating the Private Shared list
-                if(playLists.size() == 1)
-                    createPrivateShareList();
             }
-        });
-        
-        sharedFileListManager.getModel().addListEventListener(new ListEventListener<SharedFileList>(){
-            @Override
-            public void listChanged(ListEvent<SharedFileList> listChanges) {
-                while(listChanges.next()) {
-                    final SharedFileList list = listChanges.getSourceList().get(listChanges.getIndex());
-                    final int type = listChanges.getType();
-                    SwingUtilities.invokeLater(new Runnable(){
+            
+            new AbstractListEventListener<SharedFileList>() {
+                @Override
+                protected void itemAdded(final SharedFileList list, int idx, EventList<SharedFileList> source) {
+                    SwingUtils.invokeLater(new Runnable() {
                         public void run() {
-                            if(type == ListEvent.INSERT) {
-                                table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName(), list, NavType.LIST);
-                            } else if(type == ListEvent.DELETE){
-                                table.removeLibraryNavItem(list.getCollectionName());
-                            } else if(type == ListEvent.UPDATE) {
-                                //TODO: make sure only renames are called by update
-                                table.getSelectedItem().setText(list.getCollectionName());
-                            }
+                            table.addLibraryNavItem(list.getCollectionName(), list.getCollectionName(), list, NavType.LIST);
                             LibraryNavigatorPanel.this.revalidate();
                         }
-                    });                    
+                    });
                 }
-            }
-        });
+                
+                @Override
+                protected void itemRemoved(final SharedFileList list, int idx, EventList<SharedFileList> source) {
+                    SwingUtils.invokeLater(new Runnable() {
+                        public void run() {
+                            table.removeLibraryNavItem(list);
+                            LibraryNavigatorPanel.this.revalidate();
+                        }
+                    });
+                }
+                
+                @Override
+                protected void itemUpdated(final SharedFileList list, SharedFileList priorItem, int idx, EventList<SharedFileList> source) {
+                    SwingUtils.invokeLater(new Runnable() {
+                        public void run() {
+                            //TODO: make sure only renames are called by update
+                            table.getSelectedItem().setText(list.getCollectionName());
+                            LibraryNavigatorPanel.this.revalidate();
+                        }
+                    });
+                }
+            }.install(listsModel);
+        } finally {
+            listsModel.getReadWriteLock().readLock().unlock();
+        }
+        if(lifecycleManager.isStarted() && listsModel.size() == 1) {
+            createPrivateShareList();
+        } else {
+            lifecycleManager.addListener(new EventListener<LifeCycleEvent>() {
+                @SwingEDTEvent
+                public void handleEvent(LifeCycleEvent event) {
+                    switch(event) {
+                    case STARTED:
+                        if(listsModel.size() == 1) {
+                            createPrivateShareList();
+                        }
+                    }
+                }
+            });            
+        }
     }
     
     /**

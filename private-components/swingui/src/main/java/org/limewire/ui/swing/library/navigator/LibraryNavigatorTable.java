@@ -56,12 +56,13 @@ public class LibraryNavigatorTable extends JXTable {
         eventList.add(new LibraryNavItem(name, id, localFileList, type));
     }
     
-    public void removeLibraryNavItem(String id) {
+    public void removeLibraryNavItem(SharedFileList fileList) {
         eventList.getReadWriteLock().writeLock().lock();
         try {
             for(LibraryNavItem item : eventList) {
-                if(item.getTabID().equals(id) && item.canRemove())
+                if(item.getLocalFileList() == fileList) {
                     eventList.remove(item);
+                }
             }
         } finally {
             eventList.getReadWriteLock().writeLock().unlock();
