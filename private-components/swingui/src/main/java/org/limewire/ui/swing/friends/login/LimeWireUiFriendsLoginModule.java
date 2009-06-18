@@ -9,6 +9,7 @@ public class LimeWireUiFriendsLoginModule extends AbstractModule {
     protected void configure() {
         bind(XMPPUserEntryLoginPanelFactory.class).toProvider(
               FactoryProvider.newFactory(XMPPUserEntryLoginPanelFactory.class, XMPPUserEntryLoginPanel.class));
+        bind(AutoLoginService.class);
     }
 
 }
