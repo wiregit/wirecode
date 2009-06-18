@@ -272,11 +272,17 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         repaintTimer = new Timer(50, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                filteredSharedFileLists.setMatcher(matcher);
-                resize();
                 repaint();
             }
         });
+        
+        final Timer resizeTimer = new Timer(50, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resize();
+            }
+        });
+        
         repaintTimer.setRepeats(false);
         
         final ListEventListener repaintListener = new RepaintListener();
@@ -296,7 +302,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                         newList.getModel().addListEventListener(repaintListener);
                     }
                 }
-                repaintTimer.start();
+                resizeTimer.start();
             }
         });
        
@@ -486,7 +492,15 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
                 NavItem item = navigator.getNavItem(NavCategory.LIBRARY, I18n.tr("My Library"));
                 item.select();
             }
-        });
+        }) {
+            
+            /**
+             * Used to filter out evil foreground calls from the default JXTable Highlighter
+             */
+            @Override
+            public void setForeground(Color c) {
+            }
+        };
         
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
@@ -514,10 +528,7 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     private static class VisiblityMatcher implements Matcher<SharedFileList> {
         @Override
         public boolean matches(SharedFileList item) {
-            return item.size() != 0 && 
-                    (   item.isPublic() 
-                     || (item.getFriendIds().size() != 0)
-                    );
+            return item.isPublic() || item.getFriendIds().size() != 0;
         }
     }
 }
