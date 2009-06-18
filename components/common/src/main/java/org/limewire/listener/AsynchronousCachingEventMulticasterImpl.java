@@ -10,18 +10,39 @@ import org.limewire.logging.Log;
  */
 public class AsynchronousCachingEventMulticasterImpl<E> extends CachingEventMulticasterImpl<E> implements AsynchronousBroadcaster<E> {
 
+    /**
+     * Creates a new AsynchronousCachingEventMulticasterImpl with a
+     * <code>BroadcastPolicy</code> of ALWAYS and no Logging.
+     * @param executor
+     */
     public AsynchronousCachingEventMulticasterImpl(Executor executor) {
         this(executor, BroadcastPolicy.ALWAYS);
     }
 
+    /**
+     * Creates a new AsynchronousCachingEventMulticasterImpl with a
+     * <code>BroadcastPolicy</code> of ALWAYS.
+     * @param executor
+     * @param log
+     */
     public AsynchronousCachingEventMulticasterImpl(Executor executor, Log log) {
         this(executor, BroadcastPolicy.ALWAYS, log);
     }
 
+    /**
+     * Creates a new AsynchronousCachingEventMulticasterImpl with no Logging.
+     * @param executor
+     * @param broadcastPolicy
+     */
     public AsynchronousCachingEventMulticasterImpl(Executor executor, BroadcastPolicy broadcastPolicy) {
         super(broadcastPolicy, new AsynchronousMulticaster<E>(executor));
     }
 
+    /**
+     * Creates a new AsynchronousCachingEventMulticasterImpl.
+     * @param executor
+     * @param broadcastPolicy
+     */
     public AsynchronousCachingEventMulticasterImpl(Executor executor, BroadcastPolicy broadcastPolicy, Log log) {
         super(broadcastPolicy, new AsynchronousMulticaster<E>(executor, log));
     }
