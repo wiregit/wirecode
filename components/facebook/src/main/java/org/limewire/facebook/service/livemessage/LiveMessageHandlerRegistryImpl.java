@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class LiveMessageHandlerRegistryImpl implements LiveMessageHandlerRegistry {
+class LiveMessageHandlerRegistryImpl implements LiveMessageHandlerRegistry {
     
     private final Map<String, LiveMessageHandler> handlers;
     

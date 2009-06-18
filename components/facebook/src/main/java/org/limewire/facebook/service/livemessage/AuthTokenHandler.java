@@ -3,9 +3,7 @@ package org.limewire.facebook.service.livemessage;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
-import org.limewire.util.StringUtils;
 import org.limewire.facebook.service.FacebookFriendConnection;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;

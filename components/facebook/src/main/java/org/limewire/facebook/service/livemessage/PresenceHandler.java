@@ -14,6 +14,7 @@ public class PresenceHandler implements LiveMessageHandler {
 
     private static final String TYPE = "presence";
 
+    @SuppressWarnings("unused")
     private static final Log LOG = LogFactory.getLog(PresenceHandler.class);
 
     private final FacebookFriendConnection connection;

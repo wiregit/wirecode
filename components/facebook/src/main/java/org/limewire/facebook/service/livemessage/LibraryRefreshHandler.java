@@ -22,7 +22,7 @@ public class LibraryRefreshHandler implements FeatureTransport<LibraryChangedNot
 
     @AssistedInject
     public LibraryRefreshHandler(@Assisted FacebookFriendConnection connection,
-                                              Handler<LibraryChangedNotifier> handler) {
+            Handler<LibraryChangedNotifier> handler) {
         this.connection = connection;
         this.handler = handler;
     }
